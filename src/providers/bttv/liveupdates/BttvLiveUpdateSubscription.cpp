@@ -79,7 +79,8 @@ QJsonObject BttvLiveUpdateBroadcastMe::encode(bool /*isSubscribe*/) const
     root["name"] = "broadcast_me";
 
     QJsonObject data;
-    data["name"] = this->userName;
+    data["provider"] = "twitch";
+    data["providerId"] = this->userID;
     data["channel"] = QString("twitch:%1").arg(this->twitchID);
 
     root["data"] = data;
@@ -89,7 +90,7 @@ QJsonObject BttvLiveUpdateBroadcastMe::encode(bool /*isSubscribe*/) const
 bool BttvLiveUpdateBroadcastMe::operator==(
     const BttvLiveUpdateBroadcastMe &rhs) const
 {
-    return this->twitchID == rhs.twitchID && this->userName == rhs.userName;
+    return this->twitchID == rhs.twitchID && this->userID == rhs.userID;
 }
 
 bool BttvLiveUpdateBroadcastMe::operator!=(
@@ -101,7 +102,7 @@ bool BttvLiveUpdateBroadcastMe::operator!=(
 QDebug &operator<<(QDebug &dbg, const BttvLiveUpdateBroadcastMe &data)
 {
     dbg << "BttvLiveUpdateBroadcastMe{ twitchID:" << data.twitchID
-        << "userName:" << data.userName << '}';
+        << "userID:" << data.userID << '}';
     return dbg;
 }
 

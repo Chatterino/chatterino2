@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Common.hpp"
-#include "widgets/helper/Button.hpp"
+#include "widgets/buttons/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 
@@ -91,6 +91,9 @@ protected:
     void themeChangedEvent() override;
 
     void paintEvent(QPaintEvent *) override;
+    void paintContent(QPainter &painter) override
+    {
+    }
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -103,6 +106,7 @@ protected:
     void leaveEvent(QEvent *) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;

@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/helper/SignalLabel.hpp"
+#include "widgets/buttons/SignalLabel.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -76,9 +76,29 @@ class ComboBox : public QComboBox
 {
     Q_OBJECT
 
+protected:
     void wheelEvent(QWheelEvent *event) override
     {
-        (void)event;
+        event->ignore();
+    }
+};
+
+class SpinBox : public QSpinBox
+{
+    Q_OBJECT
+
+public:
+    SpinBox(QWidget *parent = nullptr)
+        : QSpinBox(parent)
+    {
+        // QAbstractSpinBox defaults to Qt::WheelFocus
+        this->setFocusPolicy(Qt::StrongFocus);
+    }
+
+protected:
+    void wheelEvent(QWheelEvent *event) override
+    {
+        event->ignore();
     }
 };
 
@@ -289,7 +309,7 @@ public:
 
     DescriptionLabel *addDescription(const QString &text);
 
-    void addSeperator();
+    void addSeparator();
     bool filterElements(const QString &query);
 
 protected:

@@ -134,6 +134,12 @@ public:
         this->lastUserThatWhisperedMe = user;
     }
 
+    void initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
+                       SeventvEventAPI *seventvEventAPI) override
+    {
+        //
+    }
+
     ChannelPtr getWhispersChannel() const override
     {
         return this->whispersChannel;

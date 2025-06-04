@@ -968,7 +968,8 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     }
     else if (getSettings()->showJoins.getValue())
     {
-        twitchChannel->addJoinedUser(message->nick());
+        twitchChannel->addJoinedUser(message->nick(), twitchChannel->isMod(),
+                                     twitchChannel->isBroadcaster());
     }
 }
 
@@ -988,7 +989,8 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (message->nick() != selfAccountName &&
         getSettings()->showParts.getValue())
     {
-        twitchChannel->addPartedUser(message->nick());
+        twitchChannel->addPartedUser(message->nick(), twitchChannel->isMod(),
+                                     twitchChannel->isBroadcaster());
     }
 
     if (message->nick() == selfAccountName)

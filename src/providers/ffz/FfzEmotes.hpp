@@ -27,12 +27,10 @@ using FfzChannelBadgeMap =
 
 namespace ffz::detail {
 
-    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot);
+EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot);
 
-    /**
-     * Parse the `user_badge_ids` into a map of User IDs -> Badge IDs
-     */
-    FfzChannelBadgeMap parseChannelBadges(const QJsonObject &badgeRoot);
+/// Parse the `user_badge_ids` into a map of User IDs -> Badge IDs
+FfzChannelBadgeMap parseChannelBadges(const QJsonObject &badgeRoot);
 
 }  // namespace ffz::detail
 
@@ -51,7 +49,7 @@ public:
         std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
         std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
         std::function<void(FfzChannelBadgeMap &&)> channelBadgesCallback,
-        bool manualRefresh);
+        bool manualRefresh, bool cacheHit);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

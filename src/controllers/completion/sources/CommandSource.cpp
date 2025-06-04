@@ -5,28 +5,29 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino::completion {
 
 namespace {
 
-    void addCommand(const QString &command, std::vector<CommandItem> &out)
+void addCommand(const QString &command, std::vector<CommandItem> &out)
+{
+    if (command.startsWith('/') || command.startsWith('.'))
     {
-        if (command.startsWith('/') || command.startsWith('.'))
-        {
-            out.push_back({
-                .name = command.mid(1),
-                .prefix = command.at(0),
-            });
-        }
-        else
-        {
-            out.push_back({
-                .name = command,
-                .prefix = "",
-            });
-        }
+        out.push_back({
+            .name = command.mid(1),
+            .prefix = command.at(0),
+        });
     }
+    else
+    {
+        out.push_back({
+            .name = command,
+            .prefix = "",
+        });
+    }
+}
 
 }  // namespace
 

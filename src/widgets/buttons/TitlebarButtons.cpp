@@ -1,8 +1,8 @@
-#include "widgets/helper/TitlebarButtons.hpp"
+#include "widgets/buttons/TitlebarButtons.hpp"
 
 #ifdef USEWINSDK
 
-#    include "widgets/helper/TitlebarButton.hpp"
+#    include "widgets/buttons/TitlebarButton.hpp"
 
 #    include <Windows.h>
 
@@ -82,16 +82,16 @@ void TitleBarButtons::updateMaxButton()
 
 void TitleBarButtons::setSmallSize()
 {
-    this->minButton_->setScaleIndependantSize(30, 30);
-    this->maxButton_->setScaleIndependantSize(30, 30);
-    this->closeButton_->setScaleIndependantSize(30, 30);
+    this->minButton_->setScaleIndependentSize(30, 30);
+    this->maxButton_->setScaleIndependentSize(30, 30);
+    this->closeButton_->setScaleIndependentSize(30, 30);
 }
 
 void TitleBarButtons::setRegularSize()
 {
-    this->minButton_->setScaleIndependantSize(46, 30);
-    this->maxButton_->setScaleIndependantSize(46, 30);
-    this->closeButton_->setScaleIndependantSize(46, 30);
+    this->minButton_->setScaleIndependentSize(46, 30);
+    this->maxButton_->setScaleIndependentSize(46, 30);
+    this->closeButton_->setScaleIndependentSize(46, 30);
 }
 
 TitleBarButton *TitleBarButtons::buttonForHt(size_t ht) const

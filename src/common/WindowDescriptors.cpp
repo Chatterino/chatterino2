@@ -11,84 +11,84 @@ namespace chatterino {
 
 namespace {
 
-    QJsonArray loadWindowArray(const QString &settingsPath)
+QJsonArray loadWindowArray(const QString &settingsPath)
+{
+    QFile file(settingsPath);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+    QJsonDocument document = QJsonDocument::fromJson(data);
+    QJsonArray windows_arr = document.object().value("windows").toArray();
+    return windows_arr;
+}
+
+template <typename T>
+T loadNodes(const QJsonObject &obj)
+{
+    static_assert("loadNodes must be called with the SplitNodeDescriptor "
+                  "or ContainerNodeDescriptor type");
+}
+
+template <>
+SplitNodeDescriptor loadNodes(const QJsonObject &root)
+{
+    SplitNodeDescriptor descriptor;
+
+    descriptor.flexH_ = root.value("flexh").toDouble(1.0);
+    descriptor.flexV_ = root.value("flexv").toDouble(1.0);
+
+    auto data = root.value("data").toObject();
+
+    SplitDescriptor::loadFromJSON(descriptor, root, data);
+
+    return descriptor;
+}
+
+template <>
+ContainerNodeDescriptor loadNodes(const QJsonObject &root)
+{
+    ContainerNodeDescriptor descriptor;
+
+    descriptor.flexH_ = root.value("flexh").toDouble(1.0);
+    descriptor.flexV_ = root.value("flexv").toDouble(1.0);
+
+    descriptor.vertical_ = root.value("type").toString() == "vertical";
+
+    for (QJsonValue _val : root.value("items").toArray())
     {
-        QFile file(settingsPath);
-        file.open(QIODevice::ReadOnly);
-        QByteArray data = file.readAll();
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QJsonArray windows_arr = document.object().value("windows").toArray();
-        return windows_arr;
-    }
+        auto _obj = _val.toObject();
 
-    template <typename T>
-    T loadNodes(const QJsonObject &obj)
-    {
-        static_assert("loadNodes must be called with the SplitNodeDescriptor "
-                      "or ContainerNodeDescriptor type");
-    }
-
-    template <>
-    SplitNodeDescriptor loadNodes(const QJsonObject &root)
-    {
-        SplitNodeDescriptor descriptor;
-
-        descriptor.flexH_ = root.value("flexh").toDouble(1.0);
-        descriptor.flexV_ = root.value("flexv").toDouble(1.0);
-
-        auto data = root.value("data").toObject();
-
-        SplitDescriptor::loadFromJSON(descriptor, root, data);
-
-        return descriptor;
-    }
-
-    template <>
-    ContainerNodeDescriptor loadNodes(const QJsonObject &root)
-    {
-        ContainerNodeDescriptor descriptor;
-
-        descriptor.flexH_ = root.value("flexh").toDouble(1.0);
-        descriptor.flexV_ = root.value("flexv").toDouble(1.0);
-
-        descriptor.vertical_ = root.value("type").toString() == "vertical";
-
-        for (QJsonValue _val : root.value("items").toArray())
+        auto _type = _obj.value("type");
+        if (_type == "split")
         {
-            auto _obj = _val.toObject();
-
-            auto _type = _obj.value("type");
-            if (_type == "split")
-            {
-                descriptor.items_.emplace_back(
-                    loadNodes<SplitNodeDescriptor>(_obj));
-            }
-            else
-            {
-                descriptor.items_.emplace_back(
-                    loadNodes<ContainerNodeDescriptor>(_obj));
-            }
+            descriptor.items_.emplace_back(
+                loadNodes<SplitNodeDescriptor>(_obj));
         }
-
-        return descriptor;
-    }
-
-    const QList<QUuid> loadFilters(QJsonValue val)
-    {
-        QList<QUuid> filterIds;
-
-        if (!val.isUndefined())
+        else
         {
-            const auto array = val.toArray();
-            filterIds.reserve(array.size());
-            for (const auto &id : array)
-            {
-                filterIds.append(QUuid::fromString(id.toString()));
-            }
+            descriptor.items_.emplace_back(
+                loadNodes<ContainerNodeDescriptor>(_obj));
         }
-
-        return filterIds;
     }
+
+    return descriptor;
+}
+
+const QList<QUuid> loadFilters(QJsonValue val)
+{
+    QList<QUuid> filterIds;
+
+    if (!val.isUndefined())
+    {
+        const auto array = val.toArray();
+        filterIds.reserve(array.size());
+        for (const auto &id : array)
+        {
+            filterIds.append(QUuid::fromString(id.toString()));
+        }
+    }
+
+    return filterIds;
+}
 
 }  // namespace
 

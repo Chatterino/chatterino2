@@ -10,6 +10,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QHeaderView>
+#include <QMessageBox>
 #include <QTableView>
 
 namespace chatterino {
@@ -31,6 +32,7 @@ FiltersPage::FiltersPage()
                 (new FilterModel(nullptr))
                     ->initialized(&getSettings()->filterRecords))
             .getElement();
+    this->view_ = view;
 
     view->setTitles({"Name", "Filter", "Valid"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -128,6 +130,13 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
 
         popup.exec();
     }
+}
+
+bool FiltersPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

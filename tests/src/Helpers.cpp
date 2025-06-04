@@ -613,3 +613,26 @@ TEST(Helpers, codepointSlice)
     ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E", 0, 3), u"🍩🍟\xD83E");
     ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E🥚", 0, 4), u"🍩🍟\xD83E🥚");
 }
+
+TEST(Helpers, splitOnce)
+{
+    auto pair = [](auto first, auto second) {
+        return std::pair{QStringView(first), QStringView(second)};
+    };
+
+    ASSERT_EQ(splitOnce(u"foo bar", u" "), pair(u"foo", u"bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"oo"), pair(u"f", u" bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"foo"), pair(u"", u" bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"bar"), pair(u"foo ", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u"baz"), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u"bars"), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u""), pair(u"", u"foo bar"));
+    ASSERT_EQ(splitOnce(u"", u"foo"), pair(u"", u""));
+    ASSERT_EQ(splitOnce(u"", u""), pair(u"", u""));
+
+    ASSERT_EQ(splitOnce(u"foo bar", u' '), pair(u"foo", u"bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u'f'), pair(u"", u"oo bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u'r'), pair(u"foo ba", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u'z'), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"", u'z'), pair(u"", u""));
+}

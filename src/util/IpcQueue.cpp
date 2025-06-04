@@ -81,7 +81,7 @@ public:
 };
 
 IpcQueue::IpcQueue(IpcQueuePrivate *priv)
-    : private_(priv){};
+    : private_(priv) {};
 IpcQueue::~IpcQueue() = default;
 
 std::pair<std::unique_ptr<IpcQueue>, QString> IpcQueue::tryReplaceOrCreate(

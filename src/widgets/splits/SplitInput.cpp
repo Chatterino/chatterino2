@@ -10,13 +10,15 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
@@ -112,9 +114,14 @@ void SplitInput::initLayout()
 
     replyHbox->addStretch(1);
 
-    auto replyCancelButton = replyHbox.emplace<EffectLabel>(nullptr, 4)
+    auto replyCancelButton = replyHbox
+                                 .emplace<SvgButton>(
+                                     SvgButton::Src{
+                                         .dark = ":/buttons/cancel.svg",
+                                         .light = ":/buttons/cancelDark.svg",
+                                     },
+                                     nullptr, QSize{4, 0})
                                  .assign(&this->ui_.cancelReplyButton);
-    replyCancelButton->getLabel().setTextFormat(Qt::RichText);
 
     replyCancelButton->hide();
     replyLabel->hide();
@@ -134,11 +141,10 @@ void SplitInput::initLayout()
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
 
-    hboxLayout.emplace<EffectLabel>().assign(&this->ui_.sendButton);
-    this->ui_.sendButton->getLabel().setText("SEND");
+    hboxLayout.emplace<LabelButton>("SEND").assign(&this->ui_.sendButton);
     this->ui_.sendButton->hide();
 
-    QObject::connect(this->ui_.sendButton, &EffectLabel::leftClicked, [this] {
+    QObject::connect(this->ui_.sendButton, &Button::leftClicked, [this] {
         std::vector<QString> arguments;
         this->handleSendMessage(arguments);
     });
@@ -165,7 +171,13 @@ void SplitInput::initLayout()
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
-        box.emplace<Button>().assign(&this->ui_.emoteButton);
+        box.emplace<SvgButton>(
+               SvgButton::Src{
+                   .dark = ":/buttons/emote.svg",
+                   .light = ":/buttons/emoteDark.svg",
+               },
+               nullptr, QSize{6, 3})
+            .assign(&this->ui_.emoteButton);
     }
 
     // ---- misc
@@ -187,15 +199,14 @@ void SplitInput::initLayout()
         });
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
+    QObject::connect(this->ui_.emoteButton, &Button::leftClicked, [this] {
         this->openEmotePopup();
     });
 
-    // clear input and remove reply target
-    QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
-                     [this] {
-                         this->clearInput();
-                     });
+    // clear input and remove reply thread
+    QObject::connect(this->ui_.cancelReplyButton, &Button::leftClicked, [this] {
+        this->setReply(nullptr);
+    });
 
     // Forward selection change signal
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -257,8 +268,6 @@ void SplitInput::themeChangedEvent()
         QPalette::PlaceholderText,
         this->theme->messages.textColors.chatPlaceholder);
 
-    this->updateEmoteButton();
-    this->updateCancelReplyButton();
     this->ui_.textEditLength->setPalette(palette);
 
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
@@ -285,15 +294,6 @@ void SplitInput::updateEmoteButton()
 {
     auto scale = this->scale();
 
-    if (this->theme->isLightTheme())
-    {
-        this->ui_.emoteButton->setSvgResource(":/buttons/emoteDark.svg");
-    }
-    else
-    {
-        this->ui_.emoteButton->setSvgResource(":/buttons/emote.svg");
-    }
-
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
     // Make button slightly wider so it's easier to click
     this->ui_.emoteButton->setFixedWidth(int(24 * scale));
@@ -303,13 +303,8 @@ void SplitInput::updateCancelReplyButton()
 {
     float scale = this->scale();
 
-    auto text =
-        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
-            .arg(this->theme->isLightTheme() ? "cancelDark" : "cancel")
-            .arg(int(12 * scale));
-
-    this->ui_.cancelReplyButton->getLabel().setText(text);
     this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
+    this->ui_.cancelReplyButton->setFixedWidth(int(20 * scale));
 }
 
 void SplitInput::openEmotePopup()
@@ -1143,53 +1138,64 @@ void SplitInput::setReply(MessagePtr target)
         this->ui_.textEdit->resetCompletion();
     }
 
-    assert(target != nullptr);
-    this->replyTarget_ = std::move(target);
-
-    if (this->enableInlineReplying_)
+    if (target != nullptr)
     {
-        this->ui_.replyMessage->setWidth(this->replyMessageWidth());
-        this->ui_.replyMessage->setMessage(this->replyTarget_);
+        this->replyTarget_ = std::move(target);
 
-        // add spacing between reply box and input box
-        this->ui_.vbox->setSpacing(this->marginForTheme());
-        if (!this->isHidden())
+        if (this->enableInlineReplying_)
         {
-            // update maximum height to give space for message
-            this->setMaximumHeight(this->scaledMaxHeight());
-        }
+            this->ui_.replyMessage->setWidth(this->replyMessageWidth());
+            this->ui_.replyMessage->setMessage(this->replyTarget_);
 
-        // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyTarget_->displayName;
-        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
-
-        // This makes it so if plainText contains "@StreamerFan" and
-        // we are replying to "@Streamer" we don't just leave "Fan"
-        // in the text box
-        if (plainText.startsWith(replyPrefix))
-        {
-            if (plainText.length() > replyPrefix.length())
+            // add spacing between reply box and input box
+            this->ui_.vbox->setSpacing(this->marginForTheme());
+            if (!this->isHidden())
             {
-                if (plainText.at(replyPrefix.length()) == ',' ||
-                    plainText.at(replyPrefix.length()) == ' ')
+                // update maximum height to give space for message
+                this->setMaximumHeight(this->scaledMaxHeight());
+            }
+
+            // Only enable reply label if inline replying
+            auto replyPrefix = "@" + this->replyTarget_->displayName;
+            auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+
+            // This makes it so if plainText contains "@StreamerFan" and
+            // we are replying to "@Streamer" we don't just leave "Fan"
+            // in the text box
+            if (plainText.startsWith(replyPrefix))
+            {
+                if (plainText.length() > replyPrefix.length())
                 {
-                    plainText.remove(0, replyPrefix.length() + 1);
+                    if (plainText.at(replyPrefix.length()) == ',' ||
+                        plainText.at(replyPrefix.length()) == ' ')
+                    {
+                        plainText.remove(0, replyPrefix.length() + 1);
+                    }
+                }
+                else
+                {
+                    plainText.remove(0, replyPrefix.length());
                 }
             }
-            else
+            if (!plainText.isEmpty() && !plainText.startsWith(' '))
             {
-                plainText.remove(0, replyPrefix.length());
+                replyPrefix.append(' ');
             }
+            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
+            this->ui_.replyLabel->setText("Replying to @" +
+                                          this->replyTarget_->displayName);
         }
-        if (!plainText.isEmpty() && !plainText.startsWith(' '))
+    }
+    else
+    {
+        this->replyTarget_.reset();
+
+        if (this->enableInlineReplying_)
         {
-            replyPrefix.append(' ');
+            this->clearReplyTarget();
         }
-        this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
-        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-        this->ui_.textEdit->resetCompletion();
-        this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyTarget_->displayName);
     }
 }
 

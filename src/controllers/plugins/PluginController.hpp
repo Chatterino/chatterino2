@@ -2,6 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
@@ -12,16 +13,15 @@
 #    include <QString>
 #    include <sol/forward.hpp>
 
-#    include <algorithm>
 #    include <map>
 #    include <memory>
 #    include <utility>
-#    include <vector>
 
 struct lua_State;
 
 namespace chatterino {
 
+class Settings;
 class Paths;
 
 class PluginController
@@ -61,6 +61,8 @@ public:
         const QString &query, const QString &fullTextContent,
         int cursorPosition, bool isFirstWord) const;
 
+    WebSocketPool &webSocketPool();
+
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
@@ -74,6 +76,7 @@ private:
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
+    WebSocketPool webSocketPool_;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;

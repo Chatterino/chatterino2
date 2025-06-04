@@ -26,19 +26,20 @@ using namespace literals;
 
 namespace {
 
-    // Computes the bounding box for the given vector of images
-    QSize getBoundingBoxSize(const std::vector<ImagePtr> &images)
+// Computes the bounding box for the given vector of images
+QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
+{
+    qreal width = 0;
+    qreal height = 0;
+    for (const auto &img : images)
     {
-        int width = 0;
-        int height = 0;
-        for (const auto &img : images)
-        {
-            width = std::max(width, img->width());
-            height = std::max(height, img->height());
-        }
-
-        return QSize(width, height);
+        QSizeF s = img->size();
+        width = std::max(width, s.width());
+        height = std::max(height, s.height());
     }
+
+    return {width, height};
+}
 
 }  // namespace
 
@@ -124,11 +125,8 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        auto size = QSize(this->image_->width() * container.getScale(),
-                          this->image_->height() * container.getScale());
-
-        container.addElement(
-            (new ImageLayoutElement(*this, this->image_, size)));
+        container.addElement(new ImageLayoutElement(
+            *this, this->image_, this->image_->size() * container.getScale()));
     }
 }
 
@@ -208,9 +206,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
             auto emoteScale = getSettings()->emoteScale.getValue();
 
-            auto size =
-                QSize(int(container.getScale() * image->width() * emoteScale),
-                      int(container.getScale() * image->height() * emoteScale));
+            auto size = image->size() * container.getScale() * emoteScale;
 
             container.addElement(this->makeImageLayoutElement(image, size));
         }
@@ -227,7 +223,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 }
 
 MessageLayoutElement *EmoteElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
+    const ImagePtr &image, QSizeF size)
 {
     return new ImageLayoutElement(*this, image, size);
 }
@@ -278,12 +274,11 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             float overallScale = emoteScale * container.getScale();
 
             auto largestSize = getBoundingBoxSize(images) * overallScale;
-            std::vector<QSize> individualSizes;
+            std::vector<QSizeF> individualSizes;
             individualSizes.reserve(this->emotes_.size());
-            for (auto img : images)
+            for (const auto &img : images)
             {
-                individualSizes.push_back(QSize(img->width(), img->height()) *
-                                          overallScale);
+                individualSizes.push_back(img->size() * overallScale);
             }
 
             container.addElement(this->makeImageLayoutElement(
@@ -319,8 +314,8 @@ std::vector<ImagePtr> LayeredEmoteElement::getLoadedImages(float scale)
 }
 
 MessageLayoutElement *LayeredEmoteElement::makeImageLayoutElement(
-    const std::vector<ImagePtr> &images, const std::vector<QSize> &sizes,
-    QSize largestSize)
+    const std::vector<ImagePtr> &images, const std::vector<QSizeF> &sizes,
+    QSizeF largestSize)
 {
     return new LayeredImageLayoutElement(*this, images, sizes, largestSize);
 }
@@ -461,10 +456,8 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
             return;
         }
 
-        auto size = QSize(int(container.getScale() * image->width()),
-                          int(container.getScale() * image->height()));
-
-        container.addElement(this->makeImageLayoutElement(image, size));
+        container.addElement(this->makeImageLayoutElement(
+            image, image->size() * container.getScale()));
     }
 }
 
@@ -474,7 +467,7 @@ EmotePtr BadgeElement::getEmote() const
 }
 
 MessageLayoutElement *BadgeElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
+    const ImagePtr &image, QSizeF size)
 {
     auto *element = new ImageLayoutElement(*this, image, size);
 
@@ -498,7 +491,7 @@ ModBadgeElement::ModBadgeElement(const EmotePtr &data,
 }
 
 MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
+    const ImagePtr &image, QSizeF size)
 {
     static const QColor modBadgeBackgroundColor("#34AE0A");
 
@@ -524,7 +517,7 @@ VipBadgeElement::VipBadgeElement(const EmotePtr &data,
 }
 
 MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
+    const ImagePtr &image, QSizeF size)
 {
     auto *element = new ImageLayoutElement(*this, image, size);
 
@@ -548,7 +541,7 @@ FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
 }
 
 MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
+    const ImagePtr &image, QSizeF size)
 {
     auto *element =
         new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
@@ -583,20 +576,20 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        QFontMetrics metrics =
+        auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
         for (const auto &word : this->words_)
         {
             auto wordId = container.nextWordId();
 
-            auto getTextLayoutElement = [&](QString text, int width,
+            auto getTextLayoutElement = [&](QString text, qreal width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(ctx.messageColors);
                 app->getThemes()->normalizeColor(color);
 
                 auto *e = new TextLayoutElement(
-                    *this, text, QSize(width, metrics.height()), color,
+                    *this, text, QSizeF(width, metrics.height()), color,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
@@ -749,16 +742,16 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        QFontMetrics metrics =
+        auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
-        auto getTextLayoutElement = [&](QString text, int width,
+        auto getTextLayoutElement = [&](QString text, qreal width,
                                         bool hasTrailingSpace) {
             auto color = this->color_.getColor(ctx.messageColors);
             app->getThemes()->normalizeColor(color);
 
             auto *e = new TextLayoutElement(
-                *this, text, QSize(width, metrics.height()), color,
+                *this, text, QSizeF(width, metrics.height()), color,
                 this->style_, container.getScale());
             e->setTrailingSpace(hasTrailingSpace);
             e->setText(text);
@@ -811,11 +804,10 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     {
                         auto emoteScale = getSettings()->emoteScale.getValue();
 
-                        int currentWidth =
+                        auto currentWidth =
                             metrics.horizontalAdvance(currentText);
                         auto emoteSize =
-                            QSize(image->width(), image->height()) *
-                            (emoteScale * container.getScale());
+                            image->size() * emoteScale * container.getScale();
 
                         if (!container.fitsInLine(currentWidth +
                                                   emoteSize.width()))
@@ -847,7 +839,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         // Add the last of the pending message text to the container.
         if (!currentText.isEmpty())
         {
-            int width = metrics.horizontalAdvance(currentText);
+            auto width = metrics.horizontalAdvance(currentText);
             container.addElementNoLineBreak(
                 getTextLayoutElement(currentText, width, false));
         }
@@ -1051,12 +1043,14 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.has(MessageElementFlag::ModeratorTools))
     {
-        QSize size(int(container.getScale() * 16),
-                   int(container.getScale() * 16));
+        QSizeF size{
+            container.getScale() * 16,
+            container.getScale() * 16,
+        };
         auto actions = getSettings()->moderationActions.readOnly();
         for (const auto &action : *actions)
         {
-            if (auto image = action.getImage())
+            if (const auto &image = action.getImage())
             {
                 container.addElement(
                     (new ImageLayoutElement(*this, *image, size))
@@ -1123,10 +1117,8 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
             return;
         }
 
-        auto size = QSize(image->width() * container.getScale(),
-                          image->height() * container.getScale());
-
-        container.addElement(new ImageLayoutElement(*this, image, size));
+        container.addElement(new ImageLayoutElement(
+            *this, image, image->size() * container.getScale()));
     }
 }
 
@@ -1147,7 +1139,7 @@ ReplyCurveElement::ReplyCurveElement()
 void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
                                        const MessageLayoutContext &ctx)
 {
-    static const int width = 18;         // Overall width
+    static const qreal width = 18;       // Overall width
     static const float thickness = 1.5;  // Pen width
     static const int radius = 6;         // Radius of the top left corner
     static const int margin = 2;         // Top/Left/Bottom margin

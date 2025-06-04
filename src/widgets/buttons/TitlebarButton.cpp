@@ -1,4 +1,4 @@
-#include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
 
 #include "singletons/Theme.hpp"
 
@@ -6,9 +6,11 @@
 
 namespace chatterino {
 
-TitleBarButton::TitleBarButton()
-    : Button(nullptr)
+TitleBarButton::TitleBarButton(TitleBarButtonStyle style)
+    : DimButton(nullptr)
+    , style_(style)
 {
+    this->setContentCacheEnabled(true);
 }
 
 TitleBarButtonStyle TitleBarButton::getButtonStyle() const
@@ -16,17 +18,20 @@ TitleBarButtonStyle TitleBarButton::getButtonStyle() const
     return this->style_;
 }
 
-void TitleBarButton::setButtonStyle(TitleBarButtonStyle _style)
+void TitleBarButton::setButtonStyle(TitleBarButtonStyle style)
 {
-    this->style_ = _style;
-    this->update();
+    this->style_ = style;
+    this->invalidateContent();
 }
 
-void TitleBarButton::paintEvent(QPaintEvent *event)
+void TitleBarButton::themeChangedEvent()
 {
-    QPainter painter(this);
+    this->invalidateContent();
+}
 
-    painter.setOpacity(this->getCurrentDimAmount());
+void TitleBarButton::paintContent(QPainter &painter)
+{
+    painter.setOpacity(this->currentContentOpacity());
 
     QColor color = this->theme->window.text;
     QColor background = this->theme->window.background;
@@ -65,32 +70,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             painter.drawLine(rect.topRight(), rect.bottomLeft());
             break;
         }
-        case TitleBarButtonStyle::User: {
-            color = "#999";
-
-            painter.setRenderHint(QPainter::Antialiasing);
-
-            auto a = xD / 3;
-            QPainterPath path;
-
-            painter.save();
-            painter.translate(3, 3);
-
-            path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
-            path.arcTo(a, 4 * a, 6 * a, 6 * a, 0, 180);
-
-            painter.fillPath(path, color);
-
-            painter.setBrush(background);
-            painter.drawEllipse(2 * a, 1 * a, 4 * a, 4 * a);
-
-            painter.setBrush(color);
-            painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
-            painter.restore();
-
-            break;
-        }
         case TitleBarButtonStyle::Settings: {
+            painter.setPen(color);
             color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
 
@@ -121,7 +102,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    this->paintButton(painter);
+    painter.setOpacity(1.0);
 }
 
 void TitleBarButton::ncEnter()
@@ -138,23 +119,23 @@ void TitleBarButton::ncLeave()
 
 void TitleBarButton::ncMove(QPoint at)
 {
-    QMouseEvent evt(QMouseEvent::MouseMove, at, Qt::NoButton, Qt::NoButton,
-                    Qt::NoModifier);
+    QMouseEvent evt(QMouseEvent::MouseMove, at, QCursor::pos(), Qt::NoButton,
+                    Qt::NoButton, Qt::NoModifier);
     this->mouseMoveEvent(&evt);
 }
 
 void TitleBarButton::ncMousePress(QPoint at)
 {
-    QMouseEvent evt(QMouseEvent::MouseButtonPress, at, Qt::LeftButton,
-                    Qt::NoButton, Qt::NoModifier);
+    QMouseEvent evt(QMouseEvent::MouseButtonPress, at, QCursor::pos(),
+                    Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
     this->mousePressEvent(&evt);
     this->update();
 }
 
 void TitleBarButton::ncMouseRelease(QPoint at)
 {
-    QMouseEvent evt(QMouseEvent::MouseButtonRelease, at, Qt::LeftButton,
-                    Qt::NoButton, Qt::NoModifier);
+    QMouseEvent evt(QMouseEvent::MouseButtonRelease, at, QCursor::pos(),
+                    Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
     this->mouseReleaseEvent(&evt);
     this->update();
 }

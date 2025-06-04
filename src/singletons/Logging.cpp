@@ -34,6 +34,11 @@ Logging::Logging(Settings &settings)
 void Logging::addMessage(const QString &channelName, MessagePtr message,
                          const QString &platformName, const QString &streamID)
 {
+    if (platformName.isEmpty())
+    {
+        return;
+    }
+
     this->threadGuard.guard();
 
     if (!getSettings()->enableLogging)
@@ -76,6 +81,11 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
 void Logging::closeChannel(const QString &channelName,
                            const QString &platformName)
 {
+    if (platformName.isEmpty())
+    {
+        return;
+    }
+
     auto platIt = this->loggingChannels_.find(platformName);
     if (platIt == this->loggingChannels_.end())
     {

@@ -40,7 +40,7 @@ enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
-class EffectLabel;
+class LabelButton;
 struct Link;
 class MessageLayoutElement;
 class Split;
@@ -258,8 +258,8 @@ protected:
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
-                         QPoint &relativePos, int &index);
+    bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
+                         QPointF &relativePos, int &index);
 
 private:
     struct InternalCtor {
@@ -381,7 +381,7 @@ private:
     Split *split_;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_{};
+    LabelButton *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;

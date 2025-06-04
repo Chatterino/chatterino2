@@ -1,8 +1,8 @@
-#include "widgets/helper/NotebookButton.hpp"
+#include "widgets/buttons/NotebookButton.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
-#include "widgets/helper/Button.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
@@ -40,14 +40,12 @@ void NotebookButton::themeChangedEvent()
     this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
-void NotebookButton::paintEvent(QPaintEvent *event)
+void NotebookButton::paintContent(QPainter &painter)
 {
-    QPainter painter(this);
-
     QColor background;
     QColor foreground;
 
-    if (mouseDown_ || mouseOver_)
+    if (this->mouseDown() || this->mouseOver())
     {
         background = this->theme->tabs.regular.backgrounds.hover;
         foreground = this->theme->tabs.regular.text;
@@ -71,7 +69,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
                 {
                     tmp = this->theme->tabs.selected.line.regular;
                 }
-                else if (!this->mouseOver_)
+                else if (!this->mouseOver())
                 {
                     tmp.setAlpha(180);
                 }
@@ -135,22 +133,6 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
         default:;
     }
-
-    this->paintButton(painter);
-}
-
-void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton)
-    {
-        mouseDown_ = false;
-
-        update();
-
-        leftClicked();
-    }
-
-    Button::mouseReleaseEvent(event);
 }
 
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
@@ -162,21 +144,22 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
     event->acceptProposedAction();
 
-    auto *e = new QMouseEvent(QMouseEvent::MouseButtonPress,
-                              QPointF(this->width() / 2, this->height() / 2),
-                              Qt::LeftButton, Qt::LeftButton, {});
+    auto *e =
+        new QMouseEvent(QMouseEvent::MouseButtonPress,
+                        QPointF(this->width() / 2, this->height() / 2),
+                        QCursor::pos(), Qt::LeftButton, Qt::LeftButton, {});
     Button::mousePressEvent(e);
     delete e;
 }
 
 void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 {
-    this->mouseDown_ = true;
     this->update();
 
-    auto *e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
-                              QPointF(this->width() / 2, this->height() / 2),
-                              Qt::LeftButton, Qt::LeftButton, {});
+    auto *e =
+        new QMouseEvent(QMouseEvent::MouseButtonRelease,
+                        QPointF(this->width() / 2, this->height() / 2),
+                        QCursor::pos(), Qt::LeftButton, Qt::LeftButton, {});
     Button::mouseReleaseEvent(e);
     delete e;
 }
@@ -211,11 +194,21 @@ void NotebookButton::dropEvent(QDropEvent *event)
 
 void NotebookButton::hideEvent(QHideEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 
 void NotebookButton::showEvent(QShowEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 

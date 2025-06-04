@@ -1,6 +1,6 @@
 /** @noSelfInFile */
 
-declare module c2 {
+declare namespace c2 {
     enum LogLevel {
         Debug,
         Info,
@@ -66,8 +66,8 @@ declare module c2 {
         is_mod(): boolean;
         is_vip(): boolean;
 
-        static by_name(name: string): null | Channel;
-        static by_twitch_id(id: string): null | Channel;
+        static by_name(this: void, name: string): null | Channel;
+        static by_twitch_id(this: void, id: string): null | Channel;
     }
 
     enum HTTPMethod {
@@ -96,8 +96,7 @@ declare module c2 {
 
         execute(): void;
 
-        // might error
-        static create(method: HTTPMethod, url: string): HTTPRequest;
+        static create(this: void, method: HTTPMethod, url: string): HTTPRequest;
     }
 
     function log(level: LogLevel, ...data: any[]): void;
@@ -129,4 +128,26 @@ declare module c2 {
 
     function register_callback<T>(type: T, func: CbFunc<T>): void;
     function later(callback: () => void, msec: number): void;
+
+    interface WebSocket {
+        close(): void;
+        send_text(data: string): void;
+        send_binary(data: string): void;
+        on_close: null | (() => void);
+        on_text: null | ((data: string) => void);
+        on_binary: null | ((data: string) => void);
+    }
+    interface WebSocketConstructor {
+        new: (
+            this: void,
+            url: string,
+            options?: {
+                headers?: Record<string, string>;
+                on_close?: () => void;
+                on_text?: (data: string) => void;
+                on_binary?: (data: string) => void;
+            }
+        ) => WebSocket;
+    }
+    var WebSocket: WebSocketConstructor;
 }

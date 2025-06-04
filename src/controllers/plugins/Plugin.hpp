@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "Application.hpp"
 #    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
@@ -136,6 +135,7 @@ public:
 
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
+    bool hasNetworkPermission() const;
 
     std::map<lua::api::EventType, sol::protected_function> callbacks;
 

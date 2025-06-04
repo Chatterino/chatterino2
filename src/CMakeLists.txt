@@ -1,8 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
 add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
@@ -19,10 +19,10 @@ set(SOURCE_FILES
 
         common/Args.cpp
         common/Args.hpp
-        common/Channel.cpp
-        common/Channel.hpp
         common/ChannelChatters.cpp
         common/ChannelChatters.hpp
+        common/Channel.cpp
+        common/Channel.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
@@ -38,6 +38,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
@@ -56,6 +57,15 @@ set(SOURCE_FILES
         common/network/NetworkResult.hpp
         common/network/NetworkTask.cpp
         common/network/NetworkTask.hpp
+
+        common/websockets/WebSocketPool.cpp
+        common/websockets/WebSocketPool.hpp
+        common/websockets/detail/WebSocketConnection.cpp
+        common/websockets/detail/WebSocketConnection.hpp
+        common/websockets/detail/WebSocketConnectionImpl.cpp
+        common/websockets/detail/WebSocketConnectionImpl.hpp
+        common/websockets/detail/WebSocketPoolImpl.cpp
+        common/websockets/detail/WebSocketPoolImpl.hpp
 
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
@@ -238,6 +248,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/WebSocket.cpp
+        controllers/plugins/api/WebSocket.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
@@ -393,8 +405,6 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
-        providers/twitch/PubSubActions.cpp
-        providers/twitch/PubSubActions.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
         providers/twitch/PubSubClientOptions.hpp
@@ -441,18 +451,12 @@ set(SOURCE_FILES
         providers/twitch/eventsub/SubscriptionRequest.cpp
         providers/twitch/eventsub/SubscriptionRequest.hpp
 
-        providers/twitch/pubsubmessages/AutoMod.cpp
-        providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
         providers/twitch/pubsubmessages/ChannelPoints.cpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.cpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
-        providers/twitch/pubsubmessages/LowTrustUsers.cpp
-        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
@@ -519,8 +523,6 @@ set(SOURCE_FILES
         util/Helpers.hpp
         util/IncognitoBrowser.cpp
         util/IncognitoBrowser.hpp
-        util/InitUpdateButton.cpp
-        util/InitUpdateButton.hpp
         util/IpcQueue.cpp
         util/IpcQueue.hpp
         util/IrcHelpers.cpp
@@ -598,6 +600,27 @@ set(SOURCE_FILES
         widgets/Window.cpp
         widgets/Window.hpp
 
+        widgets/buttons/Button.cpp
+        widgets/buttons/Button.hpp
+        widgets/buttons/DimButton.cpp
+        widgets/buttons/DimButton.hpp
+        widgets/buttons/InitUpdateButton.cpp
+        widgets/buttons/InitUpdateButton.hpp
+        widgets/buttons/LabelButton.cpp
+        widgets/buttons/LabelButton.hpp
+        widgets/buttons/NotebookButton.cpp
+        widgets/buttons/NotebookButton.hpp
+        widgets/buttons/PixmapButton.cpp
+        widgets/buttons/PixmapButton.hpp
+        widgets/buttons/SignalLabel.cpp
+        widgets/buttons/SignalLabel.hpp
+        widgets/buttons/SvgButton.cpp
+        widgets/buttons/SvgButton.hpp
+        widgets/buttons/TitlebarButton.cpp
+        widgets/buttons/TitlebarButton.hpp
+        widgets/buttons/TitlebarButtons.cpp
+        widgets/buttons/TitlebarButtons.hpp
+
         widgets/dialogs/BadgePickerDialog.cpp
         widgets/dialogs/BadgePickerDialog.hpp
         widgets/dialogs/ChannelFilterEditorDialog.cpp
@@ -606,6 +629,8 @@ set(SOURCE_FILES
         widgets/dialogs/ColorPickerDialog.hpp
         widgets/dialogs/EditHotkeyDialog.cpp
         widgets/dialogs/EditHotkeyDialog.hpp
+        widgets/dialogs/EditUserNotesDialog.cpp
+        widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
         widgets/dialogs/LastRunCrashDialog.cpp
@@ -654,8 +679,6 @@ set(SOURCE_FILES
         widgets/helper/color/SBCanvas.cpp
         widgets/helper/color/SBCanvas.hpp
 
-        widgets/helper/Button.cpp
-        widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
@@ -664,16 +687,12 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
-        widgets/helper/EffectLabel.cpp
-        widgets/helper/EffectLabel.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
-        widgets/helper/NotebookButton.cpp
-        widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/OverlayInteraction.cpp
@@ -688,14 +707,8 @@ set(SOURCE_FILES
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/SignalLabel.cpp
-        widgets/helper/SignalLabel.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
-        widgets/helper/TitlebarButton.cpp
-        widgets/helper/TitlebarButton.hpp
-        widgets/helper/TitlebarButtons.cpp
-        widgets/helper/TitlebarButtons.hpp
         widgets/helper/TrimRegExpValidator.cpp
         widgets/helper/TrimRegExpValidator.hpp
 
@@ -929,7 +942,18 @@ if (BUILD_APP)
         get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         # This assumes the installed CRT is up-to-date (see .CI/deploy-crt.ps1)
-        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        set(WINDEPLOYQT_COMMAND_ARGV
+            "${WINDEPLOYQT_PATH}"
+            "$<TARGET_FILE:${EXECUTABLE_PROJECT}>"
+            ${WINDEPLOYQT_MODE}
+            --no-compiler-runtime
+            --no-translations
+            --no-opengl-sw
+        )
+        if (Qt6_VERSION VERSION_GREATER_EQUAL "6.8.0")
+            # windeployqt expects to find openssl in '/bin' but we deploy it in '/'.
+            list(APPEND WINDEPLOYQT_COMMAND_ARGV --force-openssl)
+        endif()
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
         install(TARGETS ${EXECUTABLE_PROJECT} 

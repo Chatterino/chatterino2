@@ -16,10 +16,11 @@ typedef struct tagMSG MSG;
 namespace chatterino {
 
 class Button;
-class EffectLabel;
+class LabelButton;
+class PixmapButton;
 class TitleBarButton;
 class TitleBarButtons;
-enum class TitleBarButtonStyle;
+enum class TitleBarButtonStyle : std::uint8_t;
 
 class BaseWindow : public BaseWidget
 {
@@ -52,9 +53,20 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame() const;
-    TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
-                                      std::function<void()> onClicked);
-    EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
+
+    template <typename T>
+    T *addTitleBarButton(std::function<void()> onClicked, auto &&...args)
+    {
+        auto *button = new T(std::forward<decltype(args)>(args)...);
+        button->setScaleIndependentSize(30, 30);
+        this->appendTitlebarButton(button);
+
+        QObject::connect(button, &T::leftClicked, this, std::move(onClicked));
+
+        return button;
+    }
+
+    LabelButton *addTitleBarLabel(std::function<void()> onClicked);
 
     void moveTo(QPoint point, widgets::BoundsChecking mode);
 
@@ -110,6 +122,8 @@ protected:
     WindowDeactivateAction windowDeactivateAction =
         WindowDeactivateAction::Nothing;
 
+    virtual void windowDeactivationEvent();
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
@@ -120,6 +134,7 @@ protected:
     void scaleChangedEvent(float) override;
 
     void paintEvent(QPaintEvent *) override;
+    virtual void drawOutline(QPainter &);
 
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
@@ -165,6 +180,8 @@ private:
     bool handleNCCALCSIZE(MSG *msg, long *result);
     bool handleNCHITTEST(MSG *msg, long *result);
 #endif
+
+    void appendTitlebarButton(Button *button);
 
     bool enableCustomFrame_;
     bool frameless_;

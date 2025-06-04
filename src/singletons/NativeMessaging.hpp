@@ -1,12 +1,26 @@
 #pragma once
 
 #include "common/Atomic.hpp"
+#include "util/Expected.hpp"
 
 #include <QString>
 #include <QThread>
 
 #include <optional>
 #include <vector>
+
+namespace chatterino::nm::detail {
+
+enum class WriteManifestError : std::uint8_t {
+    FailedToCreateDirectory,
+    FailedToCreateFile,
+};
+
+nonstd::expected<void, WriteManifestError> writeManifestTo(
+    QString directory, const QString &nmDirectory, const QString &filename,
+    const QJsonDocument &json);
+
+}  // namespace chatterino::nm::detail
 
 namespace chatterino {
 
@@ -23,8 +37,8 @@ Atomic<std::optional<QString>> &nmIpcError();
 
 namespace nm::client {
 
-    void sendMessage(const QByteArray &array);
-    void writeToCout(const QByteArray &array);
+void sendMessage(const QByteArray &array);
+void writeToCout(const QByteArray &array);
 
 }  // namespace nm::client
 

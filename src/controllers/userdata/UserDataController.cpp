@@ -39,6 +39,11 @@ UserDataController::UserDataController(const Paths &paths)
 
 std::optional<UserData> UserDataController::getUser(const QString &userID) const
 {
+    if (userID.isEmpty())
+    {
+        return std::nullopt;
+    }
+
     std::shared_lock lock(this->usersMutex);
     auto it = this->users.find(userID);
 
@@ -59,7 +64,14 @@ std::unordered_map<QString, UserData> UserDataController::getUsers() const
 void UserDataController::setUserColor(const QString &userID,
                                       const QString &colorString)
 {
-    auto c = this->getUsers();
+    if (userID.isEmpty())
+    {
+        return;
+    }
+
+    std::unique_lock lock(this->usersMutex);
+
+    auto c = this->users;
     auto it = c.find(userID);
     std::optional<QColor> finalColor =
         makeConditionedOptional(!colorString.isEmpty(), QColor(colorString));
@@ -80,15 +92,46 @@ void UserDataController::setUserColor(const QString &userID,
         it->second.color = finalColor;
     }
 
-    this->update(std::move(c));
+    this->update(std::move(c), std::move(lock));
 }
 
 void UserDataController::update(
-    std::unordered_map<QString, UserData> &&newUsers)
+    std::unordered_map<QString, UserData> &&newUsers,
+    std::unique_lock<std::shared_mutex> usersLock)
 {
-    std::unique_lock lock(this->usersMutex);
+    // Remove empty user data items
+    std::erase_if(newUsers, [](const auto &pair) {
+        return pair.second.isEmpty();
+    });
+
     this->users = std::move(newUsers);
     this->setting.setValue(this->users);
+
+    // unlock before invoking updated signal
+    usersLock.unlock();
+
+    this->userDataUpdated_.invoke();
+}
+
+void UserDataController::setUserNotes(const QString &userID,
+                                      const QString &notes)
+{
+    if (userID.isEmpty())
+    {
+        return;
+    }
+
+    std::unique_lock lock(this->usersMutex);
+
+    auto users = this->users;
+    users[userID].notes = notes;
+
+    this->update(std::move(users), std::move(lock));
+}
+
+pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
+{
+    return this->userDataUpdated_;
 }
 
 }  // namespace chatterino

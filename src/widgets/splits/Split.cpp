@@ -2,15 +2,12 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/network/NetworkRequest.hpp"
-#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "messages/MessageThread.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -20,11 +17,9 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clipboard.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/Helpers.hpp"
 #include "util/StreamLink.hpp"
-#include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -44,7 +39,6 @@
 #include "widgets/Window.hpp"
 
 #include <QApplication>
-#include <QClipboard>
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
@@ -58,7 +52,6 @@
 #include <QVBoxLayout>
 
 #include <functional>
-#include <random>
 
 namespace {
 
@@ -114,7 +107,7 @@ QString formatVIPListError(HelixListVIPsError error, const QString &message)
     return errorMessage;
 }
 
-QString formatModsError(HelixGetModeratorsError error, QString message)
+QString formatModsError(HelixGetModeratorsError error, const QString &message)
 {
     using Error = HelixGetModeratorsError;
 
@@ -150,7 +143,7 @@ QString formatModsError(HelixGetModeratorsError error, QString message)
     return errorMessage;
 }
 
-QString formatChattersError(HelixGetChattersError error, QString message)
+QString formatChattersError(HelixGetChattersError error, const QString &message)
 {
     using Error = HelixGetChattersError;
 
@@ -190,28 +183,28 @@ QString formatChattersError(HelixGetChattersError error, QString message)
 
 namespace chatterino {
 namespace {
-    void showTutorialVideo(QWidget *parent, const QString &source,
-                           const QString &title, const QString &description)
-    {
-        auto *window = new BasePopup(
-            {
-                BaseWindow::EnableCustomFrame,
-                BaseWindow::BoundsCheckOnShow,
-            },
-            parent);
-        window->setWindowTitle("Chatterino - " + title);
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        auto *layout = new QVBoxLayout();
-        layout->addWidget(new QLabel(description));
-        auto *label = new QLabel(window);
-        layout->addWidget(label);
-        auto *movie = new QMovie(label);
-        movie->setFileName(source);
-        label->setMovie(movie);
-        movie->start();
-        window->getLayoutContainer()->setLayout(layout);
-        window->show();
-    }
+void showTutorialVideo(QWidget *parent, const QString &source,
+                       const QString &title, const QString &description)
+{
+    auto *window = new BasePopup(
+        {
+            BaseWindow::EnableCustomFrame,
+            BaseWindow::BoundsCheckOnShow,
+        },
+        parent);
+    window->setWindowTitle("Chatterino - " + title);
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    auto *layout = new QVBoxLayout();
+    layout->addWidget(new QLabel(description));
+    auto *label = new QLabel(window);
+    layout->addWidget(label);
+    auto *movie = new QMovie(label);
+    movie->setFileName(source);
+    label->setMovie(movie);
+    movie->start();
+    window->getLayoutContainer()->setLayout(layout);
+    window->show();
+}
 }  // namespace
 
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
@@ -317,7 +310,7 @@ Split::Split(QWidget *parent)
         });
 
     getSettings()->showEmptyInput.connect(
-        [this](const bool &showEmptyInput, auto) {
+        [this](const bool &showEmptyInput) {
             if (showEmptyInput)
             {
                 this->input_->show();
@@ -505,7 +498,7 @@ void Split::addShortcuts()
                         "focus direction Use \"up\", \"above\", \"down\", "
                         "\"below\", \"left\" or \"right\".";
              }
-             auto direction = arguments.at(0);
+             const auto &direction = arguments.at(0);
              if (direction == "up" || direction == "above")
              {
                  this->actionRequested.invoke(Action::SelectSplitAbove);
@@ -550,7 +543,7 @@ void Split::addShortcuts()
                      << "scrollPage hotkey called without arguments!";
                  return "scrollPage hotkey called without arguments!";
              }
-             auto direction = arguments.at(0);
+             const auto &direction = arguments.at(0);
 
              auto &scrollbar = this->getChannelView().getScrollBar();
              if (direction == "up")
@@ -627,7 +620,7 @@ void Split::addShortcuts()
              auto reloadSubscriber = true;
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "channel")
                  {
                      reloadSubscriber = false;
@@ -661,7 +654,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
@@ -732,7 +725,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
@@ -816,7 +809,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
@@ -903,12 +896,12 @@ void Split::updateInputPlaceholder()
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
 }
 
-void Split::joinChannelInNewTab(ChannelPtr channel)
+void Split::joinChannelInNewTab(const ChannelPtr &channel)
 {
     auto &nb = getApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
-    Split *split = new Split(container);
+    auto *split = new Split(container);
     split->setChannel(channel);
     container->insertSplit(split);
 }
@@ -1100,11 +1093,7 @@ void Split::resizeEvent(QResizeEvent *event)
     this->overlay_->setGeometry(this->rect());
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void Split::enterEvent(QEnterEvent * /*event*/)
-#else
-void Split::enterEvent(QEvent * /*event*/)
-#endif
 {
     this->isMouseOver_ = true;
 
@@ -1185,8 +1174,7 @@ void Split::popup()
     auto *app = getApp();
     Window &window = app->getWindows()->createWindow(WindowType::Popup);
 
-    Split *split = new Split(static_cast<SplitContainer *>(
-        window.getNotebook().getOrAddSelectedPage()));
+    auto *split = new Split(window.getNotebook().getOrAddSelectedPage());
 
     split->setChannel(this->getIndirectChannel());
     split->setModerationMode(this->getModerationMode());
@@ -1570,7 +1558,7 @@ void Split::setFilters(const QList<QUuid> ids)
     this->header_->updateChannelText();
 }
 
-const QList<QUuid> Split::getFilters() const
+QList<QUuid> Split::getFilters() const
 {
     return this->view_->getFilterIds();
 }
@@ -1647,21 +1635,6 @@ void Split::dropEvent(QDropEvent *event)
         BaseWidget::dropEvent(event);
     }
 }
-template <typename Iter, typename RandomGenerator>
-static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
-{
-    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
-    std::advance(start, dis(g));
-    return start;
-}
-
-template <typename Iter>
-static Iter select_randomly(Iter start, Iter end)
-{
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    return select_randomly(start, end, gen);
-}
 
 void Split::drag()
 {
@@ -1683,7 +1656,8 @@ void Split::drag()
     drag->setMimeData(mimeData);
 
     // drag->exec is a blocking action
-    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    auto dragRes = drag->exec(Qt::MoveAction);
+    if (dragRes != Qt::MoveAction || drag->target() == nullptr)
     {
         // The split wasn't dropped in a valid spot, return it to its original position
         container->insertSplit(this, {.position = originalLocation});

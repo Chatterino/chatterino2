@@ -27,6 +27,7 @@
 
 namespace {
 
+using namespace chatterino::nm::detail;
 using namespace chatterino;
 using namespace chatterino::literals;
 
@@ -38,7 +39,8 @@ struct Config {
     QString fileName;
     QString registryKey;
 #else
-    QString directory;
+    QString browserDirectory;
+    QString nmDirectory;
 #endif
 };
 
@@ -48,10 +50,11 @@ const Config FIREFOX{
     .registryKey =
         u"HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com.chatterino.chatterino"_s,
 #elif defined(Q_OS_MACOS)
-    .directory =
-        u"~/Library/Application Support/Mozilla/NativeMessagingHosts"_s,
+    .browserDirectory = u"~/Library/Application Support/Mozilla"_s,
+    .nmDirectory = u"NativeMessagingHosts"_s,
 #else
-    .directory = u"~/.mozilla/native-messaging-hosts"_s,
+    .browserDirectory = u"~/.mozilla"_s,
+    .nmDirectory = u"native-messaging-hosts"_s,
 #endif
 };
 
@@ -61,15 +64,36 @@ const Config CHROME{
     .registryKey =
         u"HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino"_s,
 #elif defined(Q_OS_MACOS)
-    .directory =
-        u"~/Library/Application Support/Google/Chrome/NativeMessagingHosts"_s,
+    .browserDirectory = u"~/Library/Application Support/Google/Chrome/"_s,
+    .nmDirectory = u"NativeMessagingHosts"_s,
 #else
-    .directory = u"~/.config/google-chrome/NativeMessagingHosts"_s,
+    .browserDirectory = u"~/.config/google-chrome"_s,
+    .nmDirectory = u"NativeMessagingHosts"_s,
 #endif
 };
 
-void writeManifestTo(QString directory, const QString &filename,
-                     const QJsonDocument &json)
+void registerNmManifest([[maybe_unused]] const Paths &paths,
+                        const Config &config, const QJsonDocument &document)
+{
+#ifdef Q_OS_WIN
+    writeManifestTo(paths.miscDirectory, u"."_s, config.fileName, document);
+
+    QSettings registry(config.registryKey, QSettings::NativeFormat);
+    registry.setValue("Default",
+                      QString(paths.miscDirectory % u'/' % config.fileName));
+#else
+    writeManifestTo(config.browserDirectory, config.nmDirectory,
+                    u"com.chatterino.chatterino.json"_s, document);
+#endif
+}
+
+}  // namespace
+
+namespace chatterino::nm::detail {
+
+nonstd::expected<void, WriteManifestError> writeManifestTo(
+    QString directory, const QString &nmDirectory, const QString &filename,
+    const QJsonDocument &json)
 {
     if (directory.startsWith('~'))
     {
@@ -77,40 +101,31 @@ void writeManifestTo(QString directory, const QString &filename,
     }
 
     QDir dir(directory);
-    if (!dir.mkpath(u"."_s))
+    if (!dir.exists(nmDirectory) && !dir.mkdir(nmDirectory))
     {
-        qCWarning(chatterinoNativeMessage) << "Failed to create" << directory;
-        return;
+        qCWarning(chatterinoNativeMessage)
+            << "Failed to create" << nmDirectory << "in" << directory;
+        return makeUnexpected(WriteManifestError::FailedToCreateDirectory);
     }
+    dir.cd(nmDirectory);
+
     QFile file(dir.filePath(filename));
     if (!file.open(QFile::WriteOnly | QFile::Truncate))
     {
         qCWarning(chatterinoNativeMessage)
             << "Failed to open" << filename << "in" << directory;
-        return;
+        return makeUnexpected(WriteManifestError::FailedToCreateFile);
     }
     file.write(json.toJson());
+
+    return {};
 }
 
-void registerNmManifest([[maybe_unused]] const Paths &paths,
-                        const Config &config, const QJsonDocument &document)
-{
-#ifdef Q_OS_WIN
-    writeManifestTo(paths.miscDirectory, config.fileName, document);
-
-    QSettings registry(config.registryKey, QSettings::NativeFormat);
-    registry.setValue("Default",
-                      QString(paths.miscDirectory % u'/' % config.fileName));
-#else
-    writeManifestTo(config.directory, u"com.chatterino.chatterino.json"_s,
-                    document);
-#endif
-}
-
-}  // namespace
+}  // namespace chatterino::nm::detail
 
 namespace chatterino {
 
+using namespace chatterino::nm::detail;
 using namespace literals;
 
 void registerNmHost(const Paths &paths)
@@ -185,22 +200,22 @@ std::string &getNmQueueName(const Paths &paths)
 
 namespace nm::client {
 
-    void sendMessage(const QByteArray &array)
-    {
-        ipc::sendMessage("chatterino_gui", array);
-    }
+void sendMessage(const QByteArray &array)
+{
+    ipc::sendMessage("chatterino_gui", array);
+}
 
-    void writeToCout(const QByteArray &array)
-    {
-        const auto *data = array.data();
-        auto size = uint32_t(array.size());
+void writeToCout(const QByteArray &array)
+{
+    const auto *data = array.data();
+    auto size = uint32_t(array.size());
 
-        // We're writing the raw bytes to cout.
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        std::cout.write(reinterpret_cast<char *>(&size), 4);
-        std::cout.write(data, size);
-        std::cout.flush();
-    }
+    // We're writing the raw bytes to cout.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    std::cout.write(reinterpret_cast<char *>(&size), 4);
+    std::cout.write(data, size);
+    std::cout.flush();
+}
 
 }  // namespace nm::client
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -10,26 +11,19 @@
 #include <QWidget>
 
 #include <functional>
+#include <span>
 
 namespace chatterino {
 
+class Button;
+class PixmapButton;
+class SvgButton;
 class Window;
 class UpdateDialog;
 class NotebookButton;
 class NotebookTab;
 class SplitContainer;
 class Split;
-
-enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
-
-// Controls the visibility of tabs in this notebook
-enum NotebookTabVisibility : int {
-    // Show all tabs
-    AllTabs = 0,
-
-    // Only show tabs containing splits that are live
-    LiveOnly = 1,
-};
 
 using TabVisibilityFilter = std::function<bool(const NotebookTab *)>;
 
@@ -140,7 +134,16 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
-    NotebookButton *addCustomButton();
+
+    template <typename T>
+    T *addCustomButton(auto &&...args)
+    {
+        auto *btn = new T(std::forward<decltype(args)>(args)..., this);
+        this->customButtons_.push_back(btn);
+        this->performLayout();
+
+        return btn;
+    }
 
     struct Item {
         NotebookTab *tab{};
@@ -170,6 +173,26 @@ protected:
 private:
     void performLayout(bool animate = false);
 
+    struct LayoutContext {
+        int left = 0;
+        int right = 0;
+        int bottom = 0;
+        float scale = 0;
+        int tabHeight = 0;
+        int minimumTabAreaSpace = 0;
+        int addButtonWidth = 0;
+        int lineThickness = 0;
+        int tabSpacer = 0;
+
+        int buttonWidth = 0;
+        int buttonHeight = 0;
+
+        std::span<Item> items;
+    };
+
+    void performHorizontalLayout(const LayoutContext &ctx, bool animated);
+    void performVerticalLayout(const LayoutContext &ctx, bool animated);
+
     /**
      * @brief Show a popup informing the user of some big tab visibility changes
      **/
@@ -195,7 +218,7 @@ private:
     QWidget *selectedPage_ = nullptr;
 
     NotebookButton *addButton_;
-    std::vector<NotebookButton *> customButtons_;
+    std::vector<Button *> customButtons_;
 
     bool allowUserTabManagement_ = false;
     bool showTabs_ = true;
@@ -250,7 +273,7 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Main window on Windows has basically a duplicate of this in Window
-    NotebookButton *streamerModeIcon_{};
+    PixmapButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
 };
 

@@ -254,7 +254,7 @@ QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
     auto *label = new QLabel(text + ":");
     this->addToolTip(*label, toolTipText);
 
-    auto *input = new QSpinBox;
+    auto *input = new SpinBox;
     input->setMinimum(min);
     input->setMaximum(max);
 
@@ -309,7 +309,7 @@ DescriptionLabel *GeneralPageView::addDescription(const QString &text)
     return label;
 }
 
-void GeneralPageView::addSeperator()
+void GeneralPageView::addSeparator()
 {
     this->addWidget(new Line(false));
 }
