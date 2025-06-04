@@ -2554,43 +2554,40 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     });
 
     // Only display reply option where it makes sense
-    if (this->canReplyToMessages() && layout->isReplyable())
+    if (this->canReplyToMessages())
     {
         const auto &messagePtr = layout->getMessagePtr();
-        if (messagePtr->replyThread != nullptr)
+        switch (messagePtr->isReplyable())
         {
-            const auto &rootPtr = messagePtr->replyThread->root();
-            // if the root of the thread is an invalid reply target (i.e. has been deleted)
-            // the whole thread is now invalid reply target (Twitch behaviour)
-            if (!rootPtr->flags.has(MessageFlag::InvalidReplyTarget) &&
-                rootPtr->serverReceivedTime.secsTo(
-                    QDateTime::currentDateTime()) <= 24 * 60 * 60)
-            {
-                if (!messagePtr->flags.has(MessageFlag::InvalidReplyTarget))
-                {
-                    menu->addAction("&Reply to message", [this, &messagePtr] {
-                        this->setInputReply(messagePtr);
-                    });
-                }
+            case Message::ReplyStatus::NotReplyable: {
+                break;
+            }
 
+            case Message::ReplyStatus::Replyable: {
+                menu->addAction("&Reply to message", [this, &messagePtr] {
+                    this->setInputReply(messagePtr);
+                });
+                break;
+            }
+
+            case Message::ReplyStatus::ReplyableWithThread: {
+                menu->addAction("&Reply to message", [this, &messagePtr] {
+                    this->setInputReply(messagePtr);
+                });
                 menu->addAction(
                     "Reply to &original thread", [this, &messagePtr] {
                         this->setInputReply(messagePtr->replyThread->root());
                     });
             }
+        }
+    }
 
-            menu->addAction("View &thread", [this, &messagePtr] {
-                this->showReplyThreadPopup(messagePtr);
-            });
-        }
-        else if (!messagePtr->flags.has(MessageFlag::InvalidReplyTarget) &&
-                 messagePtr->serverReceivedTime.secsTo(
-                     QDateTime::currentDateTime()) <= 24 * 60 * 60)
-        {
-            menu->addAction("&Reply to message", [this, &messagePtr] {
-                this->setInputReply(messagePtr);
-            });
-        }
+    if (const auto &messagePtr = layout->getMessagePtr();
+        messagePtr->replyThread != nullptr)
+    {
+        menu->addAction("View &thread", [this, &messagePtr] {
+            this->showReplyThreadPopup(messagePtr);
+        });
     }
 
     auto *twitchChannel =

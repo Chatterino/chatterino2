@@ -108,7 +108,6 @@ public:
 
     // Misc
     bool isDisabled() const;
-    bool isReplyable() const;
 
 private:
     // methods
