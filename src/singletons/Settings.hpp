@@ -294,8 +294,6 @@ public:
         "/behaviour/autoSubToParticipatedThreads",
         true,
     };
-    // BoolSetting twitchSeperateWriteConnection =
-    // {"/behaviour/twitchSeperateWriteConnection", false};
 
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {
