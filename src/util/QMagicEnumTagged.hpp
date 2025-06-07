@@ -83,12 +83,11 @@ template <typename E, typename Tag>
 inline constexpr auto TAGGED_DATA_STORAGE = taggedDataStorage<E, Tag>(
     std::make_index_sequence<magic_enum::enum_count<E>()>{});
 
-/// @brief Get the name of an enum value TODO
-///
-/// This version is much lighter on the compile times and is not restricted to the enum_range limitation.
+/// @brief Get the tagged data of an enum value
 ///
 /// @tparam V The enum value
-/// @returns The name as a string view
+/// @tparam Tag The tag (i.e. type) of data to return
+/// @returns The tagged data belonging to the enum value as a string view.
 template <detail::IsEnum auto V, typename Tag>
 [[nodiscard]] consteval QStringView enumTaggedData() noexcept
 {
@@ -100,10 +99,7 @@ template <detail::IsEnum auto V, typename Tag>
 ///
 /// @tparam Tag The tag (i.e. type) of data to return
 /// @param value The enum value
-/// @returns The tagged data as a string view.
-///          If @a value does not have a display name, its name will be returned.
-///          If @a value does not have a name, or if it's out of range, an empty
-///          string is returned.
+/// @returns The tagged data belonging to the enum value as a string view.
 template <detail::IsEnum E, typename Tag>
 [[nodiscard]] constexpr QStringView enumTaggedData(E value) noexcept
 {
@@ -118,9 +114,11 @@ template <detail::IsEnum E, typename Tag>
 
 }  // namespace detail
 
-/// @brief Get the display name of an enum value
+/// @brief Get the display name of an enum value as a string view
 ///
-/// This version is much lighter on the compile times and is not restricted to the enum_range limitation.
+/// The enum can override `qmagicenumDisplayName(TheEnum enumValue)`, or this
+/// function will return the basic `qmagicenum::enumName` value instead, which relies
+/// on base `magic_enum`
 ///
 /// @tparam V The enum value
 /// @returns The display name as a string view.
@@ -139,7 +137,11 @@ template <detail::IsEnum auto V>
     return enumName<V>();
 }
 
-/// @brief Get the display name of an enum value
+/// @brief Get the display name of an enum value as a string view
+///
+/// The enum can override `qmagicenumDisplayName(TheEnum enumValue)`, or this
+/// function will return the basic `qmagicenum::enumName` value instead, which relies
+/// on base `magic_enum`
 ///
 /// @param value The enum value
 /// @returns The display name as a string view.
@@ -160,10 +162,11 @@ template <detail::IsEnum E>
     return enumName(value);
 }
 
-/// @brief Get the name of an enum value
+/// @brief Get the display name of an enum value as a static string
 ///
-/// This version is much lighter on the compile times and is not restricted to
-/// the enum_range limitation.
+/// The enum can override `qmagicenumDisplayName(TheEnum enumValue)`, or this
+/// function will return the basic `qmagicenum::enumName` value instead, which relies
+/// on base `magic_enum`
 ///
 /// @tparam V The enum value
 /// @returns The name as a string. The returned string is static.
@@ -173,10 +176,11 @@ template <detail::IsEnum auto V>
     return detail::staticString(enumDisplayName<V>());
 }
 
-/// @brief Get the name of an enum value
+/// @brief Get the display name of an enum value as a static string
 ///
-/// This version is much lighter on the compile times and is not restricted to
-/// the enum_range limitation.
+/// The enum can override `qmagicenumDisplayName(TheEnum enumValue)`, or this
+/// function will return the basic `qmagicenum::enumName` value instead, which relies
+/// on base `magic_enum`
 ///
 /// @tparam V The enum value
 /// @returns The name as a string. If @a value does not have name or the
