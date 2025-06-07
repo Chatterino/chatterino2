@@ -31,19 +31,6 @@
 namespace {
 using namespace chatterino;
 
-void logHelper(lua_State *L, Plugin *pl, QDebug stream,
-               const sol::variadic_args &args)
-{
-    stream.noquote();
-    stream << "[" + pl->id + ":" + pl->meta.name + "]";
-    for (const auto &arg : args)
-    {
-        stream << lua::toString(L, arg.stack_index());
-        // Remove this from our stack
-        lua_pop(L, 1);
-    }
-}
-
 QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
 {
     auto base =
@@ -101,7 +88,7 @@ void c2_log(ThisPluginState L, LogLevel lvl, sol::variadic_args args)
     lua::StackGuard guard(L);
     {
         QDebug stream = qdebugStreamForLogLevel(lvl);
-        logHelper(L, L.plugin(), stream, args);
+        L.plugin()->log(L.state(), lvl, std::move(stream), args);
     }
 }
 
@@ -261,7 +248,7 @@ void g_print(ThisPluginState L, sol::variadic_args args)
         (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
                         QT_MESSAGELOG_FUNC, chatterinoLua().categoryName())
              .debug());
-    logHelper(L, L.plugin(), stream, args);
+    L.plugin()->log(L.state(), LogLevel::Info, std::move(stream), args);
 }
 
 void package_loadlib(sol::variadic_args args)

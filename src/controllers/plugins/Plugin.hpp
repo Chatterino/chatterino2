@@ -6,6 +6,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
+#    include <boost/signals2/signal.hpp>
 #    include <QDir>
 #    include <QString>
 #    include <QUrl>
@@ -20,6 +21,10 @@
 
 struct lua_State;
 class QTimer;
+
+namespace chatterino::lua::api {
+enum class LogLevel;
+}  // namespace chatterino::lua::api
 
 namespace chatterino {
 
@@ -137,11 +142,19 @@ public:
     bool hasHTTPPermissionFor(const QUrl &url);
     bool hasNetworkPermission() const;
 
+    void log(lua_State *L, lua::api::LogLevel level, QDebug stream,
+             const sol::variadic_args &args);
+
+    sol::state_view state();
+
     std::map<lua::api::EventType, sol::protected_function> callbacks;
 
     // In-flight HTTP Requests
     // This is a lifetime hack to ensure they get deleted with the plugin. This relies on the Plugin getting deleted on reload!
     std::vector<std::shared_ptr<lua::api::HTTPRequest>> httpRequests;
+
+    boost::signals2::signal<void()> onUnloaded;
+    boost::signals2::signal<void(lua::api::LogLevel, const QString &)> onLog;
 
 private:
     QDir loadDirectory_;
