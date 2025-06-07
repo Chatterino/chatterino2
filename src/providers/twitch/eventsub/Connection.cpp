@@ -188,6 +188,10 @@ void Connection::onChannelModerate(
 
             if constexpr (CanMakeModMessage<Action>)
             {
+                if (getSettings()->hideDeletionActions)
+                {
+                    return;
+                }
                 EventSubMessageBuilder builder(channel, now);
                 builder->loginName = payload.event.moderatorUserLogin.qt();
                 makeModerateMessage(builder, payload.event, action);
