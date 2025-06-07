@@ -244,7 +244,7 @@ TEST(QMagicEnumTagged, enumDisplayNameString)
     ASSERT_EQ(withSpecDN, u"First (Display Name)");
 
     auto withSpec = enumName<MyCustom::First>();
-    ASSERT_EQ(withSpec, u"first.*");
+    ASSERT_EQ(withSpec, u"myfirst");
 
     auto withoutSpecDN = enumDisplayNameString<MyFlag::Eight>();
     ASSERT_EQ(withoutSpecDN, u"Eight");
