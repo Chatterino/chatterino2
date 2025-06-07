@@ -9,7 +9,44 @@ Contribution guidelines can be found [here](https://wiki.chatterino.com/Contribu
 ## Download
 
 Current releases are available at [https://chatterino.com](https://chatterino.com).
-Windows users can also install Chatterino [from Chocolatey](https://chocolatey.org/packages/chatterino).
+
+### Windows
+
+Windows users can also install Chatterino
+
+- [From Chocolatey](https://chocolatey.org/packages/chatterino):
+
+```
+choco install chatterino
+```
+
+- [From WinGet](https://winstall.app/apps/ChatterinoTeam.Chatterino):
+
+```
+winget install --id=ChatterinoTeam.Chatterino  -e
+```
+
+- Portable version: https://chatterino.fra1.digitaloceanspaces.com/bin/2.5.3/Chatterino.Portable.zip
+
+### macOS
+
+macOS users can install the Universal binary [from brew.sh](https://formulae.brew.sh/cask/chatterino):
+
+```
+brew install --cask chatterino
+```
+
+### GNU/Linux
+
+Chatterino is available for multiple GNU/Linux distros from native package managers, generic AppImage/Flatpak, and compiled from source: https://chatterino.com/linux
+
+### FreeBSD
+
+FreeBSD users can install the package as root:
+
+```
+pkg install chatterino2
+```
 
 ## Nightly build
 
