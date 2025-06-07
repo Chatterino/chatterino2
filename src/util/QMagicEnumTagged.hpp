@@ -6,6 +6,10 @@
 
 namespace chatterino::qmagicenum {
 
+using customize_t = std::optional<std::string_view>;
+
+namespace detail {
+
 namespace tag {
 
 struct DisplayName {
@@ -13,25 +17,19 @@ struct DisplayName {
 
 }  // namespace tag
 
-namespace customize {
-
-using customize_t = std::optional<std::string_view>;
-
-template <typename E, typename Tag>
-constexpr customize_t enumTaggedData(E /*v*/) noexcept
-{
-    return {};
-}
-
-}  // namespace customize
-
-namespace detail {
-
 template <typename E, typename Tag, E V>
 constexpr auto enumTaggedDataValue() noexcept
 {
-    [[maybe_unused]] constexpr auto custom =
-        customize::enumTaggedData<E, Tag>(V);
+    [[maybe_unused]] constexpr auto custom = [] {
+        static_assert(
+            std::is_same_v<Tag, tag::DisplayName>,
+            "unhandled tag in QMagicEnumTagged.hpp::enumTaggedDataValue");
+
+        if constexpr (std::is_same_v<Tag, tag::DisplayName>)
+        {
+            return qmagicenumDisplayName(V);
+        }
+    }();
 
     if constexpr (custom.has_value())
     {
@@ -42,7 +40,8 @@ constexpr auto enumTaggedDataValue() noexcept
     }
     else
     {
-        // Fallback to magic_enum::enum_name
+        // This specific enum value did not have a specialization, fall back to
+        // magic_enum's value
         return magic_enum::detail::enum_name_v<E, V>;
     }
 }
@@ -131,7 +130,13 @@ template <detail::IsEnum E, typename Tag>
 template <detail::IsEnum auto V>
 [[nodiscard]] consteval QStringView enumDisplayName() noexcept
 {
-    return detail::enumTaggedData<V, tag::DisplayName>();
+    if constexpr (requires { qmagicenumDisplayName(V); })
+    {
+        return detail::enumTaggedData<V, detail::tag::DisplayName>();
+    }
+
+    // Fall back to our qmagicenum "enum name" implementation
+    return enumName<V>();
 }
 
 /// @brief Get the display name of an enum value
@@ -144,9 +149,15 @@ template <detail::IsEnum auto V>
 template <detail::IsEnum E>
 [[nodiscard]] constexpr QStringView enumDisplayName(E value) noexcept
 {
-    using D = std::decay_t<E>;
+    if constexpr (requires { qmagicenumDisplayName(value); })
+    {
+        using D = std::decay_t<E>;
 
-    return detail::enumTaggedData<D, tag::DisplayName>(value);
+        return detail::enumTaggedData<D, detail::tag::DisplayName>(value);
+    }
+
+    // Fall back to our qmagicenum "enum name" implementation
+    return enumName(value);
 }
 
 /// @brief Get the name of an enum value

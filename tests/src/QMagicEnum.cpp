@@ -41,6 +41,19 @@ enum class MyCustom {
     Second = 9,
 };
 
+constexpr chatterino::qmagicenum::customize_t qmagicenumDisplayName(
+    MyCustom value) noexcept
+{
+    switch (value)
+    {
+        case MyCustom::First:
+            return "First (Display Name)";
+
+        default:
+            return {};
+    }
+}
+
 enum MyOpen {
     OpenOne = 11,
     OpenTwo = 12,
@@ -103,21 +116,6 @@ constexpr magic_enum::customize::customize_t
 
         default:
             return default_tag;
-    }
-}
-
-template <>
-constexpr chatterino::qmagicenum::customize::customize_t
-    chatterino::qmagicenum::customize::enumTaggedData<
-        MyCustom, qmagicenum::tag::DisplayName>(MyCustom value) noexcept
-{
-    switch (value)
-    {
-        case MyCustom::First:
-            return "First (Display Name)";
-
-        default:
-            return {};
     }
 }
 
@@ -242,10 +240,21 @@ TEST(QMagicEnumTagged, displayName)
 
 TEST(QMagicEnumTagged, enumDisplayNameString)
 {
-    ASSERT_EQ(enumDisplayNameString<MyCustom::First>(),
-              u"First (Display Name)");
-    ASSERT_EQ(enumDisplayNameString<MyCustom::Second>(), u"mysecond.*");
+    auto withSpecDN = enumDisplayNameString<MyCustom::First>();
+    ASSERT_EQ(withSpecDN, u"First (Display Name)");
 
-    ASSERT_EQ(enumDisplayNameString(MyCustom::First), u"First (Display Name)");
-    ASSERT_EQ(enumDisplayNameString(MyCustom::Second), u"mysecond.*");
+    auto withSpec = enumName<MyCustom::First>();
+    ASSERT_EQ(withSpec, u"first.*");
+
+    auto withoutSpecDN = enumDisplayNameString<MyFlag::Eight>();
+    ASSERT_EQ(withoutSpecDN, u"Eight");
+
+    auto withoutSpec = enumName<MyFlag::Eight>();
+    ASSERT_EQ(withoutSpec, u"Eight");
+
+    auto secondWithSpecDN = enumDisplayNameString<MyCustom::Second>();
+    ASSERT_EQ(secondWithSpecDN, u"mysecond.*");
+
+    auto secondWithSpec = enumName<MyCustom::Second>();
+    ASSERT_EQ(secondWithSpec, u"mysecond.*");
 }

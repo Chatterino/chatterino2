@@ -98,6 +98,19 @@ enum class TabStyle : std::uint8_t {
     Compact,
 };
 
+constexpr chatterino::qmagicenum::customize_t qmagicenumDisplayName(
+    TabStyle value) noexcept
+{
+    switch (value)
+    {
+        case TabStyle::Normal:
+            return "Normal (default)";
+
+        default:
+            return {};
+    }
+}
+
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -773,22 +786,5 @@ constexpr magic_enum::customize::customize_t
 
         default:
             return default_tag;
-    }
-}
-
-template <>
-constexpr chatterino::qmagicenum::customize::customize_t
-    chatterino::qmagicenum::customize::enumTaggedData<
-        chatterino::TabStyle, chatterino::qmagicenum::tag::DisplayName>(
-        chatterino::TabStyle value) noexcept
-{
-    using chatterino::TabStyle;
-    switch (value)
-    {
-        case TabStyle::Normal:
-            return "Normal (default)";
-
-        default:
-            return {};
     }
 }
