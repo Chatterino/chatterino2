@@ -15,7 +15,6 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
-#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
@@ -97,19 +96,6 @@ enum class TabStyle : std::uint8_t {
     Normal,
     Compact,
 };
-
-constexpr chatterino::qmagicenum::customize_t qmagicenumDisplayName(
-    TabStyle value) noexcept
-{
-    switch (value)
-    {
-        case TabStyle::Normal:
-            return "Normal (default)";
-
-        default:
-            return {};
-    }
-}
 
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
