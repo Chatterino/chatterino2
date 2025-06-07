@@ -62,6 +62,8 @@ struct Message {
     // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
     MessagePtr replyParent;
+    enum class ReplyStatus { NotReplyable, Replyable, ReplyableWithThread };
+    ReplyStatus isReplyable() const;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 

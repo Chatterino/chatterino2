@@ -159,4 +159,41 @@ QJsonObject Message::toJson() const
     return msg;
 }
 
+Message::ReplyStatus Message::isReplyable() const
+{
+    if (this->loginName.isEmpty())
+    {
+        return ReplyStatus::NotReplyable;
+    }
+
+    if (this->flags.hasAny({MessageFlag::System, MessageFlag::Subscription,
+                            MessageFlag::Timeout, MessageFlag::Whisper,
+                            MessageFlag::ModerationAction,
+                            MessageFlag::InvalidReplyTarget}))
+    {
+        return ReplyStatus::NotReplyable;
+    }
+
+    constexpr int oneDayInSeconds = 24 * 60 * 60;
+    if (this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
+        oneDayInSeconds)
+    {
+        return ReplyStatus::NotReplyable;
+    }
+
+    if (this->replyThread != nullptr)
+    {
+        const auto &rootPtr = this->replyThread->root();
+        if (rootPtr == nullptr ||
+            rootPtr->isReplyable() == ReplyStatus::NotReplyable)
+        {
+            return ReplyStatus::NotReplyable;
+        }
+
+        return ReplyStatus::ReplyableWithThread;
+    }
+
+    return ReplyStatus::Replyable;
+}
+
 }  // namespace chatterino
