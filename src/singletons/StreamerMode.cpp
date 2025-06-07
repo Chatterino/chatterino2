@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "util/PostToThread.hpp"
@@ -55,8 +56,17 @@ bool isBroadcasterSoftwareActive()
     static bool shouldShowWarning = true;
 
     QProcess p;
-    p.start("pgrep", {"-xi", broadcastingBinaries().join("|")},
-            QIODevice::NotOpen);
+    if (Version::instance().isFlatpak())
+    {
+        p.start("flatpak-spawn",
+                {"--host", "pgrep", "-xi", broadcastingBinaries().join("|")},
+                QIODevice::NotOpen);
+    }
+    else
+    {
+        p.start("pgrep", {"-xi", broadcastingBinaries().join("|")},
+                QIODevice::NotOpen);
+    }
 
     if (p.waitForFinished(1000) && p.exitStatus() == QProcess::NormalExit)
     {
