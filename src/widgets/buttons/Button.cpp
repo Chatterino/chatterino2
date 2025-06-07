@@ -306,9 +306,11 @@ void Button::paintButton(QPainter &painter)
 
     if (this->cachePixmap_)
     {
-        if (this->cachedPixmap_.size() != this->size())
+        if (this->cachedPixmap_.size() / this->devicePixelRatio() !=
+            this->size())
         {
-            this->cachedPixmap_ = QPixmap(this->size());
+            this->cachedPixmap_ =
+                QPixmap(this->size() * this->devicePixelRatio());
             this->cachedPixmap_.setDevicePixelRatio(this->devicePixelRatio());
             this->pixmapValid_ = false;
         }
