@@ -782,7 +782,7 @@ void ChannelView::updateScrollbar(
         {
             this->scrollBar_->setPageSize(
                 static_cast<qreal>(messages.size() - i) +
-                (h / std::max(1.0, message->getHeight())));
+                (h / std::max(1, message->getHeight())));
 
             showScrollbar = true;
             break;
@@ -1626,8 +1626,9 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
         .isMentions = this->underlyingChannel_ ==
                       getApp()->getTwitch()->getMentionsChannel(),
 
-        .y = -(messagesSnapshot[start]->getHeight() *
-               (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))),
+        .y = -static_cast<int>(
+            messagesSnapshot[start]->getHeight() *
+            (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))),
         .messageIndex = start,
         .isLastReadMessage = false,
 
@@ -1664,25 +1665,23 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
                 {
                     animationArea = QRect{
                         0,
-                        static_cast<int>(ctx.y),
-                        static_cast<int>(layout->getWidth()),
-                        static_cast<int>(layout->getHeight()),
+                        ctx.y,
+                        layout->getWidth(),
+                        layout->getHeight(),
                     };
                 }
                 else
                 {
-                    animationArea.setBottom(
-                        static_cast<int>(ctx.y + layout->getHeight()));
+                    animationArea.setBottom((ctx.y + layout->getHeight()));
                     animationArea.setWidth(
-                        std::max(static_cast<int>(layout->getWidth()),
-                                 animationArea.width()));
+                        std::max(layout->getWidth(), animationArea.width()));
                 }
             }
 
             if (this->highlightedMessage_ == layout)
             {
                 painter.fillRect(
-                    QRectF{
+                    QRect{
                         0,
                         ctx.y,
                         layout->getWidth(),
