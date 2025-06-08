@@ -183,6 +183,7 @@ Message::ReplyStatus Message::isReplyable() const
     {
         if (const auto &rootPtr = this->replyThread->root(); rootPtr != nullptr)
         {
+            assert(this != rootPtr.get());
             if (rootPtr->isReplyable() == ReplyStatus::NotReplyable)
             {
                 // thread parent must be replyable to be replyable
