@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
+#include "common/QLogging.hpp"
 #include "util/QMagicEnum.hpp"
 #include "util/QMagicEnumTagged.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
@@ -8,6 +9,7 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <QBoxLayout>
 #include <QComboBox>
+#include <QDebug>
 #include <QLabel>
 #include <QObject>
 #include <QString>
@@ -93,12 +95,14 @@ public:
 
         QObject::connect(
             combo, &QComboBox::currentTextChanged,
-            [combo, &setting](const auto &newText) {
+            [label, combo, &setting](const auto &newText) {
                 bool ok = true;
                 auto enumValue = combo->currentData().toInt(&ok);
                 if (!ok)
                 {
-                    // TODO: log?
+                    qCWarning(chatterinoWidget)
+                        << "Combo" << label << " with value" << newText
+                        << "did not contain an intable UserRole data";
                     return;
                 }
 
