@@ -147,7 +147,7 @@ template <detail::IsEnum E, typename Tag>
 /// If the enum type provides a qmagicenumDisplayName specialization, it is used. Otherwise, fall back to magic_enum's name.
 ///
 /// @tparam V Enum value
-/// @returns Display name as QStringView, or name as fallback, or an empty string if not available.
+/// @returns Display name as QStringView, or name as fallback.
 template <detail::IsEnum auto V>
 [[nodiscard]] consteval QStringView enumDisplayName() noexcept
 {
