@@ -2599,14 +2599,19 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         const auto &messagePtr = layout->getMessagePtr();
         switch (messagePtr->isReplyable())
         {
-            case Message::ReplyStatus::NotReplyable: {
-                break;
-            }
-
             case Message::ReplyStatus::Replyable: {
                 menu->addAction("&Reply to message", [this, &messagePtr] {
                     this->setInputReply(messagePtr);
                 });
+                break;
+            }
+
+            case Message::ReplyStatus::NotReplyable: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
                 break;
             }
 
@@ -2618,16 +2623,47 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                     "Reply to &original thread", [this, &messagePtr] {
                         this->setInputReply(messagePtr->replyThread->root());
                     });
+                break;
+            }
+
+            case Message::ReplyStatus::NotReplyableWithThread: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
+
+                menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
+                break;
+            }
+
+            case Message::ReplyStatus::NotReplyableDueToThread: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
+
+                const auto &replyThreadAction = menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
+
+                replyThreadAction->setEnabled(false);
+                break;
             }
         }
-    }
 
-    if (const auto &messagePtr = layout->getMessagePtr();
-        messagePtr->replyThread != nullptr)
-    {
-        menu->addAction("View &thread", [this, &messagePtr] {
-            this->showReplyThreadPopup(messagePtr);
-        });
+        if (const auto &messagePtr = layout->getMessagePtr();
+            messagePtr->replyThread != nullptr)
+        {
+            menu->addAction("View &thread", [this, &messagePtr] {
+                this->showReplyThreadPopup(messagePtr);
+            });
+        }
     }
 
     auto *twitchChannel =

@@ -163,37 +163,39 @@ Message::ReplyStatus Message::isReplyable() const
 {
     if (this->loginName.isEmpty())
     {
-        return ReplyStatus::NotReplyable;
-    }
-
-    if (this->flags.hasAny({MessageFlag::System, MessageFlag::Subscription,
-                            MessageFlag::Timeout, MessageFlag::Whisper,
-                            MessageFlag::ModerationAction,
-                            MessageFlag::InvalidReplyTarget}))
-    {
+        // no replies can happen
         return ReplyStatus::NotReplyable;
     }
 
     constexpr int oneDayInSeconds = 24 * 60 * 60;
-    if (this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
-        oneDayInSeconds)
+    bool messageReplyable = true;
+    if (this->flags.hasAny({MessageFlag::System, MessageFlag::Subscription,
+                            MessageFlag::Timeout, MessageFlag::Whisper,
+                            MessageFlag::ModerationAction,
+                            MessageFlag::InvalidReplyTarget}) ||
+        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
+            oneDayInSeconds)
     {
-        return ReplyStatus::NotReplyable;
+        messageReplyable = false;
     }
 
     if (this->replyThread != nullptr)
     {
-        const auto &rootPtr = this->replyThread->root();
-        if (rootPtr == nullptr ||
-            rootPtr->isReplyable() == ReplyStatus::NotReplyable)
+        if (const auto &rootPtr = this->replyThread->root(); rootPtr != nullptr)
         {
-            return ReplyStatus::NotReplyable;
-        }
+            if (rootPtr->isReplyable() == ReplyStatus::NotReplyable)
+            {
+                // thread parent must be replyable to be replyable
+                return ReplyStatus::NotReplyableDueToThread;
+            }
 
-        return ReplyStatus::ReplyableWithThread;
+            return messageReplyable ? ReplyStatus::ReplyableWithThread
+                                    : ReplyStatus::NotReplyableWithThread;
+        }
     }
 
-    return ReplyStatus::Replyable;
+    return messageReplyable ? ReplyStatus::Replyable
+                            : ReplyStatus::NotReplyable;
 }
 
 }  // namespace chatterino
