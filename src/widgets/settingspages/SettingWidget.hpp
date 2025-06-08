@@ -88,7 +88,6 @@ public:
 
                 auto i = magic_enum::enum_integer(enumValue);
 
-                // TODO: iterate over possible values & set based on user data instead?
                 combo->setCurrentIndex(i);
             },
             widget->managedConnections);
