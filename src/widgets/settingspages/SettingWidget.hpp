@@ -1,12 +1,15 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
+#include "common/QLogging.hpp"
 #include "util/QMagicEnum.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QBoxLayout>
 #include <QComboBox>
+#include <QDebug>
 #include <QLabel>
 #include <QObject>
 #include <QString>
@@ -59,10 +62,14 @@ public:
         auto *lbl = new QLabel(label % ":");
         auto *combo = new ComboBox;
         combo->setFocusPolicy(Qt::StrongFocus);
-        for (const auto &item : qmagicenum::enumNames<T>())
+
+        for (const auto value : magic_enum::enum_values<T>())
         {
-            combo->addItem(item.toString());
+            combo->addItem(
+                qmagicenum::enumDisplayNameString(value),
+                QVariant(static_cast<std::underlying_type_t<T>>(value)));
         }
+
         // TODO: this can probably use some other size hint/size strategy
         combo->setMinimumWidth(combo->minimumSizeHint().width());
 
@@ -87,11 +94,18 @@ public:
 
         QObject::connect(
             combo, &QComboBox::currentTextChanged,
-            [&setting](const auto &newText) {
-                // The setter for EnumStringSetting does not check that this value is valid
-                // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
-                // You could also use the settings `getEnum` function
-                setting = newText;
+            [label, combo, &setting](const auto &newText) {
+                bool ok = true;
+                auto enumValue = combo->currentData().toInt(&ok);
+                if (!ok)
+                {
+                    qCWarning(chatterinoWidget)
+                        << "Combo" << label << " with value" << newText
+                        << "did not contain an intable UserRole data";
+                    return;
+                }
+
+                setting = qmagicenum::enumNameString(static_cast<T>(enumValue));
             });
 
         return widget;
