@@ -631,7 +631,6 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             // we have to fall back to using horizontalAdvance which has some
             // corner cases when processing whole words (see #5944).
 #ifdef CHATTERINO_WITH_PRIVATE_QT_API
-            // NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
             auto font =
                 app->getFonts()->getFont(this->style_, container.getScale());
 
@@ -708,7 +707,6 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                                             word.size() - actualStart);
                 assert(needsBreak || view.isEmpty());
             } while (!view.isEmpty());
-            // NOLINTEND(cppcoreguidelines-avoid-do-while)
 #else
             auto textLength = word.length();
             int wordStart = 0;
