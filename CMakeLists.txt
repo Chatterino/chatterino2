@@ -134,7 +134,6 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Network
     Svg
     Concurrent
-    ${_additional_qt_components}
     )
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
