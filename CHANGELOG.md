@@ -57,6 +57,7 @@
 - Dev: Refactored `Button` and friends. (#6102, #6255)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Added optional improved text wrapping through private Qt APIs. (#6265)
 
 ## 2.5.3
 
