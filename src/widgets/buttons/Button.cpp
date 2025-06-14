@@ -188,9 +188,15 @@ void Button::mousePressEvent(QMouseEvent *event)
     }
 }
 
+void Button::stopClick()
+{
+    this->mouseDown_ = false;
+    this->update();
+}
+
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!this->enabled_)
+    if (!this->enabled_ || !this->mouseDown_)
     {
         return;
     }

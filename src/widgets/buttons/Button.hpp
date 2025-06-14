@@ -100,6 +100,11 @@ public:
     /// Setter for #menu()
     void setMenu(std::unique_ptr<QMenu> menu);
 
+    /// Stop a potentially in-progess click.
+    ///
+    /// This should only be used if events are manually dispatched.
+    void stopClick();
+
 Q_SIGNALS:
     /// @brief Emitted after the user left-clicked the button.
     ///
