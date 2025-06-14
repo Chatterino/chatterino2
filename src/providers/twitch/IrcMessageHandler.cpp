@@ -329,6 +329,39 @@ void IrcMessageHandler::parseMessageInto(Communi::IrcMessage *message,
             sink.addOrReplaceTimeout(std::move(clearChat.message), time);
         }
     }
+
+    if (command == u"CLEARMSG"_s)
+    {
+        // check parameter count
+        if (message->parameters().length() < 1)
+        {
+            return;
+        }
+
+        QString chanName;
+        if (!trimChannelName(message->parameter(0), chanName))
+        {
+            return;
+        }
+
+        auto tags = message->tags();
+
+        QString targetID = tags.value("target-msg-id").toString();
+
+        auto msg = sink.findMessageByID(targetID);
+        if (msg == nullptr)
+        {
+            return;
+        }
+
+        msg->flags.set(MessageFlag::Disabled);
+        msg->flags.set(MessageFlag::InvalidReplyTarget);
+        if (!getSettings()->hideDeletionActions)
+        {
+            sink.addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
+                            MessageContext::Original);
+        }
+    }
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
@@ -519,6 +552,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     }
 
     msg->flags.set(MessageFlag::Disabled);
+    msg->flags.set(MessageFlag::InvalidReplyTarget);
     if (!getSettings()->hideDeletionActions)
     {
         chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
