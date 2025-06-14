@@ -2,8 +2,6 @@
 
 NUM_FORMAT_JOBS=${NUM_FORMAT_JOBS:-$(nproc)}
 
-echo "num format jobs: $NUM_FORMAT_JOBS"
-
 if ! command -v parallel >/dev/null 2>&1; then
     echo "Missing parallel command"
     exit 1
