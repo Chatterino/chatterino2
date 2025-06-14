@@ -27,16 +27,15 @@ void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
 
 namespace chatterino {
 
-const QRect &MessageLayoutElement::getRect() const
+const QRectF &MessageLayoutElement::getRect() const
 {
     return this->rect_;
 }
 
-MessageLayoutElement::MessageLayoutElement(MessageElement &creator,
-                                           const QSize &size)
-    : creator_(creator)
+MessageLayoutElement::MessageLayoutElement(MessageElement &creator, QSizeF size)
+    : rect_(QPointF{}, size)
+    , creator_(creator)
 {
-    this->rect_.setSize(size);
     DebugCount::increase("message layout elements");
 }
 
@@ -50,7 +49,7 @@ MessageElement &MessageLayoutElement::getCreator() const
     return this->creator_;
 }
 
-void MessageLayoutElement::setPosition(QPoint point)
+void MessageLayoutElement::setPosition(QPointF point)
 {
     this->rect_.moveTopLeft(point);
 }
@@ -123,7 +122,7 @@ void MessageLayoutElement::setWordId(int wordId)
 //
 
 ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
-                                       const QSize &size)
+                                       QSizeF size)
     : MessageLayoutElement(creator, size)
     , image_(std::move(image))
 {
@@ -167,7 +166,7 @@ void ImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-bool ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool ImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
 {
     if (this->image_ == nullptr)
     {
@@ -187,12 +186,12 @@ bool ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
     return false;
 }
 
-int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int ImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
 {
     return 0;
 }
 
-int ImageLayoutElement::getXFromIndex(size_t index)
+qreal ImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -215,7 +214,7 @@ int ImageLayoutElement::getXFromIndex(size_t index)
 
 LayeredImageLayoutElement::LayeredImageLayoutElement(
     MessageElement &creator, std::vector<ImagePtr> images,
-    std::vector<QSize> sizes, QSize largestSize)
+    std::vector<QSizeF> sizes, QSizeF largestSize)
     : MessageLayoutElement(creator, largestSize)
     , images_(std::move(images))
     , sizes_(std::move(sizes))
@@ -281,7 +280,7 @@ void LayeredImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
 {
     auto fullRect = QRectF(this->getRect());
     fullRect.moveTop(fullRect.y() + yOffset);
@@ -316,12 +315,12 @@ bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
     return animatedFlag;
 }
 
-int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int LayeredImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
 {
     return 0;
 }
 
-int LayeredImageLayoutElement::getXFromIndex(size_t index)
+qreal LayeredImageLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -342,8 +341,8 @@ int LayeredImageLayoutElement::getXFromIndex(size_t index)
 // IMAGE WITH BACKGROUND
 //
 ImageWithBackgroundLayoutElement::ImageWithBackgroundLayoutElement(
-    MessageElement &creator, ImagePtr image, const QSize &size, QColor color)
-    : ImageLayoutElement(creator, image, size)
+    MessageElement &creator, ImagePtr image, QSizeF size, QColor color)
+    : ImageLayoutElement(creator, std::move(image), size)
     , color_(color)
 {
 }
@@ -411,9 +410,9 @@ void ImageWithCircleBackgroundLayoutElement::paint(
 //
 
 TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
-                                     const QSize &_size, QColor _color,
+                                     QSizeF size, QColor _color,
                                      FontStyle _style, float _scale)
-    : MessageLayoutElement(_creator, _size)
+    : MessageLayoutElement(_creator, size)
     , color_(_color)
     , style_(_style)
     , scale_(_scale)
@@ -456,12 +455,12 @@ void TextLayoutElement::paint(QPainter &painter,
         QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
-bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, int /*yOffset*/)
+bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, qreal /*yOffset*/)
 {
     return false;
 }
 
-int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int TextLayoutElement::getMouseOverIndex(QPointF abs) const
 {
     if (abs.x() < this->getRect().left())
     {
@@ -500,12 +499,11 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
 }
 
-int TextLayoutElement::getXFromIndex(size_t index)
+qreal TextLayoutElement::getXFromIndex(size_t index)
 {
     auto *app = getApp();
 
-    QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(this->style_, this->scale_);
+    auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
 
     if (index <= 0)
     {
@@ -513,7 +511,7 @@ int TextLayoutElement::getXFromIndex(size_t index)
     }
     else if (index < static_cast<size_t>(this->getText().size()))
     {
-        int x = 0;
+        qreal x = 0;
         for (size_t i = 0; i < index; i++)
         {
             x += metrics.horizontalAdvance(
@@ -531,7 +529,7 @@ int TextLayoutElement::getXFromIndex(size_t index)
 TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
                                              const QString &_line1,
                                              const QString &_line2,
-                                             float _scale, const QSize &size)
+                                             float _scale, QSizeF size)
     : MessageLayoutElement(creator, size)
     , scale(_scale)
     , line1(_line1)
@@ -564,33 +562,37 @@ void TextIconLayoutElement::paint(QPainter &painter,
 
     if (this->line2.isEmpty())
     {
-        QRect _rect(this->getRect());
-        painter.drawText(_rect, this->line1, option);
+        painter.drawText(this->getRect(), this->line1, option);
     }
     else
     {
         painter.drawText(
-            QPoint(this->getRect().x(),
-                   this->getRect().y() + this->getRect().height() / 2),
+            QPointF{
+                this->getRect().x(),
+                this->getRect().y() + (this->getRect().height() / 2),
+            },
             this->line1);
-        painter.drawText(QPoint(this->getRect().x(),
-                                this->getRect().y() + this->getRect().height()),
-                         this->line2);
+        painter.drawText(
+            QPointF{
+                this->getRect().x(),
+                this->getRect().y() + this->getRect().height(),
+            },
+            this->line2);
     }
 }
 
 bool TextIconLayoutElement::paintAnimated(QPainter & /*painter*/,
-                                          int /*yOffset*/)
+                                          qreal /*yOffset*/)
 {
     return false;
 }
 
-int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int TextIconLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
 {
     return 0;
 }
 
-int TextIconLayoutElement::getXFromIndex(size_t index)
+qreal TextIconLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {
@@ -608,10 +610,10 @@ int TextIconLayoutElement::getXFromIndex(size_t index)
 }
 
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
-                                                 int width, float thickness,
+                                                 qreal width, float thickness,
                                                  float radius,
                                                  float neededMargin)
-    : MessageLayoutElement(creator, QSize(width, 0))
+    : MessageLayoutElement(creator, QSizeF(width, 0))
     , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
     , radius_(radius)
     , neededMargin_(neededMargin)
@@ -655,17 +657,17 @@ void ReplyCurveLayoutElement::paint(QPainter &painter,
 }
 
 bool ReplyCurveLayoutElement::paintAnimated(QPainter & /*painter*/,
-                                            int /*yOffset*/)
+                                            qreal /*yOffset*/)
 {
     return false;
 }
 
-int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int ReplyCurveLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
 {
     return 0;
 }
 
-int ReplyCurveLayoutElement::getXFromIndex(size_t index)
+qreal ReplyCurveLayoutElement::getXFromIndex(size_t index)
 {
     if (index <= 0)
     {

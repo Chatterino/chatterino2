@@ -14,7 +14,6 @@ class OnceFlag
 {
 public:
     OnceFlag();
-    ~OnceFlag();
 
     /// Set this flag and notify waiters
     void set();
@@ -35,7 +34,7 @@ public:
 private:
     std::mutex mutex;
     std::condition_variable condvar;
-    bool flag = false;
+    std::atomic<bool> flag = false;
 };
 
 }  // namespace chatterino

@@ -33,52 +33,52 @@
 
 namespace chatterino {
 namespace {
-    // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
-    // For example, if location is Top, the rectangle will be translated in the negative Y direction,
-    // or "up" on the screen, by amount.
-    void translateRectForLocation(QRect &rect, NotebookTabLocation location,
-                                  int amount)
+// Translates the given rectangle by an amount in the direction to appear like the tab is selected.
+// For example, if location is Top, the rectangle will be translated in the negative Y direction,
+// or "up" on the screen, by amount.
+void translateRectForLocation(QRect &rect, NotebookTabLocation location,
+                              int amount)
+{
+    switch (location)
     {
-        switch (location)
-        {
-            case NotebookTabLocation::Top:
-                rect.translate(0, -amount);
-                break;
-            case NotebookTabLocation::Left:
-                rect.translate(-amount, 0);
-                break;
-            case NotebookTabLocation::Right:
-                rect.translate(amount, 0);
-                break;
-            case NotebookTabLocation::Bottom:
-                rect.translate(0, amount);
-                break;
-        }
+        case NotebookTabLocation::Top:
+            rect.translate(0, -amount);
+            break;
+        case NotebookTabLocation::Left:
+            rect.translate(-amount, 0);
+            break;
+        case NotebookTabLocation::Right:
+            rect.translate(amount, 0);
+            break;
+        case NotebookTabLocation::Bottom:
+            rect.translate(0, amount);
+            break;
     }
+}
 
-    float getCompactDivider(TabStyle tabStyle)
+float getCompactDivider(TabStyle tabStyle)
+{
+    switch (tabStyle)
     {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 1.5;
-            case TabStyle::Normal:
-            default:
-                return 1.0;
-        }
+        case TabStyle::Compact:
+            return 1.5;
+        case TabStyle::Normal:
+        default:
+            return 1.0;
     }
+}
 
-    float getCompactReducer(TabStyle tabStyle)
+float getCompactReducer(TabStyle tabStyle)
+{
+    switch (tabStyle)
     {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 4.0;
-            case TabStyle::Normal:
-            default:
-                return 0.0;
-        }
+        case TabStyle::Compact:
+            return 4.0;
+        case TabStyle::Normal:
+        default:
+            return 0.0;
     }
+}
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -87,6 +87,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     , notebook_(notebook)
     , menu_(this)
 {
+    this->setContentCacheEnabled(false);
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation_.setEasingCurve(
@@ -232,19 +233,19 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     float scale = this->scale();
     int width = 0;
 
-    QFontMetrics metrics =
+    auto metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(32 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (32 / compactDivider * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(16 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (16 / compactDivider * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -679,8 +680,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     float scale = this->scale();
 
     painter.setFont(app->getFonts()->getFont(FontStyle::UiTabs, scale));
-    QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
+    auto metrics = app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 

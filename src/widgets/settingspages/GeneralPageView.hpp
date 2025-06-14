@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/helper/SignalLabel.hpp"
+#include "widgets/buttons/SignalLabel.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>

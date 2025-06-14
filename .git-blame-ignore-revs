@@ -12,3 +12,6 @@ e259b9e39f46f3cb0e4838c988d4f320a03dfaa4
 #
 # 2019 - Normalize line endings in already existing files
 b06eb9df835c25154899fbcf43e9b37addcea1b1
+#
+# 2025 - Unindented inner namespaces https://github.com/Chatterino/chatterino2/pull/6235
+8acca1c241db169a682c4712154145f5fc92e0d4

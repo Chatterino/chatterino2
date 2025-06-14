@@ -18,44 +18,44 @@ namespace chatterino {
 // only qualified for tests
 namespace helpers::detail {
 
-    using SizeType = QStringView::size_type;
+using SizeType = QStringView::size_type;
 
-    /**
-     * Skips all spaces.
-     * The caller must guarantee view.at(startPos).isSpace().
-     *
-     * @param view The string to skip spaces in.
-     * @param startPos The starting position (there must be a space in the view).
-     * @return The position of the last space.
-     */
-    SizeType skipSpace(QStringView view, SizeType startPos);
+/**
+ * Skips all spaces.
+ * The caller must guarantee view.at(startPos).isSpace().
+ *
+ * @param view The string to skip spaces in.
+ * @param startPos The starting position (there must be a space in the view).
+ * @return The position of the last space.
+ */
+SizeType skipSpace(QStringView view, SizeType startPos);
 
-    /**
-     * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
-     *
-     * @param word Word to test. Must not be empty.
-     * @param expected Singular of the expected word.
-     * @return true if `word` is singular or plural of `expected`.
-     */
-    bool matchesIgnorePlural(QStringView word, const QString &expected);
+/**
+ * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
+ *
+ * @param word Word to test. Must not be empty.
+ * @param expected Singular of the expected word.
+ * @return true if `word` is singular or plural of `expected`.
+ */
+bool matchesIgnorePlural(QStringView word, const QString &expected);
 
-    /**
-     * Tries to find the unit starting at `pos` and returns its multiplier so
-     * `valueInUnit * multiplier = valueInSeconds` (e.g. 60 for minutes).
-     *
-     * Supported units are
-     *      'w[eek(s)]', 'd[ay(s)]',
-     *      'h[our(s)]', 'm[inute(s)]', 's[econd(s)]'.
-     * The unit must be in lowercase.
-     *
-     * @param view A view into a string
-     * @param pos The starting position.
-     *            This is set to the last position of the unit
-     *            if it's a valid unit, undefined otherwise.
-     * @return (multiplier, ok)
-     */
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
-                                                      SizeType &pos);
+/**
+ * Tries to find the unit starting at `pos` and returns its multiplier so
+ * `valueInUnit * multiplier = valueInSeconds` (e.g. 60 for minutes).
+ *
+ * Supported units are
+ *      'w[eek(s)]', 'd[ay(s)]',
+ *      'h[our(s)]', 'm[inute(s)]', 's[econd(s)]'.
+ * The unit must be in lowercase.
+ *
+ * @param view A view into a string
+ * @param pos The starting position.
+ *            This is set to the last position of the unit
+ *            if it's a valid unit, undefined otherwise.
+ * @return (multiplier, ok)
+ */
+std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
+                                                  SizeType &pos);
 
 }  // namespace helpers::detail
 
