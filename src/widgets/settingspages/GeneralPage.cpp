@@ -658,6 +658,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return args.index;
         },
         false);
+    SettingWidget::dropdown("Emote & badge thumbnail size on hover",
+                            s.emoteTooltipScale)
+        ->addTo(layout);
     layout.addDropdown("Emoji style",
                        {
                            "Twitter",
