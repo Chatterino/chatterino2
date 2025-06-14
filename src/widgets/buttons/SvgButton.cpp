@@ -23,6 +23,12 @@ void SvgButton::setSource(Src source)
     this->invalidateContent();
 }
 
+void SvgButton::setColor(std::optional<QColor> color)
+{
+    this->color_ = color;
+    this->invalidateContent();
+}
+
 void SvgButton::setPadding(QSize padding)
 {
     if (this->padding_ == padding)
@@ -65,7 +71,16 @@ void SvgButton::paintContent(QPainter &painter)
     QSize actualPadding = this->scale() * this->padding_;
     QPoint topLeft{actualPadding.width(), actualPadding.height()};
     QSize contentSize = this->size() - 2 * actualPadding;
-    this->svg_->render(&painter, {topLeft, contentSize});
+    auto bounds = QRectF{topLeft, contentSize};
+    this->svg_->render(&painter, bounds);
+
+    if (this->color_.has_value())
+    {
+        painter.save();
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(bounds, *this->color_);
+        painter.restore();
+    }
 }
 
 QString SvgButton::currentSvgPath() const
