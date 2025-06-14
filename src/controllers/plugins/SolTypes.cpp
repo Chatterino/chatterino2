@@ -3,9 +3,11 @@
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include <QObject>
+#    include <QStringBuilder>
 #    include <sol/thread.hpp>
 
 namespace chatterino::lua {
@@ -27,9 +29,10 @@ Plugin *ThisPluginState::plugin()
 
 void logError(Plugin *plugin, QStringView context, const QString &msg)
 {
+    QString fullMessage = context % u" - " % msg;
     qCWarning(chatterinoLua).noquote()
-        << "[" + plugin->id + ":" + plugin->meta.name + "]" << context << "-"
-        << msg;
+        << "[" + plugin->id + ":" + plugin->meta.name + "]" << fullMessage;
+    plugin->onLog(api::LogLevel::Warning, fullMessage);
 }
 
 }  // namespace chatterino::lua
