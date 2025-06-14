@@ -39,6 +39,14 @@ Frames::Frames(QList<Frame> &&frames)
     : items_(std::move(frames))
 {
     assertInGuiThread();
+    auto *app = tryGetApp();
+    if (app == nullptr)
+    {
+        qCDebug(chatterinoImage)
+            << "Frames constructor called while app is shutting down";
+        return;
+    }
+
     DebugCount::increase("images");
     if (!this->empty())
     {
@@ -50,7 +58,7 @@ Frames::Frames(QList<Frame> &&frames)
         DebugCount::increase("animated images");
 
         this->gifTimerConnection_ =
-            getApp()->getEmotes()->getGIFTimer().signal.connect([this] {
+            app->getEmotes()->getGIFTimer().signal.connect([this] {
                 this->advance();
             });
 
@@ -67,8 +75,7 @@ Frames::Frames(QList<Frame> &&frames)
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->getEmotes()->getGIFTimer().position() %
-                    totalLength),
+                int(app->getEmotes()->getGIFTimer().position() % totalLength),
                 60000);
         }
         this->processOffset();
@@ -275,6 +282,15 @@ Image::~Image()
         return;
     }
 
+    if (isAppAboutToQuit())
+    {
+        if (this->frames_)
+        {
+            std::ignore = this->frames_.release();
+        }
+        return;
+    }
+
     // Ensure the destructor for our frames is called in the GUI thread
     // If the Image destructor is called outside of the GUI thread, move the
     // ownership of the frames to the GUI thread, otherwise the frames will be
@@ -468,6 +484,19 @@ int Image::height() const
     return static_cast<int>(this->expectedSize_.height() * this->scale_);
 }
 
+QSizeF Image::size() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_->first())
+    {
+        return pixmap->size().toSizeF() * this->scale_;
+    }
+
+    // No frames loaded, use the expected size
+    return this->expectedSize_.toSizeF() * this->scale_;
+}
+
 void Image::actuallyLoad()
 {
     auto weak = weakOf(this);
@@ -480,6 +509,8 @@ void Image::actuallyLoad()
             {
                 return;
             }
+
+            assert(!isAppAboutToQuit());
 
             QBuffer buffer;
             buffer.setData(result.getData());

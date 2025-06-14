@@ -200,22 +200,22 @@ std::string &getNmQueueName(const Paths &paths)
 
 namespace nm::client {
 
-    void sendMessage(const QByteArray &array)
-    {
-        ipc::sendMessage("chatterino_gui", array);
-    }
+void sendMessage(const QByteArray &array)
+{
+    ipc::sendMessage("chatterino_gui", array);
+}
 
-    void writeToCout(const QByteArray &array)
-    {
-        const auto *data = array.data();
-        auto size = uint32_t(array.size());
+void writeToCout(const QByteArray &array)
+{
+    const auto *data = array.data();
+    auto size = uint32_t(array.size());
 
-        // We're writing the raw bytes to cout.
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        std::cout.write(reinterpret_cast<char *>(&size), 4);
-        std::cout.write(data, size);
-        std::cout.flush();
-    }
+    // We're writing the raw bytes to cout.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    std::cout.write(reinterpret_cast<char *>(&size), 4);
+    std::cout.write(data, size);
+    std::cout.flush();
+}
 
 }  // namespace nm::client
 

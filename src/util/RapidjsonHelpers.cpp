@@ -5,45 +5,43 @@
 namespace chatterino {
 namespace rj {
 
-    void addMember(rapidjson::Value &obj, const char *key,
-                   rapidjson::Value &&value,
-                   rapidjson::Document::AllocatorType &a)
+void addMember(rapidjson::Value &obj, const char *key, rapidjson::Value &&value,
+               rapidjson::Document::AllocatorType &a)
+{
+    obj.AddMember(rapidjson::Value(key, a).Move(), value, a);
+}
+
+void addMember(rapidjson::Value &obj, const char *key, rapidjson::Value &value,
+               rapidjson::Document::AllocatorType &a)
+{
+    obj.AddMember(rapidjson::Value(key, a).Move(), value.Move(), a);
+}
+
+QString stringify(const rapidjson::Value &value)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    value.Accept(writer);
+
+    return buffer.GetString();
+}
+
+bool getSafeObject(rapidjson::Value &obj, const char *key,
+                   rapidjson::Value &out)
+{
+    if (!checkJsonValue(obj, key))
     {
-        obj.AddMember(rapidjson::Value(key, a).Move(), value, a);
+        return false;
     }
 
-    void addMember(rapidjson::Value &obj, const char *key,
-                   rapidjson::Value &value,
-                   rapidjson::Document::AllocatorType &a)
-    {
-        obj.AddMember(rapidjson::Value(key, a).Move(), value.Move(), a);
-    }
+    out = obj[key].Move();
+    return true;
+}
 
-    QString stringify(const rapidjson::Value &value)
-    {
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        value.Accept(writer);
-
-        return buffer.GetString();
-    }
-
-    bool getSafeObject(rapidjson::Value &obj, const char *key,
-                       rapidjson::Value &out)
-    {
-        if (!checkJsonValue(obj, key))
-        {
-            return false;
-        }
-
-        out = obj[key].Move();
-        return true;
-    }
-
-    bool checkJsonValue(const rapidjson::Value &obj, const char *key)
-    {
-        return obj.IsObject() && !obj.IsNull() && obj.HasMember(key);
-    }
+bool checkJsonValue(const rapidjson::Value &obj, const char *key)
+{
+    return obj.IsObject() && !obj.IsNull() && obj.HasMember(key);
+}
 
 }  // namespace rj
 }  // namespace chatterino

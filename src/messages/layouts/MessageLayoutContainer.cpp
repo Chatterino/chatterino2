@@ -23,7 +23,7 @@ namespace {
 using namespace chatterino;
 
 constexpr QMargins MARGIN{8, 4, 8, 4};
-constexpr int COMPACT_EMOTES_OFFSET = 4;
+constexpr qreal COMPACT_EMOTES_OFFSET = 4;
 
 int maxUncollapsedLines()
 {
@@ -34,7 +34,7 @@ int maxUncollapsedLines()
 
 namespace chatterino {
 
-void MessageLayoutContainer::beginLayout(int width, float scale,
+void MessageLayoutContainer::beginLayout(qreal width, float scale,
                                          float imageScale, MessageFlags flags)
 {
     this->elements_.clear();
@@ -74,7 +74,7 @@ void MessageLayoutContainer::endLayout()
 
         auto *element = new TextLayoutElement(
             dotdotdot, dotdotdotText,
-            QSize(this->dotdotdotWidth_, this->textLineHeight_),
+            QSizeF(this->dotdotdotWidth_, this->textLineHeight_),
             QColor("#00D80A"), FontStyle::ChatMediumBold, this->scale_);
 
         if (this->isRTL())
@@ -83,9 +83,11 @@ void MessageLayoutContainer::endLayout()
             for (auto i = this->lines_.back().startIndex;
                  i < this->elements_.size(); i++)
             {
-                QPoint prevPos = this->elements_[i]->getRect().topLeft();
-                this->elements_[i]->setPosition(
-                    QPoint(prevPos.x() + this->dotdotdotWidth_, prevPos.y()));
+                QPointF prevPos = this->elements_[i]->getRect().topLeft();
+                this->elements_[i]->setPosition(QPointF{
+                    prevPos.x() + this->dotdotdotWidth_,
+                    prevPos.y(),
+                });
             }
         }
         this->addElement(element, true, -2);
@@ -157,7 +159,7 @@ void MessageLayoutContainer::breakLine()
         this->anyReorderingDone_ = true;
     }
 
-    int xOffset = 0;
+    qreal xOffset = 0;
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
     {
@@ -179,16 +181,16 @@ void MessageLayoutContainer::breakLine()
             element->getCreator().getFlags().has(
                 MessageElementFlag::EmoteImages);
 
-        int yExtra = 0;
+        qreal yExtra = 0;
         if (isCompactEmote)
         {
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
         }
 
-        element->setPosition(
-            QPoint(element->getRect().x() + xOffset +
-                       int(MARGIN.left() * this->scale_),
-                   element->getRect().y() + this->lineHeight_ + yExtra));
+        element->setPosition(QPointF{
+            element->getRect().x() + xOffset + (MARGIN.left() * this->scale_),
+            element->getRect().y() + this->lineHeight_ + yExtra,
+        });
     }
 
     if (!this->lines_.empty())
@@ -201,7 +203,7 @@ void MessageLayoutContainer::breakLine()
         .endIndex = 0,
         .startCharIndex = this->charIndex_,
         .endCharIndex = 0,
-        .rect = QRect(-100000, this->currentY_, 200000, lineHeight_),
+        .rect = QRectF(-100000, this->currentY_, 200000, lineHeight_),
     });
 
     for (auto i = this->lineStart_; i < this->elements_.size(); i++)
@@ -260,7 +262,7 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
 }
 
 bool MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
-                                                   int yOffset) const
+                                                   qreal yOffset) const
 {
     bool anyAnimatedElement = false;
     for (const auto &element : this->elements_)
@@ -273,7 +275,7 @@ bool MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
 void MessageLayoutContainer::paintSelection(QPainter &painter,
                                             const size_t messageIndex,
                                             const Selection &selection,
-                                            const int yOffset) const
+                                            const qreal yOffset) const
 {
     if (selection.selectionMin.messageIndex > messageIndex ||
         selection.selectionMax.messageIndex < messageIndex)
@@ -383,7 +385,7 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
     }
 }
 
-MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point) const
+MessageLayoutElement *MessageLayoutContainer::getElementAt(QPointF point) const
 {
     for (const auto &element : this->elements_)
     {
@@ -396,7 +398,7 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point) const
     return nullptr;
 }
 
-size_t MessageLayoutContainer::getSelectionIndex(QPoint point) const
+size_t MessageLayoutContainer::getSelectionIndex(QPointF point) const
 {
     if (this->elements_.empty())
     {
@@ -534,12 +536,12 @@ size_t MessageLayoutContainer::getLastCharacterIndex() const
     return this->lines_.back().endCharIndex;
 }
 
-int MessageLayoutContainer::getWidth() const
+qreal MessageLayoutContainer::getWidth() const
 {
     return this->width_;
 }
 
-int MessageLayoutContainer::getHeight() const
+qreal MessageLayoutContainer::getHeight() const
 {
     return this->height_;
 }
@@ -564,12 +566,12 @@ bool MessageLayoutContainer::atStartOfLine() const
     return this->lineStart_ == this->elements_.size();
 }
 
-bool MessageLayoutContainer::fitsInLine(int width) const
+bool MessageLayoutContainer::fitsInLine(qreal width) const
 {
     return width <= this->remainingWidth();
 }
 
-int MessageLayoutContainer::remainingWidth() const
+qreal MessageLayoutContainer::remainingWidth() const
 {
     return (this->width_ - int(MARGIN.left() * this->scale_) -
             int(MARGIN.right() * this->scale_) -
@@ -663,7 +665,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         this->currentY_ = int(MARGIN.top() * this->scale_);
     }
 
-    int elementLineHeight = element->getRect().height();
+    qreal elementLineHeight = element->getRect().height();
 
     // compact emote offset
     bool isCompactEmote =
@@ -678,8 +680,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     // update line height
     this->lineHeight_ = std::max(this->lineHeight_, elementLineHeight);
 
-    auto xOffset = 0;
-    auto yOffset = 0;
+    qreal xOffset = 0;
+    qreal yOffset = 0;
 
     if (element->getCreator().getFlags().has(
             MessageElementFlag::ChannelPointReward) &&
@@ -713,8 +715,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
 
     // set move element
     element->setPosition(
-        QPoint(this->currentX_ + xOffset,
-               this->currentY_ - element->getRect().height() + yOffset));
+        QPointF(this->currentX_ + xOffset,
+                this->currentY_ - element->getRect().height() + yOffset));
 
     element->setLine(this->line_);
 
@@ -832,15 +834,13 @@ void MessageLayoutContainer::reorderRTL(size_t firstTextIndex)
     }
 }
 
-void MessageLayoutContainer::paintSelectionRect(QPainter &painter,
-                                                const Line &line,
-                                                const int left, const int right,
-                                                const int yOffset,
-                                                const QColor &color) const
+void MessageLayoutContainer::paintSelectionRect(
+    QPainter &painter, const Line &line, const qreal left, const qreal right,
+    const qreal yOffset, const QColor &color) const
 {
-    QRect rect = line.rect;
+    QRectF rect = line.rect;
 
-    rect.setTop(std::max(0, rect.top()) + yOffset);
+    rect.setTop(std::max(rect.top(), 0.0) + yOffset);
     rect.setBottom(std::min(this->height_, rect.bottom()) + yOffset);
     rect.setLeft(left);
     rect.setRight(right);
@@ -850,7 +850,7 @@ void MessageLayoutContainer::paintSelectionRect(QPainter &painter,
 
 std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
     QPainter &painter, const size_t messageIndex, const Selection &selection,
-    const int yOffset) const
+    const qreal yOffset) const
 {
     const auto selectionColor = getTheme()->messages.selection;
 
@@ -899,8 +899,8 @@ std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
             return {lineIndex + 1};
         }
 
-        int x = this->elements_[line.startIndex]->getRect().left();
-        int r = this->elements_[line.endIndex - 1]->getRect().right();
+        qreal x = this->elements_[line.startIndex]->getRect().left();
+        qreal r = this->elements_[line.endIndex - 1]->getRect().right();
 
         auto index = line.startCharIndex;
         for (auto i = line.startIndex; i < line.endIndex; i++)
@@ -966,7 +966,7 @@ std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
 void MessageLayoutContainer::paintSelectionEnd(QPainter &painter,
                                                size_t lineIndex,
                                                const Selection &selection,
-                                               const int yOffset) const
+                                               const qreal yOffset) const
 {
     const auto selectionColor = getTheme()->messages.selection;
     // [2] selection contains or ends in this message (starts before our message or line)
@@ -986,7 +986,7 @@ void MessageLayoutContainer::paintSelectionEnd(QPainter &painter,
         }
 
         // find the right end of the selection
-        int r = this->elements_[line.endIndex - 1]->getRect().right();
+        qreal r = this->elements_[line.endIndex - 1]->getRect().right();
 
         for (auto i = line.startIndex; i < line.endIndex; i++)
         {

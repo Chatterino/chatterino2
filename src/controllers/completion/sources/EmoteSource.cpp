@@ -11,42 +11,42 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino::completion {
 
 namespace {
 
-    void addEmotes(std::vector<EmoteItem> &out, const EmoteMap &map,
-                   const QString &providerName)
+void addEmotes(std::vector<EmoteItem> &out, const EmoteMap &map,
+               const QString &providerName)
+{
+    for (auto &&emote : map)
     {
-        for (auto &&emote : map)
-        {
-            out.push_back({.emote = emote.second,
-                           .searchName = emote.first.string,
-                           .tabCompletionName = emote.first.string,
-                           .displayName = emote.second->name.string,
-                           .providerName = providerName,
-                           .isEmoji = false});
-        }
+        out.push_back({.emote = emote.second,
+                       .searchName = emote.first.string,
+                       .tabCompletionName = emote.first.string,
+                       .displayName = emote.second->name.string,
+                       .providerName = providerName,
+                       .isEmoji = false});
     }
+}
 
-    void addEmojis(std::vector<EmoteItem> &out,
-                   const std::vector<EmojiPtr> &map)
+void addEmojis(std::vector<EmoteItem> &out, const std::vector<EmojiPtr> &map)
+{
+    for (const auto &emoji : map)
     {
-        for (const auto &emoji : map)
+        for (auto &&shortCode : emoji->shortCodes)
         {
-            for (auto &&shortCode : emoji->shortCodes)
-            {
-                out.push_back(
-                    {.emote = emoji->emote,
-                     .searchName = shortCode,
-                     .tabCompletionName = QStringLiteral(":%1:").arg(shortCode),
-                     .displayName = shortCode,
-                     .providerName = "Emoji",
-                     .isEmoji = true});
-            }
-        };
-    }
+            out.push_back(
+                {.emote = emoji->emote,
+                 .searchName = shortCode,
+                 .tabCompletionName = QStringLiteral(":%1:").arg(shortCode),
+                 .displayName = shortCode,
+                 .providerName = "Emoji",
+                 .isEmoji = true});
+        }
+    };
+}
 
 }  // namespace
 

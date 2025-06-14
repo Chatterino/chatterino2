@@ -1,6 +1,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/SolTypes.hpp"
 
+#    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 

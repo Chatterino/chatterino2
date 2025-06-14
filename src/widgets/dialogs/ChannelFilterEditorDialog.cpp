@@ -8,14 +8,13 @@
 namespace chatterino {
 
 namespace {
-    const QStringList friendlyBinaryOps = {
-        "and", "or",       "+",           "-",         "*",        "/",
-        "%",   "equals",   "not equals",  "<",         ">",        "<=",
-        ">=",  "contains", "starts with", "ends with", "(nothing)"};
-    const QStringList realBinaryOps = {
-        "&&", "||",       "+",          "-",        "*", "/",
-        "%",  "==",       "!=",         "<",        ">", "<=",
-        ">=", "contains", "startswith", "endswith", ""};
+const QStringList friendlyBinaryOps = {
+    "and", "or",       "+",           "-",         "*",        "/",
+    "%",   "equals",   "not equals",  "<",         ">",        "<=",
+    ">=",  "contains", "starts with", "ends with", "(nothing)"};
+const QStringList realBinaryOps = {
+    "&&", "||", "+",  "-",  "*",        "/",          "%",        "==", "!=",
+    "<",  ">",  "<=", ">=", "contains", "startswith", "endswith", ""};
 }  // namespace
 
 ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
