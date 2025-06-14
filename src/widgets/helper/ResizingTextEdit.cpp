@@ -47,7 +47,7 @@ ResizingTextEdit::ResizingTextEdit()
 
 QSize ResizingTextEdit::sizeHint() const
 {
-    return QSize(this->width(), this->heightForWidth(this->width()));
+    return {this->width(), this->heightForWidth(this->width())};
 }
 
 bool ResizingTextEdit::hasHeightForWidth() const
@@ -80,7 +80,7 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     auto words = QStringView{textUpToCursor}.split(' ');
     if (words.size() == 0)
     {
-        return QString();
+        return {};
     }
 
     bool first = true;
@@ -105,7 +105,7 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     if (lastWord.isEmpty())
     {
-        return QString();
+        return {};
     }
 
     return lastWord;

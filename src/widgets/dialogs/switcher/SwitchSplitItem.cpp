@@ -80,7 +80,7 @@ void SwitchSplitItem::paint(QPainter *painter, const QRect &rect) const
 
 QSize SwitchSplitItem::sizeHint(const QRect &rect) const
 {
-    return QSize(rect.width(), ICON_SIZE.height());
+    return {rect.width(), ICON_SIZE.height()};
 }
 
 }  // namespace chatterino

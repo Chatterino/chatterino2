@@ -134,7 +134,7 @@ public:
             row >= static_cast<int>(this->rows_.size()) ||
             column >= this->columnCount_)
         {
-            return QVariant();
+            return {};
         }
 
         return rows_[row].items[column]->data(role);
@@ -193,13 +193,13 @@ public:
     {
         if (orientation != Qt::Horizontal)
         {
-            return QVariant();
+            return {};
         }
 
         auto it = this->headerData_[section].find(role);
         if (it == this->headerData_[section].end())
         {
-            return QVariant();
+            return {};
         }
         else
         {
