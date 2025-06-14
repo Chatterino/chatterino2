@@ -35,7 +35,6 @@
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
-- Bugfix: Fixed notebook buttons triggering a click when dragging items over them. (#6266)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
@@ -55,7 +54,7 @@
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 
