@@ -34,7 +34,11 @@ namespace chatterino {
 
 TooltipEntry TooltipEntry::scaled(ImagePtr image, QString text, float scale)
 {
-    TooltipEntry entry = {.image = std::move(image), .text = std::move(text)};
+    auto entry = TooltipEntry{
+        .image = std::move(image),
+        .text = std::move(text),
+    };
+
     if (entry.image)
     {
         auto imgWidth = entry.image->width() / entry.image->scale();
