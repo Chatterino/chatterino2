@@ -20,7 +20,8 @@ enum class LogLevel;
 namespace chatterino {
 
 class Plugin;
-class Button;
+class SvgButton;
+class PixmapButton;
 
 class PluginRepl : public BaseWindow
 {
@@ -62,9 +63,9 @@ private:
     struct {
         QTextEdit *input = nullptr;
         QTextEdit *output = nullptr;
-        Button *clear = nullptr;
-        Button *reload = nullptr;
-        Button *pin = nullptr;
+        SvgButton *clear = nullptr;
+        SvgButton *reload = nullptr;
+        PixmapButton *pin = nullptr;
     } ui;
 
     struct {

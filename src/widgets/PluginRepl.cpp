@@ -11,7 +11,8 @@
 #    include "singletons/Resources.hpp"
 #    include "singletons/Settings.hpp"
 #    include "singletons/Theme.hpp"
-#    include "widgets/helper/Button.hpp"
+#    include "widgets/buttons/PixmapButton.hpp"
+#    include "widgets/buttons/SvgButton.hpp"
 
 #    include <QBoxLayout>
 #    include <QFontDatabase>
@@ -372,14 +373,24 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
     // top row
     {
         auto *top = new QHBoxLayout;
-        this->ui.clear = new Button;
+        this->ui.clear = new SvgButton(
+            {
+                .dark = u":/buttons/cancel.svg"_s,
+                .light = u":/buttons/cancelDark.svg"_s,
+            },
+            nullptr, {3, 3});
         this->ui.clear->setScaleIndependentSize({18, 18});
         this->ui.clear->setToolTip(u"Clear Output"_s);
         QObject::connect(this->ui.clear, &Button::leftClicked, this, [this] {
             this->ui.output->clear();
         });
 
-        this->ui.reload = new Button;
+        this->ui.reload = new SvgButton(
+            {
+                .dark = u":/buttons/reloadLight.svg"_s,
+                .light = u":/buttons/reloadDark.svg"_s,
+            },
+            nullptr, {3, 3});
         this->ui.reload->setScaleIndependentSize({18, 18});
         this->ui.reload->setToolTip(u"Reload"_s);
         QObject::connect(this->ui.reload, &Button::leftClicked, this, [this] {
@@ -400,7 +411,7 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
             }
         });
 
-        this->ui.pin = new Button;
+        this->ui.pin = new PixmapButton;
         this->ui.pin->setScaleIndependentSize({18, 18});
         this->ui.pin->setToolTip(u"Pin Window"_s);
         QObject::connect(this->ui.pin, &Button::leftClicked, this, [this] {
@@ -457,8 +468,6 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.warning.setBackground(QColor(0xfffbd6));
         this->charFormats.error.setForeground(QColor(0xa4000f));
         this->blockFormats.error.setBackground(QColor(0xfdf2f5));
-        this->ui.clear->setSvgResource(u":/buttons/cancelDark.svg"_s);
-        this->ui.reload->setSvgResource(u":/buttons/reloadDark.svg"_s);
     }
     else
     {
@@ -467,8 +476,6 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.warning.setBackground(QColor(0x42381f));
         this->charFormats.error.setForeground(QColor(0xffb3d2));
         this->blockFormats.error.setBackground(QColor(0x4b2f36));
-        this->ui.clear->setSvgResource(u":/buttons/cancel.svg"_s);
-        this->ui.reload->setSvgResource(u":/buttons/reloadLight.svg"_s);
     }
 
     if (this->isPinned)
