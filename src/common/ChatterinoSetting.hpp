@@ -130,7 +130,7 @@ public:
         return this->getEnum();
     }
 
-    Enum getEnum()
+    Enum getEnum() const
     {
         return qmagicenum::enumCast<Enum>(this->getValue(),
                                           qmagicenum::CASE_INSENSITIVE)

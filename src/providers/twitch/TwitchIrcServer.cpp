@@ -129,22 +129,6 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
         });
 }
 
-/// Returns true if chat messages should be sent over Helix
-bool shouldSendHelixChat()
-{
-    switch (getSettings()->chatSendProtocol)
-    {
-        case ChatSendProtocol::Helix:
-            return true;
-        case ChatSendProtocol::Default:
-        case ChatSendProtocol::IRC:
-            return false;
-        default:
-            assert(false && "Invalid chat protocol value");
-            return false;
-    }
-}
-
 }  // namespace
 
 namespace chatterino {
@@ -762,7 +746,7 @@ void TwitchIrcServer::onMessageSendRequested(
         return;
     }
 
-    if (shouldSendHelixChat())
+    if (getSettings()->shouldSendHelixChat())
     {
         sendHelixMessage(channel, message);
     }
@@ -786,7 +770,7 @@ void TwitchIrcServer::onReplySendRequested(
         return;
     }
 
-    if (shouldSendHelixChat())
+    if (getSettings()->shouldSendHelixChat())
     {
         sendHelixMessage(channel, message, replyId);
     }
