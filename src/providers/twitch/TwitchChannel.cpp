@@ -789,6 +789,14 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
+    if (parsedMessage.startsWith('/') &&
+        !parsedMessage.startsWith("/me ", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
+        return;
+    }
+
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
     this->updateSevenTVActivity();
@@ -820,6 +828,14 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
     {
+        return;
+    }
+
+    if (parsedMessage.startsWith('/') &&
+        !parsedMessage.startsWith("/me ", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
         return;
     }
 
