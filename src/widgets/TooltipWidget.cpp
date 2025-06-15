@@ -43,8 +43,8 @@ TooltipEntry TooltipEntry::scaled(ImagePtr image, QString text, float scale)
     {
         auto imgWidth = entry.image->width() / entry.image->scale();
         auto imgHeight = entry.image->height() / entry.image->scale();
-        entry.customWidth = imgWidth * scale;
-        entry.customHeight = imgHeight * scale;
+        entry.customWidth = static_cast<int>(imgWidth * scale);
+        entry.customHeight = static_cast<int>(imgHeight * scale);
     }
     return entry;
 }
