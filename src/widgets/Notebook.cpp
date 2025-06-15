@@ -38,10 +38,8 @@ namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
-    , addButton_(new NotebookButton(this))
+    , addButton_(new NotebookButton(NotebookButton::Type::Plus, this))
 {
-    this->addButton_->setIcon(NotebookButton::Icon::Plus);
-
     this->addButton_->setHidden(true);
 
     this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
@@ -1298,7 +1296,7 @@ SplitNotebook::SplitNotebook(Window *parent)
     getSettings()->tabVisibility.connect(
         [this](int val, auto) {
             auto visibility = NotebookTabVisibility(val);
-            // Set the correct TabVisibilityFilter for the given visiblity setting.
+            // Set the correct TabVisibilityFilter for the given visibility setting.
             // Note that selected tabs are always shown regardless of what the tab
             // filter returns, so no need to include `tab->isSelected()` in the
             // predicate. See Notebook::setTabVisibilityFilter.

@@ -16,23 +16,18 @@
 
 namespace chatterino {
 
-NotebookButton::NotebookButton(Notebook *parent)
+NotebookButton::NotebookButton(Type type_, Notebook *parent)
     : Button(parent)
     , parent_(parent)
+    , type(type_)
 {
-    this->setAcceptDrops(true);
-}
-
-void NotebookButton::setIcon(Icon icon)
-{
-    this->icon_ = icon;
-
-    this->update();
-}
-
-NotebookButton::Icon NotebookButton::getIcon() const
-{
-    return this->icon_;
+    switch (this->type)
+    {
+        case Type::Plus: {
+            this->setAcceptDrops(true);
+        }
+        break;
+    }
 }
 
 void NotebookButton::themeChangedEvent()
@@ -60,9 +55,9 @@ void NotebookButton::paintContent(QPainter &painter)
 
     float h = height(), w = width();
 
-    switch (icon_)
+    switch (this->type)
     {
-        case Plus: {
+        case Type::Plus: {
             painter.setPen([&] {
                 QColor tmp = foreground;
                 if (isDraggingSplit())
@@ -88,13 +83,16 @@ void NotebookButton::paintContent(QPainter &painter)
                              rect.top() + rect.height() / 2 + (s / 2));
         }
         break;
-
-        default:;
     }
 }
 
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 {
+    if (this->type != Type::Plus)
+    {
+        return;
+    }
+
     if (!event->mimeData()->hasFormat("chatterino/split"))
     {
         return;
@@ -110,6 +108,11 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
 void NotebookButton::dropEvent(QDropEvent *event)
 {
+    if (this->type != Type::Plus)
+    {
+        return;
+    }
+
     auto *draggedSplit = dynamic_cast<Split *>(event->source());
     if (!draggedSplit)
     {
