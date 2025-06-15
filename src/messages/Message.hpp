@@ -63,19 +63,25 @@ struct Message {
     std::shared_ptr<MessageThread> replyThread;
     MessagePtr replyParent;
     enum class ReplyStatus : std::uint8_t {
-        /// no reply thread, message is not replyable
+        /// message has no reply thread, and message is not replyable
+        ///
+        /// e.g. due to message being deleted or too old
         NotReplyable,
 
-        /// no reply thread, message is replyable
+        /// message has no reply thread, but message is replyable
         Replyable,
 
-        /// reply thread exists, message is replyable, thread root is replyable
+        /// message is part of a reply thread. both message & thread are replyable
         ReplyableWithThread,
 
-        /// reply thread exists, message is not replyable, thread root is replyable
+        /// message is part of a reply thread. thread is replyable, but message is not replyable
+        ///
+        /// e.g. due to message being deleted or too old
         NotReplyableWithThread,
 
-        /// reply thread exists, but thread root is not replyable, thus message is not replyable
+        /// message is part of a reply thread. neither reply or message is replyable
+        ///
+        /// e.g. due to message at the top of the thread being deleted
         NotReplyableDueToThread,
     };
     ReplyStatus isReplyable() const;
