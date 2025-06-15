@@ -15,6 +15,7 @@
 - Minor: The JSON selector in the upload response can now query arrays using their indices like `foo.0`. (#6193)
 - Minor: Made nicknames searchable in the Settings dialog search bar. (#5886)
 - Minor: Added hotkey Action for opening account selector. (#6192)
+- Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
@@ -55,7 +56,8 @@
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266)
+- Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 
