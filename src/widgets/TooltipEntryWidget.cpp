@@ -44,7 +44,6 @@ void TooltipEntryWidget::setImageScale(int w, int h)
         return;
     }
     this->customSize = QSize{w, h};
-    this->actualCustomSize = {};
     this->refreshPixmap();
 }
 
@@ -91,9 +90,9 @@ bool TooltipEntryWidget::refreshPixmap()
     {
         this->displayImage_->setPixmap(
             pixmap->scaled(this->customSize, Qt::KeepAspectRatio));
-        if (this->displayImage_->size() != this->actualCustomSize)
+
+        if (this->displayImage_->pixmap().size() != this->customSize)
         {
-            this->actualCustomSize = this->displayImage_->size();
             this->adjustSize();
         }
     }

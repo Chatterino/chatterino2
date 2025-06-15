@@ -36,7 +36,6 @@ private:
 
     ImagePtr image_ = nullptr;
     QSize customSize;
-    QSize actualCustomSize;
 };
 
 }  // namespace chatterino
