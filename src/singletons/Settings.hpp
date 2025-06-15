@@ -15,6 +15,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
@@ -103,6 +104,21 @@ enum class EmoteTooltipScale : std::uint8_t {
     Large,
     Huge,
 };
+
+constexpr qmagicenum::customize_t qmagicenumDisplayName(
+    EmoteTooltipScale value) noexcept
+{
+    switch (value)
+    {
+        case EmoteTooltipScale::Medium:
+            return "Medium (default)";
+
+        case EmoteTooltipScale::Small:
+        case EmoteTooltipScale::Large:
+        case EmoteTooltipScale::Huge:
+            return {};
+    }
+}
 
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
@@ -776,27 +792,6 @@ constexpr magic_enum::customize::customize_t
 
         case chatterino::StreamLinkPreferredQuality::AudioOnly:
             return "Audio only";
-
-        default:
-            return default_tag;
-    }
-}
-
-template <>
-constexpr magic_enum::customize::customize_t
-    magic_enum::customize::enum_name<chatterino::EmoteTooltipScale>(
-        chatterino::EmoteTooltipScale value) noexcept
-{
-    using chatterino::EmoteTooltipScale;
-    switch (value)
-    {
-        case chatterino::EmoteTooltipScale::Small:
-        case chatterino::EmoteTooltipScale::Large:
-        case chatterino::EmoteTooltipScale::Huge:
-            return default_tag;
-
-        case chatterino::EmoteTooltipScale::Medium:
-            return "Medium (default)";
 
         default:
             return default_tag;
