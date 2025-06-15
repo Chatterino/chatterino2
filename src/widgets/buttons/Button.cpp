@@ -172,7 +172,7 @@ void Button::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    this->clickEffects_.emplace_back(event->pos());
+    this->addClickEffect(event->pos());
 
     this->mouseDown_ = true;
 
@@ -190,7 +190,7 @@ void Button::mousePressEvent(QMouseEvent *event)
 
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!this->enabled_)
+    if (!this->enabled_ || !this->mouseDown_)
     {
         return;
     }
@@ -221,6 +221,11 @@ void Button::mouseMoveEvent(QMouseEvent *event)
 
         this->update();
     }
+}
+
+void Button::addClickEffect(QPoint position)
+{
+    this->clickEffects_.emplace_back(position);
 }
 
 void Button::onMouseEffectTimeout()

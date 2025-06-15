@@ -180,6 +180,9 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    /// Queue up the click animation at the given position
+    void addClickEffect(QPoint position);
+
 private:
     void onMouseEffectTimeout();
     void showMenu();
