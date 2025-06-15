@@ -102,18 +102,10 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
     event->acceptProposedAction();
 
-    auto *e =
-        new QMouseEvent(QMouseEvent::MouseButtonPress,
-                        QPointF(this->width() / 2, this->height() / 2),
-                        QCursor::pos(), Qt::LeftButton, Qt::LeftButton, {});
-    Button::mousePressEvent(e);
-    delete e;
-}
-
-void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
-{
-    this->update();
-    this->stopClick();
+    this->addClickEffect(QPoint{
+        this->width() / 2,
+        this->height() / 2,
+    });
 }
 
 void NotebookButton::dropEvent(QDropEvent *event)
@@ -135,7 +127,6 @@ void NotebookButton::dropEvent(QDropEvent *event)
     }
 
     event->acceptProposedAction();
-    this->stopClick();
 
     auto *page = new SplitContainer(notebook);
     auto *tab = notebook->addPage(page);

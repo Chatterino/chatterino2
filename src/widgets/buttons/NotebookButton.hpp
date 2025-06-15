@@ -28,7 +28,6 @@ protected:
 
     void themeChangedEvent() override;
     void dragEnterEvent(QDragEnterEvent *) override;
-    void dragLeaveEvent(QDragLeaveEvent *) override;
     void dropEvent(QDropEvent *) override;
 
     void hideEvent(QHideEvent *) override;
