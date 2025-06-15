@@ -544,22 +544,4 @@ void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
     this->container_.addSelectionText(str, from, to, copymode);
 }
 
-bool MessageLayout::isReplyable() const
-{
-    if (this->message_->loginName.isEmpty())
-    {
-        return false;
-    }
-
-    if (this->message_->flags.hasAny(
-            {MessageFlag::System, MessageFlag::Subscription,
-             MessageFlag::Timeout, MessageFlag::Whisper,
-             MessageFlag::ModerationAction}))
-    {
-        return false;
-    }
-
-    return true;
-}
-
 }  // namespace chatterino
