@@ -774,7 +774,7 @@ QString TwitchChannel::prepareMessage(const QString &message) const
 static bool isUnknownCommand(const QString &text)
 {
     static QRegularExpression isUnknownCommand(
-        R"(^(?:\.|\/)(?!me|\s))", QRegularExpression::CaseInsensitiveOption);
+        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
 
     auto match = isUnknownCommand.match(text);
 
