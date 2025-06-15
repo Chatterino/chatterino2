@@ -251,7 +251,14 @@ QString stringifyValue(const sol::object &obj)
     return s;
 }
 
-void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10)
+enum class ExpandFlag : uint8_t {
+    None = 0,
+    TryUsertypeStorage = 1 << 0,
+};
+using ExpandFlags = FlagsEnum<ExpandFlag>;
+
+void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10,
+               ExpandFlags flags = {})
 {
     lua::StackGuard g(it.lua_state());
 
@@ -304,9 +311,33 @@ void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10)
             if (meta != 0)
             {
                 s.append(u"(metatable): "_s);
-                stringify({it.lua_state(), -1}, s, maxItems / 2);
+                stringify({it.lua_state(), -1}, s, maxItems / 2,
+                          flags | ExpandFlag::TryUsertypeStorage);
                 n++;
                 lua_pop(it.lua_state(), 1);  // metatable
+            }
+
+            if (flags.has(ExpandFlag::TryUsertypeStorage))
+            {
+                auto uts = sol::u_detail::maybe_get_usertype_storage_base(
+                    it.lua_state(), it.stack_index());
+                if (uts)
+                {
+                    for (const auto &[key, _] : uts->string_keys)
+                    {
+                        if (n == 0)
+                        {
+                            s.append('[');
+                        }
+                        else
+                        {
+                            s.append(u", ["_s);
+                        }
+                        s.append(QUtf8StringView(key));
+                        s.append("] = <dyn>");
+                        n++;
+                    }
+                }
             }
 
             for (const auto &inner : *tbl)
