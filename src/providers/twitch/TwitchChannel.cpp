@@ -766,6 +766,16 @@ QString TwitchChannel::prepareMessage(const QString &message) const
     return parsedMessage;
 }
 
+static bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.|\/)(?!me|\s))", QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
 void TwitchChannel::sendMessage(const QString &message)
 {
     auto *app = getApp();
@@ -789,8 +799,7 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (parsedMessage.startsWith('/') &&
-        !parsedMessage.startsWith("/me ", Qt::CaseSensitivity::CaseInsensitive))
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
     {
         this->addSystemMessage(QString("%1 is not a known command.")
                                    .arg(parsedMessage.split(' ').first()));
@@ -831,8 +840,7 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
         return;
     }
 
-    if (parsedMessage.startsWith('/') &&
-        !parsedMessage.startsWith("/me ", Qt::CaseSensitivity::CaseInsensitive))
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
     {
         this->addSystemMessage(QString("%1 is not a known command.")
                                    .arg(parsedMessage.split(' ').first()));
