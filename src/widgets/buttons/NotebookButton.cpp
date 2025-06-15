@@ -89,48 +89,6 @@ void NotebookButton::paintContent(QPainter &painter)
         }
         break;
 
-        case User: {
-            painter.setRenderHint(QPainter::Antialiasing);
-
-            auto a = w / 8;
-            QPainterPath path;
-
-            path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
-            path.arcTo(a, 4 * a, 6 * a, 6 * a, 0, 180);
-
-            QPainterPath remove;
-            remove.addEllipse(2 * a, 1 * a, 4 * a, 4 * a);
-            path = path.subtracted(remove);
-
-            path.addEllipse(2.5 * a, 1.5 * a, 3 * a, 3 * a);
-
-            painter.fillPath(path, foreground);
-        }
-        break;
-
-        case Settings: {
-            painter.setRenderHint(QPainter::Antialiasing);
-
-            auto a = w / 8;
-            QPainterPath path;
-
-            path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
-
-            for (int i = 0; i < 8; i++)
-            {
-                path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
-                           (360 / 32.0));
-                path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
-                           i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
-            }
-
-            QPainterPath remove;
-            remove.addEllipse(3 * a, 3 * a, 2 * a, 2 * a);
-
-            painter.fillPath(path.subtracted(remove), foreground);
-        }
-        break;
-
         default:;
     }
 }

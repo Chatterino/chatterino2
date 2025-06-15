@@ -56,6 +56,7 @@
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
 - Dev: Refactored `Button` and friends. (#6102, #6255)
+- Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 
