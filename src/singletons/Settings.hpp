@@ -360,7 +360,9 @@ public:
     BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
     EnumStringSetting<EmoteTooltipScale> emoteTooltipScale = {
-        "/emotes/tooltipScale", EmoteTooltipScale::Medium};
+        "/emotes/tooltipScale",
+        EmoteTooltipScale::Medium,
+    };
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
