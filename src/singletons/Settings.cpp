@@ -283,6 +283,21 @@ void Settings::disableSave()
     this->disableSaving = true;
 }
 
+bool Settings::shouldSendHelixChat() const
+{
+    switch (this->chatSendProtocol.getEnum())
+    {
+        case ChatSendProtocol::Helix:
+            return true;
+        case ChatSendProtocol::Default:
+        case ChatSendProtocol::IRC:
+            return false;
+        default:
+            assert(false && "Invalid chat protocol value");
+            return false;
+    }
+}
+
 float Settings::getClampedUiScale() const
 {
     return std::clamp(this->uiScale.getValue(), 0.2F, 10.F);

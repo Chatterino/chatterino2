@@ -145,6 +145,9 @@ public:
 
     void disableSave();
 
+    /// Returns true if chat messages should be sent over Helix
+    bool shouldSendHelixChat() const;
+
     FloatSetting uiScale = {"/appearance/uiScale2", 1};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
 

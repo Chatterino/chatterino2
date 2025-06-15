@@ -64,6 +64,24 @@ class TwitchAccount;
 
 const int MAX_QUEUED_REDEMPTIONS = 16;
 
+namespace detail {
+
+/// isUnknownCommand checks if the given text contains a command that should not be forwarded to Twitch
+///
+/// "/ hello" should be allowed
+/// ". hello" should be allowed
+/// "/me hello" should be allowed
+/// ".me hello" should be allowed
+/// "/mebadcommand hello" should NOT be allowed
+/// ".mebadcommand hello" should NOT be allowed
+/// "/badcommand hello" should NOT be allowed
+/// "/badcommand hello" should NOT be allowed
+/// ".@badcommand hello" should NOT be allowed
+/// ".@badcommand hello" should NOT be allowed
+bool isUnknownCommand(const QString &text);
+
+}  // namespace detail
+
 class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
