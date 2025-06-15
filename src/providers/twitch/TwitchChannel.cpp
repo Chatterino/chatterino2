@@ -61,6 +61,22 @@ namespace chatterino {
 
 using namespace literals;
 
+namespace detail {
+
+bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
+}  // namespace detail
+
+using detail::isUnknownCommand;
+
 namespace {
 #if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
 const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
@@ -91,28 +107,6 @@ constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
 // From Twitch docs - expected size for a badge (1x)
 constexpr QSize BASE_BADGE_SIZE(18, 18);
-
-/// isUnknownCommand checks if the given text contains a command that should not be forwarded to Twitch
-///
-/// "/ hello" should be allowed
-/// ". hello" should be allowed
-/// "/me hello" should be allowed
-/// ".me hello" should be allowed
-/// "/mebadcommand hello" should NOT be allowed
-/// ".mebadcommand hello" should NOT be allowed
-/// "/badcommand hello" should NOT be allowed
-/// "/badcommand hello" should NOT be allowed
-/// ".@badcommand hello" should NOT be allowed
-/// ".@badcommand hello" should NOT be allowed
-bool isUnknownCommand(const QString &text)
-{
-    static QRegularExpression isUnknownCommand(
-        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
-
-    auto match = isUnknownCommand.match(text);
-
-    return match.hasMatch();
-}
 
 }  // namespace
 
