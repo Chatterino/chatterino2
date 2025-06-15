@@ -13,19 +13,17 @@ class NotebookButton : public Button
     Q_OBJECT
 
 public:
-    enum Icon { None, Plus, User, Settings };
+    enum class Type : std::uint8_t {
+        Plus,
+    };
 
-    explicit NotebookButton(Notebook *parent);
-
-    void setIcon(Icon icon);
-    Icon getIcon() const;
+    NotebookButton(Type type_, Notebook *parent);
 
 protected:
     void paintContent(QPainter &painter) override;
 
     void themeChangedEvent() override;
     void dragEnterEvent(QDragEnterEvent *) override;
-    void dragLeaveEvent(QDragLeaveEvent *) override;
     void dropEvent(QDropEvent *) override;
 
     void hideEvent(QHideEvent *) override;
@@ -34,7 +32,7 @@ protected:
 private:
     Notebook *parent_ = nullptr;
     QPoint mousePos_;
-    Icon icon_ = None;
+    Type type = Type::Plus;
 };
 
 }  // namespace chatterino

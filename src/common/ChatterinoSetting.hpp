@@ -63,10 +63,9 @@ using QStringSetting = ChatterinoSetting<QString>;
 using QSizeSetting = ChatterinoSetting<QSize>;
 
 template <typename Enum>
-class EnumSetting
-    : public ChatterinoSetting<typename std::underlying_type<Enum>::type>
+class EnumSetting : public ChatterinoSetting<std::underlying_type_t<Enum>>
 {
-    using Underlying = typename std::underlying_type<Enum>::type;
+    using Underlying = std::underlying_type_t<Enum>;
 
 public:
     using ChatterinoSetting<Underlying>::ChatterinoSetting;
@@ -131,7 +130,7 @@ public:
         return this->getEnum();
     }
 
-    Enum getEnum()
+    Enum getEnum() const
     {
         return qmagicenum::enumCast<Enum>(this->getValue(),
                                           qmagicenum::CASE_INSENSITIVE)

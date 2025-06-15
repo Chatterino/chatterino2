@@ -15,6 +15,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
@@ -97,6 +98,28 @@ enum class TabStyle : std::uint8_t {
     Compact,
 };
 
+enum class EmoteTooltipScale : std::uint8_t {
+    Small,
+    Medium,
+    Large,
+    Huge,
+};
+
+constexpr qmagicenum::customize_t qmagicenumDisplayName(
+    EmoteTooltipScale value) noexcept
+{
+    switch (value)
+    {
+        case EmoteTooltipScale::Medium:
+            return "Medium (default)";
+
+        case EmoteTooltipScale::Small:
+        case EmoteTooltipScale::Large:
+        case EmoteTooltipScale::Huge:
+            return {};
+    }
+}
+
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -121,6 +144,9 @@ public:
     void restoreSnapshot();
 
     void disableSave();
+
+    /// Returns true if chat messages should be sent over Helix
+    bool shouldSendHelixChat() const;
 
     FloatSetting uiScale = {"/appearance/uiScale2", 1};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
@@ -336,6 +362,10 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+    EnumStringSetting<EmoteTooltipScale> emoteTooltipScale = {
+        "/emotes/tooltipScale",
+        EmoteTooltipScale::Medium,
+    };
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
