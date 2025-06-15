@@ -63,11 +63,20 @@ struct Message {
     std::shared_ptr<MessageThread> replyThread;
     MessagePtr replyParent;
     enum class ReplyStatus : std::uint8_t {
-        NotReplyable,  // no reply thread, message is not replyable
-        Replyable,     // no reply thread, message is replyable
-        ReplyableWithThread,  // reply thread exists, message is replyable, thread root is replyable
-        NotReplyableWithThread,  // reply thread exists, message is not replyable, thread root is replyable
-        NotReplyableDueToThread,  // reply thread exists, but thread root is not replyable, thus message is not replyable
+        /// no reply thread, message is not replyable
+        NotReplyable,
+
+        /// no reply thread, message is replyable
+        Replyable,
+
+        /// reply thread exists, message is replyable, thread root is replyable
+        ReplyableWithThread,
+
+        /// reply thread exists, message is not replyable, thread root is replyable
+        NotReplyableWithThread,
+
+        /// reply thread exists, but thread root is not replyable, thus message is not replyable
+        NotReplyableDueToThread,
     };
     ReplyStatus isReplyable() const;
     uint32_t count = 1;
