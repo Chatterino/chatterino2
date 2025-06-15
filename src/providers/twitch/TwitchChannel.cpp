@@ -91,6 +91,29 @@ constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
 // From Twitch docs - expected size for a badge (1x)
 constexpr QSize BASE_BADGE_SIZE(18, 18);
+
+/// isUnknownCommand checks if the given text contains a command that should not be forwarded to Twitch
+///
+/// "/ hello" should be allowed
+/// ". hello" should be allowed
+/// "/me hello" should be allowed
+/// ".me hello" should be allowed
+/// "/mebadcommand hello" should NOT be allowed
+/// ".mebadcommand hello" should NOT be allowed
+/// "/badcommand hello" should NOT be allowed
+/// "/badcommand hello" should NOT be allowed
+/// ".@badcommand hello" should NOT be allowed
+/// ".@badcommand hello" should NOT be allowed
+bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -769,16 +792,6 @@ QString TwitchChannel::prepareMessage(const QString &message) const
     }
 
     return parsedMessage;
-}
-
-static bool isUnknownCommand(const QString &text)
-{
-    static QRegularExpression isUnknownCommand(
-        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
-
-    auto match = isUnknownCommand.match(text);
-
-    return match.hasMatch();
 }
 
 void TwitchChannel::sendMessage(const QString &message)
