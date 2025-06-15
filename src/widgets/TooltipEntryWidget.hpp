@@ -35,8 +35,8 @@ private:
     bool attemptRefresh_ = false;
 
     ImagePtr image_ = nullptr;
-    int customImgWidth_ = 0;
-    int customImgHeight_ = 0;
+    QSize customSize;
+    QSize actualCustomSize;
 };
 
 }  // namespace chatterino
