@@ -13,7 +13,10 @@ class NotebookButton : public Button
     Q_OBJECT
 
 public:
-    enum Icon { None, Plus, User, Settings };
+    enum Icon {
+        None,
+        Plus,
+    };
 
     explicit NotebookButton(Notebook *parent);
 

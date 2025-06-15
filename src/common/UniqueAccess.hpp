@@ -85,8 +85,7 @@ public:
         return AccessGuard<T>(this->element_, this->mutex_);
     }
 
-    template <typename X = T,
-              typename = std::enable_if_t<!std::is_const<X>::value>>
+    template <typename X = T, typename = std::enable_if_t<!std::is_const_v<X>>>
     SharedAccessGuard<const X> accessConst() const
     {
         return SharedAccessGuard<const T>(this->element_, this->mutex_);
