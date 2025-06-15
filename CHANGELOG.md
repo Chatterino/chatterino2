@@ -36,6 +36,7 @@
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
+- Bugfix: Don't add reply buttons to messages that are invalid reply targets. (#6119)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
