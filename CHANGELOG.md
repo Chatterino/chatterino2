@@ -45,7 +45,7 @@
 - Dev: Removed authenticated PubSub implementation. (#6158)
 - Dev: Save settings in `aboutToQuit`. (#6159)
 - Dev: Bumped deprecation cutoff to Qt 6.4.3. (#6169)
-- Dev: Use `QMetaObject::invokeMethod` to run code on a specific thread. (#6203)
+- Dev: Use `QMetaObject::invokeMethod` to run code on a specific thread. (#6203, #6278)
 - Dev: Added a `run-and-kill.sh` script to help debug crash-on-exit bugs. (#6188)
 - Dev: Refactored the `TimeoutStackStyle` enum into its own file. (#6216)
 - Dev: Refactored `Notebook`-related enums into their own file. (#6220)
