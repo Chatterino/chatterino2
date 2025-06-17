@@ -334,7 +334,7 @@ void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10,
                             s.append(u", ["_s);
                         }
 #    if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
-                        s.append(QLatin1StringView(
+                        s.append(QString::fromUtf8(
                             key.data(), static_cast<qsizetype>(key.size())));
 #    else
                         s.append(QUtf8StringView(key));
