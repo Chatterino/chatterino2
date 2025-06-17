@@ -250,14 +250,19 @@ void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
         if (!isPushQueued)
         {
             isPushQueued = true;
-            postToThread([] {
-                isPushQueued = false;
-                auto *app = tryGetApp();
-                if (app != nullptr)
-                {
-                    app->getWindows()->forceLayoutChannelViews();
-                }
-            });
+            // We don't use postToThread here, because that would run immediately.
+            // We explicitly want to queue a callback after the current ones.
+            QMetaObject::invokeMethod(
+                qApp,
+                [] {
+                    isPushQueued = false;
+                    auto *app = tryGetApp();
+                    if (app != nullptr)
+                    {
+                        app->getWindows()->forceLayoutChannelViews();
+                    }
+                },
+                Qt::QueuedConnection);
         }
     };
 
