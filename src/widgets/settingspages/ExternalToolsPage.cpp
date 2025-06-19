@@ -5,9 +5,16 @@
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QApplication>
+#include <QClipboard>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 
 namespace chatterino {
 
@@ -137,7 +144,191 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             ->addTo(layout, form);
     }
 
+    {
+        layout.addTitle("Settings Import/Export");
+        layout.addDescription(
+            "Export your current image uploader settings as JSON to share with "
+            "others, or import settings from clipboard (compatible with ShareX "
+            ".sxcu format).");
+
+        auto *buttonLayout = new QHBoxLayout;
+
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            this->exportSettings();
+        });
+        buttonLayout->addWidget(exportButton);
+
+        auto *importButton = new QPushButton("Import Settings from Clipboard");
+        QObject::connect(importButton, &QPushButton::clicked, [this]() {
+            this->importSettings();
+        });
+        buttonLayout->addWidget(importButton);
+
+        buttonLayout->addStretch();
+        layout.addLayout(buttonLayout);
+    }
+
     layout.addStretch();
+}
+void ExternalToolsPage::exportSettings()
+{
+    auto &s = *getSettings();
+
+    QJsonObject settingsObj;
+    settingsObj["Version"] = "1.0.0";
+    settingsObj["Name"] = "Chatterino Image Uploader Settings";
+    settingsObj["RequestMethod"] = "POST";
+    settingsObj["RequestURL"] = s.imageUploaderUrl.getValue();
+
+    QJsonObject headersObj;
+    QString headers = s.imageUploaderHeaders.getValue();
+    if (!headers.isEmpty())
+    {
+        QStringList headerLines = headers.split('\n', Qt::SkipEmptyParts);
+        for (const QString &line : headerLines)
+        {
+            QStringList parts = line.split(':', Qt::SkipEmptyParts);
+            if (parts.size() >= 2)
+            {
+                QString key = parts[0].trimmed();
+                QString value = parts.mid(1).join(':').trimmed();
+                headersObj[key] = value;
+            }
+        }
+    }
+    if (!headersObj.isEmpty())
+    {
+        settingsObj["Headers"] = headersObj;
+    }
+
+    settingsObj["Body"] = "MultipartFormData";
+    settingsObj["FileFormName"] = s.imageUploaderFormField.getValue();
+    settingsObj["URL"] = s.imageUploaderLink.getValue();
+    settingsObj["DeletionURL"] = s.imageUploaderDeletionLink.getValue();
+
+    QJsonDocument doc(settingsObj);
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(doc.toJson(QJsonDocument::Indented));
+
+    QMessageBox::information(
+        this, "Settings Exported",
+        "Image uploader settings have been copied to clipboard as JSON.\n"
+        "You can share this with others or save it for later use.");
+}
+
+void ExternalToolsPage::importSettings()
+{
+    auto &s = *getSettings();
+
+    QClipboard *clipboard = QApplication::clipboard();
+    QString clipboardText = clipboard->text().trimmed();
+
+    if (clipboardText.isEmpty())
+    {
+        QMessageBox::warning(this, "Import Failed",
+                             "Clipboard is empty. Please copy JSON settings to "
+                             "clipboard first.");
+        return;
+    }
+
+    QJsonParseError parseError;
+    QJsonDocument doc =
+        QJsonDocument::fromJson(clipboardText.toUtf8(), &parseError);
+
+    if (parseError.error != QJsonParseError::NoError)
+    {
+        QMessageBox::warning(
+            this, "Import Failed",
+            QString("Invalid JSON format: %1").arg(parseError.errorString()));
+        return;
+    }
+
+    if (!doc.isObject())
+    {
+        QMessageBox::warning(this, "Import Failed",
+                             "JSON must be an object containing settings.");
+        return;
+    }
+
+    QJsonObject settingsObj = doc.object();
+
+    int ret = QMessageBox::question(
+        this, "Import Settings",
+        "This will overwrite your current image uploader settings. Continue?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (ret != QMessageBox::Yes)
+    {
+        return;
+    }
+
+    bool hasValidSettings = false;
+
+    if (settingsObj.contains("RequestURL") &&
+        settingsObj["RequestURL"].isString())
+    {
+        s.imageUploaderUrl.setValue(settingsObj["RequestURL"].toString());
+        hasValidSettings = true;
+    }
+
+    if (settingsObj.contains("FileFormName") &&
+        settingsObj["FileFormName"].isString())
+    {
+        s.imageUploaderFormField.setValue(
+            settingsObj["FileFormName"].toString());
+        hasValidSettings = true;
+    }
+
+    if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject())
+    {
+        QJsonObject headers = settingsObj["Headers"].toObject();
+        QStringList headerLines;
+        for (auto it = headers.begin(); it != headers.end(); ++it)
+        {
+            if (it.value().isString())
+            {
+                headerLines.append(
+                    QString("%1: %2").arg(it.key(), it.value().toString()));
+            }
+        }
+        if (!headerLines.isEmpty())
+        {
+            s.imageUploaderHeaders.setValue(headerLines.join('\n'));
+            hasValidSettings = true;
+        }
+    }
+
+    if (settingsObj.contains("URL") && settingsObj["URL"].isString())
+    {
+        s.imageUploaderLink.setValue(settingsObj["URL"].toString());
+        hasValidSettings = true;
+    }
+
+    if (settingsObj.contains("DeletionURL") &&
+        settingsObj["DeletionURL"].isString())
+    {
+        s.imageUploaderDeletionLink.setValue(
+            settingsObj["DeletionURL"].toString());
+        hasValidSettings = true;
+    }
+
+    if (hasValidSettings)
+    {
+        s.imageUploaderEnabled.setValue(true);
+
+        QMessageBox::information(
+            this, "Import Successful",
+            "Image uploader settings have been imported successfully!\n"
+            "Image uploader has been enabled.");
+    }
+    else
+    {
+        QMessageBox::warning(
+            this, "Import Failed",
+            "No valid image uploader settings found in the JSON.\n"
+            "Please check the format and try again.");
+    }
 }
 
 }  // namespace chatterino
