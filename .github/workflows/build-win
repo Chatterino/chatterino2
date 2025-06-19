@@ -1,0 +1,183 @@
+name: build-win
+
+# Run nightly at 00:00 UTC (02:00 CEST) + manual trigger
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-qt5
+  cancel-in-progress: true
+
+env:
+  CONAN_VERSION: 2.11.0
+  # disable Qt6, enable Qt5
+  C2_BUILD_WITH_QT6: Off
+  # upstream uses C2_BUILD_WITH_QT6=Off to force Qt5
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
+
+jobs:
+  build-ubuntu-docker:
+    name: Build Ubuntu Docker (Qt 5.12.5)
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
+            qt-version: 5.12.5
+            force-lto: false
+            plugins: true
+            skip-crashpad: true
+            build-appimage: false
+            build-deb: true
+
+    env:
+      C2_ENABLE_LTO: ${{ matrix.force-lto }}
+      C2_PLUGINS: ${{ matrix.plugins }}
+      C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Fix git permission error
+        run: git config --global --add safe.directory '*'
+
+      - name: Build in Docker
+        run: |
+          mkdir build && cd build
+          # mirror upstream CMake options
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+            -DBUILD_WITH_QT6=Off \
+            -DCMAKE_PREFIX_PATH="$Qt5_DIR/lib/cmake" \
+            -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DFORCE_JSON_GENERATION=${{ matrix.os == 'ubuntu-20.04' && 'On' || 'Off'}} \
+            ..
+          make -j"$(nproc)"
+
+      - name: Package AppImage (if enabled)
+        if: matrix.build-appimage
+        run: |
+          cd build && sh ../.CI/CreateAppImage.sh
+
+      - name: Upload AppImage
+        if: matrix.build-appimage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chatterino-ubuntu-20.04-Qt-${{ matrix.qt-version }}.AppImage
+          path: build/Chatterino-x86_64.AppImage
+
+      - name: Package .deb (if enabled)
+        if: matrix.build-deb
+        run: |
+          cd build && sh ../.CI/CreateUbuntuDeb.sh
+
+      - name: Upload .deb
+        if: matrix.build-deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chatterino-ubuntu-20.04-Qt-${{ matrix.qt-version }}.deb
+          path: build/Chatterino-ubuntu-20.04-x86_64.deb
+
+  build:
+    name: Build ${{ matrix.os }} with Qt ${{ matrix.qt-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # macOS + Windows Qt5
+          - os: macos-13
+            qt-version: 5.12.5
+            force-lto: false
+            plugins: true
+            skip-crashpad: true
+            skip-artifact: false
+          - os: windows-latest
+            qt-version: 5.12.5
+            force-lto: false
+            plugins: true
+            skip-crashpad: true
+            skip-artifact: false
+
+    env:
+      C2_ENABLE_LTO: ${{ matrix.force-lto }}
+      C2_PLUGINS: ${{ matrix.plugins }}
+      C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
+      # ensures Qt6 stays off
+      C2_BUILD_WITH_QT6: Off
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Qt5
+        uses: jurplel/install-qt-action@v4.1.1
+        with:
+          cache: true
+          version: ${{ matrix.qt-version }}
+
+      - name: Install native deps
+        run: |
+          if [[ "$(uname)" == "Darwin" ]]; then
+            brew install openssl cmake boost p7zip create-dmg
+          fi
+        shell: bash
+
+      - name: Configure & Build
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+            -DBUILD_WITH_QT6=Off \
+            -DBUILD_WITH_QT5=On \
+            -DCMAKE_PREFIX_PATH="$Qt5_DIR/lib/cmake"
+          cmake --build . --config Release
+        shell: bash
+
+      - name: Package & Upload
+        run: |
+          cd build
+          # ZIP for all, DMG for macOS
+          if [[ "$(uname)" == "Darwin" ]]; then
+            sh ../.CI/CreateDMG.sh
+            actions/upload-artifact@v4 --name chatterino-macos-Qt-${{ matrix.qt-version }}.dmg --path chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
+          else
+            zip -r chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip Chatterino2/
+            actions/upload-artifact@v4 --name chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip --path chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          fi
+        shell: bash
+
+  create-release:
+    needs: [build-ubuntu-docker, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          name: '*'
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1.15.0
+        with:
+          tag: nightly-qt5-${{ github.run_number }}
+          name: Qt5 Nightly #${{ github.run_number }}
+          prerelease: true
+          artifacts: 'release-artifacts/*'
