@@ -919,13 +919,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         note->setStyleSheet("color: #bbb");
 
         layout.addWidget(note);
-        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
-        extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
 
-        auto form = new QFormLayout();
-        form->addRow("Extra extension IDs:", extraIDs);
-
+        auto *form = new QFormLayout();
         layout.addLayout(form);
+
+        SettingWidget::lineEdit("Extra extension IDs", s.additionalExtensionIDs,
+                                "Extension;IDs;separated;by;semicolons")
+            ->addTo(layout, form);
     }
 #endif
 
