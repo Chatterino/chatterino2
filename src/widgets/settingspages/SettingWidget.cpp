@@ -202,7 +202,6 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
                                        QStringSetting &setting,
                                        const QString &placeholderText)
 {
-    QColor color(setting.getValue());
     auto *widget = new SettingWidget(label);
 
     auto *lbl = new QLabel(label + ":");
@@ -215,7 +214,6 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
-    // widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(edit);
 
     // Update the setting when the widget changes.
