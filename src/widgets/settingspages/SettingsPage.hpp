@@ -61,7 +61,6 @@ public:
                               const QString &toolTipText = {});
     QComboBox *createComboBox(const QStringList &items,
                               pajlada::Settings::Setting<QString> &setting);
-    QLineEdit *createLineEdit(pajlada::Settings::Setting<QString> &setting);
     QSpinBox *createSpinBox(pajlada::Settings::Setting<int> &setting,
                             int min = 0, int max = 2500);
     template <typename T>
