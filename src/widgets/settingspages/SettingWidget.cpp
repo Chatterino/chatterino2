@@ -202,7 +202,6 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
                                        QStringSetting &setting,
                                        const QString &placeholderText)
 {
-    QColor color(setting.getValue());
     auto *widget = new SettingWidget(label);
 
     auto *lbl = new QLabel(label + ":");
@@ -215,14 +214,25 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
-    // widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(edit);
 
-    // update when setting changes
+    // Update the setting when the widget changes.
     QObject::connect(edit, &QLineEdit::textChanged,
                      [&setting](const QString &newValue) {
                          setting = newValue;
                      });
+
+    // Update the widget to reflect the new setting value if the setting changes
+    // This _will_ fire every time the widget changes, so we are being conservative
+    // with the `setText` call to ensure the user doesn't get their cursor bounced around.
+    setting.connect(
+        [edit](const QString &value) {
+            if (edit->text() != value)
+            {
+                edit->setText(value);
+            }
+        },
+        widget->managedConnections, false);
 
     widget->actionWidget = edit;
     widget->label = lbl;
