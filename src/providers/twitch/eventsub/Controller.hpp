@@ -5,6 +5,7 @@
 #include "twitch-eventsub-ws/logger.hpp"
 #include "twitch-eventsub-ws/session.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/OnceFlag.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
@@ -149,6 +150,7 @@ private:
     std::unordered_map<SubscriptionRequest, Subscription> subscriptions;
 
     std::atomic<bool> quitting = false;
+    OnceFlag stoppedFlag;
 };
 
 class DummyController : public IController
