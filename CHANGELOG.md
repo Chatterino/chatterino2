@@ -27,6 +27,7 @@
 - Bugfix: Fixed an on-shutdown-crash that could occur when we didn't wait long enough for 7TV/BetterTTV live update connections to close. (#6197)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
 - Bugfix: Fixed blocked users showing up in "Users joined:" and "Users parted:" messages. (#6181)
+- Bugfix: Fixed an issue where text boxes in the settings dialog could be stuck with an old value. (#6286)
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
