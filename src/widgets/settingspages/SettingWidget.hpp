@@ -18,6 +18,8 @@
 #include <QtContainerFwd>
 #include <QWidget>
 
+#include <optional>
+
 class QFormLayout;
 
 namespace chatterino {
@@ -56,6 +58,10 @@ public:
     template <typename T>
     static SettingWidget *dropdown(const QString &label,
                                    EnumStringSetting<T> &setting);
+
+    template <typename T>
+    static SettingWidget *dropdown(const QString &label,
+                                   EnumSetting<T> &setting);
 
     static SettingWidget *colorButton(const QString &label,
                                       QStringSetting &setting);

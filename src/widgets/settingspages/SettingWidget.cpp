@@ -230,6 +230,78 @@ template SettingWidget *SettingWidget::dropdown<ShowModerationState>(
 template SettingWidget *SettingWidget::dropdown<EmojiStyle>(
     const QString &label, EnumStringSetting<EmojiStyle> &setting);
 
+template <typename T>
+SettingWidget *SettingWidget::dropdown(const QString &label,
+                                       EnumSetting<T> &setting)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label % ":");
+    auto *combo = new ComboBox;
+    combo->setFocusPolicy(Qt::StrongFocus);
+
+    for (const auto value : magic_enum::enum_values<T>())
+    {
+        combo->addItem(qmagicenum::enumDisplayNameString(value),
+                       QVariant(static_cast<std::underlying_type_t<T>>(value)));
+    }
+
+    // TODO: this can probably use some other size hint/size strategy
+    combo->setMinimumWidth(combo->minimumSizeHint().width());
+
+    widget->actionWidget = combo;
+    widget->label = lbl;
+
+    widget->hLayout->addWidget(lbl);
+    widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(combo);
+
+    setting.connect(
+        [combo, label](const auto &value) {
+            std::optional<int> foundRow;
+
+            for (auto row = 0; row < combo->model()->rowCount(); ++row)
+            {
+                auto index = combo->model()->index(row, 0);
+                auto rowEnumValue = index.data(Qt::UserRole);
+                if (rowEnumValue == value)
+                {
+                    foundRow = row;
+                    break;
+                }
+            }
+
+            if (foundRow)
+            {
+                combo->setCurrentIndex(*foundRow);
+            }
+            else
+            {
+                qCWarning(chatterinoWidget)
+                    << "Did not find a correct combo box row for" << label
+                    << " with value" << value;
+            }
+        },
+        widget->managedConnections);
+
+    QObject::connect(combo, &QComboBox::currentTextChanged,
+                     [label, combo, &setting](const auto &newText) {
+                         bool ok = true;
+                         auto enumValue = combo->currentData().toInt(&ok);
+                         if (!ok)
+                         {
+                             qCWarning(chatterinoWidget)
+                                 << "Combo" << label << " with value" << newText
+                                 << "did not contain an intable UserRole data";
+                             return;
+                         }
+
+                         setting.setValue(enumValue);
+                     });
+
+    return widget;
+}
+
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
 {

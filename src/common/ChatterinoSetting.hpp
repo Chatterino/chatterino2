@@ -62,6 +62,7 @@ using StringSetting = ChatterinoSetting<std::string>;
 using QStringSetting = ChatterinoSetting<QString>;
 using QSizeSetting = ChatterinoSetting<QSize>;
 
+/// Accepts any enum and saves the the value as an integer
 template <typename Enum>
 class EnumSetting : public ChatterinoSetting<std::underlying_type_t<Enum>>
 {
