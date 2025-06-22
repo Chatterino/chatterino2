@@ -86,7 +86,7 @@ public:
                     qmagicenum::enumCast<T>(value, qmagicenum::CASE_INSENSITIVE)
                         .value_or(setting.defaultValue);
 
-                auto i = magic_enum::enum_integer(enumValue);
+                auto i = magic_enum::enum_index(enumValue).value_or(0);
 
                 combo->setCurrentIndex(i);
             },
