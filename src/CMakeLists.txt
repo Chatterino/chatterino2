@@ -31,6 +31,7 @@ set(SOURCE_FILES
         common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
+        common/LastMessageLineStyle.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Literals.hpp

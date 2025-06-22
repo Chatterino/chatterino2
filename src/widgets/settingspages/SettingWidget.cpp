@@ -1,5 +1,6 @@
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include "common/LastMessageLineStyle.hpp"
 #include "singletons/Settings.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/dialogs/ColorPickerDialog.hpp"
@@ -301,6 +302,9 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
 
     return widget;
 }
+
+template SettingWidget *SettingWidget::dropdown<LastMessageLineStyle>(
+    const QString &label, EnumSetting<LastMessageLineStyle> &setting);
 
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)

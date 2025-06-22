@@ -552,29 +552,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.showLastMessageIndicator, false,
                        "Adds an underline below the most recent message "
                        "sent before you tabbed out of Chatterino.");
-    layout.addDropdown<std::underlying_type_t<Qt::BrushStyle>>(
-        "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
-        [](int value) {
-            switch (value)
-            {
-                case Qt::VerPattern:
-                    return 0;
-                case Qt::SolidPattern:
-                default:
-                    return 1;
-            }
-        },
-        [](DropdownArgs args) {
-            switch (args.index)
-            {
-                case 0:
-                    return Qt::VerPattern;
-                case 1:
-                default:
-                    return Qt::SolidPattern;
-            }
-        },
-        false);
+
+    SettingWidget::dropdown("Line style", s.lastMessagePattern)->addTo(layout);
 
     SettingWidget::colorButton("Line color", s.lastMessageColor)->addTo(layout);
 

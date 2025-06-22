@@ -2,6 +2,7 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "common/TimeoutStackStyle.hpp"
@@ -163,8 +164,10 @@ public:
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
-    EnumSetting<Qt::BrushStyle> lastMessagePattern = {
-        "/appearance/messages/lastMessagePattern", Qt::SolidPattern};
+    EnumSetting<LastMessageLineStyle> lastMessagePattern = {
+        "/appearance/messages/lastMessagePattern",
+        LastMessageLineStyle::Solid,
+    };
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        "#7f2026"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
