@@ -51,6 +51,7 @@
 - Dev: Refactored the `TimeoutStackStyle` enum into its own file. (#6216)
 - Dev: Refactored `Notebook`-related enums into their own file. (#6220)
 - Dev: Refactored `SettingWidget::dropdown` for string enums to the source file. (#6293)
+- Dev: Don't try to save emote popup bounds if we're quitting. (#6292)
 - Dev: Implemented customizable display names for enums. (#6238)
 - Dev: Refactored event API initialization away from Application and into TwitchIrcServer. (#6198)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
