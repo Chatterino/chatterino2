@@ -55,61 +55,8 @@ public:
 
     template <typename T>
     static SettingWidget *dropdown(const QString &label,
-                                   EnumStringSetting<T> &setting)
-    {
-        auto *widget = new SettingWidget(label);
+                                   EnumStringSetting<T> &setting);
 
-        auto *lbl = new QLabel(label % ":");
-        auto *combo = new ComboBox;
-        combo->setFocusPolicy(Qt::StrongFocus);
-
-        for (const auto value : magic_enum::enum_values<T>())
-        {
-            combo->addItem(
-                qmagicenum::enumDisplayNameString(value),
-                QVariant(static_cast<std::underlying_type_t<T>>(value)));
-        }
-
-        // TODO: this can probably use some other size hint/size strategy
-        combo->setMinimumWidth(combo->minimumSizeHint().width());
-
-        widget->actionWidget = combo;
-        widget->label = lbl;
-
-        widget->hLayout->addWidget(lbl);
-        widget->hLayout->addStretch(1);
-        widget->hLayout->addWidget(combo);
-
-        setting.connect(
-            [&setting, combo](const QString &value) {
-                auto enumValue =
-                    qmagicenum::enumCast<T>(value, qmagicenum::CASE_INSENSITIVE)
-                        .value_or(setting.defaultValue);
-
-                auto i = magic_enum::enum_integer(enumValue);
-
-                combo->setCurrentIndex(i);
-            },
-            widget->managedConnections);
-
-        QObject::connect(
-            combo, &QComboBox::currentTextChanged,
-            [label, combo, &setting](const auto &newText) {
-                bool ok = true;
-                auto enumValue = combo->currentData().toInt(&ok);
-                if (!ok)
-                {
-                    qCWarning(chatterinoWidget)
-                        << "Combo" << label << " with value" << newText
-                        << "did not contain an intable UserRole data";
-                    return;
-                }
-
-                setting = qmagicenum::enumNameString(static_cast<T>(enumValue));
-            });
-
-        return widget;
-    }
     static SettingWidget *colorButton(const QString &label,
                                       QStringSetting &setting);
     static SettingWidget *lineEdit(const QString &label,
