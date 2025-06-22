@@ -4,6 +4,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/QCompareTransparent.hpp"
 #include "util/QMagicEnum.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -24,6 +25,24 @@ const std::map<QString, QString> TONE_NAMES{
     {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
     {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
 };
+
+EmojiData::Capability emojiCapabilityFromEmojiStyle(EmojiStyle emojiStyle)
+{
+    switch (emojiStyle)
+    {
+        case EmojiStyle::Twitter:
+            return EmojiData::Capability::Twitter;
+
+        case EmojiStyle::Facebook:
+            return EmojiData::Capability::Facebook;
+
+        case EmojiStyle::Apple:
+            return EmojiData::Capability::Apple;
+
+        case EmojiStyle::Google:
+            return EmojiData::Capability::Google;
+    }
+}
 
 void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                 const rapidjson::Value &unparsedEmoji,
@@ -245,15 +264,15 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
-        EmojiData::Capability setCapability =
-            qmagicenum::enumCast<EmojiData::Capability>(emojiSet).value_or(
-                EmojiData::Capability::Google);
+        auto setCapability = qmagicenum::enumCast<EmojiData::Capability>(
+                                 emojiSet, qmagicenum::CASE_INSENSITIVE)
+                                 .value_or(EmojiData::Capability::Google);
 
         for (const auto &emoji : this->emojis)
         {
             QString emojiSetToUse = emojiSet;
             // clang-format off
-            static std::map<QString, QString> emojiSets = {
+            static std::map<QString, QString, QCompareCaseInsensitive> emojiSets = {
                 // JSDELIVR
                 // {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
                 // {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},

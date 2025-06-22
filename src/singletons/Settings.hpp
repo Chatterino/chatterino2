@@ -14,6 +14,7 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "providers/emoji/EmojiStyle.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
@@ -368,7 +369,10 @@ public:
     };
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
-    QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
+    EnumStringSetting<EmojiStyle> emojiSet = {
+        "/emotes/emojiSet",
+        EmojiStyle::Twitter,
+    };
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
     BoolSetting removeSpacesBetweenEmotes = {

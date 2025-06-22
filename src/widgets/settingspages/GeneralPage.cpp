@@ -661,14 +661,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::dropdown("Emote & badge thumbnail size on hover",
                             s.emoteTooltipScale)
         ->addTo(layout);
-    layout.addDropdown("Emoji style",
-                       {
-                           "Twitter",
-                           "Facebook",
-                           "Apple",
-                           "Google",
-                       },
-                       s.emojiSet);
+
+    SettingWidget::dropdown("Emoji style", s.emojiSet)->addTo(layout);
+
     SettingWidget::checkbox("Show BetterTTV global emotes",
                             s.enableBTTVGlobalEmotes)
         ->addKeywords({"bttv"})
