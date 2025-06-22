@@ -2,6 +2,7 @@
 
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "Test.hpp"
 #include "util/QMagicEnumTagged.hpp"
 
@@ -257,4 +258,8 @@ TEST(QMagicEnumTagged, enumDisplayNameString)
 
     auto secondWithSpec = enumName<MyCustom::Second>();
     ASSERT_EQ(secondWithSpec, u"mysecond.*");
+
+    ASSERT_EQ(
+        qmagicenum::enumDisplayNameString<ThumbnailPreviewMode::DontShow>(),
+        u"Don't show");
 }

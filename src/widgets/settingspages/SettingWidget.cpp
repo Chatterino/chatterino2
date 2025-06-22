@@ -1,6 +1,7 @@
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include "common/LastMessageLineStyle.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "singletons/Settings.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/dialogs/ColorPickerDialog.hpp"
@@ -305,6 +306,8 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
 
 template SettingWidget *SettingWidget::dropdown<LastMessageLineStyle>(
     const QString &label, EnumSetting<LastMessageLineStyle> &setting);
+template SettingWidget *SettingWidget::dropdown<ThumbnailPreviewMode>(
+    const QString &label, EnumSetting<ThumbnailPreviewMode> &setting);
 
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)

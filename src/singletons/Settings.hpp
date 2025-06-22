@@ -5,6 +5,7 @@
 #include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
@@ -17,13 +18,15 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/emoji/EmojiStyle.hpp"
 #include "singletons/Toasts.hpp"
-#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
+
+#include <optional>
+#include <string_view>
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -51,14 +54,6 @@ enum UsernameDisplayMode : int {
     Username = 1,                  // Username
     LocalizedName = 2,             // Localized name
     UsernameAndLocalizedName = 3,  // Username (Localized name)
-};
-
-enum ThumbnailPreviewMode : int {
-    DontShow = 0,
-
-    AlwaysShow = 1,
-
-    ShowOnShift = 2,
 };
 
 enum UsernameRightClickBehavior : int {
@@ -107,7 +102,7 @@ enum class EmoteTooltipScale : std::uint8_t {
     Huge,
 };
 
-constexpr qmagicenum::customize_t qmagicenumDisplayName(
+constexpr std::optional<std::string_view> qmagicenumDisplayName(
     EmoteTooltipScale value) noexcept
 {
     switch (value)
