@@ -64,6 +64,7 @@
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Added a system to generate Lua definitions at build time. (#6297)
 
 ## 2.5.3
 
