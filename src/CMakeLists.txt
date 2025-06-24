@@ -794,6 +794,35 @@ list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if (SKIP_LUA_DEFINITIONS_GENERATION)
+    message(STATUS "Skipping lua definition generation")
+else()
+    message(STATUS "Doing lua definition generation")
+    find_package(Python3 COMPONENTS Interpreter)
+
+    # HACK(Mm2PL): Trick make into running our script
+    if (FORCE_LUA_DEFINITIONS_GENERATION)
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua" _fake_output)
+    else()
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+    endif()
+
+    # If additional build performance is needed: consider having the script
+    # generate a proper listing of files containing lua meta directives or at
+    # least use only headers here. This command takes only ~25ms for me on
+    # Linux.
+    add_custom_command(
+        COMMENT "Generating Lua definitions"
+        DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py" ${SOURCE_FILES}
+        COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py"
+        OUTPUT ${outputs}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        VERBATIM
+    )
+    add_custom_target(plugin_definitions ALL DEPENDS ${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua)
+    add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
+endif ()
+
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
         PUBLIC
