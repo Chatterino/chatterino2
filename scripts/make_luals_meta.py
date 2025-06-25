@@ -30,9 +30,12 @@ Non-command lines of comments are written with a space after '---'
 """
 
 from io import TextIOWrapper
+import os
 from pathlib import Path
 import re
 from typing import Optional
+from argparse import ArgumentParser
+import logging
 
 BOILERPLATE = """
 ---@meta Chatterino2
@@ -45,10 +48,6 @@ c2 = {}
 """
 
 repo_root = Path(__file__).parent.parent
-lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
-lua_meta = repo_root / "docs" / "plugin-meta.lua"
-
-print("Writing to", lua_meta.relative_to(repo_root))
 
 
 def strip_line(line: str):
@@ -185,7 +184,7 @@ def finish_class(out, name):
 
 
 def printmsg(path: Path, line: int, message: str):
-    print(f"{path.relative_to(repo_root)}:{line} {message}")
+    logging.debug(f"{path.relative_to(repo_root)}:{line} {message}")
 
 
 def panic(path: Path, line: int, message: str):
@@ -214,11 +213,12 @@ def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
     out.write(f"function {name}({lua_params}) end\n\n")
 
 
-def read_file(path: Path, out: TextIOWrapper):
-    print("Reading", path.relative_to(repo_root))
+def read_file(path: Path, out: TextIOWrapper) -> list[Path]:
+    logging.debug(f"Reading {path.relative_to(repo_root)}")
     with path.open("r") as f:
         lines = f.read().splitlines()
 
+    deps = [path]
     reader = Reader(lines)
     while reader.has_next():
         doc_comment = reader.next_doc_comment()
@@ -306,14 +306,17 @@ def read_file(path: Path, out: TextIOWrapper):
             continue
         else:
             for comment in header:
-                inline_command(path, reader.line_no(), comment, out)
+                inline_command(path, reader.line_no(), comment, out, deps)
+    return deps
 
 
-def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
+def inline_command(
+    path: Path, line: int, comment: str, out: TextIOWrapper, deps: list[Path]
+):
     if comment.startswith("@includefile "):
         filename = comment.split(" ", 1)[1]
         out.write(f"-- Begin src/{filename}\n\n")
-        read_file(repo_root / "src" / filename, out)
+        deps.extend(read_file(repo_root / "src" / filename, out))
         out.write(f"-- End src/{filename}\n\n")
     elif comment.startswith("@lua@class"):
         panic(
@@ -326,6 +329,20 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--depfile")
+    parser.add_argument("--log", default="DEBUG")
+    args = parser.parse_args()
+    log_level = getattr(logging, args.log.upper(), logging.DEBUG)
+    logging.basicConfig(level=log_level, format="%(message)s")
+
+    lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
+    lua_meta = repo_root / "docs" / "plugin-meta.lua"
+    logging.debug("Writing to %s", lua_meta.relative_to(repo_root))
     with lua_meta.open("w") as output:
         output.write(BOILERPLATE[1:])  # skip the newline after triple quote
-        read_file(lua_api_file, output)
+        deps = read_file(lua_api_file, output)
+
+    if args.depfile:
+        with Path(args.depfile).open("w") as f:
+            f.write(f"{lua_meta}: {' \\\n  '.join(str(d) for d in deps)}\n")
