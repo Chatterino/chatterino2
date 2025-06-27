@@ -31,8 +31,9 @@ Non-command lines of comments are written with a space after '---'
 
 from io import TextIOWrapper
 from pathlib import Path
-import re
 from typing import Optional
+import re
+import argparse
 
 BOILERPLATE = """
 ---@meta Chatterino2
@@ -313,7 +314,9 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
     if comment.startswith("@includefile "):
         filename = comment.split(" ", 1)[1]
         out.write(f"-- Begin src/{filename}\n\n")
-        read_file(repo_root / "src" / filename, out)
+        f = repo_root / "src" / filename
+        depedancy_list.append(f)
+        read_file(f, out)
         out.write(f"-- End src/{filename}\n\n")
     elif comment.startswith("@lua@class"):
         panic(
@@ -324,8 +327,28 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
     elif comment.startswith("@lua@"):
         out.write(f'---{comment.replace("@lua", "", 1)}\n')
 
+depedancy_list: list[Path] = []
 
-if __name__ == "__main__":
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('--depfile', help='Generate a dependancy file', type=Path)
+    args = p.parse_args()
+
+    depedancy_list.append(lua_api_file)
     with lua_meta.open("w") as output:
         output.write(BOILERPLATE[1:])  # skip the newline after triple quote
         read_file(lua_api_file, output)
+
+    depfile: Path = args.depfile
+    if depfile:
+        depfile.parent.mkdir(exist_ok=True, parents=True)
+        with open(depfile, "w") as output:
+            output.write(str(lua_meta.resolve()) + ': ')
+            output.write(f' \\\n{" "*4}'.join(
+                str(p.resolve()) for p in depedancy_list
+            ))
+            output.write('\n')
+        print('Wrote dependancy file: ', depfile)
+
+if __name__ == "__main__":
+    main()

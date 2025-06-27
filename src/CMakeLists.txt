@@ -807,19 +807,16 @@ else()
         set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
     endif()
 
-    # If additional build performance is needed: consider having the script
-    # generate a proper listing of files containing lua meta directives or at
-    # least use only headers here. This command takes only ~25ms for me on
-    # Linux.
     add_custom_command(
         COMMENT "Generating Lua definitions"
-        DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py" ${SOURCE_FILES}
-        COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py"
+        DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py"
+        DEPFILE "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
+        COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py" --depfile "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
         OUTPUT ${outputs}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         VERBATIM
     )
-    add_custom_target(plugin_definitions ALL DEPENDS ${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua)
+    add_custom_target(plugin_definitions ALL DEPENDS "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
     add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
 endif ()
 
