@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/emoji/EmojiStyle.hpp"
 
 #include <boost/variant.hpp>
 #include <QMap>
@@ -30,12 +31,7 @@ struct EmojiData {
     // i.e. thinking
     std::vector<QString> shortCodes;
 
-    enum class Capability : uint8_t {
-        Apple = 1 << 0,
-        Google = 1 << 1,
-        Twitter = 1 << 2,
-        Facebook = 1 << 3,
-    };
+    using Capability = EmojiStyle;
     using Capabilities = FlagsEnum<Capability>;
 
     Capabilities capabilities;
