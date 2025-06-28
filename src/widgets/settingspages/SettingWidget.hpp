@@ -23,7 +23,7 @@ namespace chatterino {
 
 class GeneralPageView;
 
-class SettingWidget : QWidget
+class SettingWidget : public QWidget
 {
     Q_OBJECT
 
@@ -65,6 +65,11 @@ public:
     static SettingWidget *lineEdit(const QString &label,
                                    QStringSetting &setting,
                                    const QString &placeholderText = {});
+
+    static SettingWidget *fontButton(const QString &label,
+                                     QStringSetting &familySetting,
+                                     std::function<QFont()> currentFont,
+                                     std::function<void(QFont)> onChange);
 
     SettingWidget *setTooltip(QString tooltip);
     SettingWidget *setDescription(const QString &text);

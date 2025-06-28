@@ -680,6 +680,15 @@ public:
 
     BoolSetting showSendButton = {"/ui/showSendButton", false};
 
+    struct {
+        // this isn't shown in the UI
+        BoolSetting enabled = {"/plugins/repl/enabled", false};
+        // An empty string implies the default monospace font
+        QStringSetting fontFamily = {"/plugins/repl/fontFamily", {}};
+        QStringSetting fontStyle = {"/plugins/repl/fontStyle", "Regular"};
+        IntSetting fontSize = {"/plugins/repl/fontSize", 10};
+    } pluginRepl;
+
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",

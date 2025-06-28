@@ -278,6 +278,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     }
     temp->dataDirectory().mkpath(".");
 
+    // make sure we capture log messages during load
+    this->onPluginLoaded(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)

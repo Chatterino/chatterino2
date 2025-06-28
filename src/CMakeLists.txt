@@ -594,6 +594,8 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
+        widgets/PluginRepl.cpp
+        widgets/PluginRepl.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
