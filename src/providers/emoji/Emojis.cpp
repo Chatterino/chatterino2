@@ -26,24 +26,6 @@ const std::map<QString, QString> TONE_NAMES{
     {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
 };
 
-EmojiData::Capability emojiCapabilityFromEmojiStyle(EmojiStyle emojiStyle)
-{
-    switch (emojiStyle)
-    {
-        case EmojiStyle::Twitter:
-            return EmojiData::Capability::Twitter;
-
-        case EmojiStyle::Facebook:
-            return EmojiData::Capability::Facebook;
-
-        case EmojiStyle::Apple:
-            return EmojiData::Capability::Apple;
-
-        case EmojiStyle::Google:
-            return EmojiData::Capability::Google;
-    }
-}
-
 void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                 const rapidjson::Value &unparsedEmoji,
                 const QString &shortCode = {})
