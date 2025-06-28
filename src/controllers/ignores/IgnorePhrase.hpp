@@ -7,11 +7,14 @@
 #include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringView>
 
 #include <memory>
 #include <unordered_map>
 
 namespace chatterino {
+
+constexpr inline QStringView DEFAULT_IGNORE_PHRASE_REPLACE = u"***";
 
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;

@@ -427,10 +427,6 @@ public:
         true,
     };
 
-    /// Ignored Phrases
-    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
-                                           "***"};
-
     /// Blocked Users
     BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
                                             true};
