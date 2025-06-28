@@ -1,8 +1,8 @@
 #include "widgets/settingspages/SettingWidget.hpp"
 
-#include "common/LastMessageLineStyle.hpp"
-#include "common/ThumbnailPreviewMode.hpp"
-#include "singletons/Settings.hpp"
+#include "common/QLogging.hpp"
+#include "singletons/Settings.hpp"  // IWYU pragma: keep
+#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorButton.hpp"

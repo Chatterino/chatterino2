@@ -1,10 +1,6 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
-#include "common/QLogging.hpp"
-#include "util/QMagicEnum.hpp"
-#include "util/QMagicEnumTagged.hpp"
-#include "widgets/settingspages/GeneralPageView.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QBoxLayout>
@@ -18,6 +14,7 @@
 #include <QtContainerFwd>
 #include <QWidget>
 
+#include <functional>
 #include <optional>
 
 class QFormLayout;
