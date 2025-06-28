@@ -2046,7 +2046,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         if (badgeElement || emoteElement || layeredEmoteElement)
         {
             auto showThumbnailSetting =
-                getSettings()->emotesTooltipPreview.getValue();
+                getSettings()->emotesTooltipPreview.getEnum();
 
             bool showThumbnail =
                 showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||

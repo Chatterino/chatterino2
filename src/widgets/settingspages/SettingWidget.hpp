@@ -1,10 +1,6 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
-#include "common/QLogging.hpp"
-#include "util/QMagicEnum.hpp"
-#include "util/QMagicEnumTagged.hpp"
-#include "widgets/settingspages/GeneralPageView.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QBoxLayout>
@@ -17,6 +13,9 @@
 #include <QStringList>
 #include <QtContainerFwd>
 #include <QWidget>
+
+#include <functional>
+#include <optional>
 
 class QFormLayout;
 
@@ -56,6 +55,10 @@ public:
     template <typename T>
     static SettingWidget *dropdown(const QString &label,
                                    EnumStringSetting<T> &setting);
+
+    template <typename T>
+    static SettingWidget *dropdown(const QString &label,
+                                   EnumSetting<T> &setting);
 
     static SettingWidget *colorButton(const QString &label,
                                       QStringSetting &setting);
