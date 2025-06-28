@@ -60,7 +60,7 @@
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255, #6266)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
