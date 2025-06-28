@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -552,29 +553,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.showLastMessageIndicator, false,
                        "Adds an underline below the most recent message "
                        "sent before you tabbed out of Chatterino.");
-    layout.addDropdown<std::underlying_type_t<Qt::BrushStyle>>(
-        "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
-        [](int value) {
-            switch (value)
-            {
-                case Qt::VerPattern:
-                    return 0;
-                case Qt::SolidPattern:
-                default:
-                    return 1;
-            }
-        },
-        [](DropdownArgs args) {
-            switch (args.index)
-            {
-                case 0:
-                    return Qt::VerPattern;
-                case 1:
-                default:
-                    return Qt::SolidPattern;
-            }
-        },
-        false);
+
+    SettingWidget::dropdown("Line style", s.lastMessagePattern)->addTo(layout);
 
     SettingWidget::colorButton("Line color", s.lastMessageColor)->addTo(layout);
 
@@ -634,30 +614,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 });
         },
         false);
-    layout.addDropdown<std::underlying_type_t<ThumbnailPreviewMode>>(
-        "Show emote & badge thumbnail on hover",
-        {
-            "Don't show",
-            "Always show",
-            "Hold shift",
-        },
-        s.emotesTooltipPreview,
-        [](auto val) {
-            switch (val)
-            {
-                case ThumbnailPreviewMode::DontShow:
-                    return "Don't show";
-                case ThumbnailPreviewMode::AlwaysShow:
-                    return "Always show";
-                case ThumbnailPreviewMode::ShowOnShift:
-                    return "Hold shift";
-            }
-            return "";
-        },
-        [](auto args) {
-            return args.index;
-        },
-        false);
+
+    SettingWidget::dropdown("Show emote & badge thumbnail on hover",
+                            s.emotesTooltipPreview)
+        ->addTo(layout);
+
     SettingWidget::dropdown("Emote & badge thumbnail size on hover",
                             s.emoteTooltipScale)
         ->addTo(layout);
