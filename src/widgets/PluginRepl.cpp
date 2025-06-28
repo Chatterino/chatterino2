@@ -125,13 +125,11 @@ bool HistoricTextEdit::event(QEvent *event)
         if (!text.isEmpty())
         {
             e->accept();
-            if (this->history.empty() ||
-                this->history[std::clamp(this->historyIdx, 0LL,
-                                         this->history.size() - 1)] != text)
+            if (this->history.empty() || this->history.back() != text)
             {
                 this->history.append(text);
-                this->historyIdx = this->history.size();
             }
+            this->historyIdx = this->history.size();
             this->setPlainText({});
             this->lastUnfinishedInput = {};
             this->onSend(text);
