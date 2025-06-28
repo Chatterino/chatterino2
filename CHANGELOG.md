@@ -44,6 +44,7 @@
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 - Dev: Fixed `<build-tool> clean` not working correctly with generated sources. (#6154)
 - Dev: Removed authenticated PubSub implementation. (#6158)
+- Dev: Removed unused `ignoredPhraseReplace` setting. (#6304)
 - Dev: Save settings in `aboutToQuit`. (#6159)
 - Dev: Bumped deprecation cutoff to Qt 6.4.3. (#6169)
 - Dev: Use `QMetaObject::invokeMethod` to run code on a specific thread. (#6203, #6278)
