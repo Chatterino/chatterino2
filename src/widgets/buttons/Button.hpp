@@ -203,6 +203,8 @@ private:
     bool enabled_ = true;
     bool mouseOver_ = false;
     bool leftMouseButtonDown_ = false;
+    bool rightMouseButtonDown_ = false;
+    bool middleMouseButtonDown_ = false;
     bool menuVisible_ = false;
 
     QPixmap cachedPixmap_;
