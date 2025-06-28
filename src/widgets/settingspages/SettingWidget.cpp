@@ -227,6 +227,8 @@ template SettingWidget *SettingWidget::dropdown<TabStyle>(
     const QString &label, EnumStringSetting<TabStyle> &setting);
 template SettingWidget *SettingWidget::dropdown<ShowModerationState>(
     const QString &label, EnumStringSetting<ShowModerationState> &setting);
+template SettingWidget *SettingWidget::dropdown<EmojiStyle>(
+    const QString &label, EnumStringSetting<EmojiStyle> &setting);
 
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
