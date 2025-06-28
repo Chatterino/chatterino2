@@ -2046,7 +2046,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         if (badgeElement || emoteElement || layeredEmoteElement)
         {
             auto showThumbnailSetting =
-                getSettings()->emotesTooltipPreview.getValue();
+                getSettings()->emotesTooltipPreview.getEnum();
 
             bool showThumbnail =
                 showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
@@ -2615,19 +2615,72 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     });
 
     // Only display reply option where it makes sense
-    if (this->canReplyToMessages() && layout->isReplyable())
+    if (this->canReplyToMessages())
     {
         const auto &messagePtr = layout->getMessagePtr();
-        menu->addAction("&Reply to message", [this, &messagePtr] {
-            this->setInputReply(messagePtr);
-        });
-
-        if (messagePtr->replyThread != nullptr)
+        switch (messagePtr->isReplyable())
         {
-            menu->addAction("Reply to &original thread", [this, &messagePtr] {
-                this->setInputReply(messagePtr->replyThread->root());
-            });
+            case Message::ReplyStatus::Replyable: {
+                menu->addAction("&Reply to message", [this, &messagePtr] {
+                    this->setInputReply(messagePtr);
+                });
+                break;
+            }
 
+            case Message::ReplyStatus::NotReplyable: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
+                break;
+            }
+
+            case Message::ReplyStatus::ReplyableWithThread: {
+                menu->addAction("&Reply to message", [this, &messagePtr] {
+                    this->setInputReply(messagePtr);
+                });
+                menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
+                break;
+            }
+
+            case Message::ReplyStatus::NotReplyableWithThread: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
+
+                menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
+                break;
+            }
+
+            case Message::ReplyStatus::NotReplyableDueToThread: {
+                const auto &replyAction =
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                replyAction->setEnabled(false);
+
+                const auto &replyThreadAction = menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
+
+                replyThreadAction->setEnabled(false);
+                break;
+            }
+        }
+
+        if (const auto &messagePtr = layout->getMessagePtr();
+            messagePtr->replyThread != nullptr)
+        {
             menu->addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
             });
@@ -3057,7 +3110,11 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
         case Link::ReplyToMessage: {
-            this->setInputReply(layout->getMessagePtr());
+            if (layout->getMessagePtr()->isReplyable() !=
+                Message::ReplyStatus::NotReplyable)
+            {
+                this->setInputReply(layout->getMessagePtr());
+            }
         }
         break;
         case Link::ViewThread: {
