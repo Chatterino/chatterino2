@@ -39,9 +39,9 @@ bool Button::mouseOver() const noexcept
     return this->mouseOver_;
 }
 
-bool Button::mouseDown() const noexcept
+bool Button::leftMouseButtonDown() const noexcept
 {
-    return this->mouseDown_;
+    return this->leftMouseButtonDown_;
 }
 
 bool Button::menuVisible() const noexcept
@@ -174,7 +174,7 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     this->addClickEffect(event->pos());
 
-    this->mouseDown_ = true;
+    this->leftMouseButtonDown_ = true;
 
     this->leftMousePress();
 
@@ -183,14 +183,14 @@ void Button::mousePressEvent(QMouseEvent *event)
         QTimer::singleShot(80, this, [this] {
             this->showMenu();
         });
-        this->mouseDown_ = false;
+        this->leftMouseButtonDown_ = false;
         this->mouseOver_ = false;
     }
 }
 
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!this->enabled_ || !this->mouseDown_)
+    if (!this->enabled_ || !this->leftMouseButtonDown_)
     {
         return;
     }
@@ -199,7 +199,7 @@ void Button::mouseReleaseEvent(QMouseEvent *event)
 
     if (event->button() == Qt::LeftButton)
     {
-        this->mouseDown_ = false;
+        this->leftMouseButtonDown_ = false;
 
         if (isInside)
         {
@@ -258,7 +258,7 @@ void Button::onMouseEffectTimeout()
         for (auto it = this->clickEffects_.begin();
              it != this->clickEffects_.end();)
         {
-            it->progress += mouseDown_ ? 0.02 : 0.07;
+            it->progress += this->leftMouseButtonDown_ ? 0.02 : 0.07;
 
             if (it->progress >= 1.0)
             {
