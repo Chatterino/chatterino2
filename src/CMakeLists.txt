@@ -350,6 +350,7 @@ set(SOURCE_FILES
 
         providers/emoji/Emojis.cpp
         providers/emoji/Emojis.hpp
+        providers/emoji/EmojiStyle.hpp
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
