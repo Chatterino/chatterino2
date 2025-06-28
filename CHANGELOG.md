@@ -17,6 +17,7 @@
 - Minor: Made nicknames searchable in the Settings dialog search bar. (#5886)
 - Minor: Added hotkey Action for opening account selector. (#6192)
 - Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
+- Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)

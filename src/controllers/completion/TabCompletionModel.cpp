@@ -27,7 +27,7 @@ void TabCompletionModel::updateResults(const QString &query,
                                        const QString &fullTextContent,
                                        int cursorPosition, bool isFirstWord)
 {
-    this->updateSourceFromQuery(query);
+    this->updateSourceFromQuery(query, isFirstWord);
 
     if (this->source_)
     {
@@ -56,9 +56,10 @@ void TabCompletionModel::updateResults(const QString &query,
     }
 }
 
-void TabCompletionModel::updateSourceFromQuery(const QString &query)
+void TabCompletionModel::updateSourceFromQuery(const QString &query,
+                                               bool isFirstWord)
 {
-    auto deducedKind = this->deduceSourceKind(query);
+    auto deducedKind = this->deduceSourceKind(query, isFirstWord);
     if (!deducedKind)
     {
         // unable to determine what kind of completion is occurring
@@ -71,7 +72,8 @@ void TabCompletionModel::updateSourceFromQuery(const QString &query)
 }
 
 std::optional<TabCompletionModel::SourceKind>
-    TabCompletionModel::deduceSourceKind(const QString &query) const
+    TabCompletionModel::deduceSourceKind(const QString &query,
+                                         bool isFirstWord) const
 {
     if (query.length() < 2 || !this->channel_.isTwitchChannel())
     {
@@ -88,7 +90,7 @@ std::optional<TabCompletionModel::SourceKind>
     {
         return SourceKind::Emote;
     }
-    else if (query.startsWith('/') || query.startsWith('.'))
+    else if (isFirstWord && (query.startsWith('/') || query.startsWith('.')))
     {
         return SourceKind::Command;
     }
@@ -97,14 +99,27 @@ std::optional<TabCompletionModel::SourceKind>
     // Therefore, we must also consider that the user could be completing an emote
     // OR a mention depending on their completion settings.
 
-    if (getSettings()->userCompletionOnlyWithAt)
+    if (isFirstWord)
     {
-        // All kinds but user are possible
-        return SourceKind::EmoteCommand;
+        if (getSettings()->userCompletionOnlyWithAt)
+        {
+            // All kinds but user are possible
+            return SourceKind::EmoteCommand;
+        }
+
+        // Any kind is possible
+        return SourceKind::EmoteUserCommand;
     }
 
-    // Any kind is possible
-    return SourceKind::EmoteUserCommand;
+    // We don't allow for mid-message command completions,
+    // which means only emote or user tab completions are possible.
+
+    if (getSettings()->userCompletionOnlyWithAt)
+    {
+        return SourceKind::Emote;
+    }
+
+    return SourceKind::EmoteUser;
 }
 
 std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
@@ -120,6 +135,14 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
         }
         case SourceKind::Command: {
             return this->buildCommandSource();
+        }
+        case SourceKind::EmoteUser: {
+            std::vector<std::unique_ptr<completion::Source>> sources;
+            sources.push_back(this->buildEmoteSource());
+            sources.push_back(this->buildUserSource(false));
+
+            return std::make_unique<completion::UnifiedSource>(
+                std::move(sources));
         }
         case SourceKind::EmoteCommand: {
             std::vector<std::unique_ptr<completion::Source>> sources;
