@@ -174,8 +174,6 @@ void Button::mousePressEvent(QMouseEvent *event)
 
             this->addClickEffect(event->pos());
 
-            this->leftMouseButtonDown_ = true;
-
             this->leftMousePress();
 
             if (this->menu_ && !this->menuVisible_)
