@@ -62,7 +62,7 @@ using StringSetting = ChatterinoSetting<std::string>;
 using QStringSetting = ChatterinoSetting<QString>;
 using QSizeSetting = ChatterinoSetting<QSize>;
 
-/// Accepts any enum and saves the the enum value as an integer
+/// Accepts any enum and saves the enum value as an integer
 ///
 /// e.g. for enum class {Foo = 2, Bar = 6}, Foo would be saved as 2 and Bar would be saved as 6
 template <typename Enum>
