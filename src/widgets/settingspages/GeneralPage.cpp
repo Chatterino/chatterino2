@@ -749,11 +749,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Hide blocked terms",
                             s.streamerModeHideBlockedTermText)
-        ->setTooltip("Hide blocked terms from showing up in places like "
-                     "AutoMod messages. "
-                     "This can be useful in case you have some blocked terms "
-                     "that you don't "
-                     "want to show on stream.")
+        ->setTooltip(
+            "Hide blocked terms from showing up in places like AutoMod "
+            "messages. This can be useful in case you have some blocked terms "
+            "that you don't want to show on stream.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Mute mention sounds", s.streamerModeMuteMentions)
