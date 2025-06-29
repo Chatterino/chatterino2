@@ -1180,9 +1180,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,
                        "If Chatterino has seen a user, highlight @mention's of "
                        "them with their Twitch color.");
-    layout.addCheckbox("Try to find usernames without @ prefix",
-                       s.findAllUsernames, false,
-                       "Find mentions of users in chat without the @ prefix.");
+
+    SettingWidget::checkbox("Try to find usernames without @ prefix",
+                            s.findAllUsernames)
+        ->setTooltip("Find mentions of users in chat without the @ prefix.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Show username autocompletion popup menu",
                             s.showUsernameCompletionMenu)
