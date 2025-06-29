@@ -1253,10 +1253,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
                        "Show whispers as messages in all splits instead "
                        "of just /whispers.");
-    layout.addCheckbox(
-        "Highlight received inline whispers", s.highlightInlineWhispers, false,
-        "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-        "whispers inline\" is disabled, this setting will do nothing.");
+
+    SettingWidget::checkbox("Highlight received inline whispers",
+                            s.highlightInlineWhispers)
+        ->setTooltip(
+            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
+            "whispers inline\" is disabled, this setting will do nothing.")
+        ->addTo(layout);
 
     SettingWidget::checkbox(
         "Automatically subscribe to participated reply threads",
