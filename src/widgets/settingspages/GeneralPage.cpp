@@ -554,7 +554,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::colorButton("Line color", s.lastMessageColor)->addTo(layout);
 
     layout.addTitle("Emotes");
-    layout.addCheckbox("Enable", s.enableEmoteImages);
+
+    SettingWidget::checkbox("Enable", s.enableEmoteImages)->addTo(layout);
 
     SettingWidget::checkbox("Animate", s.animateEmotes)->addTo(layout);
 
