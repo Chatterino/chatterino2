@@ -1110,8 +1110,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     if (supportsIncognitoLinks())
     {
-        layout.addCheckbox("Open links in incognito/private mode",
-                           s.openLinksIncognito);
+        SettingWidget::checkbox("Open links in incognito/private mode",
+                                s.openLinksIncognito)
+            ->addTo(layout);
     }
 
     SettingWidget::customCheckbox(
