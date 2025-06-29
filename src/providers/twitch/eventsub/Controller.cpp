@@ -133,6 +133,7 @@ Controller::~Controller()
 
     qCWarning(LOG) << "Controller dtor end bad, thread didn't finish within "
                       "250ms, detaching and letting the OS handle it";
+    this->thread->detach();
 }
 
 void Controller::removeRef(const SubscriptionRequest &request)
