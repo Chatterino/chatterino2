@@ -819,7 +819,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addDescription(
             "You can receive updates earlier by ticking the box below. Report "
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
-        layout.addCheckbox("Receive beta updates", s.betaUpdates);
+
+        SettingWidget::checkbox("Receive beta updates", s.betaUpdates)
+            ->addTo(layout);
     }
     else
     {
