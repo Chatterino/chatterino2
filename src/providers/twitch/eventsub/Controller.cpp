@@ -40,6 +40,8 @@ const auto &LOG = chatterinoTwitchEventSub;
 
 namespace chatterino::eventsub {
 
+using namespace std::literals::chrono_literals;
+
 class QLogProxy : public lib::Logger
 {
 public:
@@ -79,6 +81,11 @@ Controller::Controller()
     std::tie(this->eventSubHost, this->eventSubPort, this->eventSubPath) =
         getEventSubHost();
     this->thread = std::make_unique<std::thread>([this] {
+        // make sure we set in any case, even exceptions
+        auto guard = qScopeGuard([&] {
+            this->stoppedFlag.set();
+        });
+
         this->ioContext.run();
     });
     renameThread(*this->thread, "C2EventSub");
@@ -111,16 +118,22 @@ Controller::~Controller()
 
     this->work.reset();
 
-    if (this->thread->joinable())
+    if (!this->thread->joinable())
     {
-        this->thread->join();
-    }
-    else
-    {
-        qCWarning(LOG) << "Thread not joinable";
+        qCWarning(LOG) << "Controller dtor end (not joinable)";
+        return;
     }
 
-    qCInfo(LOG) << "Controller dtor end";
+    if (this->stoppedFlag.waitFor(250ms))
+    {
+        this->thread->join();
+        qCWarning(LOG) << "Controller dtor end good";
+        return;
+    }
+
+    qCWarning(LOG) << "Controller dtor end bad, thread didn't finish within "
+                      "250ms, detaching and letting the OS handle it";
+    this->thread->detach();
 }
 
 void Controller::removeRef(const SubscriptionRequest &request)
