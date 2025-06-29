@@ -1244,11 +1244,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When disabled, emote tab-completion will complete based on any part "
         "of the name."
         "\ne.g. sheffy -> DatSheffy");
-    layout.addCheckbox(
-        "Only search for username autocompletion with an @",
-        s.userCompletionOnlyWithAt, false,
-        "When enabled, username tab-completion will only complete when using @"
-        "\ne.g. pajl -> pajl | @pajl -> @pajlada");
+
+    SettingWidget::checkbox("Only search for username autocompletion with an @",
+                            s.userCompletionOnlyWithAt)
+        ->setTooltip("When enabled, username tab-completion will only complete "
+                     "when using @\ne.g. pajl -> pajl | @pajl -> @pajlada")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
