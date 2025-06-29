@@ -1264,8 +1264,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "participate in.\n"
         "This means reply threads you participate in will use your "
         "\"Subscribed Reply Threads\" highlight settings.");
-    layout.addCheckbox("Load message history on connect",
-                       s.loadTwitchMessageHistoryOnConnect);
+
+    SettingWidget::checkbox("Load message history on connect",
+                            s.loadTwitchMessageHistoryOnConnect)
+        ->addTo(layout);
+
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
     layout.addIntInput("Max number of history messages to load on connect",
                        s.twitchMessageHistoryLimit, 10, 800, 10);
