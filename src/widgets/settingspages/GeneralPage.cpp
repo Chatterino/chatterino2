@@ -564,8 +564,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Animate", s.animateEmotes)->addTo(layout);
 
-    layout.addCheckbox("Animate only when Chatterino is focused",
-                       s.animationsWhenFocused);
+    SettingWidget::checkbox("Animate only when Chatterino is focused",
+                            s.animationsWhenFocused)
+        ->addTo(layout);
+
     layout.addCheckbox(
         "Enable zero-width emotes", s.enableZeroWidthEmotes,
         "When disabled, emotes that overlap other emotes, such as BTTV's "
