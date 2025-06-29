@@ -1238,12 +1238,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "version of the link.\ne.g. https://bit.ly/mrfors -> "
         "https://forsen.tv/");
 
-    layout.addCheckbox(
+    SettingWidget::checkbox(
         "Only search for emote autocompletion at the start of emote names",
-        s.prefixOnlyEmoteCompletion, false,
-        "When disabled, emote tab-completion will complete based on any part "
-        "of the name."
-        "\ne.g. sheffy -> DatSheffy");
+        s.prefixOnlyEmoteCompletion)
+        ->setTooltip("When disabled, emote tab-completion will complete based "
+                     "on any part of the name.\ne.g. sheffy -> DatSheffy")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Only search for username autocompletion with an @",
                             s.userCompletionOnlyWithAt)
