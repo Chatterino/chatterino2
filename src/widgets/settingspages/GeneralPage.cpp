@@ -1183,8 +1183,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames, false,
                        "Find mentions of users in chat without the @ prefix.");
-    layout.addCheckbox("Show username autocompletion popup menu",
-                       s.showUsernameCompletionMenu);
+
+    SettingWidget::checkbox("Show username autocompletion popup menu",
+                            s.showUsernameCompletionMenu)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Always include broadcaster in user completions",
                             s.alwaysIncludeBroadcasterInUserCompletions)
