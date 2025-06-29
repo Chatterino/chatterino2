@@ -1177,9 +1177,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
                        "Bold @mentions to make them more noticeable.");
-    layout.addCheckbox("Color @usernames", s.colorUsernames, false,
-                       "If Chatterino has seen a user, highlight @mention's of "
-                       "them with their Twitch color.");
+
+    SettingWidget::checkbox("Color @usernames", s.colorUsernames)
+        ->setTooltip("If Chatterino has seen a user, highlight @mention's of "
+                     "them with their Twitch color.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Try to find usernames without @ prefix",
                             s.findAllUsernames)
