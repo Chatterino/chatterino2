@@ -16,6 +16,7 @@ class WebSocketListenerProxy final : public WebSocketListener
 public:
     WebSocketListenerProxy(std::weak_ptr<WebSocket> target);
 
+    void onOpen() override;
     void onClose(std::unique_ptr<WebSocketListener> self) override;
     void onBinaryMessage(QByteArray data) override;
     void onTextMessage(QByteArray data) override;
@@ -58,10 +59,15 @@ void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
                                                   v.as<std::string>());
                     }
                 }
+                sol::optional<sol::main_function> onOpen = luaOpts["on_open"];
                 sol::optional<sol::main_function> onText = luaOpts["on_text"];
                 sol::optional<sol::main_function> onBinary =
                     luaOpts["on_binary"];
                 sol::optional<sol::main_function> onClose = luaOpts["on_close"];
+                if (onOpen)
+                {
+                    self->onOpen = std::move(*onOpen);
+                }
                 if (onText)
                 {
                     self->onText = std::move(*onText);
@@ -84,6 +90,14 @@ void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
         }),
         // Note: These properties could be pointers to members, but Clang 18
         // specifically can't compile these - see https://github.com/ThePhD/sol2/issues/1581
+        "on_open",
+        sol::property(
+            [](WebSocket &ws) {
+                return ws.onOpen;
+            },
+            [](WebSocket &ws, sol::main_function fn) {
+                ws.onOpen = std::move(fn);
+            }),
         "on_close",
         sol::property(
             [](WebSocket &ws) {
@@ -132,6 +146,19 @@ void WebSocket::sendBinary(const QByteArray &data)
 WebSocketListenerProxy::WebSocketListenerProxy(std::weak_ptr<WebSocket> target)
     : target(std::move(target))
 {
+}
+
+void WebSocketListenerProxy::onOpen()
+{
+    auto target = this->target;
+    runInGuiThread([target] {
+        auto strong = target.lock();
+        if (strong && strong->onOpen)
+        {
+            loggedVoidCall(strong->onOpen, u"WebSocket.on_open",
+                           strong->plugin);
+        }
+    });
 }
 
 void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)

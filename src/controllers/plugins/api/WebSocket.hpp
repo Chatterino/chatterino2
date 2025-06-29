@@ -55,6 +55,10 @@ public:
 
 private:
     /**
+     * @lua@field on_open fun()|nil Handler called when the websocket handshake successfully completed.
+     */
+    sol::main_function onOpen;
+    /**
      * @lua@field on_close fun()|nil Handler called when the socket is closed.
      */
     sol::main_function onClose;

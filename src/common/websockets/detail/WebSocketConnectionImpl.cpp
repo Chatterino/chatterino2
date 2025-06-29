@@ -193,6 +193,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
     }
 
     qCDebug(chatterinoWebsocket) << *this << "WS handshake done";
+    this->listener->onOpen();
 
     this->trySend();
     this->stream.async_read(
