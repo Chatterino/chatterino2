@@ -1250,9 +1250,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When enabled, username tab-completion will only complete when using @"
         "\ne.g. pajl -> pajl | @pajl -> @pajlada");
 
-    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers, false,
-                       "Show whispers as messages in all splits instead "
-                       "of just /whispers.");
+    SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
+        ->setTooltip("Show whispers as messages in all splits instead of just "
+                     "/whispers.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Highlight received inline whispers",
                             s.highlightInlineWhispers)
