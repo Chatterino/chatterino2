@@ -689,9 +689,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Hide link thumbnails", s.streamerModeHideLinkThumbnails,
                        "Prevent potentially explicit thumbnails from showing "
                        "when hovering links.");
-    layout.addCheckbox(
+
+    SettingWidget::checkbox(
         "Hide viewer count and stream length while hovering over split header",
-        s.streamerModeHideViewerCountAndDuration);
+        s.streamerModeHideViewerCountAndDuration)
+        ->addTo(layout);
+
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
