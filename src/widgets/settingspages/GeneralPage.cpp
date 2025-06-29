@@ -1299,11 +1299,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
         "When disabled, the /mentions tab will not highlight in "
         "red when you are mentioned.");
-    layout.addCheckbox(
-        "Strip leading mention in replies", s.stripReplyMention, false,
-        "When disabled, messages sent in reply threads will include the "
-        "@mention for the related thread. If the reply context is hidden, "
-        "these mentions will never be stripped.");
+    SettingWidget::checkbox("Strip leading mention in replies",
+                            s.stripReplyMention)
+        ->setTooltip(
+            "When disabled, messages sent in reply threads will include the "
+            "@mention for the related thread. If the reply context is hidden, "
+            "these mentions will never be stripped.")
+        ->addTo(layout);
 
     SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
         ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
