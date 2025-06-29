@@ -1077,9 +1077,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "corresponds to a fully opaque background.")
         ->addTo(layout);
 
-    layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
-                       "Enables a drop shadow on the overlay. This will use "
-                       "more processing power.");
+    SettingWidget::checkbox("Enable Shadow", s.enableOverlayShadow)
+        ->setTooltip("Enables a drop shadow on the overlay. This will use more "
+                     "processing power.")
+        ->addTo(layout);
+
     layout.addIntInput("Shadow opacity (0-255)", s.overlayShadowOpacity, 0, 255,
                        1,
                        "Controls the opacity of the added drop shadow. 255 "
