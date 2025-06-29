@@ -1126,9 +1126,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getApp()->getPaths().isPortable())
     {
-        layout.addCheckbox(
+        SettingWidget::checkbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring);
+            s.useKeyring)
+            ->addTo(layout);
     }
 #endif
 
