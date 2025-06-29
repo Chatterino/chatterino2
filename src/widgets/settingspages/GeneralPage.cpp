@@ -1144,10 +1144,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "from TreuKS was deleted: abc")
         ->addTo(layout);
 
-    layout.addCheckbox(
-        "Colorize users without color set (gray names)", s.colorizeNicknames,
-        false,
-        "Grant a random color to users who never set a color for themselves");
+    SettingWidget::checkbox("Colorize users without color set (gray names)",
+                            s.colorizeNicknames)
+        ->setTooltip("Grant a random color to users who never set a color for "
+                     "themselves")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Mention users with a comma",
                             s.mentionUsersWithComma)
