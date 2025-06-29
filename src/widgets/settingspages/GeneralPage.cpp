@@ -1,13 +1,10 @@
 #include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
-#include "common/Literals.hpp"
-#include "common/QLogging.hpp"
-#include "common/ThumbnailPreviewMode.hpp"
+#include "common/Literals.hpp"  // IWYU pragma: keep
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -23,19 +20,17 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
-#include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
-#include <QScrollArea>
 
 namespace {
 
 using namespace chatterino;
-using namespace literals;
+using namespace chatterino::literals;
 
 const QString CHROME_EXTENSION_LINK =
     u"https://chrome.google.com/webstore/detail/chatterino-native-host/glknmaideaikkmemifbfkhnomoknepka"_s;
