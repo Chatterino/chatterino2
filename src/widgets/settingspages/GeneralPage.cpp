@@ -386,8 +386,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
-    layout.addCheckbox("Smooth scrolling on new messages",
-                       s.enableSmoothScrollingNewMessages);
+
+    SettingWidget::checkbox("Smooth scrolling on new messages",
+                            s.enableSmoothScrollingNewMessages)
+        ->addTo(layout);
+
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput,
                        "Show the chat box even when there is nothing typed.");
     layout.addCheckbox(
