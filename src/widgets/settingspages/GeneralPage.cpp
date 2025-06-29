@@ -299,10 +299,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 
     SettingWidget::checkbox("Show tab close button", s.showTabCloseButton)
-        ->setTooltip("When disabled, the x to close a tab will be "
-                     "hidden.\nTabs can still "
-                     "be closed by right-clicking or pressing " +
-                     removeTabShortcut + ".")
+        ->setTooltip(
+            "When disabled, the x to close a tab will be hidden.\nTabs can "
+            "still be closed by right-clicking or pressing " +
+            removeTabShortcut + ".")
         ->addTo(layout);
 
     SettingWidget::checkbox("Always on top", s.windowTopMost)
