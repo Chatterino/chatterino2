@@ -133,9 +133,6 @@ public:
     TitleLabel *addTitle(const QString &text);
     SubtitleLabel *addSubtitle(const QString &text);
 
-    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           QString toolTipText = {});
-
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,

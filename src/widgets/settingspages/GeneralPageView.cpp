@@ -159,33 +159,6 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
     return label;
 }
 
-QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting,
-                                        QString toolTipText)
-{
-    auto *check = new QCheckBox(text);
-    this->addToolTip(*check, toolTipText);
-
-    // update when setting changes
-    setting.connect(
-        [check](const bool &value, auto) {
-            check->setChecked(value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(check, &QCheckBox::toggled, this, [&setting](bool state) {
-        setting = state;
-    });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
 ComboBox *GeneralPageView::addDropdown(const QString &text,
                                        const QStringList &list,
                                        QString toolTipText)
