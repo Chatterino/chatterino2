@@ -967,7 +967,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide similar messages to those previously seen. Toggle hidden "
         "messages by pressing " +
         toggleLocalr9kShortcut + ".");
-    layout.addCheckbox("Enable similarity checks", s.similarityEnabled);
+
+    SettingWidget::checkbox("Enable similarity checks", s.similarityEnabled)
+        ->addTo(layout);
+
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
 
     SettingWidget::checkbox("Only if by the same user", s.hideSimilarBySameUser)
