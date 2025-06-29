@@ -1232,11 +1232,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "When enabled, opening links/usercards requires "
                        "double-clicking.\nUseful making sure you don't "
                        "accidentally click on suspicious links.");
-    layout.addCheckbox(
-        "Unshorten links", s.unshortLinks, false,
-        "When enabled, \"right-click + copy link\" will copy the unshortened "
-        "version of the link.\ne.g. https://bit.ly/mrfors -> "
-        "https://forsen.tv/");
+
+    SettingWidget::checkbox("Unshorten links", s.unshortLinks)
+        ->setTooltip("When enabled, \"right-click + copy link\" will copy the "
+                     "unshortened version of the link.\ne.g. "
+                     "https://bit.ly/mrfors -> https://forsen.tv/")
+        ->addTo(layout);
 
     SettingWidget::checkbox(
         "Only search for emote autocompletion at the start of emote names",
