@@ -1026,10 +1026,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
             QKeySequence::SequenceFormat::NativeText);
     }
-    layout.addDescription(
-        "Hide similar messages to those previously seen. Toggle hidden "
-        "messages by pressing " +
-        toggleLocalr9kShortcut + ".");
+    layout.addDescription("Hide similar messages to those previously seen. "
+                          "Toggle hidden messages by pressing " +
+                          toggleLocalr9kShortcut + ".");
 
     SettingWidget::checkbox("Enable similarity checks", s.similarityEnabled)
         ->addTo(layout);
@@ -1451,8 +1450,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
-        ->setTooltip("Change this only if you're noticing issues "
-                     "with sound playback on your system")
+        ->setTooltip("Change this only if you're noticing issues with sound "
+                     "playback on your system")
         ->addTo(layout);
 
     SettingWidget::checkbox(
@@ -1462,8 +1461,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Disable renaming of tabs on double-click",
                             s.disableTabRenamingOnClick)
-        ->setTooltip("Prevents the rename dialog from opening when a "
-                     "tab is double-clicked")
+        ->setTooltip("Prevents the rename dialog from opening when a tab is "
+                     "double-clicked")
         ->addTo(layout);
 
     layout.addStretch();
