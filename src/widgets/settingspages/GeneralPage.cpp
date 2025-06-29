@@ -298,11 +298,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             removeTabSeq.toString(QKeySequence::SequenceFormat::NativeText);
     }
     layout.addCheckbox(
-        "Show tab close button", s.showTabCloseButton, false,
+        "Show tab close button", s.showTabCloseButton,
         "When disabled, the x to close a tab will be hidden.\nTabs can still "
         "be closed by right-clicking or pressing " +
             removeTabShortcut + ".");
-    layout.addCheckbox("Always on top", s.windowTopMost, false,
+    layout.addCheckbox("Always on top", s.windowTopMost,
                        "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun, false,
@@ -328,7 +328,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         SettingWidget::inverseCheckbox("Show user button", s.hideUserButton)
             ->addTo(layout);
     }
-    layout.addCheckbox("Mark tabs with live channels", s.showTabLive, false,
+    layout.addCheckbox("Mark tabs with live channels", s.showTabLive,
                        "Shows a red dot in the top right corner of a tab to "
                        "indicate one of the channels in the tab is live.");
 
@@ -388,15 +388,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Show input when it's empty", s.showEmptyInput, false,
+    layout.addCheckbox("Show input when it's empty", s.showEmptyInput,
                        "Show the chat box even when there is nothing typed.");
     layout.addCheckbox(
-        "Show message length while typing", s.showMessageLength, false,
+        "Show message length while typing", s.showMessageLength,
         "Show how many characters are currently in your input box.\n"
         "Useful for making sure you don't go past the 500 character Twitch "
         "limit, or a lower limit enforced by a moderation bot");
     layout.addCheckbox(
-        "Allow sending duplicate messages", s.allowDuplicateMessages, false,
+        "Allow sending duplicate messages", s.allowDuplicateMessages,
         "Allow a single message to be repeatedly sent without any changes.");
     layout.addDropdown<std::underlying_type_t<MessageOverflow>>(
         "Message overflow", {"Highlight", "Prevent", "Allow"},
@@ -545,7 +545,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addSeparator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",
-                       s.showLastMessageIndicator, false,
+                       s.showLastMessageIndicator,
                        "Adds an underline below the most recent message "
                        "sent before you tabbed out of Chatterino.");
 
@@ -559,7 +559,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
     layout.addCheckbox(
-        "Enable zero-width emotes", s.enableZeroWidthEmotes, false,
+        "Enable zero-width emotes", s.enableZeroWidthEmotes,
         "When disabled, emotes that overlap other emotes, such as BTTV's "
         "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",
@@ -584,7 +584,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
 
     layout.addCheckbox("Remove spaces between emotes",
-                       s.removeSpacesBetweenEmotes, false,
+                       s.removeSpacesBetweenEmotes,
                        "When enabled, adjacent emotes will no longer have an "
                        "added space separating them.");
     SettingWidget::checkbox("Show unlisted 7TV emotes",
@@ -684,17 +684,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
 
     layout.addCheckbox("Hide usercard avatars",
-                       s.streamerModeHideUsercardAvatars, false,
+                       s.streamerModeHideUsercardAvatars,
                        "Prevent potentially explicit avatars from showing.");
     layout.addCheckbox("Hide link thumbnails", s.streamerModeHideLinkThumbnails,
-                       false,
                        "Prevent potentially explicit thumbnails from showing "
                        "when hovering links.");
     layout.addCheckbox(
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox(
-        "Hide moderation actions", s.streamerModeHideModActions, false,
+        "Hide moderation actions", s.streamerModeHideModActions,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
 
     SettingWidget::checkbox("Hide messages from restricted users",
@@ -704,17 +703,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addCheckbox(
-        "Hide blocked terms", s.streamerModeHideBlockedTermText, false,
+        "Hide blocked terms", s.streamerModeHideBlockedTermText,
         "Hide blocked terms from showing up in places like AutoMod messages. "
         "This can be useful in case you have some blocked terms that you don't "
         "want to show on stream.");
-    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions,
                        "Mute your ping sound from playing.");
     layout.addCheckbox(
         "Suppress Live Notifications", s.streamerModeSuppressLiveNotifications,
-        false, "Hide Live notification popups from appearing. (Windows Only)");
+        "Hide Live notification popups from appearing. (Windows Only)");
     layout.addCheckbox("Suppress Inline Whispers",
-                       s.streamerModeSuppressInlineWhispers, false,
+                       s.streamerModeSuppressInlineWhispers,
                        "Hide whispers sent to you from appearing in chat.");
 
     layout.addTitle("Link Previews");
@@ -855,7 +854,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           "attaching to other windows by accident.");
     layout.addCheckbox(
         "Attach to any browser (may cause issues)",
-        s.attachExtensionToAnyProcess, false,
+        s.attachExtensionToAnyProcess,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
 
@@ -944,14 +943,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Chat title");
     layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime, false,
+    layout.addCheckbox("Uptime", s.headerUptime,
                        "Show how long the channel has been live");
-    layout.addCheckbox("Viewer count", s.headerViewerCount, false,
+    layout.addCheckbox("Viewer count", s.headerViewerCount,
                        "Show how many users are watching");
-    layout.addCheckbox("Category", s.headerGame, false,
+    layout.addCheckbox("Category", s.headerGame,
                        "Show what Category the stream is listed under");
-    layout.addCheckbox("Title", s.headerStreamTitle, false,
-                       "Show the stream title");
+    layout.addCheckbox("Title", s.headerStreamTitle, "Show the stream title");
 
     layout.addSubtitle("R9K");
     auto toggleLocalr9kSeq = getApp()->getHotkeys()->getDisplaySequence(
