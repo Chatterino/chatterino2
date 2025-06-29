@@ -1163,9 +1163,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "only available when chat has less than 1000 users");
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
-    layout.addCheckbox(
+
+    SettingWidget::checkbox(
         "Automatically close reply thread popup when it loses focus",
-        s.autoCloseThreadPopup);
+        s.autoCloseThreadPopup)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
                             s.lowercaseDomains)
