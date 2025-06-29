@@ -1257,13 +1257,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Highlight received inline whispers", s.highlightInlineWhispers, false,
         "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
         "whispers inline\" is disabled, this setting will do nothing.");
-    layout.addCheckbox(
+
+    SettingWidget::checkbox(
         "Automatically subscribe to participated reply threads",
-        s.autoSubToParticipatedThreads, false,
-        "When enabled, you will automatically subscribe to reply threads you "
-        "participate in.\n"
-        "This means reply threads you participate in will use your "
-        "\"Subscribed Reply Threads\" highlight settings.");
+        s.autoSubToParticipatedThreads)
+        ->setTooltip(
+            "When enabled, you will automatically subscribe to reply threads "
+            "you participate in.\nThis means reply threads you participate in "
+            "will use your \"Subscribed Reply Threads\" highlight settings.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
