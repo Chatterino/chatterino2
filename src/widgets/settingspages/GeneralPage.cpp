@@ -385,7 +385,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
+
+    SettingWidget::checkbox("Smooth scrolling", s.enableSmoothScrolling)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Smooth scrolling on new messages",
                             s.enableSmoothScrollingNewMessages)
