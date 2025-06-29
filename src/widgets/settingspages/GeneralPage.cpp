@@ -1021,7 +1021,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
                        "e.g. staff, admin");
-    layout.addCheckbox("Predictions", s.showBadgesPredictions);
+
+    SettingWidget::checkbox("Predictions", s.showBadgesPredictions)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Channel", s.showBadgesChannelAuthority)
         ->setTooltip("e.g. broadcaster, moderator")
