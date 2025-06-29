@@ -1157,10 +1157,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show joined users (< 1000 chatters)", s.showJoins, false,
         "Show a Twitch system message stating what users have joined the chat, "
         "only available when the chat has less than 1000 users");
-    layout.addCheckbox(
-        "Show parted users (< 1000 chatters)", s.showParts, false,
-        "Show a Twitch system message stating what users have left the chat, "
-        "only available when chat has less than 1000 users");
+
+    SettingWidget::checkbox("Show parted users (< 1000 chatters)", s.showParts)
+        ->setTooltip(
+            "Show a Twitch system message stating what users have left the "
+            "chat, only available when chat has less than 1000 users")
+        ->addTo(layout);
 
     SettingWidget::checkbox(
         "Automatically close user popup when it loses focus",
