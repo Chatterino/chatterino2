@@ -368,6 +368,21 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPromptHover = "Should the tabs be enabled, disabled, "
                                       "toggled, or live-only.",
           }},
+         {"lockZoom",
+          ActionDefinition{
+              .displayName = "Lock zoom",
+              .argumentDescription = "[lock, unlock, toggle. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Toggle", {}},
+                  {"Lock zoom", {"lock"}},
+                  {"Unlock zoom", {"unlock"}},
+              },
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should the zoom be locked, unlocked, or toggled.",
+          }},
      }},
 };
 
