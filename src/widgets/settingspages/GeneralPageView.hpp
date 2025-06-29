@@ -132,9 +132,6 @@ public:
 
     TitleLabel *addTitle(const QString &text);
     SubtitleLabel *addSubtitle(const QString &text);
-    /// @param inverse Inverses true to false and vice versa
-    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           bool inverse = false, QString toolTipText = {});
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});

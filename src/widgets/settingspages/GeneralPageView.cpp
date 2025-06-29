@@ -159,40 +159,6 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
     return label;
 }
 
-QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting, bool inverse,
-                                        QString toolTipText)
-{
-    if (inverse)
-    {
-        qCWarning(chatterinoWidget)
-            << "use SettingWidget::inverseCheckbox instead";
-    }
-
-    auto *check = new QCheckBox(text);
-    this->addToolTip(*check, toolTipText);
-
-    // update when setting changes
-    setting.connect(
-        [inverse, check](const bool &value, auto) {
-            check->setChecked(inverse ^ value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(check, &QCheckBox::toggled, this,
-                     [&setting, inverse](bool state) {
-                         setting = inverse ^ state;
-                     });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
 ComboBox *GeneralPageView::addDropdown(const QString &text,
                                        const QStringList &list,
                                        QString toolTipText)
