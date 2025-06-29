@@ -44,9 +44,11 @@ public:
     /// Setter for #source()
     void setSource(Src source);
 
-    /// Sets a custom color to render over the SVG
+    /// Sets a custom color to render over the SVG.
+    /// This allows you to change the color of a button to a solid color
+    /// of your choice without using multiple SVG resources.
     ///
-    /// Set to std::nullopt to not override the color
+    /// Set to std::nullopt to not override the color.
     void setColor(std::optional<QColor> color);
 
     /// @brief Returns the padding inside the button.
