@@ -1170,13 +1170,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
+
     SettingWidget::checkbox("Show user's pronouns in user card", s.showPronouns)
         ->setDescription(
             R"(Pronouns are retrieved from <a href="https://pr.alejo.io">pr.alejo.io</a> when a user card is opened.)")
         ->addTo(layout);
 
-    layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
-                       "Bold @mentions to make them more noticeable.");
+    SettingWidget::checkbox("Bold @usernames", s.boldUsernames)
+        ->setTooltip("Bold @mentions to make them more noticeable.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Color @usernames", s.colorUsernames)
         ->setTooltip("If Chatterino has seen a user, highlight @mention's of "
