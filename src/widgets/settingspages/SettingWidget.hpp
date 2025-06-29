@@ -31,9 +31,21 @@ class SettingWidget : public QWidget
 
 public:
     struct IntInputParams {
+        /// The minimum value of this spin box.
+        /// Leave empty for a minimum value of 0.
         std::optional<int> min;
+
+        /// The maximum value of this spin box.
+        /// Leave empty for a maximum value of 99.
         std::optional<int> max;
+
+        /// The value the spinbox is incremented or decremented by when the up or down arrow is clicked.
+        /// Leave empty for a single step of 1.
         std::optional<int> singleStep;
+
+        /// The suffix appended to the end of the displayed value.
+        /// Leave empty for no suffix.
+        std::optional<QString> suffix;
     };
 
     ~SettingWidget() override = default;

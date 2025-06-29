@@ -1165,31 +1165,53 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "processing power.")
         ->addTo(layout);
 
-    layout.addIntInput("Shadow opacity (0-255)", s.overlayShadowOpacity, 0, 255,
-                       1,
-                       "Controls the opacity of the added drop shadow. 255 "
-                       "corresponds to a fully opaque shadow.");
+    SettingWidget::intInput("Shadow opacity (0-255)", s.overlayShadowOpacity,
+                            {
+                                .min = 0,
+                                .max = 255,
+                                .singleStep = 1,
+                            })
+        ->setTooltip("Controls the opacity of the added drop shadow. 255 "
+                     "corresponds to a fully opaque shadow.")
+        ->addTo(layout);
 
     SettingWidget::colorButton("Shadow color", s.overlayShadowColor)
         ->addTo(layout);
 
-    layout
-        .addIntInput("Shadow radius", s.overlayShadowRadius, 0, 40, 1,
-                     "Controls how far the shadow is spread (the blur "
+    SettingWidget::intInput("Shadow radius", s.overlayShadowRadius,
+                            {
+                                .min = 0,
+                                .max = 40,
+                                .singleStep = 1,
+                                .suffix = "dp",
+                            })
+        ->setTooltip("Controls how far the shadow is spread (the blur "
                      "radius) in device-independent pixels.")
-        ->setSuffix("dp");
-    layout
-        .addIntInput("Shadow offset x", s.overlayShadowOffsetX, -20, 20, 1,
-                     "Controls how far the shadow is offset on the x axis in "
+        ->addTo(layout);
+
+    SettingWidget::intInput("Shadow offset x", s.overlayShadowOffsetX,
+                            {
+                                .min = -20,
+                                .max = 20,
+                                .singleStep = 1,
+                                .suffix = "dp",
+                            })
+        ->setTooltip("Controls how far the shadow is offset on the x axis in "
                      "device-independent pixels. A negative value offsets to "
                      "the left and a positive to the right.")
-        ->setSuffix("dp");
-    layout
-        .addIntInput("Shadow offset y", s.overlayShadowOffsetY, -20, 20, 1,
-                     "Controls how far the shadow is offset on the y axis in "
+        ->addTo(layout);
+
+    SettingWidget::intInput("Shadow offset y", s.overlayShadowOffsetY,
+                            {
+                                .min = -20,
+                                .max = 20,
+                                .singleStep = 1,
+                                .suffix = "dp",
+                            })
+        ->setTooltip("Controls how far the shadow is offset on the y axis in "
                      "device-independent pixels. A negative value offsets to "
                      "the top and a positive to the bottom.")
-        ->setSuffix("dp");
+        ->addTo(layout);
 
     layout.addSubtitle("Miscellaneous");
 
@@ -1393,13 +1415,32 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
-    layout.addIntInput("Max number of history messages to load on connect",
-                       s.twitchMessageHistoryLimit, 10, 800, 10);
+    SettingWidget::intInput("Max number of history messages to load on connect",
+                            s.twitchMessageHistoryLimit,
+                            {
+                                .min = 10,
+                                .max = 800,
+                                .singleStep = 10,
+                            })
+        ->addTo(layout);
 
-    layout.addIntInput("Split message scrollback limit (requires restart)",
-                       s.scrollbackSplitLimit, 100, 100000, 100);
-    layout.addIntInput("Usercard scrollback limit (requires restart)",
-                       s.scrollbackUsercardLimit, 100, 100000, 100);
+    SettingWidget::intInput("Split message scrollback limit (requires restart)",
+                            s.scrollbackSplitLimit,
+                            {
+                                .min = 100,
+                                .max = 100000,
+                                .singleStep = 100,
+                            })
+        ->addTo(layout);
+
+    SettingWidget::intInput("Usercard scrollback limit (requires restart)",
+                            s.scrollbackUsercardLimit,
+                            {
+                                .min = 100,
+                                .max = 100000,
+                                .singleStep = 100,
+                            })
+        ->addTo(layout);
 
     SettingWidget::dropdown("Show blocked term automod messages",
                             s.showBlockedTermAutomodMessages)

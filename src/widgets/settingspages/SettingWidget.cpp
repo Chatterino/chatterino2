@@ -136,6 +136,10 @@ SettingWidget *SettingWidget::intInput(const QString &label,
     {
         input->setSingleStep(params.singleStep.value());
     }
+    if (params.suffix.has_value())
+    {
+        input->setSuffix(params.suffix.value());
+    }
 
     widget->hLayout->addWidget(lbl);
     widget->hLayout->addStretch(1);

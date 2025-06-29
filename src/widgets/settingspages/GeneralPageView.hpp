@@ -7,7 +7,6 @@
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>
-#include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QPushButton>
@@ -138,8 +137,6 @@ public:
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false, QString toolTipText = {});
-    QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
-                          int max, int step, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
