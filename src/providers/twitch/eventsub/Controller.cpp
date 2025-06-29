@@ -120,8 +120,7 @@ Controller::~Controller()
 
     if (!this->thread->joinable())
     {
-        qCWarning(LOG) << "Controller thread is not joinable";
-        this->thread->detach();
+        qCWarning(LOG) << "Controller dtor end (not joinable)";
         return;
     }
 
