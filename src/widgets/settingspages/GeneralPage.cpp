@@ -912,9 +912,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
                             s.attachExtensionToAnyProcess)
-        ->setTooltip("Attempt to force the Chatterino Browser Extension to "
-                     "work in certain "
-                     "browsers that do not work automatically.\ne.g. Librewolf")
+        ->setTooltip(
+            "Attempt to force the Chatterino Browser Extension to work in "
+            "certain browsers that do not work automatically.\ne.g. Librewolf")
         ->addTo(layout);
 
     {
