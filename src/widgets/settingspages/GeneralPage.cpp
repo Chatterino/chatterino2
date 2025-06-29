@@ -1166,10 +1166,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup);
-    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains,
-                       false,
-                       "Make all clickable links lowercase to deter "
-                       "phishing attempts.");
+
+    SettingWidget::checkbox("Lowercase domains (anti-phishing)",
+                            s.lowercaseDomains)
+        ->setTooltip(
+            "Make all clickable links lowercase to deter phishing attempts.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Show user's pronouns in user card", s.showPronouns)
         ->setDescription(
