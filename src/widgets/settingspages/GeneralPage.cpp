@@ -969,10 +969,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Enable similarity checks", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox(
-        "Only if by the same user", s.hideSimilarBySameUser, false,
-        "When checked, messages that are very similar to each other can still "
-        "be shown as long as they're sent by different users.");
+
+    SettingWidget::checkbox("Only if by the same user", s.hideSimilarBySameUser)
+        ->setTooltip(
+            "When checked, messages that are very similar to each other can "
+            "still be shown as long as they're sent by different users.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Hide my own messages", s.hideSimilarMyself)
         ->addTo(layout);
