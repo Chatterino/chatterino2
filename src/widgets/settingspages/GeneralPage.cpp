@@ -1294,11 +1294,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits, false,
                        "Combine consecutive cheermotes (sent in a single "
                        "message) into one cheermote.");
-    layout.addCheckbox(
-        "Messages in /mentions highlights tab", s.highlightMentions, false,
-        // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
-        "When disabled, the /mentions tab will not highlight in "
-        "red when you are mentioned.");
+
+    // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
+    SettingWidget::checkbox("Messages in /mentions highlights tab",
+                            s.highlightMentions)
+        ->setTooltip("When disabled, the /mentions tab will not highlight in "
+                     "red when you are mentioned.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Strip leading mention in replies",
                             s.stripReplyMention)
         ->setTooltip(
