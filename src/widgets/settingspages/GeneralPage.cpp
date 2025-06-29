@@ -973,7 +973,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Only if by the same user", s.hideSimilarBySameUser, false,
         "When checked, messages that are very similar to each other can still "
         "be shown as long as they're sent by different users.");
-    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
+
+    SettingWidget::checkbox("Hide my own messages", s.hideSimilarMyself)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Receive notification sounds from hidden messages",
                             s.shownSimilarTriggerHighlights)
