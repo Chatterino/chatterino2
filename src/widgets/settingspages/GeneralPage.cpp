@@ -555,7 +555,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
-    layout.addCheckbox("Animate", s.animateEmotes);
+
+    SettingWidget::checkbox("Animate", s.animateEmotes)->addTo(layout);
+
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
     layout.addCheckbox(
