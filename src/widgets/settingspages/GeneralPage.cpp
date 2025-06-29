@@ -1291,9 +1291,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return args.index;
         },
         false, "Combine consecutive timeout messages into a single message.");
-    layout.addCheckbox("Combine multiple bit tips into one", s.stackBits, false,
-                       "Combine consecutive cheermotes (sent in a single "
-                       "message) into one cheermote.");
+
+    SettingWidget::checkbox("Combine multiple bit tips into one", s.stackBits)
+        ->setTooltip("Combine consecutive cheermotes (sent in a single "
+                     "message) into one cheermote.")
+        ->addTo(layout);
 
     // update this tooltip if https://github.com/Chatterino/chatterino2/pull/1557 is ever merged
     SettingWidget::checkbox("Messages in /mentions highlights tab",
