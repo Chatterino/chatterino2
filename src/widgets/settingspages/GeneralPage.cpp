@@ -728,7 +728,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "terms-of-service\">Terms of Services</a> and <a "
         "href=\"https://braize.pajlada.com/chatterino/legal/"
         "privacy-policy\">Privacy Policy</a>.");
-    layout.addCheckbox("Enable", s.linkInfoTooltip);
+
+    SettingWidget::checkbox("Enable", s.linkInfoTooltip)->addTo(layout);
+
     layout.addDropdown<int>(
         "Also show thumbnails if available",
         {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
