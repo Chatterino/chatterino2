@@ -1019,8 +1019,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "compared to only if they are new enough.");
 
     layout.addSubtitle("Visible badges");
-    layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
-                       "e.g. staff, admin");
+    SettingWidget::checkbox("Authority", s.showBadgesGlobalAuthority)
+        ->setTooltip("e.g. staff, admin")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Predictions", s.showBadgesPredictions)
         ->addTo(layout);
