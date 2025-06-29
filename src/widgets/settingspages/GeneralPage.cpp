@@ -1320,9 +1320,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "with sound playback on your system")
         ->addTo(layout);
 
-    layout.addCheckbox(
+    SettingWidget::checkbox(
         "Enable experimental Twitch EventSub support (requires restart)",
-        s.enableExperimentalEventSub);
+        s.enableExperimentalEventSub)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Disable renaming of tabs on double-click",
                             s.disableTabRenamingOnClick)
