@@ -1025,8 +1025,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Channel", s.showBadgesChannelAuthority, false,
                        "e.g. broadcaster, moderator");
     layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
-    layout.addCheckbox("Vanity", s.showBadgesVanity, false,
-                       "e.g. prime, bits, sub gifter");
+
+    SettingWidget::checkbox("Vanity", s.showBadgesVanity)
+        ->setTooltip("e.g. prime, bits, sub gifter")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Chatterino", s.showBadgesChatterino)
         ->setTooltip("e.g. Chatterino Supporter/Contributor/Developer")
         ->addTo(layout);
