@@ -1227,11 +1227,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 63.f);
         });
-    layout.addCheckbox("Double click to open links and other elements in chat",
-                       s.linksDoubleClickOnly, false,
-                       "When enabled, opening links/usercards requires "
-                       "double-clicking.\nUseful making sure you don't "
-                       "accidentally click on suspicious links.");
+
+    SettingWidget::checkbox(
+        "Double click to open links and other elements in chat",
+        s.linksDoubleClickOnly)
+        ->setTooltip("When enabled, opening links/usercards requires "
+                     "double-clicking.\nUseful making sure you don't "
+                     "accidentally click on suspicious links.")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Unshorten links", s.unshortLinks)
         ->setTooltip("When enabled, \"right-click + copy link\" will copy the "
