@@ -1148,11 +1148,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Colorize users without color set (gray names)", s.colorizeNicknames,
         false,
         "Grant a random color to users who never set a color for themselves");
-    layout.addCheckbox("Mention users with a comma", s.mentionUsersWithComma,
-                       false,
-                       "When using tab-completon, if the username is at the "
-                       "start of the message, include a comma at the end of "
-                       "the name.\ne.g. pajl -> pajlada,");
+
+    SettingWidget::checkbox("Mention users with a comma",
+                            s.mentionUsersWithComma)
+        ->setTooltip("When using tab-completon, if the username is at the "
+                     "start of the message, include a comma at the end of the "
+                     "name.\ne.g. pajl -> pajlada,")
+        ->addTo(layout);
 
     SettingWidget::checkbox("Show joined users (< 1000 chatters)", s.showJoins)
         ->setTooltip(
