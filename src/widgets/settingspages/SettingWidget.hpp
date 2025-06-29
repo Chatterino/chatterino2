@@ -34,6 +34,7 @@ public:
         std::optional<int> min;
         std::optional<int> max;
         std::optional<int> singleStep;
+        std::optional<QString> suffix;
     };
 
     ~SettingWidget() override = default;
