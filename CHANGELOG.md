@@ -70,6 +70,7 @@
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Added a system to generate Lua definitions at build time. (#6297)
 
 ## 2.5.3
 
