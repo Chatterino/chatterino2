@@ -79,10 +79,31 @@ TEST(OnceFlag, waitForTimeout)
     });
 
     startedFlag.wait();
+    ASSERT_TRUE(startedFlag.isSet());
     startedAckFlag.set();
+    ASSERT_TRUE(startedAckFlag.isSet());
 
     ASSERT_FALSE(stoppedFlag.waitFor(std::chrono::milliseconds{25}));
     stoppedFlag.wait();
+    ASSERT_TRUE(stoppedFlag.isSet());
 
     t.join();
+}
+
+TEST(OnceFlag, alreadySet)
+{
+    OnceFlag flag;
+    flag.set();
+    ASSERT_TRUE(flag.isSet());
+
+    auto start = std::chrono::system_clock::now();
+    flag.wait();
+    auto stop = std::chrono::system_clock::now();
+    ASSERT_LT(stop - start, std::chrono::milliseconds{10});
+
+    start = std::chrono::system_clock::now();
+    ASSERT_TRUE(flag.waitFor(std::chrono::milliseconds{0}));
+    stop = std::chrono::system_clock::now();
+
+    ASSERT_LT(stop - start, std::chrono::milliseconds{10});
 }
