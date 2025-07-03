@@ -7,7 +7,7 @@
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added interactive REPL for plugins. (#6120)
-- Minor: Added WebSocket API for plugins. (#6076, #6186)
+- Minor: Added WebSocket API for plugins. (#6076, #6186, #6314)
 - Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
 - Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
 - Minor: Made filters searchable in the Settings dialog search bar. (#5890)
