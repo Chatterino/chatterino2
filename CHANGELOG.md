@@ -68,7 +68,7 @@
 - Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
-- Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
+- Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 
 ## 2.5.3
