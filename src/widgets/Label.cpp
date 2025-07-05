@@ -116,8 +116,8 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     int padding = this->getPadding();
 
     // draw text
-    QRect textRect(padding, 0, this->width() - padding - padding,
-                   this->height());
+    QRectF textRect(this->getPadding(), 0, this->getInnerWidth(),
+                    this->height());
 
     auto text = [this] {
         if (this->shouldElide_)
