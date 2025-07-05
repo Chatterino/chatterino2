@@ -31,8 +31,10 @@ Non-command lines of comments are written with a space after '---'
 
 from io import TextIOWrapper
 from pathlib import Path
-import re
 from typing import Optional
+import argparse
+import logging
+import re
 
 BOILERPLATE = """
 ---@meta Chatterino2
@@ -48,7 +50,6 @@ repo_root = Path(__file__).parent.parent
 lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
 lua_meta = repo_root / "docs" / "plugin-meta.lua"
 
-print("Writing to", lua_meta.relative_to(repo_root))
 
 
 def strip_line(line: str):
@@ -185,11 +186,11 @@ def finish_class(out, name):
 
 
 def printmsg(path: Path, line: int, message: str):
-    print(f"{path.relative_to(repo_root)}:{line} {message}")
+    logging.debug(f"{path.relative_to(repo_root)}:{line} {message}")
 
 
 def panic(path: Path, line: int, message: str):
-    printmsg(path, line, message)
+    logging.critical(f"{path.relative_to(repo_root)}:{line} {message}")
     exit(1)
 
 
@@ -215,7 +216,7 @@ def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
 
 
 def read_file(path: Path, out: TextIOWrapper):
-    print("Reading", path.relative_to(repo_root))
+    logging.debug(f"Reading {path.relative_to(repo_root)}")
     with path.open("r") as f:
         lines = f.read().splitlines()
 
@@ -313,7 +314,9 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
     if comment.startswith("@includefile "):
         filename = comment.split(" ", 1)[1]
         out.write(f"-- Begin src/{filename}\n\n")
-        read_file(repo_root / "src" / filename, out)
+        f = repo_root / "src" / filename
+        depedancy_list.append(f)
+        read_file(f, out)
         out.write(f"-- End src/{filename}\n\n")
     elif comment.startswith("@lua@class"):
         panic(
@@ -324,8 +327,32 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
     elif comment.startswith("@lua@"):
         out.write(f'---{comment.replace("@lua", "", 1)}\n')
 
+depedancy_list: list[Path] = []
 
-if __name__ == "__main__":
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('--depfile', help='Generate a dependancy file', type=Path)
+    p.add_argument("--log", default="DEBUG")
+    args = p.parse_args()
+    log_level = getattr(logging, args.log.upper(), logging.DEBUG)
+    logging.basicConfig(level=log_level, format="%(message)s")
+
+    depedancy_list.append(lua_api_file)
+    logging.debug(f"Writing to {lua_meta.relative_to(repo_root)}")
     with lua_meta.open("w") as output:
         output.write(BOILERPLATE[1:])  # skip the newline after triple quote
         read_file(lua_api_file, output)
+
+    depfile: Path = args.depfile
+    if depfile:
+        depfile.parent.mkdir(exist_ok=True, parents=True)
+        with open(depfile, "w") as output:
+            output.write(str(lua_meta.resolve()) + ': ')
+            output.write(f' \\\n{" "*4}'.join(
+                str(p.resolve()) for p in depedancy_list
+            ))
+            output.write('\n')
+        logging.info(f'Wrote dependancy file: {depfile}')
+
+if __name__ == "__main__":
+    main()
