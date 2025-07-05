@@ -42,6 +42,11 @@ private:
 struct WebSocketListener {
     virtual ~WebSocketListener() = default;
 
+    /// The WebSocket handshake completed successfully.
+    ///
+    /// This function is called from the websocket thread.
+    virtual void onOpen() = 0;
+
     /// A text message was received.
     ///
     /// This function is called from the websocket thread.

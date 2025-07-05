@@ -133,6 +133,7 @@ declare namespace c2 {
         close(): void;
         send_text(data: string): void;
         send_binary(data: string): void;
+        on_open: null | (() => void);
         on_close: null | (() => void);
         on_text: null | ((data: string) => void);
         on_binary: null | ((data: string) => void);
@@ -143,6 +144,7 @@ declare namespace c2 {
             url: string,
             options?: {
                 headers?: Record<string, string>;
+                on_open?: () => void;
                 on_close?: () => void;
                 on_text?: (data: string) => void;
                 on_binary?: (data: string) => void;
