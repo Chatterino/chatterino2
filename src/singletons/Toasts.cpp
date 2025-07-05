@@ -142,6 +142,13 @@ using WinToastLib::WinToast;
 using WinToastLib::WinToastTemplate;
 #endif
 
+Toasts::Toasts()
+{
+#ifdef Q_OS_WIN
+    this->ensureInitialized();
+#endif
+}
+
 Toasts::~Toasts()
 {
 #ifdef Q_OS_WIN
