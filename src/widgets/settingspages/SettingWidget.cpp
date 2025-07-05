@@ -181,7 +181,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     }
 
     // TODO: this can probably use some other size hint/size strategy
-    combo->setMinimumWidth(combo->minimumSizeHint().width());
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
     widget->actionWidget = combo;
     widget->label = lbl;
@@ -254,7 +254,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     }
 
     // TODO: this can probably use some other size hint/size strategy
-    combo->setMinimumWidth(combo->minimumSizeHint().width());
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
     widget->actionWidget = combo;
     widget->label = lbl;
@@ -330,7 +330,7 @@ SettingWidget *SettingWidget::dropdown(
     }
 
     // TODO: this can probably use some other size hint/size strategy
-    combo->setMinimumWidth(combo->minimumSizeHint().width());
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
     widget->actionWidget = combo;
     widget->label = lbl;
