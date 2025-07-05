@@ -174,12 +174,7 @@ QFontMetricsF Label::getFontMetrics() const
 
 qreal Label::getInnerWidth() const
 {
-    if (this->hasPadding_)
-    {
-        return this->width() - this->getPadding() - this->getPadding();
-    }
-
-    return this->width();
+    return this->width() - (2 * this->getPadding());
 }
 
 void Label::updateSize()
