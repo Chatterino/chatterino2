@@ -17,10 +17,6 @@ private:
     void exportSettings();
     void importSettings();
 
-    bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj);
-    bool applyImportedSettings(const QJsonObject &settingsObj);
-    void parseAndApplyHeaders(const QJsonObject &headersObj);
-
     GeneralPageView *view{};
 };
 
