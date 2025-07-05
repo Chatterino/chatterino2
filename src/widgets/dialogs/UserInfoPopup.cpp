@@ -1171,7 +1171,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         title->addStretch(1);
         auto label = title.emplace<Label>(text);
         label->setStyleSheet("color: #BBB");
-        label->setHasOffset(false);
+        label->setHasPadding(false);
         title->addStretch(1);
 
         auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();

@@ -59,14 +59,9 @@ void Label::setCentered(bool centered)
     this->updateSize();
 }
 
-bool Label::getHasOffset() const
+void Label::setHasPadding(bool hasPadding)
 {
-    return this->hasOffset_;
-}
-
-void Label::setHasOffset(bool hasOffset)
-{
-    this->hasOffset_ = hasOffset;
+    this->hasPadding_ = hasPadding;
     this->updateSize();
 }
 
@@ -118,10 +113,11 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     painter.setFont(
         getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
-    int offset = this->getOffset();
+    int padding = this->getPadding();
 
     // draw text
-    QRect textRect(offset, 0, this->width() - offset - offset, this->height());
+    QRect textRect(padding, 0, this->width() - padding - padding,
+                   this->height());
 
     auto text = [this] {
         if (this->shouldElide_)
@@ -178,9 +174,9 @@ QFontMetricsF Label::getFontMetrics() const
 
 qreal Label::getWidthWithoutOffset() const
 {
-    if (this->hasOffset_)
+    if (this->hasPadding_)
     {
-        return this->width() - this->getOffset() - this->getOffset();
+        return this->width() - this->getPadding() - this->getPadding();
     }
 
     return this->width();
@@ -200,7 +196,7 @@ void Label::updateSize()
     else
     {
         auto width =
-            metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());
+            metrics.horizontalAdvance(this->text_) + (2 * this->getPadding());
         auto height = metrics.height();
         this->sizeHint_ = QSizeF(width, height).toSize();
         this->minimumSizeHint_ = this->sizeHint_;
@@ -209,9 +205,14 @@ void Label::updateSize()
     this->updateGeometry();
 }
 
-int Label::getOffset() const
+int Label::getPadding() const
 {
-    return this->hasOffset_ ? int(8 * this->scale()) : 0;
+    if (this->hasPadding_)
+    {
+        return static_cast<int>(8 * this->scale());
+    }
+
+    return 0;
 }
 
 bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
