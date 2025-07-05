@@ -144,7 +144,10 @@ void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)
             auto cb = std::move(strong->onClose);
             strong->onText.reset();
             strong->onBinary.reset();
-            loggedVoidCall(cb, u"WebSocket.on_close", strong->plugin);
+            if (cb)
+            {
+                loggedVoidCall(cb, u"WebSocket.on_close", strong->plugin);
+            }
         }
     });
 }
@@ -154,7 +157,7 @@ void WebSocketListenerProxy::onTextMessage(QByteArray data)
     auto target = this->target;
     runInGuiThread([target, data{std::move(data)}] {
         auto strong = target.lock();
-        if (strong)
+        if (strong && strong->onText)
         {
             loggedVoidCall(strong->onText, u"WebSocket.on_text", strong->plugin,
                            data);
@@ -167,7 +170,7 @@ void WebSocketListenerProxy::onBinaryMessage(QByteArray data)
     auto target = this->target;
     runInGuiThread([target, data{std::move(data)}] {
         auto strong = target.lock();
-        if (strong)
+        if (strong && strong->onBinary)
         {
             loggedVoidCall(strong->onBinary, u"WebSocket.on_binary",
                            strong->plugin, data);
