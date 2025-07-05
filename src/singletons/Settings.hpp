@@ -5,6 +5,7 @@
 #include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
+#include "common/StreamerModeSetting.hpp"
 #include "common/ThumbnailPreviewMode.hpp"
 #include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
@@ -82,12 +83,6 @@ enum class StreamLinkPreferredQuality : std::uint8_t {
     Medium,
     Low,
     AudioOnly,
-};
-
-enum StreamerModeSetting {
-    Disabled = 0,
-    Enabled = 1,
-    DetectStreamingSoftware = 2,
 };
 
 enum class TabStyle : std::uint8_t {
@@ -402,7 +397,9 @@ public:
     //  - "Always hide"
     //  - "Don't hide"
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
-        "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
+        "/streamerMode/enabled",
+        StreamerModeSetting::DetectStreamingSoftware,
+    };
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {

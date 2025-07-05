@@ -690,19 +690,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "streaming software is running.\nSelect which things you want to "
         "change while streaming");
 
-    ComboBox *dankDropdown =
-        layout.addDropdown<std::underlying_type_t<StreamerModeSetting>>(
-            "Enable Streamer Mode",
-            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
-            s.enableStreamerMode,
-            [](int value) {
-                return value;
-            },
-            [](DropdownArgs args) {
-                return static_cast<StreamerModeSetting>(args.index);
-            },
-            false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
+    SettingWidget::dropdown("Enable Streamer Mode", s.enableStreamerMode)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Hide usercard avatars",
                             s.streamerModeHideUsercardAvatars)
