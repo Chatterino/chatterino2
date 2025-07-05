@@ -11,10 +11,11 @@ namespace {
 
 struct Listener : public WebSocketListener {
     Listener(std::vector<std::pair<bool, QByteArray>> &messages,
-             OnceFlag &messageFlag, OnceFlag &closeFlag)
+             OnceFlag &messageFlag, OnceFlag &closeFlag, OnceFlag &openFlag)
         : messages(messages)
         , messageFlag(messageFlag)
         , closeFlag(closeFlag)
+        , openFlag(openFlag)
     {
     }
 
@@ -35,9 +36,15 @@ struct Listener : public WebSocketListener {
         messages.emplace_back(false, std::move(data));
     }
 
+    void onOpen() override
+    {
+        this->openFlag.set();
+    }
+
     std::vector<std::pair<bool, QByteArray>> &messages;
     OnceFlag &messageFlag;
     OnceFlag &closeFlag;
+    OnceFlag &openFlag;
 };
 
 }  // namespace
@@ -50,6 +57,7 @@ TEST(WebSocketPool, tcpEcho)
     std::vector<std::pair<bool, QByteArray>> messages;
     OnceFlag messageFlag;
     OnceFlag closeFlag;
+    OnceFlag openFlag;
 
     auto handle = pool.createSocket(
         {
@@ -62,13 +70,14 @@ TEST(WebSocketPool, tcpEcho)
                     {"User-Agent", "MyUserAgent"},
                 },
         },
-        std::make_unique<Listener>(messages, messageFlag, closeFlag));
+        std::make_unique<Listener>(messages, messageFlag, closeFlag, openFlag));
     handle.sendBinary("message1");
     handle.sendBinary("message2");
     handle.sendBinary("message3");
     handle.sendText("message4");
 
     ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");
@@ -111,6 +120,7 @@ TEST(WebSocketPool, tlsEcho)
     std::vector<std::pair<bool, QByteArray>> messages;
     OnceFlag messageFlag;
     OnceFlag closeFlag;
+    OnceFlag openFlag;
 
     auto handle = pool.createSocket(
         {
@@ -121,13 +131,14 @@ TEST(WebSocketPool, tlsEcho)
                 {"Cookie", "xd"},  // "known" header
             },
         },
-        std::make_unique<Listener>(messages, messageFlag, closeFlag));
+        std::make_unique<Listener>(messages, messageFlag, closeFlag, openFlag));
     handle.sendBinary("message1");
     handle.sendBinary("message2");
     handle.sendBinary("message3");
     handle.sendText("message4");
 
     ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");

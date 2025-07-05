@@ -170,7 +170,7 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
     part.setHeader(QNetworkRequest::ContentLengthHeader,
                    QVariant(imageData.data.length()));
     part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                   QString("form-data; name=\"%1\"; filename=\"control_v.%2\"")
+                   QString(R"(form-data; name="%1"; filename="control_v.%2")")
                        .arg(formField)
                        .arg(imageData.format));
     payload->append(part);

@@ -57,7 +57,7 @@ public:
     [[nodiscard]] bool mouseOver() const noexcept;
 
     /// Returns true if the left mouse button is held down
-    [[nodiscard]] bool mouseDown() const noexcept;
+    [[nodiscard]] bool leftMouseButtonDown() const noexcept;
 
     /// @brief Returns true if the menu is visible
     ///
@@ -180,6 +180,9 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    /// Queue up the click animation at the given position
+    void addClickEffect(QPoint position);
+
 private:
     void onMouseEffectTimeout();
     void showMenu();
@@ -199,7 +202,9 @@ private:
 
     bool enabled_ = true;
     bool mouseOver_ = false;
-    bool mouseDown_ = false;
+    bool leftMouseButtonDown_ = false;
+    bool rightMouseButtonDown_ = false;
+    bool middleMouseButtonDown_ = false;
     bool menuVisible_ = false;
 
     QPixmap cachedPixmap_;

@@ -159,40 +159,6 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
     return label;
 }
 
-QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting, bool inverse,
-                                        QString toolTipText)
-{
-    if (inverse)
-    {
-        qCWarning(chatterinoWidget)
-            << "use SettingWidget::inverseCheckbox instead";
-    }
-
-    auto *check = new QCheckBox(text);
-    this->addToolTip(*check, toolTipText);
-
-    // update when setting changes
-    setting.connect(
-        [inverse, check](const bool &value, auto) {
-            check->setChecked(inverse ^ value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(check, &QCheckBox::toggled, this,
-                     [&setting, inverse](bool state) {
-                         setting = inverse ^ state;
-                     });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
 ComboBox *GeneralPageView::addDropdown(const QString &text,
                                        const QStringList &list,
                                        QString toolTipText)
@@ -243,45 +209,6 @@ ComboBox *GeneralPageView::addDropdown(
                      });
 
     return combo;
-}
-
-QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
-                                       int min, int max, int step,
-                                       QString toolTipText)
-{
-    auto *layout = new QHBoxLayout;
-
-    auto *label = new QLabel(text + ":");
-    this->addToolTip(*label, toolTipText);
-
-    auto *input = new SpinBox;
-    input->setMinimum(min);
-    input->setMaximum(max);
-
-    // update when setting changes
-    setting.connect(
-        [input](const int &value, auto) {
-            input->setValue(value);
-        },
-        this->managedConnections_);
-
-    // update setting on value changed
-    QObject::connect(input, QOverload<int>::of(&QSpinBox::valueChanged), this,
-                     [&setting](int newValue) {
-                         setting = newValue;
-                     });
-
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(input);
-
-    this->addLayout(layout);
-
-    // groups
-    this->groups_.back().widgets.push_back({input, {text}});
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return input;
 }
 
 void GeneralPageView::addNavigationSpacing()

@@ -23,7 +23,7 @@ sudo apt install qt6-base-dev qt6-5compat-dev qt6-svg-dev qt6-image-formats-plug
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost libnotify rapidjson pkgconf openssl cmake
+sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost libnotify rapidjson pkgconf cmake
 ```
 
 If you use Wayland, you will also need to ensure `qt6-wayland` is installed.
