@@ -30,6 +30,7 @@ option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
+option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
@@ -119,6 +120,11 @@ if (_compiler_launcher)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
+
+if (CHATTERINO_ALLOW_PRIVATE_QT_API)
+    # For qtextengine_p.h
+    set(_additional_qt_components GuiPrivate)
+endif()
 
 find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     COMPONENTS
