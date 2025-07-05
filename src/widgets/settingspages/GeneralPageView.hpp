@@ -134,9 +134,6 @@ public:
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
-    ComboBox *addDropdown(const QString &text, const QStringList &items,
-                          pajlada::Settings::Setting<QString> &setting,
-                          bool editable = false, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
