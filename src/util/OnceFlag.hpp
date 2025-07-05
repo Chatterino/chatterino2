@@ -31,6 +31,9 @@ public:
     /// The calling thread will be suspended during the wait.
     void wait();
 
+    /// Is the flag currently set?
+    bool isSet();
+
 private:
     std::mutex mutex;
     std::condition_variable condvar;

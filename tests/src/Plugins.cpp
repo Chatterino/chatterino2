@@ -816,4 +816,27 @@ TEST_F(PluginTest, testWebSocketApi)
     ASSERT_TRUE(ok);
 }
 
+TEST_F(PluginTest, testWebSocketUnsetFns)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    RequestWaiter waiter;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+
+    lua->script(R"lua(
+        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        ws.on_close = function()
+            done()
+        end
+        ws:send_text("message1")
+        ws:send_text("message2")
+        ws:send_binary("message3")
+        ws:send_binary("/CLOSE")
+    )lua");
+
+    waiter.waitForRequest();
+}
+
 #endif

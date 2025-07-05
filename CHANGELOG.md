@@ -7,7 +7,7 @@
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added interactive REPL for plugins. (#6120)
-- Minor: Added WebSocket API for plugins. (#6076, #6186)
+- Minor: Added WebSocket API for plugins. (#6076, #6186, #6314)
 - Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
 - Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
 - Minor: Made filters searchable in the Settings dialog search bar. (#5890)
@@ -68,7 +68,7 @@
 - Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
-- Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
+- Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 
 ## 2.5.3
