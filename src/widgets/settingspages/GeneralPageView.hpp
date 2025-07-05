@@ -237,15 +237,6 @@ public:
         return combo;
     }
 
-    void enableIf(QComboBox *widget, auto &setting, auto cb)
-    {
-        auto updateVisibility = [cb = std::move(cb), &setting, widget]() {
-            auto enabled = cb(setting.getValue());
-            widget->setEnabled(enabled);
-        };
-        setting.connect(updateVisibility, this->managedConnections_);
-    }
-
     DescriptionLabel *addDescription(const QString &text);
 
     void addSeparator();
