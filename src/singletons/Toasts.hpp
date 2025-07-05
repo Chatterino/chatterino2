@@ -16,6 +16,7 @@ enum class ToastReaction {
 class Toasts final
 {
 public:
+    Toasts();
     ~Toasts();
 
     void sendChannelNotification(const QString &channelName,
