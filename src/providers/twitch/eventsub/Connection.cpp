@@ -188,6 +188,7 @@ void Connection::onChannelModerate(
 
             if constexpr (CanMakeModMessage<Action>)
             {
+                // FIXME: This message should still be added, but instead hidden during layout if the setting is enabled.
                 if (getSettings()->hideDeletionActions)
                 {
                     return;
