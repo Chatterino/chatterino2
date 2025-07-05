@@ -134,22 +134,6 @@ QComboBox *SettingsPage::createComboBox(
     return combo;
 }
 
-QLineEdit *SettingsPage::createLineEdit(
-    pajlada::Settings::Setting<QString> &setting)
-{
-    QLineEdit *edit = new QLineEdit();
-
-    edit->setText(setting);
-
-    // update when setting changes
-    QObject::connect(edit, &QLineEdit::textChanged,
-                     [&setting](const QString &newValue) {
-                         setting = newValue;
-                     });
-
-    return edit;
-}
-
 QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting,
                                       int min, int max)
 {

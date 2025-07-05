@@ -3,11 +3,10 @@
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/helper/SignalLabel.hpp"
+#include "widgets/buttons/SignalLabel.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>
-#include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QPushButton>
@@ -132,17 +131,12 @@ public:
 
     TitleLabel *addTitle(const QString &text);
     SubtitleLabel *addSubtitle(const QString &text);
-    /// @param inverse Inverses true to false and vice versa
-    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           bool inverse = false, QString toolTipText = {});
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false, QString toolTipText = {});
-    QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
-                          int max, int step, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>

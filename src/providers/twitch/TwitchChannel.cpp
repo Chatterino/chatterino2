@@ -61,37 +61,53 @@ namespace chatterino {
 
 using namespace literals;
 
+namespace detail {
+
+bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.|\/)(?!me\s|\s))", QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
+}  // namespace detail
+
+using detail::isUnknownCommand;
+
 namespace {
 #if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
-    const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
+const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
 #else
-    const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
+const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
-    constexpr int CLIP_CREATION_COOLDOWN = 5000;
-    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
-        "Failed to create a clip - clips are temporarily unavailable: %1");
-    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
-        "Failed to create a clip - the streamer has clips disabled in their "
-        "channel.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
-        "Failed to create a clip - the streamer has restricted clip creation "
-        "to subscribers, or followers of an unknown duration.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
-        "Failed to create a clip - the streamer has disabled clips while in "
-        "this category.");
-    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
-        "Failed to create a clip - you need to re-authenticate.");
-    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
-        "Failed to create a clip: %1");
-    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
-    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
+constexpr int CLIP_CREATION_COOLDOWN = 5000;
+const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
+    "Failed to create a clip - clips are temporarily unavailable: %1");
+const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+    "Failed to create a clip - the streamer has clips disabled in their "
+    "channel.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
+    "Failed to create a clip - the streamer has restricted clip creation "
+    "to subscribers, or followers of an unknown duration.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
+    "Failed to create a clip - the streamer has disabled clips while in "
+    "this category.");
+const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+    "Failed to create a clip - you need to re-authenticate.");
+const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT("Failed to create a clip: %1");
+const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
-    // Maximum number of chatters to fetch when refreshing chatters
-    constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
+// Maximum number of chatters to fetch when refreshing chatters
+constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
-    // From Twitch docs - expected size for a badge (1x)
-    constexpr QSize BASE_BADGE_SIZE(18, 18);
+// From Twitch docs - expected size for a badge (1x)
+constexpr QSize BASE_BADGE_SIZE(18, 18);
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -192,6 +208,11 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     getApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                               this->seventvEmoteSetID_);
 
@@ -790,6 +811,13 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
+        return;
+    }
+
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
     this->updateSevenTVActivity();
@@ -821,6 +849,13 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
     {
+        return;
+    }
+
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
         return;
     }
 
@@ -1448,7 +1483,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     int limit = getSettings()->twitchMessageHistoryLimit.getValue();
     if (this->lastConnectedAt_.has_value())
     {
-        // calculate how many messages could have occured
+        // calculate how many messages could have occurred
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
         const auto secondsSinceDisconnect =

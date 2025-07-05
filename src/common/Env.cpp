@@ -10,61 +10,61 @@ namespace chatterino {
 
 namespace {
 
-    template <typename T>
-    void warn(const char *envName, const QString &envString, T defaultValue)
-    {
-        const auto typeName = QString::fromStdString(
-            std::string(type_name<decltype(defaultValue)>()));
+template <typename T>
+void warn(const char *envName, const QString &envString, T defaultValue)
+{
+    const auto typeName = QString::fromStdString(
+        std::string(type_name<decltype(defaultValue)>()));
 
-        qCWarning(chatterinoEnv).noquote()
-            << QStringLiteral(
-                   "Cannot parse value '%1' of environment variable '%2' "
-                   "as a %3, reverting to default value '%4'")
-                   .arg(envString)
-                   .arg(envName)
-                   .arg(typeName)
-                   .arg(defaultValue);
+    qCWarning(chatterinoEnv).noquote()
+        << QStringLiteral(
+               "Cannot parse value '%1' of environment variable '%2' "
+               "as a %3, reverting to default value '%4'")
+               .arg(envString)
+               .arg(envName)
+               .arg(typeName)
+               .arg(defaultValue);
+}
+
+std::optional<QString> readOptionalStringEnv(const char *envName)
+{
+    auto envString = qEnvironmentVariable(envName);
+    if (!envString.isEmpty())
+    {
+        return envString;
     }
 
-    std::optional<QString> readOptionalStringEnv(const char *envName)
+    return std::nullopt;
+}
+
+uint16_t readPortEnv(const char *envName, uint16_t defaultValue)
+{
+    auto envString = qEnvironmentVariable(envName);
+    if (!envString.isEmpty())
     {
-        auto envString = qEnvironmentVariable(envName);
-        if (!envString.isEmpty())
+        bool ok = false;
+        auto val = envString.toUShort(&ok);
+        if (ok)
         {
-            return envString;
+            return val;
         }
 
-        return std::nullopt;
+        warn(envName, envString, defaultValue);
     }
 
-    uint16_t readPortEnv(const char *envName, uint16_t defaultValue)
+    return defaultValue;
+}
+
+bool readBoolEnv(const char *envName, bool defaultValue)
+{
+    auto envString = qEnvironmentVariable(envName);
+    if (!envString.isEmpty())
     {
-        auto envString = qEnvironmentVariable(envName);
-        if (!envString.isEmpty())
-        {
-            bool ok = false;
-            auto val = envString.toUShort(&ok);
-            if (ok)
-            {
-                return val;
-            }
-
-            warn(envName, envString, defaultValue);
-        }
-
-        return defaultValue;
+        return QVariant(envString).toBool();
     }
 
-    bool readBoolEnv(const char *envName, bool defaultValue)
-    {
-        auto envString = qEnvironmentVariable(envName);
-        if (!envString.isEmpty())
-        {
-            return QVariant(envString).toBool();
-        }
-
-        return defaultValue;
-    }
+    return defaultValue;
+}
 
 }  // namespace
 

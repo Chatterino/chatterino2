@@ -31,6 +31,7 @@ set(SOURCE_FILES
         common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
+        common/LastMessageLineStyle.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Literals.hpp
@@ -38,6 +39,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/ThumbnailPreviewMode.hpp
         common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
@@ -350,6 +352,7 @@ set(SOURCE_FILES
 
         providers/emoji/Emojis.cpp
         providers/emoji/Emojis.hpp
+        providers/emoji/EmojiStyle.hpp
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
@@ -523,8 +526,6 @@ set(SOURCE_FILES
         util/Helpers.hpp
         util/IncognitoBrowser.cpp
         util/IncognitoBrowser.hpp
-        util/InitUpdateButton.cpp
-        util/InitUpdateButton.hpp
         util/IpcQueue.cpp
         util/IpcQueue.hpp
         util/IrcHelpers.cpp
@@ -593,6 +594,8 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
+        widgets/PluginRepl.cpp
+        widgets/PluginRepl.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
@@ -601,6 +604,27 @@ set(SOURCE_FILES
         widgets/TooltipWidget.hpp
         widgets/Window.cpp
         widgets/Window.hpp
+
+        widgets/buttons/Button.cpp
+        widgets/buttons/Button.hpp
+        widgets/buttons/DimButton.cpp
+        widgets/buttons/DimButton.hpp
+        widgets/buttons/InitUpdateButton.cpp
+        widgets/buttons/InitUpdateButton.hpp
+        widgets/buttons/LabelButton.cpp
+        widgets/buttons/LabelButton.hpp
+        widgets/buttons/NotebookButton.cpp
+        widgets/buttons/NotebookButton.hpp
+        widgets/buttons/PixmapButton.cpp
+        widgets/buttons/PixmapButton.hpp
+        widgets/buttons/SignalLabel.cpp
+        widgets/buttons/SignalLabel.hpp
+        widgets/buttons/SvgButton.cpp
+        widgets/buttons/SvgButton.hpp
+        widgets/buttons/TitlebarButton.cpp
+        widgets/buttons/TitlebarButton.hpp
+        widgets/buttons/TitlebarButtons.cpp
+        widgets/buttons/TitlebarButtons.hpp
 
         widgets/dialogs/BadgePickerDialog.cpp
         widgets/dialogs/BadgePickerDialog.hpp
@@ -660,8 +684,6 @@ set(SOURCE_FILES
         widgets/helper/color/SBCanvas.cpp
         widgets/helper/color/SBCanvas.hpp
 
-        widgets/helper/Button.cpp
-        widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
@@ -670,16 +692,12 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
-        widgets/helper/EffectLabel.cpp
-        widgets/helper/EffectLabel.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
-        widgets/helper/NotebookButton.cpp
-        widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/OverlayInteraction.cpp
@@ -694,14 +712,8 @@ set(SOURCE_FILES
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/SignalLabel.cpp
-        widgets/helper/SignalLabel.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
-        widgets/helper/TitlebarButton.cpp
-        widgets/helper/TitlebarButton.hpp
-        widgets/helper/TitlebarButtons.cpp
-        widgets/helper/TitlebarButtons.hpp
         widgets/helper/TrimRegExpValidator.cpp
         widgets/helper/TrimRegExpValidator.hpp
 

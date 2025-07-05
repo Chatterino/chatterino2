@@ -183,28 +183,28 @@ QString formatChattersError(HelixGetChattersError error, const QString &message)
 
 namespace chatterino {
 namespace {
-    void showTutorialVideo(QWidget *parent, const QString &source,
-                           const QString &title, const QString &description)
-    {
-        auto *window = new BasePopup(
-            {
-                BaseWindow::EnableCustomFrame,
-                BaseWindow::BoundsCheckOnShow,
-            },
-            parent);
-        window->setWindowTitle("Chatterino - " + title);
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        auto *layout = new QVBoxLayout();
-        layout->addWidget(new QLabel(description));
-        auto *label = new QLabel(window);
-        layout->addWidget(label);
-        auto *movie = new QMovie(label);
-        movie->setFileName(source);
-        label->setMovie(movie);
-        movie->start();
-        window->getLayoutContainer()->setLayout(layout);
-        window->show();
-    }
+void showTutorialVideo(QWidget *parent, const QString &source,
+                       const QString &title, const QString &description)
+{
+    auto *window = new BasePopup(
+        {
+            BaseWindow::EnableCustomFrame,
+            BaseWindow::BoundsCheckOnShow,
+        },
+        parent);
+    window->setWindowTitle("Chatterino - " + title);
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    auto *layout = new QVBoxLayout();
+    layout->addWidget(new QLabel(description));
+    auto *label = new QLabel(window);
+    layout->addWidget(label);
+    auto *movie = new QMovie(label);
+    movie->setFileName(source);
+    label->setMovie(movie);
+    movie->start();
+    window->getLayoutContainer()->setLayout(layout);
+    window->show();
+}
 }  // namespace
 
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;

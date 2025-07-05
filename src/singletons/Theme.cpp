@@ -20,6 +20,7 @@
 #include <QApplication>
 
 #include <cmath>
+#include <numbers>
 
 namespace {
 
@@ -621,10 +622,11 @@ void Theme::normalizeColor(QColor &color) const
         if (color.lightnessF() > 0.4 && color.hueF() > 0.1 &&
             color.hueF() < 0.33333)
         {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() - sin((color.hueF() - 0.1) /
-                                                   (0.3333 - 0.1) * 3.14159) *
-                                                   color.saturationF() * 0.4);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) *
+                                         std::numbers::pi) *
+                                         color.saturationF() * 0.4);
         }
     }
     else
@@ -637,11 +639,11 @@ void Theme::normalizeColor(QColor &color) const
         if (color.lightnessF() < 0.6 && color.hueF() > 0.54444 &&
             color.hueF() < 0.83333)
         {
-            color.setHslF(
-                color.hueF(), color.saturationF(),
-                color.lightnessF() + sin((color.hueF() - 0.54444) /
-                                         (0.8333 - 0.54444) * 3.14159) *
-                                         color.saturationF() * 0.4);
+            color.setHslF(color.hueF(), color.saturationF(),
+                          color.lightnessF() +
+                              sin((color.hueF() - 0.54444) /
+                                  (0.8333 - 0.54444) * std::numbers::pi) *
+                                  color.saturationF() * 0.4);
         }
     }
 }

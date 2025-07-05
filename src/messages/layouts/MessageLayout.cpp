@@ -23,15 +23,15 @@ namespace chatterino {
 
 namespace {
 
-    QColor blendColors(const QColor &base, const QColor &apply)
-    {
-        const qreal &alpha = apply.alphaF();
-        QColor result;
-        result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
-                       base.greenF() * (1 - alpha) + apply.greenF() * alpha,
-                       base.blueF() * (1 - alpha) + apply.blueF() * alpha);
-        return result;
-    }
+QColor blendColors(const QColor &base, const QColor &apply)
+{
+    const qreal &alpha = apply.alphaF();
+    QColor result;
+    result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
+                   base.greenF() * (1 - alpha) + apply.greenF() * alpha,
+                   base.blueF() * (1 - alpha) + apply.blueF() * alpha);
+    return result;
+}
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)
@@ -56,14 +56,14 @@ const MessagePtr &MessageLayout::getMessagePtr() const
 }
 
 // Height
-qreal MessageLayout::getHeight() const
+int MessageLayout::getHeight() const
 {
-    return this->container_.getHeight();
+    return static_cast<int>(this->container_.getHeight());
 }
 
-qreal MessageLayout::getWidth() const
+int MessageLayout::getWidth() const
 {
-    return this->container_.getWidth();
+    return static_cast<int>(this->container_.getWidth());
 }
 
 // Layout
@@ -236,7 +236,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     // draw on buffer
-    ctx.painter.drawPixmap(QPointF{0, ctx.y}, *pixmap);
+    ctx.painter.drawPixmap(QPoint{0, ctx.y}, *pixmap);
 
     // draw gif emotes
     result.hasAnimatedElements =
@@ -246,11 +246,11 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     if (this->message_->flags.has(MessageFlag::Disabled))
     {
         ctx.painter.fillRect(
-            QRectF{
+            QRect{
                 0,
                 ctx.y,
-                static_cast<qreal>(pixmap->width()),
-                static_cast<qreal>(pixmap->height()),
+                pixmap->width(),
+                pixmap->height(),
             },
             ctx.messageColors.disabled);
     }
@@ -259,11 +259,11 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
         ctx.preferences.fadeMessageHistory)
     {
         ctx.painter.fillRect(
-            QRectF{
+            QRect{
                 0,
                 ctx.y,
-                static_cast<qreal>(pixmap->width()),
-                static_cast<qreal>(pixmap->height()),
+                pixmap->width(),
+                pixmap->height(),
             },
             ctx.messageColors.disabled);
     }
@@ -274,11 +274,11 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
         ctx.preferences.enableRedeemedHighlight)
     {
         ctx.painter.fillRect(
-            QRectF{
+            QRect{
                 0,
                 ctx.y,
-                this->scale_ * 4,
-                static_cast<qreal>(pixmap->height()),
+                static_cast<int>(this->scale_ * 4),
+                pixmap->height(),
             },
             *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
@@ -542,24 +542,6 @@ void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
     this->container_.addSelectionText(str, from, to, copymode);
-}
-
-bool MessageLayout::isReplyable() const
-{
-    if (this->message_->loginName.isEmpty())
-    {
-        return false;
-    }
-
-    if (this->message_->flags.hasAny(
-            {MessageFlag::System, MessageFlag::Subscription,
-             MessageFlag::Timeout, MessageFlag::Whisper,
-             MessageFlag::ModerationAction}))
-    {
-        return false;
-    }
-
-    return true;
 }
 
 }  // namespace chatterino

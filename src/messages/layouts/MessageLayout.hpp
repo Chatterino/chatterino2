@@ -52,8 +52,10 @@ public:
     const Message *getMessage();
     const MessagePtr &getMessagePtr() const;
 
-    qreal getHeight() const;
-    qreal getWidth() const;
+    /// In contrast to other metrics, the height and width are integers because
+    /// this is how the backing pixmap is measured - it needs whole integers.
+    int getHeight() const;
+    int getWidth() const;
 
     MessageLayoutFlags flags;
 
@@ -108,7 +110,6 @@ public:
 
     // Misc
     bool isDisabled() const;
-    bool isReplyable() const;
 
 private:
     // methods

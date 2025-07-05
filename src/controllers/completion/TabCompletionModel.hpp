@@ -41,6 +41,8 @@ private:
         User,
         // Known to be a command, i.e. started with / or .
         Command,
+        // Emote or user without : or @ .
+        EmoteUser,
         // Emote or command without : or / .
         EmoteCommand,
         // Emote, user, or command without :, @, / .
@@ -51,14 +53,17 @@ private:
     /// The completion source will only change if the deduced completion kind
     /// changes (see deduceSourceKind).
     /// @param query Completion query
-    void updateSourceFromQuery(const QString &query);
+    /// @param isFirstWord Whether the completion is the first word in the input
+    void updateSourceFromQuery(const QString &query, bool isFirstWord);
 
     /// @brief Attempts to deduce the source kind from the current query. If the
     /// bound Channel is not a TwitchChannel or if the query is too short, no
     /// query type will be deduced to prevent completions.
     /// @param query Completion query
+    /// @param isFirstWord Whether the completion is the first word in the input
     /// @return An optional SourceKind deduced from the query
-    std::optional<SourceKind> deduceSourceKind(const QString &query) const;
+    std::optional<SourceKind> deduceSourceKind(const QString &query,
+                                               bool isFirstWord) const;
 
     std::unique_ptr<completion::Source> buildSource(SourceKind kind) const;
 

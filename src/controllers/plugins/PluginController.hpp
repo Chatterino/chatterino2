@@ -6,6 +6,7 @@
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include <boost/signals2/signal.hpp>
 #    include <QDir>
 #    include <QFileInfo>
 #    include <QJsonArray>
@@ -62,6 +63,8 @@ public:
         int cursorPosition, bool isFirstWord) const;
 
     WebSocketPool &webSocketPool();
+
+    boost::signals2::signal<void(Plugin *)> onPluginLoaded;
 
 private:
     void loadPlugins();

@@ -644,6 +644,11 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::saveBounds() const
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     auto bounds = this->getBounds();
     if (!bounds.isNull())
     {
