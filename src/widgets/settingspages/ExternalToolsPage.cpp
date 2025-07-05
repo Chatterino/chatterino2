@@ -2,12 +2,20 @@
 
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
+#include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QApplication>
+#include <QClipboard>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 
 namespace chatterino {
 
@@ -135,9 +143,73 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
 
         SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
             ->addTo(layout, form);
+
+        layout.addDescription(
+            "Export your current image uploader settings as JSON to share with "
+            "others, or import settings from clipboard (compatible with ShareX .sxcu format).");
+
+        auto *buttonLayout = new QHBoxLayout;
+
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        exportButton->setToolTip("Copy current image uploader settings to clipboard as JSON");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            this->exportSettings();
+        });
+        buttonLayout->addWidget(exportButton);
+
+        auto *importButton = new QPushButton("Import Settings from Clipboard");
+        importButton->setToolTip("Import image uploader settings from clipboard JSON");
+        QObject::connect(importButton, &QPushButton::clicked, [this]() {
+            this->importSettings();
+        });
+        buttonLayout->addWidget(importButton);
+
+        buttonLayout->addStretch();
+        layout.addLayout(buttonLayout);
     }
 
     layout.addStretch();
+}
+
+void ExternalToolsPage::exportSettings()
+{
+    auto &s = *getSettings();
+
+    QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
+    QJsonDocument doc(settingsObj);
+    QApplication::clipboard()->setText(doc.toJson(QJsonDocument::Indented));
+
+    QMessageBox::information(this, "Settings Exported",
+        "Image uploader settings have been copied to clipboard as JSON.");
+}
+
+void ExternalToolsPage::importSettings()
+{
+    QString clipboardText = QApplication::clipboard()->text().trimmed();
+    QJsonObject settingsObj;
+
+    if (!imageuploader::detail::validateImportJson(clipboardText, settingsObj)) {
+        QMessageBox::warning(this, "Import Failed",
+            "Clipboard is empty or contains invalid JSON. Please copy valid JSON settings to clipboard first.");
+        return;
+    }
+
+    int ret = QMessageBox::question(this, "Import Settings",
+        "This will overwrite your current image uploader settings. Continue?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (ret != QMessageBox::Yes) {
+        return;
+    }
+
+    auto &s = *getSettings();
+    if (imageuploader::detail::importSettings(settingsObj, s)) {
+        QMessageBox::information(this, "Import Successful",
+            "Image uploader settings have been imported successfully!");
+    } else {
+        QMessageBox::warning(this, "Import Failed",
+            "No valid image uploader settings found in the JSON.");
+    }
 }
 
 }  // namespace chatterino
