@@ -147,8 +147,8 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     painter.drawText(textRect, text, option);
 
 #if 0
-        painter.setPen(QColor(255, 0, 0));
-        painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+    painter.setPen(QColor(255, 0, 0));
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 #endif
 }
 
