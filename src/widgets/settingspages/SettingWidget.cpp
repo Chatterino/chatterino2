@@ -502,22 +502,23 @@ void SettingWidget::addTo(GeneralPageView &view)
 {
     view.pushWidget(this);
 
-    if (this->label != nullptr)
-    {
-        view.registerWidget(this->label, this->keywords, this);
-    }
-    view.registerWidget(this->actionWidget, this->keywords, this);
+    this->registerWidget(view);
 }
 
 void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
+{
+    this->registerWidget(view);
+
+    formLayout->addRow(this->label, this->actionWidget);
+}
+
+void SettingWidget::registerWidget(GeneralPageView &view)
 {
     if (this->label != nullptr)
     {
         view.registerWidget(this->label, this->keywords, this);
     }
     view.registerWidget(this->actionWidget, this->keywords, this);
-
-    formLayout->addRow(this->label, this->actionWidget);
 }
 
 }  // namespace chatterino

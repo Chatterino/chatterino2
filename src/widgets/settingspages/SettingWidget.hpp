@@ -103,6 +103,9 @@ public:
     void addTo(GeneralPageView &view, QFormLayout *formLayout);
 
 private:
+    /// Registers this widget & its optional label to the given page view
+    void registerWidget(GeneralPageView &view);
+
     QWidget *label = nullptr;
     QWidget *actionWidget = nullptr;
 
