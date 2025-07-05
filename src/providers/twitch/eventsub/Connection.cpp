@@ -188,6 +188,11 @@ void Connection::onChannelModerate(
 
             if constexpr (CanMakeModMessage<Action>)
             {
+                // FIXME: This message should still be added, but instead hidden during layout if the setting is enabled.
+                if (getSettings()->hideDeletionActions)
+                {
+                    return;
+                }
                 EventSubMessageBuilder builder(channel, now);
                 builder->loginName = payload.event.moderatorUserLogin.qt();
                 makeModerateMessage(builder, payload.event, action);
