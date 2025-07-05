@@ -653,6 +653,7 @@ TEST_F(PluginTest, testTcpWebSocket)
         EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
     });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
     lua->set_function("open", [&] {
         EXPECT_FALSE(open);
         open = true;
