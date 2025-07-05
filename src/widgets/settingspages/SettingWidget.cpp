@@ -181,7 +181,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     }
 
     // TODO: this can probably use some other size hint/size strategy
-    combo->setMinimumWidth(combo->minimumSizeHint().width());
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
     widget->actionWidget = combo;
     widget->label = lbl;
@@ -254,7 +254,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     }
 
     // TODO: this can probably use some other size hint/size strategy
-    combo->setMinimumWidth(combo->minimumSizeHint().width());
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
     widget->actionWidget = combo;
     widget->label = lbl;
@@ -313,6 +313,72 @@ template SettingWidget *SettingWidget::dropdown<LastMessageLineStyle>(
     const QString &label, EnumSetting<LastMessageLineStyle> &setting);
 template SettingWidget *SettingWidget::dropdown<ThumbnailPreviewMode>(
     const QString &label, EnumSetting<ThumbnailPreviewMode> &setting);
+template SettingWidget *SettingWidget::dropdown<StreamerModeSetting>(
+    const QString &label, EnumSetting<StreamerModeSetting> &setting);
+
+SettingWidget *SettingWidget::dropdown(
+    const QString &label, QStringSetting &setting,
+    const std::vector<std::pair<QString, QVariant>> &items)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label % ":");
+    auto *combo = new ComboBox;
+    combo->setFocusPolicy(Qt::StrongFocus);
+
+    for (const auto &[itemText, itemData] : items)
+    {
+        combo->addItem(itemText, itemData);
+    }
+
+    // TODO: this can probably use some other size hint/size strategy
+    combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
+
+    widget->actionWidget = combo;
+    widget->label = lbl;
+
+    widget->hLayout->addWidget(lbl);
+    widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(combo);
+
+    setting.connect(
+        [combo, label](const auto &value) {
+            std::optional<int> foundRow;
+
+            for (auto row = 0; row < combo->model()->rowCount(); ++row)
+            {
+                auto index = combo->model()->index(row, 0);
+                auto rowEnumValue = index.data(Qt::UserRole);
+                if (rowEnumValue == value)
+                {
+                    foundRow = row;
+                    break;
+                }
+            }
+
+            if (foundRow)
+            {
+                combo->setCurrentIndex(*foundRow);
+            }
+            else
+            {
+                qCWarning(chatterinoWidget)
+                    << "Did not find a correct combo box row for" << label
+                    << " with value" << value;
+            }
+        },
+        widget->managedConnections);
+
+    QObject::connect(combo, &QComboBox::currentTextChanged,
+                     [label, combo, &setting](const auto &newText) {
+                         bool ok = true;
+                         auto stringValue = combo->currentData().toString();
+
+                         setting.setValue(stringValue);
+                     });
+
+    return widget;
+}
 
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
@@ -498,26 +564,39 @@ SettingWidget *SettingWidget::conditionallyEnabledBy(BoolSetting &setting)
     return this;
 }
 
+SettingWidget *SettingWidget::conditionallyEnabledBy(
+    QStringSetting &setting, const QString &expectedValue)
+{
+    setting.connect(
+        [this, expectedValue](const auto &value, const auto &) {
+            this->actionWidget->setEnabled(value == expectedValue);
+        },
+        this->managedConnections);
+
+    return this;
+}
+
 void SettingWidget::addTo(GeneralPageView &view)
 {
     view.pushWidget(this);
 
-    if (this->label != nullptr)
-    {
-        view.registerWidget(this->label, this->keywords, this);
-    }
-    view.registerWidget(this->actionWidget, this->keywords, this);
+    this->registerWidget(view);
 }
 
 void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
+{
+    this->registerWidget(view);
+
+    formLayout->addRow(this->label, this->actionWidget);
+}
+
+void SettingWidget::registerWidget(GeneralPageView &view)
 {
     if (this->label != nullptr)
     {
         view.registerWidget(this->label, this->keywords, this);
     }
     view.registerWidget(this->actionWidget, this->keywords, this);
-
-    formLayout->addRow(this->label, this->actionWidget);
 }
 
 }  // namespace chatterino

@@ -131,40 +131,25 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         available.emplace_back("System", "System");
 #endif
 
-        auto addThemeDropdown = [&](auto name, auto &setting,
-                                    const auto &options,
-                                    const QString &tooltip = {}) {
-            return layout.addDropdown<QString>(
-                name, options, setting,
-                [](const auto *combo, const auto &themeKey) {
-                    return combo->findData(themeKey, Qt::UserRole);
-                },
-                [](const auto &args) {
-                    return args.combobox->itemData(args.index, Qt::UserRole)
-                        .toString();
-                },
-                tooltip, Theme::fallbackTheme.name);
-        };
-
-        addThemeDropdown("Theme", themes->themeName, available);
+        SettingWidget::dropdown("Theme", themes->themeName, available)
+            ->addTo(layout);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-        auto *darkDropdown = addThemeDropdown(
-            "Dark system theme", themes->darkSystemThemeName,
-            themes->availableThemes(),
-            "This theme is selected if your system is in a dark theme and you "
-            "enabled the adaptive 'System' theme.");
-        auto *lightDropdown = addThemeDropdown(
-            "Light system theme", themes->lightSystemThemeName,
-            themes->availableThemes(),
-            "This theme is selected if your system is in a light theme and you "
-            "enabled the adaptive 'System' theme.");
+        SettingWidget::dropdown("Dark system theme",
+                                themes->darkSystemThemeName,
+                                themes->availableThemes())
+            ->setTooltip("This theme is selected if your system is in a dark "
+                         "theme and you enabled the adaptive 'System' theme.")
+            ->conditionallyEnabledBy(themes->themeName, "System")
+            ->addTo(layout);
 
-        auto isSystem = [](const auto &s) {
-            return s == "System";
-        };
-        layout.enableIf(darkDropdown, themes->themeName, isSystem);
-        layout.enableIf(lightDropdown, themes->themeName, isSystem);
+        SettingWidget::dropdown("Light system theme",
+                                themes->lightSystemThemeName,
+                                themes->availableThemes())
+            ->setTooltip("This theme is selected if your system is in a light "
+                         "theme and you enabled the adaptive 'System' theme.")
+            ->conditionallyEnabledBy(themes->themeName, "System")
+            ->addTo(layout);
 #endif
     }
 
@@ -705,19 +690,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "streaming software is running.\nSelect which things you want to "
         "change while streaming");
 
-    ComboBox *dankDropdown =
-        layout.addDropdown<std::underlying_type_t<StreamerModeSetting>>(
-            "Enable Streamer Mode",
-            {"Disabled", "Enabled", "Automatic (Detect streaming software)"},
-            s.enableStreamerMode,
-            [](int value) {
-                return value;
-            },
-            [](DropdownArgs args) {
-                return static_cast<StreamerModeSetting>(args.index);
-            },
-            false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 30);
+    SettingWidget::dropdown("Enable Streamer Mode", s.enableStreamerMode)
+        ->addTo(layout);
 
     SettingWidget::checkbox("Hide usercard avatars",
                             s.streamerModeHideUsercardAvatars)
