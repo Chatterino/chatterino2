@@ -490,7 +490,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
     auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
     notesPreview->setVisible(false);
-    notesPreview->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     notesPreview->setShouldElide(true);
 
     auto lineMod = layout.emplace<Line>(false);

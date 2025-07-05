@@ -34,8 +34,6 @@ public:
 
     /// Sets whether the text should elide if there's not enough room to
     /// render the current text.
-    ///
-    /// When using text eliding, you should most likely set the horizontal size policy to Minimum
     void setShouldElide(bool shouldElide);
 
 protected:
