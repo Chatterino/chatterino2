@@ -498,6 +498,18 @@ SettingWidget *SettingWidget::conditionallyEnabledBy(BoolSetting &setting)
     return this;
 }
 
+SettingWidget *SettingWidget::conditionallyEnabledBy(
+    QStringSetting &setting, const QString &expectedValue)
+{
+    setting.connect(
+        [this, expectedValue](const auto &value, const auto &) {
+            this->actionWidget->setEnabled(value == expectedValue);
+        },
+        this->managedConnections);
+
+    return this;
+}
+
 void SettingWidget::addTo(GeneralPageView &view)
 {
     view.pushWidget(this);

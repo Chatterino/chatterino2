@@ -96,8 +96,14 @@ public:
     [[nodiscard("Must use created setting widget")]] SettingWidget *addKeywords(
         const QStringList &newKeywords);
 
+    /// Conditionally enable the widget if the given bool setting is true
     [[nodiscard("Must use created setting widget")]] SettingWidget *
         conditionallyEnabledBy(BoolSetting &setting);
+
+    /// Conditionally enable the widget if the given string setting is equal to expectedValue
+    [[nodiscard("Must use created setting widget")]] SettingWidget *
+        conditionallyEnabledBy(QStringSetting &setting,
+                               const QString &expectedValue);
 
     void addTo(GeneralPageView &view);
     void addTo(GeneralPageView &view, QFormLayout *formLayout);
