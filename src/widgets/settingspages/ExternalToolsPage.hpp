@@ -17,7 +17,11 @@ private:
     void exportSettings();
     void importSettings();
 
-    GeneralPageView *view;
+    bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj);
+    bool applyImportedSettings(const QJsonObject &settingsObj);
+    void parseAndApplyHeaders(const QJsonObject &headersObj);
+
+    GeneralPageView *view{};
 };
 
 }  // namespace chatterino
