@@ -36,7 +36,7 @@ void Label::setText(const QString &text)
         if (this->shouldElide_)
         {
             this->updateElidedText(this->getFontMetrics(),
-                                   this->getWidthWithoutOffset());
+                                   this->getInnerWidth());
         }
         this->updateSize();
         this->update();
@@ -157,7 +157,7 @@ void Label::resizeEvent(QResizeEvent *event)
     if (this->shouldElide_)
     {
         auto metrics = this->getFontMetrics();
-        if (this->updateElidedText(metrics, this->getWidthWithoutOffset()))
+        if (this->updateElidedText(metrics, this->getInnerWidth()))
         {
             this->update();
         }
@@ -172,7 +172,7 @@ QFontMetricsF Label::getFontMetrics() const
                                                 this->scale());
 }
 
-qreal Label::getWidthWithoutOffset() const
+qreal Label::getInnerWidth() const
 {
     if (this->hasPadding_)
     {
@@ -189,7 +189,7 @@ void Label::updateSize()
     if (this->shouldElide_)
     {
         auto height = metrics.height();
-        this->updateElidedText(metrics, this->getWidthWithoutOffset());
+        this->updateElidedText(metrics, this->getInnerWidth());
         this->sizeHint_ = QSizeF(-1, height).toSize();
         this->minimumSizeHint_ = this->sizeHint_;
     }

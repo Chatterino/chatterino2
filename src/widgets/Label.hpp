@@ -55,8 +55,8 @@ private:
     /// Returns the current font style's font metric based on the current scale.
     QFontMetricsF getFontMetrics() const;
 
-    /// Returns the width of this widget, with the offset calculated out if the offset is enabled.
-    qreal getWidthWithoutOffset() const;
+    /// Returns the width of this content without padding
+    qreal getInnerWidth() const;
 
     /// Calculate the new elided text based on text_
     ///
