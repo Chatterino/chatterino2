@@ -5,6 +5,8 @@
 
 #include <pajlada/signals/signalholder.hpp>
 
+class QFontMetricsF;
+
 namespace chatterino {
 
 class Label : public BaseWidget
@@ -30,23 +32,45 @@ public:
     bool getWordWrap() const;
     void setWordWrap(bool wrap);
 
+    /// Sets whether the text should elide if there's not enough room to
+    /// render the current text.
+    ///
+    /// When using text eliding, you should most likely set the horizontal size policy to Minimum
+    void setShouldElide(bool shouldElide);
+
 protected:
     void scaleChangedEvent(float scale_) override;
     void paintEvent(QPaintEvent *) override;
+    void resizeEvent(QResizeEvent *event) override;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
 private:
     void updateSize();
-    int getOffset();
+    int getOffset() const;
+
+    /// Returns the current font style's font metric based on the current scale.
+    QFontMetricsF getFontMetrics() const;
+
+    /// Returns the width of this widget, with the offset calculated out if the offset is enabled.
+    qreal getWidthWithoutOffset() const;
+
+    /// Calculate the new elided text based on text_
+    ///
+    /// Return true if the elided text changed
+    bool updateElidedText(const QFontMetricsF &fontMetrics, qreal width);
 
     QString text_;
     FontStyle fontStyle_;
-    QSize preferedSize_;
+    QSize sizeHint_;
+    QSize minimumSizeHint_;
     bool centered_ = false;
     bool hasOffset_ = true;
     bool wordWrap_ = false;
+    bool shouldElide_ = false;
+    /// The text, but elided. Only set if shouldElide_ is true
+    QString elidedText_;
 
     pajlada::Signals::SignalHolder connections_;
 };
