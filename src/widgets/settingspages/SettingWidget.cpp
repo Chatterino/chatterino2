@@ -314,6 +314,70 @@ template SettingWidget *SettingWidget::dropdown<LastMessageLineStyle>(
 template SettingWidget *SettingWidget::dropdown<ThumbnailPreviewMode>(
     const QString &label, EnumSetting<ThumbnailPreviewMode> &setting);
 
+SettingWidget *SettingWidget::dropdown(
+    const QString &label, QStringSetting &setting,
+    const std::vector<std::pair<QString, QVariant>> &items)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label % ":");
+    auto *combo = new ComboBox;
+    combo->setFocusPolicy(Qt::StrongFocus);
+
+    for (const auto &[itemText, itemData] : items)
+    {
+        combo->addItem(itemText, itemData);
+    }
+
+    // TODO: this can probably use some other size hint/size strategy
+    combo->setMinimumWidth(combo->minimumSizeHint().width());
+
+    widget->actionWidget = combo;
+    widget->label = lbl;
+
+    widget->hLayout->addWidget(lbl);
+    widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(combo);
+
+    setting.connect(
+        [combo, label](const auto &value) {
+            std::optional<int> foundRow;
+
+            for (auto row = 0; row < combo->model()->rowCount(); ++row)
+            {
+                auto index = combo->model()->index(row, 0);
+                auto rowEnumValue = index.data(Qt::UserRole);
+                if (rowEnumValue == value)
+                {
+                    foundRow = row;
+                    break;
+                }
+            }
+
+            if (foundRow)
+            {
+                combo->setCurrentIndex(*foundRow);
+            }
+            else
+            {
+                qCWarning(chatterinoWidget)
+                    << "Did not find a correct combo box row for" << label
+                    << " with value" << value;
+            }
+        },
+        widget->managedConnections);
+
+    QObject::connect(combo, &QComboBox::currentTextChanged,
+                     [label, combo, &setting](const auto &newText) {
+                         bool ok = true;
+                         auto stringValue = combo->currentData().toString();
+
+                         setting.setValue(stringValue);
+                     });
+
+    return widget;
+}
+
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
 {
