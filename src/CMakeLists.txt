@@ -440,6 +440,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+        providers/twitch/UserColor.cpp
+        providers/twitch/UserColor.hpp
 
         providers/twitch/eventsub/Connection.cpp
         providers/twitch/eventsub/Connection.hpp
