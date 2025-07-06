@@ -1,8 +1,8 @@
 #include "common/ChannelChatters.hpp"
-#include "controllers/userdata/UserDataController.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/Logging.hpp"
+#include "mocks/UserData.hpp"
 #include "providers/twitch/UserColor.hpp"
 #include "Test.hpp"
 
@@ -33,8 +33,7 @@ protected:
     void SetUp() override
     {
         this->app = std::make_unique<MockApplication>();
-        this->userDataController =
-            std::make_unique<UserDataController>(this->app->getPaths());
+        this->userDataController = std::make_unique<mock::UserDataController>();
         this->channel = std::make_unique<mock::MockChannel>("test");
         this->chatters = std::make_unique<ChannelChatters>(*this->channel);
     }
@@ -48,7 +47,7 @@ protected:
     }
 
     std::unique_ptr<MockApplication> app;
-    std::unique_ptr<UserDataController> userDataController;
+    std::unique_ptr<mock::UserDataController> userDataController;
     std::unique_ptr<mock::MockChannel> channel;
     std::unique_ptr<ChannelChatters> chatters;
 };
@@ -127,7 +126,7 @@ TEST_F(TwitchUserColor, UCD)
 
     chatters->setUserColor("pajlada", QColor("#FF0000"));
 
-    // userDataController->setUserColor("11148817", "#0000FF");
+    userDataController->setUserColor("11148817", "#0000FF");
 
     ASSERT_EQ(getUserColor({
                   .userLogin = "pajlada",

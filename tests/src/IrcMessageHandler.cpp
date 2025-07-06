@@ -576,6 +576,17 @@ TEST_P(TestIrcMessageHandlerP, Run)
 
     VectorMessageSink sink;
 
+    const auto &userData = snapshot->param("userData").toObject();
+    for (auto it = userData.begin(); it != userData.end(); ++it)
+    {
+        const auto &userID = it.key();
+        const auto &data = it.value().toObject();
+        if (auto color = data.value("color").toString(); !color.isEmpty())
+        {
+            this->mockApplication->getUserData()->setUserColor(userID, color);
+        }
+    }
+
     for (auto prevInput : snapshot->param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
