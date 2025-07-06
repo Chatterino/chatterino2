@@ -777,7 +777,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             // subgifts are special because they include two users
             auto msg = MessageBuilder::makeSubgiftMessage(
                 parseTagString(messageText), tags,
-                calculateMessageTime(message).time());
+                calculateMessageTime(message).time(), channel);
 
             msg->flags.set(MessageFlag::Subscription);
             if (mirrored)
