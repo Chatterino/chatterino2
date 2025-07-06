@@ -1,0 +1,300 @@
+[33mcommit c5983fcca74bbf827b2e2d32c162a8e9289a3744[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32menhancement/image-uploader-settings[m[33m)[m
+Author: Jacob <Jacobmetz@proton.me>
+Date:   Fri Jul 4 19:16:44 2025 -0600
+
+    broke down importSettings into smaller functions
+
+[1mdiff --git a/src/widgets/settingspages/ExternalToolsPage.cpp b/src/widgets/settingspages/ExternalToolsPage.cpp[m
+[1mindex bb2894c3..bf9195fe 100644[m
+[1m--- a/src/widgets/settingspages/ExternalToolsPage.cpp[m
+[1m+++ b/src/widgets/settingspages/ExternalToolsPage.cpp[m
+[36m@@ -142,24 +142,23 @@[m [mvoid ExternalToolsPage::initLayout(GeneralPageView &layout)[m
+ [m
+         SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)[m
+             ->addTo(layout, form);[m
+[31m-    }[m
+ [m
+[31m-    {[m
+         layout.addTitle("Settings Import/Export");[m
+         layout.addDescription([m
+             "Export your current image uploader settings as JSON to share with "[m
+[31m-            "others, or import settings from clipboard (compatible with ShareX "[m
+[31m-            ".sxcu format).");[m
+[32m+[m[32m            "others, or import settings from clipboard (compatible with ShareX .sxcu format).");[m
+ [m
+         auto *buttonLayout = new QHBoxLayout;[m
+ [m
+         auto *exportButton = new QPushButton("Export Settings to Clipboard");[m
+[32m+[m[32m        exportButton->setToolTip("Copy current image uploader settings to clipboard as JSON");[m
+         QObject::connect(exportButton, &QPushButton::clicked, [this]() {[m
+             this->exportSettings();[m
+         });[m
+         buttonLayout->addWidget(exportButton);[m
+ [m
+         auto *importButton = new QPushButton("Import Settings from Clipboard");[m
+[32m+[m[32m        importButton->setToolTip("Import image uploader settings from clipboard JSON");[m
+         QObject::connect(importButton, &QPushButton::clicked, [this]() {[m
+             this->importSettings();[m
+         });[m
+[36m@@ -171,6 +170,7 @@[m [mvoid ExternalToolsPage::initLayout(GeneralPageView &layout)[m
+ [m
+     layout.addStretch();[m
+ }[m
+[32m+[m
+ void ExternalToolsPage::exportSettings()[m
+ {[m
+     auto &s = *getSettings();[m
+[36m@@ -180,154 +180,138 @@[m [mvoid ExternalToolsPage::exportSettings()[m
+     settingsObj["Name"] = "Chatterino Image Uploader Settings";[m
+     settingsObj["RequestMethod"] = "POST";[m
+     settingsObj["RequestURL"] = s.imageUploaderUrl.getValue();[m
+[32m+[m[32m    settingsObj["Body"] = "MultipartFormData";[m
+[32m+[m[32m    settingsObj["FileFormName"] = s.imageUploaderFormField.getValue();[m
+[32m+[m[32m    settingsObj["URL"] = s.imageUploaderLink.getValue();[m
+[32m+[m[32m    settingsObj["DeletionURL"] = s.imageUploaderDeletionLink.getValue();[m
+ [m
+[31m-    QJsonObject headersObj;[m
+     QString headers = s.imageUploaderHeaders.getValue();[m
+[31m-    if (!headers.isEmpty())[m
+[31m-    {[m
+[32m+[m[32m    if (!headers.isEmpty()) {[m
+[32m+[m[32m        QJsonObject headersObj;[m
+         QStringList headerLines = headers.split('\n', Qt::SkipEmptyParts);[m
+[31m-        for (const QString &line : headerLines)[m
+[31m-        {[m
+[32m+[m[32m        for (const QString &line : headerLines) {[m
+             QStringList parts = line.split(':', Qt::SkipEmptyParts);[m
+[31m-            if (parts.size() >= 2)[m
+[31m-            {[m
+[32m+[m[32m            if (parts.size() >= 2) {[m
+                 QString key = parts[0].trimmed();[m
+                 QString value = parts.mid(1).join(':').trimmed();[m
+                 headersObj[key] = value;[m
+             }[m
+         }[m
+[32m+[m[32m        if (!headersObj.isEmpty()) {[m
+[32m+[m[32m            settingsObj["Headers"] = headersObj;[m
+[32m+[m[32m        }[m
+     }[m
+[31m-    if (!headersObj.isEmpty())[m
+[31m-    {[m
+[31m-        settingsObj["Headers"] = headersObj;[m
+[31m-    }[m
+[31m-[m
+[31m-    settingsObj["Body"] = "MultipartFormData";[m
+[31m-    settingsObj["FileFormName"] = s.imageUploaderFormField.getValue();[m
+[31m-    settingsObj["URL"] = s.imageUploaderLink.getValue();[m
+[31m-    settingsObj["DeletionURL"] = s.imageUploaderDeletionLink.getValue();[m
+ [m
+     QJsonDocument doc(settingsObj);[m
+[31m-    QClipboard *clipboard = QApplication::clipboard();[m
+[31m-    clipboard->setText(doc.toJson(QJsonDocument::Indented));[m
+[32m+[m[32m    QApplication::clipboard()->setText(doc.toJson(QJsonDocument::Indented));[m
+ [m
+[31m-    QMessageBox::information([m
+[31m-        this, "Settings Exported",[m
+[31m-        "Image uploader settings have been copied to clipboard as JSON.\n"[m
+[31m-        "You can share this with others or save it for later use.");[m
+[32m+[m[32m    QMessageBox::information(this, "Settings Exported",[m
+[32m+[m[32m        "Image uploader settings have been copied to clipboard as JSON.");[m
+ }[m
+ [m
+ void ExternalToolsPage::importSettings()[m
+ {[m
+[31m-    auto &s = *getSettings();[m
+[31m-[m
+[31m-    QClipboard *clipboard = QApplication::clipboard();[m
+[31m-    QString clipboardText = clipboard->text().trimmed();[m
+[32m+[m[32m    QString clipboardText = QApplication::clipboard()->text().trimmed();[m
+[32m+[m[32m    QJsonObject settingsObj;[m
+ [m
+[31m-    if (clipboardText.isEmpty())[m
+[31m-    {[m
+[31m-        QMessageBox::warning(this, "Import Failed",[m
+[31m-                             "Clipboard is empty. Please copy JSON settings to "[m
+[31m-                             "clipboard first.");[m
+[32m+[m[32m    if (!this->validateImportJson(clipboardText, settingsObj)) {[m
+         return;[m
+     }[m
+ [m
+[31m-    QJsonParseError parseError;[m
+[31m-    QJsonDocument doc =[m
+[31m-        QJsonDocument::fromJson(clipboardText.toUtf8(), &parseError);[m
+[32m+[m[32m    int ret = QMessageBox::question(this, "Import Settings",[m
+[32m+[m[32m        "This will overwrite your current image uploader settings. Continue?",[m
+[32m+[m[32m        QMessageBox::Yes | QMessageBox::No);[m
+ [m
+[31m-    if (parseError.error != QJsonParseError::NoError)[m
+[31m-    {[m
+[31m-        QMessageBox::warning([m
+[31m-            this, "Import Failed",[m
+[31m-            QString("Invalid JSON format: %1").arg(parseError.errorString()));[m
+[32m+[m[32m    if (ret != QMessageBox::Yes) {[m
+         return;[m
+     }[m
+ [m
+[31m-    if (!doc.isObject())[m
+[31m-    {[m
+[32m+[m[32m    if (this->applyImportedSettings(settingsObj)) {[m
+[32m+[m[32m        QMessageBox::information(this, "Import Successful",[m
+[32m+[m[32m            "Image uploader settings have been imported successfully!");[m
+[32m+[m[32m    } else {[m
+         QMessageBox::warning(this, "Import Failed",[m
+[31m-                             "JSON must be an object containing settings.");[m
+[31m-        return;[m
+[32m+[m[32m            "No valid image uploader settings found in the JSON.");[m
+     }[m
+[32m+[m[32m}[m
+ [m
+[31m-    QJsonObject settingsObj = doc.object();[m
+[32m+[m[32mbool ExternalToolsPage::validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)[m
+[32m+[m[32m{[m
+[32m+[m[32m    if (clipboardText.isEmpty()) {[m
+[32m+[m[32m        QMessageBox::warning(this, "Import Failed",[m
+[32m+[m[32m            "Clipboard is empty. Please copy JSON settings to clipboard first.");[m
+[32m+[m[32m        return false;[m
+[32m+[m[32m    }[m
+ [m
+[31m-    int ret = QMessageBox::question([m
+[31m-        this, "Import Settings",[m
+[31m-        "This will overwrite your current image uploader settings. Continue?",[m
+[31m-        QMessageBox::Yes | QMessageBox::No);[m
+[32m+[m[32m    QJsonParseError parseError;[m
+[32m+[m[32m    QJsonDocument doc = QJsonDocument::fromJson(clipboardText.toUtf8(), &parseError);[m
+ [m
+[31m-    if (ret != QMessageBox::Yes)[m
+[31m-    {[m
+[31m-        return;[m
+[32m+[m[32m    if (parseError.error != QJsonParseError::NoError) {[m
+[32m+[m[32m        QMessageBox::warning(this, "Import Failed",[m
+[32m+[m[32m            QString("Invalid JSON format: %1").arg(parseError.errorString()));[m
+[32m+[m[32m        return false;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    if (!doc.isObject()) {[m
+[32m+[m[32m        QMessageBox::warning(this, "Import Failed",[m
+[32m+[m[32m            "JSON must be an object containing settings.");[m
+[32m+[m[32m        return false;[m
+     }[m
+ [m
+[32m+[m[32m    settingsObj = doc.object();[m
+[32m+[m[32m    return true;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mbool ExternalToolsPage::applyImportedSettings(const QJsonObject &settingsObj)[m
+[32m+[m[32m{[m
+[32m+[m[32m    auto &s = *getSettings();[m
+     bool hasValidSettings = false;[m
+ [m
+[31m-    if (settingsObj.contains("RequestURL") &&[m
+[31m-        settingsObj["RequestURL"].isString())[m
+[31m-    {[m
+[31m-        s.imageUploaderUrl.setValue(settingsObj["RequestURL"].toString());[m
+[32m+[m[32m    if (settingsObj.contains("RequestURL") && settingsObj["RequestURL"].isString()) {[m
+[32m+[m[32m        s.imageUploaderUrl = settingsObj["RequestURL"].toString();[m
+         hasValidSettings = true;[m
+     }[m
+ [m
+[31m-    if (settingsObj.contains("FileFormName") &&[m
+[31m-        settingsObj["FileFormName"].isString())[m
+[31m-    {[m
+[31m-        s.imageUploaderFormField.setValue([m
+[31m-            settingsObj["FileFormName"].toString());[m
+[32m+[m[32m    if (settingsObj.contains("FileFormName") && settingsObj["FileFormName"].isString()) {[m
+[32m+[m[32m        s.imageUploaderFormField = settingsObj["FileFormName"].toString();[m
+         hasValidSettings = true;[m
+     }[m
+ [m
+[31m-    if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject())[m
+[31m-    {[m
+[31m-        QJsonObject headers = settingsObj["Headers"].toObject();[m
+[31m-        QStringList headerLines;[m
+[31m-        for (auto it = headers.begin(); it != headers.end(); ++it)[m
+[31m-        {[m
+[31m-            if (it.value().isString())[m
+[31m-            {[m
+[31m-                headerLines.append([m
+[31m-                    QString("%1: %2").arg(it.key(), it.value().toString()));[m
+[31m-            }[m
+[31m-        }[m
+[31m-        if (!headerLines.isEmpty())[m
+[31m-        {[m
+[31m-            s.imageUploaderHeaders.setValue(headerLines.join('\n'));[m
+[31m-            hasValidSettings = true;[m
+[31m-        }[m
+[32m+[m[32m    if (settingsObj.contains("URL") && settingsObj["URL"].isString()) {[m
+[32m+[m[32m        s.imageUploaderLink = settingsObj["URL"].toString();[m
+[32m+[m[32m        hasValidSettings = true;[m
+     }[m
+ [m
+[31m-    if (settingsObj.contains("URL") && settingsObj["URL"].isString())[m
+[31m-    {[m
+[31m-        s.imageUploaderLink.setValue(settingsObj["URL"].toString());[m
+[32m+[m[32m    if (settingsObj.contains("DeletionURL") && settingsObj["DeletionURL"].isString()) {[m
+[32m+[m[32m        s.imageUploaderDeletionLink = settingsObj["DeletionURL"].toString();[m
+         hasValidSettings = true;[m
+     }[m
+ [m
+[31m-    if (settingsObj.contains("DeletionURL") &&[m
+[31m-        settingsObj["DeletionURL"].isString())[m
+[31m-    {[m
+[31m-        s.imageUploaderDeletionLink.setValue([m
+[31m-            settingsObj["DeletionURL"].toString());[m
+[32m+[m[32m    if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject()) {[m
+[32m+[m[32m        this->parseAndApplyHeaders(settingsObj["Headers"].toObject());[m
+         hasValidSettings = true;[m
+     }[m
+ [m
+[31m-    if (hasValidSettings)[m
+[31m-    {[m
+[31m-        s.imageUploaderEnabled.setValue(true);[m
+[32m+[m[32m    if (hasValidSettings) {[m
+[32m+[m[32m        s.imageUploaderEnabled = true;[m
+[32m+[m[32m    }[m
+ [m
+[31m-        QMessageBox::information([m
+[31m-            this, "Import Successful",[m
+[31m-            "Image uploader settings have been imported successfully!\n"[m
+[31m-            "Image uploader has been enabled.");[m
+[32m+[m[32m    return hasValidSettings;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid ExternalToolsPage::parseAndApplyHeaders(const QJsonObject &headersObj)[m
+[32m+[m[32m{[m
+[32m+[m[32m    auto &s = *getSettings();[m
+[32m+[m[32m    QStringList headerLines;[m
+[32m+[m
+[32m+[m[32m    for (auto it = headersObj.begin(); it != headersObj.end(); ++it) {[m
+[32m+[m[32m        if (it.value().isString()) {[m
+[32m+[m[32m            headerLines.append(QString("%1: %2").arg(it.key(), it.value().toString()));[m
+[32m+[m[32m        }[m
+     }[m
+[31m-    else[m
+[31m-    {[m
+[31m-        QMessageBox::warning([m
+[31m-            this, "Import Failed",[m
+[31m-            "No valid image uploader settings found in the JSON.\n"[m
+[31m-            "Please check the format and try again.");[m
+[32m+[m
+[32m+[m[32m    if (!headerLines.isEmpty()) {[m
+[32m+[m[32m        s.imageUploaderHeaders = headerLines.join('\n');[m
+     }[m
+ }[m
+ [m
+[1mdiff --git a/src/widgets/settingspages/ExternalToolsPage.hpp b/src/widgets/settingspages/ExternalToolsPage.hpp[m
+[1mindex 3c59cac0..9e04a15f 100644[m
+[1m--- a/src/widgets/settingspages/ExternalToolsPage.hpp[m
+[1m+++ b/src/widgets/settingspages/ExternalToolsPage.hpp[m
+[36m@@ -17,7 +17,11 @@[m [mprivate:[m
+     void exportSettings();[m
+     void importSettings();[m
+ [m
+[31m-    GeneralPageView *view;[m
+[32m+[m[32m    bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj);[m
+[32m+[m[32m    bool applyImportedSettings(const QJsonObject &settingsObj);[m
+[32m+[m[32m    void parseAndApplyHeaders(const QJsonObject &headersObj);[m
+[32m+[m
+[32m+[m[32m    GeneralPageView *view{};[m
+ };[m
+ [m
+ }  // namespace chatterino[m

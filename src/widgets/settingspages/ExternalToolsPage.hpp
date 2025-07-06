@@ -14,8 +14,6 @@ public:
 
 private:
     void initLayout(GeneralPageView &layout);
-    void exportSettings();
-    void importSettings();
 
     GeneralPageView *view{};
 };

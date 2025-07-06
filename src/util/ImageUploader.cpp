@@ -9,7 +9,7 @@ namespace chatterino {
 namespace imageuploader {
 namespace detail {
 
-QJsonObject exportSettings(Settings &s)
+QJsonObject exportSettings(const Settings &s)
 {
     QJsonObject settingsObj;
     settingsObj["Version"] = "1.0.0";
@@ -41,40 +41,43 @@ QJsonObject exportSettings(Settings &s)
     return settingsObj;
 }
 
+static QStringList parseHeaders(const QJsonObject &headersObj)
+{
+    QStringList headerLines;
+    for (auto it = headersObj.begin(); it != headersObj.end(); ++it) {
+        if (it.value().isString()) {
+            headerLines.append(QString("%1: %2").arg(it.key(), it.value().toString()));
+        }
+    }
+    return headerLines;
+}
+
 bool importSettings(const QJsonObject &settingsObj, Settings &s)
 {
-    bool hasValidSettings = false;
-
-    if (settingsObj.contains("RequestURL") && settingsObj["RequestURL"].isString()) {
-        s.imageUploaderUrl = settingsObj["RequestURL"].toString();
-        hasValidSettings = true;
+    if (!settingsObj.contains("RequestURL") || !settingsObj["RequestURL"].isString() ||
+        !settingsObj.contains("FileFormName") || !settingsObj["FileFormName"].isString() ||
+        !settingsObj.contains("URL") || !settingsObj["URL"].isString()) {
+        return false;
     }
 
-    if (settingsObj.contains("FileFormName") && settingsObj["FileFormName"].isString()) {
-        s.imageUploaderFormField = settingsObj["FileFormName"].toString();
-        hasValidSettings = true;
-    }
-
-    if (settingsObj.contains("URL") && settingsObj["URL"].isString()) {
-        s.imageUploaderLink = settingsObj["URL"].toString();
-        hasValidSettings = true;
-    }
+    s.imageUploaderUrl = settingsObj["RequestURL"].toString();
+    s.imageUploaderFormField = settingsObj["FileFormName"].toString();
+    s.imageUploaderLink = settingsObj["URL"].toString();
 
     if (settingsObj.contains("DeletionURL") && settingsObj["DeletionURL"].isString()) {
         s.imageUploaderDeletionLink = settingsObj["DeletionURL"].toString();
-        hasValidSettings = true;
     }
 
     if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject()) {
-        parseAndApplyHeaders(settingsObj["Headers"].toObject(), s);
-        hasValidSettings = true;
+        QStringList headers = parseHeaders(settingsObj["Headers"].toObject());
+        if (!headers.isEmpty()) {
+            s.imageUploaderHeaders = headers.join('\n');
+        }
     }
 
-    if (hasValidSettings) {
-        s.imageUploaderEnabled = true;
-    }
+    s.imageUploaderEnabled = true;
 
-    return hasValidSettings;
+    return true;
 }
 
 bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)
@@ -95,22 +98,12 @@ bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)
     }
 
     settingsObj = doc.object();
+
+    if (!settingsObj.contains("Version") || !settingsObj.contains("Name")) {
+        return false;
+    }
+
     return true;
-}
-
-void parseAndApplyHeaders(const QJsonObject &headersObj, Settings &s)
-{
-    QStringList headerLines;
-
-    for (auto it = headersObj.begin(); it != headersObj.end(); ++it) {
-        if (it.value().isString()) {
-            headerLines.append(QString("%1: %2").arg(it.key(), it.value().toString()));
-        }
-    }
-
-    if (!headerLines.isEmpty()) {
-        s.imageUploaderHeaders = headerLines.join('\n');
-    }
 }
 
 }  // namespace detail
