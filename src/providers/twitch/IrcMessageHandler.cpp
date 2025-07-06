@@ -667,6 +667,8 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(channel != nullptr);
+
     auto tags = message->tags();
     auto parameters = message->parameters();
 
