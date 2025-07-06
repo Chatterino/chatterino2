@@ -2,6 +2,10 @@
 
 #include <QString>
 
+#ifdef Q_OS_WIN
+#    include <string>
+#endif
+
 namespace chatterino {
 
 /**
@@ -52,6 +56,13 @@ public:
     // Returns a string about the current running system
     const QString &runningString() const;
 
+#ifdef Q_OS_WIN
+    /// Chatterino's App ID on Windows
+    ///
+    /// See https://learn.microsoft.com/en-us/windows/win32/shell/appids
+    const std::wstring &appUserModelID() const;
+#endif
+
 private:
     Version();
 
@@ -69,6 +80,10 @@ private:
     QString runningString_;
     // Generate a running string (e.g. Running on Arch Linux, kernel 5.14.3) and store it in runningString_ for future use
     void generateRunningString();
+
+#ifdef Q_OS_WIN
+    std::wstring appUserModelID_;
+#endif
 };
 
 };  // namespace chatterino

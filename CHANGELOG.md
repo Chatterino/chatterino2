@@ -72,6 +72,7 @@
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Factored out AUMID to `Version`. (#6321)
 
 ## 2.5.3
 
