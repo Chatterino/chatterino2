@@ -50,6 +50,10 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
+#ifdef Q_OS_WIN
+#    include <dwmapi.h>
+#endif
+
 namespace chatterino {
 
 Window::Window(WindowType type, QWidget *parent)
@@ -76,12 +80,6 @@ Window::Window(WindowType type, QWidget *parent)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-#ifdef Q_OS_LINUX
-        if (this->theme->window.background.alpha() != 255)
-        {
-            this->setAttribute(Qt::WA_TranslucentBackground);
-        }
-#endif
     }
     else
     {
@@ -107,6 +105,8 @@ Window::Window(WindowType type, QWidget *parent)
             },
             this->signalHolder_);
     }
+
+    this->updateWindowTransparency();
 }
 
 WindowType Window::getType()
@@ -265,10 +265,49 @@ void Window::updateStreamerModeIcon()
 #endif
 }
 
+#ifdef CHATTERINO_SUPPORTS_WINDOW_TRANSPARENCY
+void Window::updateWindowTransparency()
+{
+    if (this->type_ == WindowType::Main)
+    {
+        if (this->theme->window.background.alpha() != 255)
+        {
+            this->setAttribute(Qt::WA_TranslucentBackground);
+
+#    ifdef Q_OS_WIN
+            DWM_BLURBEHIND bb = {0};
+            bb.dwFlags = DWM_BB_ENABLE;
+            bb.fEnable = TRUE;
+            bb.hRgnBlur = nullptr;
+            ::DwmEnableBlurBehindWindow(reinterpret_cast<HWND>(this->winId()),
+                                        &bb);
+            this->enabledBlurBehind_ = true;
+#    endif
+        }
+#    ifdef Q_OS_WIN
+        else if (this->enabledBlurBehind_)
+        {
+            DWM_BLURBEHIND bb = {0};
+            bb.dwFlags = DWM_BB_ENABLE;
+            bb.fEnable = FALSE;
+            bb.hRgnBlur = nullptr;
+            ::DwmEnableBlurBehindWindow(reinterpret_cast<HWND>(this->winId()),
+                                        &bb);
+            this->enabledBlurBehind_ = false;
+        }
+#    endif
+    }
+}
+#endif
+
 void Window::themeChangedEvent()
 {
     this->updateStreamerModeIcon();
     BaseWindow::themeChangedEvent();
+
+#ifdef CHATTERINO_SUPPORTS_WINDOW_TRANSPARENCY
+    this->updateWindowTransparency();
+#endif
 }
 
 void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
