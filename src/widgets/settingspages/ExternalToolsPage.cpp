@@ -20,11 +20,13 @@
 
 namespace chatterino {
 
+namespace {
+
 inline const QStringList STREAMLINK_QUALITY = {
     "Choose", "Source", "High", "Medium", "Low", "Audio only",
 };
 
-static void exportImageUploaderSettings(QWidget *parent)
+void exportImageUploaderSettings(QWidget *parent)
 {
     auto &s = *getSettings();
 
@@ -37,7 +39,7 @@ static void exportImageUploaderSettings(QWidget *parent)
         "Image uploader settings have been copied to clipboard as JSON.");
 }
 
-static void importImageUploaderSettings(QWidget *parent)
+void importImageUploaderSettings(QWidget *parent)
 {
     QString clipboardText = getClipboardText().trimmed();
     QJsonObject settingsObj;
@@ -75,6 +77,8 @@ static void importImageUploaderSettings(QWidget *parent)
             "No valid image uploader settings found in the JSON.");
     }
 }
+
+}  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
     : view(GeneralPageView::withoutNavigation(this))
