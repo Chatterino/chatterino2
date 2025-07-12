@@ -31,6 +31,8 @@
 - Bugfix: Fixed blocked users showing up in "Users joined:" and "Users parted:" messages. (#6181)
 - Bugfix: Fixed an issue where text boxes in the settings dialog could be stuck with an old value. (#6286)
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
+- Bugfix: Correctly color gifter & recipient usernames in subscription gift messages, taking all color sources into consideration. (#6322)
+- Bugfix: Correctly color usernames in subscription, announcement, bits badge tier update, raid, and other similar notification messages, taking all color sources into consideration. (#6323)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
 - Bugfix: Fixed a few crashes that could occur when Chatterino was shutting down, some related to network tasks still firing despite us shutting down. (#6187)
@@ -71,6 +73,7 @@
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Factored out AUMID to `Version`. (#6321)
 
 ## 2.5.3
 

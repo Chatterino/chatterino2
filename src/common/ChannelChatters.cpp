@@ -112,7 +112,7 @@ size_t ChannelChatters::colorsSize() const
     return size;
 }
 
-const QColor ChannelChatters::getUserColor(const QString &user)
+QColor ChannelChatters::getUserColor(const QString &user) const
 {
     const auto chatterColors = this->chatterColors_.access();
 
