@@ -77,6 +77,7 @@
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
 - Dev: Factored out AUMID to `Version`. (#6321)
+- Dev: Silenced some warnings when compiling with clang-cl. (#6331)
 
 ## 2.5.3
 
