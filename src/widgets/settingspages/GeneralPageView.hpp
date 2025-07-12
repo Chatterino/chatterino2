@@ -134,9 +134,6 @@ public:
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
-    ComboBox *addDropdown(const QString &text, const QStringList &items,
-                          pajlada::Settings::Setting<QString> &setting,
-                          bool editable = false, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
@@ -238,67 +235,6 @@ public:
         }
 
         return combo;
-    }
-
-    template <typename T>
-    ComboBox *addDropdown(
-        const QString &text,
-        const std::vector<std::pair<QString, QVariant>> &items,
-        pajlada::Settings::Setting<T> &setting,
-        std::function<boost::variant<int, QString>(ComboBox *, T)> getValue,
-        std::function<T(DropdownArgs)> setValue, QString toolTipText = {},
-        const QString &defaultValueText = {})
-    {
-        auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
-
-        for (const auto &[itemText, userData] : items)
-        {
-            combo->addItem(itemText, userData);
-        }
-
-        if (!defaultValueText.isEmpty())
-        {
-            combo->setCurrentText(defaultValueText);
-        }
-
-        setting.connect(
-            [getValue = std::move(getValue), combo](const T &value, auto) {
-                auto var = getValue(combo, value);
-                if (var.which() == 0)
-                {
-                    const auto index = boost::get<int>(var);
-                    if (index >= 0)
-                    {
-                        combo->setCurrentIndex(index);
-                    }
-                }
-                else
-                {
-                    combo->setCurrentText(boost::get<QString>(var));
-                    combo->setEditText(boost::get<QString>(var));
-                }
-            },
-            this->managedConnections_);
-
-        QObject::connect(
-            combo, QOverload<const int>::of(&QComboBox::currentIndexChanged),
-            [combo, &setting,
-             setValue = std::move(setValue)](const int newIndex) {
-                setting = setValue(DropdownArgs{combo->itemText(newIndex),
-                                                combo->currentIndex(), combo});
-                getApp()->getWindows()->forceLayoutChannelViews();
-            });
-
-        return combo;
-    }
-
-    void enableIf(QComboBox *widget, auto &setting, auto cb)
-    {
-        auto updateVisibility = [cb = std::move(cb), &setting, widget]() {
-            auto enabled = cb(setting.getValue());
-            widget->setEnabled(enabled);
-        };
-        setting.connect(updateVisibility, this->managedConnections_);
     }
 
     DescriptionLabel *addDescription(const QString &text);
