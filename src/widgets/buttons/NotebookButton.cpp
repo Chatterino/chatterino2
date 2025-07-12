@@ -40,7 +40,7 @@ void NotebookButton::paintContent(QPainter &painter)
     QColor background;
     QColor foreground;
 
-    if (this->mouseDown() || this->mouseOver())
+    if (this->leftMouseButtonDown() || this->mouseOver())
     {
         background = this->theme->tabs.regular.backgrounds.hover;
         foreground = this->theme->tabs.regular.text;

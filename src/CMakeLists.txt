@@ -31,6 +31,7 @@ set(SOURCE_FILES
         common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
+        common/LastMessageLineStyle.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Literals.hpp
@@ -38,6 +39,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/ThumbnailPreviewMode.hpp
         common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
@@ -350,6 +352,7 @@ set(SOURCE_FILES
 
         providers/emoji/Emojis.cpp
         providers/emoji/Emojis.hpp
+        providers/emoji/EmojiStyle.hpp
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
@@ -437,6 +440,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+        providers/twitch/UserColor.cpp
+        providers/twitch/UserColor.hpp
 
         providers/twitch/eventsub/Connection.cpp
         providers/twitch/eventsub/Connection.hpp
@@ -593,6 +598,8 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
+        widgets/PluginRepl.cpp
+        widgets/PluginRepl.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
