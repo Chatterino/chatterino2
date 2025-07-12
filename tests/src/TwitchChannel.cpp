@@ -20,6 +20,27 @@ TEST(TwitchChannelDetail_isUnknownCommand, good)
         ". .hello",
         "/ .hello",
         ". /hello",
+        ".", // this results in an empty message but not in an error (twitchdev/issues#1019)
+        "/me",
+        ".me",
+        "..",
+        "...",
+        "....",
+        "",
+        "foo",
+        "a",
+        "!",
+        ". .",
+        ". ..",
+        ".. ..",
+        ".. .",
+        "/ /",
+        "/ .",
+        ". /",
+        ". ./",
+        ".. /",
+        ".. me",
+        ". me",
     };
     // clang-format on
 
@@ -40,6 +61,16 @@ TEST(TwitchChannelDetail_isUnknownCommand, bad)
         ".badcommand hello",
         "/@badcommand hello",
         ".@badcommand hello",
+        "/bann username ban reason",
+        "/bann username",
+        "//",
+        "./",
+        "./me",
+        "./w",
+        "/.",
+        "/.me",
+        "/.w",
+        "/,me",
     };
     // clang-format on
 
