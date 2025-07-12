@@ -26,7 +26,7 @@ inline const QStringList STREAMLINK_QUALITY = {
 
 void exportImageUploaderSettings(QWidget *parent)
 {
-    auto &s = *getSettings();
+    const auto &s = *getSettings();
 
     QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
     QJsonDocument doc(settingsObj);
