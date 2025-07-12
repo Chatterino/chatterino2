@@ -66,7 +66,7 @@ namespace detail {
 bool isUnknownCommand(const QString &text)
 {
     static QRegularExpression isUnknownCommand(
-        R"(^(?:\.(?!\.|$)|\/)(?!me\s|\s))",
+        R"(^(?:\.(?!\.|$)|\/)(?!me(?:\s|$)|\s))",
         QRegularExpression::CaseInsensitiveOption);
 
     auto match = isUnknownCommand.match(text);
