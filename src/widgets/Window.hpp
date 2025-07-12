@@ -18,6 +18,10 @@ class Channel;
 
 enum class WindowType { Main, Popup, Attached };
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
+#    define CHATTERINO_SUPPORTS_WINDOW_TRANSPARENCY
+#endif
+
 class Window : public BaseWindow
 {
     Q_OBJECT
@@ -57,6 +61,14 @@ private:
     // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
     PixmapButton *streamerModeTitlebarIcon_ = nullptr;
     void updateStreamerModeIcon();
+
+#ifdef CHATTERINO_SUPPORTS_WINDOW_TRANSPARENCY
+    void updateWindowTransparency();
+
+#    ifdef Q_OS_WIN
+    bool enabledBlurBehind_ = false;
+#    endif
+#endif
 
     friend class Notebook;
 };
