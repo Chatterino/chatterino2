@@ -61,6 +61,8 @@ TEST(TwitchChannelDetail_isUnknownCommand, bad)
         ".badcommand hello",
         "/@badcommand hello",
         ".@badcommand hello",
+        "/bann username ban reason",
+        "/bann username",
         "//",
         "./",
         "./me",
