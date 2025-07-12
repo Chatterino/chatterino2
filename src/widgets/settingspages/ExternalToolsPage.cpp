@@ -1,11 +1,11 @@
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
-#include "util/Clipboard.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -21,196 +21,210 @@
 namespace chatterino {
 
 inline const QStringList STREAMLINK_QUALITY = {
-   "Choose", "Source", "High", "Medium", "Low", "Audio only",
+    "Choose", "Source", "High", "Medium", "Low", "Audio only",
 };
 
 static void exportImageUploaderSettings(QWidget *parent)
 {
-   auto &s = *getSettings();
+    auto &s = *getSettings();
 
-   QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
-   QJsonDocument doc(settingsObj);
-   crossPlatformCopy(doc.toJson(QJsonDocument::Indented));
+    QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
+    QJsonDocument doc(settingsObj);
+    crossPlatformCopy(doc.toJson(QJsonDocument::Indented));
 
-   QMessageBox::information(parent, "Settings Exported",
-       "Image uploader settings have been copied to clipboard as JSON.");
+    QMessageBox::information(
+        parent, "Settings Exported",
+        "Image uploader settings have been copied to clipboard as JSON.");
 }
 
 static void importImageUploaderSettings(QWidget *parent)
 {
-   QString clipboardText = getClipboardText().trimmed();
-   QJsonObject settingsObj;
+    QString clipboardText = getClipboardText().trimmed();
+    QJsonObject settingsObj;
 
-   if (!imageuploader::detail::validateImportJson(clipboardText, settingsObj)) {
-       QMessageBox::warning(parent, "Import Failed",
-           "Clipboard is empty or contains invalid JSON. Please copy valid JSON settings to clipboard first.");
-       return;
-   }
+    if (!imageuploader::detail::validateImportJson(clipboardText, settingsObj))
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            "Clipboard is empty or contains invalid JSON. Please copy valid "
+            "JSON settings to clipboard first.");
+        return;
+    }
 
-   int ret = QMessageBox::question(parent, "Import Settings",
-       "This will overwrite your current image uploader settings. Continue?",
-       QMessageBox::Yes | QMessageBox::No);
+    int ret = QMessageBox::question(
+        parent, "Import Settings",
+        "This will overwrite your current image uploader settings. Continue?",
+        QMessageBox::Yes | QMessageBox::No);
 
-   if (ret != QMessageBox::Yes) {
-       return;
-   }
+    if (ret != QMessageBox::Yes)
+    {
+        return;
+    }
 
-   auto &s = *getSettings();
-   if (imageuploader::detail::importSettings(settingsObj, s)) {
-       QMessageBox::information(parent, "Import Successful",
-           "Image uploader settings have been imported successfully!");
-   } else {
-       QMessageBox::warning(parent, "Import Failed",
-           "No valid image uploader settings found in the JSON.");
-   }
+    auto &s = *getSettings();
+    if (imageuploader::detail::importSettings(settingsObj, s))
+    {
+        QMessageBox::information(
+            parent, "Import Successful",
+            "Image uploader settings have been imported successfully!");
+    }
+    else
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            "No valid image uploader settings found in the JSON.");
+    }
 }
 
 ExternalToolsPage::ExternalToolsPage()
-   : view(GeneralPageView::withoutNavigation(this))
+    : view(GeneralPageView::withoutNavigation(this))
 {
-   auto *y = new QVBoxLayout;
-   auto *x = new QHBoxLayout;
-   x->addWidget(this->view);
-   auto *z = new QFrame;
-   z->setLayout(x);
-   y->addWidget(z);
-   this->setLayout(y);
+    auto *y = new QVBoxLayout;
+    auto *x = new QHBoxLayout;
+    x->addWidget(this->view);
+    auto *z = new QFrame;
+    z->setLayout(x);
+    y->addWidget(z);
+    this->setLayout(y);
 
-   this->initLayout(*view);
+    this->initLayout(*view);
 }
 
 bool ExternalToolsPage::filterElements(const QString &query)
 {
-   if (this->view)
-   {
-       return this->view->filterElements(query) || query.isEmpty();
-   }
+    if (this->view)
+    {
+        return this->view->filterElements(query) || query.isEmpty();
+    }
 
-   return false;
+    return false;
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void ExternalToolsPage::initLayout(GeneralPageView &layout)
 {
-   auto &s = *getSettings();
+    auto &s = *getSettings();
 
-   {
-       auto *form = new QFormLayout;
-       layout.addTitle("Streamlink");
-       layout.addDescription("Streamlink is a command-line utility that pipes "
-                             "video streams from "
-                             "various services into a video player, such as "
-                             "VLC. Make sure to edit "
-                             "the configuration file before you use it!");
-       layout.addDescription(
-           formatRichNamedLink("https://streamlink.github.io/", "Website") +
-           " " +
-           formatRichNamedLink(
-               "https://github.com/streamlink/streamlink/releases/latest",
-               "Download") +
-           " " +
-           formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
-                               "Documentation"));
+    {
+        auto *form = new QFormLayout;
+        layout.addTitle("Streamlink");
+        layout.addDescription("Streamlink is a command-line utility that pipes "
+                              "video streams from "
+                              "various services into a video player, such as "
+                              "VLC. Make sure to edit "
+                              "the configuration file before you use it!");
+        layout.addDescription(
+            formatRichNamedLink("https://streamlink.github.io/", "Website") +
+            " " +
+            formatRichNamedLink(
+                "https://github.com/streamlink/streamlink/releases/latest",
+                "Download") +
+            " " +
+            formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
+                                "Documentation"));
 
-       SettingWidget::checkbox("Use custom path (Enable if using non-standard "
-                               "streamlink installation path)",
-                               s.streamlinkUseCustomPath)
-           ->addTo(layout);
+        SettingWidget::checkbox("Use custom path (Enable if using non-standard "
+                                "streamlink installation path)",
+                                s.streamlinkUseCustomPath)
+            ->addTo(layout);
 
-       layout.addDescription(
-           QStringLiteral(
-               "Chatterino expects the executable to be called \"%1\".")
-               .arg(STREAMLINK_BINARY_NAME));
+        layout.addDescription(
+            QStringLiteral(
+                "Chatterino expects the executable to be called \"%1\".")
+                .arg(STREAMLINK_BINARY_NAME));
 
-       layout.addLayout(form);
+        layout.addLayout(form);
 
-       SettingWidget::lineEdit(
-           "Custom streamlink path", s.streamlinkPath,
-           "Path to folder where Streamlink executable can be found")
-           ->conditionallyEnabledBy(s.streamlinkUseCustomPath)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit(
+            "Custom streamlink path", s.streamlinkPath,
+            "Path to folder where Streamlink executable can be found")
+            ->conditionallyEnabledBy(s.streamlinkUseCustomPath)
+            ->addTo(layout, form);
 
-       SettingWidget::dropdown("Preferred quality", s.preferredQuality)
-           ->addTo(layout, form);
+        SettingWidget::dropdown("Preferred quality", s.preferredQuality)
+            ->addTo(layout, form);
 
-       SettingWidget::lineEdit("Additional options", s.streamlinkOpts, "")
-           ->addTo(layout, form);
-   }
+        SettingWidget::lineEdit("Additional options", s.streamlinkOpts, "")
+            ->addTo(layout, form);
+    }
 
-   {
-       layout.addTitle("Custom stream player");
-       layout.addDescription(
-           "You can open Twitch streams directly in any video player that has "
-           "built-in Twitch support and has own URI Scheme.\nE.g.: IINA for "
-           "macOS and Potplayer (with extension) for Windows.\n\nWith this "
-           "value set, you will get the option to \"Open in custom player\" "
-           "when right-clicking a channel header.");
+    {
+        layout.addTitle("Custom stream player");
+        layout.addDescription(
+            "You can open Twitch streams directly in any video player that has "
+            "built-in Twitch support and has own URI Scheme.\nE.g.: IINA for "
+            "macOS and Potplayer (with extension) for Windows.\n\nWith this "
+            "value set, you will get the option to \"Open in custom player\" "
+            "when right-clicking a channel header.");
 
-       SettingWidget::lineEdit("Custom stream player URI Scheme",
-                               s.customURIScheme, "custom-player-scheme://")
-           ->addTo(layout);
-   }
+        SettingWidget::lineEdit("Custom stream player URI Scheme",
+                                s.customURIScheme, "custom-player-scheme://")
+            ->addTo(layout);
+    }
 
-   {
-       auto *form = new QFormLayout;
-       layout.addTitle("Image Uploader");
+    {
+        auto *form = new QFormLayout;
+        layout.addTitle("Image Uploader");
 
-       layout.addDescription(
-           "You can set custom host for uploading images, like imgur.com or "
-           "s-ul.eu.<br>Check " +
-           formatRichNamedLink("https://chatterino.com/help/image-uploader",
-                               "this guide") +
-           " for help.");
+        layout.addDescription(
+            "You can set custom host for uploading images, like imgur.com or "
+            "s-ul.eu.<br>Check " +
+            formatRichNamedLink("https://chatterino.com/help/image-uploader",
+                                "this guide") +
+            " for help.");
 
-       SettingWidget::checkbox("Enable image uploader", s.imageUploaderEnabled)
-           ->addTo(layout);
+        SettingWidget::checkbox("Enable image uploader", s.imageUploaderEnabled)
+            ->addTo(layout);
 
-       SettingWidget::checkbox("Ask for confirmation when uploading an image",
-                               s.askOnImageUpload)
-           ->addTo(layout);
+        SettingWidget::checkbox("Ask for confirmation when uploading an image",
+                                s.askOnImageUpload)
+            ->addTo(layout);
 
-       layout.addLayout(form);
+        layout.addLayout(form);
 
-       SettingWidget::lineEdit("Request URL", s.imageUploaderUrl)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit("Request URL", s.imageUploaderUrl)
+            ->addTo(layout, form);
 
-       SettingWidget::lineEdit("Form field", s.imageUploaderFormField)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit("Form field", s.imageUploaderFormField)
+            ->addTo(layout, form);
 
-       SettingWidget::lineEdit("Extra Headers", s.imageUploaderHeaders)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit("Extra Headers", s.imageUploaderHeaders)
+            ->addTo(layout, form);
 
-       SettingWidget::lineEdit("Image link", s.imageUploaderLink)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit("Image link", s.imageUploaderLink)
+            ->addTo(layout, form);
 
-       SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
-           ->addTo(layout, form);
+        SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
+            ->addTo(layout, form);
 
-       layout.addDescription(
-           "Export your current image uploader settings as JSON to share with "
-           "others, or import settings from clipboard (compatible with ShareX .sxcu format).");
+        layout.addDescription(
+            "Export your current image uploader settings as JSON to share with "
+            "others, or import settings from clipboard (compatible with ShareX "
+            ".sxcu format).");
 
-       auto *buttonLayout = new QHBoxLayout;
+        auto *buttonLayout = new QHBoxLayout;
 
-       auto *exportButton = new QPushButton("Export Settings to Clipboard");
-       exportButton->setToolTip("Copy current image uploader settings to clipboard as JSON");
-       QObject::connect(exportButton, &QPushButton::clicked, [this]() {
-           exportImageUploaderSettings(this);
-       });
-       buttonLayout->addWidget(exportButton);
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        exportButton->setToolTip(
+            "Copy current image uploader settings to clipboard as JSON");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            exportImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(exportButton);
 
-       auto *importButton = new QPushButton("Import Settings from Clipboard");
-       importButton->setToolTip("Import image uploader settings from clipboard JSON");
-       QObject::connect(importButton, &QPushButton::clicked, [this]() {
-           importImageUploaderSettings(this);
-       });
-       buttonLayout->addWidget(importButton);
+        auto *importButton = new QPushButton("Import Settings from Clipboard");
+        importButton->setToolTip(
+            "Import image uploader settings from clipboard JSON");
+        QObject::connect(importButton, &QPushButton::clicked, [this]() {
+            importImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(importButton);
 
-       buttonLayout->addStretch();
-       layout.addLayout(buttonLayout);
-   }
+        buttonLayout->addStretch();
+        layout.addLayout(buttonLayout);
+    }
 
-   layout.addStretch();
+    layout.addStretch();
 }
 
 }  // namespace chatterino
