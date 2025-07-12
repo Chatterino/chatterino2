@@ -42,9 +42,12 @@ void importImageUploaderSettings(QWidget *parent)
     QString clipboardText = getClipboardText().trimmed();
 
     auto res = imageuploader::detail::validateImportJson(clipboardText);
-    if (!res) {
+    if (!res)
+    {
         QMessageBox::warning(
-            parent, "Import Failed", QString("Error validating image uploader import: %1.").arg(res.error()));
+            parent, "Import Failed",
+            QString("Error validating image uploader import: %1.")
+                .arg(res.error()));
         return;
     }
     const auto &settingsObj = *res;
