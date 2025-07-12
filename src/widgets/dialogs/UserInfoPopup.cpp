@@ -56,7 +56,6 @@ constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
 constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
-constexpr qsizetype NOTES_PREVIEW_LENGTH = 80;
 
 using namespace chatterino;
 
