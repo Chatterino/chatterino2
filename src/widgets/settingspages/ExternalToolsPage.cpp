@@ -206,14 +206,6 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
 
         auto *buttonLayout = new QHBoxLayout;
 
-        auto *exportButton = new QPushButton("Export Settings to Clipboard");
-        exportButton->setToolTip(
-            "Copy current image uploader settings to clipboard as JSON");
-        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
-            exportImageUploaderSettings(this);
-        });
-        buttonLayout->addWidget(exportButton);
-
         auto *importButton = new QPushButton("Import Settings from Clipboard");
         importButton->setToolTip(
             "Import image uploader settings from clipboard JSON");
@@ -221,6 +213,14 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             importImageUploaderSettings(this);
         });
         buttonLayout->addWidget(importButton);
+
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        exportButton->setToolTip(
+            "Copy current image uploader settings to clipboard as JSON");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            exportImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(exportButton);
 
         buttonLayout->addStretch();
         layout.addLayout(buttonLayout);
