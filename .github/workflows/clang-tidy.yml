@@ -47,6 +47,8 @@ jobs:
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "lib/*,tools/crash-handler/*,mocks/*"
+          extra_arguments: "-load=/usr/lib/ClazyClangTidy21.so"
+          clang_tidy_version: 21
           cmake_command: >-
             ./.CI/setup-clang-tidy.sh
           apt_packages: >-
@@ -61,7 +63,8 @@ jobs:
             libxcb-glx0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0,
             libxcb-render-util0, libxcb-render0, libxcb-shape0, libxcb-shm0, libxcb-sync1,
             libxcb-util1, libxcb-xfixes0, libxcb-xinerama0, libxcb1, libxkbcommon-dev,
-            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0
+            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0,
+            curl, unzip
 
       - name: clang-tidy-review upload
         uses: ZedThree/clang-tidy-review/upload@v0.22.2
