@@ -7,8 +7,6 @@
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
-#include <QApplication>
-#include <QClipboard>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
