@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Expected.hpp"
+
 class QJsonObject;
 class QString;
 
@@ -16,7 +18,7 @@ QJsonObject exportSettings(const Settings &s);
 bool importSettings(const QJsonObject &settingsObj, Settings &s);
 
 // Validates if the clipboard text contains valid JSON and parses it.
-bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj);
+ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText);
 
 }  // namespace imageuploader::detail
 

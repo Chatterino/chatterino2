@@ -40,16 +40,14 @@ void exportImageUploaderSettings(QWidget *parent)
 void importImageUploaderSettings(QWidget *parent)
 {
     QString clipboardText = getClipboardText().trimmed();
-    QJsonObject settingsObj;
 
-    if (!imageuploader::detail::validateImportJson(clipboardText, settingsObj))
-    {
+    auto res = imageuploader::detail::validateImportJson(clipboardText);
+    if (!res) {
         QMessageBox::warning(
-            parent, "Import Failed",
-            "Clipboard is empty or contains invalid JSON. Please copy valid "
-            "JSON settings to clipboard first.");
+            parent, "Import Failed", QString("Error validating image uploader import: %1.").arg(res.error()));
         return;
     }
+    const auto &settingsObj = *res;
 
     int ret = QMessageBox::question(
         parent, "Import Settings",

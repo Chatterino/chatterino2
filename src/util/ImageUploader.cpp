@@ -96,11 +96,11 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
     return true;
 }
 
-bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)
+ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText)
 {
     if (clipboardText.isEmpty())
     {
-        return false;
+        return nonstd::make_unexpected("Clipboard must not be empty");
     }
 
     QJsonParseError parseError;
@@ -109,22 +109,29 @@ bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)
 
     if (parseError.error != QJsonParseError::NoError)
     {
-        return false;
+        return nonstd::make_unexpected("Clipboard did not contain valid JSON");
     }
 
     if (!doc.isObject())
     {
-        return false;
+        return nonstd::make_unexpected("JSON must be an object");
     }
 
-    settingsObj = doc.object();
+    auto settingsObj = doc.object();
 
-    if (!settingsObj.contains("Version") || !settingsObj.contains("Name"))
+    if (!settingsObj.contains("Version"))
     {
-        return false;
+        return nonstd::make_unexpected(
+            "JSON must contain the 'Version' key");
     }
 
-    return true;
+    if (!settingsObj.contains("Name"))
+    {
+        return nonstd::make_unexpected(
+            "JSON must contain the 'Name' key");
+    }
+
+    return settingsObj;
 }
 
 }  // namespace chatterino::imageuploader::detail
