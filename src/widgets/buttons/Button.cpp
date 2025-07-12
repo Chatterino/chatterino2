@@ -39,9 +39,9 @@ bool Button::mouseOver() const noexcept
     return this->mouseOver_;
 }
 
-bool Button::mouseDown() const noexcept
+bool Button::leftMouseButtonDown() const noexcept
 {
-    return this->mouseDown_;
+    return this->leftMouseButtonDown_;
 }
 
 bool Button::menuVisible() const noexcept
@@ -167,48 +167,82 @@ void Button::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    if (event->button() != Qt::LeftButton)
+    switch (event->button())
     {
-        return;
-    }
+        case Qt::MouseButton::LeftButton: {
+            this->leftMouseButtonDown_ = true;
 
-    this->addClickEffect(event->pos());
+            this->addClickEffect(event->pos());
 
-    this->mouseDown_ = true;
+            this->leftMousePress();
 
-    this->leftMousePress();
+            if (this->menu_ && !this->menuVisible_)
+            {
+                QTimer::singleShot(80, this, [this] {
+                    this->showMenu();
+                });
+                this->leftMouseButtonDown_ = false;
+                this->mouseOver_ = false;
+            }
+        }
+        break;
+        case Qt::MouseButton::RightButton: {
+            this->rightMouseButtonDown_ = true;
+        }
+        break;
+        case Qt::MouseButton::MiddleButton: {
+            this->middleMouseButtonDown_ = true;
+        }
+        break;
 
-    if (this->menu_ && !this->menuVisible_)
-    {
-        QTimer::singleShot(80, this, [this] {
-            this->showMenu();
-        });
-        this->mouseDown_ = false;
-        this->mouseOver_ = false;
+        default:
+            // Unsupported button
+            return;
     }
 }
 
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!this->enabled_ || !this->mouseDown_)
+    // Reset the "mouse button down" state of the released button and store
+    // whether the button was in the down state when this event fired
+    bool hadCorrectButtonPressed = false;
+    switch (event->button())
+    {
+        case Qt::MouseButton::LeftButton: {
+            hadCorrectButtonPressed = this->leftMouseButtonDown_;
+            this->leftMouseButtonDown_ = false;
+        }
+        break;
+        case Qt::MouseButton::RightButton: {
+            hadCorrectButtonPressed = this->rightMouseButtonDown_;
+            this->rightMouseButtonDown_ = false;
+        }
+        break;
+        case Qt::MouseButton::MiddleButton: {
+            hadCorrectButtonPressed = this->middleMouseButtonDown_;
+            this->middleMouseButtonDown_ = false;
+        }
+        break;
+
+        default:
+            // Unsupported button
+            return;
+    }
+
+    if (!this->enabled_)
     {
         return;
     }
 
     bool isInside = this->rect().contains(event->pos());
 
-    if (event->button() == Qt::LeftButton)
+    if (isInside && hadCorrectButtonPressed)
     {
-        this->mouseDown_ = false;
-
-        if (isInside)
+        if (event->button() == Qt::LeftButton)
         {
             leftClicked();
         }
-    }
 
-    if (isInside)
-    {
         clicked(event->button());
     }
 }
@@ -258,7 +292,7 @@ void Button::onMouseEffectTimeout()
         for (auto it = this->clickEffects_.begin();
              it != this->clickEffects_.end();)
         {
-            it->progress += mouseDown_ ? 0.02 : 0.07;
+            it->progress += this->leftMouseButtonDown_ ? 0.02 : 0.07;
 
             if (it->progress >= 1.0)
             {

@@ -161,7 +161,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.2.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -394,7 +394,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.16.0
+        uses: ncipollo/release-action@v1.18.0
         with:
           replacesArtifacts: true
           allowUpdates: true

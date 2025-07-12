@@ -1424,10 +1424,16 @@ void SplitNotebook::addCustomButtons()
             !getSettings()->hidePreferencesButton.getValue());
 
         getSettings()->hidePreferencesButton.connect(
-            [settingsBtn](bool hide, auto) {
-                settingsBtn->setVisible(!hide);
+            [this, settingsBtn](bool hide) {
+                auto oldVisibility = settingsBtn->isVisible();
+                auto newVisibility = !hide;
+                settingsBtn->setVisible(newVisibility);
+                if (oldVisibility != newVisibility)
+                {
+                    this->performLayout();
+                }
             },
-            this->signalHolder_);
+            this->signalHolder_, false);
     }
 
     QObject::connect(settingsBtn, &Button::leftClicked, [this] {
@@ -1444,10 +1450,16 @@ void SplitNotebook::addCustomButtons()
 
     userBtn->setVisible(!getSettings()->hideUserButton.getValue());
     getSettings()->hideUserButton.connect(
-        [userBtn](bool hide, auto) {
-            userBtn->setVisible(!hide);
+        [this, userBtn](bool hide) {
+            auto oldVisibility = userBtn->isVisible();
+            auto newVisibility = !hide;
+            userBtn->setVisible(newVisibility);
+            if (oldVisibility != newVisibility)
+            {
+                this->performLayout();
+            }
         },
-        this->signalHolder_);
+        this->signalHolder_, false);
 
     QObject::connect(userBtn, &Button::leftClicked, [this, userBtn] {
         getApp()->getWindows()->showAccountSelectPopup(
@@ -1489,8 +1501,16 @@ void SplitNotebook::updateStreamerModeIcon()
         this->streamerModeIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledDark);
     }
-    this->streamerModeIcon_->setVisible(
-        getApp()->getStreamerMode()->isEnabled());
+
+    auto oldVisibility = this->streamerModeIcon_->isVisible();
+    auto newVisibility = getApp()->getStreamerMode()->isEnabled();
+
+    this->streamerModeIcon_->setVisible(newVisibility);
+
+    if (oldVisibility != newVisibility)
+    {
+        this->performLayout();
+    }
 }
 
 void SplitNotebook::themeChangedEvent()
