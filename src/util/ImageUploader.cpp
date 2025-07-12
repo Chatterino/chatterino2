@@ -5,9 +5,25 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-namespace chatterino {
-namespace imageuploader {
-namespace detail {
+namespace chatterino::imageuploader::detail {
+
+namespace {
+
+QStringList parseHeaders(const QJsonObject &headersObj)
+{
+    QStringList headerLines;
+    for (auto it = headersObj.begin(); it != headersObj.end(); ++it)
+    {
+        if (it.value().isString())
+        {
+            headerLines.append(
+                QString("%1: %2").arg(it.key(), it.value().toString()));
+        }
+    }
+    return headerLines;
+}
+
+}  // namespace
 
 QJsonObject exportSettings(const Settings &s)
 {
@@ -22,18 +38,22 @@ QJsonObject exportSettings(const Settings &s)
     settingsObj["DeletionURL"] = s.imageUploaderDeletionLink.getValue();
 
     QString headers = s.imageUploaderHeaders.getValue();
-    if (!headers.isEmpty()) {
+    if (!headers.isEmpty())
+    {
         QJsonObject headersObj;
         QStringList headerLines = headers.split('\n', Qt::SkipEmptyParts);
-        for (const QString &line : headerLines) {
+        for (const QString &line : headerLines)
+        {
             QStringList parts = line.split(':', Qt::SkipEmptyParts);
-            if (parts.size() >= 2) {
+            if (parts.size() >= 2)
+            {
                 QString key = parts[0].trimmed();
                 QString value = parts.mid(1).join(':').trimmed();
                 headersObj[key] = value;
             }
         }
-        if (!headersObj.isEmpty()) {
+        if (!headersObj.isEmpty())
+        {
             settingsObj["Headers"] = headersObj;
         }
     }
@@ -41,22 +61,14 @@ QJsonObject exportSettings(const Settings &s)
     return settingsObj;
 }
 
-static QStringList parseHeaders(const QJsonObject &headersObj)
-{
-    QStringList headerLines;
-    for (auto it = headersObj.begin(); it != headersObj.end(); ++it) {
-        if (it.value().isString()) {
-            headerLines.append(QString("%1: %2").arg(it.key(), it.value().toString()));
-        }
-    }
-    return headerLines;
-}
-
 bool importSettings(const QJsonObject &settingsObj, Settings &s)
 {
-    if (!settingsObj.contains("RequestURL") || !settingsObj["RequestURL"].isString() ||
-        !settingsObj.contains("FileFormName") || !settingsObj["FileFormName"].isString() ||
-        !settingsObj.contains("URL") || !settingsObj["URL"].isString()) {
+    if (!settingsObj.contains("RequestURL") ||
+        !settingsObj["RequestURL"].isString() ||
+        !settingsObj.contains("FileFormName") ||
+        !settingsObj["FileFormName"].isString() ||
+        !settingsObj.contains("URL") || !settingsObj["URL"].isString())
+    {
         return false;
     }
 
@@ -64,13 +76,17 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
     s.imageUploaderFormField = settingsObj["FileFormName"].toString();
     s.imageUploaderLink = settingsObj["URL"].toString();
 
-    if (settingsObj.contains("DeletionURL") && settingsObj["DeletionURL"].isString()) {
+    if (settingsObj.contains("DeletionURL") &&
+        settingsObj["DeletionURL"].isString())
+    {
         s.imageUploaderDeletionLink = settingsObj["DeletionURL"].toString();
     }
 
-    if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject()) {
+    if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject())
+    {
         QStringList headers = parseHeaders(settingsObj["Headers"].toObject());
-        if (!headers.isEmpty()) {
+        if (!headers.isEmpty())
+        {
             s.imageUploaderHeaders = headers.join('\n');
         }
     }
@@ -82,30 +98,33 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
 
 bool validateImportJson(const QString &clipboardText, QJsonObject &settingsObj)
 {
-    if (clipboardText.isEmpty()) {
+    if (clipboardText.isEmpty())
+    {
         return false;
     }
 
     QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(clipboardText.toUtf8(), &parseError);
+    QJsonDocument doc =
+        QJsonDocument::fromJson(clipboardText.toUtf8(), &parseError);
 
-    if (parseError.error != QJsonParseError::NoError) {
+    if (parseError.error != QJsonParseError::NoError)
+    {
         return false;
     }
 
-    if (!doc.isObject()) {
+    if (!doc.isObject())
+    {
         return false;
     }
 
     settingsObj = doc.object();
 
-    if (!settingsObj.contains("Version") || !settingsObj.contains("Name")) {
+    if (!settingsObj.contains("Version") || !settingsObj.contains("Name"))
+    {
         return false;
     }
 
     return true;
 }
 
-}  // namespace detail
-}  // namespace imageuploader
-}  // namespace chatterino
+}  // namespace chatterino::imageuploader::detail
