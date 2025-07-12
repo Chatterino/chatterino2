@@ -19,6 +19,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/UserColor.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
@@ -667,6 +668,11 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(channel != nullptr);
+
+    const auto *userDataController = getApp()->getUserData();
+    assert(userDataController != nullptr);
+
     auto tags = message->tags();
     auto parameters = message->parameters();
 
@@ -775,7 +781,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             // subgifts are special because they include two users
             auto msg = MessageBuilder::makeSubgiftMessage(
                 parseTagString(messageText), tags,
-                calculateMessageTime(message).time());
+                calculateMessageTime(message).time(), channel);
 
             msg->flags.set(MessageFlag::Subscription);
             if (mirrored)
@@ -831,12 +837,16 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             displayName = login;
         }
 
-        MessageColor userColor = MessageColor::System;
-        if (auto colorTag = tags.value("color").value<QColor>();
-            colorTag.isValid())
-        {
-            userColor = MessageColor(colorTag);
-        }
+        auto userID = tags.value("user-id").toString();
+        auto userColor = twitch::getUserColor(
+                             {
+                                 .userLogin = login,
+                                 .userID = userID,
+                                 .userDataController = userDataController,
+                                 .channelChatters = channel,
+                                 .color = tags.value("color").value<QColor>(),
+                             })
+                             .value_or(MessageColor::System);
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,

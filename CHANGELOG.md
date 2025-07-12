@@ -2,12 +2,12 @@
 
 ## Unversioned
 
-- Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
+- Minor: Added user notes to the user info dialog (when clicking a username). (#6122, #6318)
 - Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added interactive REPL for plugins. (#6120)
-- Minor: Added WebSocket API for plugins. (#6076, #6186, #6314)
+- Minor: Added WebSocket API for plugins. (#6076, #6186, #6314, #6315)
 - Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
 - Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
 - Minor: Made filters searchable in the Settings dialog search bar. (#5890)
@@ -31,6 +31,8 @@
 - Bugfix: Fixed blocked users showing up in "Users joined:" and "Users parted:" messages. (#6181)
 - Bugfix: Fixed an issue where text boxes in the settings dialog could be stuck with an old value. (#6286)
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
+- Bugfix: Correctly color gifter & recipient usernames in subscription gift messages, taking all color sources into consideration. (#6322)
+- Bugfix: Correctly color usernames in subscription, announcement, bits badge tier update, raid, and other similar notification messages, taking all color sources into consideration. (#6323)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
 - Bugfix: Fixed a few crashes that could occur when Chatterino was shutting down, some related to network tasks still firing despite us shutting down. (#6187)
@@ -39,6 +41,7 @@
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
+- Bugfix: Fixed eventsub message delete notifications not being affected by "Show deletions of single messages". (#6233)
 - Bugfix: Don't add reply buttons to messages that are invalid reply targets. (#6119)
 - Bugfix: Fixed invalid commands from being forwarded to Helix, making it possible for information to leak (e.g. if you typed `/bann username ban reason` it would be seen by others in chat as `username ban reason`). (#6272)
 - Dev: Mini refactor of Split. (#6148)
@@ -70,6 +73,7 @@
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
 - Dev: Bumped clang-format requirement to 19. (#6236)
+- Dev: Factored out AUMID to `Version`. (#6321)
 
 ## 2.5.3
 

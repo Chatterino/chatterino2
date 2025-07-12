@@ -104,6 +104,9 @@ const QStringList &getSampleSubMessages()
 
         // resub without message
         R"(@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol):\s$9.99\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\sjust\ssubscribed\swith\sa\sTier\s2\ssub.\scspice\ssubscribed\sfor\s12\smonths\sin\sa\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada)",
+
+        // pajlada gifted a sub to rustafur
+        R"(@tmi-sent-ts=1751793597378;subscriber=1;id=ac51c358-0525-468f-9e0f-e9f2b7953c29;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/114;color=#CC44FF;flags=;user-type=;emotes=;msg-param-sub-plan-name=look\sat\sthose\sshitty\semotes,\srip\s$5\sLUL;msg-param-gift-months=1;system-msg=pajlada\sgifted\sa\sTier\s1\ssub\sto\srustafur!;msg-param-months=6;msg-param-origin-id=4645652708379472175;msg-param-recipient-id=27787997;msg-param-sub-plan=1000;msg-id=subgift;msg-param-recipient-display-name=rustafur;msg-param-recipient-user-name=rustafur;msg-param-community-gift-id=4645652708379472175;msg-param-sender-count=0 :tmi.twitch.tv USERNOTICE #pajlada)",
     };
     return list;
 }

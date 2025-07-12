@@ -645,11 +645,18 @@ TEST_F(PluginTest, testTcpWebSocket)
 
     RequestWaiter waiter;
     std::vector<std::pair<bool, QByteArray>> messages;
+    bool open = false;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
+    });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
     });
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
@@ -671,6 +678,9 @@ TEST_F(PluginTest, testTcpWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -682,6 +692,7 @@ TEST_F(PluginTest, testTcpWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 7);
     ASSERT_EQ(messages[0].first, true);
@@ -709,12 +720,19 @@ TEST_F(PluginTest, testTlsWebSocket)
     configure({PluginPermission{{{"type", "Network"}}}});
 
     RequestWaiter waiter;
+    bool open = false;
     std::vector<std::pair<bool, QByteArray>> messages;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
+    });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
     });
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
@@ -744,6 +762,9 @@ TEST_F(PluginTest, testTlsWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -755,6 +776,7 @@ TEST_F(PluginTest, testTlsWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 9);
     ASSERT_EQ(messages[0].first, true);
