@@ -190,7 +190,6 @@ void EditableModelView::filterSearchResultsHotkey(
 {
     auto rowAmount = this->model_->rowCount();
 
-
     for (int i = 0; i < rowAmount; i++)
     {
         QModelIndex idx = model_->index(i, 1);
