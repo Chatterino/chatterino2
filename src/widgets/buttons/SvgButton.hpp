@@ -72,6 +72,8 @@ protected:
 private:
     [[nodiscard]] QString currentSvgPath() const;
 
+    void loadSource();
+
     Src source_;
     QSvgRenderer *svg_;
     QSize padding_;

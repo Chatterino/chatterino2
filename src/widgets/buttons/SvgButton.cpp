@@ -19,7 +19,7 @@ SvgButton::SvgButton(Src source, BaseWidget *parent, QSize padding)
 void SvgButton::setSource(Src source)
 {
     this->source_ = std::move(source);
-    this->svg_->load(this->currentSvgPath());
+    this->loadSource();
     this->invalidateContent();
 }
 
@@ -48,7 +48,7 @@ void SvgButton::themeChangedEvent()
     {
         return;
     }
-    this->svg_->load(this->currentSvgPath());
+    this->loadSource();
     this->invalidateContent();
 }
 
@@ -96,6 +96,12 @@ QString SvgButton::currentSvgPath() const
         return this->source_.light;
     }
     return this->source_.dark;
+}
+
+void SvgButton::loadSource()
+{
+    this->svg_->load(this->currentSvgPath());
+    this->svg_->setAspectRatioMode(Qt::KeepAspectRatio);
 }
 
 }  // namespace chatterino
