@@ -1,22 +1,17 @@
 #include "controllers/sound/MiniaudioBackend.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "debug/Benchmark.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/RenameThread.hpp"
-#include "widgets/Window.hpp"
 
-#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio.hpp>
 
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <QFile>
 #include <QScopeGuard>
 
-#include <limits>
 #include <memory>
 
 namespace {
@@ -89,6 +84,7 @@ MiniaudioBackend::MiniaudioBackend()
         {
             qCWarning(chatterinoSound)
                 << "Error initializing logger:" << result;
+            this->state = State::Failed;
             return;
         }
 
@@ -98,6 +94,7 @@ MiniaudioBackend::MiniaudioBackend()
         {
             qCWarning(chatterinoSound)
                 << "Error registering logger callback:" << result;
+            this->state = State::Failed;
             return;
         }
 
@@ -111,6 +108,7 @@ MiniaudioBackend::MiniaudioBackend()
         {
             qCWarning(chatterinoSound)
                 << "Error initializing context:" << result;
+            this->state = State::Failed;
             return;
         }
 
@@ -119,6 +117,7 @@ MiniaudioBackend::MiniaudioBackend()
         if (!defaultPingFile.open(QIODevice::ReadOnly))
         {
             qCWarning(chatterinoSound) << "Error loading default ping sound";
+            this->state = State::Failed;
             return;
         }
         this->defaultPingData = defaultPingFile.readAll();
@@ -133,6 +132,7 @@ MiniaudioBackend::MiniaudioBackend()
         {
             qCWarning(chatterinoSound)
                 << "Error initializing engine:" << result;
+            this->state = State::Failed;
             return;
         }
 
@@ -168,6 +168,7 @@ MiniaudioBackend::MiniaudioBackend()
                     qCWarning(chatterinoSound) << "Error initializing default "
                                                   "ping decoder from memory:"
                                                << result;
+                    this->state = State::Failed;
                     return;
                 }
 
@@ -179,6 +180,7 @@ MiniaudioBackend::MiniaudioBackend()
                     qCWarning(chatterinoSound)
                         << "Error initializing default sound from data source:"
                         << result;
+                    this->state = State::Failed;
                     return;
                 }
 
@@ -189,7 +191,7 @@ MiniaudioBackend::MiniaudioBackend()
 
         qCInfo(chatterinoSound) << "miniaudio sound system initialized";
 
-        this->initialized = true;
+        this->state = State::Initialized;
     });
 
     this->audioThread = std::make_unique<std::thread>([this] {
@@ -204,8 +206,7 @@ MiniaudioBackend::MiniaudioBackend()
 
 MiniaudioBackend::~MiniaudioBackend()
 {
-    // NOTE: This destructor is never called because the `runGui` function calls _exit before that happens
-    // I have manually called the destructor prior to _exit being called to ensure this logic is sound
+    this->state = State::Stopping;
 
     boost::asio::post(this->ioContext, [this] {
         for (const auto &snd : this->defaultPingSounds)
@@ -219,37 +220,43 @@ MiniaudioBackend::~MiniaudioBackend()
 
         ma_engine_uninit(this->engine.get());
         ma_context_uninit(this->context.get());
-
-        this->workGuard.reset();
     });
 
-    if (!this->audioThread->joinable())
-    {
-        qCWarning(chatterinoSound) << "Audio thread not joinable";
-        return;
-    }
+    this->workGuard.reset();
+    this->sleepTimer.cancel();
 
-    if (this->stoppedFlag.waitFor(std::chrono::seconds{1}))
+    if (this->audioThread->joinable())
     {
-        this->audioThread->join();
-        return;
-    }
+        if (this->stoppedFlag.waitFor(std::chrono::seconds{1}))
+        {
+            this->audioThread->join();
+            return;
+        }
 
-    qCWarning(chatterinoSound) << "Audio thread did not stop within 1 second";
-    this->audioThread->detach();
+        qCWarning(chatterinoSound)
+            << "Audio thread did not stop within 1 second";
+        this->audioThread->detach();
+    }
 }
 
 void MiniaudioBackend::play(const QUrl &sound)
 {
+    if (this->state != State::Initialized)
+    {
+        qCWarning(chatterinoSound) << "Can't play sound, sound controller "
+                                      "is not initialized";
+        return;
+    }
+
     boost::asio::post(this->ioContext, [this, sound] {
         static size_t i = 0;
 
         this->tgPlay.guard();
 
-        if (!this->initialized)
+        if (this->state != State::Initialized)
         {
             qCWarning(chatterinoSound) << "Can't play sound, sound controller "
-                                          "didn't initialize correctly";
+                                          "is not initialized";
             return;
         }
 
