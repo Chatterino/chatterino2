@@ -22,6 +22,7 @@
 #include "util/LayoutHelper.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/Label.hpp"
@@ -280,6 +281,13 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->addButton_ = new SvgButton(
+        SvgButton::Src{
+            .dark = ":/buttons/addSplit-darkMode.svg",
+            .light = ":/buttons/addSplit-lightMode.svg",
+        },
+        this, QSize{1, 0});
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -352,15 +360,7 @@ void SplitHeader::initializeLayout()
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
-        // add split
-        this->addButton_ = makeWidget<PixmapButton>([&](auto w) {
-            w->setPixmap(getResources().buttons.addSplitDark);
-            w->setMarginEnabled(false);
-
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->addSibling();
-            });
-        }),
+        this->addButton_,
     });
 
     getSettings()->customURIScheme.connect(
@@ -1066,13 +1066,11 @@ void SplitHeader::themeChangedEvent()
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
-        this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
-        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
 
     this->update();
