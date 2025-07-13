@@ -18,11 +18,14 @@ concurrency:
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
-  C2_BUILD_WITH_QT6: Off
   CONAN_VERSION: 2.11.0
 
 jobs:
   build-ubuntu-docker:
+    # Our Ubuntu builds are built using Docker images that have been pre-published.
+    # This speeds up builds for us since we do some pre-building of packages that takes a long time
+    # However, this means if you need to add a dependency to the build, you'll need to do that
+    # in the https://github.com/Chatterino/docker repository first.
     name: "Build Ubuntu in Docker"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
@@ -33,7 +36,6 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: false
@@ -42,7 +44,6 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: true
@@ -51,14 +52,12 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: false
             build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
-      C2_PLUGINS: ${{ matrix.plugins }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
@@ -71,6 +70,16 @@ jobs:
         run: |
           git config --global --add safe.directory '*'
 
+      - name: Install Python and libclang (24.04)
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
+            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
+          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
+
       - name: Build
         run: |
           mkdir build
@@ -82,11 +91,17 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
             ..
           make -j"$(nproc)"
+
+      - name: Check generated sources
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
+          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
 
       - name: Package - AppImage (Ubuntu)
         if: matrix.build-appimage
@@ -121,35 +136,22 @@ jobs:
       matrix:
         include:
           # macOS
-          - os: macos-13
-            qt-version: 5.15.2
+          - os: macos-14
+            qt-version: 6.7.1
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
             qt-version: 6.7.1
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
-          # Windows 7/8
-          - os: windows-latest
-            qt-version: 5.15.2
-            force-lto: false
-            plugins: true
-            skip-artifact: false
-            skip-crashpad: true
 
       fail-fast: false
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
-      C2_PLUGINS: ${{ matrix.plugins }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
-      C2_USE_OPENSSL3: ${{ startsWith(matrix.qt-version, '6.') && 'True' || 'False' }}
-      C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -157,17 +159,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
-      - name: Install Qt5
-        if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v4.1.1
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          version: ${{ matrix.qt-version }}
-
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.1.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -181,7 +175,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.16
+        uses: hendrikmuhs/ccache-action@v1.2.18
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -195,7 +189,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
 
       - name: Install Conan (Windows)
@@ -222,7 +216,7 @@ jobs:
               -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
               -b missing `
               --output-folder=. `
-              -o with_openssl3="$Env:C2_USE_OPENSSL3"
+              -o with_openssl3="True"
         shell: powershell
 
       - name: Build (Windows)
@@ -237,8 +231,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
-              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
-              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
+              -DFORCE_JSON_GENERATION=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -306,8 +299,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              -DFORCE_JSON_GENERATION=Off \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -355,12 +347,6 @@ jobs:
           name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v4
-        name: Windows Qt5.15.2
-        with:
-          name: chatterino-windows-x86-64-Qt-5.15.2.zip
-          path: release-artifacts/
-
       # Linux
       - uses: actions/download-artifact@v4
         name: Linux AppImage
@@ -391,15 +377,6 @@ jobs:
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
         shell: bash
 
-      - name: Rename artifacts
-        run: |
-          ls -l
-
-          # Mark all Windows Qt5 builds as old
-          mv chatterino-windows-x86-64-Qt-5.15.2.zip chatterino-windows-old-x86-64-Qt-5.15.2.zip
-        working-directory: release-artifacts
-        shell: bash
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -417,7 +394,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.18.0
         with:
           replacesArtifacts: true
           allowUpdates: true

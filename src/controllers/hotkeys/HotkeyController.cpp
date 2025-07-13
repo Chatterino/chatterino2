@@ -4,9 +4,12 @@
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
-#include "singletons/Settings.hpp"
+#include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
+#include <pajlada/settings.hpp>
+#include <QMessageBox>
 #include <QShortcut>
+#include <QWidget>
 
 namespace {
 
@@ -515,9 +518,11 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+G"), "reopenSplit",
                             std::vector<QString>(), "reopen split");
 
+#ifndef Q_OS_MACOS
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+H"), "toggleLocalR9K",
                             std::vector<QString>(), "toggle local r9k");
+#endif
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+K"), "openQuickSwitcher",

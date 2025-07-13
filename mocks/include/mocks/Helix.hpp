@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <functional>
 #include <vector>
 
 namespace chatterino::mock {
@@ -426,6 +427,20 @@ public:
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));
+
+    MOCK_METHOD(void, createEventSubSubscription,
+                (const eventsub::SubscriptionRequest &request,
+                 const QString &sessionID,
+                 ResultCallback<HelixCreateEventSubSubscriptionResponse>
+                     successCallback,
+                 (FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+                      failureCallback)),
+                (override));
+
+    MOCK_METHOD(void, deleteEventSubSubscription,
+                (const QString &request, ResultCallback<> successCallback,
+                 (FailureCallback<QString> failureCallback)),
+                (override));
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));

@@ -21,7 +21,8 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : windowManager(this->paths_, this->settings, this->theme, this->fonts)
+        : windowManager(this->args, this->paths_, this->settings, this->theme,
+                        this->fonts)
     {
     }
 

@@ -38,7 +38,7 @@ struct MessageLayoutContainer {
      * This will reset all line calculations, and will be considered incomplete
      * until the accompanying end function has been called
      */
-    void beginLayout(int width, float scale, float imageScale,
+    void beginLayout(qreal width, float scale, float imageScale,
                      MessageFlags flags);
 
     /**
@@ -73,7 +73,7 @@ struct MessageLayoutContainer {
      * Paint the animated elements in this message
      * @returns true if this container contains at least one animated element
      */
-    bool paintAnimatedElements(QPainter &painter, int yOffset) const;
+    bool paintAnimatedElements(QPainter &painter, qreal yOffset) const;
 
     /**
      * Paint the selection for this container
@@ -86,7 +86,7 @@ struct MessageLayoutContainer {
      * @param yOffset The extra offset added to Y for everything that's painted
      */
     void paintSelection(QPainter &painter, size_t messageIndex,
-                        const Selection &selection, int yOffset) const;
+                        const Selection &selection, qreal yOffset) const;
 
     /**
      * Add text from this message into the `str` parameter
@@ -104,12 +104,12 @@ struct MessageLayoutContainer {
      *
      * If no element is found at the given point, this returns a null pointer
      */
-    MessageLayoutElement *getElementAt(QPoint point) const;
+    MessageLayoutElement *getElementAt(QPointF point) const;
 
     /**
      * Get the character index at the given point, in the context of selections
      */
-    size_t getSelectionIndex(QPoint point) const;
+    size_t getSelectionIndex(QPointF point) const;
 
     /**
      * Get the index of the first visible character in this message
@@ -141,12 +141,12 @@ struct MessageLayoutContainer {
     /**
      * Returns the width of this message
      */
-    int getWidth() const;
+    qreal getWidth() const;
 
     /**
      * Returns the height of this message
      */
-    int getHeight() const;
+    qreal getHeight() const;
 
     /**
      * Returns the scale of this message
@@ -173,12 +173,12 @@ struct MessageLayoutContainer {
      *
      * Returns true if it does fit, false if not
      */
-    bool fitsInLine(int width) const;
+    bool fitsInLine(qreal width) const;
 
     /**
      * Returns the remaining width of this line until we will need to start a new line
      */
-    int remainingWidth() const;
+    qreal remainingWidth() const;
 
     /**
      * Returns the id of the next word that can be added to this container
@@ -215,7 +215,7 @@ private:
          * The rectangle that covers all elements on this line
          * This rectangle will always take up 100% of the view's width
          */
-        QRect rect;
+        QRectF rect;
     };
 
     /// @brief Attempts to add @a element to this container
@@ -277,8 +277,9 @@ private:
      * @param yOffset Extra offset for line's top & bottom
      * @param color Color of the selection
      **/
-    void paintSelectionRect(QPainter &painter, const Line &line, int left,
-                            int right, int yOffset, const QColor &color) const;
+    void paintSelectionRect(QPainter &painter, const Line &line, qreal left,
+                            qreal right, qreal yOffset,
+                            const QColor &color) const;
 
     /**
      * Paint the selection start
@@ -293,7 +294,7 @@ private:
     std::optional<size_t> paintSelectionStart(QPainter &painter,
                                               size_t messageIndex,
                                               const Selection &selection,
-                                              int yOffset) const;
+                                              qreal yOffset) const;
 
     /**
      * Paint the selection end
@@ -301,7 +302,7 @@ private:
      * @param lineIndex The index of the line to start painting at
      */
     void paintSelectionEnd(QPainter &painter, size_t lineIndex,
-                           const Selection &selection, int yOffset) const;
+                           const Selection &selection, qreal yOffset) const;
 
     /**
      * canAddElements returns true if it's possible to add more elements to this message
@@ -330,7 +331,7 @@ private:
      * Scale factor for images
      */
     float imageScale_ = 1.F;
-    int width_ = 0;
+    qreal width_ = 0;
     MessageFlags flags_{};
     /**
      * line_ is the current line index we are adding
@@ -338,19 +339,19 @@ private:
      * incrementing if the message is collapsed
      */
     size_t line_{};
-    int height_ = 0;
-    int currentX_ = 0;
-    int currentY_ = 0;
+    qreal height_ = 0;
+    qreal currentX_ = 0;
+    qreal currentY_ = 0;
     /**
      * charIndex_ is the selection-contexted index of where we currently are in our message
      * At the end, this will always be equal to the sum of `elements_` getSelectionIndexCount()
      */
     size_t charIndex_ = 0;
     size_t lineStart_ = 0;
-    int lineHeight_ = 0;
-    int spaceWidth_ = 4;
-    int textLineHeight_ = 0;
-    int dotdotdotWidth_ = 0;
+    qreal lineHeight_ = 0;
+    qreal spaceWidth_ = 4;
+    qreal textLineHeight_ = 0;
+    qreal dotdotdotWidth_ = 0;
     int currentWordId_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;

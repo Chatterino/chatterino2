@@ -14,7 +14,6 @@ class OnceFlag
 {
 public:
     OnceFlag();
-    ~OnceFlag();
 
     /// Set this flag and notify waiters
     void set();
@@ -32,10 +31,13 @@ public:
     /// The calling thread will be suspended during the wait.
     void wait();
 
+    /// Is the flag currently set?
+    bool isSet();
+
 private:
     std::mutex mutex;
     std::condition_variable condvar;
-    bool flag = false;
+    std::atomic<bool> flag = false;
 };
 
 }  // namespace chatterino

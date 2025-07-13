@@ -340,8 +340,15 @@ private:
 class MentionElement : public TextElement
 {
 public:
-    MentionElement(const QString &displayName, QString loginName_,
-                   MessageColor fallbackColor_, MessageColor userColor_);
+    explicit MentionElement(const QString &displayName, QString loginName_,
+                            MessageColor fallbackColor_,
+                            MessageColor userColor_);
+    /// Deprioritized ctor allowing us to pass through a potentially invalid userColor_
+    ///
+    /// If the userColor_ is invalid, we fall back to the fallbackColor_
+    template <typename = void>
+    explicit MentionElement(const QString &displayName, QString loginName_,
+                            MessageColor fallbackColor_, QColor userColor_);
     ~MentionElement() override = default;
     MentionElement(const MentionElement &) = delete;
     MentionElement(MentionElement &&) = delete;
@@ -387,7 +394,7 @@ public:
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                         const QSize &size);
+                                                         QSizeF size);
 
 private:
     std::unique_ptr<TextElement> textElement_;
@@ -424,8 +431,8 @@ public:
 
 private:
     MessageLayoutElement *makeImageLayoutElement(
-        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
-        QSize largestSize);
+        const std::vector<ImagePtr> &image, const std::vector<QSizeF> &sizes,
+        QSizeF largestSize);
 
     QString getCopyString() const;
     void updateTooltips();
@@ -452,7 +459,7 @@ public:
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                         const QSize &size);
+                                                         QSizeF size);
 
 private:
     EmotePtr emote_;
@@ -467,7 +474,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
 };
 
 class VipBadgeElement : public BadgeElement
@@ -479,7 +486,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
 };
 
 class FfzBadgeElement : public BadgeElement
@@ -492,7 +499,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
     const QColor color;
 };
 

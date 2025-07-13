@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "message_id": "bf6e248f-a523-4bf8-b215-ea1822e60223",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.suspicious_user.message",
+    "subscription_version": "1"
+  },
+  "payload": {
+    "subscription": {
+      "id": "f1c2a387-161a-49f9-a165-0f21d7a4e1c4",
+      "type": "channel.suspicious_user.message",
+      "version": "1",
+      "status": "enabled",
+      "cost": 0,
+      "condition": {
+        "moderator_user_id": "9001",
+        "broadcaster_user_id": "1050263432"
+      },
+      "transport": { "method": "websocket", "session_id": "38de428e_b11f07be" },
+      "created_at": "2023-04-11T10:11:12.123Z"
+    },
+    "event": {
+      "broadcaster_user_id": "1050263432",
+      "broadcaster_user_name": "dcf9dd9336034d23b65",
+      "broadcaster_user_login": "dcf9dd9336034d23b65",
+      "user_id": "1050263434",
+      "user_name": "4a46e2cf2e2f4d6a9e6",
+      "user_login": "4a46e2cf2e2f4d6a9e6",
+      "low_trust_status": "active_monitoring",
+      "shared_ban_channel_ids": ["100", "200"],
+      "types": ["ban_evader"],
+      "ban_evasion_evaluation": "likely",
+      "message": {
+        "message_id": "101010",
+        "text": "bad stuff pogchamp",
+        "fragments": [
+          {
+            "type": "emote",
+            "text": "bad stuff",
+            "cheermote": null,
+            "emote": {
+              "id": "899",
+              "emote_set_id": "1"
+            }
+          },
+          {
+            "type": "cheermote",
+            "text": "pogchamp",
+            "cheermote": {
+              "prefix": "pogchamp",
+              "bits": 100,
+              "tier": 1
+            },
+            "emote": null
+          }
+        ]
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.11
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
@@ -23,32 +23,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13]
-        qt-version: [5.15.2, 6.7.1]
-        plugins: [true]
+        os: [macos-14]
+        qt-version: [6.4.3, 6.7.1]
       fail-fast: false
     env:
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4.1.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -75,8 +63,6 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 
@@ -94,7 +80,7 @@ jobs:
         run: |
           httpbox --port 9051 &
           cd ../pubsub-server-test
-          ./server 127.0.0.1:9050 &
+          ./server 127.0.0.1:9050 127.0.0.1:9052 &
           cd ../build-test
           ctest --repeat until-pass:4 --output-on-failure
         working-directory: build-test

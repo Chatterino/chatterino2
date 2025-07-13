@@ -4,6 +4,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/QCompareTransparent.hpp"
 #include "util/QMagicEnum.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -245,15 +246,15 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
-        EmojiData::Capability setCapability =
-            qmagicenum::enumCast<EmojiData::Capability>(emojiSet).value_or(
-                EmojiData::Capability::Google);
+        auto setCapability = qmagicenum::enumCast<EmojiData::Capability>(
+                                 emojiSet, qmagicenum::CASE_INSENSITIVE)
+                                 .value_or(EmojiData::Capability::Google);
 
         for (const auto &emoji : this->emojis)
         {
             QString emojiSetToUse = emojiSet;
             // clang-format off
-            static std::map<QString, QString> emojiSets = {
+            static std::map<QString, QString, QCompareCaseInsensitive> emojiSets = {
                 // JSDELIVR
                 // {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
                 // {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},
@@ -275,15 +276,15 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
-            // As of emoji-data v15.1.1, google is the only source missing no images.
+            // Both Twitter/Twemoji and Google have all images
             if (!emoji->capabilities.has(setCapability))
             {
-                emojiSetToUse = QStringLiteral("Google");
+                emojiSetToUse = QStringLiteral("Twitter");
             }
 
             QString code = emoji->unifiedCode.toLower();
             QString urlPrefix =
-                "https://pajbot.com/static/emoji-v2/img/google/64/";
+                "https://pajbot.com/static/emoji-v2/img/twitter/64/";
             auto it = emojiSets.find(emojiSetToUse);
             if (it != emojiSets.end())
             {

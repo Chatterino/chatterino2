@@ -16,10 +16,11 @@ typedef struct tagMSG MSG;
 namespace chatterino {
 
 class Button;
-class EffectLabel;
+class LabelButton;
+class PixmapButton;
 class TitleBarButton;
 class TitleBarButtons;
-enum class TitleBarButtonStyle;
+enum class TitleBarButtonStyle : std::uint8_t;
 
 class BaseWindow : public BaseWidget
 {
@@ -38,9 +39,10 @@ public:
         DisableLayoutSave = 1 << 7,
         BoundsCheckOnShow = 1 << 8,
         ClearBuffersOnDpiChange = 1 << 9,
-    };
 
-    enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
+        /// special flag that enables the Qt::Popup flag on Linux
+        LinuxPopup = 1 << 10,
+    };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
                         QWidget *parent = nullptr);
@@ -51,12 +53,20 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame() const;
-    TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
-                                      std::function<void()> onClicked);
-    EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
-    void setActionOnFocusLoss(ActionOnFocusLoss value);
-    ActionOnFocusLoss getActionOnFocusLoss() const;
+    template <typename T>
+    T *addTitleBarButton(std::function<void()> onClicked, auto &&...args)
+    {
+        auto *button = new T(std::forward<decltype(args)>(args)...);
+        button->setScaleIndependentSize(30, 30);
+        this->appendTitlebarButton(button);
+
+        QObject::connect(button, &T::leftClicked, this, std::move(onClicked));
+
+        return button;
+    }
+
+    LabelButton *addTitleBarLabel(std::function<void()> onClicked);
 
     void moveTo(QPoint point, widgets::BoundsChecking mode);
 
@@ -93,6 +103,27 @@ Q_SIGNALS:
     void topMostChanged(bool topMost);
 
 protected:
+    enum class FocusOutAction : std::uint8_t {
+        None,
+        Hide,
+    };
+
+    /// focusOutAction is used when the `FocusOut` event is fired
+    FocusOutAction focusOutAction = FocusOutAction::None;
+
+    enum class WindowDeactivateAction : std::uint8_t {
+        Nothing,
+        Delete,
+        Close,
+        Hide,
+    };
+
+    /// This action is used when the `WindowDeactivate` event is fired
+    WindowDeactivateAction windowDeactivateAction =
+        WindowDeactivateAction::Nothing;
+
+    virtual void windowDeactivationEvent();
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
@@ -103,6 +134,7 @@ protected:
     void scaleChangedEvent(float) override;
 
     void paintEvent(QPaintEvent *) override;
+    virtual void drawOutline(QPainter &);
 
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
@@ -118,9 +150,14 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+    void focusOutEvent(QFocusEvent *event) override;
+
     QPointF movingRelativePos;
     bool moving{};
 
+    /// @returns The scale this window wants to be at.
+    virtual float desiredScale() const;
     void updateScale();
 
     std::optional<QColor> overrideBackgroundColor_;
@@ -130,7 +167,6 @@ private:
 
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
-    void onFocusLost();
 
     static void applyScaleRecursive(QObject *root, float scale);
 
@@ -145,8 +181,9 @@ private:
     bool handleNCHITTEST(MSG *msg, long *result);
 #endif
 
+    void appendTitlebarButton(Button *button);
+
     bool enableCustomFrame_;
-    ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
     bool shown_ = false;
     FlagsEnum<Flags> flags_;

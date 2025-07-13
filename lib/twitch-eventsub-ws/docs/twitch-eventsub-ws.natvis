@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="chatterino::eventsub::lib::String">
+    <Intrinsic Name="isQt" Expression="(flags &amp; QT_BIT) != 0"></Intrinsic>
+    <Intrinsic Name="isAlloc" Expression="(flags &amp; ALLOC_BIT) != 0"></Intrinsic>
+    <Intrinsic Name="isInPlace" Expression="!(flags &amp; (ALLOC_BIT | QT_BIT))"></Intrinsic>
+    <Intrinsic Name="size" Expression="isQt() ? storage.qt.d.size : (flags &amp; LENGTH_MASK)"></Intrinsic>
+
+    <DisplayString Condition="isInPlace()">{storage.inPlace,[size()]s8}</DisplayString>
+    <DisplayString Condition="isAlloc()">{storage.data,[size()]s8}</DisplayString>
+    <DisplayString Condition="isQt()">{storage.qt.d.ptr,su}</DisplayString>
+
+    <Expand>
+      <Synthetic Name="[type]">
+        <DisplayString Condition="isInPlace()">InPlace</DisplayString>
+        <DisplayString Condition="isAlloc()">Allocated</DisplayString>
+        <DisplayString Condition="isQt()">QString</DisplayString>
+      </Synthetic>
+
+      <!-- QString's visualizer includes the size already -->
+      <Item Name="[size]" Condition="!isQt()">size()</Item>
+      <ExpandedItem Condition="isInPlace() &amp;&amp; size()">
+        storage.inPlace,[size()]
+      </ExpandedItem>
+      <ExpandedItem Condition="isAlloc()">
+        storage.data,[size()]
+      </ExpandedItem>
+      <ExpandedItem Condition="isQt()">
+        storage.qt
+      </ExpandedItem>
+    </Expand>
+  </Type>
+</AutoVisualizer>

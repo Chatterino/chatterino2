@@ -469,7 +469,7 @@ public:
 
         this->mockApplication->getAccounts()
             ->twitch.getCurrent()
-            ->blockUserLocally(u"12345"_s);
+            ->blockUserLocally(u"12345"_s, u"blocked"_s);
 
         auto makeBadge = [](QStringView platform) {
             return std::make_shared<Emote>(Emote{
@@ -575,6 +575,17 @@ TEST_P(TestIrcMessageHandlerP, Run)
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
     VectorMessageSink sink;
+
+    const auto &userData = snapshot->param("userData").toObject();
+    for (auto it = userData.begin(); it != userData.end(); ++it)
+    {
+        const auto &userID = it.key();
+        const auto &data = it.value().toObject();
+        if (auto color = data.value("color").toString(); !color.isEmpty())
+        {
+            this->mockApplication->getUserData()->setUserColor(userID, color);
+        }
+    }
 
     for (auto prevInput : snapshot->param("prevMessages").toArray())
     {

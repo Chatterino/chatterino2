@@ -81,7 +81,7 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
 {
     MessagePtr deleted;
 
-    if (context == MessageContext::Original)
+    if (context == MessageContext::Original && this->getType() != Type::None)
     {
         // Only log original messages
         auto isDoNotLogSet =
@@ -283,9 +283,9 @@ void Channel::replaceMessage(size_t hint, const MessagePtr &message,
     }
 }
 
-void Channel::deleteMessage(QString messageID)
+void Channel::disableMessage(const QString &messageID)
 {
-    auto msg = this->findMessage(messageID);
+    auto msg = this->findMessageByID(messageID);
     if (msg != nullptr)
     {
         msg->flags.set(MessageFlag::Disabled);
@@ -296,11 +296,6 @@ void Channel::clearMessages()
 {
     this->messages_.clear();
     this->messagesCleared.invoke();
-}
-
-MessagePtr Channel::findMessage(QString messageID)
-{
-    return this->findMessageByID(messageID);
 }
 
 MessagePtr Channel::findMessageByID(QStringView messageID)
@@ -445,16 +440,14 @@ pajlada::Signals::NoArgSignal &IndirectChannel::getChannelChanged()
     return this->data_->changed;
 }
 
-Channel::Type IndirectChannel::getType()
+Channel::Type IndirectChannel::getType() const
 {
     if (this->data_->type == Channel::Type::Direct)
     {
         return this->get()->getType();
     }
-    else
-    {
-        return this->data_->type;
-    }
+
+    return this->data_->type;
 }
 
 }  // namespace chatterino

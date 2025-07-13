@@ -24,8 +24,8 @@ struct BttvLiveUpdateEmoteRemoveMessage;
 
 namespace bttv::detail {
 
-    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot,
-                                const QString &channelDisplayName);
+EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot,
+                            const QString &channelDisplayName);
 
 }  // namespace bttv::detail
 
@@ -47,7 +47,7 @@ public:
                             const QString &channelId,
                             const QString &channelDisplayName,
                             std::function<void(EmoteMap &&)> callback,
-                            bool manualRefresh);
+                            bool manualRefresh, bool cacheHit);
 
     /**
      * Adds an emote to the `channelEmoteMap`.

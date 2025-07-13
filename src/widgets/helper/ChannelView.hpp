@@ -40,7 +40,7 @@ enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
-class EffectLabel;
+class LabelButton;
 struct Link;
 class MessageLayoutElement;
 class Split;
@@ -145,7 +145,7 @@ public:
     /// nor IrcChannel.
     /// It's **not** equal to the channel passed in #setChannel().
     /// @see #underlyingChannel()
-    ChannelPtr channel();
+    ChannelPtr channel() const;
 
     /// @brief The channel this view displays messages for
     ///
@@ -258,8 +258,8 @@ protected:
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
-                         QPoint &relativePos, int &index);
+    bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
+                         QPointF &relativePos, int &index);
 
 private:
     struct InternalCtor {
@@ -359,7 +359,7 @@ private:
     /// screen and will always be a @a Channel, or, it will never be a
     /// TwitchChannel or IrcChannel, however, it will have the same type and
     /// name as @a underlyingChannel_. It's not know to any registry/server.
-    ChannelPtr channel_ = nullptr;
+    ChannelPtr channel_;
 
     /// @brief The channel receiving messages
     ///
@@ -381,7 +381,7 @@ private:
     Split *split_;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_{};
+    LabelButton *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;

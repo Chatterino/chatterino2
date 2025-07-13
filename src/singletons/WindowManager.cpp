@@ -34,16 +34,35 @@
 #include <chrono>
 #include <optional>
 
-namespace chatterino {
 namespace {
 
-    std::optional<bool> &shouldMoveOutOfBoundsWindow()
+std::optional<bool> &shouldMoveOutOfBoundsWindow()
+{
+    static std::optional<bool> x;
+    return x;
+}
+
+void closeWindowsRecursive(QWidget *window)
+{
+    if (window->isWindow() && window->isVisible())
     {
-        static std::optional<bool> x;
-        return x;
+        window->close();
     }
 
+    for (auto *child : window->children())
+    {
+        if (child->isWidgetType())
+        {
+            // We check if it's a widget above
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
+            closeWindowsRecursive(static_cast<QWidget *>(child));
+        }
+    }
+}
+
 }  // namespace
+
+namespace chatterino {
 
 const QString WindowManager::WINDOW_LAYOUT_FILENAME(
     QStringLiteral("window-layout.json"));
@@ -53,7 +72,7 @@ using SplitNode = SplitContainer::Node;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (this->appArgs.dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -69,19 +88,13 @@ void WindowManager::showSettingsDialog(QWidget *parent,
 
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
-    //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopup *w = new AccountSwitchPopup();
+    static auto *w = new AccountSwitchPopup;
 
     if (w->hasFocus())
     {
         w->hide();
-        //            if (lastFocusedWidget) {
-        //                lastFocusedWidget->setFocus();
-        //            }
         return;
     }
-
-    //    lastFocusedWidget = this->focusWidget();
 
     w->refresh();
 
@@ -90,9 +103,10 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager(const Paths &paths, Settings &settings,
-                             Theme &themes_, Fonts &fonts)
+WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
+                             Settings &settings, Theme &themes_, Fonts &fonts)
     : themes(themes_)
+    , appArgs(appArgs_)
     , windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
     , updateWordTypeMaskListener([this] {
@@ -147,12 +161,15 @@ WindowManager::WindowManager(const Paths &paths, Settings &settings,
     this->forceLayoutChannelViewsListener.add(settings.hideModerated);
     this->forceLayoutChannelViewsListener.add(
         settings.streamerModeHideModActions);
+    this->forceLayoutChannelViewsListener.add(
+        settings.streamerModeHideRestrictedUsers);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
     this->layoutChannelViewsListener.add(fonts.fontChanged);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
     this->invalidateChannelViewBuffersListener.add(settings.separateMessages);
+    this->invalidateChannelViewBuffersListener.add(settings.fadeMessageHistory);
 
     this->repaintVisibleChatWidgetsListener.add(
         this->themes.repaintVisibleChatWidgets_);
@@ -395,16 +412,16 @@ void WindowManager::initialize()
     {
         WindowLayout windowLayout;
 
-        if (getApp()->getArgs().customChannelLayout)
+        if (this->appArgs.customChannelLayout)
         {
-            windowLayout = getApp()->getArgs().customChannelLayout.value();
+            windowLayout = this->appArgs.customChannelLayout.value();
         }
         else
         {
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
-        auto desired = getApp()->getArgs().activateChannel;
+        auto desired = this->appArgs.activateChannel;
         if (desired)
         {
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
@@ -415,7 +432,7 @@ void WindowManager::initialize()
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getApp()->getArgs().isFramelessEmbed)
+    if (this->appArgs.isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -428,7 +445,7 @@ void WindowManager::initialize()
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getApp()->getArgs().isFramelessEmbed)
+        if (this->appArgs.isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -437,7 +454,7 @@ void WindowManager::initialize()
 
 void WindowManager::save()
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (this->appArgs.dontSaveSettings)
     {
         return;
     }
@@ -780,7 +797,7 @@ void WindowManager::closeAll()
 
     for (Window *window : windows_)
     {
-        window->close();
+        closeWindowsRecursive(window);
     }
 }
 
@@ -801,7 +818,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getApp()->getArgs().dontLoadMainWindow)
+    if (this->appArgs.dontLoadMainWindow)
     {
         return;
     }

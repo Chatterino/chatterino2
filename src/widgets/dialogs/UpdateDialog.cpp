@@ -15,6 +15,8 @@ UpdateDialog::UpdateDialog()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost,
                   BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave})
 {
+    this->windowDeactivateAction = WindowDeactivateAction::Delete;
+
     auto layout =
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
@@ -42,8 +44,8 @@ UpdateDialog::UpdateDialog()
                                           this->updateStatusChanged(status);
                                       });
 
-    this->setScaleIndependantHeight(150);
-    this->setScaleIndependantWidth(250);
+    this->setScaleIndependentHeight(150);
+    this->setScaleIndependentWidth(250);
 }
 
 void UpdateDialog::updateStatusChanged(Updates::Status status)

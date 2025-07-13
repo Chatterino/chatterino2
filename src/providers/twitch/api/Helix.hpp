@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
@@ -809,6 +810,66 @@ struct HelixPaginationState {
     bool done;
 };
 
+struct HelixCreateEventSubSubscriptionResponse {
+    QString subscriptionID;
+    QString subscriptionStatus;
+    QString subscriptionType;
+    QString subscriptionVersion;
+    QJsonObject subscriptionCondition;
+    QString subscriptionCreatedAt;
+    QString subscriptionSessionID;
+    QString subscriptionConnectedAt;
+    int subscriptionCost;
+
+    int total;
+    int totalCost;
+    int maxTotalCost;
+
+    explicit HelixCreateEventSubSubscriptionResponse(
+        const QJsonObject &jsonObject)
+    {
+        {
+            auto jsonData = jsonObject.value("data").toArray().at(0).toObject();
+            this->subscriptionID = jsonData.value("id").toString();
+            this->subscriptionStatus = jsonData.value("status").toString();
+            this->subscriptionType = jsonData.value("type").toString();
+            this->subscriptionVersion = jsonData.value("version").toString();
+            this->subscriptionCondition =
+                jsonData.value("condition").toObject();
+            this->subscriptionCreatedAt =
+                jsonData.value("created_at").toString();
+            this->subscriptionSessionID = jsonData.value("transport")
+                                              .toObject()
+                                              .value("session_id")
+                                              .toString();
+            this->subscriptionConnectedAt = jsonData.value("transport")
+                                                .toObject()
+                                                .value("connected_at")
+                                                .toString();
+            this->subscriptionCost = jsonData.value("cost").toInt();
+        }
+
+        this->total = jsonObject.value("total").toInt();
+        this->totalCost = jsonObject.value("total_cost").toInt();
+        this->maxTotalCost = jsonObject.value("max_total_cost").toInt();
+    }
+
+    friend QDebug &operator<<(
+        QDebug &dbg, const HelixCreateEventSubSubscriptionResponse &data);
+};
+
+enum class HelixCreateEventSubSubscriptionError : std::uint8_t {
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    Conflict,
+    Ratelimited,
+    NoSession,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 class IHelix
 {
 public:
@@ -1148,6 +1209,18 @@ public:
     virtual void getFollowedChannel(
         QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
+    virtual void createEventSubSubscription(
+        const eventsub::SubscriptionRequest &request, const QString &sessionID,
+        ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+        FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+            failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#delete-eventsub-subscription
+    virtual void deleteEventSubSubscription(
+        const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
@@ -1491,6 +1564,18 @@ public:
     void getFollowedChannel(
         QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+        FailureCallback<QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
+    void createEventSubSubscription(
+        const eventsub::SubscriptionRequest &request, const QString &sessionID,
+        ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+        FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+            failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#delete-eventsub-subscription
+    void deleteEventSubSubscription(
+        const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;

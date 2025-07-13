@@ -1,0 +1,19 @@
+{
+    "input": {
+        "banned_at": "2023-05-20T12:30:55.518375571Z",
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "ends_at": "2023-05-20T12:40:55.518375571Z",
+        "is_permanent": false,
+        "moderator_user_id": "29024944",
+        "moderator_user_login": "CLIModerator",
+        "moderator_user_name": "CLIModerator",
+        "reason": "This is a test event",
+        "user_id": "40389552",
+        "user_login": "testFromUser",
+        "user_name": "testFromUser"
+    },
+    "output": [
+    ]
+}

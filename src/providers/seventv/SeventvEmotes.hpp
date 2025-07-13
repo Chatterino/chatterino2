@@ -21,9 +21,9 @@ namespace chatterino {
 class ImageSet;
 class Channel;
 namespace seventv::eventapi {
-    struct EmoteAddDispatch;
-    struct EmoteUpdateDispatch;
-    struct EmoteRemoveDispatch;
+struct EmoteAddDispatch;
+struct EmoteUpdateDispatch;
+struct EmoteRemoveDispatch;
 }  // namespace seventv::eventapi
 
 // https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L29-L36
@@ -86,7 +86,7 @@ using SeventvEmoteSetFlags = FlagsEnum<SeventvEmoteSetFlag>;
 
 namespace seventv::detail {
 
-    EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal);
+EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal);
 
 }  // namespace seventv::detail
 
@@ -108,7 +108,7 @@ public:
     static void loadChannelEmotes(
         const std::weak_ptr<Channel> &channel, const QString &channelId,
         std::function<void(EmoteMap &&, ChannelInfo)> callback,
-        bool manualRefresh);
+        bool manualRefresh, bool cacheHit);
 
     /**
      * Adds an emote to the `map` if it's valid.

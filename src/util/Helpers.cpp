@@ -1,11 +1,20 @@
 #include "util/Helpers.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Paths.hpp"
 
+#include <QDateTime>
 #include <QDirIterator>
+#include <QJsonObject>
 #include <QLocale>
+#include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
+#include <QStringView>
+#include <QThreadPool>
+#include <QTimeZone>
 #include <QUuid>
 
 namespace {
@@ -24,104 +33,104 @@ namespace chatterino {
 
 namespace helpers::detail {
 
-    SizeType skipSpace(QStringView view, SizeType startPos)
+SizeType skipSpace(QStringView view, SizeType startPos)
+{
+    while (startPos < view.length() && view.at(startPos).isSpace())
     {
-        while (startPos < view.length() && view.at(startPos).isSpace())
-        {
-            startPos++;
-        }
-        return startPos - 1;
+        startPos++;
     }
+    return startPos - 1;
+}
 
-    bool matchesIgnorePlural(QStringView word, const QString &expected)
+bool matchesIgnorePlural(QStringView word, const QString &expected)
+{
+    if (!word.startsWith(expected))
     {
-        if (!word.startsWith(expected))
-        {
-            return false;
-        }
-        if (word.length() == expected.length())
-        {
-            return true;
-        }
-        return word.length() == expected.length() + 1 &&
-               word.at(word.length() - 1).toLatin1() == 's';
+        return false;
     }
-
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
-                                                      SizeType &pos)
+    if (word.length() == expected.length())
     {
-        // Step 1. find end of unit
-        auto startIdx = pos;
-        auto endIdx = view.length();
-        for (; pos < view.length(); pos++)
-        {
-            auto c = view.at(pos);
-            if (c.isSpace() || c.isDigit())
-            {
-                endIdx = pos;
-                break;
-            }
-        }
-        pos--;
+        return true;
+    }
+    return word.length() == expected.length() + 1 &&
+           word.at(word.length() - 1).toLatin1() == 's';
+}
 
-        // TODO(QT6): use sliced (more readable)
-        auto unit = view.mid(startIdx, endIdx - startIdx);
-        if (unit.isEmpty())
+std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
+                                                  SizeType &pos)
+{
+    // Step 1. find end of unit
+    auto startIdx = pos;
+    auto endIdx = view.length();
+    for (; pos < view.length(); pos++)
+    {
+        auto c = view.at(pos);
+        if (c.isSpace() || c.isDigit())
         {
-            return std::make_pair(0, false);
+            endIdx = pos;
+            break;
         }
+    }
+    pos--;
 
-        auto first = unit.at(0).toLatin1();
-        switch (first)
-        {
-            case 's': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("second")))
-                {
-                    return std::make_pair(1, true);
-                }
-            }
-            break;
-            case 'm': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("minute")))
-                {
-                    return std::make_pair(60, true);
-                }
-                if ((unit.length() == 2 && unit.at(1).toLatin1() == 'o') ||
-                    matchesIgnorePlural(unit, QStringLiteral("month")))
-                {
-                    return std::make_pair(60 * 60 * 24 * 30, true);
-                }
-            }
-            break;
-            case 'h': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("hour")))
-                {
-                    return std::make_pair(60 * 60, true);
-                }
-            }
-            break;
-            case 'd': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("day")))
-                {
-                    return std::make_pair(60 * 60 * 24, true);
-                }
-            }
-            break;
-            case 'w': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("week")))
-                {
-                    return std::make_pair(60 * 60 * 24 * 7, true);
-                }
-            }
-            break;
-        }
+    // TODO(QT6): use sliced (more readable)
+    auto unit = view.mid(startIdx, endIdx - startIdx);
+    if (unit.isEmpty())
+    {
         return std::make_pair(0, false);
     }
+
+    auto first = unit.at(0).toLatin1();
+    switch (first)
+    {
+        case 's': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("second")))
+            {
+                return std::make_pair(1, true);
+            }
+        }
+        break;
+        case 'm': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("minute")))
+            {
+                return std::make_pair(60, true);
+            }
+            if ((unit.length() == 2 && unit.at(1).toLatin1() == 'o') ||
+                matchesIgnorePlural(unit, QStringLiteral("month")))
+            {
+                return std::make_pair(60 * 60 * 24 * 30, true);
+            }
+        }
+        break;
+        case 'h': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("hour")))
+            {
+                return std::make_pair(60 * 60, true);
+            }
+        }
+        break;
+        case 'd': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("day")))
+            {
+                return std::make_pair(60 * 60 * 24, true);
+            }
+        }
+        break;
+        case 'w': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("week")))
+            {
+                return std::make_pair(60 * 60 * 24 * 7, true);
+            }
+        }
+        break;
+    }
+    return std::make_pair(0, false);
+}
 
 }  // namespace helpers::detail
 using namespace helpers::detail;
@@ -312,6 +321,156 @@ QLocale getSystemLocale()
 #endif
 
     return QLocale::system();
+}
+
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
+{
+    auto msSinceEpoch =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(time)
+            .time_since_epoch();
+    auto dt = QDateTime::fromMSecsSinceEpoch(msSinceEpoch.count());
+
+#if CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        dt = dt.toUTC();
+    }
+#endif
+
+    return dt;
+}
+
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
+{
+    if (end <= begin || begin < 0)
+    {
+        return {};
+    }
+
+    qsizetype n = 0;
+    const QChar *pos = str.begin();
+    const QChar *endPos = str.end();
+
+    const QChar *sliceBegin = nullptr;
+    while (n < end)
+    {
+        if (pos >= endPos)
+        {
+            return {};
+        }
+        if (n == begin)
+        {
+            sliceBegin = pos;
+        }
+
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < endPos && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        n++;
+    }
+    assert(pos <= endPos);
+
+    return {sliceBegin, pos};
+}
+
+void removeFirstQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeFirst();
+#else
+    str.remove(0, 1);
+#endif
+}
+
+void removeLastQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeLast();
+#else
+    str.chop(1);
+#endif
+}
+
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes)
+{
+    auto *threadPool = QThreadPool::globalInstance();
+    if (threadPool == nullptr)
+    {
+        // Must be exiting - do nothing
+        return;
+    }
+
+    threadPool->start([bytes, id, provider]() {
+        QString cacheKey = id % "." % provider;
+        QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
+
+        if (responseCache.open(QIODevice::WriteOnly))
+        {
+            qCDebug(chatterinoCache)
+                << "Saved json response " << id << "." << provider;
+            responseCache.write(qCompress(bytes));
+        }
+    });
+}
+
+bool readProviderEmotesCache(const QString &id, const QString &provider,
+                             const std::function<void(QJsonDocument)> &callback)
+{
+    QString cacheKey = id % "." % provider;
+    QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
+
+    if (responseCache.open(QIODevice::ReadOnly))
+    {
+        QJsonParseError parseError;
+        auto doc = QJsonDocument::fromJson(qUncompress(responseCache.readAll()),
+                                           &parseError);
+
+        if (parseError.error != QJsonParseError::NoError)
+        {
+            qCWarning(chatterinoCache)
+                << "Emote cache " << id << "." << provider
+                << " parsing failed: " << parseError.errorString();
+        }
+
+        qCDebug(chatterinoCache)
+            << "Loaded emote cache: " << id << "." << provider;
+        callback(doc);
+        return true;
+    }
+
+    // If the API call fails, we need to know if loading cached emotes was successful
+    return false;
+}
+
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QStringView needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + needle.size()),
+    };
+}
+
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QChar needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + 1),
+    };
 }
 
 }  // namespace chatterino

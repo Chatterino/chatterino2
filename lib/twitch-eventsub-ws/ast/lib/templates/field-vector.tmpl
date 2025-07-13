@@ -1,0 +1,14 @@
+{% if field.tag -%}
+static_assert(false && "JSON tag support is not implemented for vectors");
+{%- endif %}
+std::vector<{{field.type_name}}> v{{field.name}};
+const auto *jv{{field.name}} = root.if_contains("{{field.json_name}}");
+if (jv{{field.name}} != nullptr && !jv{{field.name}}->is_null()) {
+    auto {{field.name}} = boost::json::try_value_to<std::vector<{{field.type_name}}>>(*jv{{field.name}});
+    if ({{field.name}}.has_error())
+    {
+        {% include 'error-failed-to-deserialize.tmpl' indent content %}
+    } else {
+        v{{field.name}} = std::move({{field.name}}.value());
+    }
+}

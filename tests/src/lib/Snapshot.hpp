@@ -70,6 +70,9 @@ public:
     /// Finds all tests in @a category
     static QStringList discover(const QString &category);
 
+    /// Finds all 1-level nested tests in @a category (category/foo/bar)
+    static QStringList discoverNested(const QString &category);
+
     /// @brief Runs the snapshot test
     ///
     /// If @a updateSnapshots is `false`, this checks that @a got matches the

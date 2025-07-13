@@ -165,21 +165,23 @@ bool EditableModelView::filterSearchResults(const QString &query,
 
     for (int i = 0; i < rowAmount; i++)
     {
-        tableView_->hideRow(i);
-    }
-    for (int j : columnSelect)
-    {
-        for (int i = 0; i < rowAmount; i++)
+        bool foundMatch = false;
+
+        for (int j : columnSelect)
         {
             QModelIndex idx = model_->index(i, j);
             QVariant a = model_->data(idx);
             if (a.toString().contains(query, Qt::CaseInsensitive))
             {
-                tableView_->showRow(i);
+                foundMatch = true;
                 searchFoundSomething = true;
+                break;
             }
         }
+
+        tableView_->setRowHidden(i, !foundMatch);
     }
+
     return searchFoundSomething;
 }
 
@@ -187,10 +189,8 @@ void EditableModelView::filterSearchResultsHotkey(
     const QKeySequence &keySequenceQuery)
 {
     auto rowAmount = this->model_->rowCount();
-    for (int i = 0; i < rowAmount; i++)
-    {
-        tableView_->hideRow(i);
-    }
+
+
     for (int i = 0; i < rowAmount; i++)
     {
         QModelIndex idx = model_->index(i, 1);
@@ -202,6 +202,10 @@ void EditableModelView::filterSearchResultsHotkey(
         if (keySequenceQuery.matches(seq) != QKeySequence::NoMatch)
         {
             tableView_->showRow(i);
+        }
+        else
+        {
+            tableView_->hideRow(i);
         }
     }
 }

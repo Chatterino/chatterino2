@@ -1,7 +1,5 @@
 #pragma once
 
-#include "singletons/NativeMessaging.hpp"
-
 #include <cassert>
 #include <memory>
 
@@ -54,9 +52,13 @@ class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
 class ITwitchUsers;
+class NativeMessagingServer;
 namespace pronouns {
-    class Pronouns;
+class Pronouns;
 }  // namespace pronouns
+namespace eventsub {
+class IController;
+}  // namespace eventsub
 
 class IApplication
 {
@@ -109,6 +111,7 @@ public:
     virtual IStreamerMode *getStreamerMode() = 0;
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
+    virtual eventsub::IController *getEventSub() = 0;
 };
 
 class Application : public IApplication
@@ -135,7 +138,8 @@ public:
 
     void initialize(Settings &settings, const Paths &paths);
     void load();
-    void save();
+    void aboutToQuit();
+    void stop();
 
     int run();
 
@@ -144,9 +148,10 @@ public:
 private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
-    const std::unique_ptr<Logging> logging;
+    std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
+    std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
     std::unique_ptr<WindowManager> windows;
     std::unique_ptr<Toasts> toasts;
@@ -221,17 +226,16 @@ public:
     SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;
     pronouns::Pronouns *getPronouns() override;
+    eventsub::IController *getEventSub() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
     ITwitchUsers *getTwitchUsers() override;
 
 private:
-    void initBttvLiveUpdates();
-    void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
-    NativeMessagingServer nmServer;
+    std::unique_ptr<NativeMessagingServer> nmServer;
     Updates &updates;
 
     bool initialized{false};
@@ -241,5 +245,7 @@ IApplication *getApp();
 
 /// Might return `nullptr` if the app is being destroyed
 IApplication *tryGetApp();
+
+bool isAppAboutToQuit();
 
 }  // namespace chatterino

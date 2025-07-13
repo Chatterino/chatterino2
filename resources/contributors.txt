@@ -80,6 +80,12 @@ nealxm | https://github.com/nealxm | :/avatars/nealxm.png
 Niller2005 | https://github.com/Niller2005 | :/avatars/niller2005.png
 JakeRYW | https://github.com/JakeRYW | :/avatars/jakeryw.png
 maliByatzes | https://github.com/maliByatzes | :/avatars/maliByatzes.png
+Zakary2841 | https://github.com/Zakary2841 | :/avatars/zakary2841.png
+MiguVT | https://github.com/MiguVT | :/avatars/miguvt.png
+jacob-thompson | https://github.com/jacob-thompson |
+Jujufrost | https://github.com/Jujufrost |
+occluder | https://github.com/occluder | :/avatars/occluder.png
+knobby-tires | https://github.com/knobby-tires | :/avatars/knobby-tires.jpg
 
 # If you are a contributor add yourself above this line
 
@@ -91,5 +97,6 @@ Ian321 | https://github.com/Ian321 |
 Yardanico | https://github.com/Yardanico |
 huti26 | https://github.com/huti26 |
 chrisduerr | https://github.com/chrisduerr |
+ynot01 | https://github.com/ynot01 | :/avatars/ynot01.png
 
 # Otherwise add yourself right above this one

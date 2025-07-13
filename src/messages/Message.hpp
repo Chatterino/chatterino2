@@ -44,6 +44,8 @@ struct Message {
     QString id;
     QString searchText;
     QString messageText;
+    // TODO: This field is used ambiguously, it could use a comment or a name change to
+    // clarify the intent of the field
     QString loginName;
     QString displayName;
     QString localizedName;
@@ -60,6 +62,29 @@ struct Message {
     // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
     MessagePtr replyParent;
+    enum class ReplyStatus : std::uint8_t {
+        /// message has no reply thread, and message is not replyable
+        ///
+        /// e.g. due to message being deleted or too old
+        NotReplyable,
+
+        /// message has no reply thread, but message is replyable
+        Replyable,
+
+        /// message is part of a reply thread. both message & thread are replyable
+        ReplyableWithThread,
+
+        /// message is part of a reply thread. thread is replyable, but message is not replyable
+        ///
+        /// e.g. due to message being deleted or too old
+        NotReplyableWithThread,
+
+        /// message is part of a reply thread. neither reply or message is replyable
+        ///
+        /// e.g. due to message at the top of the thread being deleted
+        NotReplyableDueToThread,
+    };
+    ReplyStatus isReplyable() const;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 

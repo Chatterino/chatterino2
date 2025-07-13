@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -73,7 +73,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification",
+            "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "",

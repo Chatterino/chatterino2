@@ -15,11 +15,11 @@ public:
     {
         if (this->vertical_)
         {
-            this->setScaleIndependantWidth(8);
+            this->setScaleIndependentWidth(8);
         }
         else
         {
-            this->setScaleIndependantHeight(8);
+            this->setScaleIndependentHeight(8);
         }
     }
 

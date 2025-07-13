@@ -11,6 +11,7 @@
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -220,6 +221,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(c2);
+    lua::api::WebSocket::createUserType(c2, plugin);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
@@ -276,6 +278,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     }
     temp->dataDirectory().mkpath(".");
 
+    // make sure we capture log messages during load
+    this->onPluginLoaded(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -426,6 +430,11 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     }
 
     return {false, results};
+}
+
+WebSocketPool &PluginController::webSocketPool()
+{
+    return this->webSocketPool_;
 }
 
 }  // namespace chatterino

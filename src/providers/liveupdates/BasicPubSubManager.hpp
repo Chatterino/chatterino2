@@ -159,16 +159,16 @@ public:
         // There is a case where a new client was initiated but not added to the clients list.
         // We just don't join the thread & let the operating system nuke the thread if joining fails
         // within 1s.
-        if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
         {
             this->mainThread_->join();
             return;
         }
 
         qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish within 1 second, force-stop the client";
+            << "Thread didn't finish within 100ms, force-stop the client";
         this->websocketClient_.stop();
-        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
         {
             this->mainThread_->join();
             return;
@@ -336,13 +336,14 @@ private:
 
     WebsocketContextPtr onTLSInit(const websocketpp::connection_hdl & /*hdl*/)
     {
-        WebsocketContextPtr ctx(
-            new boost::asio::ssl::context(boost::asio::ssl::context::tlsv12));
+        WebsocketContextPtr ctx(new boost::asio::ssl::context(
+            boost::asio::ssl::context::tls_client));
 
         try
         {
             ctx->set_options(boost::asio::ssl::context::default_workarounds |
-                             boost::asio::ssl::context::no_sslv2 |
+                             boost::asio::ssl::context::no_tlsv1 |
+                             boost::asio::ssl::context::no_tlsv1_1 |
                              boost::asio::ssl::context::single_dh_use);
         }
         catch (const std::exception &e)
@@ -401,22 +402,22 @@ private:
         return false;
     }
 
+    std::vector<Subscription> pendingSubscriptions_;
+    std::atomic<bool> addingClient_{false};
+    ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
+
+    liveupdates::WebsocketClient websocketClient_;
+    std::unique_ptr<std::thread> mainThread_;
+    OnceFlag stoppedFlag_;
+
     std::map<liveupdates::WebsocketHandle,
              std::shared_ptr<BasicPubSubClient<Subscription>>,
              std::owner_less<liveupdates::WebsocketHandle>>
         clients_;
 
-    std::vector<Subscription> pendingSubscriptions_;
-    std::atomic<bool> addingClient_{false};
-    ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
-
     std::shared_ptr<boost::asio::executor_work_guard<
         boost::asio::io_context::executor_type>>
         work_{nullptr};
-
-    liveupdates::WebsocketClient websocketClient_;
-    std::unique_ptr<std::thread> mainThread_;
-    OnceFlag stoppedFlag_;
 
     const QString host_;
 

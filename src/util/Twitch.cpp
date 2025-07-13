@@ -11,16 +11,16 @@ namespace chatterino {
 
 namespace {
 
-    const auto TWITCH_USER_LOGIN_PATTERN = R"(^[a-z0-9]\w{0,24}$)";
+const auto TWITCH_USER_LOGIN_PATTERN = R"(^[a-z0-9]\w{0,24}$)";
 
-    // Remember to keep VALID_HELIX_COLORS up-to-date if a new color is implemented to keep naming for users consistent
-    const std::unordered_map<QString, QString> HELIX_COLOR_REPLACEMENTS{
-        {"blueviolet", "blue_violet"},   {"cadetblue", "cadet_blue"},
-        {"dodgerblue", "dodger_blue"},   {"goldenrod", "golden_rod"},
-        {"hotpink", "hot_pink"},         {"orangered", "orange_red"},
-        {"seagreen", "sea_green"},       {"springgreen", "spring_green"},
-        {"yellowgreen", "yellow_green"},
-    };
+// Remember to keep VALID_HELIX_COLORS up-to-date if a new color is implemented to keep naming for users consistent
+const std::unordered_map<QString, QString> HELIX_COLOR_REPLACEMENTS{
+    {"blueviolet", "blue_violet"},   {"cadetblue", "cadet_blue"},
+    {"dodgerblue", "dodger_blue"},   {"goldenrod", "golden_rod"},
+    {"hotpink", "hot_pink"},         {"orangered", "orange_red"},
+    {"seagreen", "sea_green"},       {"springgreen", "spring_green"},
+    {"yellowgreen", "yellow_green"},
+};
 
 }  // namespace
 
@@ -60,6 +60,16 @@ void stripChannelName(QString &channelName)
     {
         channelName.chop(1);
     }
+}
+
+QString cleanChannelName(const QString &dirtyChannelName)
+{
+    if (dirtyChannelName.startsWith('#'))
+    {
+        return dirtyChannelName.mid(1).toLower();
+    }
+
+    return dirtyChannelName.toLower();
 }
 
 std::pair<ParsedUserName, ParsedUserID> parseUserNameOrID(const QString &input)
