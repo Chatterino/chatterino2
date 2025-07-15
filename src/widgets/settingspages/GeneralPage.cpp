@@ -520,6 +520,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "When enabled, messages deleted by moderators will be hidden.")
         ->addTo(layout);
 
+    layout.addDropdown<int>(
+        "Limit message height",
+        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
+        s.collpseMessagesMinLines,
+        [](auto val) {
+            return val ? QString::number(val) + " lines" : QString("Never");
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 0);
+        });
     layout.addDropdown<QString>(
         "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -538,16 +548,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
-    layout.addDropdown<int>(
-        "Limit message height",
-        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
-        s.collpseMessagesMinLines,
-        [](auto val) {
-            return val ? QString::number(val) + " lines" : QString("Never");
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 0);
-        });
+
+    SettingWidget::checkbox("Use Timestamp format for log files.",
+                            s.customLogTimestamp)
+        ->setTooltip("Uses the selected Timestamp format for log files as "
+                     "well as messages instead of the default hh:mm:ss.")
+        ->addTo(layout);
+
     layout.addSeparator();
 
     SettingWidget::checkbox("Draw a line below the most recent message before "

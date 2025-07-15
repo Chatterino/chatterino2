@@ -183,7 +183,12 @@ void LoggingChannel::addMessage(const MessagePtr &message,
     }
 
     str.append('[');
-    str.append(now.toString("HH:mm:ss"));
+    QString timestampFormat = "HH:mm:ss";
+    if (getSettings()->customLogTimestamp)
+    {
+        timestampFormat = getSettings()->timestampFormat;
+    }
+    str.append(now.toString(timestampFormat));
     str.append("] ");
 
     QString messageText;

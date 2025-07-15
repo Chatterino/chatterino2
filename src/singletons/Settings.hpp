@@ -152,6 +152,8 @@ public:
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
+    BoolSetting customLogTimestamp = {
+        "/appearance/messages/customLogTimestamp", false};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     EnumSetting<LastMessageLineStyle> lastMessagePattern = {
