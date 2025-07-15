@@ -520,18 +520,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "When enabled, messages deleted by moderators will be hidden.")
         ->addTo(layout);
 
-    layout.addDropdown<int>(
-        "Limit message height",
-        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
-        s.collpseMessagesMinLines,
-        [](auto val) {
-            return val ? QString::number(val) + " lines" : QString("Never");
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 0);
-        });
     layout.addDropdown<QString>(
-        "Timestamp format",
+        "Message Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
          "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
@@ -549,11 +539,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         true, "a = am/pm, zzz = milliseconds");
 
-    SettingWidget::checkbox("Use Timestamp format for log files.",
-                            s.customLogTimestamp)
-        ->setTooltip("Uses the selected Timestamp format for log files as "
-                     "well as messages instead of the default hh:mm:ss.")
-        ->addTo(layout);
+    layout.addDropdown<QString>(
+        "Log File Timestamp format",
+        {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
+         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
+         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
+        s.logTimestampFormat,
+        [](auto val) {
+            return val;
+        },
+        [](auto args) {
+            return args.value;
+        },
+        true, "a = am/pm, zzz = milliseconds");
+
+    layout.addDropdown<int>(
+        "Limit message height",
+        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
+        s.collpseMessagesMinLines,
+        [](auto val) {
+            return val ? QString::number(val) + " lines" : QString("Never");
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 0);
+        });
 
     layout.addSeparator();
 
