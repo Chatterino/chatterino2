@@ -548,7 +548,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto val) {
             return val;
         },
-        [](auto args) {
+        [](const auto& args) {
             return args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
