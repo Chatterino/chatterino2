@@ -153,7 +153,9 @@ public:
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     QStringSetting logTimestampFormat = {
-        "/appearance/messages/logTimestampFormat", "hh:mm:ss"};
+        "/appearance/messages/logTimestampFormat",
+        "hh:mm:ss",
+    };
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     EnumSetting<LastMessageLineStyle> lastMessagePattern = {
