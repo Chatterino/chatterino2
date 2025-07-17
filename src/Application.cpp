@@ -607,6 +607,8 @@ void Application::aboutToQuit()
 
     this->hotkeys->save();
     this->windows->save();
+
+    this->windows->closeAll();
 }
 
 void Application::stop()
@@ -664,6 +666,9 @@ void Application::initNm(const Paths &paths)
 IApplication *getApp()
 {
     assert(INSTANCE != nullptr);
+    if (STOPPED.load() == true) {
+	    __debugbreak();
+    }
     assert(STOPPED.load() == false);
 
     return INSTANCE;
