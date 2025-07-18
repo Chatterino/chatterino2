@@ -175,9 +175,7 @@ public:
         }
 
         qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish after stopping, discard it";
-        // detach the thread so the destructor doesn't attempt any joining
-        this->mainThread_->detach();
+            << "Thread didn't finish after stopping";
     }
 
 protected:

@@ -66,6 +66,7 @@
 - Dev: Implemented customizable display names for enums. (#6238)
 - Dev: Refactored event API initialization away from Application and into TwitchIrcServer. (#6198)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
+- Dev: Don't detach threads. (#6333)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
