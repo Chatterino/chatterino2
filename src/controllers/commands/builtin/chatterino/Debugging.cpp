@@ -152,7 +152,7 @@ QString incrementImageGeneration(const CommandContext & /*ctx*/)
     return {};
 }
 
-QString invalidateBuffers(const CommandContext &ctx)
+QString invalidateBuffers(const CommandContext & /*ctx*/)
 {
     getApp()->getWindows()->invalidateChannelViewBuffers();
     return {};
