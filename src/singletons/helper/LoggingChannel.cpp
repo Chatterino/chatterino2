@@ -166,7 +166,9 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
 void LoggingChannel::addMessage(const MessagePtr &message,
                                 const QString &streamID)
 {
-    QString messageDateString = generateDateString(message->serverReceivedTime);
+    QDateTime now = QDateTime::currentDateTime();
+
+    QString messageDateString = generateDateString(now);
     if (messageDateString != this->dateString)
     {
         this->dateString = messageDateString;
@@ -184,7 +186,7 @@ void LoggingChannel::addMessage(const MessagePtr &message,
     if (logTimestampFormat != "Disable")
     {
         str.append('[');
-        str.append(message->serverReceivedTime.toString(logTimestampFormat));
+        str.append(now.toString(logTimestampFormat));
         str.append("] ");
     }
 
