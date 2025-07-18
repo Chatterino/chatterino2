@@ -235,7 +235,6 @@ MiniaudioBackend::~MiniaudioBackend()
 
         qCWarning(chatterinoSound)
             << "Audio thread did not stop within 1 second";
-        this->audioThread->detach();
     }
 }
 
