@@ -165,6 +165,13 @@ ModerationPage::ModerationPage()
         logTimestampFormat->setToolTip("a = am/pm, zzz = milliseconds");
         logsTimestampFormatLayout.append(logTimestampFormat);
 
+        QCheckBox *logTimestampFromMessage =
+            this->createCheckBox("Use server recieve timestamp from message for logging",
+                                 getSettings()->logTimestampFromMessage);
+
+        logTimestampFromMessage->setEnabled(getSettings()->enableLogging);
+        logs.append(logTimestampFromMessage);
+
         QCheckBox *onlyLogListedChannels =
             this->createCheckBox("Only log channels listed below",
                                  getSettings()->onlyLogListedChannels);

@@ -571,6 +571,10 @@ public:
         "/logging/logTimestampFormat",
         "hh:mm:ss",
     };
+    BoolSetting logTimestampFromMessage = {
+        "/logging/logTimestampFromMessage",
+        false,
+    };
     QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
