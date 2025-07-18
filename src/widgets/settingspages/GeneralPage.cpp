@@ -539,20 +539,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         true, "a = am/pm, zzz = milliseconds");
 
-    layout.addDropdown<QString>(
-        "Log File Timestamp format",
-        {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
-         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
-        s.logTimestampFormat,
-        [](auto val) {
-            return val;
-        },
-        [](const auto &args) {
-            return args.value;
-        },
-        true, "a = am/pm, zzz = milliseconds");
-
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
