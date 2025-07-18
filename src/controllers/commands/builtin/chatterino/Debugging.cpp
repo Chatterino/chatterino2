@@ -140,7 +140,7 @@ QString forceImageUnload(const CommandContext &ctx)
     return "";
 }
 
-QString forceLayoutChannelViews(const CommandContext &ctx)
+QString forceLayoutChannelViews(const CommandContext & /*ctx*/)
 {
     getApp()->getWindows()->forceLayoutChannelViews();
     return {};
