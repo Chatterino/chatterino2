@@ -568,7 +568,7 @@ public:
         false,
     };
     QStringSetting logTimestampFormat = {
-        "/appearance/messages/logTimestampFormat",
+        "/logging/logTimestampFormat",
         "hh:mm:ss",
     };
     QStringSetting logPath = {"/logging/path", ""};
