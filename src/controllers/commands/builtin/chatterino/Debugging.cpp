@@ -146,7 +146,7 @@ QString forceLayoutChannelViews(const CommandContext & /*ctx*/)
     return {};
 }
 
-QString incrementImageGeneration(const CommandContext &ctx)
+QString incrementImageGeneration(const CommandContext & /*ctx*/)
 {
     getApp()->getWindows()->incGeneration();
     return {};
