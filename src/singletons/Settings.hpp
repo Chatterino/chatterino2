@@ -152,10 +152,6 @@ public:
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
-    QStringSetting logTimestampFormat = {
-        "/appearance/messages/logTimestampFormat",
-        "hh:mm:ss",
-    };
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     EnumSetting<LastMessageLineStyle> lastMessagePattern = {
@@ -571,7 +567,10 @@ public:
         "/logging/separatelyStoreStreamLogs",
         false,
     };
-
+    QStringSetting logTimestampFormat = {
+        "/appearance/messages/logTimestampFormat",
+        "hh:mm:ss",
+    };
     QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
