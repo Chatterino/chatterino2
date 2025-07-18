@@ -735,8 +735,8 @@ void ChannelView::layoutVisibleMessages(
 
             y += message->getHeight();
         }
+        this->bufferInvalidationQueued_ = false;
     }
-    this->bufferInvalidationQueued_ = false;
 
     if (redrawRequired)
     {
