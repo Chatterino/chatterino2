@@ -16,7 +16,7 @@ public:
 
 private:
     QTimer commandsEditTimer_;
-    EditableModelView *view_;
+    EditableModelView *view;
 };
 
 }  // namespace chatterino

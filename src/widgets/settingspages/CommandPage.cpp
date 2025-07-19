@@ -85,18 +85,16 @@ CommandPage::CommandPage()
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    EditableModelView *view =
-        layout
-            .emplace<EditableModelView>(
-                getApp()->getCommands()->createModel(nullptr))
-            .getElement();
-    this->view_ = view;
+    this->view = layout
+                     .emplace<EditableModelView>(
+                         getApp()->getCommands()->createModel(nullptr))
+                     .getElement();
 
-    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    this->view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
+    std::ignore = this->view->addButtonPressed.connect([] {
         getApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
@@ -105,7 +103,7 @@ CommandPage::CommandPage()
     if (QFile(c1settingsPath()).exists())
     {
         auto *button = new QPushButton("Import commands from Chatterino 1");
-        view->addCustomButton(button);
+        this->view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {
             QFile c1settings(c1settingsPath());
@@ -137,29 +135,30 @@ CommandPage::CommandPage()
 
     // NOTE: These signals mean that the duplicate check happens in the middle of a row being moved, where he index can be wrong.
     // This should be reconsidered, or potentially changed in the signalvectormodel. Or maybe we rely on a SignalVectorModel signal instead
-    QObject::connect(view_->getModel(), &QAbstractItemModel::rowsInserted, this,
-                     [this, duplicateWarning]() {
-                         checkCommandDuplicates(view_, duplicateWarning);
+    QObject::connect(this->view->getModel(), &QAbstractItemModel::rowsInserted,
+                     this, [this, duplicateWarning]() {
+                         checkCommandDuplicates(this->view, duplicateWarning);
                      });
 
-    QObject::connect(view_->getModel(), &QAbstractItemModel::rowsRemoved, this,
-                     [this, duplicateWarning]() {
-                         checkCommandDuplicates(view_, duplicateWarning);
+    QObject::connect(this->view->getModel(), &QAbstractItemModel::rowsRemoved,
+                     this, [this, duplicateWarning]() {
+                         checkCommandDuplicates(this->view, duplicateWarning);
                      });
 
-    QObject::connect(view_->getModel(), &QAbstractItemModel::dataChanged, this,
-                     [this, duplicateWarning](const QModelIndex &topLeft,
-                                              const QModelIndex &bottomRight,
-                                              const QVector<int> &roles) {
-                         (void)topLeft;
-                         (void)bottomRight;
-                         if (roles.contains(Qt::EditRole))
-                         {
-                             checkCommandDuplicates(view_, duplicateWarning);
-                         }
-                     });
+    QObject::connect(
+        this->view->getModel(), &QAbstractItemModel::dataChanged, this,
+        [this, duplicateWarning](const QModelIndex &topLeft,
+                                 const QModelIndex &bottomRight,
+                                 const QVector<int> &roles) {
+            (void)topLeft;
+            (void)bottomRight;
+            if (roles.contains(Qt::EditRole))
+            {
+                checkCommandDuplicates(this->view, duplicateWarning);
+            }
+        });
 
-    checkCommandDuplicates(view_, duplicateWarning);
+    checkCommandDuplicates(this->view, duplicateWarning);
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
@@ -169,7 +168,7 @@ bool CommandPage::filterElements(const QString &query)
 {
     std::array fields{0, 1};
 
-    return this->view_->filterSearchResults(query, fields);
+    return this->view->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
