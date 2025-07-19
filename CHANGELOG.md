@@ -15,6 +15,7 @@
 - Minor: Allow disabling of double-click tab renaming through setting. (#6163, #6184)
 - Minor: The JSON selector in the upload response can now query arrays using their indices like `foo.0`. (#6193)
 - Minor: Made nicknames searchable in the Settings dialog search bar. (#5886)
+- Minor: Made commands searchable using the Settings dialog search bar. (#5891)
 - Minor: Added hotkey Action for opening account selector. (#6192)
 - Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
 - Minor: Add an import and export button to image uploader settings. (#6284)
