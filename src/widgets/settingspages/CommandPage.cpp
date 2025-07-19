@@ -1,14 +1,12 @@
 #include "widgets/settingspages/CommandPage.hpp"
 
 #include "Application.hpp"
-#include "common/Literals.hpp"
+#include "common/Literals.hpp"  // IWYU pragma: keep
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/CommandModel.hpp"
-#include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QColor>
