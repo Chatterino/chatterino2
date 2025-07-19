@@ -19,6 +19,7 @@
 - Minor: Added hotkey Action for opening account selector. (#6192)
 - Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
 - Minor: Add an import and export button to image uploader settings. (#6284)
+- Minor: Add a setting under Moderation -> Logs to customize the timestamp used for chat logs. (#6338)
 - Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
@@ -41,6 +42,7 @@
 - Bugfix: Fixed a crash that could occur when eventsub was enabled and Chatterino was attached to a conhost on Windows that was later gone. (#6161)
 - Bugfix: Fixed a crash that could occur an eventsub connection's keepalive timer would run after the connection was dead, causing the keepalive timer to use-itself-after-free. (#6204)
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
+- Bugfix: Fixed a crash that could occur on exit if a ping played less than 30 seconds prior. (#6332)
 - Bugfix: Fixed notebook buttons (settings, account switcher, streamer mode) not performing a relayout when their visibility changed, causing a gap until resize. Linux / macOS only. (#6328)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
@@ -66,12 +68,13 @@
 - Dev: Implemented customizable display names for enums. (#6238)
 - Dev: Refactored event API initialization away from Application and into TwitchIrcServer. (#6198)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
+- Dev: Don't detach threads. (#6333)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Some more setting widget refactors. (#6317)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
@@ -79,6 +82,7 @@
 - Dev: Bumped clang-format requirement to 19. (#6236)
 - Dev: Factored out AUMID to `Version`. (#6321)
 - Dev: Silenced some warnings when compiling with clang-cl. (#6331)
+- Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 
 ## 2.5.3
 
