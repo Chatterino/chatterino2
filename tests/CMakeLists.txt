@@ -94,6 +94,17 @@ if(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    # The warnings are stateful, options from target_compile_options get placed
+    # before the cxx flags. /W4 enables the initializer warnings.
+    string(REGEX REPLACE "/W4\\b" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /W4
+        -Wno-missing-designated-field-initializers
+        -Wno-missing-field-initializers
+    )
+endif()
+
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     AUTORCC ON

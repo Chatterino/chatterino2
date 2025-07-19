@@ -462,6 +462,15 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-force-image-unload",
                           &commands::forceImageUnload);
 
+    this->registerCommand("/debug-force-layout-channel-views",
+                          &commands::forceLayoutChannelViews);
+
+    this->registerCommand("/debug-increment-image-generation",
+                          &commands::incrementImageGeneration);
+
+    this->registerCommand("/debug-invalidate-buffers",
+                          &commands::invalidateBuffers);
+
     this->registerCommand("/debug-test", &commands::debugTest);
 
     this->registerCommand("/shield", &commands::shieldModeOn);

@@ -170,9 +170,9 @@ protected:
      **/
     bool shouldShowTab(const NotebookTab *tab) const;
 
-private:
     void performLayout(bool animate = false);
 
+private:
     struct LayoutContext {
         int left = 0;
         int right = 0;

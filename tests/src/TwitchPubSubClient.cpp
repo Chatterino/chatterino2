@@ -220,7 +220,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
-    for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
+    for (size_t i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
         pubSub.listenToChannelPointRewards(QString("1%1").arg(i));
     }
@@ -231,7 +231,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
     ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 
-    for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
+    for (size_t i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
         pubSub.listenToChannelPointRewards(QString("2%1").arg(i));
     }
@@ -261,7 +261,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
-    for (auto i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
+    for (size_t i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
     {
         pubSub.listenToChannelPointRewards("123456");
     }
