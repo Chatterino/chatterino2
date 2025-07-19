@@ -167,7 +167,10 @@ void LoggingChannel::addMessage(const MessagePtr &message,
                                 const QString &streamID)
 {
     QDateTime messageTimestamp;
-    if (getSettings()->logTimestampFromMessage)
+    if (getSettings()->logTimestampFromMessage &&
+        !message->serverReceivedTime.isNull() &&
+        message->serverReceivedTime !=
+            QDateTime::fromMSecsSinceEpoch(QString("").toLongLong()))
     {
         messageTimestamp = message->serverReceivedTime;
     }
