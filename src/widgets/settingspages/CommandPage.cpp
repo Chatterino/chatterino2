@@ -112,7 +112,7 @@ CommandPage::CommandPage()
                  QString(c1settings.readAll())
                      .split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts))
             {
-                if (int index = line.indexOf(' '); index != -1)
+                if (auto index = line.indexOf(' '); index != -1)
                 {
                     getApp()->getCommands()->items.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
