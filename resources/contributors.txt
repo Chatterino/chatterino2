@@ -86,6 +86,7 @@ jacob-thompson | https://github.com/jacob-thompson |
 Jujufrost | https://github.com/Jujufrost |
 occluder | https://github.com/occluder | :/avatars/occluder.png
 knobby-tires | https://github.com/knobby-tires | :/avatars/knobby-tires.jpg
+droidicus | https://github.com/droidicus | :/avatars/droidicus.png
 
 # If you are a contributor add yourself above this line
 
