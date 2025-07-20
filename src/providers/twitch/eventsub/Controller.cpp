@@ -120,20 +120,18 @@ Controller::~Controller()
 
     if (!this->thread->joinable())
     {
-        qCWarning(LOG) << "Controller dtor end (not joinable)";
+        qCInfo(LOG) << "Controller dtor end (not joinable)";
         return;
     }
 
     if (this->stoppedFlag.waitFor(250ms))
     {
         this->thread->join();
-        qCWarning(LOG) << "Controller dtor end good";
+        qCInfo(LOG) << "Controller dtor end (joined)";
         return;
     }
 
-    qCWarning(LOG) << "Controller dtor end bad, thread didn't finish within "
-                      "250ms, detaching and letting the OS handle it";
-    this->thread->detach();
+    qCWarning(LOG) << "Controller dtor end (stopped flag didn't stop)";
 }
 
 void Controller::removeRef(const SubscriptionRequest &request)
