@@ -548,6 +548,9 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
                      << qmagicenum::enumName(subscription.state);
         qCDebug(LOG) << "Set state to unsubscribed" << request;
         subscription.state = Subscription::State::Unsubscribed;
+
+        this->subscriptions.erase(request);
+
         return;
     }
 
@@ -688,6 +691,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     if (subscription.refCount == 0)
     {
         // we could remove the subscription here
+        this->subscriptions.erase(request);
         return;
     }
 
