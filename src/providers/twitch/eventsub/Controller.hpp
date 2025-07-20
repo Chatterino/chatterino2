@@ -53,6 +53,8 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) = 0;
+
+    virtual void debug() = 0;
 };
 
 class Controller : public IController
@@ -72,6 +74,8 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) override;
+
+    void debug() override;
 
 private:
     void subscribe(const SubscriptionRequest &request, bool isRetry);
@@ -180,6 +184,10 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) override;
+
+    void debug() override
+    {
+    }
 };
 
 }  // namespace chatterino::eventsub

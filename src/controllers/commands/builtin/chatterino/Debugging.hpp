@@ -28,6 +28,8 @@ QString incrementImageGeneration(const CommandContext &ctx);
 
 QString invalidateBuffers(const CommandContext &ctx);
 
+QString eventsub(const CommandContext &ctx);
+
 QString debugTest(const CommandContext &ctx);
 
 }  // namespace chatterino::commands

@@ -446,4 +446,13 @@ bool Connection::canHandleSubscriptionFrom(
            this->twitchUserID == otherTwitchUserID;
 }
 
+void Connection::debug()
+{
+    for (const auto &request : this->subscriptions)
+    {
+        qCInfo(LOG).noquote().nospace()
+            << this->getSessionID() << " -> " << request;
+    }
+}
+
 }  // namespace chatterino::eventsub

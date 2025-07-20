@@ -92,6 +92,8 @@ public:
 
     bool canHandleSubscriptionFrom(const QString &otherTwitchUserID) const;
 
+    void debug();
+
 private:
     QString sessionID;
 

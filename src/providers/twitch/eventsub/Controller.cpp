@@ -318,6 +318,59 @@ void Controller::reconnectConnection(
     }
 }
 
+void Controller::debug()
+{
+    std::lock_guard g(this->subscriptionsMutex);
+    for (const auto &[request, subscription] : this->subscriptions)
+    {
+        QString sessionID;
+        auto connection = subscription.connection.lock();
+        if (connection)
+        {
+            auto *connection2 =
+                dynamic_cast<Connection *>(connection->getListener());
+            if (connection2)
+            {
+                sessionID = connection2->getSessionID();
+            }
+            else
+            {
+                sessionID = "BAD";
+            }
+        }
+        else
+        {
+            sessionID = "DEAD";
+        }
+
+        qCInfo(LOG).noquote().nospace()
+            << request << " (" << qmagicenum::enumName(subscription.state)
+            << ") -> " << sessionID;
+    }
+
+    boost::asio::post(this->ioContext, [this] {
+        for (const auto &weakConnection : this->connections)
+        {
+            auto connection = weakConnection.lock();
+            if (connection)
+            {
+                auto *connection2 =
+                    dynamic_cast<Connection *>(connection->getListener());
+                if (connection2)
+                {
+                    // qCInfo(LOG)
+                    //     << "Connected to" << connection2->getSessionID();
+                    connection2->debug();
+                }
+            }
+            else
+            {
+                qCInfo(LOG) << "Dead connection";
+            }
+        }
+    });
+}
+
 void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
     // 1. Flush dead connections (maybe this should not be done here)
