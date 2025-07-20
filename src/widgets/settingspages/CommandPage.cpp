@@ -1,14 +1,12 @@
 #include "widgets/settingspages/CommandPage.hpp"
 
 #include "Application.hpp"
-#include "common/Literals.hpp"
+#include "common/Literals.hpp"  // IWYU pragma: keep
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/CommandModel.hpp"
-#include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QColor>
@@ -87,16 +85,16 @@ CommandPage::CommandPage()
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    auto *view = layout
+    this->view = layout
                      .emplace<EditableModelView>(
                          getApp()->getCommands()->createModel(nullptr))
                      .getElement();
 
-    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    this->view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
+    std::ignore = this->view->addButtonPressed.connect([] {
         getApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
@@ -105,7 +103,7 @@ CommandPage::CommandPage()
     if (QFile(c1settingsPath()).exists())
     {
         auto *button = new QPushButton("Import commands from Chatterino 1");
-        view->addCustomButton(button);
+        this->view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {
             QFile c1settings(c1settingsPath());
@@ -114,7 +112,7 @@ CommandPage::CommandPage()
                  QString(c1settings.readAll())
                      .split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts))
             {
-                if (int index = line.indexOf(' '); index != -1)
+                if (auto index = line.indexOf(' '); index != -1)
                 {
                     getApp()->getCommands()->items.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
@@ -137,32 +135,40 @@ CommandPage::CommandPage()
 
     // NOTE: These signals mean that the duplicate check happens in the middle of a row being moved, where he index can be wrong.
     // This should be reconsidered, or potentially changed in the signalvectormodel. Or maybe we rely on a SignalVectorModel signal instead
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
-                     [view, duplicateWarning]() {
-                         checkCommandDuplicates(view, duplicateWarning);
+    QObject::connect(this->view->getModel(), &QAbstractItemModel::rowsInserted,
+                     this, [this, duplicateWarning]() {
+                         checkCommandDuplicates(this->view, duplicateWarning);
                      });
 
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
-                     [view, duplicateWarning]() {
-                         checkCommandDuplicates(view, duplicateWarning);
+    QObject::connect(this->view->getModel(), &QAbstractItemModel::rowsRemoved,
+                     this, [this, duplicateWarning]() {
+                         checkCommandDuplicates(this->view, duplicateWarning);
                      });
 
-    QObject::connect(view->getModel(), &QAbstractItemModel::dataChanged, this,
-                     [view, duplicateWarning](const QModelIndex &topLeft,
-                                              const QModelIndex &bottomRight,
-                                              const QVector<int> &roles) {
-                         (void)topLeft;
-                         (void)bottomRight;
-                         if (roles.contains(Qt::EditRole))
-                         {
-                             checkCommandDuplicates(view, duplicateWarning);
-                         }
-                     });
+    QObject::connect(
+        this->view->getModel(), &QAbstractItemModel::dataChanged, this,
+        [this, duplicateWarning](const QModelIndex &topLeft,
+                                 const QModelIndex &bottomRight,
+                                 const QVector<int> &roles) {
+            (void)topLeft;
+            (void)bottomRight;
+            if (roles.contains(Qt::EditRole))
+            {
+                checkCommandDuplicates(this->view, duplicateWarning);
+            }
+        });
 
-    checkCommandDuplicates(view, duplicateWarning);
+    checkCommandDuplicates(this->view, duplicateWarning);
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
+}
+
+bool CommandPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

@@ -240,7 +240,8 @@ public:
 
     static MessagePtrMut makeSubgiftMessage(const QString &text,
                                             const QVariantMap &tags,
-                                            const QTime &time);
+                                            const QTime &time,
+                                            TwitchChannel *channel);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
 

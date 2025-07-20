@@ -143,10 +143,7 @@ void PubSub::stop()
         return;
     }
 
-    qCWarning(chatterinoLiveupdates)
-        << "Thread didn't finish after stopping, discard it";
-    // detach the thread so the destructor doesn't attempt any joining
-    this->thread->detach();
+    qCWarning(chatterinoLiveupdates) << "Thread didn't finish after stopping";
 }
 
 void PubSub::listenToChannelPointRewards(const QString &channelID)

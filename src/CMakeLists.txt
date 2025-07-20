@@ -442,6 +442,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+        providers/twitch/UserColor.cpp
+        providers/twitch/UserColor.hpp
 
         providers/twitch/eventsub/Connection.cpp
         providers/twitch/eventsub/Connection.hpp
@@ -526,6 +528,8 @@ set(SOURCE_FILES
         util/FuzzyConvert.hpp
         util/Helpers.cpp
         util/Helpers.hpp
+        util/ImageUploader.cpp
+        util/ImageUploader.hpp
         util/IncognitoBrowser.cpp
         util/IncognitoBrowser.hpp
         util/IpcQueue.cpp
