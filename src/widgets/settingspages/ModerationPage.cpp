@@ -166,8 +166,7 @@ ModerationPage::ModerationPage()
         logsTimestampFormatLayout.append(logTimestampFormat);
 
         QCheckBox *logTimestampFromMessage = this->createCheckBox(
-            "Use Twitch's timestamps",
-            getSettings()->logTimestampFromMessage);
+            "Use Twitch's timestamps", getSettings()->logTimestampFromMessage);
         logTimestampFromMessage->setToolTip(
             "Using Twitch's timestamps for logging can result in out-of-order "
             "timestamps in the log files.\nE.g. Consecutive timestamps may "
