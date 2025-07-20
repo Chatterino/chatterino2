@@ -103,8 +103,8 @@ void DrawnButton::paintContent(QPainter &painter)
 
 int DrawnButton::getPadding() const
 {
-    return static_cast<int>(static_cast<float>(this->basePadding) *
-                            this->scale());
+    return static_cast<int>(
+        std::round(static_cast<float>(this->basePadding) * this->scale()));
 }
 
 int DrawnButton::getThickness() const
