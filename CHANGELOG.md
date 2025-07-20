@@ -63,6 +63,7 @@
 - Dev: Refactored `Notebook`-related enums into their own file. (#6220)
 - Dev: Refactored `SettingWidget::dropdown` for string enums to the source file. (#6293)
 - Dev: Don't try to save emote popup bounds if we're quitting. (#6292)
+- Dev: Only carefully join EventSub controller thread. (#6136)
 - Dev: Remove `ChannelPageView::addCheckbox`. (#6305)
 - Dev: Remove `ChannelPageView::addIntInput`. (#6306)
 - Dev: Implemented customizable display names for enums. (#6238)
