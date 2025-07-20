@@ -125,6 +125,18 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserAboutToChange,
+        [this](const auto & /*oldAccount*/, const auto & /*newAccount*/) {
+            this->eventSubChannelChatUserMessageHoldHandle.reset();
+            this->eventSubChannelChatUserMessageUpdateHandle.reset();
+            this->eventSubChannelModerateHandle.reset();
+            this->eventSubAutomodMessageHoldHandle.reset();
+            this->eventSubAutomodMessageUpdateHandle.reset();
+            this->eventSubSuspiciousUserMessageHandle.reset();
+            this->eventSubSuspiciousUserUpdateHandle.reset();
+        });
+
     this->bSignals_.emplace_back(
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
