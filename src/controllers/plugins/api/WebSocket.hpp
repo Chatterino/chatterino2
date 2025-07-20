@@ -23,7 +23,7 @@ public:
      * connection is made immediately.
      *
      * @lua@param url string The URL to connect to. Must start with `wss://` or `ws://`.
-     * @lua@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string) } Additional options for the connection.
+     * @lua@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string), on_open?: fun() } Additional options for the connection.
      * @lua@return c2.WebSocket
      * @lua@nodiscard
      * @exposed c2.WebSocket.new
@@ -66,6 +66,10 @@ private:
      * @lua@field on_binary fun(data: string)|nil Handler called when the socket receives a binary message.
      */
     sol::main_function onBinary;
+    /**
+     * @lua@field on_open fun()|nil Handler called when the websocket handshake has been completed successfully.
+     */
+    sol::main_function onOpen;
     WebSocketHandle handle;
     // Note: this class lives inside the plugin -> this pointer will be valid.
     Plugin *plugin = nullptr;

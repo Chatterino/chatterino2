@@ -2,8 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "singletons/Settings.hpp"
+#include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 
 namespace chatterino {
 
@@ -115,8 +114,9 @@ bool IgnorePhrase::containsEmote() const
 
 IgnorePhrase IgnorePhrase::createEmpty()
 {
-    return IgnorePhrase(QString(), false, false,
-                        getSettings()->ignoredPhraseReplace.getValue(), true);
+    return {
+        {}, false, false, DEFAULT_IGNORE_PHRASE_REPLACE.toString(), true,
+    };
 }
 
 }  // namespace chatterino

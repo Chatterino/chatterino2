@@ -263,13 +263,14 @@ function c2.HTTPRequest.create(method, url) end
 ---@field on_close fun()|nil Handler called when the socket is closed.
 ---@field on_text fun(data: string)|nil Handler called when the socket receives a text message.
 ---@field on_binary fun(data: string)|nil Handler called when the socket receives a binary message.
+---@field on_open fun()|nil Handler called when the websocket handshake has been completed successfully.
 c2.WebSocket = {}
 
 --- Creates and connects to a WebSocket server. Upon calling this, a
 --- connection is made immediately.
 ---
 ---@param url string The URL to connect to. Must start with `wss://` or `ws://`.
----@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string) } Additional options for the connection.
+---@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string), on_open?: fun() } Additional options for the connection.
 ---@return c2.WebSocket
 ---@nodiscard
 function c2.WebSocket.new(url, options) end

@@ -144,7 +144,7 @@ public:
     template <typename T, typename... Args>
     T *emplace(Args &&...args)
     {
-        static_assert(std::is_base_of<MessageElement, T>::value,
+        static_assert(std::is_base_of_v<MessageElement, T>,
                       "T must extend MessageElement");
 
         auto unique = std::make_unique<T>(std::forward<Args>(args)...);
@@ -240,7 +240,8 @@ public:
 
     static MessagePtrMut makeSubgiftMessage(const QString &text,
                                             const QVariantMap &tags,
-                                            const QTime &time);
+                                            const QTime &time,
+                                            TwitchChannel *channel);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
 

@@ -2,8 +2,11 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
+#include "common/StreamerModeSetting.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
@@ -14,6 +17,7 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "providers/emoji/EmojiStyle.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
@@ -21,6 +25,9 @@
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
+
+#include <optional>
+#include <string_view>
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -48,14 +55,6 @@ enum UsernameDisplayMode : int {
     Username = 1,                  // Username
     LocalizedName = 2,             // Localized name
     UsernameAndLocalizedName = 3,  // Username (Localized name)
-};
-
-enum ThumbnailPreviewMode : int {
-    DontShow = 0,
-
-    AlwaysShow = 1,
-
-    ShowOnShift = 2,
 };
 
 enum UsernameRightClickBehavior : int {
@@ -86,16 +85,32 @@ enum class StreamLinkPreferredQuality : std::uint8_t {
     AudioOnly,
 };
 
-enum StreamerModeSetting {
-    Disabled = 0,
-    Enabled = 1,
-    DetectStreamingSoftware = 2,
-};
-
 enum class TabStyle : std::uint8_t {
     Normal,
     Compact,
 };
+
+enum class EmoteTooltipScale : std::uint8_t {
+    Small,
+    Medium,
+    Large,
+    Huge,
+};
+
+constexpr std::optional<std::string_view> qmagicenumDisplayName(
+    EmoteTooltipScale value) noexcept
+{
+    switch (value)
+    {
+        case EmoteTooltipScale::Medium:
+            return "Medium (default)";
+
+        case EmoteTooltipScale::Small:
+        case EmoteTooltipScale::Large:
+        case EmoteTooltipScale::Huge:
+            return {};
+    }
+}
 
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
@@ -122,6 +137,9 @@ public:
 
     void disableSave();
 
+    /// Returns true if chat messages should be sent over Helix
+    bool shouldSendHelixChat() const;
+
     FloatSetting uiScale = {"/appearance/uiScale2", 1};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
 
@@ -136,8 +154,10 @@ public:
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
-    EnumSetting<Qt::BrushStyle> lastMessagePattern = {
-        "/appearance/messages/lastMessagePattern", Qt::SolidPattern};
+    EnumSetting<LastMessageLineStyle> lastMessagePattern = {
+        "/appearance/messages/lastMessagePattern",
+        LastMessageLineStyle::Solid,
+    };
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        "#7f2026"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
@@ -336,9 +356,16 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+    EnumStringSetting<EmoteTooltipScale> emoteTooltipScale = {
+        "/emotes/tooltipScale",
+        EmoteTooltipScale::Medium,
+    };
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
-    QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
+    EnumStringSetting<EmojiStyle> emojiSet = {
+        "/emotes/emojiSet",
+        EmojiStyle::Twitter,
+    };
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
     BoolSetting removeSpacesBetweenEmotes = {
@@ -370,7 +397,9 @@ public:
     //  - "Always hide"
     //  - "Don't hide"
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
-        "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
+        "/streamerMode/enabled",
+        StreamerModeSetting::DetectStreamingSoftware,
+    };
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
@@ -392,10 +421,6 @@ public:
         "/streamerMode/hideBlockedTermText",
         true,
     };
-
-    /// Ignored Phrases
-    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
-                                           "***"};
 
     /// Blocked Users
     BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
@@ -542,7 +567,10 @@ public:
         "/logging/separatelyStoreStreamLogs",
         false,
     };
-
+    QStringSetting logTimestampFormat = {
+        "/logging/logTimestampFormat",
+        "hh:mm:ss",
+    };
     QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
@@ -651,6 +679,15 @@ public:
     /// UI
 
     BoolSetting showSendButton = {"/ui/showSendButton", false};
+
+    struct {
+        // this isn't shown in the UI
+        BoolSetting enabled = {"/plugins/repl/enabled", false};
+        // An empty string implies the default monospace font
+        QStringSetting fontFamily = {"/plugins/repl/fontFamily", {}};
+        QStringSetting fontStyle = {"/plugins/repl/fontStyle", "Regular"};
+        IntSetting fontSize = {"/plugins/repl/fontSize", 10};
+    } pluginRepl;
 
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};

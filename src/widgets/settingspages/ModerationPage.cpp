@@ -91,7 +91,7 @@ ModerationPage::ModerationPage()
 
                 QString pathShortened =
                     "Logs are saved at <a href=\"file:///" + pathOriginal +
-                    "\"><span style=\"color: white;\">" +
+                    R"("><span style="color: white;">)" +
                     shortenString(pathOriginal, 50) + "</span></a>";
 
                 logsPathLabel->setText(pathShortened);
@@ -149,6 +149,21 @@ ModerationPage::ModerationPage()
                                                return fetchLogDirectorySize();
                                            }).result());
             });
+
+        auto logsTimestampFormatLayout =
+            logs.emplace<QHBoxLayout>().withoutMargin();
+        auto logsTimestampFormatLabel =
+            logsTimestampFormatLayout.emplace<QLabel>();
+        logsTimestampFormatLabel->setText(
+            QString("Log file timestamp format: "));
+
+        QComboBox *logTimestampFormat = this->createComboBox(
+            {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss",
+             "hh:mm:ss", "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz",
+             "h:mm:ss.zzz a", "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
+            getSettings()->logTimestampFormat);
+        logTimestampFormat->setToolTip("a = am/pm, zzz = milliseconds");
+        logsTimestampFormatLayout.append(logTimestampFormat);
 
         QCheckBox *onlyLogListedChannels =
             this->createCheckBox("Only log channels listed below",

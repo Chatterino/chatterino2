@@ -1,19 +1,83 @@
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
+#include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 
 namespace chatterino {
+
+namespace {
 
 inline const QStringList STREAMLINK_QUALITY = {
     "Choose", "Source", "High", "Medium", "Low", "Audio only",
 };
+
+void exportImageUploaderSettings(QWidget *parent)
+{
+    const auto &s = *getSettings();
+
+    QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
+    QJsonDocument doc(settingsObj);
+    crossPlatformCopy(doc.toJson(QJsonDocument::Indented));
+
+    QMessageBox::information(
+        parent, "Settings Exported",
+        "Image uploader settings have been copied to clipboard as JSON.");
+}
+
+void importImageUploaderSettings(QWidget *parent)
+{
+    QString clipboardText = getClipboardText().trimmed();
+
+    auto res = imageuploader::detail::validateImportJson(clipboardText);
+    if (!res)
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            QString("Error validating image uploader import: %1.")
+                .arg(res.error()));
+        return;
+    }
+    const auto &settingsObj = *res;
+
+    int ret = QMessageBox::question(
+        parent, "Import Settings",
+        "This will overwrite your current image uploader settings. Continue?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (ret != QMessageBox::Yes)
+    {
+        return;
+    }
+
+    auto &s = *getSettings();
+    if (imageuploader::detail::importSettings(settingsObj, s))
+    {
+        QMessageBox::information(
+            parent, "Import Successful",
+            "Image uploader settings have been imported successfully!");
+    }
+    else
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            "No valid image uploader settings found in the JSON.");
+    }
+}
+
+}  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
     : view(GeneralPageView::withoutNavigation(this))
@@ -135,6 +199,32 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
 
         SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
             ->addTo(layout, form);
+
+        layout.addDescription(
+            "Export your current image uploader settings as JSON to share with "
+            "others, or import settings from clipboard (compatible with ShareX "
+            ".sxcu format).");
+
+        auto *buttonLayout = new QHBoxLayout;
+
+        auto *importButton = new QPushButton("Import Settings from Clipboard");
+        importButton->setToolTip(
+            "Import image uploader settings from clipboard JSON");
+        QObject::connect(importButton, &QPushButton::clicked, [this]() {
+            importImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(importButton);
+
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        exportButton->setToolTip(
+            "Copy current image uploader settings to clipboard as JSON");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            exportImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(exportButton);
+
+        buttonLayout->addStretch();
+        layout.addLayout(buttonLayout);
     }
 
     layout.addStretch();

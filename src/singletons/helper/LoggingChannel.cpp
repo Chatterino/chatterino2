@@ -182,9 +182,13 @@ void LoggingChannel::addMessage(const MessagePtr &message,
         str.append("#" + message->channelName + " ");
     }
 
-    str.append('[');
-    str.append(now.toString("HH:mm:ss"));
-    str.append("] ");
+    QString logTimestampFormat = getSettings()->logTimestampFormat;
+    if (logTimestampFormat != "Disable")
+    {
+        str.append('[');
+        str.append(now.toString(logTimestampFormat));
+        str.append("] ");
+    }
 
     QString messageText;
     if (message->loginName.isEmpty())

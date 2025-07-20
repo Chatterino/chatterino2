@@ -61,6 +61,23 @@ namespace chatterino {
 
 using namespace literals;
 
+namespace detail {
+
+bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.(?!\.|$)|\/)(?!me(?:\s|$)|\s))",
+        QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
+}  // namespace detail
+
+using detail::isUnknownCommand;
+
 namespace {
 #if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
 const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
@@ -91,6 +108,7 @@ constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
 // From Twitch docs - expected size for a badge (1x)
 constexpr QSize BASE_BADGE_SIZE(18, 18);
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -191,6 +209,11 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     getApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                               this->seventvEmoteSetID_);
 
@@ -789,6 +812,13 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
+        return;
+    }
+
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
     this->updateSevenTVActivity();
@@ -820,6 +850,13 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
     {
+        return;
+    }
+
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
         return;
     }
 
@@ -1447,7 +1484,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     int limit = getSettings()->twitchMessageHistoryLimit.getValue();
     if (this->lastConnectedAt_.has_value())
     {
-        // calculate how many messages could have occured
+        // calculate how many messages could have occurred
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
         const auto secondsSinceDisconnect =

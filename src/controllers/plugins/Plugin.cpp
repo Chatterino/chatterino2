@@ -218,6 +218,8 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
+    this->onUnloaded();
+
     for (auto *timer : this->activeTimeouts)
     {
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
@@ -291,6 +293,35 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
     return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
         return p.type == PluginPermission::Type::Network;
     });
+}
+
+void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
+                 const sol::variadic_args &args)
+{
+    stream.noquote();
+    stream << "[" + this->id + ":" + this->meta.name + "]";
+    QString fullMessage;
+    for (const auto &arg : args)
+    {
+        auto s = lua::toString(L, arg.stack_index());
+        stream << s;
+
+        if (!fullMessage.isEmpty())
+        {
+            fullMessage.append(' ');
+        }
+        fullMessage.append(s);
+
+        // Remove this from our stack
+        lua_pop(L, 1);
+    }
+
+    this->onLog(level, fullMessage);
+}
+
+sol::state_view Plugin::state()
+{
+    return {this->state_};
 }
 
 bool Plugin::hasNetworkPermission() const
