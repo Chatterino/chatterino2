@@ -110,7 +110,8 @@ private:
     std::vector<std::weak_ptr<lib::Session>> connections;
 
     [[nodiscard]] std::optional<std::shared_ptr<lib::Session>>
-        getViableConnection(uint32_t &openButNotReadyConnections);
+        getViableConnection(const QString &ownerTwitchUserID,
+                            uint32_t &openButNotReadyConnections);
 
     struct Subscription {
         enum class State : uint8_t {
