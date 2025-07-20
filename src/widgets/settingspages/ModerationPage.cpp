@@ -168,10 +168,10 @@ ModerationPage::ModerationPage()
         QCheckBox *logTimestampFromMessage = this->createCheckBox(
             "Use Twitch's timestamps", getSettings()->logTimestampFromMessage);
         logTimestampFromMessage->setToolTip(
-            "Using Twitch's timestamps for logging can result in out-of-order "
-            "timestamps in the log files.\nE.g. Consecutive timestamps may "
-            "appear like this: 11:32:39, 11:32:38, 11:32:40, 11:32:40, "
-            "11:32:42, etc.");
+            "Twitch's timestamp is when the message was recieved by the chat "
+            "server.\nOtherwise the timestamp is when the message was recieved "
+            "by the chat client.\nTwitch's timestamp is more accurate, however "
+            "it can result in out-of-order timestamps in the log files.");
         logTimestampFromMessage->setEnabled(getSettings()->enableLogging);
         logs.append(logTimestampFromMessage);
 
