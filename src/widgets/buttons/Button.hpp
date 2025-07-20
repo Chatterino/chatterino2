@@ -183,7 +183,6 @@ protected:
     /// Queue up the click animation at the given position
     void addClickEffect(QPoint position);
 
-protected:
     /// This is fired when the mouse over state changes
     virtual void mouseOverUpdated()
     {
