@@ -35,12 +35,21 @@ protected:
     void paintContent(QPainter &painter) override;
 
 private:
+    /// Returns the padding (horizontal and vertical) to be used when drawing this button, taking the widget scale into consideration.
+    int getPadding() const;
+
+    /// Returns the line thickness to be used when drawing this button, taking the widget scale into consideration.
+    int getThickness() const;
+
     QColor background;
     QColor backgroundHover;
     QColor foreground;
     QColor foregroundHover;
 
+    /// The padding without taking the widget scale into consideration.
     const int basePadding;
+
+    /// The line thickness without taking the widget scale into consideration.
     const int baseThickness;
     const Type type = Type::Plus;
 };

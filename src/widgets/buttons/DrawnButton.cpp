@@ -67,15 +67,14 @@ void DrawnButton::paintContent(QPainter &painter)
         painter.fillRect(this->rect(), bg);
     }
 
+    auto thickness = this->getThickness();
+    auto padding = this->getPadding();
+
     switch (this->type)
     {
         case Type::Plus: {
             QPen pen;
             pen.setColor(fg);
-            int thickness = std::max(
-                1,
-                static_cast<int>(std::round(
-                    static_cast<double>(this->baseThickness) * this->scale())));
             pen.setWidth(thickness);
             painter.setPen(pen);
 
@@ -84,9 +83,6 @@ void DrawnButton::paintContent(QPainter &painter)
             QRect inner;
             inner.setSize(innerSize);
             inner.moveCenter(this->rect().center());
-
-            int padding = static_cast<int>(
-                static_cast<float>(this->basePadding) * this->scale());
 
             auto top = inner.top();
             auto bottom = inner.bottom();
@@ -103,6 +99,19 @@ void DrawnButton::paintContent(QPainter &painter)
         }
         break;
     }
+}
+
+int DrawnButton::getPadding() const
+{
+    return static_cast<int>(static_cast<float>(this->basePadding) *
+                            this->scale());
+}
+
+int DrawnButton::getThickness() const
+{
+    return std::max(
+        1, static_cast<int>(std::round(
+               static_cast<double>(this->baseThickness) * this->scale())));
 }
 
 }  // namespace chatterino
