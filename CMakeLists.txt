@@ -121,11 +121,6 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
 
-if (CHATTERINO_ALLOW_PRIVATE_QT_API)
-    # For qtextengine_p.h
-    set(_additional_qt_components GuiPrivate)
-endif()
-
 find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     COMPONENTS
     Core
