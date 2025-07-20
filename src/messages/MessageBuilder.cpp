@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchIrc.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
+#include "providers/twitch/UserColor.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -587,8 +588,12 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
 
 MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
                                                  const QVariantMap &tags,
-                                                 const QTime &time)
+                                                 const QTime &time,
+                                                 TwitchChannel *channel)
 {
+    const auto *userDataController = getApp()->getUserData();
+    assert(userDataController != nullptr);
+
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
 
@@ -598,11 +603,16 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     {
         gifterDisplayName = gifterLogin;
     }
-    MessageColor gifterColor = MessageColor::System;
-    if (auto colorTag = tags.value("color").value<QColor>(); colorTag.isValid())
-    {
-        gifterColor = MessageColor(colorTag);
-    }
+
+    auto gifterColor =
+        twitch::getUserColor({
+                                 .userLogin = gifterLogin,
+                                 .userID = tags.value("user-id").toString(),
+                                 .userDataController = userDataController,
+                                 .channelChatters = channel,
+                                 .color = tags.value("color").value<QColor>(),
+                             })
+            .value_or(MessageColor::System);
 
     auto recipientLogin =
         tags.value("msg-param-recipient-user-name").toString();
@@ -616,6 +626,17 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     {
         recipientDisplayName = recipientLogin;
     }
+
+    auto recipientColor =
+        twitch::getUserColor(
+            {
+                .userLogin = recipientLogin,
+                .userID = tags.value("msg-param-recipient-id").toString(),
+
+                .userDataController = userDataController,
+                .channelChatters = channel,
+            })
+            .value_or(MessageColor::System);
 
     const auto textFragments = text.split(SPACE_REGEX, Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
@@ -632,8 +653,7 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
         {
             builder
                 .emplace<MentionElement>(recipientDisplayName, recipientLogin,
-                                         MessageColor::System,
-                                         MessageColor::System)
+                                         MessageColor::System, recipientColor)
                 ->setTrailingSpace(false);
             builder.emplace<TextElement>(u"!"_s, MessageElementFlag::Text,
                                          MessageColor::System);
