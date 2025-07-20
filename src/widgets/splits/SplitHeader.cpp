@@ -20,6 +20,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
+#include "widgets/buttons/DrawnButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -280,6 +281,13 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->addButton_ = new DrawnButton(DrawnButton::Type::Plus,
+                                       {
+                                           .padding = 3,
+                                           .thickness = 1,
+                                       },
+                                       this);
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -353,14 +361,11 @@ void SplitHeader::initializeLayout()
             });
         }),
         // add split
-        this->addButton_ = makeWidget<PixmapButton>([&](auto w) {
-            w->setPixmap(getResources().buttons.addSplitDark);
-            w->setMarginEnabled(false);
+        this->addButton_,
+    });
 
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->addSibling();
-            });
-        }),
+    QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
+        this->split_->addSibling();
     });
 
     getSettings()->customURIScheme.connect(
@@ -1061,18 +1066,20 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
+    this->addButton_->setBackground(this->theme->messages.backgrounds.regular);
+    this->addButton_->setBackgroundHover(
+        this->theme->messages.backgrounds.regular);
+
     // --
     if (this->theme->isLightTheme())
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
-        this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
-        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
 
     this->update();
