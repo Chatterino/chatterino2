@@ -43,6 +43,9 @@ namespace {
 
 using namespace chatterino;
 
+/// The width of the standard button.
+constexpr const int BUTTON_WIDTH = 28;
+
 // 5 minutes
 constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
 
@@ -796,7 +799,7 @@ void SplitHeader::handleChannelChanged()
 
 void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = int(28 * scale);
+    int w = int(BUTTON_WIDTH * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
