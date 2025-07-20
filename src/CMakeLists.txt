@@ -874,6 +874,12 @@ if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
 
+if (CHATTERINO_ALLOW_PRIVATE_QT_API)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+        CHATTERINO_WITH_PRIVATE_QT_API)
+endif()
+
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC
