@@ -46,6 +46,11 @@ using namespace chatterino;
 /// The width of the standard button.
 constexpr const int BUTTON_WIDTH = 28;
 
+/// The width of the "Add split" button.
+///
+/// This matches the scrollbar's full width.
+constexpr const int ADD_SPLIT_BUTTON_WIDTH = 16;
+
 // 5 minutes
 constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
 
@@ -800,12 +805,14 @@ void SplitHeader::handleChannelChanged()
 void SplitHeader::scaleChangedEvent(float scale)
 {
     int w = int(BUTTON_WIDTH * scale);
+    int addSplitWidth = int(ADD_SPLIT_BUTTON_WIDTH * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
-    this->addButton_->setFixedWidth(w * 5 / 8);
+
+    this->addButton_->setFixedWidth(addSplitWidth);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
