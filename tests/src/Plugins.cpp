@@ -12,6 +12,7 @@
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "lib/Snapshot.hpp"
 #    include "messages/Message.hpp"
+#    include "messages/MessageElement.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/Emotes.hpp"
@@ -968,6 +969,167 @@ TEST_F(PluginTest, ChannelAddMessage)
     ASSERT_EQ(added[0].first, logged[0]);
     ASSERT_EQ(added[2].first, logged[1]);
     ASSERT_EQ(added[5].first, logged[2]);
+}
+
+TEST_F(PluginTest, MessageModification)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            return {
+                function()
+                    assert(msg.flags == c2.MessageFlag.Debug)
+                    msg.flags = c2.MessageFlag.System
+                    assert(msg.flags == c2.MessageFlag.System)
+                end,
+                function()
+                    msg.parse_time = 1234567
+                end,
+                function()
+                    assert(msg.id == "abc")
+                    msg.id = "1234"
+                    assert(msg.id == "1234")
+                end,
+                function()
+                    assert(msg.search_text == "search")
+                    msg.search_text = "query"
+                    assert(msg.search_text == "query")
+                end,
+                function()
+                    assert(msg.message_text == "msg")
+                    msg.message_text = "text"
+                    assert(msg.message_text == "text")
+                end,
+                function()
+                    assert(msg.login_name == "login")
+                    msg.login_name = "name"
+                    assert(msg.login_name == "name")
+                end,
+                function()
+                    assert(msg.display_name == "display")
+                    msg.display_name = "name"
+                    assert(msg.display_name == "name")
+                end,
+                function()
+                    assert(msg.localized_name == "localized")
+                    msg.localized_name = "name"
+                    assert(msg.localized_name == "name")
+                end,
+                function()
+                    assert(msg.user_id == "id")
+                    msg.user_id = "id"
+                    assert(msg.user_id == "id")
+                end,
+                function()
+                    assert(msg.channel_name == "channel")
+                    msg.channel_name = "name"
+                    assert(msg.channel_name == "name")
+                end,
+                function()
+                    assert(msg.username_color == "#ffaabbcc")
+                    msg.username_color = "#ccbbaaff"
+                    assert(msg.username_color == "#ccbbaaff")
+                end,
+                function()
+                    assert(msg.server_received_time == 1230000)
+                    msg.server_received_time = 1240000
+                    assert(msg.server_received_time == 1240000)
+                end,
+                function()
+                    print(msg.highlight_color)
+                    assert(msg.highlight_color == "#ff223344")
+                    msg.highlight_color = "#44332211"
+                    assert(msg.highlight_color == "#44332211")
+                end,
+                function()
+                    assert(#msg:elements() == 2)
+                    msg:append_element({ type = "linebreak" })
+                    assert(#msg:elements() == 3)
+                    assert(msg:elements()[3].type == "linebreak")
+                end,
+            }
+        end
+    )lua");
+
+    auto makeMsg = [] {
+        auto msg = std::make_shared<Message>();
+        msg->flags = MessageFlag::Debug;
+        msg->id = "abc";
+        msg->searchText = "search";
+        msg->messageText = "msg";
+        msg->loginName = "login";
+        msg->displayName = "display";
+        msg->localizedName = "localized";
+        msg->userID = "id";
+        msg->channelName = "channel";
+        msg->usernameColor = QColor(0xaabbcc);
+        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->highlightColor = std::make_shared<QColor>(0x223344);
+        msg->elements.push_back(
+            std::make_unique<TextElement>("lol", MessageElementFlag::Text));
+        msg->elements.push_back(
+            std::make_unique<TextElement>("wow", MessageElementFlag::Text));
+        return msg;
+    };
+
+    auto liquid = makeMsg();
+    auto tests = pfn(liquid);
+    ASSERT_TRUE(tests.valid());
+    sol::table cbs = tests;
+    for (auto [_key, cb] : cbs)
+    {
+        sol::protected_function pf = cb;
+        auto res = pf();
+        if (!res.valid())
+        {
+            sol::error err = res;
+            ASSERT_TRUE(false) << err.what();
+        }
+    }
+
+    auto frozen = makeMsg();
+    frozen->freeze();
+    tests = pfn(frozen);
+    ASSERT_TRUE(tests.valid());
+    cbs = tests;
+    for (auto [key, cb] : cbs)
+    {
+        bool isFlags = key.as<int>() == 1;
+
+        sol::protected_function pf = cb;
+        auto res = pf();
+        if (isFlags)
+        {
+            ASSERT_TRUE(res.valid());
+        }
+        else
+        {
+            ASSERT_FALSE(res.valid());
+            sol::error err = res;
+            ASSERT_EQ(std::string_view(err.what()), "Message is frozen");
+        }
+    }
+}
+
+TEST_F(PluginTest, MessageConstness)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            assert(msg.login_name == "hello")
+            msg.login_name = "alien"
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->loginName = "hello";
+    MessagePtr cmsg = msg;
+
+    auto res = pfn(cmsg);
+    ASSERT_TRUE(res.valid());
+    cmsg->freeze();
+    res = pfn(cmsg);
+    ASSERT_FALSE(res.valid());
 }
 
 class PluginMessageConstructionTest
