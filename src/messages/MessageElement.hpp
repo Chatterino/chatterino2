@@ -397,7 +397,12 @@ protected:
                                                          QSizeF size);
 
 private:
+    void ensureText(bool asFallback);
+
     std::unique_ptr<TextElement> textElement_;
+    MessageColor textColor_;
+    bool usingFallbackColor_ = false;
+
     EmotePtr emote_;
 };
 

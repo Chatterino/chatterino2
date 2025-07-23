@@ -95,21 +95,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "7TVEmote"
-                        ]
-                    },
                     "tooltip": "7TVEmote Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -128,21 +113,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
                     },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
@@ -180,21 +150,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "7TVEmote"
-                        ]
-                    },
                     "tooltip": "7TVEmote Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -211,21 +166,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "❤️"
-                        ]
                     },
                     "tooltip": ":heart:<br/>Emoji",
                     "trailingSpace": true,
