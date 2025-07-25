@@ -293,7 +293,7 @@ c2.Message = {}
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
 
----@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text" and "system" are special values that take the current theme into account
+---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
 
 ---A table to initialize a new message text element
 ---@class TextElementInit : MessageElementInitBase
@@ -468,6 +468,7 @@ c2.MessageFlag = {
     ClearChat = 0,
     EventSub = 0,
     ModerationAction = 0,
+    InvalidReplyTarget = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
