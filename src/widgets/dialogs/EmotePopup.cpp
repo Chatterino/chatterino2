@@ -422,7 +422,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
-
     this->globalEmotesView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
     this->subEmotesView_->setChannel(
@@ -458,17 +457,17 @@ void EmotePopup::reloadEmotes()
         if (Settings::instance().enableBTTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                    "BetterTTV", MessageElementFlag::BttvEmote);
+                      "BetterTTV", MessageElementFlag::BttvEmote);
         }
         if (Settings::instance().enableFFZChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                    "FrankerFaceZ", MessageElementFlag::FfzEmote);
+                      "FrankerFaceZ", MessageElementFlag::FfzEmote);
         }
         if (Settings::instance().enableSevenTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                    "7TV", MessageElementFlag::SevenTVEmote);
+                      "7TV", MessageElementFlag::SevenTVEmote);
         }
     }
     // global
