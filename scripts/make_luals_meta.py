@@ -33,7 +33,8 @@ To insert larger fragments of documentation, comments like
 ---@class foo
 ...
 */
-will be inserted as-is.
+will be inserted as-is. These only work in the top-level scope. They don't work
+for class bodies.
 """
 
 from io import TextIOWrapper
@@ -391,7 +392,7 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
             "Unexpected @lua@class command. @lua@class must be placed at the start of the comment block!",
         )
     elif comment.startswith("@lua@"):
-        out.write(f'---{comment.replace("@lua", "", 1)}\n')
+        out.write(f"---{comment.replace('@lua', '', 1)}\n")
 
 
 if __name__ == "__main__":
