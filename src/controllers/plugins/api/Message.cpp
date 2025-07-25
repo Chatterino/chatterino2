@@ -51,10 +51,23 @@ MessageColor tryMakeMessageColor(const QString &name,
     return QColor(name);
 }
 
+template <typename T>
+T requiredGet(const sol::table &tbl, auto &&key)
+{
+    auto v = tbl.get<sol::optional<T>>(std::forward<decltype(key)>(key));
+    if (!v)
+    {
+        throw std::runtime_error(std::string{"Missing required property: "} +
+                                 key);
+    }
+    return *std::move(v);
+}
+
 std::unique_ptr<TextElement> textElementFromTable(const sol::table &tbl)
 {
     return std::make_unique<TextElement>(
-        tbl["text"], tbl.get_or("flags", MessageElementFlag::Text),
+        requiredGet<QString>(tbl, "text"),
+        tbl.get_or("flags", MessageElementFlag::Text),
         tryMakeMessageColor(tbl.get_or("color", QString{})),
         tbl.get_or("style", FontStyle::ChatMedium));
 }
@@ -63,7 +76,8 @@ std::unique_ptr<SingleLineTextElement> singleLineTextElementFromTable(
     const sol::table &tbl)
 {
     return std::make_unique<SingleLineTextElement>(
-        tbl["text"], tbl.get_or("flags", MessageElementFlag::Text),
+        requiredGet<QString>(tbl, "text"),
+        tbl.get_or("flags", MessageElementFlag::Text),
         tryMakeMessageColor(tbl.get_or("color", QString{})),
         tbl.get_or("style", FontStyle::ChatMedium));
 }
@@ -72,9 +86,10 @@ std::unique_ptr<MentionElement> mentionElementFromTable(const sol::table &tbl)
 {
     // no flags!
     return std::make_unique<MentionElement>(
-        tbl.get<QString>("display_name"), tbl.get<QString>("login_name"),
-        tryMakeMessageColor(tbl.get<QString>("fallback_color")),
-        tryMakeMessageColor(tbl.get<QString>("user_color")));
+        requiredGet<QString>(tbl, "display_name"),
+        requiredGet<QString>(tbl, "login_name"),
+        tryMakeMessageColor(requiredGet<QString>(tbl, "fallback_color")),
+        tryMakeMessageColor(requiredGet<QString>(tbl, "user_color")));
 }
 
 std::unique_ptr<TimestampElement> timestampElementFromTable(
@@ -111,7 +126,7 @@ std::unique_ptr<ReplyCurveElement> replyCurveElementFromTable()
 
 std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
 {
-    QString type = tbl["type"];
+    auto type = requiredGet<QString>(tbl, "type");
     std::unique_ptr<MessageElement> el;
     if (type == u"text")
     {
