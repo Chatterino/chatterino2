@@ -127,7 +127,7 @@ int DrawnButton::getThickness() const
 QColor DrawnButton::getBackground() const
 {
     auto v = this->options.background.value_or(
-        this->symbolOptions.background.value_or({}));
+        this->symbolOptions.background.value_or(QColor()));
 
     return v;
 }
@@ -135,7 +135,7 @@ QColor DrawnButton::getBackground() const
 QColor DrawnButton::getBackgroundHover() const
 {
     auto v = this->options.backgroundHover.value_or(
-        this->symbolOptions.backgroundHover.value_or({}));
+        this->symbolOptions.backgroundHover.value_or(QColor()));
 
     return v;
 }
@@ -143,7 +143,7 @@ QColor DrawnButton::getBackgroundHover() const
 QColor DrawnButton::getForeground() const
 {
     auto v = this->options.foreground.value_or(
-        this->symbolOptions.foreground.value_or({}));
+        this->symbolOptions.foreground.value_or(QColor()));
 
     assert(v.isValid());
 
@@ -153,7 +153,7 @@ QColor DrawnButton::getForeground() const
 QColor DrawnButton::getForegroundHover() const
 {
     auto v = this->options.foregroundHover.value_or(
-        this->symbolOptions.foregroundHover.value_or({}));
+        this->symbolOptions.foregroundHover.value_or(QColor()));
 
     assert(v.isValid());
 
