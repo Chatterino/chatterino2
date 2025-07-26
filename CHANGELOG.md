@@ -50,6 +50,7 @@
 - Bugfix: Don't add reply buttons to messages that are invalid reply targets. (#6119)
 - Bugfix: Fixed invalid commands from being forwarded to Helix, making it possible for information to leak (e.g. if you typed `/bann username ban reason` it would be seen by others in chat as `username ban reason`). (#6272, #6330)
 - Bugfix: Emotes that failed to load their images now show as text. (#6355)
+- Bugfix: Fixed a crash that occurs when searching for emotes in channel-less contexts. (#6357)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
