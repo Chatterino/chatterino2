@@ -144,21 +144,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "#ffcc44ff",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"

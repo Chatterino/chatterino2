@@ -112,21 +112,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Keepo"
-                        ]
-                    },
                     "tooltip": "Keepo<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
