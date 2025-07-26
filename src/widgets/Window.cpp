@@ -696,6 +696,36 @@ void Window::addShortcuts()
 
              return "";
          }},
+        {"lockZoom",
+         [this](std::vector<QString> arguments) -> QString {
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
+
+             if (arg == "lock")
+             {
+                 qInfo() << "XXX: LOCK ZOOM";
+                 // TODO: Implement zoom locking
+             }
+             else if (arg == "unlock")
+             {
+                 qInfo() << "XXX: UNLOCK ZOOM";
+                 // TODO: Implement zoom unlocking
+             }
+             else if (arg == "toggle")
+             {
+                 qInfo() << "XXX: TOGGLE ZOOM LOCK";
+                 // TODO: Implement zoom lock toggling
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for lockZoom hotkey: " << arg;
+                 return QString(
+                            R"(Invalid argument for lockZoom hotkey: %1. Use "lock", "unlock", or "toggle".)")
+                     .arg(arg);
+             }
+
+             return "";
+         }},
     };
 
     this->addDebugStuff(actions);
