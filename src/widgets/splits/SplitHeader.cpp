@@ -289,7 +289,7 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
-    this->addButton_ = new DrawnButton(DrawnButton::Type::Plus,
+    this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
                                        {
                                            .padding = 3,
                                            .thickness = 1,
@@ -1076,9 +1076,10 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
-    this->addButton_->setBackground(this->theme->messages.backgrounds.regular);
-    this->addButton_->setBackgroundHover(
-        this->theme->messages.backgrounds.regular);
+    this->addButton_->setOptions({
+        .background = this->theme->messages.backgrounds.regular,
+        .backgroundHover = this->theme->messages.backgrounds.regular,
+    });
 
     // --
     if (this->theme->isLightTheme())
