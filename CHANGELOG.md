@@ -20,6 +20,7 @@
 - Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
 - Minor: Add an import and export button to image uploader settings. (#6284)
 - Minor: Add a setting under Moderation -> Logs to customize the timestamp used for chat logs. (#6338)
+- Minor: Add a setting under Moderation -> Logs to use server timestamp from the message instead of the local clock time for logging. (#6346)
 - Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)

@@ -165,6 +165,18 @@ ModerationPage::ModerationPage()
         logTimestampFormat->setToolTip("a = am/pm, zzz = milliseconds");
         logsTimestampFormatLayout.append(logTimestampFormat);
 
+        QCheckBox *tryUseTwitchTimestamps = this->createCheckBox(
+            "Use Twitch's timestamps", getSettings()->tryUseTwitchTimestamps);
+        tryUseTwitchTimestamps->setToolTip(
+            "Try to use Twitch's timestamp (the time when the message was "
+            "received by Twitch's chat server), rather than your computer's "
+            "local timestamp.\nNote that using this setting can result in "
+            "out-of-order timestamps in the log files, and that if Twitch's "
+            "timestamp was unavailable for a message, it will fall back to "
+            "your computer's local timestamp.");
+        tryUseTwitchTimestamps->setEnabled(getSettings()->enableLogging);
+        logs.append(tryUseTwitchTimestamps);
+
         QCheckBox *onlyLogListedChannels =
             this->createCheckBox("Only log channels listed below",
                                  getSettings()->onlyLogListedChannels);

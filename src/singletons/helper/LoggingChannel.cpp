@@ -166,9 +166,18 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
 void LoggingChannel::addMessage(const MessagePtr &message,
                                 const QString &streamID)
 {
-    QDateTime now = QDateTime::currentDateTime();
+    QDateTime messageTimestamp;
+    if (getSettings()->tryUseTwitchTimestamps &&
+        !message->serverReceivedTime.isNull())
+    {
+        messageTimestamp = message->serverReceivedTime;
+    }
+    else
+    {
+        messageTimestamp = QDateTime::currentDateTime();
+    }
 
-    QString messageDateString = generateDateString(now);
+    QString messageDateString = generateDateString(messageTimestamp);
     if (messageDateString != this->dateString)
     {
         this->dateString = messageDateString;
@@ -186,7 +195,7 @@ void LoggingChannel::addMessage(const MessagePtr &message,
     if (logTimestampFormat != "Disable")
     {
         str.append('[');
-        str.append(now.toString(logTimestampFormat));
+        str.append(messageTimestamp.toString(logTimestampFormat));
         str.append("] ");
     }
 
