@@ -31,6 +31,7 @@ using ImagePtr = std::shared_ptr<Image>;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
+/** @exposeenum c2.MessageElementFlag [flags] */
 enum class MessageElementFlag : int64_t {
     None = 0LL,
     Misc = (1LL << 0),
@@ -193,6 +194,9 @@ public:
 
     virtual QJsonObject toJson() const;
 
+    // for plugins
+    virtual std::string_view type() const = 0;
+
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
@@ -213,6 +217,7 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     ImagePtr image_;
@@ -229,6 +234,16 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
+
+    int padding() const
+    {
+        return this->padding_;
+    }
+    QColor background() const
+    {
+        return this->background_;
+    }
 
 private:
     ImagePtr image_;
@@ -249,12 +264,18 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
     const MessageColor &color() const noexcept;
     FontStyle fontStyle() const noexcept;
 
     void appendText(QStringView text);
     void appendText(const QString &text);
+
+    QStringList words() const
+    {
+        return this->words_;
+    }
 
 protected:
     QStringList words_;
@@ -276,16 +297,26 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
+
+    const MessageColor &color() const
+    {
+        return this->color_;
+    }
+    FontStyle fontStyle() const
+    {
+        return this->style_;
+    }
+    QStringList words() const
+    {
+        return this->words_;
+    }
 
 private:
     MessageColor color_;
     FontStyle style_;
 
-    struct Word {
-        QString text;
-        int width = -1;
-    };
-    std::vector<Word> words_;
+    QStringList words_;
 };
 
 class LinkElement : public TextElement
@@ -318,7 +349,17 @@ public:
         return &this->linkInfo_;
     }
 
+    QStringList lowercase() const
+    {
+        return this->lowercase_;
+    }
+    QStringList original() const
+    {
+        return this->original_;
+    }
+
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     LinkInfo linkInfo_;
@@ -361,20 +402,34 @@ public:
     MessageElement *setLink(const Link &link) override;
     Link getLink() const override;
 
+    const MessageColor &fallbackColor() const
+    {
+        return this->fallbackColor_;
+    }
+    const MessageColor &userColor() const
+    {
+        return this->userColor_;
+    }
+    QString userLoginName() const
+    {
+        return this->userLoginName_;
+    }
+
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     /**
      * The color of the element in case the "Colorize @usernames" is disabled
      **/
-    MessageColor fallbackColor;
+    MessageColor fallbackColor_;
 
     /**
      * The color of the element in case the "Colorize @usernames" is enabled
      **/
-    MessageColor userColor;
+    MessageColor userColor_;
 
-    QString userLoginName;
+    QString userLoginName_;
 };
 
 // contains emote data and will pick the emote based on :
@@ -391,6 +446,7 @@ public:
     EmotePtr getEmote() const;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -433,6 +489,7 @@ public:
     const std::vector<QString> &getEmoteTooltips() const;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     MessageLayoutElement *makeImageLayoutElement(
@@ -461,6 +518,7 @@ public:
     EmotePtr getEmote() const;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -476,6 +534,7 @@ public:
     ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -488,6 +547,7 @@ public:
     VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -501,6 +561,7 @@ public:
                     QColor color_);
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -521,7 +582,13 @@ public:
 
     TextElement *formatTime(const QTime &time);
 
+    QTime time() const
+    {
+        return this->time_;
+    }
+
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     QTime time_;
@@ -540,6 +607,7 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 };
 
 // Forces a linebreak
@@ -552,6 +620,7 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 };
 
 // Image element which will pick the quality of the image based on ui scale
@@ -564,6 +633,7 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 
 private:
     ImageSet images_;
@@ -578,6 +648,7 @@ public:
                         const MessageLayoutContext &ctx) override;
 
     QJsonObject toJson() const override;
+    std::string_view type() const override;
 };
 
 }  // namespace chatterino
