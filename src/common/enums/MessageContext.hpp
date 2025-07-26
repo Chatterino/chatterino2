@@ -2,6 +2,8 @@
 
 namespace chatterino {
 
+/** @exposeenum c2.MessageContext */
+
 /// Context of the message being added to a channel
 enum class MessageContext {
     /// This message is the original
