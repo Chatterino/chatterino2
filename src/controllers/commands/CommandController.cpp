@@ -471,6 +471,8 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-invalidate-buffers",
                           &commands::invalidateBuffers);
 
+    this->registerCommand("/debug-eventsub", &commands::eventsub);
+
     this->registerCommand("/debug-test", &commands::debugTest);
 
     this->registerCommand("/shield", &commands::shieldModeOn);

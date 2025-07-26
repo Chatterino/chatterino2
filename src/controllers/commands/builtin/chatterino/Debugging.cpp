@@ -10,6 +10,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
@@ -155,6 +156,12 @@ QString incrementImageGeneration(const CommandContext & /*ctx*/)
 QString invalidateBuffers(const CommandContext & /*ctx*/)
 {
     getApp()->getWindows()->invalidateChannelViewBuffers();
+    return {};
+}
+
+QString eventsub(const CommandContext & /*ctx*/)
+{
+    getApp()->getEventSub()->debug();
     return {};
 }
 

@@ -6,6 +6,7 @@
 #include "common/Version.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/Connection.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/RenameThread.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -169,7 +170,7 @@ void Controller::removeRef(const SubscriptionRequest &request)
                 << "Refcount fell to zero for" << request
                 << "but we had no subscription ID attached - a "
                    "successful subscription was never made. From state "
-                << static_cast<uint8_t>(subscription.state);
+                << qmagicenum::enumName(subscription.state);
             return;
         }
 
@@ -202,6 +203,9 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
 {
     assert(!this->quitting &&
            "Subscribe cannot be called while we are quitting");
+
+    assert(!request.ownerTwitchUserID.isEmpty() &&
+           "Subscription requests must include a Twitch User ID");
 
     bool needToSubscribe = false;
 
@@ -251,7 +255,7 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
         subscription.refCount++;
         qCDebug(LOG) << "Added ref for" << request << subscription.refCount
                      << needToSubscribe
-                     << "state:" << static_cast<uint8_t>(subscription.state);
+                     << "state:" << qmagicenum::enumName(subscription.state);
     }
 
     auto handle = std::make_unique<RawSubscriptionHandle>(request);
@@ -314,6 +318,59 @@ void Controller::reconnectConnection(
     }
 }
 
+void Controller::debug()
+{
+    std::lock_guard g(this->subscriptionsMutex);
+    for (const auto &[request, subscription] : this->subscriptions)
+    {
+        QString sessionID;
+        auto connection = subscription.connection.lock();
+        if (connection)
+        {
+            auto *connection2 =
+                dynamic_cast<Connection *>(connection->getListener());
+            if (connection2)
+            {
+                sessionID = connection2->getSessionID();
+            }
+            else
+            {
+                sessionID = "BAD";
+            }
+        }
+        else
+        {
+            sessionID = "DEAD";
+        }
+
+        qCInfo(LOG).noquote().nospace()
+            << request << " (" << qmagicenum::enumName(subscription.state)
+            << ") -> " << sessionID;
+    }
+
+    boost::asio::post(this->ioContext, [this] {
+        for (const auto &weakConnection : this->connections)
+        {
+            auto connection = weakConnection.lock();
+            if (connection)
+            {
+                auto *connection2 =
+                    dynamic_cast<Connection *>(connection->getListener());
+                if (connection2)
+                {
+                    // qCInfo(LOG)
+                    //     << "Connected to" << connection2->getSessionID();
+                    connection2->debug();
+                }
+            }
+            else
+            {
+                qCInfo(LOG) << "Dead connection";
+            }
+        }
+    });
+}
+
 void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
     // 1. Flush dead connections (maybe this should not be done here)
@@ -341,8 +398,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
     uint32_t openButNotReadyConnections = 0;
 
     // 2. Check if any currently open connection can handle this subscription
-    auto viableConnection =
-        this->getViableConnection(openButNotReadyConnections);
+    auto viableConnection = this->getViableConnection(
+        request.ownerTwitchUserID, openButNotReadyConnections);
 
     if (viableConnection.has_value())
     {
@@ -436,7 +493,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 }
 
 std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
-    uint32_t &openButNotReadyConnections)
+    const QString &ownerTwitchUserID, uint32_t &openButNotReadyConnections)
 {
     for (const auto &weakConnection : this->connections)
     {
@@ -459,6 +516,11 @@ std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
             // This connection is open but it's not ready (i.e. no welcome has been posted yet)
             ++openButNotReadyConnections;
             continue;
+        }
+
+        if (!listener->canHandleSubscriptionFrom(ownerTwitchUserID))
+        {
+            continue;  // Connection is active with another Twitch User's subscriptions
         }
 
         // TODO: Check if this listener has room for another subscription
@@ -536,9 +598,12 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
         qCDebug(LOG) << "No one is interested in this subscription anymore, "
                         "stop trying"
                      << request << "from state"
-                     << static_cast<uint8_t>(subscription.state);
+                     << qmagicenum::enumName(subscription.state);
         qCDebug(LOG) << "Set state to unsubscribed" << request;
         subscription.state = Subscription::State::Unsubscribed;
+
+        this->subscriptions.erase(request);
+
         return;
     }
 
@@ -656,7 +721,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     auto &subscription = this->subscriptions[request];
 
     qCDebug(LOG) << "Request" << request << "marked as unsubscribed from state"
-                 << static_cast<uint8_t>(subscription.state);
+                 << qmagicenum::enumName(subscription.state);
 
     assert(subscription.state == Subscription::State::Unsubscribing ||
            subscription.state == Subscription::State::Retrying);
@@ -679,6 +744,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     if (subscription.refCount == 0)
     {
         // we could remove the subscription here
+        this->subscriptions.erase(request);
         return;
     }
 

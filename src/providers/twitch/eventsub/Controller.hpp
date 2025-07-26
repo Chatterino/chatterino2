@@ -53,6 +53,8 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) = 0;
+
+    virtual void debug() = 0;
 };
 
 class Controller : public IController
@@ -72,6 +74,8 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) override;
+
+    void debug() override;
 
 private:
     void subscribe(const SubscriptionRequest &request, bool isRetry);
@@ -110,7 +114,8 @@ private:
     std::vector<std::weak_ptr<lib::Session>> connections;
 
     [[nodiscard]] std::optional<std::shared_ptr<lib::Session>>
-        getViableConnection(uint32_t &openButNotReadyConnections);
+        getViableConnection(const QString &ownerTwitchUserID,
+                            uint32_t &openButNotReadyConnections);
 
     struct Subscription {
         enum class State : uint8_t {
@@ -179,6 +184,10 @@ public:
         std::unique_ptr<lib::Listener> connection,
         const std::optional<std::string> &reconnectURL,
         const std::unordered_set<SubscriptionRequest> &subs) override;
+
+    void debug() override
+    {
+    }
 };
 
 }  // namespace chatterino::eventsub
