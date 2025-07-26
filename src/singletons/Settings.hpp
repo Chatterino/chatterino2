@@ -571,8 +571,8 @@ public:
         "/logging/logTimestampFormat",
         "hh:mm:ss",
     };
-    BoolSetting logTimestampFromMessage = {
-        "/logging/logTimestampFromMessage",
+    BoolSetting tryUseTwitchTimestamps = {
+        "/logging/tryUseTwitchTimestamps",
         false,
     };
     QStringSetting logPath = {"/logging/path", ""};
