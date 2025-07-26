@@ -94,21 +94,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "BTTVGlobal"
-                        ]
-                    },
                     "tooltip": "BTTVGlobal Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -142,21 +127,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            ":)"
-                        ]
                     },
                     "tooltip": ":)<br>Twitch Emote",
                     "trailingSpace": true,

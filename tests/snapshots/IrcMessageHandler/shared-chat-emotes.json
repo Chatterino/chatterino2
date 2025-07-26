@@ -112,21 +112,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -160,21 +145,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "BTTVGlobal"
-                        ]
                     },
                     "tooltip": "BTTVGlobal Tooltip",
                     "trailingSpace": true,
@@ -211,21 +181,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "7TVGlobal"
-                        ]
-                    },
                     "tooltip": "7TVGlobal Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -260,21 +215,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "FFZGlobal"
-                        ]
-                    },
                     "tooltip": "FFZGlobal Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -293,21 +233,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "BTTVTwitchDev"
-                        ]
                     },
                     "tooltip": "BTTVTwitchDev Tooltip",
                     "trailingSpace": true,
@@ -329,21 +254,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "7TVTwitchDev"
-                        ]
-                    },
                     "tooltip": "7TVTwitchDev Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -362,21 +272,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "FFZTwitchDev"
-                        ]
                     },
                     "tooltip": "FFZTwitchDev Tooltip",
                     "trailingSpace": true,
