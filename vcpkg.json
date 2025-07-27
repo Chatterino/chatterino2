@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "chatterino",
   "version": "2.0.0",
-  "builtin-baseline": "01f602195983451bc83e72f4214af2cbc495aa94",
+  "builtin-baseline": "dd3097e305afa53f7b4312371f62058d2e665320",
   "dependencies": [
     "boost-asio",
     "boost-beast",
