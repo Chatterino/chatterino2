@@ -590,6 +590,17 @@ void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
     formLayout->addRow(this->label, this->actionWidget);
 }
 
+void SettingWidget::addToLayout(QLayout *layout)
+{
+    if (this->label == this->actionWidget)
+    {
+        layout->addWidget(this->actionWidget);
+        return;
+    }
+
+    assert(false && "unimplemented");
+}
+
 void SettingWidget::registerWidget(GeneralPageView &view)
 {
     if (this->label != nullptr)
