@@ -5,6 +5,7 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/PluginController.hpp"
+#    include "messages/Link.hpp"
 
 #    include <QObject>
 #    include <QStringBuilder>
@@ -138,6 +139,47 @@ int sol_lua_push(sol::types<chatterino::lua::ThisPluginState>, lua_State *L,
 }
 
 }  // namespace chatterino::lua
+
+namespace chatterino {
+
+// Link
+bool sol_lua_check(sol::types<chatterino::Link>, lua_State *L, int index,
+                   std::function<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, std::move(handler),
+                                         tracking);
+}
+
+chatterino::Link sol_lua_get(sol::types<chatterino::Link>, lua_State *L,
+                             int index, sol::stack::record &tracking)
+{
+    sol::table table = sol::stack::get<sol::table>(L, index, tracking);
+
+    auto ty = table.get<sol::optional<Link::Type>>("type");
+    if (!ty)
+    {
+        throw std::runtime_error("Missing 'type' in Link");
+    }
+    auto value = table.get<sol::optional<QString>>("value");
+    if (!value)
+    {
+        throw std::runtime_error("Missing 'value' in Link");
+    }
+
+    return {*ty, *value};
+}
+
+int sol_lua_push(sol::types<chatterino::Link>, lua_State *L,
+                 const chatterino::Link &value)
+{
+    sol::table table = sol::table::create(L, 0, 2);
+    table.set("type", value.type);
+    table.set("value", value.value);
+    return sol::stack::push(L, table);
+}
+
+}  // namespace chatterino
 
 // NOLINTEND(readability-named-parameter)
 

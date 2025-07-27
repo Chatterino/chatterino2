@@ -24,6 +24,7 @@ constexpr bool IsOptional<std::optional<T>> = true;
 namespace chatterino {
 
 class Plugin;
+struct Link;
 
 }  // namespace chatterino
 
@@ -185,6 +186,12 @@ void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
 SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
 
 }  // namespace chatterino::lua
+
+namespace chatterino {
+
+SOL_STACK_FUNCTIONS(chatterino::Link)
+
+}  // namespace chatterino
 
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)

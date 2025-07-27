@@ -32,6 +32,7 @@ c2.Message = {}
 ---@class MessageElementInitBase
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
+---@field link? c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
 
 ---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
 
@@ -91,6 +92,7 @@ function c2.Message.new(init) end
  * @includefile messages/MessageElement.hpp
  * @includefile messages/MessageFlag.hpp
  * @includefile common/enums/MessageContext.hpp
+ * @includefile messages/Link.hpp
  */
 
 /// Creates the c2.Message user type

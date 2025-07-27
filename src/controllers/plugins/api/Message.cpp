@@ -165,6 +165,18 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     el->setTrailingSpace(tbl.get_or("trailing_space", true));
     el->setTooltip(tbl.get_or("tooltip", QString{}));
 
+    auto link = tbl.get<sol::optional<Link>>("link");
+    if (link)
+    {
+        bool ok = false;
+        el->setLink(*link, &ok);
+        if (!ok)
+        {
+            throw std::runtime_error("'link' not supported on type='" +
+                                     type.toStdString() + '\'');
+        }
+    }
+
     return el;
 }
 

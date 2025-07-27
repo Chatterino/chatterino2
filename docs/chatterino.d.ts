@@ -187,6 +187,7 @@ declare namespace c2 {
     interface MessageElementInitBase {
         tooltip?: string;
         trailing_space?: boolean;
+        link?: Link;
     }
 
     type MessageColor = "text" | "link" | "system" | string;
@@ -240,6 +241,32 @@ declare namespace c2 {
 
     interface ReplyCurveElementInit extends MessageElementInitBase {
         type: "reply-curve";
+    }
+
+    interface Link {
+        type: LinkType;
+        value: string;
+    }
+
+    enum LinkType {
+        Url,
+        CloseCurrentSplit,
+        UserInfo,
+        UserTimeout,
+        UserBan,
+        UserWhisper,
+        InsertText,
+        ShowMessage,
+        UserAction,
+        AutoModAllow,
+        AutoModDeny,
+        OpenAccountsPage,
+        JumpToChannel,
+        Reconnect,
+        CopyToClipboard,
+        ReplyToMessage,
+        ViewThread,
+        JumpToMessage,
     }
 
     enum MessageFlag {
