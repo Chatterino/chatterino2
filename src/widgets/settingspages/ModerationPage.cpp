@@ -13,6 +13,7 @@
 #include "util/PostToThread.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/IconDelegate.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -165,17 +166,17 @@ ModerationPage::ModerationPage()
         logTimestampFormat->setToolTip("a = am/pm, zzz = milliseconds");
         logsTimestampFormatLayout.append(logTimestampFormat);
 
-        QCheckBox *tryUseTwitchTimestamps = this->createCheckBox(
-            "Use Twitch's timestamps", getSettings()->tryUseTwitchTimestamps);
-        tryUseTwitchTimestamps->setToolTip(
-            "Try to use Twitch's timestamp (the time when the message was "
-            "received by Twitch's chat server), rather than your computer's "
-            "local timestamp.\nNote that using this setting can result in "
-            "out-of-order timestamps in the log files, and that if Twitch's "
-            "timestamp was unavailable for a message, it will fall back to "
-            "your computer's local timestamp.");
-        tryUseTwitchTimestamps->setEnabled(getSettings()->enableLogging);
-        logs.append(tryUseTwitchTimestamps);
+        SettingWidget::checkbox("Use Twitch's timestamps",
+                                getSettings()->tryUseTwitchTimestamps)
+            ->setTooltip(
+                "Try to use Twitch's timestamp (the time when the message was "
+                "received by Twitch's chat server), rather than your "
+                "computer's local timestamp.\nNote that using this setting can "
+                "result in out-of-order timestamps in the log files, and that "
+                "if Twitch's timestamp was unavailable for a message, it will "
+                "fall back to your computer's local timestamp.")
+            ->conditionallyEnabledBy(getSettings()->enableLogging)
+            ->addToLayout(logs->layout());
 
         QCheckBox *onlyLogListedChannels =
             this->createCheckBox("Only log channels listed below",
