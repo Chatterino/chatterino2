@@ -89,6 +89,7 @@
 - Dev: Factored out AUMID to `Version`. (#6321)
 - Dev: Silenced some warnings when compiling with clang-cl. (#6331)
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
+- Dev: Update vcpkg baseline. (#6359)
 
 ## 2.5.3
 
