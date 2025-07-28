@@ -119,21 +119,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kreygasm"
-                        ]
-                    },
                     "tooltip": "Kreygasm<br>Twitch Emote",
                     "trailingSpace": false,
                     "type": "EmoteElement"
@@ -167,21 +152,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kreygasm"
-                        ]
                     },
                     "tooltip": "Kreygasm<br>Twitch Emote",
                     "trailingSpace": true,

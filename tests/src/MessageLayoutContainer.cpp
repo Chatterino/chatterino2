@@ -70,7 +70,7 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
             auto emote = std::make_shared<Emote>(Emote{
                 .name = EmoteName{word},
                 .images = ImageSet{Image::fromResourcePixmap(
-                    getResources().buttons.addSplit)},
+                    getResources().twitch.automod)},
                 .tooltip = {},
                 .homePage = {},
                 .id = {},

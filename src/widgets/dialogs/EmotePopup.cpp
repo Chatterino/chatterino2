@@ -422,11 +422,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
-    if (this->twitchChannel_ == nullptr)
-    {
-        return;
-    }
-
     this->globalEmotesView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
     this->subEmotesView_->setChannel(
@@ -441,11 +436,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
 void EmotePopup::reloadEmotes()
 {
-    if (this->twitchChannel_ == nullptr)
-    {
-        return;
-    }
-
     auto subChannel = this->subEmotesView_->underlyingChannel();
     auto globalChannel = this->globalEmotesView_->underlyingChannel();
     auto channelChannel = this->channelEmotesView_->underlyingChannel();
@@ -454,13 +444,32 @@ void EmotePopup::reloadEmotes()
     globalChannel->clearMessages();
     channelChannel->clearMessages();
 
-    // twitch
-    addTwitchEmoteSets(
-        twitchChannel_->localTwitchEmotes(),
-        *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets(),
-        *globalChannel, *subChannel, twitchChannel_->roomId(),
-        twitchChannel_->getName());
+    if (this->twitchChannel_)
+    {
+        // twitch
+        addTwitchEmoteSets(
+            twitchChannel_->localTwitchEmotes(),
+            *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets(),
+            *globalChannel, *subChannel, twitchChannel_->roomId(),
+            twitchChannel_->getName());
 
+        // channel
+        if (Settings::instance().enableBTTVChannelEmotes)
+        {
+            addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
+                      "BetterTTV", MessageElementFlag::BttvEmote);
+        }
+        if (Settings::instance().enableFFZChannelEmotes)
+        {
+            addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
+                      "FrankerFaceZ", MessageElementFlag::FfzEmote);
+        }
+        if (Settings::instance().enableSevenTVChannelEmotes)
+        {
+            addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
+                      "7TV", MessageElementFlag::SevenTVEmote);
+        }
+    }
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
@@ -475,23 +484,6 @@ void EmotePopup::reloadEmotes()
     if (Settings::instance().enableSevenTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
-                  "7TV", MessageElementFlag::SevenTVEmote);
-    }
-
-    // channel
-    if (Settings::instance().enableBTTVChannelEmotes)
-    {
-        addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                  "BetterTTV", MessageElementFlag::BttvEmote);
-    }
-    if (Settings::instance().enableFFZChannelEmotes)
-    {
-        addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
-    }
-    if (Settings::instance().enableSevenTVChannelEmotes)
-    {
-        addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
                   "7TV", MessageElementFlag::SevenTVEmote);
     }
 

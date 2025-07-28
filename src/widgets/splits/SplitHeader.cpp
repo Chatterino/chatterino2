@@ -20,6 +20,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
+#include "widgets/buttons/DrawnButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -41,6 +42,14 @@
 namespace {
 
 using namespace chatterino;
+
+/// The width of the standard button.
+constexpr const int BUTTON_WIDTH = 28;
+
+/// The width of the "Add split" button.
+///
+/// This matches the scrollbar's full width.
+constexpr const int ADD_SPLIT_BUTTON_WIDTH = 16;
 
 // 5 minutes
 constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
@@ -280,6 +289,13 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
+                                       {
+                                           .padding = 3,
+                                           .thickness = 1,
+                                       },
+                                       this);
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -353,14 +369,11 @@ void SplitHeader::initializeLayout()
             });
         }),
         // add split
-        this->addButton_ = makeWidget<PixmapButton>([&](auto w) {
-            w->setPixmap(getResources().buttons.addSplitDark);
-            w->setMarginEnabled(false);
+        this->addButton_,
+    });
 
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->addSibling();
-            });
-        }),
+    QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
+        this->split_->addSibling();
     });
 
     getSettings()->customURIScheme.connect(
@@ -791,13 +804,15 @@ void SplitHeader::handleChannelChanged()
 
 void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = int(28 * scale);
+    int w = int(BUTTON_WIDTH * scale);
+    int addSplitWidth = int(ADD_SPLIT_BUTTON_WIDTH * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
-    this->addButton_->setFixedWidth(w * 5 / 8);
+
+    this->addButton_->setFixedWidth(addSplitWidth);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
@@ -1061,18 +1076,21 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
+    this->addButton_->setOptions({
+        .background = this->theme->messages.backgrounds.regular,
+        .backgroundHover = this->theme->messages.backgrounds.regular,
+    });
+
     // --
     if (this->theme->isLightTheme())
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
-        this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
-        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
 
     this->update();

@@ -16,6 +16,7 @@
 
 namespace chatterino {
 
+class DrawnButton;
 class PixmapButton;
 class LabelButton;
 class Label;
@@ -87,7 +88,7 @@ private:
 
     PixmapButton *moderationButton_{};
     PixmapButton *chattersButton_{};
-    PixmapButton *addButton_{};
+    DrawnButton *addButton_{};
 
     // states
     QPoint dragStart_{};

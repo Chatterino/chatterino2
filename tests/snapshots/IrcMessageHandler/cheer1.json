@@ -113,22 +113,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -147,22 +131,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
@@ -213,22 +181,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -247,22 +199,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
@@ -298,22 +234,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -332,22 +252,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
@@ -383,22 +287,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -417,22 +305,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
@@ -468,22 +340,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -502,22 +358,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,

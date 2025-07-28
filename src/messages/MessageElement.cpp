@@ -181,11 +181,9 @@ QJsonObject CircularImageElement::toJson() const
 EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
                            const MessageColor &textElementColor)
     : MessageElement(flags)
+    , textColor_(textElementColor)
     , emote_(emote)
 {
-    this->textElement_.reset(new TextElement(
-        emote->getCopyString(), MessageElementFlag::Misc, textElementColor));
-
     this->setTooltip(emote->tooltip.string);
 }
 
@@ -197,39 +195,61 @@ EmotePtr EmoteElement::getEmote() const
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasNone(this->getFlags()))
     {
-        if (ctx.flags.has(MessageElementFlag::EmoteImages))
-        {
-            auto image = this->emote_->images.getImageOrLoaded(
-                container.getImageScale());
-            if (image->isEmpty())
-            {
-                return;
-            }
+        return;
+    }
 
+    if (ctx.flags.has(MessageElementFlag::EmoteImages))
+    {
+        auto image =
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
+
+        if (image->isEmpty())
+        {
+            this->ensureText(true);
+        }
+        else
+        {
             auto emoteScale = getSettings()->emoteScale.getValue();
 
             auto size = image->size() * container.getScale() * emoteScale;
 
             container.addElement(this->makeImageLayoutElement(image, size));
-        }
-        else
-        {
-            if (this->textElement_)
-            {
-                auto textCtx = ctx;
-                textCtx.flags = MessageElementFlag::Misc;
-                this->textElement_->addToContainer(container, textCtx);
-            }
+            return;
         }
     }
+    else
+    {
+        this->ensureText(false);
+    }
+
+    auto textCtx = ctx;
+    textCtx.flags = MessageElementFlag::Misc;
+    this->textElement_->addToContainer(container, textCtx);
 }
 
 MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     const ImagePtr &image, QSizeF size)
 {
     return new ImageLayoutElement(*this, image, size);
+}
+
+void EmoteElement::ensureText(bool asFallback)
+{
+    if (this->textElement_ && asFallback == this->usingFallbackColor_)
+    {
+        return;
+    }
+
+    auto color = this->textColor_;
+    if (asFallback)
+    {
+        color = MessageColor::System;
+    }
+    this->textElement_ = std::make_unique<TextElement>(
+        this->emote_->getCopyString(), MessageElementFlag::Misc, color);
+    this->usingFallbackColor_ = asFallback;
 }
 
 QJsonObject EmoteElement::toJson() const
