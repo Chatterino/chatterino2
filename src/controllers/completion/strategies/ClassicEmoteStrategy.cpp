@@ -36,8 +36,8 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
     // Second pass: filter only zero-width if needed
     if (zeroWidthOnly)
     {
-        auto [first, last] = std::ranges::remove_if(
-            output, [](const EmoteItem &emoteItem) {
+        auto [first, last] =
+            std::ranges::remove_if(output, [](const EmoteItem &emoteItem) {
                 return !emoteItem.emote->zeroWidth;
             });
         output.erase(first, last);
