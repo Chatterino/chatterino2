@@ -184,7 +184,7 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
 
         filteredItems.erase(
             std::remove_if(filteredItems.begin(), filteredItems.end(),
-                           [](EmoteItem emoteItem) {
+                           [](const EmoteItem& emoteItem) {
                                return !emoteItem.emote->zeroWidth;
                            }),
             filteredItems.end());

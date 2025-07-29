@@ -35,7 +35,7 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
     if (zeroWidthOnly)
     {
         output.erase(std::remove_if(output.begin(), output.end(),
-                                    [](EmoteItem emoteItem) {
+                                    [](const EmoteItem& emoteItem) {
                                         return !emoteItem.emote->zeroWidth;
                                     }),
                      output.end());
