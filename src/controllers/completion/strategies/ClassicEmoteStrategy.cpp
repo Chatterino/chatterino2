@@ -76,6 +76,11 @@ void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         // TODO(Qt6): use sliced
         normalizedQuery = normalizedQuery.mid(1);
     }
+    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
+        normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+    }
 
     std::set<EmoteItem, CompletionEmoteOrder> emotes;
 
