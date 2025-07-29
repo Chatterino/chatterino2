@@ -182,12 +182,11 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         normalizedQuery = normalizedQuery.mid(1);
         zeroWidthOnly = true;
 
-        filteredItems.erase(
-            std::remove_if(filteredItems.begin(), filteredItems.end(),
-                           [](const EmoteItem& emoteItem) {
-                               return !emoteItem.emote->zeroWidth;
-                           }),
-            filteredItems.end());
+        auto [first, last] = std::ranges::remove_if(
+            filteredItems, [](const EmoteItem &emoteItem) {
+                return !emoteItem.emote->zeroWidth;
+            });
+        filteredItems.erase(first, last);
     }
 
     completeEmotes(filteredItems, output, normalizedQuery, ignoreColonForCost,

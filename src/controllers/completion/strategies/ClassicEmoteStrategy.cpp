@@ -34,11 +34,11 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
     // Second pass: filter only zero-width if needed
     if (zeroWidthOnly)
     {
-        output.erase(std::remove_if(output.begin(), output.end(),
-                                    [](const EmoteItem& emoteItem) {
-                                        return !emoteItem.emote->zeroWidth;
-                                    }),
-                     output.end());
+        auto [first, last] = std::ranges::remove_if(
+            output, [](const EmoteItem &emoteItem) {
+                return !emoteItem.emote->zeroWidth;
+            });
+        output.erase(first, last);
     }
 
     // Third pass: if there is an exact match, put that emote first
