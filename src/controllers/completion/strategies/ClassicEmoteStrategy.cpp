@@ -10,9 +10,16 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                  const QString &query) const
 {
     QString normalizedQuery = query;
+    bool zeroWidthOnly = false;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
+    }
+    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
+        normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+        zeroWidthOnly = true;
     }
 
     // First pass: filter by contains match
@@ -24,7 +31,17 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         }
     }
 
-    // Second pass: if there is an exact match, put that emote first
+    // Second pass: filter only zero-width if needed
+    if (zeroWidthOnly)
+    {
+        output.erase(std::remove_if(output.begin(), output.end(),
+                                    [](EmoteItem emoteItem) {
+                                        return !emoteItem.emote->zeroWidth;
+                                    }),
+                     output.end());
+    }
+
+    // Third pass: if there is an exact match, put that emote first
     for (size_t i = 1; i < output.size(); i++)
     {
         auto emoteText = output.at(i).searchName;

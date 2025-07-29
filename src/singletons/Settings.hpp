@@ -326,6 +326,9 @@ public:
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
     BoolSetting emoteCompletionWithColon = {
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
+    BoolSetting emoteZeroWidthCompletionWithColonTilde = {
+        "/behaviour/autocompletion/emoteZeroWidthCompletionWithColonTilde",
+        true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
     BoolSetting alwaysIncludeBroadcasterInUserCompletions = {

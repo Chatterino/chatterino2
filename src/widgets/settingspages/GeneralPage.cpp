@@ -581,6 +581,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.emoteCompletionWithColon)
         ->addTo(layout);
 
+    SettingWidget::checkbox(
+        "Enable zero-width only emote auto-completion by typing :~",
+        s.emoteZeroWidthCompletionWithColonTilde)
+        ->addTo(layout);
+
     SettingWidget::checkbox("Use experimental smarter emote completion.",
                             s.useSmartEmoteCompletion)
         ->addTo(layout);
