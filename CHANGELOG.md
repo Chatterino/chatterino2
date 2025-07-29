@@ -23,6 +23,7 @@
 - Minor: Message character length label is now monospaced. (#6366)
 - Minor: Add a setting under Moderation -> Logs to customize the timestamp used for chat logs. (#6338)
 - Minor: Add a setting under Moderation -> Logs to use server timestamp from the message instead of the local clock time for logging. (#6346)
+- Minor: Add a setting under General -> Emotes to search only zero-width emotes when prepended by `:~`. (#6362)
 - Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
