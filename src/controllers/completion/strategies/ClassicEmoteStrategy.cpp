@@ -3,6 +3,8 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
+#include <algorithm>
+
 namespace chatterino::completion {
 
 void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
