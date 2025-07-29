@@ -67,7 +67,7 @@ int costOfEmote(QStringView query, QStringView emote, bool prioritizeUpper)
 // matchingFunction is used for testing if the emote should be included in the search.
 void completeEmotes(
     const std::vector<EmoteItem> &items, std::vector<EmoteItem> &output,
-    QStringView query, bool ignoreColonForCost,
+    QStringView query, bool ignoreColonForCost, bool ignoreTildeForCost,
     const std::function<bool(EmoteItem, Qt::CaseSensitivity)> &matchingFunction)
 {
     // Given these emotes: pajaW, PAJAW
@@ -128,7 +128,7 @@ void completeEmotes(
     }
 
     std::sort(output.begin(), output.end(),
-              [query, prioritizeUpper, ignoreColonForCost](
+              [query, prioritizeUpper, ignoreColonForCost, ignoreTildeForCost](
                   const EmoteItem &a, const EmoteItem &b) -> bool {
                   auto tempA = a.searchName;
                   auto tempB = b.searchName;
@@ -136,7 +136,15 @@ void completeEmotes(
                   {
                       tempA = tempA.mid(1);
                   }
+                  if (ignoreTildeForCost && tempA.startsWith("~"))
+                  {
+                      tempA = tempA.mid(1);
+                  }
                   if (ignoreColonForCost && tempB.startsWith(":"))
+                  {
+                      tempB = tempB.mid(1);
+                  }
+                  if (ignoreTildeForCost && tempB.startsWith("~"))
                   {
                       tempB = tempB.mid(1);
                   }
@@ -159,14 +167,31 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                std::vector<EmoteItem> &output,
                                const QString &query) const
 {
+    std::vector<EmoteItem> filteredItems = items;
     QString normalizedQuery = query;
     bool ignoreColonForCost = false;
+    bool zeroWidthOnly = false;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
         ignoreColonForCost = true;
     }
-    completeEmotes(items, output, normalizedQuery, ignoreColonForCost,
+    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
+        normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+        zeroWidthOnly = true;
+
+        filteredItems.erase(
+            std::remove_if(filteredItems.begin(), filteredItems.end(),
+                           [](EmoteItem emoteItem) {
+                               return !emoteItem.emote->zeroWidth;
+                           }),
+            filteredItems.end());
+    }
+
+    completeEmotes(filteredItems, output, normalizedQuery, ignoreColonForCost,
+                   zeroWidthOnly,
                    [normalizedQuery](const EmoteItem &left,
                                      Qt::CaseSensitivity caseHandling) {
                        return left.searchName.contains(normalizedQuery,
@@ -185,9 +210,14 @@ void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         // TODO(Qt6): use sliced
         normalizedQuery = normalizedQuery.mid(1);
     }
+    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
+        normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+    }
 
     completeEmotes(
-        items, output, normalizedQuery, false,
+        items, output, normalizedQuery, false, false,
         [&](const EmoteItem &item, Qt::CaseSensitivity caseHandling) -> bool {
             QStringView itemQuery;
             if (item.isEmoji)
