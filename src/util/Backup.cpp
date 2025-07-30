@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <thread>
 
-
 namespace {
 
 using namespace chatterino;
