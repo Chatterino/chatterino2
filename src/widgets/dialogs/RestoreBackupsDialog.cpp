@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
+#include <QStringBuilder>
 #include <QVBoxLayout>
 
 namespace {

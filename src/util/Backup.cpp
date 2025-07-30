@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QStringBuilder>
 
 #include <algorithm>
 #include <thread>
