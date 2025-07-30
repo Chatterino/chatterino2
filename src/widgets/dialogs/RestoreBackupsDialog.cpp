@@ -12,6 +12,7 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QProcess>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 namespace {
@@ -212,8 +213,7 @@ RestoreBackupsDialog::RestoreBackupsDialog(const Paths *paths, QWidget *parent)
         buttons, &QDialogButtonBox::clicked,
         [this, buttons, mainSettings, windowLayout, commands,
          userData](auto *btn) {
-            if (btn != static_cast<QAbstractButton *>(
-                           buttons->button(QDialogButtonBox::Apply)))
+            if (btn != buttons->button(QDialogButtonBox::Apply))
             {
                 return;
             }
