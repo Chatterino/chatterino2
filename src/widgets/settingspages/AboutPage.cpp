@@ -12,6 +12,8 @@
 #include "widgets/dialogs/RestoreBackupsDialog.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
+#include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QFormLayout>
 #include <QGroupBox>

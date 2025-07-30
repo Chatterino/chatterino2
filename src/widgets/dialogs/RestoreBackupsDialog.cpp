@@ -3,12 +3,14 @@
 #include "singletons/Paths.hpp"
 #include "util/Backup.hpp"
 #include "util/FilesystemHelpers.hpp"
+#include "util/Helpers.hpp"
 
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFile>
 #include <QLabel>
 #include <QLocale>
+#include <QMessageBox>
 #include <QProcess>
 #include <QVBoxLayout>
 
@@ -210,7 +212,8 @@ RestoreBackupsDialog::RestoreBackupsDialog(const Paths *paths, QWidget *parent)
         buttons, &QDialogButtonBox::clicked,
         [this, buttons, mainSettings, windowLayout, commands,
          userData](auto *btn) {
-            if (btn != buttons->button(QDialogButtonBox::Apply))
+            if (btn != static_cast<QAbstractButton *>(
+                           buttons->button(QDialogButtonBox::Apply)))
             {
                 return;
             }

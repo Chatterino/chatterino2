@@ -5,11 +5,13 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 
+#include <QApplication>
 #include <QDateTime>
 #include <QDirIterator>
 #include <QJsonObject>
 #include <QLocale>
 #include <QLoggingCategory>
+#include <QProcess>
 #include <QRegularExpression>
 #include <QStringBuilder>
 #include <QStringView>
