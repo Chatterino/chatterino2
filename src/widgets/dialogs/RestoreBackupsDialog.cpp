@@ -5,6 +5,8 @@
 #include "util/FilesystemHelpers.hpp"
 
 #include <QComboBox>
+#include <QDialogButtonBox>
+#include <QFile>
 #include <QLabel>
 #include <QLocale>
 #include <QProcess>
