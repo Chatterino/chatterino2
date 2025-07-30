@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <tuple>
 
-
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
 #endif
