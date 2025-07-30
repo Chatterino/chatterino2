@@ -1,12 +1,15 @@
 #include "widgets/settingspages/AboutPage.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "singletons/Paths.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/buttons/SignalLabel.hpp"
+#include "widgets/dialogs/RestoreBackupsDialog.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QFile>
@@ -58,6 +61,39 @@ AboutPage::AboutPage()
             label->setWordWrap(true);
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        }
+
+        // This instance
+        auto thisInstance = layout.emplace<QGroupBox>("This instance");
+        {
+            auto vbox = thisInstance.emplace<QVBoxLayout>();
+
+            const auto *paths = &getApp()->getPaths();
+            auto label = vbox.emplace<QLabel>(
+                "Chatterino is currently running as " %
+                QApplication::applicationFilePath() %
+                " from "
+                "<a href=\"file:///" %
+                QDir::currentPath() % "\">" % QDir::currentPath() %
+                "</a>.<br>"
+                "The application directory is at <a href=\"file:///" %
+                paths->rootAppDataDirectory % "\">" %
+                paths->rootAppDataDirectory %
+                "</a>.<br>"
+                "Settings are located at <a href=\"file:///" %
+                paths->settingsDirectory % "\">" % paths->settingsDirectory %
+                "</a>.");
+            label->setWordWrap(true);
+            label->setOpenExternalLinks(true);
+            label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+
+            auto btn =
+                vbox.emplace<QPushButton>("Restore settings from backups");
+            QObject::connect(
+                btn.getElement(), &QPushButton::clicked, this, [this, paths] {
+                    auto *diag = new RestoreBackupsDialog(paths, this);
+                    diag->exec();
+                });
         }
 
         // About Chatterino

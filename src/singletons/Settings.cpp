@@ -151,14 +151,18 @@ Settings::Settings(const Args &args, const QString &settingsDirectory)
     QString settingsPath = settingsDirectory + "/settings.json";
 
     // get global instance of the settings library
-    auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
+    const auto &settingsInstance =
+        pajlada::Settings::SettingManager::getInstance();
 
-    settingsInstance->load(qPrintable(settingsPath));
+    settingsInstance->saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
+    auto error = settingsInstance->load(qPrintable(settingsPath));
+    if (error != pajlada::Settings::SettingManager::LoadError::NoError)
+    {
+    }
 
     settingsInstance->setBackupEnabled(true);
     settingsInstance->setBackupSlots(9);
-    settingsInstance->saveMethod =
-        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
 
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);

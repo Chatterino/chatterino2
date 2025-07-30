@@ -24,6 +24,9 @@ class Paths;
 ///   --parent-window
 ///   --x-attach-split-to-window=window-id
 ///
+/// Backup restoring:
+///   --restore-plan=plan
+///
 /// -v, --verbose
 /// -V, --version
 /// -c, --channels=t:channel1;t:channel2;...
@@ -54,6 +57,8 @@ public:
     // Shows a single chat. Used on windows to embed in another application.
     bool isFramelessEmbed{};
     std::optional<unsigned long long> parentWindowId{};
+
+    std::optional<QString> restorePlan;
 
     // Not settings directly
     bool dontSaveSettings{};
