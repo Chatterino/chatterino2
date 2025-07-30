@@ -17,6 +17,10 @@
 #include <QTimeZone>
 #include <QUuid>
 
+#ifdef Q_OS_MAC
+#    include "corefoundation/CFBundle.h"
+#endif
+
 namespace {
 
 const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
@@ -471,6 +475,35 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
         haystack.sliced(0, idx),
         haystack.sliced(idx + 1),
     };
+}
+
+bool restartAppDetatched(const QStringList &args)
+{
+    QProcess proc;
+
+#ifdef Q_OS_MAC
+    // On macOS, programs are bundled into ".app" Application bundles,
+    // when restarting Chatterino that bundle should be opened with the "open"
+    // terminal command instead of directly starting the underlying executable,
+    // as those are 2 different things for the OS and i.e. do not use
+    // the same dock icon (resulting in a second Chatterino icon on restarting)
+    CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFStringRef macPath =
+        CFURLCopyFileSystemPath(appUrlRef, kCFURLPOSIXPathStyle);
+    const char *pathPtr =
+        CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+    proc.setProgram("open");
+    proc.setArguments(QStringList{pathPtr, "-n", "--args"} + args);
+
+    CFRelease(appUrlRef);
+    CFRelease(macPath);
+#else
+    proc.setProgram(QApplication::applicationFilePath());
+    proc.setArguments(args);
+#endif
+
+    return proc.startDetached();
 }
 
 }  // namespace chatterino

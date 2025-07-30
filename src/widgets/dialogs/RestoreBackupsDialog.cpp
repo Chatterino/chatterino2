@@ -232,14 +232,10 @@ RestoreBackupsDialog::RestoreBackupsDialog(const Paths *paths, QWidget *parent)
                 QMessageBox::No | QMessageBox::Yes);
             if (res == QMessageBox::Yes)
             {
-                QProcess twin;
-                // 😱 what about flatpak?????
-                twin.setProgram(QApplication::applicationFilePath());
-                twin.setArguments({
-                    "--restore-plan",
-                    backup::encodeRestoreActions(actions),
-                });
-                if (twin.startDetached())
+                if (restartAppDetatched({
+                        "--restore-plan",
+                        backup::encodeRestoreActions(actions),
+                    }))
                 {
                     _Exit(0);
                 }

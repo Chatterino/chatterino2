@@ -237,4 +237,6 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
 std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
                                               QChar needle) noexcept;
 
+bool restartAppDetatched(const QStringList &args);
+
 }  // namespace chatterino

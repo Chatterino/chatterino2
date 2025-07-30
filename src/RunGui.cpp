@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Helpers.hpp"
 #include "util/SelfCheck.hpp"
 #include "util/UnixSignalHandler.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
@@ -26,16 +27,13 @@
 #include <cstdlib>
 #include <tuple>
 
+
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
 #endif
 
 #ifdef C_USE_BREAKPAD
 #    include <QBreakpadHandler.h>
-#endif
-
-#ifdef Q_OS_MAC
-#    include "corefoundation/CFBundle.h"
 #endif
 
 namespace chatterino {
@@ -133,31 +131,7 @@ std::chrono::steady_clock::time_point signalsInitTime;
     if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
         getApp()->getCrashHandler()->shouldRecover())
     {
-        QProcess proc;
-
-#ifdef Q_OS_MAC
-        // On macOS, programs are bundled into ".app" Application bundles,
-        // when restarting Chatterino that bundle should be opened with the "open"
-        // terminal command instead of directly starting the underlying executable,
-        // as those are 2 different things for the OS and i.e. do not use
-        // the same dock icon (resulting in a second Chatterino icon on restarting)
-        CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-        CFStringRef macPath =
-            CFURLCopyFileSystemPath(appUrlRef, kCFURLPOSIXPathStyle);
-        const char *pathPtr =
-            CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
-
-        proc.setProgram("open");
-        proc.setArguments({pathPtr, "-n", "--args", "--crash-recovery"});
-
-        CFRelease(appUrlRef);
-        CFRelease(macPath);
-#else
-        proc.setProgram(QApplication::applicationFilePath());
-        proc.setArguments({"--crash-recovery"});
-#endif
-
-        proc.startDetached();
+        restartAppDetatched({"--crash-recovery"});
     }
 
     std::_Exit(signum);
