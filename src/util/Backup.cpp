@@ -4,6 +4,10 @@
 #include "util/FilesystemHelpers.hpp"
 #include "util/QMagicEnum.hpp"
 
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QMessageBox>
 #include <QRegularExpression>
 
 #include <algorithm>

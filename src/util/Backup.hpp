@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <vector>
 
+class QJsonValue;
+
 namespace chatterino::backup {
 
 bool anyBackupsOf(const QString &directory, const QString &filename);
