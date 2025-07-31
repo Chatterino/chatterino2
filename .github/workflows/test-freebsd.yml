@@ -1,0 +1,79 @@
+---
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - "bugfix-release/*"
+      - "release/*"
+  pull_request:
+  workflow_dispatch:
+  merge_group:
+
+concurrency:
+  group: build-freebsd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
+
+jobs:
+  test-vm:
+    name: "Test FreeBSD"
+    runs-on: ubuntu-latest
+
+    env:
+      TWITCH_PUBSUB_SERVER_TAG: v1.0.11
+      HTTPBOX_TAG: v0.2.1
+      QT_QPA_PLATFORM: minimal
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
+
+      - name: Build using FreeBSD
+        uses: vmactions/freebsd-vm@v1.2.1
+        with:
+          envs: 'TWITCH_PUBSUB_SERVER_TAG HTTPBOX_TAG QT_QPA_PLATFORM'
+          release: "14.2"
+          arch: x86_64
+          prepare: |
+            pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
+          run: |
+            git submodule init
+            git submodule update
+            mkdir build
+            cd build
+            c++ --version
+            cmake \
+                -DCMAKE_C_COMPILER="cc" \
+                -DCMAKE_CXX_COMPILER="c++" \
+                -DCMAKE_C_FLAGS="-O2 -pipe  -fstack-protector-strong -fno-strict-aliasing "  \
+                -DCMAKE_CXX_FLAGS="-O2 -pipe -fstack-protector-strong -fno-strict-aliasing  " \
+                -DLINK_OPTIONS="-fstack-protector-strong" \
+                -DCMAKE_INSTALL_PREFIX="/usr/local" \
+                -DUSE_SYSTEM_QTKEYCHAIN="ON" \
+                -DBUILD_TESTS=On \
+                -DBUILD_APP=OFF \
+                -DCMAKE_BUILD_TYPE=Debug \
+                ..
+            make -j $(getconf _NPROCESSORS_ONLN)
+            # Install httpbox
+            curl -L -o /tmp/httpbox.tar.xz "https://github.com/Chatterino/httpbox/releases/download/${{ env.HTTPBOX_TAG }}/httpbox-x86_64-unknown-linux-gnu.tar.xz"
+            tar -xJf /tmp/httpbox.tar.xz
+            mv ./httpbox-x86_64-unknown-linux-gnu/httpbox /usr/local/bin
+            rm -r ./httpbox-x86_64-unknown-linux-gnu
+            # Download and extract Twitch PubSub Server Test
+            mkdir pubsub-server-test
+            curl -L -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-linux-amd64.tar.gz"
+            tar -xzf pubsub-server.tar.gz -C pubsub-server-test
+            # Test
+            httpbox --port 9051 &
+            cd pubsub-server-test
+            ./server 127.0.0.1:9050 127.0.0.1:9052 &
+            cd ..
+            ctest --repeat until-pass:4 --output-on-failure
