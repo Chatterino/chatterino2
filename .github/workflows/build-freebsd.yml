@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - name: Build using FreeBSD
-        uses: vmactions/freebsd@1.2.1
+        uses: vmactions/freebsd-vm@1.2.1
         with:
           release: "14.2"
           arch: x86_64
