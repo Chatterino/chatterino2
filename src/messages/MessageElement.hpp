@@ -31,6 +31,7 @@ using ImagePtr = std::shared_ptr<Image>;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
+/** @exposeenum c2.MessageElementFlag [flags] */
 enum class MessageElementFlag : int64_t {
     None = 0LL,
     Misc = (1LL << 0),
