@@ -12,7 +12,7 @@ on:
   merge_group:
 
 concurrency:
-  group: build-freebsd-${{ github.ref }}
+  group: test-freebsd-${{ github.ref }}
   cancel-in-progress: true
 
 env:
