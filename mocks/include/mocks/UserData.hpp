@@ -42,6 +42,10 @@ public:
         return this->userDataUpdated_;
     }
 
+    void disableSave() override
+    {
+    }
+
 private:
     std::unordered_map<QString, UserData> userMap;
     pajlada::Signals::NoArgSignal userDataUpdated_;

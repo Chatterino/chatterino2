@@ -138,7 +138,11 @@ void appendRestoreActions(std::vector<backup::RestoreAction> &actions,
 
     using Command = backup::RestoreAction::Command;
 
+#if QT_CONFIG(cxx17_filesystem)
     if (QFile::exists(file->dstPath))
+#else
+    if (QFile::exists(stdPathToQString(file->dstPath)))
+#endif
     {
         actions.emplace_back(backup::RestoreAction{
             .command = Command::Move,
