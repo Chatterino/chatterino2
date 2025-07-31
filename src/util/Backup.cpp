@@ -130,7 +130,11 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
         }
 
         backups.emplace_back(BackupFile{
+#if QT_CONFIG(cxx17_filesystem)
             .path = entry.filesystemCanonicalFilePath(),
+#else
+            .path = qStringToStdPath(entry.canonicalFilePath()),
+#endif
             .dstPath = dst,
             .lastModified = entry.lastModified(),
             .fileSize = entry.size(),
