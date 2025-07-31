@@ -487,6 +487,11 @@ void CommandController::save()
     this->sm_->save();
 }
 
+void CommandController::disableSave()
+{
+    this->canSave_ = false;
+}
+
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);

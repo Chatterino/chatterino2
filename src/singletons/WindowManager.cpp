@@ -454,7 +454,7 @@ void WindowManager::initialize()
 
 void WindowManager::save()
 {
-    if (this->appArgs.dontSaveSettings)
+    if (this->appArgs.dontSaveSettings || !this->canSave)
     {
         return;
     }
@@ -582,6 +582,11 @@ void WindowManager::queueSave()
     using namespace std::chrono_literals;
 
     this->saveTimer->start(10s);
+}
+
+void WindowManager::disableSave()
+{
+    this->canSave = false;
 }
 
 void WindowManager::toggleAllOverlayInertia()

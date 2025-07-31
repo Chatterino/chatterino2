@@ -134,4 +134,11 @@ pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
     return this->userDataUpdated_;
 }
 
+void UserDataController::disableSave()
+{
+    this->sm->saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
+    this->canSave = false;
+}
+
 }  // namespace chatterino

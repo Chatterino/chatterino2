@@ -126,6 +126,7 @@ public:
     ~Settings();
 
     static Settings &instance();
+    static Settings *maybeInstance();
 
     /// Request the settings to be saved to file
     ///

@@ -31,6 +31,8 @@ public:
     virtual void setUserNotes(const QString &userID, const QString &notes) = 0;
 
     virtual pajlada::Signals::NoArgSignal &userDataUpdated() = 0;
+
+    virtual void disableSave() = 0;
 };
 
 class UserDataController : public IUserDataController
@@ -49,6 +51,8 @@ public:
     // Update or insert extra data for the notes about a user
     void setUserNotes(const QString &userID, const QString &notes) override;
 
+    void disableSave() override;
+
     pajlada::Signals::NoArgSignal &userDataUpdated() override;
 
 private:
@@ -64,6 +68,7 @@ private:
     std::shared_ptr<pajlada::Settings::SettingManager> sm;
     pajlada::Settings::Setting<std::unordered_map<QString, UserData>> setting;
     pajlada::Signals::NoArgSignal userDataUpdated_;
+    bool canSave = true;
 };
 
 }  // namespace chatterino

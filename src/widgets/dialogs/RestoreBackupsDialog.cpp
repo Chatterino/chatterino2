@@ -1,6 +1,11 @@
 #include "widgets/dialogs/RestoreBackupsDialog.hpp"
 
+#include "Application.hpp"
+#include "controllers/commands/CommandController.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Backup.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/Helpers.hpp"
@@ -242,7 +247,28 @@ RestoreBackupsDialog::RestoreBackupsDialog(const Paths *paths, QWidget *parent)
                         backup::encodeRestoreActions(actions),
                     }))
                 {
-                    _Exit(0);
+                    auto *settings = Settings::maybeInstance();
+                    if (settings)
+                    {
+                        settings->disableSave();
+                    }
+                    auto *app = tryGetApp();
+                    if (app)
+                    {
+                        app->getCommands()->disableSave();
+                        app->getUserData()->disableSave();
+                        app->getWindows()->disableSave();
+                    }
+
+                    if (app)
+                    {
+                        QApplication::exit();
+                    }
+                    else
+                    {
+                        // we're just starting up -> no eventloop yet
+                        _Exit(0);
+                    }
                 }
                 else
                 {

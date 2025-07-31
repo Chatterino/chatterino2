@@ -329,6 +329,11 @@ Settings &Settings::instance()
     return *instance_;
 }
 
+Settings *Settings::maybeInstance()
+{
+    return instance_;
+}
+
 Settings *getSettings()
 {
     return &Settings::instance();
