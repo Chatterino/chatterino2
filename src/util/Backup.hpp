@@ -27,6 +27,7 @@ struct BackupFile {
     std::filesystem::path path;
     std::filesystem::path dstPath;
     QDateTime lastModified;
+    qint64 fileSize;
     BackupState state;
 };
 

@@ -239,4 +239,6 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
 
 bool restartAppDetatched(const QStringList &args);
 
+QString formatFileSize(qint64 size);
+
 }  // namespace chatterino

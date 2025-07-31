@@ -133,6 +133,7 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
             .path = entry.filesystemCanonicalFilePath(),
             .dstPath = dst,
             .lastModified = entry.lastModified(),
+            .fileSize = entry.size(),
             .state = state,
         });
     }

@@ -40,22 +40,6 @@ qint64 dirSize(QString &dirPath)
     return size;
 }
 
-QString formatSize(qint64 size)
-{
-    QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
-    int i;
-    double outputSize = size;
-    for (i = 0; i < units.size() - 1; i++)
-    {
-        if (outputSize < 1024)
-        {
-            break;
-        }
-        outputSize = outputSize / 1024;
-    }
-    return QString("%0 %1").arg(outputSize, 0, 'f', 2).arg(units[i]);
-}
-
 QString fetchLogDirectorySize()
 {
     QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
@@ -65,7 +49,7 @@ QString fetchLogDirectorySize()
     auto logsSize = dirSize(logsDirectoryPath);
 
     return QString("Your logs currently take up %1 of space")
-        .arg(formatSize(logsSize));
+        .arg(formatFileSize(logsSize));
 }
 
 ModerationPage::ModerationPage()

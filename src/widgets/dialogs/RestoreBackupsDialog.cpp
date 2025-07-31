@@ -73,8 +73,9 @@ RestoreSection::RestoreSection(const Args &args, QWidget *parent)
         for (const auto &backup : availableBackups)
         {
             this->combo->addItem(
-                u"%1 (%2)"_s.arg(stdPathToQString(backup.path.filename()),
-                                 backup.lastModified.toString(dtf)),
+                u"%1 (%2, %3)"_s.arg(stdPathToQString(backup.path.filename()),
+                                     backup.lastModified.toString(dtf),
+                                     formatFileSize(backup.fileSize)),
                 QVariant::fromValue(backup));
         }
         auto *lbl = new QLabel("File to restore:");

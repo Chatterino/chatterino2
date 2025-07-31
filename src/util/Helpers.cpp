@@ -25,6 +25,8 @@
 
 namespace {
 
+using namespace Qt::Literals;
+
 const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
 
 // Note: \U requires /utf-8 for MSVC
@@ -506,6 +508,22 @@ bool restartAppDetatched(const QStringList &args)
 #endif
 
     return proc.startDetached();
+}
+
+QString formatFileSize(qint64 size)
+{
+    QStringList units = {"B", "KiB", "MiB", "GiB", "TiB", "PiB"};
+    auto outputSize = static_cast<double>(size);
+    qsizetype unit = 0;
+    for (; unit < units.size() - 1; unit++)
+    {
+        if (outputSize < 1024)
+        {
+            break;
+        }
+        outputSize = outputSize / 1024;
+    }
+    return u"%0\u202F%1"_s.arg(outputSize, 0, 'f', 2).arg(units[unit]);
 }
 
 }  // namespace chatterino
