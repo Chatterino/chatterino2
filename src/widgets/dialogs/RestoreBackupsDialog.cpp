@@ -10,6 +10,7 @@
 #include "util/FilesystemHelpers.hpp"
 #include "util/Helpers.hpp"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFile>
