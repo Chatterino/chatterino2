@@ -1,5 +1,5 @@
 ---
-name: Build
+name: Build FreeBSD
 
 on:
   push:
