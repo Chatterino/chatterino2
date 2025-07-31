@@ -36,7 +36,7 @@ jobs:
       - name: Build using FreeBSD
         uses: vmactions/freebsd-vm@v1.2.1
         with:
-          envs: 'C2_ENABLE_LTO'
+          envs: "C2_ENABLE_LTO"
           release: "14.2"
           arch: x86_64
           prepare: |
