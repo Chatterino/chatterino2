@@ -21,7 +21,7 @@ env:
 
 jobs:
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build FreeBSD"
     runs-on: ubuntu-latest
 
     env:
@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - name: Build using FreeBSD
-        uses: vmactions/freebsd@14.3
+        uses: vmactions/freebsd@1.2.1
         with:
           release: "14.2"
           arch: x86_64
