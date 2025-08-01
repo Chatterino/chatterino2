@@ -337,7 +337,7 @@ function c2.HTTPRequest.create(method, url) end
 ---@field type "twitch-moderation" The type of the element
 
 ---@class c2.LinebreakElement : c2.MessageElementBase
----@field type "twitch-moderation"
+---@field type "linebreak"
 
 ---A table to initialize a new linebreak element
 ---@class LinebreakElementInit : MessageElementInitBase
@@ -423,7 +423,6 @@ function c2.Message:append_element(init) end
 ---@param init MessageInit The message initialization table
 ---@return c2.Message msg The new message
 function c2.Message.new(init) end
-
 -- Begin src/singletons/Fonts.hpp
 
 ---@enum c2.FontStyle
@@ -636,3 +635,4 @@ function c2.log(level, ...) end
 ---@param callback fun() The callback that will be called.
 ---@param msec number How long to wait.
 function c2.later(callback, msec) end
+
