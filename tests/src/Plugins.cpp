@@ -1076,7 +1076,7 @@ TEST_F(PluginTest, MessageModification)
     auto tests = pfn(liquid);
     ASSERT_TRUE(tests.valid());
     sol::table cbs = tests;
-    for (auto [_key, cb] : cbs)
+    for (const auto &[_key, cb] : cbs)
     {
         sol::protected_function pf = cb;
         auto res = pf();
@@ -1092,7 +1092,7 @@ TEST_F(PluginTest, MessageModification)
     tests = pfn(frozen);
     ASSERT_TRUE(tests.valid());
     cbs = tests;
-    for (auto [key, cb] : cbs)
+    for (const auto &[key, cb] : cbs)
     {
         bool isFlags = key.as<int>() == 1;
 
