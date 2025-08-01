@@ -84,6 +84,7 @@
                 }
             ],
             "flags": "PubSub|AutoMod|EventSub",
+            "frozen": true,
             "id": "automod_5686ec52-e02c-4042-ac21-1dfd8cab0f9f",
             "localizedName": "",
             "loginName": "automod",

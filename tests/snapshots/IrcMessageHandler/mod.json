@@ -172,6 +172,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "97c28382-e8d2-45a0-bb5d-2305fc4ef139",
             "localizedName": "테스트계정420",
             "loginName": "testaccount_420",

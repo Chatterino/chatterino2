@@ -46,6 +46,7 @@
             }
         ],
         "flags": "System|Disabled",
+        "frozen": false,
         "highlightColor": "#12345678",
         "id": "foo-bar",
         "localizedName": "local",

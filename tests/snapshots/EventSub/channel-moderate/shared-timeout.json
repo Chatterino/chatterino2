@@ -199,6 +199,7 @@
                 }
             ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
