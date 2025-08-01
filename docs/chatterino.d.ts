@@ -226,7 +226,11 @@ declare namespace c2 {
         | LayeredEmoteElement
         | ImageElement
         | CircularImageElement
-        | ScalingImageElement;
+        | ScalingImageElement
+        | BadgeElement
+        | ModBadgeElement
+        | VipBadgeElement
+        | FfzBadgeElement;
 
     type MessageElementInit =
         | TextElementInit
@@ -340,6 +344,22 @@ declare namespace c2 {
 
     interface ScalingImageElement extends MessageElementBase {
         type: "scaling-image";
+    }
+
+    interface BadgeElement extends MessageElementBase {
+        type: "badge";
+    }
+
+    interface ModBadgeElement extends MessageElementBase {
+        type: "mod-badge";
+    }
+
+    interface VipBadgeElement extends MessageElementBase {
+        type: "ffz-badge";
+    }
+
+    interface FfzBadgeElement extends MessageElementBase {
+        type: "ffz-badge";
     }
 
     enum MessageFlag {

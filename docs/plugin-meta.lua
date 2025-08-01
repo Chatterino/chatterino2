@@ -376,7 +376,19 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class c2.ScalingImageElement : c2.MessageElementBase
 ---@field type "scaling-image"
 
----@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement
+---@class c2.BadgeElement : c2.MessageElementBase
+---@field type "badge"
+
+---@class c2.ModBadgeElement : c2.MessageElementBase
+---@field type "mod-badge"
+
+---@class c2.VipBadgeElement : c2.MessageElementBase
+---@field type "vip-badge"
+
+---@class c2.FfzBadgeElement : c2.MessageElementBase
+---@field type "ffz-badge"
+
+---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
 ---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit
 
 ---A chat message
