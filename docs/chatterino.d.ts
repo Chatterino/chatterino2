@@ -203,6 +203,7 @@ declare namespace c2 {
         flags: MessageElementFlag;
         tooltip: string;
         trailing_space: boolean;
+        add_flags(flags: MessageElementFlag): void;
     }
 
     interface MessageElementInitBase {

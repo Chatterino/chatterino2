@@ -272,6 +272,13 @@ function c2.HTTPRequest.create(method, url) end
 ---@field flags c2.MessageElementFlag The element's flags
 ---@field tooltip string The tooltip (if any)
 ---@field trialing_space boolean Whether to add a trailing space after the element
+c2.MessageElementBase = {}
+-- ^^^ this is kinda fake...
+
+--- Add flags to this element
+---
+---@param flags c2.MessageElementFlag
+function c2.MessageElementBase:add_flags(flags) end
 
 ---A base table to initialize a new message element
 ---@class MessageElementInitBase
