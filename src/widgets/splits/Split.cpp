@@ -1159,12 +1159,9 @@ void Split::openChatterList()
                      });
 
     chatterDock->resize(chatterListWidth, chatterListHeight);
-    // TODO: is the old move needed?
     widgets::showAndMoveWindowTo(
         chatterDock, this->mapToGlobal(QPoint{0, this->header_->height()}),
         widgets::BoundsChecking::CursorPosition);
-    // TODO: Is this needed?
-    // chatterDock->activateWindow();
 }
 
 void Split::openSubPage()
