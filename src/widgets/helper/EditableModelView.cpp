@@ -21,6 +21,8 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 {
     this->model_->setParent(this);
     this->tableView_->setModel(model_);
+    // disabling word-wrap somehow prevent '/'-prefixed commands from being elided
+    this->tableView_->setWordWrap(false);
     this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
