@@ -143,6 +143,7 @@
                 }
             ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
+            "frozen": true,
             "id": "automod_c0fac418-25a9-41b8-adf3-5bd637fca1e1",
             "localizedName": "",
             "loginName": "automod",
@@ -249,6 +250,7 @@
                 }
             ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

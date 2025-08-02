@@ -1,12 +1,11 @@
 #include "controllers/plugins/api/Message.hpp"
 
-#include "Application.hpp"
-#include "messages/MessageElement.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "Application.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/Message.hpp"
+#    include "messages/MessageElement.hpp"
 
 #    include <sol/sol.hpp>
 
@@ -232,16 +231,504 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
     return msg;
 }
 
+void checkWritable(Message *msg)
+{
+    if (msg->frozen)
+    {
+        throw std::runtime_error("Message is frozen");
+    }
+}
+
+template <typename T>
+struct MemberPtrTraits;
+
+template <class T, class C>
+struct MemberPtrTraits<T C::*> {
+    using Type = T;
+    using Object = C;
+};
+
+template <auto T>
+decltype(auto) memberAccessor()
+{
+    return sol::property(
+        [](Message *msg) {
+            return msg->*T;
+        },
+        [](Message *msg, typename MemberPtrTraits<decltype(T)>::Type v) {
+            checkWritable(msg);
+            msg->*T = std::forward<decltype(v)>(v);
+        });
+}
+
 }  // namespace
 
 namespace chatterino::lua::api::message {
 
+struct ElementRef {
+    ElementRef() = default;
+    ElementRef(std::shared_ptr<Message> msg, size_t index)
+        : msg(std::move(msg))
+        , index(index)
+    {
+    }
+
+    MessageElement *element() const
+    {
+        if (!this->msg || this->index >= this->msg->elements.size())
+        {
+            return nullptr;
+        }
+        checkWritable(this->msg.get());
+        return this->msg->elements[this->index].get();
+    }
+
+    const MessageElement *constElement() const
+    {
+        if (!this->msg || this->index >= this->msg->elements.size())
+        {
+            return nullptr;
+        }
+        return this->msg->elements[this->index].get();
+    }
+
+    MessageElement &ref() const
+    {
+        auto *el = element();
+        if (!el)
+        {
+            throw std::runtime_error("Element does not exist or expired");
+        }
+        return *el;
+    }
+
+    const MessageElement &cref() const
+    {
+        const auto *el = constElement();
+        if (!el)
+        {
+            throw std::runtime_error("Element does not exist or expired");
+        }
+        return *el;
+    }
+
+    template <typename T>
+    T &as() const
+    {
+        auto *el = dynamic_cast<T *>(element());
+        if (!el)
+        {
+            throw std::runtime_error(
+                "Element is of invalid type or does not exist");
+        }
+        return *el;
+    }
+
+    template <typename T>
+    const T &asConst() const
+    {
+        const auto *el = dynamic_cast<const T *>(constElement());
+        if (!el)
+        {
+            throw std::runtime_error(
+                "Element is of invalid type or does not exist");
+        }
+        return *el;
+    }
+
+    template <typename... T>
+    auto visit(auto &&...cb) const
+    {
+        static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
+        return visitOne<T...>(std::forward<decltype(cb)>(cb)...);
+    }
+
+    bool operator==(const ElementRef &rhs) const
+    {
+        return this->msg.get() == rhs.msg.get() && this->index == rhs.index;
+    }
+
+    std::shared_ptr<Message> msg;
+    size_t index = 0;
+
+private:
+    template <bool Const>
+    decltype(auto) maybeConstElement() const
+    {
+        if constexpr (Const)
+        {
+            return this->constElement();
+        }
+        else
+        {
+            return this->element();
+        }
+    }
+
+    template <typename T, typename... Rest>
+    decltype(auto) visitOne(auto &&cb, auto &&...rest) const
+    {
+        auto *el = dynamic_cast<T *>(maybeConstElement<std::is_const_v<T>>());
+        if (!el)
+        {
+            if constexpr (sizeof...(rest) == 0)
+            {
+                throw std::runtime_error(
+                    "Element is of invalid type or does not exist");
+            }
+            else
+            {
+                return visitOne<Rest...>(std::forward<decltype(rest)>(rest)...);
+            }
+        }
+        return std::invoke(cb, *el);
+    }
+};
+
+struct ElementIterator {
+    using difference_type = std::ptrdiff_t;
+    using value_type = ElementRef;
+
+    ElementIterator() = default;
+    ElementIterator(std::shared_ptr<Message> msg, size_t index)
+        : current(std::move(msg), index)
+    {
+    }
+
+    ElementRef operator*() const
+    {
+        return this->current;
+    }
+    ElementRef operator[](size_t i) const
+    {
+        return {this->current.msg, this->current.index + i};
+    }
+
+    ElementIterator &operator+=(difference_type diff)
+    {
+        this->current.index += diff;
+        return *this;
+    }
+    ElementIterator &operator++()
+    {
+        return *this += 1;
+    }
+    ElementIterator operator++(int)
+    {
+        auto tmp = *this;
+        ++*this;
+        return tmp;
+    }
+    friend ElementIterator operator+(difference_type diff,
+                                     const ElementIterator &it)
+    {
+        return {it.current.msg, it.current.index + diff};
+    }
+    friend ElementIterator operator+(const ElementIterator &it,
+                                     difference_type diff)
+    {
+        return {it.current.msg, it.current.index + diff};
+    }
+
+    ElementIterator &operator-=(difference_type diff)
+    {
+        this->current.index -= diff;
+        return *this;
+    }
+    ElementIterator &operator--()
+    {
+        return *this -= 1;
+    }
+    ElementIterator operator--(int)
+    {
+        auto tmp = *this;
+        --*this;
+        return tmp;
+    }
+
+    friend difference_type operator-(const ElementIterator &lhs,
+                                     const ElementIterator &rhs)
+    {
+        return static_cast<difference_type>(lhs.current.index) -
+               static_cast<difference_type>(rhs.current.index);
+    }
+    friend ElementIterator operator-(difference_type diff,
+                                     const ElementIterator &it)
+    {
+        return {it.current.msg, it.current.index - diff};
+    }
+    friend ElementIterator operator-(const ElementIterator &it,
+                                     difference_type diff)
+    {
+        return {it.current.msg, it.current.index - diff};
+    }
+
+    bool operator==(const ElementIterator &rhs) const
+    {
+        return this->current == rhs.current;
+    }
+    bool operator<(const ElementIterator &rhs) const
+    {
+        return this->current.index < rhs.current.index;
+    }
+    bool operator<=(const ElementIterator &rhs) const
+    {
+        return this->current.index <= rhs.current.index;
+    }
+    bool operator>(const ElementIterator &rhs) const
+    {
+        return this->current.index > rhs.current.index;
+    }
+    bool operator>=(const ElementIterator &rhs) const
+    {
+        return this->current.index >= rhs.current.index;
+    }
+
+    ElementRef current;
+};
+
+static_assert(std::random_access_iterator<ElementIterator>);
+
+struct MessageElements {
+    using value_type = ElementIterator::value_type;
+    using iterator = ElementIterator;
+    using size_type = size_t;
+
+    explicit MessageElements(std::shared_ptr<Message> msg)
+        : msg(std::move(msg))
+    {
+    }
+    ~MessageElements() = default;
+
+    MessageElements(const MessageElements &) = delete;
+    MessageElements(MessageElements &&) = default;
+    MessageElements &operator=(const MessageElements &) = delete;
+    MessageElements &operator=(MessageElements &&) = default;
+
+    ElementIterator begin() const
+    {
+        return {msg, 0};
+    }
+    ElementIterator end() const
+    {
+        return {msg, msg->elements.size()};
+    }
+
+    size_type size() const
+    {
+        if (!msg)
+        {
+            return 0;
+        }
+        return msg->elements.size();
+    }
+
+    // NOLINTNEXTLINE
+    size_type max_size() const
+    {
+        return this->size();  // we can't insert
+    }
+
+    bool empty() const
+    {
+        if (!msg)
+        {
+            return true;
+        }
+        return msg->elements.empty();
+    }
+
+    // NOLINTNEXTLINE
+    void push_back(ElementIterator::value_type /* v */) const
+    {
+        throw std::runtime_error("Insertion is not supported");
+    }
+
+    // NOLINTNEXTLINE
+    void erase(ElementIterator it) const
+    {
+        if (it.current.msg != this->msg || !this->msg ||
+            it.current.index >= this->msg->elements.size())
+        {
+            throw std::runtime_error("Can't erase here");
+        }
+        checkWritable(this->msg.get());
+        this->msg->elements.erase(this->msg->elements.begin() +
+                                  static_cast<ptrdiff_t>(it.current.index));
+    }
+
+    std::shared_ptr<Message> msg;
+};
+
 void createUserType(sol::table &c2)
 {
-    c2.new_usertype<Message>("Message",
-                             sol::factories([](const sol::table &tbl) {
-                                 return messageFromTable(tbl);
-                             }));
+    c2.new_usertype<ElementRef>(
+        "MessageElement", sol::no_constructor, "type",
+        sol::property([](const ElementRef &el) {
+            return el.cref().type();
+        }),
+        "flags", sol::property([](const ElementRef &el) {
+            return el.cref().getFlags();
+        }),
+        "add_flags",
+        [](const ElementRef &el, MessageElementFlag flag) {
+            el.ref().addFlags(flag);
+        },
+        "tooltip",
+        sol::property(
+            [](const ElementRef &el) {
+                return el.cref().getTooltip();
+            },
+            [](const ElementRef &el, const QString &tooltip) {
+                el.ref().setTooltip(tooltip);
+            }),
+        "trailing_space",
+        sol::property(
+            [](const ElementRef &el) {
+                return el.cref().hasTrailingSpace();
+            },
+            [](const ElementRef &el, bool trailingSpace) {
+                el.ref().setTrailingSpace(trailingSpace);
+            }),
+        "padding", sol::property([](const ElementRef &el) {
+            return el.asConst<CircularImageElement>().padding();
+        }),
+        "background", sol::property([](const ElementRef &el) {
+            return el.as<CircularImageElement>().background();
+        }),
+        "words", sol::property([](const ElementRef &el) {
+            return el.visit<const TextElement, const SingleLineTextElement>(
+                [](const TextElement &el) {
+                    return el.words();
+                },
+                [](const SingleLineTextElement &el) {
+                    return el.words();
+                });
+        }),
+        "color", sol::property([](const ElementRef &el) {
+            return el.visit<const TextElement, const SingleLineTextElement>(
+                [](const TextElement &el) {
+                    return el.color().toLua();
+                },
+                [](const SingleLineTextElement &el) {
+                    return el.color().toLua();
+                });
+        }),
+        "style", sol::property([](const ElementRef &el) {
+            return el.visit<const TextElement, const SingleLineTextElement>(
+                [](const TextElement &el) {
+                    return el.fontStyle();
+                },
+                [](const SingleLineTextElement &el) {
+                    return el.fontStyle();
+                });
+        }),
+        "lowercase", sol::property([](const ElementRef &el) {
+            return el.asConst<LinkElement>().lowercase();
+        }),
+        "original", sol::property([](const ElementRef &el) {
+            return el.asConst<LinkElement>().original();
+        }),
+        "fallback_color", sol::property([](const ElementRef &el) {
+            return el.asConst<MentionElement>().fallbackColor().toLua();
+        }),
+        "user_color", sol::property([](const ElementRef &el) {
+            return el.asConst<MentionElement>().userColor().toLua();
+        }),
+        "user_login_name", sol::property([](const ElementRef &el) {
+            return el.asConst<MentionElement>().userLoginName();
+        }),
+        "time", sol::property([](const ElementRef &el) {
+            return el.asConst<TimestampElement>().time();
+        }));
+
+    c2.new_usertype<Message>(
+        "Message", sol::factories([](const sol::table &tbl) {
+            return messageFromTable(tbl);
+        }),
+        "flags",
+        sol::property(
+            [](Message *msg) {
+                return msg->flags.value();
+            },
+            [](Message *msg, MessageFlag f) {
+                // flags are always mutable
+                msg->flags = f;
+            }),
+        "parse_time",
+        sol::property(
+            [](Message *msg) {
+                return QDateTime(QDate::currentDate(), msg->parseTime)
+                    .toMSecsSinceEpoch();
+            },
+            [](Message *msg, qint64 ms) {
+                checkWritable(msg);
+                msg->parseTime = datetimeFromOffset(ms).time();
+            }),
+        "id", memberAccessor<&Message::id>(),                         //
+        "search_text", memberAccessor<&Message::searchText>(),        //
+        "message_text", memberAccessor<&Message::messageText>(),      //
+        "login_name", memberAccessor<&Message::loginName>(),          //
+        "display_name", memberAccessor<&Message::displayName>(),      //
+        "localized_name", memberAccessor<&Message::localizedName>(),  //
+        "user_id", memberAccessor<&Message::userID>(),                //
+        "channel_name", memberAccessor<&Message::channelName>(),      //
+        "username_color",
+        sol::property(
+            [](Message *msg) {
+                return msg->usernameColor.name(QColor::HexArgb);
+            },
+            [](Message *msg, std::string_view sv) {
+                checkWritable(msg);
+                msg->usernameColor = QColor::fromString(sv);
+            }),
+        "server_received_time",
+        sol::property(
+            [](Message *msg) {
+                return msg->serverReceivedTime.toMSecsSinceEpoch();
+            },
+            [](Message *msg, qint64 ms) {
+                checkWritable(msg);
+                msg->serverReceivedTime = datetimeFromOffset(ms);
+            }),
+        "highlight_color",
+        sol::property(
+            [](Message *msg) {
+                if (!msg->highlightColor)
+                {
+                    return QString{};
+                }
+                return msg->highlightColor->name(QColor::HexArgb);
+            },
+            [](Message *msg, std::string_view sv) {
+                checkWritable(msg);
+                if (sv.empty())
+                {
+                    msg->highlightColor.reset();
+                }
+                else
+                {
+                    msg->highlightColor =
+                        std::make_shared<QColor>(QColor::fromString(sv));
+                }
+            }),
+        "elements",
+        [](const std::shared_ptr<Message> &msg) {
+            if (!msg)
+            {
+                throw std::runtime_error("No message instance");
+            }
+            return MessageElements(msg);
+        },
+        "append_element",
+        [](Message *msg, const sol::table &tbl) {
+            checkWritable(msg);
+            auto el = elementFromTable(tbl);
+            if (el)
+            {
+                msg->elements.emplace_back(std::move(el));
+            }
+        });
 }
 
 }  // namespace chatterino::lua::api::message

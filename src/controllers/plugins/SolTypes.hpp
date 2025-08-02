@@ -78,6 +78,14 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         function(std::forward<Args>(args)...);
     if (!result.valid())
     {
+        bool hasMsg = sol::stack::check<std::string>(result.lua_state());
+        if (!hasMsg)
+        {
+            return nonstd::make_unexpected(
+                "Something went wrong but we don't know what 🥲 (someone "
+                "likely forgot to catch an "
+                "exception)");
+        }
         sol::error err = result;
         return nonstd::expected_lite::make_unexpected(
             QString::fromUtf8(err.what()));

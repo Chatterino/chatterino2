@@ -193,6 +193,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "testaccount_420",

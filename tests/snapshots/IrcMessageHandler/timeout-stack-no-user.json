@@ -74,6 +74,7 @@
                 }
             ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
@@ -190,6 +191,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "aa1baade-c9c7-4932-b518-07c6b0226914",
             "localizedName": "",
             "loginName": "twitchdev",
@@ -275,6 +277,7 @@
                 }
             ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",

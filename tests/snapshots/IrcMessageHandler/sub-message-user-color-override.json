@@ -173,6 +173,7 @@
                 }
             ],
             "flags": "Collapsed|Subscription",
+            "frozen": false,
             "highlightColor": "#64c466ff",
             "id": "db25007f-7a18-43eb-9379-80131e44d633",
             "localizedName": "",
@@ -259,6 +260,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification|Subscription",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",

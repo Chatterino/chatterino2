@@ -149,6 +149,7 @@
                 }
             ],
             "flags": "System|EventSub",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

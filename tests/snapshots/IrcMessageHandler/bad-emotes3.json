@@ -108,6 +108,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "test",

@@ -141,6 +141,7 @@
                 }
             ],
             "flags": "System|Untimeout|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
