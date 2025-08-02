@@ -242,6 +242,7 @@ void SplitInput::scaleChangedEvent(float scale)
             this->ui_.vbox->setSpacing(this->marginForTheme());
         }
     }
+    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
 
@@ -252,8 +253,10 @@ void SplitInput::scaleChangedEvent(float scale)
 
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.textEdit->setPalette(placeholderPalette);
+    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
 }
