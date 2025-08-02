@@ -153,8 +153,14 @@ bool Window::event(QEvent *event)
 
 void Window::closeEvent(QCloseEvent *)
 {
-    auto *app = tryGetApp();
-    assert(app != nullptr);
+    if (isAppAboutToQuit())
+    {
+        qCWarning(chatterinoWidget)
+            << "Window closeEvent ran when Application is already dead";
+        return;
+    }
+
+    auto *app = getApp();
 
     if (this->type_ == WindowType::Main)
     {
