@@ -350,7 +350,7 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
-        QObject::connect(window, &QWidget::destroyed, [this, window] {
+        QObject::connect(window, &QWidget::destroyed, this, [this, window] {
             for (auto it = this->windows_.begin(); it != this->windows_.end();
                  it++)
             {
