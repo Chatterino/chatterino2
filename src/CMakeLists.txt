@@ -508,6 +508,8 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/Backup.cpp
+        util/Backup.hpp
         util/CancellationToken.hpp
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
@@ -656,6 +658,8 @@ set(SOURCE_FILES
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
+        widgets/dialogs/RestoreBackupsDialog.cpp
+        widgets/dialogs/RestoreBackupsDialog.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp

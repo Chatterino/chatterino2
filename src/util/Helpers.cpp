@@ -5,11 +5,13 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 
+#include <QApplication>
 #include <QDateTime>
 #include <QDirIterator>
 #include <QJsonObject>
 #include <QLocale>
 #include <QLoggingCategory>
+#include <QProcess>
 #include <QRegularExpression>
 #include <QStringBuilder>
 #include <QStringView>
@@ -17,7 +19,13 @@
 #include <QTimeZone>
 #include <QUuid>
 
+#ifdef Q_OS_MAC
+#    include "corefoundation/CFBundle.h"
+#endif
+
 namespace {
+
+using namespace Qt::Literals;
 
 const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
 
@@ -471,6 +479,51 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
         haystack.sliced(0, idx),
         haystack.sliced(idx + 1),
     };
+}
+
+bool restartAppDetatched(const QStringList &args)
+{
+    QProcess proc;
+
+#ifdef Q_OS_MAC
+    // On macOS, programs are bundled into ".app" Application bundles,
+    // when restarting Chatterino that bundle should be opened with the "open"
+    // terminal command instead of directly starting the underlying executable,
+    // as those are 2 different things for the OS and i.e. do not use
+    // the same dock icon (resulting in a second Chatterino icon on restarting)
+    CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFStringRef macPath =
+        CFURLCopyFileSystemPath(appUrlRef, kCFURLPOSIXPathStyle);
+    const char *pathPtr =
+        CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+    proc.setProgram("open");
+    proc.setArguments(QStringList{pathPtr, "-n", "--args"} + args);
+
+    CFRelease(appUrlRef);
+    CFRelease(macPath);
+#else
+    proc.setProgram(QApplication::applicationFilePath());
+    proc.setArguments(args);
+#endif
+
+    return proc.startDetached();
+}
+
+QString formatFileSize(qint64 size)
+{
+    QStringList units = {"B", "KiB", "MiB", "GiB", "TiB", "PiB"};
+    auto outputSize = static_cast<double>(size);
+    qsizetype unit = 0;
+    for (; unit < units.size() - 1; unit++)
+    {
+        if (outputSize < 1024)
+        {
+            break;
+        }
+        outputSize = outputSize / 1024;
+    }
+    return u"%0\u202F%1"_s.arg(outputSize, 0, 'f', 2).arg(units[unit]);
 }
 
 }  // namespace chatterino

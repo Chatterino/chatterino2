@@ -140,6 +140,9 @@ Args::Args(const QApplication &app, const Paths &paths)
         "specified, Twitch is assumed.",
         "t:channel");
 
+    QCommandLineOption restorePlanOption(
+        "restore-plan", "Restore plan to apply when starting.", "plan");
+
 #ifndef NDEBUG
     QCommandLineOption useLocalEventsubOption(
         "use-local-eventsub",
@@ -158,6 +161,7 @@ Args::Args(const QApplication &app, const Paths &paths)
         loginOption,
         channelLayout,
         activateOption,
+        restorePlanOption,
 #ifndef NDEBUG
         useLocalEventsubOption,
 #endif
@@ -223,6 +227,11 @@ Args::Args(const QApplication &app, const Paths &paths)
     {
         this->activateChannel =
             parseActivateOption(parser.value(activateOption));
+    }
+
+    if (parser.isSet(restorePlanOption))
+    {
+        this->restorePlan = parser.value(restorePlanOption);
     }
 
 #ifndef NDEBUG

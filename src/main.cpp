@@ -13,6 +13,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
+#include "util/Backup.hpp"
 #include "util/IpcQueue.hpp"
 
 #ifdef Q_OS_MACOS
@@ -128,6 +129,10 @@ int main(int argc, char **argv)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
                               << QSslSocket::supportedProtocols();
 #endif
+        if (args.restorePlan)
+        {
+            backup::tryApplyActions(*args.restorePlan);
+        }
 
         Settings settings(args, paths->settingsDirectory);
 
