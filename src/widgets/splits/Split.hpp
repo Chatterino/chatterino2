@@ -190,7 +190,7 @@ public Q_SLOTS:
     void openWithCustomScheme();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
-    void showChatterList();
+    void openChatterList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
     void reconnect();

@@ -590,6 +590,8 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/ChatterListWidget.cpp
+        widgets/ChatterListWidget.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp

@@ -77,6 +77,7 @@
 - Dev: Don't detach threads. (#6333)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
+- Dev: Refactored the Chatter List window into its own widget. (#6365)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)

@@ -358,7 +358,7 @@ void SplitHeader::initializeLayout()
         // chatter list
         this->chattersButton_ = makeWidget<PixmapButton>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showChatterList();
+                this->split_->openChatterList();
             });
         }),
         // dropdown
@@ -556,7 +556,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             moreMenu->addAction(
                 "Show chatter list",
                 h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"),
-                this->split_, &Split::showChatterList);
+                this->split_, &Split::openChatterList);
         }
 
         moreMenu->addAction("Subscribe",
