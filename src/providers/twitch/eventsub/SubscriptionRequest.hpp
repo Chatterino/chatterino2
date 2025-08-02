@@ -18,6 +18,12 @@ struct SubscriptionRequest {
     // maybe this should be part of the enum later
     QString subscriptionVersion;
 
+    /// The ID of the Twitch User that wants to create this subscription
+    ///
+    /// Since a single websocket connection cannot share connections between users,
+    /// we need to key them by the user id even if it's not used in the condition.
+    QString ownerTwitchUserID;
+
     /// Optional list of conditions for the subscription
     std::vector<std::pair<QString, QString>> conditions;
 

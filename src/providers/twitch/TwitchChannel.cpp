@@ -125,6 +125,18 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserAboutToChange,
+        [this](const auto & /*oldAccount*/, const auto & /*newAccount*/) {
+            this->eventSubChannelChatUserMessageHoldHandle.reset();
+            this->eventSubChannelChatUserMessageUpdateHandle.reset();
+            this->eventSubChannelModerateHandle.reset();
+            this->eventSubAutomodMessageHoldHandle.reset();
+            this->eventSubAutomodMessageUpdateHandle.reset();
+            this->eventSubSuspiciousUserMessageHandle.reset();
+            this->eventSubSuspiciousUserUpdateHandle.reset();
+        });
+
     this->bSignals_.emplace_back(
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -1547,12 +1559,15 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
+    const auto &currentTwitchUserID = currentAccount->getUserId();
+
     if (this->hasModRights())
     {
         this->eventSubChannelModerateHandle =
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.moderate",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1561,7 +1576,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1569,6 +1584,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "automod.message.hold",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1577,7 +1593,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1585,6 +1601,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "automod.message.update",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1593,7 +1610,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1601,6 +1618,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.suspicious_user.message",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1609,7 +1627,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1617,6 +1635,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.suspicious_user.update",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1625,7 +1644,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1645,6 +1664,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.chat.user_message_hold",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1653,7 +1673,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1662,6 +1682,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.chat.user_message_update",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1670,7 +1691,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });

@@ -342,6 +342,9 @@ void TwitchAccountManager::load()
 
     this->currentUsername.connect([this](const QString &newUsername) {
         auto user = this->findUserByUsername(newUsername);
+
+        this->currentUserAboutToChange.invoke(this->currentUser_, user);
+
         if (user)
         {
             qCDebug(chatterinoTwitch)
