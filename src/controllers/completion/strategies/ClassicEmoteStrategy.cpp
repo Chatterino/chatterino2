@@ -24,26 +24,21 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         zeroWidthOnly = true;
     }
 
-    // First pass: filter by contains match
+    // First pass: filter by zero-width only and contains match
     for (const auto &item : items)
     {
+        if (zeroWidthOnly && !item.emote->zeroWidth)
+        {
+            continue;
+        }
+
         if (item.searchName.contains(normalizedQuery, Qt::CaseInsensitive))
         {
             output.push_back(item);
         }
     }
 
-    // Second pass: filter only zero-width if needed
-    if (zeroWidthOnly)
-    {
-        auto [first, last] =
-            std::ranges::remove_if(output, [](const EmoteItem &emoteItem) {
-                return !emoteItem.emote->zeroWidth;
-            });
-        output.erase(first, last);
-    }
-
-    // Third pass: if there is an exact match, put that emote first
+    // Second pass: if there is an exact match, put that emote first
     for (size_t i = 1; i < output.size(); i++)
     {
         auto emoteText = output.at(i).searchName;
