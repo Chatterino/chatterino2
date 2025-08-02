@@ -3,6 +3,8 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
+#include <algorithm>
+
 namespace chatterino::completion {
 
 void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
@@ -10,14 +12,25 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                  const QString &query) const
 {
     QString normalizedQuery = query;
+    bool zeroWidthOnly = false;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
     }
+    if (normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+        zeroWidthOnly = true;
+    }
 
-    // First pass: filter by contains match
+    // First pass: filter by zero-width only and contains match
     for (const auto &item : items)
     {
+        if (zeroWidthOnly && !item.emote->zeroWidth)
+        {
+            continue;
+        }
+
         if (item.searchName.contains(normalizedQuery, Qt::CaseInsensitive))
         {
             output.push_back(item);
@@ -57,6 +70,10 @@ void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
     if (colonStart)
     {
         // TODO(Qt6): use sliced
+        normalizedQuery = normalizedQuery.mid(1);
+    }
+    if (normalizedQuery.startsWith('~'))
+    {
         normalizedQuery = normalizedQuery.mid(1);
     }
 
