@@ -204,6 +204,7 @@
                 }
             ],
             "flags": "Collapsed|RedeemedChannelPointReward",
+            "frozen": false,
             "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
             "localizedName": "",
             "loginName": "nerixyz",

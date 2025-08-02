@@ -155,6 +155,7 @@
                 }
             ],
             "flags": "Collapsed|ElevatedMessage",
+            "frozen": false,
             "id": "39a80a3d-c16e-420f-9bbb-faba4976a3bb",
             "localizedName": "",
             "loginName": "rickharrisoncoc",
@@ -224,6 +225,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",

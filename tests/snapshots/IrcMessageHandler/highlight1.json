@@ -107,6 +107,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "1bf2d49a-8b88-4116-81dd-5098f11726eb",
             "localizedName": "",
             "loginName": "ignoreduser",

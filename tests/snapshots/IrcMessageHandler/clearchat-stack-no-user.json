@@ -62,6 +62,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
