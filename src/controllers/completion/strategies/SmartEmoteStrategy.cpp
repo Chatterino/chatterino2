@@ -176,8 +176,7 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         normalizedQuery = normalizedQuery.mid(1);
         ignoreColonForCost = true;
     }
-    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
-        normalizedQuery.startsWith('~'))
+    if (normalizedQuery.startsWith('~'))
     {
         normalizedQuery = normalizedQuery.mid(1);
         zeroWidthOnly = true;
@@ -209,8 +208,7 @@ void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         // TODO(Qt6): use sliced
         normalizedQuery = normalizedQuery.mid(1);
     }
-    if (getSettings()->emoteZeroWidthCompletionWithColonTilde &&
-        normalizedQuery.startsWith('~'))
+    if (normalizedQuery.startsWith('~'))
     {
         normalizedQuery = normalizedQuery.mid(1);
     }
