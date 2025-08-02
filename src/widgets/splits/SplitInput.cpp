@@ -166,18 +166,18 @@ void SplitInput::initLayout()
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
     {
-        auto textEditLength =
-            box.emplace<QLabel>().assign(&this->ui_.textEditLength);
-        textEditLength->setAlignment(Qt::AlignRight);
+        this->ui_.textEditLength = new QLabel();
+        // Right-align the labels contents
+        this->ui_.textEditLength->setAlignment(Qt::AlignRight);
+        box->addWidget(this->ui_.textEditLength);
 
-        box->addStretch(1);
-        box.emplace<SvgButton>(
-               SvgButton::Src{
-                   .dark = ":/buttons/emote.svg",
-                   .light = ":/buttons/emoteDark.svg",
-               },
-               nullptr, QSize{6, 3})
-            .assign(&this->ui_.emoteButton);
+        this->ui_.emoteButton = new SvgButton(
+            {
+                .dark = ":/buttons/emote.svg",
+                .light = ":/buttons/emoteDark.svg",
+            },
+            nullptr, QSize{6, 3});
+        box->addWidget(this->ui_.emoteButton, 0, Qt::AlignRight);
     }
 
     // ---- misc
