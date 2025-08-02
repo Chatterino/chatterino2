@@ -254,8 +254,10 @@ void SplitInput::scaleChangedEvent(float scale)
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.textEdit->setPalette(placeholderPalette);
     // TODO: This font does _not_ get updated when you change your chat font
+    // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
+    // meaning numbers get equal width & don't bounce around while the user is typing.
     this->ui_.textEditLength->setFont(
-        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::TimestampMedium, scale));
     // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
