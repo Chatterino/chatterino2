@@ -1,5 +1,6 @@
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
@@ -7,10 +8,18 @@
 
 namespace chatterino::completion {
 
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoCompletion;
+
+}  // namespace
+
 void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                  std::vector<EmoteItem> &output,
                                  const QString &query) const
 {
+    qCDebug(LOG) << "ClassicEmoteStrategy apply" << query;
     QString normalizedQuery = query;
     bool zeroWidthOnly = false;
     if (normalizedQuery.startsWith(':'))
@@ -65,6 +74,7 @@ void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                     std::vector<EmoteItem> &output,
                                     const QString &query) const
 {
+    qCDebug(LOG) << "ClassicTabEmoteStrategy apply" << query;
     bool colonStart = query.startsWith(':');
     QStringView normalizedQuery = query;
     if (colonStart)

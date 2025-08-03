@@ -11,6 +11,10 @@
 
 namespace chatterino::completion {
 namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoCompletion;
+
 /**
  * @brief This function calculates the "cost" of the changes that need to
  * be done to the query to make it the value.
@@ -167,6 +171,7 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                std::vector<EmoteItem> &output,
                                const QString &query) const
 {
+    qCDebug(LOG) << "SmartEmoteStrategy apply" << query;
     std::vector<EmoteItem> filteredItems = items;
     QString normalizedQuery = query;
     bool ignoreColonForCost = false;
@@ -201,6 +206,7 @@ void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                   std::vector<EmoteItem> &output,
                                   const QString &query) const
 {
+    qCDebug(LOG) << "SmartTabEmoteStrategy apply" << query;
     bool colonStart = query.startsWith(':');
     QStringView normalizedQuery = query;
     if (colonStart)
