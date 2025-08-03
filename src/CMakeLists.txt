@@ -590,6 +590,8 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/ChatterListWidget.cpp
+        widgets/ChatterListWidget.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
@@ -621,8 +623,6 @@ set(SOURCE_FILES
         widgets/buttons/InitUpdateButton.hpp
         widgets/buttons/LabelButton.cpp
         widgets/buttons/LabelButton.hpp
-        widgets/buttons/NotebookButton.cpp
-        widgets/buttons/NotebookButton.hpp
         widgets/buttons/PixmapButton.cpp
         widgets/buttons/PixmapButton.hpp
         widgets/buttons/SignalLabel.cpp

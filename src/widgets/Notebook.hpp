@@ -19,8 +19,8 @@ class Button;
 class PixmapButton;
 class SvgButton;
 class Window;
+class DrawnButton;
 class UpdateDialog;
-class NotebookButton;
 class NotebookTab;
 class SplitContainer;
 class Split;
@@ -133,7 +133,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *) override;
 
-    NotebookButton *getAddButton();
+    DrawnButton *addButton_;
 
     template <typename T>
     T *addCustomButton(auto &&...args)
@@ -217,7 +217,6 @@ private:
     QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
 
-    NotebookButton *addButton_;
     std::vector<Button *> customButtons_;
 
     bool allowUserTabManagement_ = false;
