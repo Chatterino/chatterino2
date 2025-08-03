@@ -91,6 +91,7 @@
 - Dev: Added optional improved text wrapping through private Qt APIs. (#6265)
 - Dev: Factored out AUMID to `Version`. (#6321)
 - Dev: Silenced some warnings when compiling with clang-cl. (#6331)
+- Dev: Update tooltip for colon completion setting. (#6370)
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 - Dev: Update vcpkg baseline. (#6359)
 
