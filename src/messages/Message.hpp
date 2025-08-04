@@ -89,8 +89,11 @@ struct Message {
 
     /// Can this message be modified?
     ///
+    /// Our rendering and layout code expects messages to be mostly immutable.
+    /// Thus, when this flag is set, this message may not be modified.
+    /// Only flags and this member can be modified safely (from the GUI thread).
     /// This is only used for plugins right now. This value is only ever set to
-    /// false.
+    /// true.
     mutable bool frozen = false;
 
     std::vector<std::unique_ptr<MessageElement>> elements;
@@ -101,7 +104,10 @@ struct Message {
 
     QJsonObject toJson() const;
 
-    void freeze() const;
+    void freeze() const
+    {
+        this->frozen = true;
+    }
 };
 
 }  // namespace chatterino

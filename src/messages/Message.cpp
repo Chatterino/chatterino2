@@ -200,9 +200,4 @@ Message::ReplyStatus Message::isReplyable() const
                             : ReplyStatus::NotReplyable;
 }
 
-void Message::freeze() const
-{
-    this->frozen = true;
-}
-
 }  // namespace chatterino

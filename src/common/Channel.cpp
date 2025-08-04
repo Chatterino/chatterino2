@@ -179,6 +179,10 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     {
         return;
     }
+    for (const auto &msg : messages)
+    {
+        msg->freeze();
+    }
 
     auto snapshot = this->getMessageSnapshot();
     if (snapshot.size() == 0)

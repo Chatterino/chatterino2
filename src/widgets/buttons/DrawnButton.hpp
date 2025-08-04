@@ -21,6 +21,9 @@ public:
         ///  Padding: 2px
         ///  Thickness: 1px
         Plus,
+
+        /// kebab menu (3 dots underneath eachother)
+        Kebab,
     };
 
     struct Options {

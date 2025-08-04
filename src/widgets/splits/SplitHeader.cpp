@@ -296,6 +296,15 @@ void SplitHeader::initializeLayout()
                                        },
                                        this);
 
+    this->dropdownButton_ =
+        new DrawnButton(DrawnButton::Symbol::Kebab, {}, this);
+
+    /// XXX: this never gets disconnected
+    QObject::connect(this->dropdownButton_, &Button::leftMousePress, this,
+                     [this] {
+                         this->dropdownButton_->setMenu(this->createMainMenu());
+                     });
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -358,16 +367,11 @@ void SplitHeader::initializeLayout()
         // chatter list
         this->chattersButton_ = makeWidget<PixmapButton>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showChatterList();
+                this->split_->openChatterList();
             });
         }),
         // dropdown
-        this->dropdownButton_ = makeWidget<PixmapButton>([&](auto w) {
-            /// XXX: this never gets disconnected
-            QObject::connect(w, &Button::leftMousePress, this, [this] {
-                this->dropdownButton_->setMenu(this->createMainMenu());
-            });
-        }),
+        this->dropdownButton_,
         // add split
         this->addButton_,
     });
@@ -556,7 +560,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             moreMenu->addAction(
                 "Show chatter list",
                 h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"),
-                this->split_, &Split::showChatterList);
+                this->split_, &Split::openChatterList);
         }
 
         moreMenu->addAction("Subscribe",
@@ -1085,12 +1089,10 @@ void SplitHeader::themeChangedEvent()
     if (this->theme->isLightTheme())
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
     }
     else
     {
         this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
     }
 
     this->update();
