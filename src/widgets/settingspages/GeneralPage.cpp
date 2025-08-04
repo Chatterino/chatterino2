@@ -577,8 +577,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "cvMask and 7TV's RainTime, will appear as normal emotes.")
         ->addTo(layout);
 
-    SettingWidget::checkbox("Enable emote auto-completion by typing :",
+    SettingWidget::checkbox("Enable emote completion by typing :",
                             s.emoteCompletionWithColon)
+        ->setTooltip(
+            "With this setting enabled, typing the colon character opens the "
+            "colon-completion popup which gives you an updating list of emotes "
+            "matching the text after the colon.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Use experimental smarter emote completion.",

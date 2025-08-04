@@ -100,7 +100,13 @@ public:
     /// Setter for #menu()
     void setMenu(std::unique_ptr<QMenu> menu);
 
+    /// Enable drops for this button
+    void enableDrops(const std::vector<QString> &acceptedDropMimes_);
+
 Q_SIGNALS:
+    /// Emitted when a successful drop event has occurred on the button.
+    void dropEvent(QDropEvent *event) override;
+
     /// @brief Emitted after the user left-clicked the button.
     ///
     /// A click is only emitted if the user released the mouse above the button
@@ -121,6 +127,8 @@ Q_SIGNALS:
     void leftMousePress();
 
 protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+
     void paintEvent(QPaintEvent * /*event*/) override;
 
     /// @brief Paint the contents to be shown below the button
@@ -216,6 +224,11 @@ private:
     bool pixmapValid_ = false;
     bool cachePixmap_ = false;
     bool opaqueContent_ = false;
+
+    /// List of Mimes (e.g. chatterino/split) that are accepted as drop events on this button
+    ///
+    /// Controlled by the enableDrops function
+    std::vector<QString> acceptedDropMimes;
 };
 
 }  // namespace chatterino
