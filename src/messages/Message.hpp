@@ -89,6 +89,9 @@ struct Message {
 
     /// Can this message be modified?
     ///
+    /// Our rendering and layout code expects messages to be mostly immutable.
+    /// Thus, when this flag is set, this message may not be modified.
+    /// Only flags and this member can be modified safely (from the GUI thread).
     /// This is only used for plugins right now. This value is only ever set to
     /// true.
     mutable bool frozen = false;
