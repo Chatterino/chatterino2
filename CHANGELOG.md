@@ -91,6 +91,7 @@
 - Dev: Silenced some warnings when compiling with clang-cl. (#6331)
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 - Dev: Update vcpkg baseline. (#6359)
+- Dev: Added an explicit `frozen` flag to `Message`. (#6367)
 
 ## 2.5.3
 
