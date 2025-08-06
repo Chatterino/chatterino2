@@ -115,9 +115,10 @@ void HTTPRequest::execute(sol::this_state L)
     auto hack = this->weak_from_this();
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     pl->httpRequests.push_back(this->shared_from_this());
+    auto *mainState = pl->state().lua_state();
 
     std::move(this->req_)
-        .onSuccess([L, hack](const NetworkResult &res) {
+        .onSuccess([hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -127,11 +128,10 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
             (*self->cbSuccess)(HTTPResponse(res));
             self->cbSuccess = std::nullopt;
         })
-        .onError([L, hack](const NetworkResult &res) {
+        .onError([hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -141,18 +141,17 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
             (*self->cbError)(HTTPResponse(res));
             self->cbError = std::nullopt;
         })
-        .finally([L, hack]() {
+        .finally([mainState, hack]() {
             auto self = hack.lock();
             if (!self)
             {
                 // this could happen if the plugin was deleted
                 return;
             }
-            auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+            auto *pl = getApp()->getPlugins()->getPluginByStatePtr(mainState);
             for (auto it = pl->httpRequests.begin();
                  it < pl->httpRequests.end(); it++)
             {
@@ -167,7 +166,6 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
             (*self->cbFinally)();
             self->cbFinally = std::nullopt;
         })
