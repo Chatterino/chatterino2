@@ -463,6 +463,7 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     // join channels
     for (const auto &channel : activeChannels)
     {
+        // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
         if (channel->getName().startsWith("/"))
         {
             continue;
@@ -1168,9 +1169,13 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
                                << "was destroyed";
         this->channels.remove(channelName);
 
-        if (this->readConnection_ && !channelName.startsWith("/"))
+        if (this->readConnection_)
         {
-            this->readConnection_->sendRaw("PART #" + channelName);
+            // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+            if (!channelName.startsWith("/"))
+            {
+                this->readConnection_->sendRaw("PART #" + channelName);
+            }
         }
     });
 
@@ -1178,10 +1183,13 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
-        if (this->readConnection_ && this->readConnection_->isConnected() &&
-            !channelName.startsWith("/"))
+        if (this->readConnection_ && this->readConnection_->isConnected())
         {
-            this->joinBucket_->send(channelName);
+            // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+            if (!channelName.startsWith("/"))
+            {
+                this->joinBucket_->send(channelName);
+            }
         }
     }
 
