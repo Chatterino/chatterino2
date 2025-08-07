@@ -55,7 +55,6 @@
 - Bugfix: Emotes that failed to load their images now show as text. (#6355)
 - Bugfix: Fixed a crash that occurs when searching for emotes in channel-less contexts. (#6357)
 - Bugfix: Fixed command triggers showing as '/...' when the value is longer than the column width. (#6369)
-- Bugfix: Fixed sending IRC `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
@@ -97,6 +96,7 @@
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 - Dev: Update vcpkg baseline. (#6359)
 - Dev: Added an explicit `frozen` flag to `Message`. (#6367)
+- Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 
 ## 2.5.3
 
