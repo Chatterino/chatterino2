@@ -463,6 +463,10 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     // join channels
     for (const auto &channel : activeChannels)
     {
+        if (channel->getName().startsWith("/"))
+        {
+            continue;
+        }
         this->joinBucket_->send(channel->getName());
     }
 
@@ -1164,7 +1168,7 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
                                << "was destroyed";
         this->channels.remove(channelName);
 
-        if (this->readConnection_)
+        if (this->readConnection_ && !channelName.startsWith("/"))
         {
             this->readConnection_->sendRaw("PART #" + channelName);
         }
@@ -1174,12 +1178,10 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
-        if (this->readConnection_)
+        if (this->readConnection_ && this->readConnection_->isConnected() &&
+            !channelName.startsWith("/"))
         {
-            if (this->readConnection_->isConnected())
-            {
-                this->joinBucket_->send(channelName);
-            }
+            this->joinBucket_->send(channelName);
         }
     }
 
