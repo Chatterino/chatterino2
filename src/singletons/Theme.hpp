@@ -148,6 +148,7 @@ public:
             QColor background;
             QColor backgroundHighlight;
             QColor text;
+            // Used by the ChatterListWidget & QuickSwitcherPopup
             QString styleSheet;
         } input;
     } splits;
