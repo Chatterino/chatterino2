@@ -289,30 +289,35 @@ struct ElementRef {
         return *el;
     }
 
+    /// Cast this element to `T`. Otherwise nullopt is returned.
+    /// Use `.map()` to access the content.
     template <typename T>
-    T &as() const
+    sol::optional<T &> as() const
     {
-        auto *el = dynamic_cast<T *>(element());
+        // using ref() to error if the reference is invalid
+        auto *el = dynamic_cast<T *>(&ref());
         if (!el)
         {
-            throw std::runtime_error(
-                "Element is of invalid type or does not exist");
+            return sol::nullopt;
         }
         return *el;
     }
 
+    /// Cast this element to `const T`. Otherwise nullopt is returned.
+    /// Use `.map()` to access the content.
     template <typename T>
-    const T &asConst() const
+    sol::optional<const T &> asConst() const
     {
-        const auto *el = dynamic_cast<const T *>(constElement());
+        // using cref() to error if the reference is invalid
+        const auto *el = dynamic_cast<const T *>(&cref());
         if (!el)
         {
-            throw std::runtime_error(
-                "Element is of invalid type or does not exist");
+            return sol::nullopt;
         }
         return *el;
     }
 
+    /// Visit this element by dynamic casting
     template <typename... T>
     auto visit(auto &&...cb) const
     {
@@ -342,16 +347,30 @@ private:
         }
     }
 
+    /// Run one callback
+    ///
+    /// This is called recursively.
+    /// If the callback returns something, we return an `optional<T>` otherwise
+    /// we return `void`.
     template <typename T, typename... Rest>
-    decltype(auto) visitOne(auto &&cb, auto &&...rest) const
+    auto visitOne(auto &&cb, auto &&...rest) const -> std::conditional_t<
+        std::is_void_v<std::invoke_result_t<decltype(cb), T &>>, void,
+        sol::optional<std::invoke_result_t<decltype(cb), T &>>>
     {
         auto *el = dynamic_cast<T *>(maybeConstElement<std::is_const_v<T>>());
         if (!el)
         {
             if constexpr (sizeof...(rest) == 0)
             {
-                throw std::runtime_error(
-                    "Element is of invalid type or does not exist");
+                if constexpr (std::is_void_v<
+                                  std::invoke_result_t<decltype(cb), T &>>)
+                {
+                    return;
+                }
+                else
+                {
+                    return sol::nullopt;
+                }
             }
             else
             {
@@ -390,7 +409,7 @@ struct ElementIterator {
     {
         return *this += 1;
     }
-    ElementIterator operator++(int)
+    ElementIterator operator++(int)  // postfix increment
     {
         auto tmp = *this;
         ++*this;
@@ -416,7 +435,7 @@ struct ElementIterator {
     {
         return *this -= 1;
     }
-    ElementIterator operator--(int)
+    ElementIterator operator--(int)  // postfix decrement
     {
         auto tmp = *this;
         --*this;
@@ -545,7 +564,7 @@ void createUserType(sol::table &c2)
             return el.cref().type();
         }),
         "flags", sol::property([](const ElementRef &el) {
-            return el.cref().getFlags();
+            return el.cref().getFlags().value();
         }),
         "add_flags",
         [](const ElementRef &el, MessageElementFlag flag) {
@@ -568,10 +587,16 @@ void createUserType(sol::table &c2)
                 el.ref().setTrailingSpace(trailingSpace);
             }),
         "padding", sol::property([](const ElementRef &el) {
-            return el.asConst<CircularImageElement>().padding();
+            return el.asConst<CircularImageElement>().map(
+                [](const CircularImageElement &el) {
+                    return el.padding();
+                });
         }),
         "background", sol::property([](const ElementRef &el) {
-            return el.as<CircularImageElement>().background();
+            return el.as<CircularImageElement>().map(
+                [](const CircularImageElement &el) {
+                    return el.background().name(QColor::HexArgb);
+                });
         }),
         "words", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
@@ -601,22 +626,39 @@ void createUserType(sol::table &c2)
                 });
         }),
         "lowercase", sol::property([](const ElementRef &el) {
-            return el.asConst<LinkElement>().lowercase();
+            return el.asConst<LinkElement>().map([](const LinkElement &el) {
+                return el.lowercase();
+            });
         }),
         "original", sol::property([](const ElementRef &el) {
-            return el.asConst<LinkElement>().original();
+            return el.asConst<LinkElement>().map([](const LinkElement &el) {
+                return el.original();
+            });
         }),
         "fallback_color", sol::property([](const ElementRef &el) {
-            return el.asConst<MentionElement>().fallbackColor().toLua();
+            return el.asConst<MentionElement>().map(
+                [](const MentionElement &el) {
+                    return el.fallbackColor().toLua();
+                });
         }),
         "user_color", sol::property([](const ElementRef &el) {
-            return el.asConst<MentionElement>().userColor().toLua();
+            return el.asConst<MentionElement>().map(
+                [](const MentionElement &el) {
+                    return el.userColor().toLua();
+                });
         }),
         "user_login_name", sol::property([](const ElementRef &el) {
-            return el.asConst<MentionElement>().userLoginName();
+            return el.asConst<MentionElement>().map(
+                [](const MentionElement &el) {
+                    return el.userLoginName();
+                });
         }),
         "time", sol::property([](const ElementRef &el) {
-            return el.asConst<TimestampElement>().time();
+            return el.asConst<TimestampElement>().map(
+                [](const TimestampElement &el) {
+                    return QDateTime(QDate::currentDate(), el.time())
+                        .toMSecsSinceEpoch();
+                });
         }));
 
     c2.new_usertype<Message>(
@@ -689,6 +731,10 @@ void createUserType(sol::table &c2)
                         std::make_shared<QColor>(QColor::fromString(sv));
                 }
             }),
+        // must be read only (but it might be helpful for generic Lua functions)
+        "frozen", sol::property([](Message *msg) {
+            return msg->frozen;
+        }),
         "elements",
         [](const std::shared_ptr<Message> &msg) {
             if (!msg)
