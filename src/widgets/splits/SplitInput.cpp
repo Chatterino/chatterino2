@@ -33,7 +33,23 @@
 
 #include <functional>
 
+using namespace Qt::Literals;
+
 namespace chatterino {
+
+namespace {
+
+// Current function: https://www.desmos.com/calculator/vdyamchjwh
+qreal highlightEasingFunction(qreal progress)
+{
+    if (progress <= 0.1)
+    {
+        return 1.0 - pow(10.0 * progress, 3.0);
+    }
+    return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
+}
+
+}  // namespace
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
     : SplitInput(_chatWidget, _chatWidget, _chatWidget->view_,
@@ -47,6 +63,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     , split_(_chatWidget)
     , channelView_(_channelView)
     , enableInlineReplying_(enableInlineReplying)
+    , backgroundColorAnimation(this, "backgroundColor"_ba)
 {
     this->installEventFilter(this);
     this->initLayout();
@@ -75,6 +92,11 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
+
+    QEasingCurve curve;
+    curve.setCustomType(highlightEasingFunction);
+    this->backgroundColorAnimation.setDuration(500);
+    this->backgroundColorAnimation.setEasingCurve(curve);
 }
 
 void SplitInput::initLayout()
@@ -140,6 +162,7 @@ void SplitInput::initLayout()
         hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
+    textEdit->setFrameStyle(QFrame::NoFrame);
 
     hboxLayout.emplace<LabelButton>("SEND").assign(&this->ui_.sendButton);
     this->ui_.sendButton->hide();
@@ -226,6 +249,16 @@ void SplitInput::initLayout()
         this->managedConnections_);
 }
 
+void SplitInput::triggerSelfMessageReceived()
+{
+    if (this->backgroundColorAnimation.state() != QPropertyAnimation::Stopped)
+    {
+        this->backgroundColorAnimation.stop();
+    }
+    this->backgroundColorAnimation.setDirection(QPropertyAnimation::Forward);
+    this->backgroundColorAnimation.start();
+}
+
 void SplitInput::scaleChangedEvent(float scale)
 {
     auto *app = getApp();
@@ -246,13 +279,6 @@ void SplitInput::scaleChangedEvent(float scale)
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
 
-    QPalette placeholderPalette;
-    placeholderPalette.setColor(
-        QPalette::PlaceholderText,
-        this->theme->messages.textColors.chatPlaceholder);
-
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-    this->ui_.textEdit->setPalette(placeholderPalette);
     // TODO: This font does _not_ get updated when you change your chat font
     // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
     // meaning numbers get equal width & don't bounce around while the user is typing.
@@ -266,17 +292,19 @@ void SplitInput::scaleChangedEvent(float scale)
 void SplitInput::themeChangedEvent()
 {
     QPalette palette;
-    QPalette placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
-    placeholderPalette.setColor(
-        QPalette::PlaceholderText,
-        this->theme->messages.textColors.chatPlaceholder);
 
     this->ui_.textEditLength->setPalette(palette);
 
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-    this->ui_.textEdit->setPalette(placeholderPalette);
+    // Theme changed, reset current background color
+    this->setBackgroundColor(this->theme->splits.input.background);
+    this->backgroundColorAnimation.setStartValue(
+        this->theme->splits.input.backgroundPulse);
+    this->backgroundColorAnimation.setEndValue(
+        this->theme->splits.input.background);
+    this->backgroundColorAnimation.stop();
+    this->updateTextEditPalette();
 
     if (this->theme->isLightTheme())
     {
@@ -1275,6 +1303,41 @@ void SplitInput::applyOuterMargin()
 int SplitInput::replyMessageWidth() const
 {
     return this->ui_.inputWrapper->width() - 1 - 10;
+}
+
+void SplitInput::updateTextEditPalette()
+{
+    QPalette p;
+
+    // Placeholder text color
+    p.setColor(QPalette::PlaceholderText,
+               this->theme->messages.textColors.chatPlaceholder);
+
+    // Text color
+    p.setColor(QPalette::Text, this->theme->messages.textColors.regular);
+
+    // Selection background color
+    p.setBrush(QPalette::Highlight,
+               this->theme->isLightTheme()
+                   ? QColor(u"#68B1FF"_s)
+                   : this->theme->tabs.selected.backgrounds.regular);
+
+    // Background color
+    p.setBrush(QPalette::Base, this->backgroundColor());
+
+    this->ui_.textEdit->setPalette(p);
+}
+
+QColor SplitInput::backgroundColor() const
+{
+    return this->backgroundColor_;
+}
+
+void SplitInput::setBackgroundColor(QColor newColor)
+{
+    this->backgroundColor_ = newColor;
+
+    this->updateTextEditPalette();
 }
 
 }  // namespace chatterino

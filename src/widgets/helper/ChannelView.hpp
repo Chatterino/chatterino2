@@ -228,6 +228,9 @@ public:
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
 
+    /// This signal fires when a message passed filters and was added to the channel view
+    Q_SIGNAL void messageAddedToChannel(MessagePtr &message);
+
 protected:
     void themeChangedEvent() override;
     void scaleChangedEvent(float scale) override;
