@@ -299,7 +299,7 @@ void SplitInput::themeChangedEvent()
     // Theme changed, reset current background color
     this->setBackgroundColor(this->theme->splits.input.background);
     this->backgroundColorAnimation.setStartValue(
-        this->theme->splits.input.backgroundHighlight);
+        this->theme->splits.input.backgroundPulse);
     this->backgroundColorAnimation.setEndValue(
         this->theme->splits.input.background);
     this->backgroundColorAnimation.stop();
