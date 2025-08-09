@@ -971,84 +971,103 @@ TEST_F(PluginTest, ChannelAddMessage)
     ASSERT_EQ(added[5].first, logged[2]);
 }
 
-TEST_F(PluginTest, MessageModification)
+TEST_F(PluginTest, MessageFlagModification)
 {
     configure();
     sol::protected_function pfn = lua->script(R"lua(
         return function(msg)
-            return {
-                function()
-                    assert(msg.flags == c2.MessageFlag.Debug)
-                    msg.flags = c2.MessageFlag.System
-                    assert(msg.flags == c2.MessageFlag.System)
-                end,
-                function()
-                    msg.parse_time = 1234567
-                end,
-                function()
-                    assert(msg.id == "abc")
-                    msg.id = "1234"
-                    assert(msg.id == "1234")
-                end,
-                function()
-                    assert(msg.search_text == "search")
-                    msg.search_text = "query"
-                    assert(msg.search_text == "query")
-                end,
-                function()
-                    assert(msg.message_text == "msg")
-                    msg.message_text = "text"
-                    assert(msg.message_text == "text")
-                end,
-                function()
-                    assert(msg.login_name == "login")
-                    msg.login_name = "name"
-                    assert(msg.login_name == "name")
-                end,
-                function()
-                    assert(msg.display_name == "display")
-                    msg.display_name = "name"
-                    assert(msg.display_name == "name")
-                end,
-                function()
-                    assert(msg.localized_name == "localized")
-                    msg.localized_name = "name"
-                    assert(msg.localized_name == "name")
-                end,
-                function()
-                    assert(msg.user_id == "id")
-                    msg.user_id = "id"
-                    assert(msg.user_id == "id")
-                end,
-                function()
-                    assert(msg.channel_name == "channel")
-                    msg.channel_name = "name"
-                    assert(msg.channel_name == "name")
-                end,
-                function()
-                    assert(msg.username_color == "#ffaabbcc")
-                    msg.username_color = "#ccbbaaff"
-                    assert(msg.username_color == "#ccbbaaff")
-                end,
-                function()
-                    assert(msg.server_received_time == 1230000)
-                    msg.server_received_time = 1240000
-                    assert(msg.server_received_time == 1240000)
-                end,
-                function()
-                    print(msg.highlight_color)
-                    assert(msg.highlight_color == "#ff223344")
-                    msg.highlight_color = "#44332211"
-                    assert(msg.highlight_color == "#44332211")
-                end,
-                function()
-                    assert(#msg:elements() == 2)
-                    msg:append_element({ type = "linebreak" })
-                    assert(#msg:elements() == 3)
-                    assert(msg:elements()[3].type == "linebreak")
-                end,
-            }
+            assert(msg.flags == c2.MessageFlag.Debug)
+            msg.flags = c2.MessageFlag.System
+            assert(msg.flags == c2.MessageFlag.System)
         end
+    )lua");
+
+    auto liquid = std::make_shared<Message>();
+    liquid->flags = MessageFlag::Debug;
+    auto res = pfn(liquid);
+    ASSERT_TRUE(res.valid());
+
+    // for the flags, it shouldn't matter if the message is frozen
+    auto frozen = std::make_shared<Message>();
+    frozen->flags = MessageFlag::Debug;
+    frozen->freeze();
+    res = pfn(frozen);
+    ASSERT_TRUE(res.valid());
+}
+
+TEST_F(PluginTest, MessageModification)
+{
+    configure();
+
+    // Test that we can modify properties and that Lua sees the modification
+    sol::table tests = lua->script(R"lua(
+        return {
+            function(msg)
+                msg.parse_time = 1234567
+            end,
+            function(msg)
+                assert(msg.id == "abc")
+                msg.id = "1234"
+                assert(msg.id == "1234")
+            end,
+            function(msg)
+                assert(msg.search_text == "search")
+                msg.search_text = "query"
+                assert(msg.search_text == "query")
+            end,
+            function(msg)
+                assert(msg.message_text == "msg")
+                msg.message_text = "text"
+                assert(msg.message_text == "text")
+            end,
+            function(msg)
+                assert(msg.login_name == "login")
+                msg.login_name = "name"
+                assert(msg.login_name == "name")
+            end,
+            function(msg)
+                assert(msg.display_name == "display")
+                msg.display_name = "name"
+                assert(msg.display_name == "name")
+            end,
+            function(msg)
+                assert(msg.localized_name == "localized")
+                msg.localized_name = "name"
+                assert(msg.localized_name == "name")
+            end,
+            function(msg)
+                assert(msg.user_id == "id")
+                msg.user_id = "id"
+                assert(msg.user_id == "id")
+            end,
+            function(msg)
+                assert(msg.channel_name == "channel")
+                msg.channel_name = "name"
+                assert(msg.channel_name == "name")
+            end,
+            function(msg)
+                assert(msg.username_color == "#ffaabbcc")
+                msg.username_color = "#ccbbaaff"
+                assert(msg.username_color == "#ccbbaaff")
+            end,
+            function(msg)
+                assert(msg.server_received_time == 1230000)
+                msg.server_received_time = 1240000
+                assert(msg.server_received_time == 1240000)
+            end,
+            function(msg)
+                print(msg.highlight_color)
+                assert(msg.highlight_color == "#ff223344")
+                msg.highlight_color = "#44332211"
+                assert(msg.highlight_color == "#44332211")
+            end,
+            function(msg)
+                assert(#msg:elements() == 2)
+                msg:append_element({ type = "linebreak" })
+                assert(#msg:elements() == 3)
+                assert(msg:elements()[3].type == "linebreak")
+            end,
+        }
     )lua");
 
     auto makeMsg = [] {
@@ -1073,13 +1092,11 @@ TEST_F(PluginTest, MessageModification)
     };
 
     auto liquid = makeMsg();
-    auto tests = pfn(liquid);
     ASSERT_TRUE(tests.valid());
-    sol::table cbs = tests;
-    for (const auto &[_key, cb] : cbs)
+    for (const auto &[_key, cb] : tests)
     {
         sol::protected_function pf = cb;
-        auto res = pf();
+        auto res = pf(liquid);
         if (!res.valid())
         {
             sol::error err = res;
@@ -1087,27 +1104,16 @@ TEST_F(PluginTest, MessageModification)
         }
     }
 
+    // If the message is frozen, all modifications should fail with an error
     auto frozen = makeMsg();
     frozen->freeze();
-    tests = pfn(frozen);
-    ASSERT_TRUE(tests.valid());
-    cbs = tests;
-    for (const auto &[key, cb] : cbs)
+    for (const auto &[key, cb] : tests)
     {
-        bool isFlags = key.as<int>() == 1;
-
         sol::protected_function pf = cb;
-        auto res = pf();
-        if (isFlags)
-        {
-            ASSERT_TRUE(res.valid());
-        }
-        else
-        {
-            ASSERT_FALSE(res.valid());
-            sol::error err = res;
-            ASSERT_EQ(std::string_view(err.what()), "Message is frozen");
-        }
+        auto res = pf(frozen);
+        ASSERT_FALSE(res.valid());
+        sol::error err = res;
+        ASSERT_EQ(std::string_view(err.what()), "Message is frozen");
     }
 }
 
