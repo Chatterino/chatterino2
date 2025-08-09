@@ -604,9 +604,9 @@ void ChannelView::themeChangedEvent()
     BaseWidget::themeChangedEvent();
 
     this->setupHighlightAnimationColors();
-    this->queueLayout();
     this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
                                     getSettings()->overlayBackgroundOpacity);
+    this->invalidateBuffers();
 }
 
 void ChannelView::updateColorTheme()
@@ -659,6 +659,7 @@ void ChannelView::invalidateBuffers()
 {
     this->bufferInvalidationQueued_ = true;
     this->queueLayout();
+    this->update();
 }
 
 void ChannelView::queueLayout()

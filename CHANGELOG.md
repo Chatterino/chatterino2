@@ -55,6 +55,7 @@
 - Bugfix: Fixed invalid commands from being forwarded to Helix, making it possible for information to leak (e.g. if you typed `/bann username ban reason` it would be seen by others in chat as `username ban reason`). (#6272, #6330)
 - Bugfix: Emotes that failed to load their images now show as text. (#6355)
 - Bugfix: Fixed a crash that occurs when searching for emotes in channel-less contexts. (#6357)
+- Bugfix: Fixed theme changes not instantly applying to messages. (#6373)
 - Bugfix: Fixed command triggers showing as '/...' when the value is longer than the column width. (#6369)
 - Bugfix: Fixed a crash that could occur when making HTTP requests from a timeout handler. (#6375)
 - Dev: Mini refactor of Split. (#6148)
