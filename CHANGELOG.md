@@ -46,6 +46,7 @@
 - Bugfix: Fixed a crash that could occur an eventsub connection's keepalive timer would run after the connection was dead, causing the keepalive timer to use-itself-after-free. (#6204)
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed a crash that could occur on exit if a ping played less than 30 seconds prior. (#6332)
+- Bugfix: Fixed a crash that could occur on exit on newer versions of Qt. (#6368)
 - Bugfix: Fixed notebook buttons (settings, account switcher, streamer mode) not performing a relayout when their visibility changed, causing a gap until resize. Linux / macOS only. (#6328)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
@@ -97,6 +98,7 @@
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 - Dev: Update vcpkg baseline. (#6359)
 - Dev: Added an explicit `frozen` flag to `Message`. (#6367)
+- Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 
 ## 2.5.3
 
