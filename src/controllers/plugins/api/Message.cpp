@@ -27,29 +27,6 @@ QDateTime datetimeFromOffset(qint64 offset)
     return dt;
 }
 
-MessageColor tryMakeMessageColor(const QString &name,
-                                 MessageColor fallback = MessageColor::Text)
-{
-    if (name.isEmpty())
-    {
-        return fallback;
-    }
-    if (name == u"text")
-    {
-        return MessageColor::Text;
-    }
-    if (name == u"link")
-    {
-        return MessageColor::Link;
-    }
-    if (name == u"system")
-    {
-        return MessageColor::System;
-    }
-    // custom
-    return QColor(name);
-}
-
 template <typename T>
 T requiredGet(const sol::table &tbl, auto &&key)
 {
@@ -67,7 +44,7 @@ std::unique_ptr<TextElement> textElementFromTable(const sol::table &tbl)
     return std::make_unique<TextElement>(
         requiredGet<QString>(tbl, "text"),
         tbl.get_or("flags", MessageElementFlag::Text),
-        tryMakeMessageColor(tbl.get_or("color", QString{})),
+        MessageColor::fromLua(tbl.get_or("color", QString{})),
         tbl.get_or("style", FontStyle::ChatMedium));
 }
 
@@ -77,7 +54,7 @@ std::unique_ptr<SingleLineTextElement> singleLineTextElementFromTable(
     return std::make_unique<SingleLineTextElement>(
         requiredGet<QString>(tbl, "text"),
         tbl.get_or("flags", MessageElementFlag::Text),
-        tryMakeMessageColor(tbl.get_or("color", QString{})),
+        MessageColor::fromLua(tbl.get_or("color", QString{})),
         tbl.get_or("style", FontStyle::ChatMedium));
 }
 
@@ -87,8 +64,8 @@ std::unique_ptr<MentionElement> mentionElementFromTable(const sol::table &tbl)
     return std::make_unique<MentionElement>(
         requiredGet<QString>(tbl, "display_name"),
         requiredGet<QString>(tbl, "login_name"),
-        tryMakeMessageColor(requiredGet<QString>(tbl, "fallback_color")),
-        tryMakeMessageColor(requiredGet<QString>(tbl, "user_color")));
+        MessageColor::fromLua(requiredGet<QString>(tbl, "fallback_color")),
+        MessageColor::fromLua(requiredGet<QString>(tbl, "user_color")));
 }
 
 std::unique_ptr<TimestampElement> timestampElementFromTable(
@@ -563,8 +540,8 @@ struct MessageElements {
 void createUserType(sol::table &c2)
 {
     c2.new_usertype<ElementRef>(
-        "MessageElement", sol::no_constructor, "type",
-        sol::property([](const ElementRef &el) {
+        "MessageElement", sol::no_constructor,  //
+        "type", sol::property([](const ElementRef &el) {
             return el.cref().type();
         }),
         "flags", sol::property([](const ElementRef &el) {
