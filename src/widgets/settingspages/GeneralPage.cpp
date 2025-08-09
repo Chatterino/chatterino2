@@ -496,8 +496,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"scroll bar"})
         ->addTo(layout);
 
-    SettingWidget::checkbox("Pulse text input on self message",
-                            s.pulseTextInputOnSelfMessage)
+    SettingWidget::checkbox(
+        "Pulse text input when one of your messages is successfully sent",
+        s.pulseTextInputOnSelfMessage)
         ->setTooltip(
             "Pulses the text input in a green color whenever a message of "
             "yours is successfully sent in the matching channel.")
