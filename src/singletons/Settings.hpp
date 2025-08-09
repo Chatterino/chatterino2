@@ -286,7 +286,7 @@ public:
     };
 
     BoolSetting pulseTextInputOnSelfMessage = {
-        "/appearance/pulseTextInputOnSelfMessage/showUptime",
+        "/appearance/pulseTextInputOnSelfMessage",
         false,
     };
 
