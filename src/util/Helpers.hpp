@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <filesystem>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -235,5 +236,9 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
 /// `{haystack, {}}` is returned.
 std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
                                               QChar needle) noexcept;
+
+bool restartAppDetatched(const QStringList &args);
+
+QString formatFileSize(qint64 size);
 
 }  // namespace chatterino

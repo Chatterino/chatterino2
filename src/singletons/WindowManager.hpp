@@ -134,6 +134,8 @@ public:
     // again
     void queueSave();
 
+    void disableSave();
+
     /// Toggles the inertia in all open overlay windows
     void toggleAllOverlayInertia();
 
@@ -183,6 +185,7 @@ private:
     MessageElementFlags wordFlags_{};
 
     QTimer *saveTimer;
+    bool canSave = true;
 
     pajlada::Signals::SignalHolder signalHolder;
 
