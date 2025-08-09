@@ -214,10 +214,6 @@ void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         // TODO(Qt6): use sliced
         normalizedQuery = normalizedQuery.mid(1);
     }
-    if (normalizedQuery.startsWith('~'))
-    {
-        normalizedQuery = normalizedQuery.mid(1);
-    }
 
     completeEmotes(
         items, output, normalizedQuery, false, false,
