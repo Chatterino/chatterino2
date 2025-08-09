@@ -322,7 +322,13 @@ struct ElementRef {
     auto visit(auto &&...cb) const
     {
         static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
-        return visitOne<T...>(std::forward<decltype(cb)>(cb)...);
+
+        // infer the returned type inside the optional
+        using Cb0 = std::tuple_element_t<0, std::tuple<decltype(cb)...>>;
+        using T0 = std::tuple_element_t<0, std::tuple<T...>>;
+        using TReturn = std::invoke_result_t<Cb0, T0 &>;
+
+        return visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
     }
 
     bool operator==(const ElementRef &rhs) const
@@ -352,10 +358,10 @@ private:
     /// This is called recursively.
     /// If the callback returns something, we return an `optional<T>` otherwise
     /// we return `void`.
-    template <typename T, typename... Rest>
-    auto visitOne(auto &&cb, auto &&...rest) const -> std::conditional_t<
-        std::is_void_v<std::invoke_result_t<decltype(cb), T &>>, void,
-        sol::optional<std::invoke_result_t<decltype(cb), T &>>>
+    template <typename TReturn, typename T, typename... Rest>
+    auto visitOne(auto &&cb, auto &&...rest) const
+        -> std::conditional_t<std::is_void_v<TReturn>, void,
+                              sol::optional<TReturn>>
     {
         auto *el = dynamic_cast<T *>(maybeConstElement<std::is_const_v<T>>());
         if (!el)
@@ -374,7 +380,8 @@ private:
             }
             else
             {
-                return visitOne<Rest...>(std::forward<decltype(rest)>(rest)...);
+                return visitOne<TReturn, Rest...>(
+                    std::forward<decltype(rest)>(rest)...);
             }
         }
         return std::invoke(cb, *el);
