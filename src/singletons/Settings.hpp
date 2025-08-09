@@ -285,6 +285,11 @@ public:
         false,
     };
 
+    BoolSetting pulseTextInputOnSelfMessage = {
+        "/appearance/pulseTextInputOnSelfMessage/showUptime",
+        false,
+    };
+
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
