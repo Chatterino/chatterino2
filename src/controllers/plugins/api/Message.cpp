@@ -102,33 +102,33 @@ std::unique_ptr<ReplyCurveElement> replyCurveElementFromTable()
 
 std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
 {
-    auto type = requiredGet<QString>(tbl, "type");
+    auto type = requiredGet<std::string>(tbl, "type");
     std::unique_ptr<MessageElement> el;
-    if (type == u"text")
+    if (type == TextElement::TYPE)
     {
         el = textElementFromTable(tbl);
     }
-    else if (type == u"single-line-text")
+    else if (type == SingleLineTextElement::TYPE)
     {
         el = singleLineTextElementFromTable(tbl);
     }
-    else if (type == u"mention")
+    else if (type == MentionElement::TYPE)
     {
         el = mentionElementFromTable(tbl);
     }
-    else if (type == u"timestamp")
+    else if (type == TimestampElement::TYPE)
     {
         el = timestampElementFromTable(tbl);
     }
-    else if (type == u"twitch-moderation")
+    else if (type == TwitchModerationElement::TYPE)
     {
         el = twitchModerationElementFromTable();
     }
-    else if (type == u"linebreak")
+    else if (type == LinebreakElement::TYPE)
     {
         el = linebreakElementFromTable(tbl);
     }
-    else if (type == u"reply-curve")
+    else if (type == ReplyCurveElement::TYPE)
     {
         el = replyCurveElementFromTable();
     }

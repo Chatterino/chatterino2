@@ -145,7 +145,7 @@ QJsonObject ImageElement::toJson() const
 
 std::string_view ImageElement::type() const
 {
-    return "image";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 CircularImageElement::CircularImageElement(ImagePtr image, int padding,
@@ -184,7 +184,7 @@ QJsonObject CircularImageElement::toJson() const
 
 std::string_view CircularImageElement::type() const
 {
-    return "circular-image";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // EMOTE
@@ -277,7 +277,7 @@ QJsonObject EmoteElement::toJson() const
 
 std::string_view EmoteElement::type() const
 {
-    return "emote";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 LayeredEmoteElement::LayeredEmoteElement(
@@ -477,7 +477,7 @@ QJsonObject LayeredEmoteElement::toJson() const
 
 std::string_view LayeredEmoteElement::type() const
 {
-    return "layered-emote";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // BADGE
@@ -529,7 +529,7 @@ QJsonObject BadgeElement::toJson() const
 
 std::string_view BadgeElement::type() const
 {
-    return "badge";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // MOD BADGE
@@ -560,7 +560,7 @@ QJsonObject ModBadgeElement::toJson() const
 
 std::string_view ModBadgeElement::type() const
 {
-    return "mod-badge";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // VIP BADGE
@@ -588,7 +588,7 @@ QJsonObject VipBadgeElement::toJson() const
 
 std::string_view VipBadgeElement::type() const
 {
-    return "vip-badge";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // FFZ Badge
@@ -619,7 +619,7 @@ QJsonObject FfzBadgeElement::toJson() const
 
 std::string_view FfzBadgeElement::type() const
 {
-    return "ffz-badge";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // TEXT
@@ -868,7 +868,7 @@ QJsonObject TextElement::toJson() const
 
 std::string_view TextElement::type() const
 {
-    return "text";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 SingleLineTextElement::SingleLineTextElement(const QString &text,
@@ -1009,7 +1009,7 @@ QJsonObject SingleLineTextElement::toJson() const
 
 std::string_view SingleLineTextElement::type() const
 {
-    return "single-line-text";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
@@ -1049,7 +1049,7 @@ QJsonObject LinkElement::toJson() const
 
 std::string_view LinkElement::type() const
 {
-    return "link";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
@@ -1136,7 +1136,7 @@ QJsonObject MentionElement::toJson() const
 
 std::string_view MentionElement::type() const
 {
-    return "mention";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // TIMESTAMP
@@ -1192,7 +1192,7 @@ QJsonObject TimestampElement::toJson() const
 
 std::string_view TimestampElement::type() const
 {
-    return "timestamp";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 // TWITCH MODERATION
@@ -1241,7 +1241,7 @@ QJsonObject TwitchModerationElement::toJson() const
 
 std::string_view TwitchModerationElement::type() const
 {
-    return "twitch-moderation";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 LinebreakElement::LinebreakElement(MessageElementFlags flags)
@@ -1268,7 +1268,7 @@ QJsonObject LinebreakElement::toJson() const
 
 std::string_view LinebreakElement::type() const
 {
-    return "linebreak";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
@@ -1306,7 +1306,7 @@ QJsonObject ScalingImageElement::toJson() const
 
 std::string_view ScalingImageElement::type() const
 {
-    return "scaling-image";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 ReplyCurveElement::ReplyCurveElement()
@@ -1341,7 +1341,7 @@ QJsonObject ReplyCurveElement::toJson() const
 
 std::string_view ReplyCurveElement::type() const
 {
-    return "reply-curve";
+    return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
 }  // namespace chatterino

@@ -194,7 +194,10 @@ public:
 
     virtual QJsonObject toJson() const;
 
-    // for plugins
+    /// The type name for this message element. Used for Lua plugins.
+    ///
+    /// This must be unique per element. It should return the static `TYPE`
+    /// member.
     virtual std::string_view type() const = 0;
 
 protected:
@@ -211,6 +214,8 @@ private:
 class ImageElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "image";
+
     ImageElement(ImagePtr image, MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
@@ -227,6 +232,8 @@ private:
 class CircularImageElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "circular-image";
+
     CircularImageElement(ImagePtr image, int padding, QColor background,
                          MessageElementFlags flags);
 
@@ -255,6 +262,8 @@ private:
 class TextElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "text";
+
     TextElement(const QString &text, MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
@@ -288,6 +297,8 @@ protected:
 class SingleLineTextElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "single-line-text";
+
     SingleLineTextElement(const QString &text, MessageElementFlags flags,
                           const MessageColor &color = MessageColor::Text,
                           FontStyle style = FontStyle::ChatMedium);
@@ -322,6 +333,8 @@ private:
 class LinkElement : public TextElement
 {
 public:
+    static constexpr std::string_view TYPE = "link";
+
     struct Parsed {
         QString lowercase;
         QString original;
@@ -381,6 +394,8 @@ private:
 class MentionElement : public TextElement
 {
 public:
+    static constexpr std::string_view TYPE = "mention";
+
     explicit MentionElement(const QString &displayName, QString loginName_,
                             MessageColor fallbackColor_,
                             MessageColor userColor_);
@@ -438,6 +453,8 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "emote";
+
     EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
                  const MessageColor &textElementColor = MessageColor::Text);
 
@@ -468,6 +485,8 @@ private:
 class LayeredEmoteElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "layered-emote";
+
     struct Emote {
         EmotePtr ptr;
         MessageElementFlags flags;
@@ -510,6 +529,8 @@ private:
 class BadgeElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "badge";
+
     BadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
     void addToContainer(MessageLayoutContainer &container,
@@ -531,6 +552,8 @@ private:
 class ModBadgeElement : public BadgeElement
 {
 public:
+    static constexpr std::string_view TYPE = "mod-badge";
+
     ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
     QJsonObject toJson() const override;
@@ -544,6 +567,8 @@ protected:
 class VipBadgeElement : public BadgeElement
 {
 public:
+    static constexpr std::string_view TYPE = "vip-badge";
+
     VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
     QJsonObject toJson() const override;
@@ -557,6 +582,8 @@ protected:
 class FfzBadgeElement : public BadgeElement
 {
 public:
+    static constexpr std::string_view TYPE = "ffz-badge";
+
     FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
                     QColor color_);
 
@@ -573,6 +600,8 @@ protected:
 class TimestampElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "timestamp";
+
     TimestampElement();
     TimestampElement(QTime time_);
     ~TimestampElement() override = default;
@@ -601,6 +630,8 @@ private:
 class TwitchModerationElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "twitch-moderation";
+
     TwitchModerationElement();
 
     void addToContainer(MessageLayoutContainer &container,
@@ -614,6 +645,8 @@ public:
 class LinebreakElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "linebreak";
+
     LinebreakElement(MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
@@ -627,6 +660,8 @@ public:
 class ScalingImageElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "scaling-image";
+
     ScalingImageElement(ImageSet images, MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
@@ -642,6 +677,8 @@ private:
 class ReplyCurveElement : public MessageElement
 {
 public:
+    static constexpr std::string_view TYPE = "reply-curve";
+
     ReplyCurveElement();
 
     void addToContainer(MessageLayoutContainer &container,

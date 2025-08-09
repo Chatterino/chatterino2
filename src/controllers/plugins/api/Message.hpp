@@ -11,9 +11,9 @@ namespace chatterino::lua::api::message {
 ---@class c2.MessageElementBase
 ---@field flags c2.MessageElementFlag The element's flags
 ---@field tooltip string The tooltip (if any)
----@field trialing_space boolean Whether to add a trailing space after the element
+---@field trailing_space boolean Whether to add a trailing space after the element
 c2.MessageElementBase = {}
--- ^^^ this is kinda fake...
+-- ^^^ this is kinda fake - this table doesn't exist in Lua, we only declare it to add methods
 
 --- Add flags to this element
 ---
