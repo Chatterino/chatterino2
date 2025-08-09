@@ -5,6 +5,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <pajlada/settings/settinglistener.hpp>
+#include <QObject>
 #include <QPoint>
 #include <QTimer>
 
@@ -36,8 +37,10 @@ enum class WindowType;
 enum class SettingsDialogPreference;
 class FramelessEmbedWindow;
 
-class WindowManager final
+class WindowManager final : public QObject
 {
+    Q_OBJECT
+
     Theme &themes;
     const Args &appArgs;
 
