@@ -191,6 +191,7 @@
                 }
             ],
             "flags": "System|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

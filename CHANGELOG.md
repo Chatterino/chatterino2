@@ -46,6 +46,7 @@
 - Bugfix: Fixed a crash that could occur an eventsub connection's keepalive timer would run after the connection was dead, causing the keepalive timer to use-itself-after-free. (#6204)
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed a crash that could occur on exit if a ping played less than 30 seconds prior. (#6332)
+- Bugfix: Fixed a crash that could occur on exit on newer versions of Qt. (#6368)
 - Bugfix: Fixed notebook buttons (settings, account switcher, streamer mode) not performing a relayout when their visibility changed, causing a gap until resize. Linux / macOS only. (#6328)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
@@ -55,6 +56,8 @@
 - Bugfix: Emotes that failed to load their images now show as text. (#6355)
 - Bugfix: Fixed a crash that occurs when searching for emotes in channel-less contexts. (#6357)
 - Bugfix: Fixed theme changes not instantly applying to messages. (#6373)
+- Bugfix: Fixed command triggers showing as '/...' when the value is longer than the column width. (#6369)
+- Bugfix: Fixed a crash that could occur when making HTTP requests from a timeout handler. (#6375)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
@@ -82,7 +85,7 @@
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334, #6371)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334, #6371, #6372)
 - Dev: Made "add split" button (part of the split header) a natively rendered button. (#6349)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Some more setting widget refactors. (#6317)
@@ -95,6 +98,8 @@
 - Dev: Update tooltip for colon completion setting. (#6370)
 - Dev: Added some commands for forcing a relayout (and related things) in channel views. (#6342)
 - Dev: Update vcpkg baseline. (#6359)
+- Dev: Added an explicit `frozen` flag to `Message`. (#6367)
+- Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 
 ## 2.5.3
 
