@@ -146,6 +146,7 @@ public:
 
         struct {
             QColor background;
+            QColor backgroundHighlight;
             QColor text;
             QString styleSheet;
         } input;
