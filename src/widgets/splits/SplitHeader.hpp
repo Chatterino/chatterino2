@@ -76,7 +76,7 @@ private:
     std::chrono::steady_clock::time_point lastReloadedSubEmotes_;
 
     // ui
-    PixmapButton *dropdownButton_{};
+    DrawnButton *dropdownButton_{};
     Label *titleLabel_{};
 
     LabelButton *modeButton_{};

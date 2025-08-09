@@ -163,6 +163,7 @@
                 }
             ],
             "flags": "Collapsed|Action",
+            "frozen": false,
             "id": "90ef1e46-8baa-4bf2-9c54-272f39d6fa11",
             "localizedName": "",
             "loginName": "pajlada",

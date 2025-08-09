@@ -165,6 +165,7 @@
                 }
             ],
             "flags": "Collapsed|ReplyMessage",
+            "frozen": false,
             "id": "997cb8fa-4d24-411b-a5cd-433e515a5b72",
             "localizedName": "",
             "loginName": "nerixyz",

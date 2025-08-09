@@ -292,6 +292,7 @@
                 }
             ],
             "flags": "DoNotTriggerNotification|Collapsed|SharedMessage",
+            "frozen": false,
             "id": "5b6f9721-80fd-4036-951e-1ced9c591b32",
             "localizedName": "",
             "loginName": "nerixyz",

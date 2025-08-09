@@ -239,6 +239,7 @@
                 }
             ],
             "flags": "Collapsed|ReplyMessage",
+            "frozen": false,
             "id": "5e5f526a-5d60-4d81-800b-3b81b8a34c2c",
             "localizedName": "",
             "loginName": "nerixyz",

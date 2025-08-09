@@ -86,6 +86,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification|Subscription",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",

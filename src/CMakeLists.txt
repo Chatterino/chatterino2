@@ -623,8 +623,6 @@ set(SOURCE_FILES
         widgets/buttons/InitUpdateButton.hpp
         widgets/buttons/LabelButton.cpp
         widgets/buttons/LabelButton.hpp
-        widgets/buttons/NotebookButton.cpp
-        widgets/buttons/NotebookButton.hpp
         widgets/buttons/PixmapButton.cpp
         widgets/buttons/PixmapButton.hpp
         widgets/buttons/SignalLabel.cpp

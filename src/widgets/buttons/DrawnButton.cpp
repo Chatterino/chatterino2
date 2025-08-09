@@ -42,6 +42,24 @@ void DrawnButton::themeChangedEvent()
             o.foregroundHover = this->theme->messages.textColors.regular;
         }
         break;
+
+        case Symbol::Kebab: {
+            o.padding = 2;
+            o.thickness = 2;
+
+            if (this->theme->isLightTheme())
+            {
+                // TODO: This should use its own theme color (e.g. theme->button->regular)
+                o.foreground = QColor("#424242");
+            }
+            else
+            {
+                // TODO: This should use its own theme color (e.g. theme->button->regular)
+                o.foreground = QColor("#c0c0c0");
+            }
+            o.foregroundHover = this->theme->messages.textColors.regular;
+        }
+        break;
     }
 
     this->invalidateContent();
@@ -102,6 +120,28 @@ void DrawnButton::paintContent(QPainter &painter)
             QLine horizontal(left + padding, center.y(), right - padding,
                              center.y());
             painter.drawLine(horizontal);
+        }
+        break;
+
+        case Symbol::Kebab: {
+            QPen pen;
+            pen.setColor(fg);
+            pen.setWidth(thickness);
+            painter.setPen(pen);
+
+            QRect centerBox;
+            centerBox.setSize({thickness, thickness});
+            centerBox.moveCenter(rect().center());
+
+            painter.fillRect(centerBox, fg);
+
+            // NOTE: Technically a misuse of padding
+            auto bottomBox = centerBox.translated(0, thickness + padding);
+            painter.fillRect(bottomBox, fg);
+
+            // NOTE: Technically a misuse of padding
+            auto topBox = centerBox.translated(0, -(thickness + padding));
+            painter.fillRect(topBox, fg);
         }
         break;
     }
