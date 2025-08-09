@@ -173,6 +173,7 @@ declare namespace c2 {
         username_color: string;
         server_received_time: number;
         highlight_color: string | null;
+        frozen: boolean;
         elements(): MessageElement[];
         append_element(init: MessageElementInit): void;
     }
@@ -271,7 +272,7 @@ declare namespace c2 {
         style?: FontStyle;
     }
 
-    interface MentionElement extends MessageElementBase {
+    interface MentionElement extends Omit<TextElement, "type"> {
         type: "mention";
         display_name: string;
         login_name: string;
@@ -322,8 +323,10 @@ declare namespace c2 {
         type: "reply-curve";
     }
 
-    interface LinkElement extends MessageElementBase {
+    interface LinkElement extends Omit<TextElement, "type"> {
         type: "link";
+        lowercase: string;
+        original: string;
     }
 
     interface EmoteElement extends MessageElementBase {
@@ -350,15 +353,15 @@ declare namespace c2 {
         type: "badge";
     }
 
-    interface ModBadgeElement extends MessageElementBase {
+    interface ModBadgeElement extends Omit<BadgeElement, "type"> {
         type: "mod-badge";
     }
 
-    interface VipBadgeElement extends MessageElementBase {
+    interface VipBadgeElement extends Omit<BadgeElement, "type"> {
         type: "ffz-badge";
     }
 
-    interface FfzBadgeElement extends MessageElementBase {
+    interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
         type: "ffz-badge";
     }
 

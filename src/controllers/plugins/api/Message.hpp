@@ -53,7 +53,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field color? MessageColor The color of the text
 ---@field style? c2.FontStyle The font style of the text
 
----@class c2.MentionElement : c2.MessageElementBase
+---@class c2.MentionElement : c2.TextElement
 ---@field type "mention"
 ---@field login_name string The login name of the mentioned user
 ---@field fallback_color MessageColor The color of the element in case the "Colorize @usernames" is disabled
@@ -98,7 +98,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class ReplyCurveElementInit : MessageElementInitBase
 ---@field type "reply-curve" The type of the element
 
----@class c2.LinkElement : c2.MessageElementBase
+---@class c2.LinkElement : c2.TextElement
 ---@field type "link"
 
 ---@class c2.EmoteElement : c2.MessageElementBase
@@ -119,13 +119,13 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"
 
----@class c2.ModBadgeElement : c2.MessageElementBase
+---@class c2.ModBadgeElement : c2.BadgeElement
 ---@field type "mod-badge"
 
----@class c2.VipBadgeElement : c2.MessageElementBase
+---@class c2.VipBadgeElement : c2.BadgeElement
 ---@field type "vip-badge"
 
----@class c2.FfzBadgeElement : c2.MessageElementBase
+---@class c2.FfzBadgeElement : c2.BadgeElement
 ---@field type "ffz-badge"
 
 ---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
@@ -146,6 +146,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field username_color string The color of the username
 ---@field server_received_time number The time the server received the message (in milliseconds since epoch)
 ---@field highlight_color string The color of the highlight or empty
+---@field frozen boolean If this is set, Lua plugins can't modify this message (as it's visible to the user).
 c2.Message = {}
 
 --- The elements this message is made up of
