@@ -350,6 +350,24 @@ Example:
 pajladas:add_system_message("Hello, world!")
 ```
 
+#### `Channel:add_message(message[, context[, override_flags]])`
+
+Add a rich message to a channel. The message can be created with [`Message.new`](#messagenewdata).
+
+Example:
+
+```lua
+channel:add_message(c2.Message.new({
+    id = "myplugin-1234",
+    elements = {
+        {
+            type = "text",
+            text = "Hello, World!",
+        }
+    }
+}))
+```
+
 ##### `Channel:is_twitch_channel()`
 
 Returns `true` if the channel is a Twitch channel, that is its type name has
@@ -502,6 +520,42 @@ request:execute()
 -- nil
 -- ConnectionRefusedError
 ```
+
+#### `Message`
+
+Allows creation of rich chat messages. This is currently limited but is expected to be expanded soon.
+
+##### `Message.new(data)`
+
+Creates a new message from a table. The message can be added to a channel using
+[`Channel:add_message`](#channeladd_messagemessage-context-override_flags):
+
+```lua
+c2.register_command("/testing", function(ctx)
+    ctx.channel:add_message(c2.Message.new({
+        id = "myplugin-1234",
+        highlight_color = "#80ff0000",
+        flags = c2.MessageFlag.Highlighted,
+        elements = {
+            {
+                type = "text",
+                color = "link",
+                text = "Hover me!",
+                tooltip = "<h1>This is text from my plugin</h1>"
+            },
+            {
+                type = "mention",
+                display_name = "@User",
+                login_name = "twitchdev",
+                fallback_color = "text",
+                user_color = "blue",
+            }
+        }
+    }))
+end)
+```
+
+The full range of options can be found in the typing files ([LuaLS](./plugin-meta.lua), [TypeScript](./chatterino.d.ts)).
 
 ### Input/Output API
 

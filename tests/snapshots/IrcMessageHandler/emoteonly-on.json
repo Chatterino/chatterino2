@@ -60,6 +60,7 @@
                 }
             ],
             "flags": "System|DoNotTriggerNotification",
+            "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",

@@ -112,6 +112,13 @@ function c2.Channel:send_message(message, execute_commands) end
 ---@param message string
 function c2.Channel:add_system_message(message) end
 
+--- Adds a message client-side
+---
+---@param message c2.Message
+---@param context? c2.MessageContext The context of the message being added
+---@param override_flags? c2.MessageFlag|nil Flags to override the message's flags (some splits might filter for this)
+function c2.Channel:add_message(message, context, override_flags) end
+
 --- Returns true for twitch channels.
 --- Compares the channel Type. Note that enum values aren't guaranteed, just
 --- that they are equal to the exposed enum.
@@ -256,6 +263,227 @@ function c2.HTTPRequest:__tostring() end
 function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
+
+-- Begin src/controllers/plugins/api/Message.hpp
+
+
+---A chat message
+---@class c2.Message
+c2.Message = {}
+
+---A table to initialize a new message
+---@class MessageInit
+---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
+---@field id? string The (ideally unique) message ID
+---@field parse_time? number Time the message was parsed (in milliseconds since epoch)
+---@field search_text? string Text to that is compared when searching for messages
+---@field message_text? string The message text (used for filters for example)
+---@field login_name? string The login name of the sender
+---@field display_name? string The display name of the sender
+---@field localized_name? string The localized name of the sender (this is used for CJK names, otherwise it's empty)
+---@field user_id? string The ID of the user who sent the message
+---@field channel_name? string The name of the channel this message appeared in
+---@field username_color? string The color of the username
+---@field server_received_time? number The time the server received the message (in milliseconds since epoch)
+---@field highlight_color? string|nil The color of the highlight (if any)
+---@field elements? MessageElementInit[] The elements of the message
+
+---A base table to initialize a new message element
+---@class MessageElementInitBase
+---@field tooltip? string Tooltip text
+---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
+
+---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
+
+---A table to initialize a new message text element
+---@class TextElementInit : MessageElementInitBase
+---@field type "text" The type of the element
+---@field text string The text of this element
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+---@field color? MessageColor The color of the text
+---@field style? c2.FontStyle The font style of the text
+
+---A table to initialize a new message single-line text element
+---@class SingleLineTextElementInit : MessageElementInitBase
+---@field type "single-line-text" The type of the element
+---@field text string The text of this element
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+---@field color? MessageColor The color of the text
+---@field style? c2.FontStyle The font style of the text
+
+---A table to initialize a new mention element
+---@class MentionElementInit : MessageElementInitBase
+---@field type "mention" The type of the element
+---@field display_name string The display name of the mentioned user
+---@field login_name string The login name of the mentioned user
+---@field fallback_color MessageColor The color of the element in case the "Colorize @usernames" is disabled
+---@field user_color MessageColor The color of the element in case the "Colorize @usernames" is enabled
+
+---A table to initialize a new timestamp element
+---@class TimestampElementInit : MessageElementInitBase
+---@field type "timestamp" The type of the element
+---@field time number? The time of the timestamp (in milliseconds since epoch). If not provided, the current time is used.
+
+---A table to initialize a new Twitch moderation element (all the custom moderation buttons)
+---@class TwitchModerationElementInit : MessageElementInitBase
+---@field type "twitch-moderation" The type of the element
+
+---A table to initialize a new linebreak element
+---@class LinebreakElementInit : MessageElementInitBase
+---@field type "linebreak" The type of the element
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+
+---A table to initialize a new reply curve element
+---@class ReplyCurveElementInit : MessageElementInitBase
+---@field type "reply-curve" The type of the element
+
+---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit
+
+--- Creates a new message
+---
+---@param init MessageInit The message initialization table
+---@return c2.Message msg The new message
+function c2.Message.new(init) end
+-- Begin src/singletons/Fonts.hpp
+
+---@enum c2.FontStyle
+c2.FontStyle = {
+    Tiny = {}, ---@type c2.FontStyle.Tiny
+    ChatSmall = {}, ---@type c2.FontStyle.ChatSmall
+    ChatMediumSmall = {}, ---@type c2.FontStyle.ChatMediumSmall
+    ChatMedium = {}, ---@type c2.FontStyle.ChatMedium
+    ChatMediumBold = {}, ---@type c2.FontStyle.ChatMediumBold
+    ChatMediumItalic = {}, ---@type c2.FontStyle.ChatMediumItalic
+    ChatLarge = {}, ---@type c2.FontStyle.ChatLarge
+    ChatVeryLarge = {}, ---@type c2.FontStyle.ChatVeryLarge
+    TimestampMedium = {}, ---@type c2.FontStyle.TimestampMedium
+    UiMedium = {}, ---@type c2.FontStyle.UiMedium
+    UiMediumBold = {}, ---@type c2.FontStyle.UiMediumBold
+    UiTabs = {}, ---@type c2.FontStyle.UiTabs
+    EndType = {}, ---@type c2.FontStyle.EndType
+    ChatStart = {}, ---@type c2.FontStyle.ChatStart
+    ChatEnd = {}, ---@type c2.FontStyle.ChatEnd
+}
+
+-- End src/singletons/Fonts.hpp
+
+-- Begin src/messages/MessageElement.hpp
+
+---@enum c2.MessageElementFlag
+c2.MessageElementFlag = {
+    None = 0,
+    Misc = 0,
+    Text = 0,
+    Username = 0,
+    Timestamp = 0,
+    TwitchEmoteImage = 0,
+    TwitchEmoteText = 0,
+    TwitchEmote = 0,
+    BttvEmoteImage = 0,
+    BttvEmoteText = 0,
+    BttvEmote = 0,
+    ChannelPointReward = 0,
+    ChannelPointRewardImage = 0,
+    FfzEmoteImage = 0,
+    FfzEmoteText = 0,
+    FfzEmote = 0,
+    SevenTVEmoteImage = 0,
+    SevenTVEmoteText = 0,
+    SevenTVEmote = 0,
+    EmoteImages = 0,
+    EmoteText = 0,
+    BitsStatic = 0,
+    BitsAnimated = 0,
+    BadgeSharedChannel = 0,
+    BadgeGlobalAuthority = 0,
+    BadgePredictions = 0,
+    BadgeChannelAuthority = 0,
+    BadgeSubscription = 0,
+    BadgeVanity = 0,
+    BadgeChatterino = 0,
+    BadgeSevenTV = 0,
+    BadgeFfz = 0,
+    Badges = 0,
+    ChannelName = 0,
+    BitsAmount = 0,
+    ModeratorTools = 0,
+    EmojiImage = 0,
+    EmojiText = 0,
+    EmojiAll = 0,
+    AlwaysShow = 0,
+    Collapsed = 0,
+    Mention = 0,
+    LowercaseLinks = 0,
+    RepliedMessage = 0,
+    ReplyButton = 0,
+    Default = 0,
+}
+
+-- End src/messages/MessageElement.hpp
+
+-- Begin src/messages/MessageFlag.hpp
+
+---@enum c2.MessageFlag
+c2.MessageFlag = {
+    None = 0,
+    System = 0,
+    Timeout = 0,
+    Highlighted = 0,
+    DoNotTriggerNotification = 0,
+    Centered = 0,
+    Disabled = 0,
+    DisableCompactEmotes = 0,
+    Collapsed = 0,
+    ConnectedMessage = 0,
+    DisconnectedMessage = 0,
+    Untimeout = 0,
+    PubSub = 0,
+    Subscription = 0,
+    DoNotLog = 0,
+    AutoMod = 0,
+    RecentMessage = 0,
+    Whisper = 0,
+    HighlightedWhisper = 0,
+    Debug = 0,
+    Similar = 0,
+    RedeemedHighlight = 0,
+    RedeemedChannelPointReward = 0,
+    ShowInMentions = 0,
+    FirstMessage = 0,
+    ReplyMessage = 0,
+    ElevatedMessage = 0,
+    SubscribedThread = 0,
+    CheerMessage = 0,
+    LiveUpdatesAdd = 0,
+    LiveUpdatesRemove = 0,
+    LiveUpdatesUpdate = 0,
+    AutoModOffendingMessageHeader = 0,
+    AutoModOffendingMessage = 0,
+    LowTrustUsers = 0,
+    RestrictedMessage = 0,
+    MonitoredMessage = 0,
+    Action = 0,
+    SharedMessage = 0,
+    AutoModBlockedTerm = 0,
+    ClearChat = 0,
+    EventSub = 0,
+    ModerationAction = 0,
+    InvalidReplyTarget = 0,
+}
+
+-- End src/messages/MessageFlag.hpp
+
+-- Begin src/common/enums/MessageContext.hpp
+
+---@enum c2.MessageContext
+c2.MessageContext = {
+    Original = {}, ---@type c2.MessageContext.Original
+    Repost = {}, ---@type c2.MessageContext.Repost
+}
+
+-- End src/common/enums/MessageContext.hpp
+
+-- End src/controllers/plugins/api/Message.hpp
 
 -- Begin src/controllers/plugins/api/WebSocket.hpp
 

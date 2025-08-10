@@ -6,6 +6,7 @@
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
+#include "widgets/settingspages/CustomWidgets.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include <QBoxLayout>
@@ -44,13 +45,13 @@ SettingWidget *SettingWidget::checkbox(const QString &label,
 {
     auto *widget = new SettingWidget(label);
 
-    auto *check = new QCheckBox(label);
+    auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
 
     // update when setting changes
     setting.connect(
-        [check](const bool &value, auto) {
+        [check](const bool &value) {
             check->setChecked(value);
         },
         widget->managedConnections);
@@ -72,13 +73,13 @@ SettingWidget *SettingWidget::inverseCheckbox(const QString &label,
 {
     auto *widget = new SettingWidget(label);
 
-    auto *check = new QCheckBox(label);
+    auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
 
     // update when setting changes
     setting.connect(
-        [check](const bool &value, auto) {
+        [check](const bool &value) {
             check->setChecked(!value);
         },
         widget->managedConnections);
@@ -101,7 +102,7 @@ SettingWidget *SettingWidget::customCheckbox(
 {
     auto *widget = new SettingWidget(label);
 
-    auto *check = new QCheckBox(label);
+    auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
 
@@ -473,7 +474,7 @@ SettingWidget *SettingWidget::fontButton(const QString &label,
 
     auto *lbl = new QLabel(label + ":");
 
-    auto *button = new QPushButton(currentFont().family());
+    auto *button = new SPushButton(currentFont().family());
 
     widget->hLayout->addWidget(lbl);
     widget->hLayout->addStretch(1);
@@ -588,6 +589,17 @@ void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
     this->registerWidget(view);
 
     formLayout->addRow(this->label, this->actionWidget);
+}
+
+void SettingWidget::addToLayout(QLayout *layout)
+{
+    if (this->label == this->actionWidget)
+    {
+        layout->addWidget(this->actionWidget);
+        return;
+    }
+
+    assert(false && "unimplemented");
 }
 
 void SettingWidget::registerWidget(GeneralPageView &view)

@@ -5,6 +5,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QMimeData>
 #include <QPainter>
 #include <QScreen>
 
@@ -97,6 +98,32 @@ void Button::setMenu(std::unique_ptr<QMenu> menu)
         }));
 }
 
+void Button::enableDrops(const std::vector<QString> &acceptedDropMimes_)
+{
+    this->setAcceptDrops(true);
+    this->acceptedDropMimes = acceptedDropMimes_;
+}
+
+void Button::dragEnterEvent(QDragEnterEvent *event)
+{
+    auto anyMatches = std::ranges::any_of(
+        this->acceptedDropMimes, [event](const QString &acceptedMime) {
+            return event->mimeData()->hasFormat(acceptedMime);
+        });
+
+    if (!anyMatches)
+    {
+        return;
+    }
+
+    event->acceptProposedAction();
+
+    this->addClickEffect(QPoint{
+        this->width() / 2,
+        this->height() / 2,
+    });
+}
+
 void Button::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -148,6 +175,7 @@ void Button::enterEvent(QEvent * /*event*/)
     {
         this->mouseOver_ = true;
         this->update();
+        this->mouseOverUpdated();
     }
 }
 
@@ -157,6 +185,7 @@ void Button::leaveEvent(QEvent * /*event*/)
     {
         this->mouseOver_ = false;
         this->update();
+        this->mouseOverUpdated();
     }
 }
 

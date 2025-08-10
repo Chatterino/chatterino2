@@ -1,5 +1,7 @@
 #pragma once
 
+#include "widgets/settingspages/CustomWidgets.hpp"
+
 #include <pajlada/settings.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QCheckBox>
@@ -10,37 +12,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-#define SETTINGS_PAGE_WIDGET_BOILERPLATE(type, parent) \
-    class type : public parent                         \
-    {                                                  \
-        using parent::parent;                          \
-                                                       \
-    public:                                            \
-        bool greyedOut{};                              \
-                                                       \
-    protected:                                         \
-        void paintEvent(QPaintEvent *e) override       \
-        {                                              \
-            parent::paintEvent(e);                     \
-                                                       \
-            if (this->greyedOut)                       \
-            {                                          \
-                QPainter painter(this);                \
-                QColor color = QColor("#222222");      \
-                color.setAlphaF(0.7F);                 \
-                painter.fillRect(this->rect(), color); \
-            }                                          \
-        }                                              \
-    };
-
 namespace chatterino {
-
-// S* widgets are the same as their Q* counterparts,
-// but they can be greyed out and will be if you search.
-SETTINGS_PAGE_WIDGET_BOILERPLATE(SCheckBox, QCheckBox)
-SETTINGS_PAGE_WIDGET_BOILERPLATE(SLabel, QLabel)
-SETTINGS_PAGE_WIDGET_BOILERPLATE(SComboBox, QComboBox)
-SETTINGS_PAGE_WIDGET_BOILERPLATE(SPushButton, QPushButton)
 
 class SettingsDialogTab;
 

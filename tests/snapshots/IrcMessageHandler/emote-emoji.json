@@ -144,21 +144,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -175,21 +160,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "😂"
-                        ]
                     },
                     "tooltip": ":joy:<br/>Emoji",
                     "trailingSpace": true,
@@ -210,21 +180,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -244,6 +199,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "44f85d39-b5fb-475d-8555-f4244f2f7e82",
             "localizedName": "",
             "loginName": "pajlada",

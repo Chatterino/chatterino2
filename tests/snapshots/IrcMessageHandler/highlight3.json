@@ -110,6 +110,7 @@
                 }
             ],
             "flags": "Highlighted|Collapsed",
+            "frozen": false,
             "highlightColor": "#48ae812f",
             "id": "f72f5a7a-522d-407c-ac16-a0b413632fa9",
             "localizedName": "",

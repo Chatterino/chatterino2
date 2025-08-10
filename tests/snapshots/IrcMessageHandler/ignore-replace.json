@@ -94,21 +94,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "PogChamp"
-                        ]
-                    },
                     "tooltip": "PogChamp<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -143,21 +128,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -191,21 +161,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Keepo"
-                        ]
                     },
                     "tooltip": "Keepo<br>Twitch Emote",
                     "trailingSpace": true,
@@ -247,21 +202,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -298,21 +238,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "MyCoolTwitchEmote"
-                        ]
-                    },
                     "tooltip": "MyCoolTwitchEmote Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -332,6 +257,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "2199102c-31ae-49b1-9d2c-a33bb3a02021",
             "localizedName": "",
             "loginName": "nerixyz",

@@ -1,0 +1,61 @@
+{
+    "input": [
+        "msg = {",
+        "  flags = c2.MessageFlag.System | c2.MessageFlag.Disabled,",
+        "  id = 'foo-bar',",
+        "  parse_time = 420000,",
+        "  search_text = 'search',",
+        "  message_text = 'message',",
+        "  login_name = 'login',",
+        "  display_name = 'display',",
+        "  localized_name = 'local',",
+        "  user_id = 'user-id',",
+        "  username_color = 'blue',",
+        "  server_received_time = 1230000,",
+        "  highlight_color = '#12345678',",
+        "  channel_name = 'channel',",
+        "  elements = {",
+        "    { type = 'text', text = 'aliens walking' }",
+        "  }",
+        "}"
+    ],
+    "output": {
+        "badgeInfos": {
+        },
+        "badges": [
+        ],
+        "channelName": "channel",
+        "count": 1,
+        "displayName": "display",
+        "elements": [
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "aliens",
+                    "walking"
+                ]
+            }
+        ],
+        "flags": "System|Disabled",
+        "frozen": false,
+        "highlightColor": "#12345678",
+        "id": "foo-bar",
+        "localizedName": "local",
+        "loginName": "login",
+        "messageText": "message",
+        "searchText": "search",
+        "serverReceivedTime": "1970-01-01T00:20:30Z",
+        "timeoutUser": "",
+        "userID": "user-id",
+        "usernameColor": "#ff0000ff"
+    }
+}
