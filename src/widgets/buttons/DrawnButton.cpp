@@ -35,7 +35,7 @@ void DrawnButton::themeChangedEvent()
     switch (this->symbol)
     {
         case Symbol::Plus: {
-            o.padding = 3;
+            o.padding = 4;
             o.thickness = 1;
 
             o.foreground = this->theme->messages.textColors.system;

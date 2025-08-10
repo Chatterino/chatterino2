@@ -811,6 +811,11 @@ void SplitHeader::scaleChangedEvent(float scale)
     int w = int(BUTTON_WIDTH * scale);
     int addSplitWidth = int(ADD_SPLIT_BUTTON_WIDTH * scale);
 
+    if ((addSplitWidth % 2) == 0)
+    {
+        addSplitWidth++;
+    }
+
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
@@ -1080,9 +1085,11 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
+    auto bg = this->theme->messages.backgrounds.regular;
+    bg.setAlpha(220);
     this->addButton_->setOptions({
-        .background = this->theme->messages.backgrounds.regular,
-        .backgroundHover = this->theme->messages.backgrounds.regular,
+        .background = bg,
+        .backgroundHover = bg,
     });
 
     // --

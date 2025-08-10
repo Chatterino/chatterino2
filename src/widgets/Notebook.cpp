@@ -705,7 +705,11 @@ void Notebook::setShowAddButton(bool value)
 
 void Notebook::resizeAddButton()
 {
-    float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->scale();
+    int h = static_cast<int>((NOTEBOOK_TAB_HEIGHT - 1) * this->scale());
+    if ((h % 2) == 0)
+    {
+        h++;
+    }
     this->addButton_->setFixedSize(h, h);
 }
 
