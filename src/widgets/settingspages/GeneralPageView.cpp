@@ -282,6 +282,12 @@ bool GeneralPageView::filterElements(const QString &query)
                     continue;
                 }
 
+                if (auto *x = dynamic_cast<Line *>(widget.element))
+                {
+                    // Hide lines in search when not searching for full categories
+                    x->hide();
+                }
+
                 for (auto &&keyword : widget.keywords)
                 {
                     if (keyword.contains(query, Qt::CaseInsensitive) ||
