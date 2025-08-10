@@ -1278,7 +1278,7 @@ TEST_F(PluginTest, MessageElementAccess)
     ASSERT_FALSE(res.valid());
 }
 
-// Test that we can access properties of message elements
+// Test that we can modify properties of message elements
 TEST_F(PluginTest, MessageElementModification)
 {
     configure();
