@@ -720,6 +720,8 @@ set(SOURCE_FILES
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
+        widgets/helper/LiveIndicator.cpp
+        widgets/helper/LiveIndicator.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
         widgets/helper/TrimRegExpValidator.cpp
