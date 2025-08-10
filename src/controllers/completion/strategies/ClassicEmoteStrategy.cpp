@@ -1,23 +1,45 @@
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
+#include <algorithm>
+
 namespace chatterino::completion {
+
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoCompletion;
+
+}  // namespace
 
 void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                  std::vector<EmoteItem> &output,
                                  const QString &query) const
 {
+    qCDebug(LOG) << "ClassicEmoteStrategy apply" << query;
     QString normalizedQuery = query;
+    bool zeroWidthOnly = false;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
     }
+    if (normalizedQuery.startsWith('~'))
+    {
+        normalizedQuery = normalizedQuery.mid(1);
+        zeroWidthOnly = true;
+    }
 
-    // First pass: filter by contains match
+    // First pass: filter by zero-width only and contains match
     for (const auto &item : items)
     {
+        if (zeroWidthOnly && !item.emote->zeroWidth)
+        {
+            continue;
+        }
+
         if (item.searchName.contains(normalizedQuery, Qt::CaseInsensitive))
         {
             output.push_back(item);
@@ -52,6 +74,7 @@ void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                     std::vector<EmoteItem> &output,
                                     const QString &query) const
 {
+    qCDebug(LOG) << "ClassicTabEmoteStrategy apply" << query;
     bool colonStart = query.startsWith(':');
     QStringView normalizedQuery = query;
     if (colonStart)
