@@ -23,6 +23,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -946,6 +947,12 @@ void UserInfoPopup::updateUserData()
             user.displayName, this->underlyingChannel_->getName()));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+        this->ui_.createdDateLabel->setToolTip(
+            formatLongFriendlyDuration(
+                QDateTime::fromString(user.createdAt, Qt::ISODateWithMs),
+                QDateTime::currentDateTimeUtc()) +
+            u" ago"_s);
+        this->ui_.createdDateLabel->setMouseTracking(true);
         this->ui_.userIDLabel->setText(TEXT_USER_ID % user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
@@ -1022,6 +1029,11 @@ void UserInfoPopup::updateUserData()
                             followedAt.toString("yyyy-MM-dd");
                         this->ui_.followageLabel->setText("❤ Following since " +
                                                           followingSince);
+                        this->ui_.followageLabel->setToolTip(
+                            formatLongFriendlyDuration(
+                                followedAt, QDateTime::currentDateTimeUtc()) +
+                            u" ago"_s);
+                        this->ui_.followageLabel->setMouseTracking(true);
                     }
 
                     if (subageInfo.isSubHidden)
