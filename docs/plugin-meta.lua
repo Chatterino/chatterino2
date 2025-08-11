@@ -345,6 +345,17 @@ c2.Message = {}
 ---@param init MessageInit The message initialization table
 ---@return c2.Message msg The new message
 function c2.Message.new(init) end
+---@alias c2.Link { type: c2.LinkType, value: string } A link on a message element.
+---@enum c2.LinkType
+c2.LinkType = {
+    Url = {}, ---@type c2.LinkType.Url
+    UserInfo = {}, ---@type c2.LinkType.UserInfo
+    UserAction = {}, ---@type c2.LinkType.UserAction
+    JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
+    CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
+    JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
+}
+
 -- Begin src/singletons/Fonts.hpp
 
 ---@enum c2.FontStyle
@@ -485,30 +496,6 @@ c2.MessageContext = {
 -- End src/common/enums/MessageContext.hpp
 
 -- Begin src/messages/Link.hpp
-
----@alias c2.Link { type: c2.LinkType, value: string } A link on a message element.
----@enum c2.LinkType
-c2.LinkType = {
-    None = {}, ---@type c2.LinkType.None
-    Url = {}, ---@type c2.LinkType.Url
-    CloseCurrentSplit = {}, ---@type c2.LinkType.CloseCurrentSplit
-    UserInfo = {}, ---@type c2.LinkType.UserInfo
-    UserTimeout = {}, ---@type c2.LinkType.UserTimeout
-    UserBan = {}, ---@type c2.LinkType.UserBan
-    UserWhisper = {}, ---@type c2.LinkType.UserWhisper
-    InsertText = {}, ---@type c2.LinkType.InsertText
-    ShowMessage = {}, ---@type c2.LinkType.ShowMessage
-    UserAction = {}, ---@type c2.LinkType.UserAction
-    AutoModAllow = {}, ---@type c2.LinkType.AutoModAllow
-    AutoModDeny = {}, ---@type c2.LinkType.AutoModDeny
-    OpenAccountsPage = {}, ---@type c2.LinkType.OpenAccountsPage
-    JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
-    Reconnect = {}, ---@type c2.LinkType.Reconnect
-    CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
-    ReplyToMessage = {}, ---@type c2.LinkType.ReplyToMessage
-    ViewThread = {}, ---@type c2.LinkType.ViewThread
-    JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
-}
 
 -- End src/messages/Link.hpp
 
