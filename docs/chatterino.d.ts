@@ -250,22 +250,10 @@ declare namespace c2 {
 
     enum LinkType {
         Url,
-        CloseCurrentSplit,
         UserInfo,
-        UserTimeout,
-        UserBan,
-        UserWhisper,
-        InsertText,
-        ShowMessage,
         UserAction,
-        AutoModAllow,
-        AutoModDeny,
-        OpenAccountsPage,
         JumpToChannel,
-        Reconnect,
         CopyToClipboard,
-        ReplyToMessage,
-        ViewThread,
         JumpToMessage,
     }
 
