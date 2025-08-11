@@ -1080,8 +1080,7 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
-    auto bg = this->theme->messages.backgrounds.regular;
-    bg.setAlpha(220);
+    auto bg = this->theme->splits.header.background;
     this->addButton_->setOptions({
         .background = bg,
         .backgroundHover = bg,
