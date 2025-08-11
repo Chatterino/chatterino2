@@ -10,6 +10,18 @@ namespace chatterino::imageuploader::detail {
 
 namespace {
 
+/**
+  * @brief Converts ShareX-style tokens throughout the URL to the expected format.
+  *
+  * Examples:
+  *  - https://example.com/{json:foo.bar[1]}/{json:foo.bar[2]}
+  *     -> https://example.com/{foo.bar.1}/{foo.bar.2}
+  *  - {json:{response}|foo.bar[1]}
+  *     -> {foo.bar.1}
+  *
+  * @see https://github.com/ShareX/ShareX/blob/8c0fac3bdf6c6ecb9756584096332175f290072c/ShareX.UploadersLib/CustomUploader/ShareXSyntaxParser.cs
+  * @see https://github.com/ShareX/ShareX/blob/8c0fac3bdf6c6ecb9756584096332175f290072c/ShareX.UploadersLib/CustomUploader/Functions/CustomUploaderFunctionJson.cs
+  */
 QString parseUrl(const QString &url)
 {
     if (url.isEmpty() || url.compare("{response}", Qt::CaseInsensitive) == 0)
@@ -35,6 +47,8 @@ QString parseUrl(const QString &url)
 
         QString inner = match.captured(1).trimmed();
 
+        // Split by last '|' to support {json:input|jsonPath}
+        // We assume that the preceding parameter was `{response}` as other ShareX functions are not supported
         qsizetype pipeIndex = inner.lastIndexOf('|');
         if (pipeIndex != -1)
         {
