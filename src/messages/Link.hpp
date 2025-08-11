@@ -4,20 +4,14 @@
 
 namespace chatterino {
 
-/** @lua@alias c2.Link { type: c2.LinkType, value: string } A link on a message element. */
 struct Link {
 public:
-    /** @exposeenum c2.LinkType */
     enum Type {
         None,
         Url,
-        CloseCurrentSplit,
         UserInfo,
-        UserTimeout,
-        UserBan,
         UserWhisper,
         InsertText,
-        ShowMessage,
         UserAction,
         AutoModAllow,
         AutoModDeny,
