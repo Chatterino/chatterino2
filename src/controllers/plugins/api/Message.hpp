@@ -1,8 +1,11 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "messages/Link.hpp"
 #    include "messages/Message.hpp"
 
 #    include <sol/forward.hpp>
+
+#    include <cstdint>
 
 namespace chatterino::lua::api::message {
 
@@ -86,6 +89,20 @@ c2.Message = {}
 ---@return c2.Message msg The new message
 function c2.Message.new(init) end
 */
+
+/** @lua@alias c2.Link { type: c2.LinkType, value: string } A link on a message element. */
+
+// We only want certain links to be usable
+// Note: code dependant on this needs these values to be meaningful `Link::Type`s
+/** @exposeenum c2.LinkType */
+enum class ExposedLinkType : std::uint8_t {
+    Url = Link::Type::Url,
+    UserInfo = Link::Type::UserInfo,
+    UserAction = Link::Type::UserAction,  // run a command/send message
+    JumpToChannel = Link::Type::JumpToChannel,
+    CopyToClipboard = Link::Type::CopyToClipboard,
+    JumpToMessage = Link::Type::JumpToMessage,
+};
 
 /**
  * @includefile singletons/Fonts.hpp 

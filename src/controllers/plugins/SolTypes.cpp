@@ -3,6 +3,7 @@
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
+#    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "messages/Link.hpp"
@@ -156,7 +157,8 @@ chatterino::Link sol_lua_get(sol::types<chatterino::Link>, lua_State *L,
 {
     sol::table table = sol::stack::get<sol::table>(L, index, tracking);
 
-    auto ty = table.get<sol::optional<Link::Type>>("type");
+    auto ty =
+        table.get<sol::optional<lua::api::message::ExposedLinkType>>("type");
     if (!ty)
     {
         throw std::runtime_error("Missing 'type' in Link");
@@ -167,14 +169,15 @@ chatterino::Link sol_lua_get(sol::types<chatterino::Link>, lua_State *L,
         throw std::runtime_error("Missing 'value' in Link");
     }
 
-    return {*ty, *value};
+    return {static_cast<Link::Type>(*ty), *value};
 }
 
 int sol_lua_push(sol::types<chatterino::Link>, lua_State *L,
                  const chatterino::Link &value)
 {
     sol::table table = sol::table::create(L, 0, 2);
-    table.set("type", value.type);
+    table.set("type",
+              static_cast<lua::api::message::ExposedLinkType>(value.type));
     table.set("value", value.value);
     return sol::stack::push(L, table);
 }

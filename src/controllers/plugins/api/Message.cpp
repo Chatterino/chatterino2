@@ -1,12 +1,11 @@
-#include "controllers/plugins/api/Message.hpp"
-
-#include "Application.hpp"
-#include "messages/MessageElement.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/api/Message.hpp"
 
+#    include "Application.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/Message.hpp"
+#    include "messages/MessageElement.hpp"
 
 #    include <sol/sol.hpp>
 
