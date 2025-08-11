@@ -87,7 +87,7 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
         QStringList headers = parseHeaders(settingsObj["Headers"].toObject());
         if (!headers.isEmpty())
         {
-            s.imageUploaderHeaders = headers.join('\n');
+            s.imageUploaderHeaders = headers.join(';');
         }
     }
 
