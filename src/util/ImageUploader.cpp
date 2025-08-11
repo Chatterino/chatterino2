@@ -18,7 +18,7 @@ QString parseUrl(const QString &url)
     }
 
     static const QRegularExpression tokenRegex(
-        R"(\{json:([^{}]*(?:\{[^{}]*\}[^{}]*)*)\})",
+        R"(\{json:([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}*)",
         QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression arrayRegex(R"(\[(\d+)\])");
 
