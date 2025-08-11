@@ -162,7 +162,6 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     assert(el);
 
     el->setTrailingSpace(tbl.get_or("trailing_space", true));
-    el->setTooltip(tbl.get_or("tooltip", QString{}));
 
     auto link = tbl.get<sol::optional<Link>>("link");
     if (link)
@@ -174,6 +173,48 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             throw std::runtime_error("'link' not supported on type='" +
                                      type.toStdString() + '\'');
         }
+        QString tooltip = tbl.get_or("tooltip", QString{});
+        if (!tooltip.isEmpty())
+        {
+            tooltip += "<br>";
+        }
+
+        switch (link->type)
+        {
+            case Link::Url:
+                tooltip += QString("<b>URL:</b> %1").arg(link->value);
+                break;
+            case Link::UserAction:
+                tooltip += QString("<b>Command:</b> %1").arg(link->value);
+                break;
+            case Link::CopyToClipboard:
+                tooltip +=
+                    QString("<b>Copy to clipboard:</b> %1").arg(link->value);
+                break;
+
+            // these links should be safe to click as they don't have any immediate action associated with them
+            case Link::JumpToChannel:
+            case Link::JumpToMessage:
+            case Link::UserInfo:
+            case Link::UserWhisper:
+            case Link::ReplyToMessage:
+                break;
+
+            // these types are not exposed to plugins
+            case Link::None:
+            case Link::AutoModAllow:
+            case Link::AutoModDeny:
+            case Link::InsertText:
+            case Link::OpenAccountsPage:
+            case Link::Reconnect:
+                throw std::runtime_error(
+                    "Invalid link type. How'd this happen?");
+        }
+        el->setTooltip(tooltip);
+    }
+    else
+    {
+        el->setTooltip(tbl.get_or("tooltip", QString{}));
     }
 
     return el;
