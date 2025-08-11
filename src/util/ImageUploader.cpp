@@ -4,10 +4,53 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 
 namespace chatterino::imageuploader::detail {
 
 namespace {
+
+QString parseUrl(const QString &url)
+{
+    if (url.isEmpty() || url.compare("{response}", Qt::CaseInsensitive) == 0)
+    {
+        return {};
+    }
+
+    static const QRegularExpression tokenRegex(
+        R"(\{json:([^{}]*(?:\{[^{}]*\}[^{}]*)*)\})",
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression arrayRegex(R"(\[(\d+)\])");
+
+    QString out;
+    qsizetype last = 0;
+    bool changed = false;
+
+    auto it = tokenRegex.globalMatch(url);
+    while (it.hasNext())
+    {
+        auto match = it.next();
+
+        out += url.mid(last, match.capturedStart() - last);
+
+        QString inner = match.captured(1).trimmed();
+
+        qsizetype pipeIndex = inner.lastIndexOf('|');
+        if (pipeIndex != -1)
+        {
+            inner = inner.mid(pipeIndex + 1).trimmed();
+        }
+
+        inner.replace(arrayRegex, R"(.\1)");
+
+        out += '{' + inner + '}';
+        last = match.capturedEnd();
+        changed = true;
+    }
+
+    out += url.mid(last);
+    return changed ? out : QString(url);
+}
 
 QStringList parseHeaders(const QJsonObject &headersObj)
 {
@@ -74,12 +117,13 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
 
     s.imageUploaderUrl = settingsObj["RequestURL"].toString();
     s.imageUploaderFormField = settingsObj["FileFormName"].toString();
-    s.imageUploaderLink = settingsObj["URL"].toString();
+    s.imageUploaderLink = parseUrl(settingsObj["URL"].toString());
 
     if (settingsObj.contains("DeletionURL") &&
         settingsObj["DeletionURL"].isString())
     {
-        s.imageUploaderDeletionLink = settingsObj["DeletionURL"].toString();
+        s.imageUploaderDeletionLink =
+            parseUrl(settingsObj["DeletionURL"].toString());
     }
 
     if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject())
