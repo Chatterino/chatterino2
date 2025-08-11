@@ -495,10 +495,6 @@ c2.MessageContext = {
 
 -- End src/common/enums/MessageContext.hpp
 
--- Begin src/messages/Link.hpp
-
--- End src/messages/Link.hpp
-
 -- End src/controllers/plugins/api/Message.hpp
 
 -- Begin src/controllers/plugins/api/WebSocket.hpp

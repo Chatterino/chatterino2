@@ -109,7 +109,6 @@ enum class ExposedLinkType : std::uint8_t {
  * @includefile messages/MessageElement.hpp
  * @includefile messages/MessageFlag.hpp
  * @includefile common/enums/MessageContext.hpp
- * @includefile messages/Link.hpp
  */
 
 /// Creates the c2.Message user type
