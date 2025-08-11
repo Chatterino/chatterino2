@@ -84,7 +84,7 @@ QJsonObject exportSettings(const Settings &s)
     if (!headers.isEmpty())
     {
         QJsonObject headersObj;
-        QStringList headerLines = headers.split('\n', Qt::SkipEmptyParts);
+        QStringList headerLines = headers.split(';', Qt::SkipEmptyParts);
         for (const QString &line : headerLines)
         {
             QStringList parts = line.split(':', Qt::SkipEmptyParts);
