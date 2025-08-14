@@ -144,9 +144,10 @@ TEST(FunctionRef, copyCtor)
     ASSERT_FALSE(f0Copy);
 
     int i = 0;
-    FunctionRef<void()> f1([&] {
+    auto cb = [&] {
         i++;
-    });
+    };
+    FunctionRef<void()> f1(cb);
     auto f1Copy = f1;
     ASSERT_EQ(f1, f1Copy);
     f1();

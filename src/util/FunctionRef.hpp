@@ -55,7 +55,8 @@ public:
 
     bool operator==(const FunctionRef &other) const
     {
-        return this->callable == other.callable;
+        return this->callback == other.callback &&
+               this->callable == other.callable;
     }
 
     bool operator!=(const FunctionRef &other) const = default;
