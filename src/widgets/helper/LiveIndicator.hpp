@@ -11,7 +11,7 @@ class LiveIndicator : public BaseWidget
 public:
     LiveIndicator(int paddingRight, QWidget *parent = nullptr);
 
-    void setViewers(std::optional<int> viewers);
+    void setViewers(int viewers);
 
 protected:
     void scaleChangedEvent(float newScale) override;
@@ -22,9 +22,8 @@ protected:
 private:
     void updateScale();
 
-    std::optional<int> viewers;
+    int paddingRight = 0;
     bool hovered = false;
-    int paddingRight;
 };
 
 }  // namespace chatterino

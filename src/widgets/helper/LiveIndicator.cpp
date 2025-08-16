@@ -14,22 +14,14 @@ LiveIndicator::LiveIndicator(int paddingRight, QWidget *parent)
     : BaseWidget(parent)
     , paddingRight(paddingRight)
 {
-    this->setMinimumHeight(5);  // fixed min height for the circle to fit
+    this->setMinimumHeight(5);     // fixed min height for the circle to fit
+    this->setMouseTracking(true);  // for hover and tooltip
     this->updateScale();
 }
 
-void LiveIndicator::setViewers(std::optional<int> viewers)
+void LiveIndicator::setViewers(int viewers)
 {
-    this->viewers = viewers;
-    if (this->viewers)
-    {
-        this->setToolTip(
-            u"Live with %1 viewers"_s.arg(localizeNumbers(*viewers)));
-    }
-    else
-    {
-        this->setToolTip({});
-    }
+    this->setToolTip(u"Live with %1 viewers"_s.arg(localizeNumbers(viewers)));
     this->updateScale();
 }
 
@@ -40,10 +32,6 @@ void LiveIndicator::scaleChangedEvent(float /*newScale*/)
 
 void LiveIndicator::paintEvent(QPaintEvent * /*event*/)
 {
-    if (!this->viewers)
-    {
-        return;
-    }
     QPainter painter(this);
     QColor color = getTheme()->tabs.liveIndicator;
     // Indicate that there's a tooltip here
@@ -81,13 +69,8 @@ void LiveIndicator::leaveEvent(QEvent * /*event*/)
 
 void LiveIndicator::updateScale()
 {
-    qreal width = this->paddingRight;
-    if (this->viewers)
-    {
-        width += 6;  // 1dp left padding + 5dp for the circle
-    }
-    // for hover and tooltip
-    this->setMouseTracking(this->viewers.has_value());
+    // 6 = 1dp left padding + 5dp for the circle
+    qreal width = 6 + this->paddingRight;
     this->setFixedWidth(static_cast<int>(width * this->scale()));
 
     this->update();

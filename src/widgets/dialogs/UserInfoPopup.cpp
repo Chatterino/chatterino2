@@ -58,6 +58,8 @@ constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
 
+constexpr int LABEL_HORIZONTAL_PADDING = 8;
+
 using namespace chatterino;
 
 Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box, const char *tooltip,
@@ -356,8 +358,15 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                 this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
-                this->ui_.nameLabel->setPadding(QMargins(8, 0, 0, 0));
-                this->ui_.liveIndicator = new LiveIndicator(8);
+                this->ui_.nameLabel->setPadding(QMargins{
+                    LABEL_HORIZONTAL_PADDING,
+                    0,
+                    LABEL_HORIZONTAL_PADDING,
+                    0,
+                });
+                this->ui_.liveIndicator =
+                    new LiveIndicator(LABEL_HORIZONTAL_PADDING);
+                this->ui_.liveIndicator->hide();
                 // addCopyableLabel adds the copy button last -> add the indicator before that
                 box->insertWidget(box->count() - 1, this->ui_.liveIndicator);
                 box->addSpacing(5);
@@ -989,10 +998,23 @@ void UserInfoPopup::updateUserData()
                 if (isLive)
                 {
                     this->ui_.liveIndicator->setViewers(stream.viewerCount);
+                    this->ui_.liveIndicator->show();
+                    this->ui_.nameLabel->setPadding(QMargins{
+                        LABEL_HORIZONTAL_PADDING,
+                        0,
+                        0,
+                        0,
+                    });
                 }
                 else
                 {
-                    this->ui_.liveIndicator->setViewers(std::nullopt);
+                    this->ui_.liveIndicator->hide();
+                    this->ui_.nameLabel->setPadding(QMargins{
+                        LABEL_HORIZONTAL_PADDING,
+                        0,
+                        LABEL_HORIZONTAL_PADDING,
+                        0,
+                    });
                 }
             },
             [id{user.id}]() {
