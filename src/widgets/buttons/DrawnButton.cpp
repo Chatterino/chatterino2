@@ -35,7 +35,7 @@ void DrawnButton::themeChangedEvent()
     switch (this->symbol)
     {
         case Symbol::Plus: {
-            o.padding = 3;
+            o.padding = 4;
             o.thickness = 1;
 
             o.foreground = this->theme->messages.textColors.system;
@@ -107,6 +107,21 @@ void DrawnButton::paintContent(QPainter &painter)
             QRect inner;
             inner.setSize(innerSize);
             inner.moveCenter(this->rect().center());
+            inner = inner.marginsRemoved({padding, padding, padding, padding});
+
+            // make sure that the inner size is always odd:
+            // (width): [====outer====][|inner|][====outer====]
+            // -> 2 * outer_w + inner_w
+            // -> 2 * outer_w + 1dp
+            // -> odd
+            if ((inner.width() % 2) == 0)
+            {
+                inner.setRight(inner.right() + 1);
+            }
+            if ((inner.height() % 2) == 0)
+            {
+                inner.setTop(inner.top() - 1);
+            }
 
             auto top = inner.top();
             auto bottom = inner.bottom();
@@ -114,11 +129,9 @@ void DrawnButton::paintContent(QPainter &painter)
             auto left = inner.left();
             auto right = inner.right();
 
-            QLine vertical(center.x(), top + padding, center.x(),
-                           bottom - padding);
+            QLine vertical(center.x(), top, center.x(), bottom);
             painter.drawLine(vertical);
-            QLine horizontal(left + padding, center.y(), right - padding,
-                             center.y());
+            QLine horizontal(left, center.y(), right, center.y());
             painter.drawLine(horizontal);
         }
         break;
