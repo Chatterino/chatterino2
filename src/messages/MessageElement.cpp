@@ -58,9 +58,13 @@ MessageElement::~MessageElement()
     DebugCount::decrease("message elements");
 }
 
-MessageElement *MessageElement::setLink(const Link &link)
+MessageElement *MessageElement::setLink(const Link &link, bool *ok)
 {
     this->link_ = link;
+    if (ok)
+    {
+        *ok = true;
+    }
     return this;
 }
 
@@ -988,6 +992,15 @@ void LinkElement::addToContainer(MessageLayoutContainer &container,
     TextElement::addToContainer(container, ctx);
 }
 
+MessageElement *LinkElement::setLink(const Link & /* link */, bool *ok)
+{
+    if (ok)
+    {
+        *ok = false;
+    }
+    return this;
+}
+
 Link LinkElement::getLink() const
 {
     return {Link::Url, this->linkInfo_.url()};
@@ -1055,13 +1068,13 @@ void MentionElement::addToContainer(MessageLayoutContainer &container,
     TextElement::addToContainer(container, ctx);
 }
 
-MessageElement *MentionElement::setLink(const Link &link)
+MessageElement *MentionElement::setLink(const Link & /* link */, bool *ok)
 {
-    assert(false && "MentionElement::setLink should not be called. Pass "
-                    "through a valid login name in the constructor and it will "
-                    "automatically be a UserInfo link");
-
-    return TextElement::setLink(link);
+    if (ok)
+    {
+        *ok = false;
+    }
+    return this;
 }
 
 Link MentionElement::getLink() const

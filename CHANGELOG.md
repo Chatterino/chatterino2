@@ -10,7 +10,7 @@
 - Minor: Added WebSocket API for plugins. (#6076, #6186, #6314, #6315)
 - Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
 - Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
-- Minor: Added basic message API to plugins. (#5754)
+- Minor: Added basic message API to plugins. (#5754, #6386)
 - Minor: Made filters searchable in the Settings dialog search bar. (#5890)
 - Minor: Updated emojis to Unicode 16.0. (#6155)
 - Minor: Allow disabling of double-click tab renaming through setting. (#6163, #6184)
