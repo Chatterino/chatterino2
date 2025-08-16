@@ -896,7 +896,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     {
-        auto *note = new QLabel(
+        auto *note = layout.addDescription(
             "A semicolon-separated list of Chrome or Firefox extension IDs "
             "allowed to interact with Chatterino's browser integration "
             "(requires restart).\n"
