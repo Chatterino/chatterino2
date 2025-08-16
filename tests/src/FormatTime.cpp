@@ -414,6 +414,17 @@ TEST(FormatTime, formatLongFriendlyDuration)
             .to = "2018-07-04T08:36:26Z",
             .dur = "2 hours, 2 minutes, and 2 seconds",
         },
+        // more units
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-09-06T08:36:26Z",
+            .dur = "2 years, 2 months, 2 days, and 2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-07-06T08:36:26Z",
+            .dur = "2 years, 2 days, 2 hours, and 2 minutes",
+        },
         // swapped
         Case{
             .from = "2020-09-06T08:34:24Z",
