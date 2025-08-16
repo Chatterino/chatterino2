@@ -10,9 +10,8 @@ namespace chatterino {
 
 using namespace Qt::Literals;
 
-LiveIndicator::LiveIndicator(int paddingRight, QWidget *parent)
+LiveIndicator::LiveIndicator(QWidget *parent)
     : BaseWidget(parent)
-    , paddingRight(paddingRight)
 {
     this->setMinimumHeight(5);     // fixed min height for the circle to fit
     this->setMouseTracking(true);  // for hover and tooltip
@@ -51,7 +50,7 @@ void LiveIndicator::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(Qt::NoPen);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.drawEllipse(QRect{
-        QPoint{1, 0},
+        QPoint{0, 0},
         QSize{5, 5} * this->scale(),
     });
 }
@@ -69,9 +68,7 @@ void LiveIndicator::leaveEvent(QEvent * /*event*/)
 
 void LiveIndicator::updateScale()
 {
-    // 6 = 1dp left padding + 5dp for the circle
-    qreal width = 6 + this->paddingRight;
-    this->setFixedWidth(static_cast<int>(width * this->scale()));
+    this->setFixedWidth(qRound(6 * this->scale()));
 
     this->update();
 }

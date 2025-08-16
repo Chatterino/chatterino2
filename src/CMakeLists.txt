@@ -714,6 +714,8 @@ set(SOURCE_FILES
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
+        widgets/helper/ScalingSpacerItem.cpp
+        widgets/helper/ScalingSpacerItem.hpp
         widgets/helper/ScrollbarHighlight.cpp
         widgets/helper/ScrollbarHighlight.hpp
         widgets/helper/SearchPopup.cpp

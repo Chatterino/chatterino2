@@ -33,6 +33,7 @@
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/helper/LiveIndicator.hpp"
+#include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -57,8 +58,6 @@ constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
 constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
-
-constexpr int LABEL_HORIZONTAL_PADDING = 8;
 
 using namespace chatterino;
 
@@ -358,17 +357,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                 this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
-                this->ui_.nameLabel->setPadding(QMargins{
-                    LABEL_HORIZONTAL_PADDING,
-                    0,
-                    LABEL_HORIZONTAL_PADDING,
-                    0,
-                });
-                this->ui_.liveIndicator =
-                    new LiveIndicator(LABEL_HORIZONTAL_PADDING);
+                this->ui_.nameLabel->setPadding(QMargins(8, 0, 1, 0));
+                this->ui_.liveIndicator = new LiveIndicator;
                 this->ui_.liveIndicator->hide();
                 // addCopyableLabel adds the copy button last -> add the indicator before that
                 box->insertWidget(box->count() - 1, this->ui_.liveIndicator);
+                box->insertItem(box->count() - 1,
+                                ScalingSpacerItem::horizontal(7));
                 box->addSpacing(5);
                 box->addStretch(1);
 
@@ -999,22 +994,10 @@ void UserInfoPopup::updateUserData()
                 {
                     this->ui_.liveIndicator->setViewers(stream.viewerCount);
                     this->ui_.liveIndicator->show();
-                    this->ui_.nameLabel->setPadding(QMargins{
-                        LABEL_HORIZONTAL_PADDING,
-                        0,
-                        0,
-                        0,
-                    });
                 }
                 else
                 {
                     this->ui_.liveIndicator->hide();
-                    this->ui_.nameLabel->setPadding(QMargins{
-                        LABEL_HORIZONTAL_PADDING,
-                        0,
-                        LABEL_HORIZONTAL_PADDING,
-                        0,
-                    });
                 }
             },
             [id{user.id}]() {

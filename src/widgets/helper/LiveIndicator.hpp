@@ -9,7 +9,7 @@ namespace chatterino {
 class LiveIndicator : public BaseWidget
 {
 public:
-    LiveIndicator(int paddingRight, QWidget *parent = nullptr);
+    LiveIndicator(QWidget *parent = nullptr);
 
     void setViewers(int viewers);
 
@@ -22,7 +22,6 @@ protected:
 private:
     void updateScale();
 
-    int paddingRight = 0;
     bool hovered = false;
 };
 
