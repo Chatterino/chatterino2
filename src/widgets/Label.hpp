@@ -26,8 +26,7 @@ public:
     bool getCentered() const;
     void setCentered(bool centered);
 
-    /// Enable or disable horizontal padding
-    void setHasPadding(bool hasPadding);
+    void setPadding(QMargins padding);
 
     bool getWordWrap() const;
     void setWordWrap(bool wrap);
@@ -46,15 +45,10 @@ protected:
 
 private:
     void updateSize();
-
-    /// Returns the horizontal padding, or 0 if hasPadding_ is false
-    int getPadding() const;
+    QRectF textRect() const;
 
     /// Returns the current font style's font metric based on the current scale.
     QFontMetricsF getFontMetrics() const;
-
-    /// Returns the width of this content without padding
-    qreal getInnerWidth() const;
 
     /// Calculate the new elided text based on text_
     ///
@@ -65,8 +59,13 @@ private:
     FontStyle fontStyle_;
     QSize sizeHint_;
     QSize minimumSizeHint_;
+
+    /// The user specified padding (scale agnostic)
+    QMargins basePadding_;
+    /// The actual scaled padding
+    QMarginsF currentPadding_;
+
     bool centered_ = false;
-    bool hasPadding_ = true;
     bool wordWrap_ = false;
     bool shouldElide_ = false;
     /// The text, but elided. Only set if shouldElide_ is true
