@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$Env:GITHUB_ENV"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access

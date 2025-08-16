@@ -1,7 +1,10 @@
 #include "singletons/ImageUploader.hpp"
 
 #include "common/network/NetworkResult.hpp"
+#include "lib/Snapshot.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "Test.hpp"
+#include "util/ImageUploader.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -11,6 +14,12 @@
 
 #include <utility>
 #include <vector>
+
+namespace {
+
+constexpr bool UPDATE_SNAPSHOTS = false;
+
+}  // namespace
 
 namespace chatterino::imageuploader::detail {
 
@@ -256,6 +265,82 @@ TEST(ImageUploaderDetail_GetLinkFromResponse, scalar)
     ASSERT_EQ(getLinkFromResponse(res("null"), "-{0}-"), "--");
     ASSERT_EQ(getLinkFromResponse(res("null"), "-{a}-"), "--");
     ASSERT_EQ(getLinkFromResponse(res("null"), "-{a.b}-"), "--");
+}
+
+class ImageUploaderTest : public ::testing::Test
+{
+protected:
+    void configure()
+    {
+        this->app = std::make_unique<mock::BaseApplication>();
+    }
+
+    void TearDown() override
+    {
+        this->app.reset();
+    }
+
+    std::unique_ptr<mock::BaseApplication> app;
+};
+
+class ImportTest : public ImageUploaderTest,
+                   public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(ImportTest, Run)
+{
+    auto fixture = testlib::Snapshot::read("ImageUploader/Import", GetParam());
+
+    configure();
+
+    detail::importSettings(fixture->input().toObject(), *getSettings());
+
+    ASSERT_TRUE(fixture->run(
+        QJsonObject{
+            {"url", getSettings()->imageUploaderUrl.getValue()},
+            {"formField", getSettings()->imageUploaderFormField.getValue()},
+            {"headers", getSettings()->imageUploaderHeaders.getValue()},
+            {"link", getSettings()->imageUploaderLink.getValue()},
+            {"deletionLink",
+             getSettings()->imageUploaderDeletionLink.getValue()},
+        },
+        UPDATE_SNAPSHOTS));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageUploader, ImportTest,
+    testing::ValuesIn(testlib::Snapshot::discover("ImageUploader/Import")));
+
+class ExportTest : public ImageUploaderTest,
+                   public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(ExportTest, Run)
+{
+    auto fixture = testlib::Snapshot::read("ImageUploader/Export", GetParam());
+
+    configure();
+
+    const auto input = fixture->input().toObject();
+    getSettings()->imageUploaderUrl = input["url"].toString();
+    getSettings()->imageUploaderFormField = input["formField"].toString();
+    getSettings()->imageUploaderHeaders = input["headers"].toString();
+    getSettings()->imageUploaderLink = input["link"].toString();
+    getSettings()->imageUploaderDeletionLink = input["deletionLink"].toString();
+
+    auto output = detail::exportSettings(*getSettings());
+
+    ASSERT_TRUE(fixture->run(output, UPDATE_SNAPSHOTS));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageUploader, ExportTest,
+    testing::ValuesIn(testlib::Snapshot::discover("ImageUploader/Export")));
+
+// verify that all snapshots are included
+TEST(ImageUploader, ImportExportIntegrity)
+{
+    ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
 
 }  // namespace chatterino::imageuploader::detail
