@@ -53,6 +53,10 @@ SplitContainer::SplitContainer(Notebook *parent)
                 for (auto &handle : this->resizeHandles_)
                 {
                     handle->hide();
+
+                    // Resize split modifier was released, ensure no resize handle has
+                    // isMouseDown_ set to true
+                    handle->isMouseDown_ = false;
                 }
             }
 
