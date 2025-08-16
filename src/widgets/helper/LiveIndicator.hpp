@@ -2,8 +2,6 @@
 
 #include "widgets/BaseWidget.hpp"
 
-#include <optional>
-
 namespace chatterino {
 
 class LiveIndicator : public BaseWidget
