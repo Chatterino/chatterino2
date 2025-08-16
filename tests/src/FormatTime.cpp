@@ -205,3 +205,240 @@ TEST(FormatTime, chrono)
             << actual << " did not match expected value " << expected;
     }
 }
+
+TEST(FormatTime, formatLongFriendlyDuration)
+{
+    struct Case {
+        QString from;
+        QString to;
+        QString dur;
+    };
+
+    std::array cases{
+        // basic
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2025-08-10T13:03:50Z",
+            .dur = "7 years, 1 month, 6 days, and 6 hours",
+        },
+        // eq
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:34:24Z",
+            .dur = "0 seconds",
+        },
+        // one
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:34:25Z",
+            .dur = "1 second",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:35:24Z",
+            .dur = "1 minute",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:35:25Z",
+            .dur = "1 minute and 1 second",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T07:34:24Z",
+            .dur = "1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-05T06:34:24Z",
+            .dur = "1 day",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-05T07:34:24Z",
+            .dur = "1 day and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-08-04T06:34:24Z",
+            .dur = "1 month",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-08-05T06:34:24Z",
+            .dur = "1 month and 1 day",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-08-05T07:34:24Z",
+            .dur = "1 month, 1 day, and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-08-04T07:34:24Z",
+            .dur = "1 month and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-04T06:34:24Z",
+            .dur = "1 year",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-04T07:34:24Z",
+            .dur = "1 year and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-05T06:34:24Z",
+            .dur = "1 year and 1 day",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-08-04T06:34:24Z",
+            .dur = "1 year and 1 month",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-05T07:34:24Z",
+            .dur = "1 year, 1 day, and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-08-05T06:34:24Z",
+            .dur = "1 year, 1 month, and 1 day",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-08-04T07:34:24Z",
+            .dur = "1 year, 1 month, and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-08-05T07:34:24Z",
+            .dur = "1 year, 1 month, 1 day, and 1 hour",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-05T07:35:24Z",
+            .dur = "1 year, 1 day, 1 hour, and 1 minute",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2019-07-04T07:35:25Z",
+            .dur = "1 year, 1 hour, 1 minute, and 1 second",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T07:35:25Z",
+            .dur = "1 hour, 1 minute, and 1 second",
+        },
+        // two
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:34:26Z",
+            .dur = "2 seconds",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:36:24Z",
+            .dur = "2 minutes",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T06:36:26Z",
+            .dur = "2 minutes and 2 seconds",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T08:34:24Z",
+            .dur = "2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-06T06:34:24Z",
+            .dur = "2 days",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-06T08:34:24Z",
+            .dur = "2 days and 2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-09-04T06:34:24Z",
+            .dur = "2 months",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-09-06T06:34:24Z",
+            .dur = "2 months and 2 days",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-09-06T08:34:24Z",
+            .dur = "2 months, 2 days, and 2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-07-04T06:34:24Z",
+            .dur = "2 years",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-09-04T06:34:24Z",
+            .dur = "2 years and 2 months",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-09-06T06:34:24Z",
+            .dur = "2 years, 2 months, and 2 days",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-09-06T08:34:24Z",
+            .dur = "2 years, 2 months, 2 days, and 2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-07-06T08:36:24Z",
+            .dur = "2 years, 2 days, 2 hours, and 2 minutes",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-07-04T08:36:26Z",
+            .dur = "2 years, 2 hours, 2 minutes, and 2 seconds",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2018-07-04T08:36:26Z",
+            .dur = "2 hours, 2 minutes, and 2 seconds",
+        },
+        // more units
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-09-06T08:36:26Z",
+            .dur = "2 years, 2 months, 2 days, and 2 hours",
+        },
+        Case{
+            .from = "2018-07-04T06:34:24Z",
+            .to = "2020-07-06T08:36:26Z",
+            .dur = "2 years, 2 days, 2 hours, and 2 minutes",
+        },
+        // swapped
+        Case{
+            .from = "2020-09-06T08:34:24Z",
+            .to = "2018-07-04T06:34:24Z",
+            .dur = "2 years, 2 months, 2 days, and 2 hours",
+        },
+    };
+
+    for (const auto &c : cases)
+    {
+        auto d = formatLongFriendlyDuration(
+            QDateTime::fromString(c.from, Qt::ISODate),
+            QDateTime::fromString(c.to, Qt::ISODate));
+        ASSERT_EQ(d, c.dur)
+            << "from=" << c.from << " to=" << c.to << " expected=" << c.dur;
+    }
+}
