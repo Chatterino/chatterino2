@@ -512,16 +512,6 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.error.setBackground(QColor(0x4b2f36));
     }
 
-    // TODO(jupjohn): need this?
-    // if (this->isPinned)
-    // {
-    //     this->ui.pin->setSource(this->ui.pinEnabledSource_);
-    // }
-    // else
-    // {
-    //     this->ui.pin->setSource(this->ui.pinDisabledSource_);
-    // }
-
     auto pal = this->palette();
     pal.setColor(QPalette::Window,
                  getTheme()->tabs.selected.backgrounds.regular);

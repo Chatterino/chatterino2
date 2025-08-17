@@ -121,7 +121,6 @@ void DraggablePopup::togglePinned()
 Button *DraggablePopup::createPinButton()
 {
     this->pinButton_ = new SvgButton(pinDisabledSource_, this, {3, 3});
-    // TODO(jupjohn): need this?
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 
