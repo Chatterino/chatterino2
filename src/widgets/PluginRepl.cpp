@@ -11,7 +11,6 @@
 #    include "singletons/Resources.hpp"
 #    include "singletons/Settings.hpp"
 #    include "singletons/Theme.hpp"
-#    include "widgets/buttons/PixmapButton.hpp"
 #    include "widgets/buttons/SvgButton.hpp"
 
 #    include <QBoxLayout>
