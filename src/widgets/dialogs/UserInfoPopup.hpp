@@ -18,6 +18,7 @@ class ChannelView;
 class Split;
 class LabelButton;
 class PixmapButton;
+class LiveIndicator;
 
 class UserInfoPopup final : public DraggablePopup
 {
@@ -84,6 +85,8 @@ private:
         Label *userIDLabel = nullptr;
         Label *followageLabel = nullptr;
         Label *subageLabel = nullptr;
+
+        LiveIndicator *liveIndicator = nullptr;
 
         QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;

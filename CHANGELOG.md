@@ -25,6 +25,7 @@
 - Minor: Add a setting under Moderation -> Logs to use server timestamp from the message instead of the local clock time for logging. (#6346)
 - Minor: Add feature to search for only zero-width emotes when prepended by `:~`. (#6362)
 - Minor: The follow and sub dates now show the duration in a tooltip. (#6384)
+- Minor: Usercards now show a live indicator if the user is currently streaming. (#6383)
 - Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
@@ -50,6 +51,7 @@
 - Bugfix: Fixed a crash that could occur on exit if a ping played less than 30 seconds prior. (#6332)
 - Bugfix: Fixed a crash that could occur on exit on newer versions of Qt. (#6368)
 - Bugfix: Fixed notebook buttons (settings, account switcher, streamer mode) not performing a relayout when their visibility changed, causing a gap until resize. Linux / macOS only. (#6328)
+- Bugfix: Fixed split resizing mode sometimes getting stuck or acting weird if you released Ctrl before the left mouse button. (#6396)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
 - Bugfix: Fixed eventsub message delete notifications not being affected by "Show deletions of single messages". (#6233)
@@ -92,6 +94,7 @@
 - Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334, #6371, #6372)
 - Dev: Made "add split" button (part of the split header) a natively rendered button. (#6349)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
+- Dev: Made user card "pin" button SVGs. (#6399)
 - Dev: Some more setting widget refactors. (#6317)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
@@ -104,6 +107,7 @@
 - Dev: Update vcpkg baseline. (#6359)
 - Dev: Added an explicit `frozen` flag to `Message`. (#6367)
 - Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
+- Dev: Error handlers for Sol check functions now take a function reference over an owning type. (#6393)
 
 ## 2.5.3
 
