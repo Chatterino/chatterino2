@@ -61,6 +61,7 @@ enum class FromTwitchLinkOpenChannelIn {
     Tab,
     BrowserPlayer,
     Streamlink,
+    CustomPlayer,
 };
 
 using SteadyClock = std::chrono::steady_clock;

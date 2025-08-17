@@ -2816,13 +2816,21 @@ void ChannelView::addTwitchLinkContextMenuItems(
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Streamlink);
         });
+
+        if (!getSettings()->customURIScheme.getValue().isEmpty())
+        {
+            menu->addAction("Open in custom &player", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::CustomPlayer);
+            });
+        }
     }
 }
 
 void ChannelView::addCommandExecutionContextMenuItems(
     QMenu *menu, const MessageLayoutPtr &layout)
 {
-    /* Get commands to be displayed in context menu; 
+    /* Get commands to be displayed in context menu;
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
     for (const auto &cmd : getApp()->getCommands()->items)

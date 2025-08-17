@@ -151,6 +151,8 @@ Split::Split(QWidget *parent)
                 case FromTwitchLinkOpenChannelIn::Streamlink:
                     this->openChannelInStreamlink(twitchChannel);
                     break;
+                case FromTwitchLinkOpenChannelIn::CustomPlayer:
+                    this->openChannelInCustomPlayer(twitchChannel);
                 default:
                     qCWarning(chatterinoWidget)
                         << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum "
@@ -804,6 +806,11 @@ void Split::openChannelInStreamlink(const QString channelName)
     }
 }
 
+void Split::openChannelInCustomPlayer(const QString channelName)
+{
+    openInCustomPlayer(channelName);
+}
+
 IndirectChannel Split::getIndirectChannel()
 {
     return this->channel_;
@@ -1137,10 +1144,9 @@ void Split::openInStreamlink()
 void Split::openWithCustomScheme()
 {
     auto *const channel = this->getChannel().get();
-
     if (auto *const twitchChannel = dynamic_cast<TwitchChannel *>(channel))
     {
-        openInCustomPlayer(twitchChannel->getName());
+        this->openChannelInCustomPlayer(twitchChannel->getName());
     }
 }
 
