@@ -127,6 +127,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
 {
     auto type = requiredGet<QString>(tbl, "type");
     std::unique_ptr<MessageElement> el;
+    bool linksAllowed = true;
     if (type == u"text")
     {
         el = textElementFromTable(tbl);
@@ -138,6 +139,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     else if (type == u"mention")
     {
         el = mentionElementFromTable(tbl);
+        linksAllowed = false;
     }
     else if (type == u"timestamp")
     {
@@ -166,13 +168,12 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     auto link = tbl.get<sol::optional<Link>>("link");
     if (link)
     {
-        bool ok = false;
-        el->setLink(*link, &ok);
-        if (!ok)
+        if (!linksAllowed)
         {
             throw std::runtime_error("'link' not supported on type='" +
                                      type.toStdString() + '\'');
         }
+        el->setLink(*link);
         QString tooltip;
 
         switch (link->type)

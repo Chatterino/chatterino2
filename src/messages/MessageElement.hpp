@@ -178,7 +178,7 @@ public:
     MessageElement(MessageElement &&) = delete;
     MessageElement &operator=(MessageElement &&) = delete;
 
-    virtual MessageElement *setLink(const Link &link, bool *ok = nullptr);
+    virtual MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);
 
     MessageElement *setTrailingSpace(bool value);
@@ -312,7 +312,6 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         const MessageLayoutContext &ctx) override;
 
-    MessageElement *setLink(const Link &link, bool *ok = nullptr) override;
     Link getLink() const override;
 
     [[nodiscard]] LinkInfo *linkInfo()
@@ -360,7 +359,7 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         const MessageLayoutContext &ctx) override;
 
-    MessageElement *setLink(const Link &link, bool *ok = nullptr) override;
+    MessageElement *setLink(const Link &link) override;
     Link getLink() const override;
 
     QJsonObject toJson() const override;
