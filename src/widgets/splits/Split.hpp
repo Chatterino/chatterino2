@@ -133,7 +133,7 @@ private:
     /**
      * @brief Opens a Twitch channel's stream in your custom player (if the stream's live, and the custom player protocol's set)
      */
-    void openChannelInCustomPlayer(const QString channelName);
+    void openChannelInCustomPlayer(QString channelName);
     /**
      * @brief Opens a Twitch channel's chat in a new tab
      */
