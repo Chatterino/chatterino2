@@ -1,9 +1,6 @@
 #include "widgets/DraggablePopup.hpp"
 
 #include "buttons/SvgButton.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/Theme.hpp"
-#include "widgets/buttons/PixmapButton.hpp"
 
 #include <QMouseEvent>
 
