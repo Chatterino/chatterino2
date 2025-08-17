@@ -185,8 +185,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
                 tooltip = QString("<b>Command:</b> %1").arg(link->value);
                 break;
             case Link::CopyToClipboard:
-                tooltip =
-                    QString("<b>Copy to clipboard:</b> %1").arg(link->value);
+                tooltip = "<b>Copy to clipboard</b>";
                 break;
 
             // these links should be safe to click as they don't have any immediate action associated with them
