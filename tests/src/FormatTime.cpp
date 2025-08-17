@@ -214,6 +214,18 @@ TEST(FormatTime, formatLongFriendlyDuration)
         QString dur;
     };
 
+    // You can verify this with Temporal in your browser:
+    // function humanDuration(from, to) {
+    //   return Temporal.Instant.from(to)
+    //     .since(Temporal.Instant.from(from))
+    //     .round({
+    //       smallestUnit: "seconds",
+    //       largestUnit: "years",
+    //       relativeTo: Temporal.Instant.from(from).toZonedDateTimeISO("UTC"),
+    //     });
+    // }
+    // > humanDuration("2018-07-04T06:34:24Z", "2025-08-10T13:03:50Z")
+    // > P7Y1M6DT6H29M26S
     std::array cases{
         // basic
         Case{
@@ -430,6 +442,42 @@ TEST(FormatTime, formatLongFriendlyDuration)
             .from = "2020-09-06T08:34:24Z",
             .to = "2018-07-04T06:34:24Z",
             .dur = "2 years, 2 months, 2 days, and 2 hours",
+        },
+        // lower time
+        Case{
+            .from = "2018-07-04T13:34:24Z",
+            .to = "2025-08-04T10:03:50Z",
+            .dur = "7 years, 30 days, 20 hours, and 29 minutes",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-07-05T00:03:00Z",
+            .dur = "12 minutes and 10 seconds",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-07-05T00:00:00Z",
+            .dur = "9 minutes and 10 seconds",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-07-06T00:03:00Z",
+            .dur = "1 day, 12 minutes, and 10 seconds",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-07-07T00:03:00Z",
+            .dur = "2 days, 12 minutes, and 10 seconds",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-08-04T00:03:00Z",
+            .dur = "30 days, 12 minutes, and 10 seconds",
+        },
+        Case{
+            .from = "2018-07-04T23:50:50Z",
+            .to = "2018-09-04T00:03:00Z",
+            .dur = "1 month, 30 days, 12 minutes, and 10 seconds",
         },
     };
 

@@ -98,6 +98,11 @@ BalancedDuration durationBetween(const QDateTime &a, const QDateTime &b)
     auto fromD = fromDT.date();
     auto toD = toDT.date();
 
+    if (toDT.time_of_day() < fromDT.time_of_day())
+    {
+        toD -= boost::gregorian::date_duration(1);
+    }
+
     auto [years, yd] = yearsBetween(fromD, toD);
     auto [months, md] = monthsBetween(yd, toD);
 
