@@ -323,7 +323,7 @@ void SplitHeader::initializeLayout()
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
                              QSizePolicy::Preferred);
             w->setCentered(true);
-            w->setHasPadding(false);
+            w->setPadding(QMargins{});
         }),
         // space
         makeWidget<BaseWidget>([](auto w) {
