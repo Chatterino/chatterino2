@@ -854,6 +854,21 @@ void Split::setChannel(IndirectChannel newChannel)
             this->actionRequested.invoke(Action::RefreshTab);
         });
 
+    QObject::connect(
+        this->view_, &ChannelView::messageAddedToChannel, this,
+        [this](MessagePtr &message) {
+            if (!getSettings()->pulseTextInputOnSelfMessage)
+            {
+                return;
+            }
+            auto user = getApp()->getAccounts()->twitch.getCurrent();
+            if (!user->isAnon() && message->userID == user->getUserId())
+            {
+                // A message from yourself was just received in this split
+                this->input_->triggerSelfMessageReceived();
+            }
+        });
+
     this->channelChanged.invoke();
     this->actionRequested.invoke(Action::RefreshTab);
 

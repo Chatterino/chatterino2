@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QPaintEvent>
 #include <QPointer>
+#include <QPropertyAnimation>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -74,6 +75,8 @@ public:
      * This method should only be used in tests
      */
     void setInputText(const QString &newInputText);
+
+    void triggerSelfMessageReceived();
 
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -168,6 +171,22 @@ protected:
     // focus events don't work as expected, so instead we use this bool and
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
+
+    /// Updates the text edit palette using the current theme
+    /// and current "backgroundColor" property
+    void updateTextEditPalette();
+
+    // the background color defines the current background color of this split input
+    // instead of reading straight from the theme, we store a property here
+    // to be used by a property to be able to pulse a highlight color on demand
+    Q_PROPERTY(
+        QColor backgroundColor READ backgroundColor WRITE setBackgroundColor);
+
+    QColor backgroundColor_{"#000000"};
+    QColor backgroundColor() const;
+    void setBackgroundColor(QColor newColor);
+
+    QPropertyAnimation backgroundColorAnimation;
 
 private Q_SLOTS:
     void editTextChanged();

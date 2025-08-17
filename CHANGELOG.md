@@ -23,6 +23,7 @@
 - Minor: Message character length label is now monospaced. (#6366)
 - Minor: Add a setting under Moderation -> Logs to customize the timestamp used for chat logs. (#6338)
 - Minor: Add a setting under Moderation -> Logs to use server timestamp from the message instead of the local clock time for logging. (#6346)
+- Minor: Add a setting under Chat that, when enabled, pulses the text input whenever one of your messages is successfully sent to the chat. (#6380)
 - Minor: Add feature to search for only zero-width emotes when prepended by `:~`. (#6362)
 - Minor: The follow and sub dates now show the duration in a tooltip. (#6384)
 - Minor: Usercards now show a live indicator if the user is currently streaming. (#6383)
