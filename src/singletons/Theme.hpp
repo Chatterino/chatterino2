@@ -155,7 +155,6 @@ public:
 
     struct {
         QPixmap copy;
-        QPixmap pin;
     } buttons;
 
     QPalette palette;

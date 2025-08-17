@@ -13,6 +13,7 @@ Q_LOGGING_CATEGORY(chatterinoBttv, "chatterino.bttv", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoCache, "chatterino.cache", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoCommands, "chatterino.commands", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoCommon, "chatterino.common", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoCompletion, "chatterino.completion", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoCrashhandler, "chatterino.crashhandler",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoEmoji, "chatterino.emoji", logThreshold);

@@ -13,7 +13,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -22,7 +21,7 @@
 #include "util/LayoutHelper.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
-#include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/Label.hpp"
@@ -289,6 +288,20 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->moderationButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/moderationDisabled-darkMode.svg",
+            .light = ":/buttons/moderationDisabled-lightMode.svg",
+        },
+        this, {5, 5});
+
+    this->chattersButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/chatters-darkMode.svg",
+            .light = ":/buttons/chatters-lightMode.svg",
+        },
+        this, {4, 4});
+
     this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
                                        {
                                            .padding = 3,
@@ -315,7 +328,7 @@ void SplitHeader::initializeLayout()
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
                              QSizePolicy::Preferred);
             w->setCentered(true);
-            w->setHasPadding(false);
+            w->setPadding(QMargins{});
         }),
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -328,53 +341,50 @@ void SplitHeader::initializeLayout()
             w->setMenu(this->createChatModeMenu());
         }),
         // moderator
-        this->moderationButton_ = makeWidget<PixmapButton>([&](auto w) {
-            QObject::connect(
-                w, &Button::clicked, this,
-                [this, w](Qt::MouseButton button) mutable {
-                    switch (button)
-                    {
-                        case Qt::LeftButton:
-                            if (getSettings()->moderationActions.empty())
-                            {
-                                getApp()->getWindows()->showSettingsDialog(
-                                    this, SettingsDialogPreference::
-                                              ModerationActions);
-                                this->split_->setModerationMode(true);
-                            }
-                            else
-                            {
-                                auto moderationMode =
-                                    this->split_->getModerationMode();
-
-                                this->split_->setModerationMode(
-                                    !moderationMode);
-                                w->setDim(moderationMode
-                                              ? DimButton::Dim::Some
-                                              : DimButton::Dim::None);
-                            }
-                            break;
-
-                        case Qt::RightButton:
-                        case Qt::MiddleButton:
-                            getApp()->getWindows()->showSettingsDialog(
-                                this,
-                                SettingsDialogPreference::ModerationActions);
-                            break;
-                    }
-                });
-        }),
+        this->moderationButton_,
         // chatter list
-        this->chattersButton_ = makeWidget<PixmapButton>([&](auto w) {
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->openChatterList();
-            });
-        }),
+        this->chattersButton_,
         // dropdown
         this->dropdownButton_,
         // add split
         this->addButton_,
     });
+
+    QObject::connect(
+        this->moderationButton_, &Button::clicked, this,
+        [this](Qt::MouseButton button) mutable {
+            auto *w = this->moderationButton_;
+            switch (button)
+            {
+                case Qt::LeftButton:
+                    if (getSettings()->moderationActions.empty())
+                    {
+                        getApp()->getWindows()->showSettingsDialog(
+                            this, SettingsDialogPreference::ModerationActions);
+                        this->split_->setModerationMode(true);
+                    }
+                    else
+                    {
+                        auto moderationMode = this->split_->getModerationMode();
+
+                        this->split_->setModerationMode(!moderationMode);
+                        // w->setDim(moderationMode ? DimButton::Dim::Some
+                        //                          : DimButton::Dim::None);
+                    }
+                    break;
+
+                case Qt::RightButton:
+                case Qt::MiddleButton:
+                    getApp()->getWindows()->showSettingsDialog(
+                        this, SettingsDialogPreference::ModerationActions);
+                    break;
+            }
+        });
+
+    QObject::connect(this->chattersButton_, &Button::leftClicked, this,
+                     [this]() {
+                         this->split_->openChatterList();
+                     });
 
     QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
         this->split_->addSibling();
@@ -914,9 +924,20 @@ void SplitHeader::updateIcons()
         auto moderationMode = this->split_->getModerationMode() &&
                               !getSettings()->moderationActions.empty();
 
-        this->moderationButton_->setPixmap(
-            moderationMode ? getResources().buttons.modModeEnabled
-                           : getResources().buttons.modModeDisabled);
+        if (moderationMode)
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationEnabled-darkMode.svg",
+                .light = ":/buttons/moderationEnabled-lightMode.svg",
+            });
+        }
+        else
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationDisabled-darkMode.svg",
+                .light = ":/buttons/moderationDisabled-lightMode.svg",
+            });
+        }
 
         if (twitchChannel->hasModRights() || moderationMode)
         {
@@ -1084,16 +1105,6 @@ void SplitHeader::themeChangedEvent()
         .background = this->theme->messages.backgrounds.regular,
         .backgroundHover = this->theme->messages.backgrounds.regular,
     });
-
-    // --
-    if (this->theme->isLightTheme())
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
-    }
-    else
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
-    }
 
     this->update();
 }

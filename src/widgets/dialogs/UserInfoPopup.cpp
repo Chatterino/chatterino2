@@ -23,6 +23,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -32,6 +33,8 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/helper/LiveIndicator.hpp"
+#include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -355,6 +358,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                 this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                this->ui_.nameLabel->setPadding(QMargins(8, 0, 1, 0));
+                this->ui_.liveIndicator = new LiveIndicator;
+                this->ui_.liveIndicator->hide();
+                // addCopyableLabel adds the copy button last -> add the indicator before that
+                box->insertWidget(box->count() - 1, this->ui_.liveIndicator);
+                box->insertItem(box->count() - 1,
+                                ScalingSpacerItem::horizontal(7));
                 box->addSpacing(5);
                 box->addStretch(1);
 
@@ -946,6 +956,12 @@ void UserInfoPopup::updateUserData()
             user.displayName, this->underlyingChannel_->getName()));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+        this->ui_.createdDateLabel->setToolTip(
+            formatLongFriendlyDuration(
+                QDateTime::fromString(user.createdAt, Qt::ISODateWithMs),
+                QDateTime::currentDateTimeUtc()) +
+            u" ago"_s);
+        this->ui_.createdDateLabel->setMouseTracking(true);
         this->ui_.userIDLabel->setText(TEXT_USER_ID % user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
@@ -973,6 +989,29 @@ void UserInfoPopup::updateUserData()
                 qCWarning(chatterinoTwitch)
                     << "Error getting followers:" << errorMessage;
             });
+        getHelix()->getStreamById(
+            user.id,
+            [this, hack](bool isLive, const auto &stream) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+
+                if (isLive)
+                {
+                    this->ui_.liveIndicator->setViewers(stream.viewerCount);
+                    this->ui_.liveIndicator->show();
+                }
+                else
+                {
+                    this->ui_.liveIndicator->hide();
+                }
+            },
+            [id{user.id}]() {
+                qCWarning(chatterinoWidget)
+                    << "Failed to get stream for user ID" << id;
+            },
+            []() {});
 
         // get ignore state
         bool isIgnoring = currentUser->blockedUserIds().contains(user.id);
@@ -1022,6 +1061,11 @@ void UserInfoPopup::updateUserData()
                             followedAt.toString("yyyy-MM-dd");
                         this->ui_.followageLabel->setText("❤ Following since " +
                                                           followingSince);
+                        this->ui_.followageLabel->setToolTip(
+                            formatLongFriendlyDuration(
+                                followedAt, QDateTime::currentDateTimeUtc()) +
+                            u" ago"_s);
+                        this->ui_.followageLabel->setMouseTracking(true);
                     }
 
                     if (subageInfo.isSubHidden)
@@ -1169,7 +1213,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         title->addStretch(1);
         auto label = title.emplace<Label>(text);
         label->setStyleSheet("color: #BBB");
-        label->setHasPadding(false);
+        label->setPadding(QMargins{});
         title->addStretch(1);
 
         auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();

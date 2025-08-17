@@ -18,6 +18,7 @@ SvgButton::SvgButton(Src source, BaseWidget *parent, QSize padding)
 
 void SvgButton::setSource(Src source)
 {
+    // TODO: compare sources before trying to load / invalidate?
     this->source_ = std::move(source);
     this->loadSource();
     this->invalidateContent();
