@@ -65,11 +65,11 @@ private:
         SvgButton *clear = nullptr;
         SvgButton *reload = nullptr;
         SvgButton *pin = nullptr;
-        SvgButton::Src pinDisabledSource_ {
-            .dark = ":/buttons/pinDisabledLight.svg",
-            .light = ":/buttons/pinDisabledDark.svg",
+        SvgButton::Src pinDisabledSource_{
+            .dark = ":/buttons/pinDisabled-darkMode.svg",
+            .light = ":/buttons/pinDisabled-lightMode.svg",
         };
-        SvgButton::Src pinEnabledSource_ {
+        SvgButton::Src pinEnabledSource_{
             .dark = ":/buttons/pinEnabled.svg",
             .light = ":/buttons/pinEnabled.svg",
         };
