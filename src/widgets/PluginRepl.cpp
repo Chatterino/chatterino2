@@ -445,7 +445,7 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
             }
         });
 
-        this->ui.pin = new PixmapButton;
+        this->ui.pin = new SvgButton(this->ui.pinDisabledSource_, this, {0, 0});
         this->ui.pin->setScaleIndependentSize({18, 18});
         this->ui.pin->setToolTip(u"Pin Window"_s);
         QObject::connect(this->ui.pin, &Button::leftClicked, this, [this] {
@@ -512,14 +512,15 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.error.setBackground(QColor(0x4b2f36));
     }
 
-    if (this->isPinned)
-    {
-        this->ui.pin->setPixmap(getResources().buttons.pinEnabled);
-    }
-    else
-    {
-        this->ui.pin->setPixmap(getTheme()->buttons.pin);
-    }
+    // TODO(jupjohn): need this?
+    // if (this->isPinned)
+    // {
+    //     this->ui.pin->setSource(this->ui.pinEnabledSource_);
+    // }
+    // else
+    // {
+    //     this->ui.pin->setSource(this->ui.pinDisabledSource_);
+    // }
 
     auto pal = this->palette();
     pal.setColor(QPalette::Window,
@@ -754,11 +755,11 @@ void PluginRepl::updatePinned()
     this->setTopMost(this->isPinned);
     if (this->isPinned)
     {
-        this->ui.pin->setPixmap(getResources().buttons.pinEnabled);
+        this->ui.pin->setSource(this->ui.pinEnabledSource_);
     }
     else
     {
-        this->ui.pin->setPixmap(getTheme()->buttons.pin);
+        this->ui.pin->setSource(this->ui.pinDisabledSource_);
     }
 }
 

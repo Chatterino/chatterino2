@@ -1,5 +1,6 @@
 #include "widgets/DraggablePopup.hpp"
 
+#include "buttons/SvgButton.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
@@ -109,18 +110,18 @@ void DraggablePopup::togglePinned()
     if (isPinned_)
     {
         this->windowDeactivateAction = WindowDeactivateAction::Nothing;
-        this->pinButton_->setPixmap(getResources().buttons.pinEnabled);
+        this->pinButton_->setSource(this->pinEnabledSource_);
     }
     else
     {
         this->windowDeactivateAction = WindowDeactivateAction::Delete;
-        this->pinButton_->setPixmap(getTheme()->buttons.pin);
+        this->pinButton_->setSource(this->pinDisabledSource_);
     }
 }
 Button *DraggablePopup::createPinButton()
 {
-    this->pinButton_ = new PixmapButton(this);
-    this->pinButton_->setPixmap(getTheme()->buttons.pin);
+    this->pinButton_ = new SvgButton(pinDisabledSource_, this, {3, 3});
+    // TODO(jupjohn): need this?
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 
