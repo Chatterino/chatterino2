@@ -42,7 +42,7 @@ void logError(Plugin *plugin, QStringView context, const QString &msg)
 // NOLINTBEGIN(readability-named-parameter)
 // QString
 bool sol_lua_check(sol::types<QString>, lua_State *L, int index,
-                   std::function<sol::check_handler_type> handler,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
                    sol::stack::record &tracking)
 {
     return sol::stack::check<const char *>(L, index, handler, tracking);
@@ -62,7 +62,7 @@ int sol_lua_push(sol::types<QString>, lua_State *L, const QString &value)
 
 // QStringList
 bool sol_lua_check(sol::types<QStringList>, lua_State *L, int index,
-                   std::function<sol::check_handler_type> handler,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
                    sol::stack::record &tracking)
 {
     return sol::stack::check<sol::table>(L, index, handler, tracking);
@@ -94,7 +94,7 @@ int sol_lua_push(sol::types<QStringList>, lua_State *L,
 
 // QByteArray
 bool sol_lua_check(sol::types<QByteArray>, lua_State *L, int index,
-                   std::function<sol::check_handler_type> handler,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
                    sol::stack::record &tracking)
 {
     return sol::stack::check<const char *>(L, index, handler, tracking);
@@ -117,10 +117,11 @@ namespace chatterino::lua {
 
 // ThisPluginState
 
-bool sol_lua_check(sol::types<chatterino::lua::ThisPluginState>,
-                   lua_State * /*L*/, int /* index*/,
-                   std::function<sol::check_handler_type> /* handler*/,
-                   sol::stack::record & /*tracking*/)
+bool sol_lua_check(
+    sol::types<chatterino::lua::ThisPluginState>, lua_State * /*L*/,
+    int /* index*/,
+    chatterino::FunctionRef<sol::check_handler_type> /* handler*/,
+    sol::stack::record & /*tracking*/)
 {
     return true;
 }

@@ -549,12 +549,10 @@ void Theme::parseFrom(const QJsonObject &root, bool isCustomTheme)
     if (this->isLightTheme())
     {
         this->buttons.copy = getResources().buttons.copyDark;
-        this->buttons.pin = getResources().buttons.pinDisabledDark;
     }
     else
     {
         this->buttons.copy = getResources().buttons.copyLight;
-        this->buttons.pin = getResources().buttons.pinDisabledLight;
     }
 
     // This assumes that we never update the application palette
