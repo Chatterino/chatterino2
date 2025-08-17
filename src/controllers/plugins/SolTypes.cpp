@@ -146,7 +146,7 @@ namespace chatterino {
 
 // Link
 bool sol_lua_check(sol::types<chatterino::Link>, lua_State *L, int index,
-                   std::function<sol::check_handler_type> handler,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
                    sol::stack::record &tracking)
 {
     return sol::stack::check<sol::table>(L, index, std::move(handler),
