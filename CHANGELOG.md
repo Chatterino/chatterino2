@@ -50,6 +50,7 @@
 - Bugfix: Fixed a crash that could occur on exit if a ping played less than 30 seconds prior. (#6332)
 - Bugfix: Fixed a crash that could occur on exit on newer versions of Qt. (#6368)
 - Bugfix: Fixed notebook buttons (settings, account switcher, streamer mode) not performing a relayout when their visibility changed, causing a gap until resize. Linux / macOS only. (#6328)
+- Bugfix: Fixed split resizing mode sometimes getting stuck or acting weird if you released Ctrl before the left mouse button. (#6396)
 - Bugfix: Fixed some minor typos. (#6196)
 - Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231, #6254)
 - Bugfix: Fixed eventsub message delete notifications not being affected by "Show deletions of single messages". (#6233)
