@@ -23,6 +23,7 @@
 #include "widgets/buttons/DrawnButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/Label.hpp"
@@ -289,6 +290,13 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->chattersButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/chatters-darkMode.svg",
+            .light = ":/buttons/chatters-lightMode.svg",
+        },
+        this, {4, 4});
+
     this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
                                        {
                                            .padding = 3,
@@ -365,16 +373,17 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // chatter list
-        this->chattersButton_ = makeWidget<PixmapButton>([&](auto w) {
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->openChatterList();
-            });
-        }),
+        this->chattersButton_,
         // dropdown
         this->dropdownButton_,
         // add split
         this->addButton_,
     });
+
+    QObject::connect(this->chattersButton_, &Button::leftClicked, this,
+                     [this]() {
+                         this->split_->openChatterList();
+                     });
 
     QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
         this->split_->addSibling();
@@ -1084,16 +1093,6 @@ void SplitHeader::themeChangedEvent()
         .background = this->theme->messages.backgrounds.regular,
         .backgroundHover = this->theme->messages.backgrounds.regular,
     });
-
-    // --
-    if (this->theme->isLightTheme())
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
-    }
-    else
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
-    }
 
     this->update();
 }
