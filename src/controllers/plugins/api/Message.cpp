@@ -173,22 +173,18 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             throw std::runtime_error("'link' not supported on type='" +
                                      type.toStdString() + '\'');
         }
-        QString tooltip = tbl.get_or("tooltip", QString{});
-        if (!tooltip.isEmpty())
-        {
-            tooltip += "<br>";
-        }
+        QString tooltip;
 
         switch (link->type)
         {
             case Link::Url:
-                tooltip += QString("<b>URL:</b> %1").arg(link->value);
+                tooltip = QString("<b>URL:</b> %1").arg(link->value);
                 break;
             case Link::UserAction:
-                tooltip += QString("<b>Command:</b> %1").arg(link->value);
+                tooltip = QString("<b>Command:</b> %1").arg(link->value);
                 break;
             case Link::CopyToClipboard:
-                tooltip +=
+                tooltip =
                     QString("<b>Copy to clipboard:</b> %1").arg(link->value);
                 break;
 
