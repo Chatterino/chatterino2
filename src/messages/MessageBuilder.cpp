@@ -392,7 +392,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
                 return Url{"https://link.twitch.tv/SharedChatViewer"};
             }
 
-            return Url{u"https://twitch.tv/%1"_s.arg(sourceLogin)};
+            return Url{u"https://www.twitch.tv/%1"_s.arg(sourceLogin)};
         }();
 
         return std::make_shared<Emote>(Emote{
