@@ -1109,8 +1109,8 @@ void Split::openInBrowser()
 void Split::openWhispersInBrowser()
 {
     auto userName = getApp()->getAccounts()->twitch.getCurrent()->getUserName();
-    QDesktopServices::openUrl("https://www.twitch.tv/popout/moderator/" + userName +
-                              "/whispers");
+    QDesktopServices::openUrl("https://www.twitch.tv/popout/moderator/" +
+                              userName + "/whispers");
 }
 
 void Split::openBrowserPlayer()
