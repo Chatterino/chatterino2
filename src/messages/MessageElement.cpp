@@ -1126,6 +1126,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
         new TextElement(format, MessageElementFlag::Timestamp,
                         MessageColor::System, FontStyle::TimestampMedium);
     text->setLink(this->getLink());
+    text->setTooltip(this->getTooltip());
     return text;
 }
 
