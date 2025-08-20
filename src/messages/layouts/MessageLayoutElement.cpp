@@ -610,6 +610,7 @@ qreal TextIconLayoutElement::getXFromIndex(size_t index)
 }
 
 namespace {
+
 QSizeF calculateCurveSize(float neededMargin, qreal width, float radius)
 {
     QRectF rect(QPointF{}, QSizeF(width, 0));
@@ -623,6 +624,7 @@ QSizeF calculateCurveSize(float neededMargin, qreal width, float radius)
     }
     return rect.size();
 }
+
 }  // namespace
 
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
