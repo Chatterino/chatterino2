@@ -609,11 +609,28 @@ qreal TextIconLayoutElement::getXFromIndex(size_t index)
     }
 }
 
+namespace {
+QSizeF calculateCurveSize(float neededMargin, qreal width, float radius)
+{
+    QRectF rect(QPointF{}, QSizeF(width, 0));
+    rect = rect.marginsRemoved(
+        QMarginsF(neededMargin, neededMargin, 0, neededMargin));
+
+    // Make sure that our rect can always fit the radius curve
+    if (rect.height() < radius)
+    {
+        rect.setTop(rect.top() - (radius - rect.height()));
+    }
+    return rect.size();
+}
+}  // namespace
+
 ReplyCurveLayoutElement::ReplyCurveLayoutElement(MessageElement &creator,
                                                  qreal width, float thickness,
                                                  float radius,
                                                  float neededMargin)
-    : MessageLayoutElement(creator, QSizeF(width, 0))
+    : MessageLayoutElement(creator,
+                           calculateCurveSize(neededMargin, width, radius))
     , pen_(QColor("#888"), thickness, Qt::SolidLine, Qt::RoundCap)
     , radius_(radius)
     , neededMargin_(neededMargin)
@@ -626,29 +643,19 @@ void ReplyCurveLayoutElement::paint(QPainter &painter,
     QRectF paintRect(this->getRect());
     QPainterPath path;
 
-    QRectF curveRect = paintRect.marginsRemoved(QMarginsF(
-        this->neededMargin_, this->neededMargin_, 0, this->neededMargin_));
-
-    // Make sure that our curveRect can always fit the radius curve
-    if (curveRect.height() < this->radius_)
-    {
-        curveRect.setTop(curveRect.top() -
-                         (this->radius_ - curveRect.height()));
-    }
-
-    QPointF bStartPoint(curveRect.left(), curveRect.top() + this->radius_);
-    QPointF bEndPoint(curveRect.left() + this->radius_, curveRect.top());
-    QPointF bControlPoint(curveRect.topLeft());
+    QPointF bStartPoint(paintRect.left(), paintRect.top() + this->radius_);
+    QPointF bEndPoint(paintRect.left() + this->radius_, paintRect.top());
+    QPointF bControlPoint(paintRect.topLeft());
 
     // Draw line from bottom left to curve
-    path.moveTo(curveRect.bottomLeft());
+    path.moveTo(paintRect.bottomLeft());
     path.lineTo(bStartPoint);
 
     // Draw curve path
     path.quadTo(bControlPoint, bEndPoint);
 
     // Draw line from curve to top right
-    path.lineTo(curveRect.topRight());
+    path.lineTo(paintRect.topRight());
 
     // Render curve
     painter.setPen(this->pen_);
