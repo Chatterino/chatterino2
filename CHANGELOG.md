@@ -65,6 +65,7 @@
 - Bugfix: Fixed command triggers showing as '/...' when the value is longer than the column width. (#6369)
 - Bugfix: Fixed a crash that could occur when making HTTP requests from a timeout handler. (#6375)
 - Bugfix: Fixed a setting description not filtering correctly on search. (#6389)
+- Bugfix: Fixed the split input not updating its height upon tab-completion. (#6411)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
