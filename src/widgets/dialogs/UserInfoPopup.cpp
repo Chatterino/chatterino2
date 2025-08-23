@@ -283,8 +283,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 switch (button)
                 {
                     case Qt::LeftButton: {
-                        QDesktopServices::openUrl(QUrl(
-                            "https://twitch.tv/" + this->userName_.toLower()));
+                        QDesktopServices::openUrl(
+                            QUrl("https://www.twitch.tv/" +
+                                 this->userName_.toLower()));
                     }
                     break;
 
