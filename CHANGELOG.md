@@ -96,7 +96,7 @@
 - Dev: Made "add split" button (part of the split header) a natively rendered button. (#6349)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Made "Chatters" button an SVG. (#6397)
-- Dev: Made "Moderation" button an SVG. (#6398)
+- Dev: Made "Moderation" button an SVG. (#6398, #6412)
 - Dev: Made user card "pin" button SVGs. (#6399)
 - Dev: Some more setting widget refactors. (#6317)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
