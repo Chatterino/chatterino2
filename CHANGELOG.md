@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
 - Minor: Added user notes to the user info dialog (when clicking a username). (#6122, #6318)
 - Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
 - Minor: Add an option for the reduced opacity of message history. (#6121)

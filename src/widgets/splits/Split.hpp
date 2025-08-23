@@ -123,15 +123,19 @@ private:
     void addShortcuts() override;
 
     /**
-     * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
+     * @brief Opens a Twitch channel's stream in your default browser's player (opens a formatted link)
      */
     void openChannelInBrowserPlayer(ChannelPtr channel);
     /**
-     * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     * @brief Opens a Twitch channel's stream in streamlink (if the stream's live, and streamlink's installed)
      */
     void openChannelInStreamlink(const QString channelName);
     /**
-     * @brief Opens Twitch channel chat in a new Chatterino tab
+     * @brief Opens a Twitch channel's stream in your custom player (if the stream's live, and the custom player protocol's set)
+     */
+    void openChannelInCustomPlayer(QString channelName);
+    /**
+     * @brief Opens a Twitch channel's chat in a new tab
      */
     void joinChannelInNewTab(const ChannelPtr &channel);
 
