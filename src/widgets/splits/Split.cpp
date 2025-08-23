@@ -1108,7 +1108,7 @@ void Split::openInBrowser()
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        QDesktopServices::openUrl("https://twitch.tv/" +
+        QDesktopServices::openUrl("https://www.twitch.tv/" +
                                   twitchChannel->getName());
     }
 }
@@ -1116,8 +1116,8 @@ void Split::openInBrowser()
 void Split::openWhispersInBrowser()
 {
     auto userName = getApp()->getAccounts()->twitch.getCurrent()->getUserName();
-    QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
-                              "/whispers");
+    QDesktopServices::openUrl("https://www.twitch.tv/popout/moderator/" +
+                              userName + "/whispers");
 }
 
 void Split::openBrowserPlayer()
@@ -1131,7 +1131,7 @@ void Split::openModViewInBrowser()
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        QDesktopServices::openUrl("https://twitch.tv/moderator/" +
+        QDesktopServices::openUrl("https://www.twitch.tv/moderator/" +
                                   twitchChannel->getName());
     }
 }
