@@ -160,8 +160,24 @@ declare namespace c2 {
     var WebSocket: WebSocketConstructor;
 
     interface Message {
-        __dummy: void; // avoid being an empty interface
+        flags: MessageFlag;
+        id: string;
+        parse_time: number;
+        search_text: string;
+        message_text: string;
+        login_name: string;
+        display_name: string;
+        localized_name: string;
+        user_id: string;
+        channel_name: string;
+        username_color: string;
+        server_received_time: number;
+        highlight_color: string | null;
+        frozen: boolean;
+        elements(): MessageElement[];
+        append_element(init: MessageElementInit): void;
     }
+
     interface MessageConstructor {
         new: (this: void, init: MessageInit) => Message;
     }
@@ -184,12 +200,38 @@ declare namespace c2 {
         elements?: MessageElementInit[];
     }
 
+    interface MessageElementBase {
+        flags: MessageElementFlag;
+        tooltip: string;
+        trailing_space: boolean;
+        add_flags(flags: MessageElementFlag): void;
+    }
+
     interface MessageElementInitBase {
         tooltip?: string;
         trailing_space?: boolean;
     }
 
     type MessageColor = "text" | "link" | "system" | string;
+
+    type MessageElement =
+        | TextElement
+        | SingleLineTextElement
+        | MentionElement
+        | TimestampElement
+        | TwitchModerationElement
+        | LinebreakElement
+        | ReplyCurveElement
+        | LinkElement
+        | EmoteElement
+        | LayeredEmoteElement
+        | ImageElement
+        | CircularImageElement
+        | ScalingImageElement
+        | BadgeElement
+        | ModBadgeElement
+        | VipBadgeElement
+        | FfzBadgeElement;
 
     type MessageElementInit =
         | TextElementInit
@@ -200,12 +242,26 @@ declare namespace c2 {
         | LinebreakElementInit
         | ReplyCurveElementInit;
 
+    interface TextElement extends MessageElementBase {
+        type: "text";
+        words: string[];
+        color: string;
+        style: c2.FontStyle;
+    }
+
     interface TextElementInit extends MessageElementInitBase {
         type: "text";
         text: string;
         flags?: MessageElementFlag;
         color?: MessageColor;
         style?: FontStyle;
+    }
+
+    interface SingleLineTextElement extends MessageElementBase {
+        type: "single-line-text";
+        words: string[];
+        color: string;
+        style: c2.FontStyle;
     }
 
     interface SingleLineTextElementInit extends MessageElementInitBase {
@@ -216,6 +272,14 @@ declare namespace c2 {
         style?: FontStyle;
     }
 
+    interface MentionElement extends Omit<TextElement, "type"> {
+        type: "mention";
+        display_name: string;
+        login_name: string;
+        fallback_color: string;
+        user_color: string;
+    }
+
     interface MentionElementInit extends MessageElementInitBase {
         type: "mention";
         display_name: string;
@@ -224,13 +288,26 @@ declare namespace c2 {
         user_color: MessageColor;
     }
 
+    interface TimestampElement extends MessageElementBase {
+        type: "timestamp";
+        time: number;
+    }
+
     interface TimestampElementInit extends MessageElementInitBase {
         type: "timestamp";
         time?: number;
     }
 
+    interface TwitchModerationElement extends MessageElementBase {
+        type: "twitch-moderation";
+    }
+
     interface TwitchModerationElementInit extends MessageElementInitBase {
         type: "twitch-moderation";
+    }
+
+    interface LinebreakElement extends MessageElementBase {
+        type: "linebreak";
     }
 
     interface LinebreakElementInit extends MessageElementInitBase {
@@ -238,8 +315,54 @@ declare namespace c2 {
         flags?: MessageElementFlag;
     }
 
+    interface ReplyCurveElement extends MessageElementBase {
+        type: "reply-curve";
+    }
+
     interface ReplyCurveElementInit extends MessageElementInitBase {
         type: "reply-curve";
+    }
+
+    interface LinkElement extends Omit<TextElement, "type"> {
+        type: "link";
+        lowercase: string;
+        original: string;
+    }
+
+    interface EmoteElement extends MessageElementBase {
+        type: "emote";
+    }
+
+    interface LayeredEmoteElement extends MessageElementBase {
+        type: "layered-emote";
+    }
+
+    interface ImageElement extends MessageElementBase {
+        type: "image";
+    }
+
+    interface CircularImageElement extends MessageElementBase {
+        type: "circular-image";
+    }
+
+    interface ScalingImageElement extends MessageElementBase {
+        type: "scaling-image";
+    }
+
+    interface BadgeElement extends MessageElementBase {
+        type: "badge";
+    }
+
+    interface ModBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "mod-badge";
+    }
+
+    interface VipBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "ffz-badge";
+    }
+
+    interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "ffz-badge";
     }
 
     enum MessageFlag {
