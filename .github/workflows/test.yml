@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -93,7 +93,8 @@ jobs:
         working-directory: build-test
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5.4.3
+        if: github.repository_owner == 'Chatterino'
+        uses: codecov/codecov-action@v5.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           plugins: gcov
