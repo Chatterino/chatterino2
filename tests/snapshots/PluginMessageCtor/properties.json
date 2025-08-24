@@ -15,7 +15,11 @@
         "  highlight_color = '#12345678',",
         "  channel_name = 'channel',",
         "  elements = {",
-        "    { type = 'text', text = 'aliens walking' }",
+        "    {",
+        "      type = 'text',",
+        "      text = 'aliens walking',",
+        "      link = { type = c2.LinkType.UserInfo, value = 'twitchdev' }",
+        "    }",
         "  }",
         "}"
     ],
@@ -32,8 +36,8 @@
                 "color": "Text",
                 "flags": "Text",
                 "link": {
-                    "type": "None",
-                    "value": ""
+                    "type": "UserInfo",
+                    "value": "twitchdev"
                 },
                 "style": "ChatMedium",
                 "tooltip": "",
