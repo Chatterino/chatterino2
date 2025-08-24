@@ -1101,9 +1101,10 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
+    auto bg = this->theme->splits.header.background;
     this->addButton_->setOptions({
-        .background = this->theme->messages.backgrounds.regular,
-        .backgroundHover = this->theme->messages.backgrounds.regular,
+        .background = bg,
+        .backgroundHover = bg,
     });
 
     this->update();
