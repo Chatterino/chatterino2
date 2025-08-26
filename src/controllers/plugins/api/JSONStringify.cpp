@@ -232,7 +232,8 @@ int jsonStringify(lua_State *L)
     rapidjson::StringBuffer sb;
     if (pretty)
     {
-        rapidjson::PrettyWriter pw(sb);
+        rapidjson::PrettyWriter pw(
+            sb, static_cast<rapidjson::CrtAllocator *>(nullptr), 32);
         pw.SetIndent(indentChar, indentSize);
         stringifyValue(L, pw, 0);
     }

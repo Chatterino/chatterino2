@@ -352,7 +352,9 @@ int jsonParse(lua_State *L)
     boost::json::parse_options opts;
     opts.max_depth = SaxHandler::MAX_NESTING;
     opts.allow_invalid_utf8 = true;
+#if BOOST_VERSION >= 108700  // 1.87
     opts.allow_invalid_utf16 = true;
+#endif
     if (nArgs >= 2)
     {
         auto tbl = sol::stack::check_get<sol::table>(L, 2);
