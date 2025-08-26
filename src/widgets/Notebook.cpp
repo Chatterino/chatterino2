@@ -40,7 +40,7 @@ Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
     , addButton_(new DrawnButton(DrawnButton::Symbol::Plus,
                                  {
-                                     .padding = 6,
+                                     .padding = 7,
                                      .thickness = 1,
                                  },
                                  this))
