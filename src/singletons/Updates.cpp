@@ -178,7 +178,13 @@ void Updates::installUpdates()
                     combinePath(this->paths.miscDirectory, "update.zip");
 
                 QFile file(filename);
-                file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+                if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly))
+                {
+                    qCWarning(chatterinoUpdate)
+                        << "Failed to save update.zip" << file.errorString();
+                    this->setStatus_(WriteFileFailed);
+                    return;
+                }
 
                 if (file.write(object) == -1)
                 {
@@ -238,7 +244,9 @@ void Updates::installUpdates()
                     combinePath(this->paths.miscDirectory, "Update.exe");
 
                 QFile file(filePath);
-                file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+                // write() will fail if we couldn't open
+                std::ignore =
+                    file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
                 if (file.write(object) == -1)
                 {
