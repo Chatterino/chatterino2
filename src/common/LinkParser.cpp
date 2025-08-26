@@ -11,7 +11,6 @@
 
 #include <set>
 
-
 namespace {
 
 using namespace chatterino;
