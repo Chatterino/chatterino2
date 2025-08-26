@@ -135,7 +135,7 @@ QStringList discoverLuaTests(const QString &category)
 
 std::string luaTestPath(const QString &category, const QString &entry)
 {
-    return luaTestBaseDir(category).filePath(entry + u".lua").toStdString();
+    return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
 }
 
 }  // namespace
