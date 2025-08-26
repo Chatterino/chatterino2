@@ -82,7 +82,7 @@ namespace {
 #if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
 const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \u034f");
 #else
-const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \u034f");
+const QString MAGIC_MESSAGE_SUFFIX = u" \u034f"_s;
 #endif
 constexpr int CLIP_CREATION_COOLDOWN = 5000;
 const QString CLIPS_LINK("https://clips.twitch.tv/%1");
