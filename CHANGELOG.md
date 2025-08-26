@@ -29,6 +29,7 @@
 - Minor: The follow and sub dates now show the duration in a tooltip. (#6384)
 - Minor: Usercards now show a live indicator if the user is currently streaming. (#6383)
 - Minor: Consolidate twitch.tv URLs to start with www (#6407)
+- Minor: Added a JSON API for plugins. (#6420)
 - Bugfix: Fixed duplicate message sending for single-worded messages. (#6417)
 - Bugfix: Commands are no longer tab-completable in the middle of messages. (#6273)
 - Bugfix: Automatic streamer mode detection now works from Flatpak. (#6250)
