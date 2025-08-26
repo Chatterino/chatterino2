@@ -89,7 +89,7 @@ void stringifyArray(lua_State *L, auto &writer, uint16_t depth, size_t length)
 
     for (size_t i = 0; i < length; i++)
     {
-        lua_rawgeti(L, -1, static_cast<lua_Integer>(i + 1));
+        lua_rawgeti(L, -1, static_cast<lua_Integer>(i) + 1);
         stringifyValue(L, writer, depth);
         lua_pop(L, 1);  // pop value
     }
