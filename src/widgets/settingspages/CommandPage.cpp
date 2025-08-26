@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTableView>
