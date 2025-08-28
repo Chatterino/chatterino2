@@ -4,10 +4,67 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 
 namespace chatterino::imageuploader::detail {
 
 namespace {
+
+/**
+  * @brief Converts ShareX-style tokens throughout the URL to the expected format.
+  *
+  * Examples:
+  *  - https://example.com/{json:foo.bar[1]}/{json:foo.bar[2]}
+  *     -> https://example.com/{foo.bar.1}/{foo.bar.2}
+  *  - {json:{response}|foo.bar[1]}
+  *     -> {foo.bar.1}
+  *
+  * @see https://github.com/ShareX/ShareX/blob/8c0fac3bdf6c6ecb9756584096332175f290072c/ShareX.UploadersLib/CustomUploader/ShareXSyntaxParser.cs
+  * @see https://github.com/ShareX/ShareX/blob/8c0fac3bdf6c6ecb9756584096332175f290072c/ShareX.UploadersLib/CustomUploader/Functions/CustomUploaderFunctionJson.cs
+  */
+QString parseUrl(const QString &url)
+{
+    if (url.isEmpty() || url.compare("{response}", Qt::CaseInsensitive) == 0)
+    {
+        return {};
+    }
+
+    static const QRegularExpression tokenRegex(
+        R"(\{json:([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}*)",
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression arrayRegex(R"(\[(\d+)\])");
+
+    QString out;
+    qsizetype last = 0;
+    bool changed = false;
+
+    auto it = tokenRegex.globalMatch(url);
+    while (it.hasNext())
+    {
+        auto match = it.next();
+
+        out += url.mid(last, match.capturedStart() - last);
+
+        QString inner = match.captured(1).trimmed();
+
+        // Split by last '|' to support {json:input|jsonPath}
+        // We assume that the preceding parameter was `{response}` as other ShareX functions are not supported
+        qsizetype pipeIndex = inner.lastIndexOf('|');
+        if (pipeIndex != -1)
+        {
+            inner = inner.mid(pipeIndex + 1).trimmed();
+        }
+
+        inner.replace(arrayRegex, R"(.\1)");
+
+        out += '{' + inner + '}';
+        last = match.capturedEnd();
+        changed = true;
+    }
+
+    out += url.mid(last);
+    return changed ? out : QString(url);
+}
 
 QStringList parseHeaders(const QJsonObject &headersObj)
 {
@@ -41,7 +98,7 @@ QJsonObject exportSettings(const Settings &s)
     if (!headers.isEmpty())
     {
         QJsonObject headersObj;
-        QStringList headerLines = headers.split('\n', Qt::SkipEmptyParts);
+        QStringList headerLines = headers.split(';', Qt::SkipEmptyParts);
         for (const QString &line : headerLines)
         {
             QStringList parts = line.split(':', Qt::SkipEmptyParts);
@@ -74,12 +131,13 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
 
     s.imageUploaderUrl = settingsObj["RequestURL"].toString();
     s.imageUploaderFormField = settingsObj["FileFormName"].toString();
-    s.imageUploaderLink = settingsObj["URL"].toString();
+    s.imageUploaderLink = parseUrl(settingsObj["URL"].toString());
 
     if (settingsObj.contains("DeletionURL") &&
         settingsObj["DeletionURL"].isString())
     {
-        s.imageUploaderDeletionLink = settingsObj["DeletionURL"].toString();
+        s.imageUploaderDeletionLink =
+            parseUrl(settingsObj["DeletionURL"].toString());
     }
 
     if (settingsObj.contains("Headers") && settingsObj["Headers"].isObject())
@@ -87,7 +145,7 @@ bool importSettings(const QJsonObject &settingsObj, Settings &s)
         QStringList headers = parseHeaders(settingsObj["Headers"].toObject());
         if (!headers.isEmpty())
         {
-            s.imageUploaderHeaders = headers.join('\n');
+            s.imageUploaderHeaders = headers.join(';');
         }
     }
 
@@ -124,9 +182,10 @@ ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText)
         return nonstd::make_unexpected("JSON must contain the 'Version' key");
     }
 
-    if (!settingsObj.contains("Name"))
+    if (!settingsObj.contains("RequestURL"))
     {
-        return nonstd::make_unexpected("JSON must contain the 'Name' key");
+        return nonstd::make_unexpected(
+            "JSON must contain the 'RequestURL' key");
     }
 
     return settingsObj;

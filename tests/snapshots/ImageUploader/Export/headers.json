@@ -11,8 +11,9 @@
         "DeletionURL": "{more}",
         "FileFormName": "file",
         "Headers": {
-            "My-Header": "Foo ; Bar : Baz ; KeyOnly",
-            "X-My-Header": "1"
+            "Bar": "Baz",
+            "KeyOnly\nX-My-Header": "1",
+            "My-Header": "Foo"
         },
         "Name": "Chatterino Image Uploader Settings",
         "RequestMethod": "POST",
