@@ -182,9 +182,10 @@ ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText)
         return nonstd::make_unexpected("JSON must contain the 'Version' key");
     }
 
-    if (!settingsObj.contains("Name"))
+    if (!settingsObj.contains("RequestURL"))
     {
-        return nonstd::make_unexpected("JSON must contain the 'Name' key");
+        return nonstd::make_unexpected(
+            "JSON must contain the 'RequestURL' key");
     }
 
     return settingsObj;
