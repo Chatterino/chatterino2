@@ -444,7 +444,7 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
             }
         });
 
-        this->ui.pin = new SvgButton(this->ui.pinDisabledSource_, this, {0, 0});
+        this->ui.pin = new SvgButton(this->ui.pinDisabledSource_, this, {3, 3});
         this->ui.pin->setScaleIndependentSize({18, 18});
         this->ui.pin->setToolTip(u"Pin Window"_s);
         QObject::connect(this->ui.pin, &Button::leftClicked, this, [this] {
