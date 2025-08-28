@@ -25,53 +25,51 @@ namespace chatterino {
 
 namespace {
 
-    bool logInWithCredentials(QWidget *parent, const QString &userID,
-                              const QString &username, const QString &clientID,
-                              const QString &oauthToken)
+bool logInWithCredentials(QWidget *parent, const QString &userID,
+                          const QString &username, const QString &clientID,
+                          const QString &oauthToken)
+{
+    QStringList errors;
+
+    if (userID.isEmpty())
     {
-        QStringList errors;
-
-        if (userID.isEmpty())
-        {
-            errors.append("Missing user ID");
-        }
-        if (username.isEmpty())
-        {
-            errors.append("Missing username");
-        }
-        if (clientID.isEmpty())
-        {
-            errors.append("Missing Client ID");
-        }
-        if (oauthToken.isEmpty())
-        {
-            errors.append("Missing OAuth Token");
-        }
-
-        if (errors.length() > 0)
-        {
-            QMessageBox messageBox(parent);
-            messageBox.setWindowTitle("Invalid account credentials");
-            messageBox.setIcon(QMessageBox::Critical);
-            messageBox.setText(errors.join("<br>"));
-            messageBox.exec();
-            return false;
-        }
-
-        std::string basePath = "/accounts/uid" + userID.toStdString();
-        pajlada::Settings::Setting<QString>::set(basePath + "/username",
-                                                 username);
-        pajlada::Settings::Setting<QString>::set(basePath + "/userID", userID);
-        pajlada::Settings::Setting<QString>::set(basePath + "/clientID",
-                                                 clientID);
-        pajlada::Settings::Setting<QString>::set(basePath + "/oauthToken",
-                                                 oauthToken);
-
-        getApp()->getAccounts()->twitch.reloadUsers();
-        getApp()->getAccounts()->twitch.currentUsername = username;
-        getSettings()->requestSave();
-        return true;
+        errors.append("Missing user ID");
     }
+    if (username.isEmpty())
+    {
+        errors.append("Missing username");
+    }
+    if (clientID.isEmpty())
+    {
+        errors.append("Missing Client ID");
+    }
+    if (oauthToken.isEmpty())
+    {
+        errors.append("Missing OAuth Token");
+    }
+
+    if (errors.length() > 0)
+    {
+        QMessageBox messageBox(parent);
+        messageBox.setWindowTitle("Invalid account credentials");
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.setText(errors.join("<br>"));
+        messageBox.exec();
+        return false;
+    }
+
+    std::string basePath = "/accounts/uid" + userID.toStdString();
+    pajlada::Settings::Setting<QString>::set(basePath + "/username", username);
+    pajlada::Settings::Setting<QString>::set(basePath + "/userID", userID);
+    pajlada::Settings::Setting<QString>::set(basePath + "/clientID", clientID);
+    pajlada::Settings::Setting<QString>::set(basePath + "/oauthToken",
+                                             oauthToken);
+
+    getApp()->getAccounts()->twitch.reloadUsers();
+    getApp()->getAccounts()->twitch.currentUsername = username;
+    getSettings()->requestSave();
+    return true;
+}
 
 }  // namespace
 

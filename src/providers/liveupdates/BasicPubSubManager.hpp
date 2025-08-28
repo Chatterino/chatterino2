@@ -175,9 +175,7 @@ public:
         }
 
         qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish after stopping, discard it";
-        // detach the thread so the destructor doesn't attempt any joining
-        this->mainThread_->detach();
+            << "Thread didn't finish after stopping";
     }
 
 protected:
@@ -402,22 +400,22 @@ private:
         return false;
     }
 
+    std::vector<Subscription> pendingSubscriptions_;
+    std::atomic<bool> addingClient_{false};
+    ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
+
+    liveupdates::WebsocketClient websocketClient_;
+    std::unique_ptr<std::thread> mainThread_;
+    OnceFlag stoppedFlag_;
+
     std::map<liveupdates::WebsocketHandle,
              std::shared_ptr<BasicPubSubClient<Subscription>>,
              std::owner_less<liveupdates::WebsocketHandle>>
         clients_;
 
-    std::vector<Subscription> pendingSubscriptions_;
-    std::atomic<bool> addingClient_{false};
-    ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
-
     std::shared_ptr<boost::asio::executor_work_guard<
         boost::asio::io_context::executor_type>>
         work_{nullptr};
-
-    liveupdates::WebsocketClient websocketClient_;
-    std::unique_ptr<std::thread> mainThread_;
-    OnceFlag stoppedFlag_;
 
     const QString host_;
 

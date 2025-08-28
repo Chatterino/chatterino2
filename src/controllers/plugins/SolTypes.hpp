@@ -1,5 +1,6 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "util/FunctionRef.hpp"
 #    include "util/QMagicEnum.hpp"
 #    include "util/TypeName.hpp"
 
@@ -174,12 +175,13 @@ void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#    define SOL_STACK_FUNCTIONS(TYPE)                                      \
-        bool sol_lua_check(sol::types<TYPE>, lua_State *L, int index,      \
-                           std::function<sol::check_handler_type> handler, \
-                           sol::stack::record &tracking);                  \
-        TYPE sol_lua_get(sol::types<TYPE>, lua_State *L, int index,        \
-                         sol::stack::record &tracking);                    \
+#    define SOL_STACK_FUNCTIONS(TYPE)                                 \
+        bool sol_lua_check(                                           \
+            sol::types<TYPE>, lua_State *L, int index,                \
+            chatterino::FunctionRef<sol::check_handler_type> handler, \
+            sol::stack::record &tracking);                            \
+        TYPE sol_lua_get(sol::types<TYPE>, lua_State *L, int index,   \
+                         sol::stack::record &tracking);               \
         int sol_lua_push(sol::types<TYPE>, lua_State *L, const TYPE &value);
 
 SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)

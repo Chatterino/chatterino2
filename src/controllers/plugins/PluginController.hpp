@@ -6,6 +6,7 @@
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include <boost/signals2/signal.hpp>
 #    include <QDir>
 #    include <QFileInfo>
 #    include <QJsonArray>
@@ -13,16 +14,15 @@
 #    include <QString>
 #    include <sol/forward.hpp>
 
-#    include <algorithm>
 #    include <map>
 #    include <memory>
 #    include <utility>
-#    include <vector>
 
 struct lua_State;
 
 namespace chatterino {
 
+class Settings;
 class Paths;
 
 class PluginController
@@ -63,6 +63,8 @@ public:
         int cursorPosition, bool isFirstWord) const;
 
     WebSocketPool &webSocketPool();
+
+    boost::signals2::signal<void(Plugin *)> onPluginLoaded;
 
 private:
     void loadPlugins();

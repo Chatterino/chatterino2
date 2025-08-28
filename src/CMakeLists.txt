@@ -1,8 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
 add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
@@ -19,10 +19,10 @@ set(SOURCE_FILES
 
         common/Args.cpp
         common/Args.hpp
-        common/Channel.cpp
-        common/Channel.hpp
         common/ChannelChatters.cpp
         common/ChannelChatters.hpp
+        common/Channel.cpp
+        common/Channel.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
@@ -31,6 +31,7 @@ set(SOURCE_FILES
         common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
+        common/LastMessageLineStyle.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Literals.hpp
@@ -38,6 +39,8 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/ThumbnailPreviewMode.hpp
+        common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
@@ -247,6 +250,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/Message.cpp
+        controllers/plugins/api/Message.hpp
         controllers/plugins/api/WebSocket.cpp
         controllers/plugins/api/WebSocket.hpp
         controllers/plugins/LuaAPI.cpp
@@ -349,6 +354,7 @@ set(SOURCE_FILES
 
         providers/emoji/Emojis.cpp
         providers/emoji/Emojis.hpp
+        providers/emoji/EmojiStyle.hpp
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
@@ -404,8 +410,6 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
-        providers/twitch/PubSubActions.cpp
-        providers/twitch/PubSubActions.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
         providers/twitch/PubSubClientOptions.hpp
@@ -438,6 +442,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+        providers/twitch/UserColor.cpp
+        providers/twitch/UserColor.hpp
 
         providers/twitch/eventsub/Connection.cpp
         providers/twitch/eventsub/Connection.hpp
@@ -452,18 +458,12 @@ set(SOURCE_FILES
         providers/twitch/eventsub/SubscriptionRequest.cpp
         providers/twitch/eventsub/SubscriptionRequest.hpp
 
-        providers/twitch/pubsubmessages/AutoMod.cpp
-        providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
         providers/twitch/pubsubmessages/ChannelPoints.cpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.cpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
-        providers/twitch/pubsubmessages/LowTrustUsers.cpp
-        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
@@ -528,10 +528,10 @@ set(SOURCE_FILES
         util/FuzzyConvert.hpp
         util/Helpers.cpp
         util/Helpers.hpp
+        util/ImageUploader.cpp
+        util/ImageUploader.hpp
         util/IncognitoBrowser.cpp
         util/IncognitoBrowser.hpp
-        util/InitUpdateButton.cpp
-        util/InitUpdateButton.hpp
         util/IpcQueue.cpp
         util/IpcQueue.hpp
         util/IrcHelpers.cpp
@@ -590,6 +590,8 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/ChatterListWidget.cpp
+        widgets/ChatterListWidget.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
@@ -600,6 +602,8 @@ set(SOURCE_FILES
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
+        widgets/PluginRepl.cpp
+        widgets/PluginRepl.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
@@ -609,6 +613,27 @@ set(SOURCE_FILES
         widgets/Window.cpp
         widgets/Window.hpp
 
+        widgets/buttons/Button.cpp
+        widgets/buttons/Button.hpp
+        widgets/buttons/DimButton.cpp
+        widgets/buttons/DimButton.hpp
+        widgets/buttons/DrawnButton.cpp
+        widgets/buttons/DrawnButton.hpp
+        widgets/buttons/InitUpdateButton.cpp
+        widgets/buttons/InitUpdateButton.hpp
+        widgets/buttons/LabelButton.cpp
+        widgets/buttons/LabelButton.hpp
+        widgets/buttons/PixmapButton.cpp
+        widgets/buttons/PixmapButton.hpp
+        widgets/buttons/SignalLabel.cpp
+        widgets/buttons/SignalLabel.hpp
+        widgets/buttons/SvgButton.cpp
+        widgets/buttons/SvgButton.hpp
+        widgets/buttons/TitlebarButton.cpp
+        widgets/buttons/TitlebarButton.hpp
+        widgets/buttons/TitlebarButtons.cpp
+        widgets/buttons/TitlebarButtons.hpp
+
         widgets/dialogs/BadgePickerDialog.cpp
         widgets/dialogs/BadgePickerDialog.hpp
         widgets/dialogs/ChannelFilterEditorDialog.cpp
@@ -617,6 +642,8 @@ set(SOURCE_FILES
         widgets/dialogs/ColorPickerDialog.hpp
         widgets/dialogs/EditHotkeyDialog.cpp
         widgets/dialogs/EditHotkeyDialog.hpp
+        widgets/dialogs/EditUserNotesDialog.cpp
+        widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
         widgets/dialogs/LastRunCrashDialog.cpp
@@ -665,8 +692,6 @@ set(SOURCE_FILES
         widgets/helper/color/SBCanvas.cpp
         widgets/helper/color/SBCanvas.hpp
 
-        widgets/helper/Button.cpp
-        widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
@@ -675,16 +700,12 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
-        widgets/helper/EffectLabel.cpp
-        widgets/helper/EffectLabel.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
-        widgets/helper/NotebookButton.cpp
-        widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/OverlayInteraction.cpp
@@ -693,20 +714,18 @@ set(SOURCE_FILES
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
+        widgets/helper/ScalingSpacerItem.cpp
+        widgets/helper/ScalingSpacerItem.hpp
         widgets/helper/ScrollbarHighlight.cpp
         widgets/helper/ScrollbarHighlight.hpp
         widgets/helper/SearchPopup.cpp
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/SignalLabel.cpp
-        widgets/helper/SignalLabel.hpp
+        widgets/helper/LiveIndicator.cpp
+        widgets/helper/LiveIndicator.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
-        widgets/helper/TitlebarButton.cpp
-        widgets/helper/TitlebarButton.hpp
-        widgets/helper/TitlebarButtons.cpp
-        widgets/helper/TitlebarButtons.hpp
         widgets/helper/TrimRegExpValidator.cpp
         widgets/helper/TrimRegExpValidator.hpp
 
@@ -728,6 +747,7 @@ set(SOURCE_FILES
         widgets/settingspages/AccountsPage.hpp
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
+        widgets/settingspages/CustomWidgets.hpp
         widgets/settingspages/ExternalToolsPage.cpp
         widgets/settingspages/ExternalToolsPage.hpp
         widgets/settingspages/FiltersPage.cpp
@@ -859,6 +879,12 @@ target_link_libraries(${LIBRARY_PROJECT}
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
+endif()
+
+if (CHATTERINO_ALLOW_PRIVATE_QT_API)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+        CHATTERINO_WITH_PRIVATE_QT_API)
 endif()
 
 if (BUILD_WITH_QTKEYCHAIN)

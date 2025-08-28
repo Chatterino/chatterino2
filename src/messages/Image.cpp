@@ -39,6 +39,14 @@ Frames::Frames(QList<Frame> &&frames)
     : items_(std::move(frames))
 {
     assertInGuiThread();
+    auto *app = tryGetApp();
+    if (app == nullptr)
+    {
+        qCDebug(chatterinoImage)
+            << "Frames constructor called while app is shutting down";
+        return;
+    }
+
     DebugCount::increase("images");
     if (!this->empty())
     {
@@ -50,7 +58,7 @@ Frames::Frames(QList<Frame> &&frames)
         DebugCount::increase("animated images");
 
         this->gifTimerConnection_ =
-            getApp()->getEmotes()->getGIFTimer().signal.connect([this] {
+            app->getEmotes()->getGIFTimer().signal.connect([this] {
                 this->advance();
             });
 
@@ -67,8 +75,7 @@ Frames::Frames(QList<Frame> &&frames)
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->getEmotes()->getGIFTimer().position() %
-                    totalLength),
+                int(app->getEmotes()->getGIFTimer().position() % totalLength),
                 60000);
         }
         this->processOffset();
@@ -243,14 +250,19 @@ void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
         if (!isPushQueued)
         {
             isPushQueued = true;
-            postToThread([] {
-                isPushQueued = false;
-                auto *app = tryGetApp();
-                if (app != nullptr)
-                {
-                    app->getWindows()->forceLayoutChannelViews();
-                }
-            });
+            // We don't use postToThread here, because that would run immediately.
+            // We explicitly want to queue a callback after the current ones.
+            QMetaObject::invokeMethod(
+                qApp,
+                [] {
+                    isPushQueued = false;
+                    auto *app = tryGetApp();
+                    if (app != nullptr)
+                    {
+                        app->getWindows()->forceLayoutChannelViews();
+                    }
+                },
+                Qt::QueuedConnection);
         }
     };
 
@@ -272,6 +284,15 @@ Image::~Image()
     {
         // No data in this image, don't bother trying to release it
         // The reason we do this check is that we keep a few (or one) static empty image around that are deconstructed at the end of the programs lifecycle, and we want to prevent the isGuiThread call to be called after the QApplication has been exited
+        return;
+    }
+
+    if (isAppAboutToQuit())
+    {
+        if (this->frames_)
+        {
+            std::ignore = this->frames_.release();
+        }
         return;
     }
 
@@ -468,6 +489,19 @@ int Image::height() const
     return static_cast<int>(this->expectedSize_.height() * this->scale_);
 }
 
+QSizeF Image::size() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_->first())
+    {
+        return pixmap->size().toSizeF() * this->scale_;
+    }
+
+    // No frames loaded, use the expected size
+    return this->expectedSize_.toSizeF() * this->scale_;
+}
+
 void Image::actuallyLoad()
 {
     auto weak = weakOf(this);
@@ -480,6 +514,8 @@ void Image::actuallyLoad()
             {
                 return;
             }
+
+            assert(!isAppAboutToQuit());
 
             QBuffer buffer;
             buffer.setData(result.getData());

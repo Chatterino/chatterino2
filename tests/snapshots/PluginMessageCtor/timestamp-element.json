@@ -1,0 +1,140 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'timestamp' },",
+        "  { type = 'timestamp', time = 1230000, flags = c2.MessageElementFlag.BttvEmote },",
+        "  { type = 'timestamp', tooltip = 't' },",
+        "  { type = 'timestamp', trailing_space = false },",
+        "}}"
+    ],
+    "output": {
+        "badgeInfos": {
+        },
+        "badges": [
+        ],
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "element": {
+                    "color": "System",
+                    "flags": "Timestamp",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "TimestampMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "0:00"
+                    ]
+                },
+                "flags": "Timestamp",
+                "format": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "time": "00:00:00",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TimestampElement"
+            },
+            {
+                "element": {
+                    "color": "System",
+                    "flags": "Timestamp",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "TimestampMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "0:20"
+                    ]
+                },
+                "flags": "Timestamp",
+                "format": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "time": "00:20:30",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TimestampElement"
+            },
+            {
+                "element": {
+                    "color": "System",
+                    "flags": "Timestamp",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "TimestampMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "0:00"
+                    ]
+                },
+                "flags": "Timestamp",
+                "format": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "time": "00:00:00",
+                "tooltip": "t",
+                "trailingSpace": true,
+                "type": "TimestampElement"
+            },
+            {
+                "element": {
+                    "color": "System",
+                    "flags": "Timestamp",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "TimestampMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "0:00"
+                    ]
+                },
+                "flags": "Timestamp",
+                "format": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "time": "00:00:00",
+                "tooltip": "",
+                "trailingSpace": false,
+                "type": "TimestampElement"
+            }
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

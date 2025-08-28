@@ -262,7 +262,7 @@ public:
     {
     }
 
-    void toastActivated(const char *response) const override
+    void toastActivated(std::wstring response) const override
     {
     }
 
@@ -285,8 +285,7 @@ void Toasts::ensureInitialized()
 
     auto *instance = WinToast::instance();
     instance->setAppName(L"Chatterino");
-    instance->setAppUserModelId(
-        WinToast::configureAUMI(L"ChatterinoTeam", L"Chatterino", L"", L""));
+    instance->setAppUserModelId(Version::instance().appUserModelID());
     if (!getSettings()->createShortcutForToasts)
     {
         instance->setShortcutPolicy(WinToast::SHORTCUT_POLICY_IGNORE);

@@ -107,6 +107,7 @@ QJsonObject Message::toJson() const
         {"count"_L1, static_cast<qint64>(this->count)},
         {"serverReceivedTime"_L1,
          this->serverReceivedTime.toString(Qt::ISODate)},
+        {"frozen"_L1, this->frozen},
     };
 
     QJsonArray badges;
@@ -157,6 +158,46 @@ QJsonObject Message::toJson() const
     msg["elements"_L1] = elements;
 
     return msg;
+}
+
+Message::ReplyStatus Message::isReplyable() const
+{
+    if (this->loginName.isEmpty())
+    {
+        // no replies can happen
+        return ReplyStatus::NotReplyable;
+    }
+
+    constexpr int oneDayInSeconds = 24 * 60 * 60;
+    bool messageReplyable = true;
+    if (this->flags.hasAny({MessageFlag::System, MessageFlag::Subscription,
+                            MessageFlag::Timeout, MessageFlag::Whisper,
+                            MessageFlag::ModerationAction,
+                            MessageFlag::InvalidReplyTarget}) ||
+        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
+            oneDayInSeconds)
+    {
+        messageReplyable = false;
+    }
+
+    if (this->replyThread != nullptr)
+    {
+        if (const auto &rootPtr = this->replyThread->root(); rootPtr != nullptr)
+        {
+            assert(this != rootPtr.get());
+            if (rootPtr->isReplyable() == ReplyStatus::NotReplyable)
+            {
+                // thread parent must be replyable to be replyable
+                return ReplyStatus::NotReplyableDueToThread;
+            }
+
+            return messageReplyable ? ReplyStatus::ReplyableWithThread
+                                    : ReplyStatus::NotReplyableWithThread;
+        }
+    }
+
+    return messageReplyable ? ReplyStatus::Replyable
+                            : ReplyStatus::NotReplyable;
 }
 
 }  // namespace chatterino

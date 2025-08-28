@@ -8,8 +8,9 @@
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
-#include "widgets/helper/EffectLabel.hpp"
-#include "widgets/helper/TitlebarButtons.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
+#include "widgets/buttons/TitlebarButtons.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Window.hpp"
 
@@ -34,8 +35,6 @@
 #    include <QMargins>
 #    include <QOperatingSystemVersion>
 #endif
-
-#include "widgets/helper/TitlebarButton.hpp"
 
 namespace {
 
@@ -484,6 +483,28 @@ bool BaseWindow::supportsCustomWindowFrame()
 #endif
 }
 
+void BaseWindow::windowDeactivationEvent()
+{
+    switch (this->windowDeactivateAction)
+    {
+        case WindowDeactivateAction::Delete:
+            this->deleteLater();
+            break;
+
+        case WindowDeactivateAction::Close:
+            this->close();
+            break;
+
+        case WindowDeactivateAction::Hide:
+            this->hide();
+            break;
+
+        case WindowDeactivateAction::Nothing:
+        default:
+            break;
+    }
+}
+
 void BaseWindow::themeChangedEvent()
 {
     if (this->hasCustomWindowFrame())
@@ -520,24 +541,7 @@ bool BaseWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowDeactivate)
     {
-        switch (this->windowDeactivateAction)
-        {
-            case WindowDeactivateAction::Delete:
-                this->deleteLater();
-                break;
-
-            case WindowDeactivateAction::Close:
-                this->close();
-                break;
-
-            case WindowDeactivateAction::Hide:
-                this->hide();
-                break;
-
-            case WindowDeactivateAction::Nothing:
-            default:
-                break;
-        }
+        this->windowDeactivationEvent();
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
@@ -589,9 +593,9 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_.has(FramelessDraggable))
     {
-        this->movingRelativePos = event->localPos();
-        if (auto *widget =
-                this->childAt(event->localPos().x(), event->localPos().y()))
+        this->movingRelativePos = event->position();
+        auto pos = event->position().toPoint();
+        if (auto *widget = this->childAt(pos.x(), pos.y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
@@ -641,7 +645,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            const auto &newPos = event->screenPos() - this->movingRelativePos;
+            auto newPos =
+                (event->globalPosition() - this->movingRelativePos).toPoint();
             this->move(newPos.x(), newPos.y());
         }
     }
@@ -666,34 +671,21 @@ void BaseWindow::focusOutEvent(QFocusEvent *event)
     BaseWidget::focusOutEvent(event);
 }
 
-TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
-                                              std::function<void()> onClicked)
+void BaseWindow::appendTitlebarButton(Button *button)
 {
-    TitleBarButton *button = new TitleBarButton;
-    button->setScaleIndependantSize(30, 30);
-
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
-    button->setButtonStyle(style);
-
-    QObject::connect(button, &TitleBarButton::leftClicked, this, [onClicked] {
-        onClicked();
-    });
-
-    return button;
 }
 
-EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+LabelButton *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
-    EffectLabel *button = new EffectLabel;
-    button->setScaleIndependantHeight(30);
+    auto *button = new LabelButton;
+    button->setScaleIndependentHeight(30);
 
-    this->ui_.buttons.push_back(button);
-    this->ui_.titlebarBox->insertWidget(1, button);
+    this->appendTitlebarButton(button);
 
-    QObject::connect(button, &EffectLabel::leftClicked, this, [onClicked] {
-        onClicked();
-    });
+    QObject::connect(button, &LabelButton::leftClicked, this,
+                     std::move(onClicked));
 
     return button;
 }
@@ -974,14 +966,17 @@ void BaseWindow::scaleChangedEvent(float scale)
 void BaseWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->drawOutline(painter);
+    this->drawCustomWindowFrame(painter);
+}
 
+void BaseWindow::drawOutline(QPainter &painter)
+{
     if (this->frameless_)
     {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
-
-    this->drawCustomWindowFrame(painter);
 }
 
 float BaseWindow::desiredScale() const

@@ -109,6 +109,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "a964d705-0b72-4867-aab7-bc9a14945742",
             "localizedName": "",
             "loginName": "nickname",

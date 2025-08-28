@@ -61,37 +61,50 @@ namespace chatterino {
 
 using namespace literals;
 
+namespace detail {
+
+bool isUnknownCommand(const QString &text)
+{
+    static QRegularExpression isUnknownCommand(
+        R"(^(?:\.(?!\.|$)|\/)(?!me(?:\s|$)|\s))",
+        QRegularExpression::CaseInsensitiveOption);
+
+    auto match = isUnknownCommand.match(text);
+
+    return match.hasMatch();
+}
+
+}  // namespace detail
+
+using detail::isUnknownCommand;
+
 namespace {
-#if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
-    const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
-#else
-    const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
-#endif
-    constexpr int CLIP_CREATION_COOLDOWN = 5000;
-    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
-        "Failed to create a clip - clips are temporarily unavailable: %1");
-    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
-        "Failed to create a clip - the streamer has clips disabled in their "
-        "channel.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
-        "Failed to create a clip - the streamer has restricted clip creation "
-        "to subscribers, or followers of an unknown duration.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
-        "Failed to create a clip - the streamer has disabled clips while in "
-        "this category.");
-    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
-        "Failed to create a clip - you need to re-authenticate.");
-    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
-        "Failed to create a clip: %1");
-    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
-    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
+const QString MAGIC_MESSAGE_SUFFIX = u" \u034f"_s;
+constexpr int CLIP_CREATION_COOLDOWN = 5000;
+const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
+    "Failed to create a clip - clips are temporarily unavailable: %1");
+const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+    "Failed to create a clip - the streamer has clips disabled in their "
+    "channel.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
+    "Failed to create a clip - the streamer has restricted clip creation "
+    "to subscribers, or followers of an unknown duration.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
+    "Failed to create a clip - the streamer has disabled clips while in "
+    "this category.");
+const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+    "Failed to create a clip - you need to re-authenticate.");
+const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT("Failed to create a clip: %1");
+const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
-    // Maximum number of chatters to fetch when refreshing chatters
-    constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
+// Maximum number of chatters to fetch when refreshing chatters
+constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
-    // From Twitch docs - expected size for a badge (1x)
-    constexpr QSize BASE_BADGE_SIZE(18, 18);
+// From Twitch docs - expected size for a badge (1x)
+constexpr QSize BASE_BADGE_SIZE(18, 18);
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -99,7 +112,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , ChannelChatters(*static_cast<Channel *>(this))
     , nameOptions{name, name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
-    , channelUrl_("https://twitch.tv/" + name)
+    , channelUrl_("https://www.twitch.tv/" + name)
     , popoutPlayerUrl_(TWITCH_PLAYER_URL.arg(name))
     , localTwitchEmotes_(std::make_shared<EmoteMap>())
     , bttvEmotes_(std::make_shared<EmoteMap>())
@@ -107,6 +120,18 @@ TwitchChannel::TwitchChannel(const QString &name)
     , seventvEmotes_(std::make_shared<EmoteMap>())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
+
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserAboutToChange,
+        [this](const auto & /*oldAccount*/, const auto & /*newAccount*/) {
+            this->eventSubChannelChatUserMessageHoldHandle.reset();
+            this->eventSubChannelChatUserMessageUpdateHandle.reset();
+            this->eventSubChannelModerateHandle.reset();
+            this->eventSubAutomodMessageHoldHandle.reset();
+            this->eventSubAutomodMessageUpdateHandle.reset();
+            this->eventSubSuspiciousUserMessageHandle.reset();
+            this->eventSubSuspiciousUserUpdateHandle.reset();
+        });
 
     this->bSignals_.emplace_back(
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
@@ -192,6 +217,11 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     getApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                               this->seventvEmoteSetID_);
 
@@ -327,6 +357,17 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
         return;
     }
 
+    bool cacheHit = readProviderEmotesCache(
+        this->roomId(), "betterttv",
+        [this, weak = weakOf<Channel>(this)](auto jsonDoc) {
+            if (auto shared = weak.lock())
+            {
+                auto emoteMap = bttv::detail::parseChannelEmotes(
+                    jsonDoc.object(), this->getLocalizedName());
+                this->setBttvEmotes(std::make_shared<const EmoteMap>(emoteMap));
+            }
+        });
+
     BttvEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
@@ -335,7 +376,7 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
                 this->setBttvEmotes(std::make_shared<const EmoteMap>(emoteMap));
             }
         },
-        manualRefresh);
+        manualRefresh, cacheHit);
 }
 
 void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
@@ -345,6 +386,12 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         this->ffzEmotes_.set(EMPTY_EMOTE_MAP);
         return;
     }
+
+    bool cacheHit = readProviderEmotesCache(
+        this->roomId(), "frankerfacez", [this](const auto &jsonDoc) {
+            auto emoteMap = ffz::detail::parseChannelEmotes(jsonDoc.object());
+            this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
+        });
 
     FfzEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(),
@@ -376,7 +423,7 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
                     std::forward<decltype(channelBadges)>(channelBadges);
             }
         },
-        manualRefresh);
+        manualRefresh, cacheHit);
 }
 
 void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
@@ -386,6 +433,15 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         this->seventvEmotes_.set(EMPTY_EMOTE_MAP);
         return;
     }
+
+    bool cacheHit = readProviderEmotesCache(
+        this->roomId(), "seventv", [this](auto jsonDoc) {
+            const auto json = jsonDoc.object();
+            const auto emoteSet = json["emote_set"].toObject();
+            const auto parsedEmotes = emoteSet["emotes"].toArray();
+            auto emoteMap = seventv::detail::parseEmotes(parsedEmotes, false);
+            this->setSeventvEmotes(std::make_shared<const EmoteMap>(emoteMap));
+        });
 
     SeventvEmotes::loadChannelEmotes(
         weakOf<Channel>(this), this->roomId(),
@@ -401,7 +457,7 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
                     channelInfo.twitchConnectionIndex;
             }
         },
-        manualRefresh);
+        manualRefresh, cacheHit);
 }
 
 void TwitchChannel::setBttvEmotes(std::shared_ptr<const EmoteMap> &&map)
@@ -764,6 +820,13 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
+        return;
+    }
+
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
     this->updateSevenTVActivity();
@@ -795,6 +858,13 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
     {
+        return;
+    }
+
+    if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
+    {
+        this->addSystemMessage(QString("%1 is not a known command.")
+                                   .arg(parsedMessage.split(' ').first()));
         return;
     }
 
@@ -1355,6 +1425,7 @@ void TwitchChannel::loadRecentMessages()
     recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
+            assert(!isAppAboutToQuit());
             auto shared = weak.lock();
             if (!shared)
             {
@@ -1421,7 +1492,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     int limit = getSettings()->twitchMessageHistoryLimit.getValue();
     if (this->lastConnectedAt_.has_value())
     {
-        // calculate how many messages could have occured
+        // calculate how many messages could have occurred
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
         const auto secondsSinceDisconnect =
@@ -1484,16 +1555,15 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
-    getApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
+    const auto &currentTwitchUserID = currentAccount->getUserId();
+
     if (this->hasModRights())
     {
-        getApp()->getTwitchPubSub()->listenToAutomod(roomId);
-        getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
-
         this->eventSubChannelModerateHandle =
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.moderate",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1502,7 +1572,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1510,6 +1580,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "automod.message.hold",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1518,7 +1589,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1526,6 +1597,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "automod.message.update",
                 .subscriptionVersion = "2",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1534,7 +1606,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1542,6 +1614,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.suspicious_user.message",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1550,7 +1623,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1558,6 +1631,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.suspicious_user.update",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1566,7 +1640,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "moderator_user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1586,6 +1660,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.chat.user_message_hold",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1594,7 +1669,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });
@@ -1603,6 +1678,7 @@ void TwitchChannel::refreshPubSub()
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.chat.user_message_update",
                 .subscriptionVersion = "1",
+                .ownerTwitchUserID = currentTwitchUserID,
                 .conditions =
                     {
                         {
@@ -1611,7 +1687,7 @@ void TwitchChannel::refreshPubSub()
                         },
                         {
                             "user_id",
-                            currentAccount->getUserId(),
+                            currentTwitchUserID,
                         },
                     },
             });

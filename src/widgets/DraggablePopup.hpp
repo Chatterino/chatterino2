@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buttons/SvgButton.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QPoint>
@@ -60,7 +61,15 @@ private:
     // dragTimer_ is called ~60 times per second once the user has initiated dragging
     QTimer dragTimer_;
 
-    Button *pinButton_ = nullptr;
+    SvgButton *pinButton_{};
+    SvgButton::Src pinDisabledSource_{
+        .dark = ":/buttons/pinDisabled-darkMode.svg",
+        .light = ":/buttons/pinDisabled-lightMode.svg",
+    };
+    SvgButton::Src pinEnabledSource_{
+        .dark = ":/buttons/pinEnabled.svg",
+        .light = ":/buttons/pinEnabled.svg",
+    };
     bool isPinned_ = false;
 };
 

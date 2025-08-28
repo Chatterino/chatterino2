@@ -6,6 +6,7 @@
 #include "common/Version.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/Connection.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/RenameThread.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -40,8 +41,37 @@ const auto &LOG = chatterinoTwitchEventSub;
 
 namespace chatterino::eventsub {
 
+using namespace std::literals::chrono_literals;
+
+class QLogProxy : public lib::Logger
+{
+public:
+    QLogProxy(const QLoggingCategory &loggingCategory_)
+        : loggingCategory(loggingCategory_)
+    {
+    }
+
+    void debug(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCDebug(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+    void warn(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCWarning(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+private:
+    const QLoggingCategory &loggingCategory;
+};
+
 Controller::Controller()
-    : userAgent(QStringLiteral("chatterino/%1 (%2)")
+    : logProxy(std::shared_ptr<lib::Logger>(new QLogProxy(LOG())))
+    , userAgent(QStringLiteral("chatterino/%1 (%2)")
                     .arg(Version::instance().version(),
                          Version::instance().commitHash())
                     .toUtf8()
@@ -52,6 +82,11 @@ Controller::Controller()
     std::tie(this->eventSubHost, this->eventSubPort, this->eventSubPath) =
         getEventSubHost();
     this->thread = std::make_unique<std::thread>([this] {
+        // make sure we set in any case, even exceptions
+        auto guard = qScopeGuard([&] {
+            this->stoppedFlag.set();
+        });
+
         this->ioContext.run();
     });
     renameThread(*this->thread, "C2EventSub");
@@ -77,20 +112,27 @@ Controller::~Controller()
         connection->close();
     }
 
-    this->subscriptions.clear();
+    {
+        std::lock_guard lock(this->subscriptionsMutex);
+        this->subscriptions.clear();
+    }
 
     this->work.reset();
 
-    if (this->thread->joinable())
+    if (!this->thread->joinable())
     {
-        this->thread->join();
-    }
-    else
-    {
-        qCWarning(LOG) << "Thread not joinable";
+        qCInfo(LOG) << "Controller dtor end (not joinable)";
+        return;
     }
 
-    qCInfo(LOG) << "Controller dtor end";
+    if (this->stoppedFlag.waitFor(250ms))
+    {
+        this->thread->join();
+        qCInfo(LOG) << "Controller dtor end (joined)";
+        return;
+    }
+
+    qCWarning(LOG) << "Controller dtor end (stopped flag didn't stop)";
 }
 
 void Controller::removeRef(const SubscriptionRequest &request)
@@ -128,7 +170,7 @@ void Controller::removeRef(const SubscriptionRequest &request)
                 << "Refcount fell to zero for" << request
                 << "but we had no subscription ID attached - a "
                    "successful subscription was never made. From state "
-                << static_cast<uint8_t>(subscription.state);
+                << qmagicenum::enumName(subscription.state);
             return;
         }
 
@@ -161,6 +203,9 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
 {
     assert(!this->quitting &&
            "Subscribe cannot be called while we are quitting");
+
+    assert(!request.ownerTwitchUserID.isEmpty() &&
+           "Subscription requests must include a Twitch User ID");
 
     bool needToSubscribe = false;
 
@@ -210,7 +255,7 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
         subscription.refCount++;
         qCDebug(LOG) << "Added ref for" << request << subscription.refCount
                      << needToSubscribe
-                     << "state:" << static_cast<uint8_t>(subscription.state);
+                     << "state:" << qmagicenum::enumName(subscription.state);
     }
 
     auto handle = std::make_unique<RawSubscriptionHandle>(request);
@@ -273,6 +318,59 @@ void Controller::reconnectConnection(
     }
 }
 
+void Controller::debug()
+{
+    std::lock_guard g(this->subscriptionsMutex);
+    for (const auto &[request, subscription] : this->subscriptions)
+    {
+        QString sessionID;
+        auto connection = subscription.connection.lock();
+        if (connection)
+        {
+            auto *connection2 =
+                dynamic_cast<Connection *>(connection->getListener());
+            if (connection2)
+            {
+                sessionID = connection2->getSessionID();
+            }
+            else
+            {
+                sessionID = "BAD";
+            }
+        }
+        else
+        {
+            sessionID = "DEAD";
+        }
+
+        qCInfo(LOG).noquote().nospace()
+            << request << " (" << qmagicenum::enumName(subscription.state)
+            << ") -> " << sessionID;
+    }
+
+    boost::asio::post(this->ioContext, [this] {
+        for (const auto &weakConnection : this->connections)
+        {
+            auto connection = weakConnection.lock();
+            if (connection)
+            {
+                auto *connection2 =
+                    dynamic_cast<Connection *>(connection->getListener());
+                if (connection2)
+                {
+                    // qCInfo(LOG)
+                    //     << "Connected to" << connection2->getSessionID();
+                    connection2->debug();
+                }
+            }
+            else
+            {
+                qCInfo(LOG) << "Dead connection";
+            }
+        }
+    });
+}
+
 void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
     // 1. Flush dead connections (maybe this should not be done here)
@@ -300,8 +398,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
     uint32_t openButNotReadyConnections = 0;
 
     // 2. Check if any currently open connection can handle this subscription
-    auto viableConnection =
-        this->getViableConnection(openButNotReadyConnections);
+    auto viableConnection = this->getViableConnection(
+        request.ownerTwitchUserID, openButNotReadyConnections);
 
     if (viableConnection.has_value())
     {
@@ -314,7 +412,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
         qCDebug(LOG) << "Make helix request for" << request;
         getHelix()->createEventSubSubscription(
             request, listener->getSessionID(),
-            [this, request, connection,
+            [this, request,
              weakConnection{std::weak_ptr<lib::Session>(connection)}](
                 const auto &res) {
                 qCDebug(LOG) << "Subscription success" << request;
@@ -395,7 +493,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 }
 
 std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
-    uint32_t &openButNotReadyConnections)
+    const QString &ownerTwitchUserID, uint32_t &openButNotReadyConnections)
 {
     for (const auto &weakConnection : this->connections)
     {
@@ -420,6 +518,11 @@ std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
             continue;
         }
 
+        if (!listener->canHandleSubscriptionFrom(ownerTwitchUserID))
+        {
+            continue;  // Connection is active with another Twitch User's subscriptions
+        }
+
         // TODO: Check if this listener has room for another subscription
 
         return connection;
@@ -438,6 +541,8 @@ void Controller::createConnection(std::string host, std::string port,
                                   std::string path,
                                   std::unique_ptr<lib::Listener> listener)
 {
+    qCDebug(LOG) << "Create EventSub connection";
+
     try
     {
         boost::asio::ssl::context sslContext{
@@ -456,7 +561,7 @@ void Controller::createConnection(std::string host, std::string port,
         }
 
         auto connection = std::make_shared<lib::Session>(
-            this->ioContext, sslContext, std::move(listener));
+            this->ioContext, sslContext, std::move(listener), this->logProxy);
 
         this->registerConnection(connection);
 
@@ -478,6 +583,12 @@ void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
 
 void Controller::retrySubscription(const SubscriptionRequest &request)
 {
+    if (isAppAboutToQuit())
+    {
+        qCDebug(LOG) << "retrySubscription, but app is quitting" << request;
+        return;
+    }
+
     std::lock_guard lock(this->subscriptionsMutex);
 
     auto &subscription = this->subscriptions[request];
@@ -487,9 +598,12 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
         qCDebug(LOG) << "No one is interested in this subscription anymore, "
                         "stop trying"
                      << request << "from state"
-                     << static_cast<uint8_t>(subscription.state);
+                     << qmagicenum::enumName(subscription.state);
         qCDebug(LOG) << "Set state to unsubscribed" << request;
         subscription.state = Subscription::State::Unsubscribed;
+
+        this->subscriptions.erase(request);
+
         return;
     }
 
@@ -507,6 +621,14 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
         std::make_unique<boost::asio::system_timer>(this->ioContext);
     retryTimer->expires_after(subscription.backoff.next() + jitter);
     retryTimer->async_wait([this, request](const auto &ec) {
+        if (isAppAboutToQuit())
+        {
+            qCDebug(LOG)
+                << "Retry was going to fire, but app is quitting so we won't."
+                << request;
+            return;
+        }
+
         if (!ec)
         {
             qCDebug(LOG) << "Firing retry" << request;
@@ -599,7 +721,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     auto &subscription = this->subscriptions[request];
 
     qCDebug(LOG) << "Request" << request << "marked as unsubscribed from state"
-                 << static_cast<uint8_t>(subscription.state);
+                 << qmagicenum::enumName(subscription.state);
 
     assert(subscription.state == Subscription::State::Unsubscribing ||
            subscription.state == Subscription::State::Retrying);
@@ -622,6 +744,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     if (subscription.refCount == 0)
     {
         // we could remove the subscription here
+        this->subscriptions.erase(request);
         return;
     }
 

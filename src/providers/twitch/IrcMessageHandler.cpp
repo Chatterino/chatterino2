@@ -19,6 +19,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/UserColor.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
@@ -329,6 +330,39 @@ void IrcMessageHandler::parseMessageInto(Communi::IrcMessage *message,
             sink.addOrReplaceTimeout(std::move(clearChat.message), time);
         }
     }
+
+    if (command == u"CLEARMSG"_s)
+    {
+        // check parameter count
+        if (message->parameters().length() < 1)
+        {
+            return;
+        }
+
+        QString chanName;
+        if (!trimChannelName(message->parameter(0), chanName))
+        {
+            return;
+        }
+
+        auto tags = message->tags();
+
+        QString targetID = tags.value("target-msg-id").toString();
+
+        auto msg = sink.findMessageByID(targetID);
+        if (msg == nullptr)
+        {
+            return;
+        }
+
+        msg->flags.set(MessageFlag::Disabled);
+        msg->flags.set(MessageFlag::InvalidReplyTarget);
+        if (!getSettings()->hideDeletionActions)
+        {
+            sink.addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
+                            MessageContext::Original);
+        }
+    }
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
@@ -519,6 +553,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     }
 
     msg->flags.set(MessageFlag::Disabled);
+    msg->flags.set(MessageFlag::InvalidReplyTarget);
     if (!getSettings()->hideDeletionActions)
     {
         chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
@@ -633,6 +668,11 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(channel != nullptr);
+
+    const auto *userDataController = getApp()->getUserData();
+    assert(userDataController != nullptr);
+
     auto tags = message->tags();
     auto parameters = message->parameters();
 
@@ -741,7 +781,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             // subgifts are special because they include two users
             auto msg = MessageBuilder::makeSubgiftMessage(
                 parseTagString(messageText), tags,
-                calculateMessageTime(message).time());
+                calculateMessageTime(message).time(), channel);
 
             msg->flags.set(MessageFlag::Subscription);
             if (mirrored)
@@ -797,12 +837,16 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             displayName = login;
         }
 
-        MessageColor userColor = MessageColor::System;
-        if (auto colorTag = tags.value("color").value<QColor>();
-            colorTag.isValid())
-        {
-            userColor = MessageColor(colorTag);
-        }
+        auto userID = tags.value("user-id").toString();
+        auto userColor = twitch::getUserColor(
+                             {
+                                 .userLogin = login,
+                                 .userID = userID,
+                                 .userDataController = userDataController,
+                                 .channelChatters = channel,
+                                 .color = tags.value("color").value<QColor>(),
+                             })
+                             .value_or(MessageColor::System);
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
@@ -934,7 +978,8 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     }
     else if (getSettings()->showJoins.getValue())
     {
-        twitchChannel->addJoinedUser(message->nick());
+        twitchChannel->addJoinedUser(message->nick(), twitchChannel->isMod(),
+                                     twitchChannel->isBroadcaster());
     }
 }
 
@@ -954,7 +999,8 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (message->nick() != selfAccountName &&
         getSettings()->showParts.getValue())
     {
-        twitchChannel->addPartedUser(message->nick());
+        twitchChannel->addPartedUser(message->nick(), twitchChannel->isMod(),
+                                     twitchChannel->isBroadcaster());
     }
 
     if (message->nick() == selfAccountName)

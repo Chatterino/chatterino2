@@ -61,7 +61,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -154,14 +154,14 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.1.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -175,7 +175,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.16
+        uses: hendrikmuhs/ccache-action@v1.2.18
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -330,43 +330,43 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # allows for tags access
 
       # Windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Windows Qt6.7.1
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Windows Qt6.7.1 symbols
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Linux AppImage
         with:
           name: Chatterino-x86_64-Qt-6.7.2.AppImage
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Ubuntu 20.04 deb
         with:
           name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Ubuntu 22.04 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         name: Ubuntu 24.04 deb
         with:
           name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
@@ -394,7 +394,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.16.0
+        uses: ncipollo/release-action@v1.18.0
         with:
           replacesArtifacts: true
           allowUpdates: true

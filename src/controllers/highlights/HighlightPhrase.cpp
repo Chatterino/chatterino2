@@ -6,8 +6,8 @@ namespace chatterino {
 
 namespace {
 
-    constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
-    constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
+constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
+constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
 
 }  // namespace
 

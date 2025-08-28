@@ -20,14 +20,6 @@ namespace chatterino {
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-enum class TimeoutStackStyle : int {
-    StackHard = 0,
-    DontStackBeyondUserMessage = 1,
-    DontStack = 2,
-
-    Default = DontStackBeyondUserMessage,
-};
-
 class Channel : public std::enable_shared_from_this<Channel>, public MessageSink
 {
 public:
@@ -35,16 +27,28 @@ public:
     /**
      * @exposeenum c2.ChannelType
      */
-    enum class Type {
+    enum class Type : std::uint8_t {
+        /// This channel may not be backed by a real channel.
+        ///
+        /// Messages sent to this channel are not logged.
         None,
+        /// Direct
         Direct,
+        /// Twitch
         Twitch,
+        /// TwitchWhispers
         TwitchWhispers,
+        /// TwitchWatching
         TwitchWatching,
+        /// TwitchMentions
         TwitchMentions,
+        /// TwitchLive
         TwitchLive,
+        /// TwitchAutomod
         TwitchAutomod,
+        /// TwitchEnd
         TwitchEnd,
+        /// Misc
         Misc,
     };
 
@@ -135,7 +139,7 @@ public:
 protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
-    QString platform_{"other"};
+    QString platform_;
 
 private:
     const QString name_;

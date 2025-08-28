@@ -13,16 +13,17 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
+#include "widgets/buttons/DrawnButton.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -40,6 +41,14 @@
 namespace {
 
 using namespace chatterino;
+
+/// The width of the standard button.
+constexpr const int BUTTON_WIDTH = 28;
+
+/// The width of the "Add split" button.
+///
+/// This matches the scrollbar's full width.
+constexpr const int ADD_SPLIT_BUTTON_WIDTH = 16;
 
 // 5 minutes
 constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
@@ -279,85 +288,106 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->moderationButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/moderationDisabled-darkMode.svg",
+            .light = ":/buttons/moderationDisabled-lightMode.svg",
+        },
+        this, {5, 5});
+
+    this->chattersButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/chatters-darkMode.svg",
+            .light = ":/buttons/chatters-lightMode.svg",
+        },
+        this, {4, 4});
+
+    this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
+                                       {
+                                           .padding = 3,
+                                           .thickness = 1,
+                                       },
+                                       this);
+
+    this->dropdownButton_ =
+        new DrawnButton(DrawnButton::Symbol::Kebab, {}, this);
+
+    /// XXX: this never gets disconnected
+    QObject::connect(this->dropdownButton_, &Button::leftMousePress, this,
+                     [this] {
+                         this->dropdownButton_->setMenu(this->createMainMenu());
+                     });
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
-            w->setScaleIndependantSize(8, 4);
+            w->setScaleIndependentSize(8, 4);
         }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
                              QSizePolicy::Preferred);
             w->setCentered(true);
-            w->setHasOffset(false);
+            w->setPadding(QMargins{});
         }),
         // space
         makeWidget<BaseWidget>([](auto w) {
-            w->setScaleIndependantSize(8, 4);
+            w->setScaleIndependentSize(8, 4);
         }),
         // mode
-        this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
+        this->modeButton_ = makeWidget<LabelButton>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             w->hide();
             w->setMenu(this->createChatModeMenu());
         }),
         // moderator
-        this->moderationButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(
-                w, &Button::clicked, this,
-                [this, w](Qt::MouseButton button) mutable {
-                    switch (button)
-                    {
-                        case Qt::LeftButton:
-                            if (getSettings()->moderationActions.empty())
-                            {
-                                getApp()->getWindows()->showSettingsDialog(
-                                    this, SettingsDialogPreference::
-                                              ModerationActions);
-                                this->split_->setModerationMode(true);
-                            }
-                            else
-                            {
-                                auto moderationMode =
-                                    this->split_->getModerationMode();
-
-                                this->split_->setModerationMode(
-                                    !moderationMode);
-                                w->setDim(Button::Dim(moderationMode));
-                            }
-                            break;
-
-                        case Qt::RightButton:
-                        case Qt::MiddleButton:
-                            getApp()->getWindows()->showSettingsDialog(
-                                this,
-                                SettingsDialogPreference::ModerationActions);
-                            break;
-                    }
-                });
-        }),
+        this->moderationButton_,
         // chatter list
-        this->chattersButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showChatterList();
-            });
-        }),
+        this->chattersButton_,
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
-            /// XXX: this never gets disconnected
-            QObject::connect(w, &Button::leftMousePress, this, [this] {
-                this->dropdownButton_->setMenu(this->createMainMenu());
-            });
-        }),
+        this->dropdownButton_,
         // add split
-        this->addButton_ = makeWidget<Button>([&](auto w) {
-            w->setPixmap(getResources().buttons.addSplitDark);
-            w->setEnableMargin(false);
+        this->addButton_,
+    });
 
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->addSibling();
-            });
-        }),
+    QObject::connect(
+        this->moderationButton_, &Button::clicked, this,
+        [this](Qt::MouseButton button) mutable {
+            auto *w = this->moderationButton_;
+            switch (button)
+            {
+                case Qt::LeftButton:
+                    if (getSettings()->moderationActions.empty())
+                    {
+                        getApp()->getWindows()->showSettingsDialog(
+                            this, SettingsDialogPreference::ModerationActions);
+                        this->split_->setModerationMode(true);
+                    }
+                    else
+                    {
+                        auto moderationMode = this->split_->getModerationMode();
+
+                        this->split_->setModerationMode(!moderationMode);
+                        // w->setDim(moderationMode ? DimButton::Dim::Some
+                        //                          : DimButton::Dim::None);
+                    }
+                    break;
+
+                case Qt::RightButton:
+                case Qt::MiddleButton:
+                    getApp()->getWindows()->showSettingsDialog(
+                        this, SettingsDialogPreference::ModerationActions);
+                    break;
+            }
+        });
+
+    QObject::connect(this->chattersButton_, &Button::leftClicked, this,
+                     [this]() {
+                         this->split_->openChatterList();
+                     });
+
+    QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
+        this->split_->addSibling();
     });
 
     getSettings()->customURIScheme.connect(
@@ -382,26 +412,29 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     const auto &h = getApp()->getHotkeys();
     auto menu = std::make_unique<QMenu>();
     menu->addAction(
-        "Change channel", this->split_, &Split::changeChannel,
-        h->getDisplaySequence(HotkeyCategory::Split, "changeChannel"));
-    menu->addAction("Close", this->split_, &Split::deleteFromContainer,
-                    h->getDisplaySequence(HotkeyCategory::Split, "delete"));
+        "Change channel",
+        h->getDisplaySequence(HotkeyCategory::Split, "changeChannel"),
+        this->split_, &Split::changeChannel);
+    menu->addAction("Close",
+                    h->getDisplaySequence(HotkeyCategory::Split, "delete"),
+                    this->split_, &Split::deleteFromContainer);
     menu->addSeparator();
     menu->addAction(
-        "Popup", this->split_, &Split::popup,
-        h->getDisplaySequence(HotkeyCategory::Window, "popup", {{"split"}}));
+        "Popup",
+        h->getDisplaySequence(HotkeyCategory::Window, "popup", {{"split"}}),
+        this->split_, &Split::popup);
     menu->addAction(
-        "Popup overlay", this->split_, &Split::showOverlayWindow,
-        h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"));
-    menu->addAction(
-        "Search", this->split_,
-        [this] {
-            this->split_->showSearch(true);
-        },
-        h->getDisplaySequence(HotkeyCategory::Split, "showSearch"));
-    menu->addAction(
-        "Set filters", this->split_, &Split::setFiltersDialog,
-        h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
+        "Popup overlay",
+        h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"),
+        this->split_, &Split::showOverlayWindow);
+    menu->addAction("Search",
+                    h->getDisplaySequence(HotkeyCategory::Split, "showSearch"),
+                    this->split_, [this] {
+                        this->split_->showSearch(true);
+                    });
+    menu->addAction("Set filters",
+                    h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"),
+                    this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
 
     auto *twitchChannel =
@@ -410,38 +443,41 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         menu->addAction(
-            OPEN_IN_BROWSER, this->split_, &Split::openInBrowser,
-            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
-        menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
-                        &Split::openBrowserPlayer,
-                        h->getDisplaySequence(HotkeyCategory::Split,
-                                              "openPlayerInBrowser"));
+            OPEN_IN_BROWSER,
+            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
+            this->split_, &Split::openInBrowser);
         menu->addAction(
-            OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink,
-            h->getDisplaySequence(HotkeyCategory::Split, "openInStreamlink"));
+            OPEN_PLAYER_IN_BROWSER,
+            h->getDisplaySequence(HotkeyCategory::Split, "openPlayerInBrowser"),
+            this->split_, &Split::openBrowserPlayer);
+        menu->addAction(
+            OPEN_IN_STREAMLINK,
+            h->getDisplaySequence(HotkeyCategory::Split, "openInStreamlink"),
+            this->split_, &Split::openInStreamlink);
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {
-            menu->addAction("Open in custom player", this->split_,
-                            &Split::openWithCustomScheme,
+            menu->addAction("Open in custom player",
                             h->getDisplaySequence(HotkeyCategory::Split,
-                                                  "openInCustomPlayer"));
+                                                  "openInCustomPlayer"),
+                            this->split_, &Split::openWithCustomScheme);
         }
 
         if (this->split_->getChannel()->hasModRights())
         {
             menu->addAction(
-                OPEN_MOD_VIEW_IN_BROWSER, this->split_,
-                &Split::openModViewInBrowser,
-                h->getDisplaySequence(HotkeyCategory::Split, "openModView"));
+                OPEN_MOD_VIEW_IN_BROWSER,
+                h->getDisplaySequence(HotkeyCategory::Split, "openModView"),
+                this->split_, &Split::openModViewInBrowser);
         }
 
         menu->addAction(
-                "Create a clip", this->split_,
+                "Create a clip",
+                h->getDisplaySequence(HotkeyCategory::Split, "createClip"),
+                this->split_,
                 [twitchChannel] {
                     twitchChannel->createClip();
-                },
-                h->getDisplaySequence(HotkeyCategory::Split, "createClip"))
+                })
             ->setVisible(twitchChannel->isLive());
 
         menu->addSeparator();
@@ -450,9 +486,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
     {
         menu->addAction(
-            OPEN_WHISPERS_IN_BROWSER, this->split_,
-            &Split::openWhispersInBrowser,
-            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
+            OPEN_WHISPERS_IN_BROWSER,
+            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
+            this->split_, &Split::openWhispersInBrowser);
         menu->addSeparator();
     }
 
@@ -460,8 +496,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (this->split_->getChannel()->canReconnect())
     {
         menu->addAction(
-            "Reconnect", this, SLOT(reconnect()),
-            h->getDisplaySequence(HotkeyCategory::Split, "reconnect"));
+            "Reconnect",
+            h->getDisplaySequence(HotkeyCategory::Split, "reconnect"), this,
+            &SplitHeader::reconnect);
     }
 
     if (twitchChannel)
@@ -472,12 +509,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                                                 "reloadEmotes", {{"channel"}});
         auto subSeq = h->getDisplaySequence(HotkeyCategory::Split,
                                             "reloadEmotes", {{"subscriber"}});
-        menu->addAction("Reload channel emotes", this,
-                        SLOT(reloadChannelEmotes()),
-                        channelSeq.isEmpty() ? bothSeq : channelSeq);
-        menu->addAction("Reload subscriber emotes", this,
-                        SLOT(reloadSubscriberEmotes()),
-                        subSeq.isEmpty() ? bothSeq : subSeq);
+        menu->addAction("Reload channel emotes",
+                        channelSeq.isEmpty() ? bothSeq : channelSeq, this,
+                        &SplitHeader::reloadChannelEmotes);
+        menu->addAction("Reload subscriber emotes",
+                        subSeq.isEmpty() ? bothSeq : subSeq, this,
+                        &SplitHeader::reloadSubscriberEmotes);
     }
 
     menu->addSeparator();
@@ -505,11 +542,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         // this makes a full std::optional<> with an empty vector inside
     }
     moreMenu->addAction(
-        "Toggle moderation mode", this->split_,
-        [this]() {
+        "Toggle moderation mode", modModeSeq, this->split_, [this]() {
             this->split_->setModerationMode(!this->split_->getModerationMode());
-        },
-        modModeSeq);
+        });
 
     if (this->split_->getChannel()->getType() == Channel::Type::TwitchMentions)
     {
@@ -533,13 +568,15 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         if (twitchChannel->hasModRights())
         {
             moreMenu->addAction(
-                "Show chatter list", this->split_, &Split::showChatterList,
-                h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
+                "Show chatter list",
+                h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"),
+                this->split_, &Split::openChatterList);
         }
 
-        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage,
+        moreMenu->addAction("Subscribe",
                             h->getDisplaySequence(HotkeyCategory::Split,
-                                                  "openSubscriptionPage"));
+                                                  "openSubscriptionPage"),
+                            this->split_, &Split::openSubPage);
 
         {
             auto *action = new QAction(this);
@@ -603,8 +640,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     moreMenu->addSeparator();
     moreMenu->addAction(
-        "Clear messages", this->split_, &Split::clear,
-        h->getDisplaySequence(HotkeyCategory::Split, "clearMessages"));
+        "Clear messages",
+        h->getDisplaySequence(HotkeyCategory::Split, "clearMessages"),
+        this->split_, &Split::clear);
     //    moreMenu->addSeparator();
     //    moreMenu->addAction("Show changelog", this,
     //    SLOT(moreMenuShowChangelog()));
@@ -717,7 +755,7 @@ void SplitHeader::updateRoomModes()
     if (auto *twitchChannel =
             dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
-        this->modeButton_->setEnable(twitchChannel->hasModRights());
+        this->modeButton_->setEnabled(twitchChannel->hasModRights());
 
         QString text;
         {
@@ -738,7 +776,7 @@ void SplitHeader::updateRoomModes()
 
         if (!text.isEmpty())
         {
-            this->modeButton_->getLabel().setText(text);
+            this->modeButton_->setText(text);
             this->modeButton_->show();
         }
         else
@@ -780,13 +818,15 @@ void SplitHeader::handleChannelChanged()
 
 void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = int(28 * scale);
+    int w = int(BUTTON_WIDTH * scale);
+    int addSplitWidth = int(ADD_SPLIT_BUTTON_WIDTH * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
-    this->addButton_->setFixedWidth(w * 5 / 8);
+
+    this->addButton_->setFixedWidth(addSplitWidth);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
@@ -840,6 +880,8 @@ void SplitHeader::updateChannelText()
                 NetworkRequest(url, NetworkRequestType::Get)
                     .caller(this)
                     .onSuccess([this](auto result) {
+                        assert(!isAppAboutToQuit());
+
                         // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
                         if (result.status() == 200)
                         {
@@ -882,9 +924,20 @@ void SplitHeader::updateIcons()
         auto moderationMode = this->split_->getModerationMode() &&
                               !getSettings()->moderationActions.empty();
 
-        this->moderationButton_->setPixmap(
-            moderationMode ? getResources().buttons.modModeEnabled
-                           : getResources().buttons.modModeDisabled);
+        if (moderationMode)
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationEnabled-darkMode.svg",
+                .light = ":/buttons/moderationEnabled-lightMode.svg",
+            });
+        }
+        else
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationDisabled-darkMode.svg",
+                .light = ":/buttons/moderationDisabled-lightMode.svg",
+            });
+        }
 
         if (twitchChannel->hasModRights() || moderationMode)
         {
@@ -1048,19 +1101,11 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
-    // --
-    if (this->theme->isLightTheme())
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
-        this->addButton_->setPixmap(getResources().buttons.addSplit);
-    }
-    else
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
-        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
-    }
+    auto bg = this->theme->splits.header.background;
+    this->addButton_->setOptions({
+        .background = bg,
+        .backgroundHover = bg,
+    });
 
     this->update();
 }

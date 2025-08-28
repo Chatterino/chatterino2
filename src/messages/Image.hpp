@@ -98,6 +98,7 @@ public:
     bool isEmpty() const;
     int width() const;
     int height() const;
+    QSizeF size() const;
     bool animated() const;
 
     bool operator==(const Image &image) = delete;

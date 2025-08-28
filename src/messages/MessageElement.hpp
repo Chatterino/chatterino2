@@ -31,6 +31,7 @@ using ImagePtr = std::shared_ptr<Image>;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
+/** @exposeenum c2.MessageElementFlag [flags] */
 enum class MessageElementFlag : int64_t {
     None = 0LL,
     Misc = (1LL << 0),
@@ -394,10 +395,15 @@ public:
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                         const QSize &size);
+                                                         QSizeF size);
 
 private:
+    void ensureText(bool asFallback);
+
     std::unique_ptr<TextElement> textElement_;
+    MessageColor textColor_;
+    bool usingFallbackColor_ = false;
+
     EmotePtr emote_;
 };
 
@@ -431,8 +437,8 @@ public:
 
 private:
     MessageLayoutElement *makeImageLayoutElement(
-        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
-        QSize largestSize);
+        const std::vector<ImagePtr> &image, const std::vector<QSizeF> &sizes,
+        QSizeF largestSize);
 
     QString getCopyString() const;
     void updateTooltips();
@@ -459,7 +465,7 @@ public:
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                         const QSize &size);
+                                                         QSizeF size);
 
 private:
     EmotePtr emote_;
@@ -474,7 +480,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
 };
 
 class VipBadgeElement : public BadgeElement
@@ -486,7 +492,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
 };
 
 class FfzBadgeElement : public BadgeElement
@@ -499,7 +505,7 @@ public:
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
+                                                 QSizeF size) override;
     const QColor color;
 };
 

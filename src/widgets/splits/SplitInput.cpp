@@ -10,13 +10,15 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
@@ -31,7 +33,23 @@
 
 #include <functional>
 
+using namespace Qt::Literals;
+
 namespace chatterino {
+
+namespace {
+
+// Current function: https://www.desmos.com/calculator/vdyamchjwh
+qreal highlightEasingFunction(qreal progress)
+{
+    if (progress <= 0.1)
+    {
+        return 1.0 - pow(10.0 * progress, 3.0);
+    }
+    return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
+}
+
+}  // namespace
 
 SplitInput::SplitInput(Split *_chatWidget, bool enableInlineReplying)
     : SplitInput(_chatWidget, _chatWidget, _chatWidget->view_,
@@ -45,6 +63,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     , split_(_chatWidget)
     , channelView_(_channelView)
     , enableInlineReplying_(enableInlineReplying)
+    , backgroundColorAnimation(this, "backgroundColor"_ba)
 {
     this->installEventFilter(this);
     this->initLayout();
@@ -73,6 +92,11 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
+
+    QEasingCurve curve;
+    curve.setCustomType(highlightEasingFunction);
+    this->backgroundColorAnimation.setDuration(500);
+    this->backgroundColorAnimation.setEasingCurve(curve);
 }
 
 void SplitInput::initLayout()
@@ -112,8 +136,14 @@ void SplitInput::initLayout()
 
     replyHbox->addStretch(1);
 
-    auto replyCancelButton =
-        replyHbox.emplace<Button>().assign(&this->ui_.cancelReplyButton);
+    auto replyCancelButton = replyHbox
+                                 .emplace<SvgButton>(
+                                     SvgButton::Src{
+                                         .dark = ":/buttons/cancel.svg",
+                                         .light = ":/buttons/cancelDark.svg",
+                                     },
+                                     nullptr, QSize{4, 0})
+                                 .assign(&this->ui_.cancelReplyButton);
 
     replyCancelButton->hide();
     replyLabel->hide();
@@ -132,12 +162,12 @@ void SplitInput::initLayout()
         hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
+    textEdit->setFrameStyle(QFrame::NoFrame);
 
-    hboxLayout.emplace<EffectLabel>().assign(&this->ui_.sendButton);
-    this->ui_.sendButton->getLabel().setText("SEND");
+    hboxLayout.emplace<LabelButton>("SEND").assign(&this->ui_.sendButton);
     this->ui_.sendButton->hide();
 
-    QObject::connect(this->ui_.sendButton, &EffectLabel::leftClicked, [this] {
+    QObject::connect(this->ui_.sendButton, &Button::leftClicked, [this] {
         std::vector<QString> arguments;
         this->handleSendMessage(arguments);
     });
@@ -159,12 +189,18 @@ void SplitInput::initLayout()
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
     {
-        auto textEditLength =
-            box.emplace<QLabel>().assign(&this->ui_.textEditLength);
-        textEditLength->setAlignment(Qt::AlignRight);
+        this->ui_.textEditLength = new QLabel();
+        // Right-align the labels contents
+        this->ui_.textEditLength->setAlignment(Qt::AlignRight);
+        box->addWidget(this->ui_.textEditLength);
 
-        box->addStretch(1);
-        box.emplace<Button>().assign(&this->ui_.emoteButton);
+        this->ui_.emoteButton = new SvgButton(
+            {
+                .dark = ":/buttons/emote.svg",
+                .light = ":/buttons/emoteDark.svg",
+            },
+            nullptr, QSize{6, 3});
+        box->addWidget(this->ui_.emoteButton, 0, Qt::AlignRight);
     }
 
     // ---- misc
@@ -186,15 +222,14 @@ void SplitInput::initLayout()
         });
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
+    QObject::connect(this->ui_.emoteButton, &Button::leftClicked, [this] {
         this->openEmotePopup();
     });
 
-    // clear input and remove reply target
-    QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
-                     [this] {
-                         this->clearInput();
-                     });
+    // clear input and remove reply thread
+    QObject::connect(this->ui_.cancelReplyButton, &Button::leftClicked, [this] {
+        this->setReply(nullptr);
+    });
 
     // Forward selection change signal
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -214,6 +249,16 @@ void SplitInput::initLayout()
         this->managedConnections_);
 }
 
+void SplitInput::triggerSelfMessageReceived()
+{
+    if (this->backgroundColorAnimation.state() != QPropertyAnimation::Stopped)
+    {
+        this->backgroundColorAnimation.stop();
+    }
+    this->backgroundColorAnimation.setDirection(QPropertyAnimation::Forward);
+    this->backgroundColorAnimation.start();
+}
+
 void SplitInput::scaleChangedEvent(float scale)
 {
     auto *app = getApp();
@@ -230,18 +275,16 @@ void SplitInput::scaleChangedEvent(float scale)
             this->ui_.vbox->setSpacing(this->marginForTheme());
         }
     }
+    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
 
-    QPalette placeholderPalette;
-    placeholderPalette.setColor(
-        QPalette::PlaceholderText,
-        this->theme->messages.textColors.chatPlaceholder);
-
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-    this->ui_.textEdit->setPalette(placeholderPalette);
+    // TODO: This font does _not_ get updated when you change your chat font
+    // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
+    // meaning numbers get equal width & don't bounce around while the user is typing.
     this->ui_.textEditLength->setFont(
-        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::TimestampMedium, scale));
+    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
 }
@@ -249,19 +292,19 @@ void SplitInput::scaleChangedEvent(float scale)
 void SplitInput::themeChangedEvent()
 {
     QPalette palette;
-    QPalette placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
-    placeholderPalette.setColor(
-        QPalette::PlaceholderText,
-        this->theme->messages.textColors.chatPlaceholder);
 
-    this->updateEmoteButton();
-    this->updateCancelReplyButton();
     this->ui_.textEditLength->setPalette(palette);
 
-    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-    this->ui_.textEdit->setPalette(placeholderPalette);
+    // Theme changed, reset current background color
+    this->setBackgroundColor(this->theme->splits.input.background);
+    this->backgroundColorAnimation.setStartValue(
+        this->theme->splits.input.backgroundPulse);
+    this->backgroundColorAnimation.setEndValue(
+        this->theme->splits.input.background);
+    this->backgroundColorAnimation.stop();
+    this->updateTextEditPalette();
 
     if (this->theme->isLightTheme())
     {
@@ -284,15 +327,6 @@ void SplitInput::updateEmoteButton()
 {
     auto scale = this->scale();
 
-    if (this->theme->isLightTheme())
-    {
-        this->ui_.emoteButton->setSvgResource(":/buttons/emoteDark.svg");
-    }
-    else
-    {
-        this->ui_.emoteButton->setSvgResource(":/buttons/emote.svg");
-    }
-
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
     // Make button slightly wider so it's easier to click
     this->ui_.emoteButton->setFixedWidth(int(24 * scale));
@@ -302,15 +336,6 @@ void SplitInput::updateCancelReplyButton()
 {
     float scale = this->scale();
 
-    if (this->theme->isLightTheme())
-    {
-        this->ui_.cancelReplyButton->setSvgResource(":/buttons/cancelDark.svg");
-    }
-    else
-    {
-        this->ui_.cancelReplyButton->setSvgResource(":/buttons/cancel.svg");
-    }
-    this->ui_.cancelReplyButton->setEnableMargin(false);
     this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
     this->ui_.cancelReplyButton->setFixedWidth(int(20 * scale));
 }
@@ -1146,53 +1171,64 @@ void SplitInput::setReply(MessagePtr target)
         this->ui_.textEdit->resetCompletion();
     }
 
-    assert(target != nullptr);
-    this->replyTarget_ = std::move(target);
-
-    if (this->enableInlineReplying_)
+    if (target != nullptr)
     {
-        this->ui_.replyMessage->setWidth(this->replyMessageWidth());
-        this->ui_.replyMessage->setMessage(this->replyTarget_);
+        this->replyTarget_ = std::move(target);
 
-        // add spacing between reply box and input box
-        this->ui_.vbox->setSpacing(this->marginForTheme());
-        if (!this->isHidden())
+        if (this->enableInlineReplying_)
         {
-            // update maximum height to give space for message
-            this->setMaximumHeight(this->scaledMaxHeight());
-        }
+            this->ui_.replyMessage->setWidth(this->replyMessageWidth());
+            this->ui_.replyMessage->setMessage(this->replyTarget_);
 
-        // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyTarget_->displayName;
-        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
-
-        // This makes it so if plainText contains "@StreamerFan" and
-        // we are replying to "@Streamer" we don't just leave "Fan"
-        // in the text box
-        if (plainText.startsWith(replyPrefix))
-        {
-            if (plainText.length() > replyPrefix.length())
+            // add spacing between reply box and input box
+            this->ui_.vbox->setSpacing(this->marginForTheme());
+            if (!this->isHidden())
             {
-                if (plainText.at(replyPrefix.length()) == ',' ||
-                    plainText.at(replyPrefix.length()) == ' ')
+                // update maximum height to give space for message
+                this->setMaximumHeight(this->scaledMaxHeight());
+            }
+
+            // Only enable reply label if inline replying
+            auto replyPrefix = "@" + this->replyTarget_->displayName;
+            auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+
+            // This makes it so if plainText contains "@StreamerFan" and
+            // we are replying to "@Streamer" we don't just leave "Fan"
+            // in the text box
+            if (plainText.startsWith(replyPrefix))
+            {
+                if (plainText.length() > replyPrefix.length())
                 {
-                    plainText.remove(0, replyPrefix.length() + 1);
+                    if (plainText.at(replyPrefix.length()) == ',' ||
+                        plainText.at(replyPrefix.length()) == ' ')
+                    {
+                        plainText.remove(0, replyPrefix.length() + 1);
+                    }
+                }
+                else
+                {
+                    plainText.remove(0, replyPrefix.length());
                 }
             }
-            else
+            if (!plainText.isEmpty() && !plainText.startsWith(' '))
             {
-                plainText.remove(0, replyPrefix.length());
+                replyPrefix.append(' ');
             }
+            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
+            this->ui_.replyLabel->setText("Replying to @" +
+                                          this->replyTarget_->displayName);
         }
-        if (!plainText.isEmpty() && !plainText.startsWith(' '))
+    }
+    else
+    {
+        this->replyTarget_.reset();
+
+        if (this->enableInlineReplying_)
         {
-            replyPrefix.append(' ');
+            this->clearReplyTarget();
         }
-        this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
-        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-        this->ui_.textEdit->resetCompletion();
-        this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyTarget_->displayName);
     }
 }
 
@@ -1267,6 +1303,41 @@ void SplitInput::applyOuterMargin()
 int SplitInput::replyMessageWidth() const
 {
     return this->ui_.inputWrapper->width() - 1 - 10;
+}
+
+void SplitInput::updateTextEditPalette()
+{
+    QPalette p;
+
+    // Placeholder text color
+    p.setColor(QPalette::PlaceholderText,
+               this->theme->messages.textColors.chatPlaceholder);
+
+    // Text color
+    p.setColor(QPalette::Text, this->theme->messages.textColors.regular);
+
+    // Selection background color
+    p.setBrush(QPalette::Highlight,
+               this->theme->isLightTheme()
+                   ? QColor(u"#68B1FF"_s)
+                   : this->theme->tabs.selected.backgrounds.regular);
+
+    // Background color
+    p.setBrush(QPalette::Base, this->backgroundColor());
+
+    this->ui_.textEdit->setPalette(p);
+}
+
+QColor SplitInput::backgroundColor() const
+{
+    return this->backgroundColor_;
+}
+
+void SplitInput::setBackgroundColor(QColor newColor)
+{
+    this->backgroundColor_ = newColor;
+
+    this->updateTextEditPalette();
 }
 
 }  // namespace chatterino

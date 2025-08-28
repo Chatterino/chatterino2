@@ -64,9 +64,13 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([] {
-        getSettings()->ignoredMessages.append(
-            IgnorePhrase{"my pattern", false, false,
-                         getSettings()->ignoredPhraseReplace.getValue(), true});
+        getSettings()->ignoredMessages.append(IgnorePhrase{
+            "my pattern",
+            false,
+            false,
+            DEFAULT_IGNORE_PHRASE_REPLACE.toString(),
+            true,
+        });
     });
 }
 

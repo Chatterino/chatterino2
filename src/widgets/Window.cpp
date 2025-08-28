@@ -17,16 +17,17 @@
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/InitUpdateButton.hpp"
 #include "util/RapidJsonSerializeQSize.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
+#include "widgets/buttons/InitUpdateButton.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
@@ -75,6 +76,12 @@ Window::Window(WindowType type, QWidget *parent)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
+#ifdef Q_OS_LINUX
+        if (this->theme->window.background.alpha() != 255)
+        {
+            this->setAttribute(Qt::WA_TranslucentBackground);
+        }
+#endif
     }
     else
     {
@@ -146,10 +153,19 @@ bool Window::event(QEvent *event)
 
 void Window::closeEvent(QCloseEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        qCWarning(chatterinoWidget)
+            << "Window closeEvent ran when Application is already dead";
+        return;
+    }
+
+    auto *app = getApp();
+
     if (this->type_ == WindowType::Main)
     {
-        getApp()->getWindows()->save();
-        getApp()->getWindows()->closeAll();
+        app->getWindows()->save();
+        app->getWindows()->closeAll();
     }
     else
     {
@@ -160,7 +176,7 @@ void Window::closeEvent(QCloseEvent *)
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
     // `selectedWindow_`.
-    getApp()->getWindows()->selectedWindow_ = nullptr;
+    app->getWindows()->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -196,12 +212,14 @@ void Window::addCustomTitlebarButtons()
     }
 
     // settings
-    this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getApp()->getWindows()->showSettingsDialog(this);
-    });
+    this->addTitleBarButton<TitleBarButton>(
+        [this] {
+            getApp()->getWindows()->showSettingsDialog(this);
+        },
+        TitleBarButtonStyle::Settings);
 
     // updates
-    auto *update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
+    auto *update = this->addTitleBarButton<PixmapButton>([] {});
 
     initUpdateButton(*update, this->signalHolder_);
 
@@ -215,7 +233,7 @@ void Window::addCustomTitlebarButtons()
 
     // streamer mode
     this->streamerModeTitlebarIcon_ =
-        this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
+        this->addTitleBarButton<PixmapButton>([this] {
             getApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
@@ -346,6 +364,11 @@ void Window::addShortcuts()
              SettingsDialog::showDialog(this);
              return "";
          }},
+        {"openAccountSelector",  // Open account selector
+         [](const std::vector<QString> &) -> QString {
+             getApp()->getWindows()->showAccountSelectPopup({0, 0});
+             return "";
+         }},
         {"newSplit",  // Create a new split
          [this](std::vector<QString>) -> QString {
              this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
@@ -424,7 +447,7 @@ void Window::addShortcuts()
              }
              else
              {
-                 return "Invalid popup target. Use \"split\" or \"window\".";
+                 return R"(Invalid popup target. Use "split" or "window".)";
              }
              return "";
          }},
@@ -785,11 +808,11 @@ void Window::onAccountSelected()
     {
         if (user->isAnon())
         {
-            this->userLabel_->getLabel().setText("anonymous");
+            this->userLabel_->setText("anonymous");
         }
         else
         {
-            this->userLabel_->getLabel().setText(user->getUserName());
+            this->userLabel_->setText(user->getUserName());
         }
     }
 }

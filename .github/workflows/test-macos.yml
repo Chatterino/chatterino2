@@ -30,13 +30,13 @@ jobs:
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4.1.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
