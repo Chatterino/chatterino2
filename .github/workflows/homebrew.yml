@@ -19,6 +19,7 @@ jobs:
   update_stable_homebrew_cask:
     name: "Update the stable homebrew cask"
     runs-on: "macos-latest"
+    if: github.repository_owner == 'Chatterino'
     steps:
       # Pulls out the version from the ref (e.g. refs/tags/v2.3.1 -> 2.3.1)
       - name: Execute brew bump-cask-pr with version
