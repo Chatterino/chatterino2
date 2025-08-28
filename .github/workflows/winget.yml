@@ -5,7 +5,7 @@ on:
 jobs:
   publish:
     runs-on: windows-latest
-    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }} && github.repository_owner == 'Chatterino'
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
         with:

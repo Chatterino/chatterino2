@@ -24,8 +24,6 @@ jobs:
     name: "Test Arch Linux"
     runs-on: ubuntu-latest
     container: archlinux:base-devel
-    strategy:
-      fail-fast: false
 
     steps:
       - name: Install dependencies
