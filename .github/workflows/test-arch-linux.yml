@@ -34,7 +34,7 @@ jobs:
           sudo pacman -S --noconfirm 'qt6-base' 'qt6-tools' 'boost-libs' 'openssl' 'qt6-imageformats' 'qtkeychain-qt6' 'qt6-5compat' 'qt6-svg' 'libnotify'
           sudo pacman -S --noconfirm 'git' 'boost' 'cmake' 'benchmark'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 

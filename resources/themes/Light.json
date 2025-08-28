@@ -59,6 +59,7 @@
       },
       "input": {
         "background": "#dbdbdb",
+        "backgroundPulse": "#dbffdb",
         "text": "#000000"
       },
       "messageSeperator": "#7f7f7f",

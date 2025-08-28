@@ -40,7 +40,7 @@ Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
     , addButton_(new DrawnButton(DrawnButton::Symbol::Plus,
                                  {
-                                     .padding = 6,
+                                     .padding = 7,
                                      .thickness = 1,
                                  },
                                  this))
@@ -705,7 +705,7 @@ void Notebook::setShowAddButton(bool value)
 
 void Notebook::resizeAddButton()
 {
-    float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->scale();
+    int h = static_cast<int>((NOTEBOOK_TAB_HEIGHT - 1) * this->scale());
     this->addButton_->setFixedSize(h, h);
 }
 

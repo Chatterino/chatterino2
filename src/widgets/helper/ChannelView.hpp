@@ -61,6 +61,7 @@ enum class FromTwitchLinkOpenChannelIn {
     Tab,
     BrowserPlayer,
     Streamlink,
+    CustomPlayer,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -227,6 +228,9 @@ public:
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
+
+    /// This signal fires when a message passed filters and was added to the channel view
+    Q_SIGNAL void messageAddedToChannel(MessagePtr &message);
 
 protected:
     void themeChangedEvent() override;

@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "buttons/SvgButton.hpp"
 #    include "widgets/BaseWindow.hpp"
 
 #    include <boost/signals2/connection.hpp>
@@ -20,8 +21,6 @@ enum class LogLevel;
 namespace chatterino {
 
 class Plugin;
-class SvgButton;
-class PixmapButton;
 
 class PluginRepl : public BaseWindow
 {
@@ -65,7 +64,15 @@ private:
         QTextEdit *output = nullptr;
         SvgButton *clear = nullptr;
         SvgButton *reload = nullptr;
-        PixmapButton *pin = nullptr;
+        SvgButton *pin = nullptr;
+        SvgButton::Src pinDisabledSource_{
+            .dark = ":/buttons/pinDisabled-darkMode.svg",
+            .light = ":/buttons/pinDisabled-lightMode.svg",
+        };
+        SvgButton::Src pinEnabledSource_{
+            .dark = ":/buttons/pinEnabled.svg",
+            .light = ":/buttons/pinEnabled.svg",
+        };
     } ui;
 
     struct {
