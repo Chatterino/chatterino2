@@ -205,6 +205,7 @@ void parseSplits(const QJsonObject &splits, const QJsonObject &splitsFallback,
         const auto input = splits["input"_L1].toObject();
         const auto inputFallback = splitsFallback["input"_L1].toObject();
         parseColor(theme.splits, input, background);
+        parseColor(theme.splits, input, backgroundPulse);
         parseColor(theme.splits, input, text);
     }
 }

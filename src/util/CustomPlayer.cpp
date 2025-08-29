@@ -22,7 +22,7 @@ void openInCustomPlayer(QStringView channelName)
     }
 
     QDesktopServices::openUrl(
-        QUrl{scheme % u"https://twitch.tv/" % channelName});
+        QUrl{scheme % u"https://www.twitch.tv/" % channelName});
 }
 
 }  // namespace chatterino

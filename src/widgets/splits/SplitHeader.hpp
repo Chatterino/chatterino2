@@ -16,8 +16,8 @@
 
 namespace chatterino {
 
+class SvgButton;
 class DrawnButton;
-class PixmapButton;
 class LabelButton;
 class Label;
 class Split;
@@ -86,8 +86,8 @@ private:
     QAction *modeActionSetR9k{};
     QAction *modeActionSetFollowers{};
 
-    PixmapButton *moderationButton_{};
-    PixmapButton *chattersButton_{};
+    SvgButton *moderationButton_{};
+    SvgButton *chattersButton_{};
     DrawnButton *addButton_{};
 
     // states

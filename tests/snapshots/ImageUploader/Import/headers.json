@@ -17,7 +17,7 @@
     "output": {
         "deletionLink": "{more}",
         "formField": "file",
-        "headers": "Another: header\nMy-Header: Foo ; Bar : Baz ; KeyOnly\nX-My-Header: 1",
+        "headers": "Another: header;My-Header: Foo ; Bar : Baz ; KeyOnly;X-My-Header: 1",
         "link": "foo{bar}baz",
         "url": "https://example.com"
     }
