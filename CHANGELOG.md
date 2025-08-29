@@ -116,7 +116,6 @@
 - Dev: Added an explicit `frozen` flag to `Message`. (#6367)
 - Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 - Dev: Error handlers for Sol check functions now take a function reference over an owning type. (#6393)
-- Dev: Make attaching links to `ReplyCurveElement` work. (#6386)
 
 ## 2.5.3
 
