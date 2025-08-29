@@ -20,6 +20,7 @@
 namespace {
 
 const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
+const QString MAGIC_MESSAGE_SUFFIX = QStringLiteral(" \u034f");
 
 // Note: \U requires /utf-8 for MSVC
 // See https://mm2pl.github.io/emoji_rfc.pdf
@@ -472,5 +473,124 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
         haystack.sliced(idx + 1),
     };
 }
+
+uint64_t gospersHack(uint64_t x)
+{
+#pragma warning(push)
+#pragma warning(disable : 4146)
+    uint64_t u = x & -x;
+#pragma warning(pop)
+    uint64_t v = x + u;
+    return v + (((v ^ x) / u) >> 2);
+}
+
+int popCount(uint64_t x)
+{
+#ifdef _MSC_VER
+    return __popcnt64(x);
+#else
+    return __builtin_popcountll(x);
+#endif
+}
+
+namespace helpers::duplicate_message {
+
+QVector<int> getSpacePositions(const QString &message)
+{
+    QVector<int> spacePositions;
+    bool isCommand = message.startsWith('/') || message.startsWith('.');
+    bool skippedFirst = false;
+
+    // the total number of variants is (1ULL << n) * 3
+    // so 62 is the max number of positions we can safely have without overflow in a uint64_t bitmask
+    const int maxPositions = 62;
+
+    for (int i = 0; i < static_cast<int>(message.size()); ++i)
+    {
+        if (message.at(i) == ' ')
+        {
+            if (isCommand && !skippedFirst)
+            {
+                skippedFirst = true;
+                continue;
+            }
+            spacePositions.append(i);
+            if (spacePositions.size() >= maxPositions)
+            {
+                break;
+            }
+        }
+    }
+    return spacePositions;
+}
+
+QString normalizeMessage(const QString &message)
+{
+    QString normalized = message;
+    normalized.replace(MAGIC_MESSAGE_SUFFIX, "");
+    normalized = normalized.simplified();
+    return normalized;
+}
+
+QString buildVariant(const QString &message, const QVector<int> &spacePositions,
+                     uint64_t spaceMask, uint64_t magicGroup)
+{
+    QString variant = message;
+    int offset = 0;
+    for (int i = 0; i < static_cast<int>(spacePositions.size()); ++i)
+    {
+        if ((spaceMask & (1ULL << i)) != 0)
+        {
+            int pos = spacePositions[i] + offset;
+            variant.insert(pos, ' ');
+            ++offset;
+        }
+    }
+    if (magicGroup == 1)
+    {
+        variant.append(MAGIC_MESSAGE_SUFFIX);
+    }
+    else if (magicGroup == 2)
+    {
+        variant.append(" " + MAGIC_MESSAGE_SUFFIX);
+    }
+    return variant;
+}
+
+uint64_t getNextMask(uint64_t currentMask, uint64_t numSpaces)
+{
+    // bits for each space position plus 2 bits for magic suffixes
+    uint64_t totalBits = numSpaces + 2;
+    uint64_t nextMask = gospersHack(currentMask);
+
+    // skip any masks that have both magic bits set, these are invalid
+    uint64_t invalidMagicMask = 3ULL << numSpaces;
+    uint64_t maxValidMask = (1ULL << totalBits) - 1;
+    while (nextMask <= maxValidMask &&
+           (nextMask & invalidMagicMask) == invalidMagicMask)
+    {
+        nextMask = gospersHack(nextMask);
+    }
+
+    if (nextMask > maxValidMask || nextMask == 0)
+    {
+        // we've exhausted all valid masks for the current grade
+        int w = popCount(currentMask);
+        if (w < int(totalBits))
+        {
+            // lowest mask with the next grade
+            nextMask = (1ULL << (w + 1)) - 1;
+        }
+        else
+        {
+            // we're at the max grade, reset to the original message
+            nextMask = 0;
+        }
+    }
+
+    return nextMask;
+}
+
+}  // namespace helpers::duplicate_message
 
 }  // namespace chatterino
