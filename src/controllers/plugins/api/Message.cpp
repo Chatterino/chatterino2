@@ -156,6 +156,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     else if (type == u"reply-curve")
     {
         el = replyCurveElementFromTable();
+        linksAllowed = false;
     }
     else
     {
