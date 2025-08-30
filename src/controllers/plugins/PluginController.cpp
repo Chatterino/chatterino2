@@ -11,6 +11,8 @@
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/JSONParse.hpp"
+#    include "controllers/plugins/api/JSONStringify.hpp"
 #    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
@@ -234,6 +236,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
+
+    c2["json_parse"] = lua::api::jsonParse;
+    c2["json_stringify"] = lua::api::jsonStringify;
+    // pushed as lightuserdata
+    c2["json_null"] = static_cast<void *>(nullptr);
 
     sol::table io = g["io"];
     io.set_function(
