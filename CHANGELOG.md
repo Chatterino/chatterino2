@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
+
 ## 2.5.4-beta.1
 
 - Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
