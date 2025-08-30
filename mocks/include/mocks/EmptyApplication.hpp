@@ -17,10 +17,12 @@ public:
     explicit EmptyApplication(const QString &settingsData)
     {
         QFile settingsFile(this->settingsDir.filePath("settings.json"));
-        settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
-        settingsFile.write(settingsData.toUtf8());
-        settingsFile.flush();
-        settingsFile.close();
+        if (settingsFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            settingsFile.write(settingsData.toUtf8());
+            settingsFile.flush();
+            settingsFile.close();
+        }
     }
 
     ~EmptyApplication() override = default;

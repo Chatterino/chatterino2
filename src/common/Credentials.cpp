@@ -65,14 +65,21 @@ QString insecurePath()
 QJsonDocument loadInsecure()
 {
     QFile file(insecurePath());
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return {};
+    }
+
     return QJsonDocument::fromJson(file.readAll());
 }
 
 void storeInsecure(const QJsonDocument &doc)
 {
     QSaveFile file(insecurePath());
-    file.open(QIODevice::WriteOnly);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return;
+    }
     file.write(doc.toJson());
     file.commit();
 }
