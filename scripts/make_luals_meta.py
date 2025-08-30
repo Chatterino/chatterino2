@@ -207,7 +207,7 @@ class Reader:
                     for line in line[opener:closer].split(",")
                 ]
                 break
-            if line.startswith("enum class"):
+            if line.startswith("enum "):
                 continue
 
             if waiting_for_end:
