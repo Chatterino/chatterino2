@@ -45,7 +45,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake boost
+          # brew install openssl rapidjson p7zip create-dmg cmake boost
+          brew install openssl rapidjson p7zip create-dmg boost
 
       - name: Install httpbox
         run: |
