@@ -43,7 +43,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.3
+    VERSION 2.5.4
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
