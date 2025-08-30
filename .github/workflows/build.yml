@@ -285,7 +285,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake tree boost
+          # brew install openssl rapidjson p7zip create-dmg cmake tree boost
+          brew install openssl rapidjson p7zip create-dmg tree boost
         shell: bash
 
       - name: Build (MacOS)
