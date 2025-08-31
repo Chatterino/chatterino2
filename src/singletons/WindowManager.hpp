@@ -139,6 +139,8 @@ public:
 
     std::set<QString> getVisibleChannelNames() const;
 
+    std::span<Window *const> windows() const;
+
     /// Signals
     pajlada::Signals::NoArgSignal gifRepaintRequested;
 

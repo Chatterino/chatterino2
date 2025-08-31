@@ -188,11 +188,11 @@ public:
 
     static void createUserType(sol::table &c2);
 
-private:
-    std::weak_ptr<Channel> weak;
-
     /// Locks the weak pointer and throws if the pointer expired
     std::shared_ptr<Channel> strong();
+
+private:
+    std::weak_ptr<Channel> weak;
 
     /// Locks the weak pointer and throws if the pointer is invalid
     std::shared_ptr<TwitchChannel> twitch();

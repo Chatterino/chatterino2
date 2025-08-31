@@ -739,6 +739,69 @@ This table describes links available to plugins.
 | `JumpToMessage`   | ID of the message                  | Highlight the message with given ID in current split, do nothing if it was not found | n/a                                   |
 | `InsertText`      | Any text, command or emote         | Insert text into split input                                                         | n/a                                   |
 
+#### `Split`
+
+A split. See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
+This holds a `channel` ([Channel]()) that's open in this split.
+
+#### `SplitContainerNode`
+
+A node in a split container. It has the following fields:
+
+- `type` (`SplitContainerNodeType`) The type of this node
+- `split` ([`Split`](#split)?) The split contained in this code (if this is a split node)
+- `parent` ([`SplitContainerNode`](#splitcontainernode)?) The parent node
+- `horizontal_flex` (`number`) The amount of horizontal space this split takes
+- `vertical_flex` (`number`) The amount of vertical space this split takes
+
+##### `SplitContainerNode:children()`
+
+Get all children ([`SplitContainerNode`](#splitcontainernode)) of this node.
+
+#### `SplitContainer`
+
+A container with potentially multiple splits. It has the following fields:
+
+- `selected_split` ([`Split`](#split)) The currently selected split.
+- `base_node` ([`SplitContainerNode`](#splitcontainernode)) The top level node.
+
+##### `SplitContainer:splits()`
+
+Get all splits ([`Split`](#split)) contained in this container.
+
+#### `SplitNotebook`
+
+- `selected_page` ([`SplitContainer`](#splitcontainer)?) The currently selected page.
+- `page_count` (`integer`) The number of pages/tabs.
+
+##### `SplitNotebook:page_at(i)`
+
+Get the notebook page at a specific index.
+`i` is the zero based index of the page.
+Returns the page ([`SplitContainer`](#splitcontainer)) contained at the specified index.
+
+#### `Window`
+
+It has the following fields:
+
+- `notebook` ([`SplitNotebook`](#splitnotebook)) The notebook of this window.
+- `type` (`WindowType`) The type of this window.
+
+#### `WindowManager`
+
+It has the following fields:
+
+- `main_window` ([`Window`](#window)) The main window.
+- `last_selected_window` ([`Window`](#window)) The last selected window (or the main window if none were selected last).
+
+##### `WindowManager:all()`
+
+Get all open windows.
+
+#### `c2.windows`
+
+The global [`WindowManager`](#windowmanager).
+
 ### Input/Output API
 
 These functions are wrappers for Lua's I/O library. Functions on file pointer
