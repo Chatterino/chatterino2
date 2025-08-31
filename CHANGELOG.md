@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Refactored split container nodes to use shared pointers. (#6435)
+
 ## 2.5.4-beta.1
 
 - Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
