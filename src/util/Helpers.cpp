@@ -476,10 +476,7 @@ std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
 
 uint64_t gospersHack(uint64_t x)
 {
-#pragma warning(push)
-#pragma warning(disable : 4146)
-    uint64_t u = x & -x;
-#pragma warning(pop)
+    uint64_t u = x & (~x + 1ULL);
     uint64_t v = x + u;
     return v + (((v ^ x) / u) >> 2);
 }
