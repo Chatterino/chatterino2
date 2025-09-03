@@ -96,7 +96,6 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",
                             "2x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/2",
@@ -139,7 +138,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

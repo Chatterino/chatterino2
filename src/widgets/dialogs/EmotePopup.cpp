@@ -3,18 +3,16 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -116,13 +114,12 @@ auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
     return builder.release();
 }
 
-void addEmotes(Channel &channel, auto &&emotes, const QString &title,
-               const MessageElementFlag &emoteFlag)
+void addEmotes(Channel &channel, auto &&emotes, const QString &title)
 {
     channel.addMessage(makeTitleMessage(title), MessageContext::Original);
-    channel.addMessage(
-        makeEmoteMessage(std::forward<decltype(emotes)>(emotes), emoteFlag),
-        MessageContext::Original);
+    channel.addMessage(makeEmoteMessage(std::forward<decltype(emotes)>(emotes),
+                                        MessageElementFlag::Emote),
+                       MessageContext::Original);
 }
 
 void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
@@ -133,8 +130,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 {
     if (!local->empty())
     {
-        addEmotes(subChannel, *local, channelName % u" (Follower)",
-                  MessageElementFlag::TwitchEmote);
+        addEmotes(subChannel, *local, channelName % u" (Follower)");
     }
 
     std::vector<
@@ -146,8 +142,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
         if (set.owner->id == currentChannelID)
         {
             // Put current channel emotes at the top
-            addEmotes(subChannel, set.emotes, set.title(),
-                      MessageElementFlag::TwitchEmote);
+            addEmotes(subChannel, set.emotes, set.title());
         }
         else
         {
@@ -162,7 +157,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
     for (const auto &[title, set] : sortedSets)
     {
         addEmotes(set.get().isSubLike ? subChannel : globalChannel,
-                  set.get().emotes, title, MessageElementFlag::TwitchEmote);
+                  set.get().emotes, title);
     }
 }
 
@@ -269,7 +264,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
-            MessageElementFlag::EmoteImages});
+            MessageElementFlag::EmoteImage});
         view->setEnableScrollingToBottom(false);
         // We can safely ignore this signal connection since the ChannelView is deleted
         // either when the notebook is deleted, or when our main layout is deleted.
@@ -296,7 +291,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     loadEmojis(*this->viewEmojis_,
-               getApp()->getEmotes()->getEmojis()->getEmojis());
+               getApp()->getEmoteController()->emojis()->getEmojis());
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
@@ -419,6 +414,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->channel_ = std::move(channel);
     this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    this->emoteChannel_ = dynamic_cast<EmoteChannel *>(this->channel_.get());
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
@@ -452,39 +448,28 @@ void EmotePopup::reloadEmotes()
             *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets(),
             *globalChannel, *subChannel, twitchChannel_->roomId(),
             twitchChannel_->getName());
+    }
 
-        // channel
-        if (Settings::instance().enableBTTVChannelEmotes)
+    if (this->emoteChannel_)
+    {
+        for (const auto &item : this->emoteChannel_->emotes().items())
         {
-            addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                      "BetterTTV", MessageElementFlag::BttvEmote);
-        }
-        if (Settings::instance().enableFFZChannelEmotes)
-        {
-            addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                      "FrankerFaceZ", MessageElementFlag::FfzEmote);
-        }
-        if (Settings::instance().enableSevenTVChannelEmotes)
-        {
-            addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                      "7TV", MessageElementFlag::SevenTVEmote);
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*channelChannel, *item.emotes, provider->name());
         }
     }
-    // global
-    if (Settings::instance().enableBTTVGlobalEmotes)
+
+    for (const auto &provider : getApp()->getEmoteController()->providers())
     {
-        addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
-                  "BetterTTV", MessageElementFlag::BttvEmote);
-    }
-    if (Settings::instance().enableFFZGlobalEmotes)
-    {
-        addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
-                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
-    }
-    if (Settings::instance().enableSevenTVGlobalEmotes)
-    {
-        addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
-                  "7TV", MessageElementFlag::SevenTVEmote);
+        if (!provider->hasGlobalEmotes())
+        {
+            continue;
+        }
+        addEmotes(*globalChannel, *provider->globalEmotes(), provider->name());
     }
 
     if (subChannel->getMessageSnapshot().size() == 0)
@@ -524,8 +509,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         if (!local.empty())
         {
             addEmotes(*searchChannel, local,
-                      this->twitchChannel_->getName() % u" (Follower)",
-                      MessageElementFlag::TwitchEmote);
+                      this->twitchChannel_->getName() % u" (Follower)");
         }
 
         for (const auto &[_id, set] :
@@ -534,63 +518,40 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
             auto filtered = filterEmoteVec(searchText, set.emotes);
             if (!filtered.empty())
             {
-                addEmotes(*searchChannel, std::move(filtered), set.title(),
-                          MessageElementFlag::TwitchEmote);
+                addEmotes(*searchChannel, std::move(filtered), set.title());
             }
         }
     }
 
-    auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getBttvEmotes()->emotes());
-    auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getFfzEmotes()->emotes());
-    auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->getSeventvEmotes()->globalEmotes());
+    for (const auto &provider : getApp()->getEmoteController()->providers())
+    {
+        auto filtered = filterEmoteMap(searchText, provider->globalEmotes());
+        if (filtered.empty())
+        {
+            continue;
+        }
 
-    // global
-    if (!bttvGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, bttvGlobalEmotes, "BetterTTV (Global)",
-                  MessageElementFlag::BttvEmote);
-    }
-    if (!ffzGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, ffzGlobalEmotes, "FrankerFaceZ (Global)",
-                  MessageElementFlag::FfzEmote);
-    }
-    if (!seventvGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)",
-                  MessageElementFlag::SevenTVEmote);
+        addEmotes(*searchChannel, std::move(filtered),
+                  provider->name() % u" (Global)");
     }
 
-    if (this->twitchChannel_ == nullptr)
+    if (this->emoteChannel_)
     {
-        return;
-    }
-
-    auto bttvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
-    auto ffzChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
-    auto seventvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
-
-    // channel
-    if (!bttvChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, bttvChannelEmotes, "BetterTTV (Channel)",
-                  MessageElementFlag::BttvEmote);
-    }
-    if (!ffzChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, ffzChannelEmotes, "FrankerFaceZ (Channel)",
-                  MessageElementFlag::FfzEmote);
-    }
-    if (!seventvChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)",
-                  MessageElementFlag::SevenTVEmote);
+        for (const auto &item : this->emoteChannel_->emotes().items())
+        {
+            auto filtered = filterEmoteMap(searchText, item.emotes);
+            if (filtered.empty())
+            {
+                continue;
+            }
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*searchChannel, std::move(filtered),
+                      provider->name() % u" (Channel)");
+        }
     }
 }
 
@@ -615,7 +576,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
     std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
+    const auto &emojis = getApp()->getEmoteController()->emojis()->getEmojis();
     for (const auto &emoji : emojis)
     {
         if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))

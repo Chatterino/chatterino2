@@ -56,14 +56,6 @@ public:
         return nullptr;
     }
 
-    IEmotes *getEmotes() override
-    {
-        assert(
-            false &&
-            "EmptyApplication::getEmotes was called without being initialized");
-        return nullptr;
-    }
-
     AccountController *getAccounts() override
     {
         assert(false && "EmptyApplication::getAccounts was called without "
@@ -194,6 +186,14 @@ public:
         return nullptr;
     }
 
+    EmoteController *getEmoteController() override
+    {
+        assert(false &&
+               "EmptyApplication::getEmoteController was called without "
+               "being initialized");
+        return nullptr;
+    }
+
     SeventvAPI *getSeventvAPI() override
     {
         return nullptr;
@@ -208,31 +208,10 @@ public:
     }
 #endif
 
-    BttvEmotes *getBttvEmotes() override
-    {
-        assert(false && "EmptyApplication::getBttvEmotes was called without "
-                        "being initialized");
-        return nullptr;
-    }
-
     BttvLiveUpdates *getBttvLiveUpdates() override
     {
         assert(false && "EmptyApplication::getBttvLiveUpdates was called "
                         "without being initialized");
-        return nullptr;
-    }
-
-    FfzEmotes *getFfzEmotes() override
-    {
-        assert(false && "EmptyApplication::getFfzEmotes was called without "
-                        "being initialized");
-        return nullptr;
-    }
-
-    SeventvEmotes *getSeventvEmotes() override
-    {
-        assert(false && "EmptyApplication::getSeventvEmotes was called without "
-                        "being initialized");
         return nullptr;
     }
 

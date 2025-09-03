@@ -7,6 +7,8 @@
 
 #include <QDateTime>
 #include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QLocale>
 #include <QLoggingCategory>
@@ -417,7 +419,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
 }
 
 bool readProviderEmotesCache(const QString &id, const QString &provider,
-                             const std::function<void(QJsonDocument)> &callback)
+                             const std::function<void(QJsonValue)> &callback)
 {
     QString cacheKey = id % "." % provider;
     QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
@@ -437,7 +439,17 @@ bool readProviderEmotesCache(const QString &id, const QString &provider,
 
         qCDebug(chatterinoCache)
             << "Loaded emote cache: " << id << "." << provider;
-        callback(doc);
+
+        QJsonValue jv;
+        if (doc.isArray())
+        {
+            jv = doc.array();
+        }
+        else if (doc.isObject())
+        {
+            jv = doc.object();
+        }
+        callback(jv);
         return true;
     }
 

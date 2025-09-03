@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
@@ -10,7 +11,7 @@
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/emoji/Emojis.hpp"
-#include "singletons/Emotes.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
@@ -200,7 +201,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         return;
     }
 
-    if (ctx.flags.has(MessageElementFlag::EmoteImages))
+    if (ctx.flags.has(MessageElementFlag::EmoteImage))
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -286,7 +287,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        if (ctx.flags.has(MessageElementFlag::EmoteImages))
+        if (ctx.flags.has(MessageElementFlag::EmoteImage))
         {
             auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
@@ -884,7 +885,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
             bool done = false;
             for (const auto &parsedWord :
-                 app->getEmotes()->getEmojis()->parse(word.text))
+                 app->getEmoteController()->emojis()->parse(word.text))
             {
                 if (parsedWord.type() == typeid(QString))
                 {

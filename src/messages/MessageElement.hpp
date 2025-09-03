@@ -40,29 +40,20 @@ enum class MessageElementFlag : int64_t {
     Username = (1LL << 2),
     Timestamp = (1LL << 3),
 
-    TwitchEmoteImage = (1LL << 4),
-    TwitchEmoteText = (1LL << 5),
-    TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
+    EmoteImage = (1LL << 4),
+    EmoteText = (1LL << 5),
+    Emote = EmoteImage | EmoteText,
 
-    BttvEmoteImage = (1LL << 6),
-    BttvEmoteText = (1LL << 7),
-    BttvEmote = BttvEmoteImage | BttvEmoteText,
+    // Unused:
+    // (1LL << 6)
+    // (1LL << 7)
 
     ChannelPointReward = (1LL << 8),
-    ChannelPointRewardImage = ChannelPointReward | TwitchEmoteImage,
+    ChannelPointRewardImage = ChannelPointReward | EmoteImage,
 
-    FfzEmoteImage = (1LL << 9),
-    FfzEmoteText = (1LL << 10),
-    FfzEmote = FfzEmoteImage | FfzEmoteText,
-
-    SevenTVEmoteImage = (1LL << 34),
-    SevenTVEmoteText = (1LL << 35),
-    SevenTVEmote = SevenTVEmoteImage | SevenTVEmoteText,
-
-    EmoteImages =
-        TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage | SevenTVEmoteImage,
-    EmoteText =
-        TwitchEmoteText | BttvEmoteText | FfzEmoteText | SevenTVEmoteText,
+    // Unused:
+    // (1LL << 9)
+    // (1LL << 10)
 
     BitsStatic = (1LL << 11),
     BitsAnimated = (1LL << 12),
@@ -158,11 +149,11 @@ enum class MessageElementFlag : int64_t {
     // for the reply button element
     ReplyButton = (1LL << 33),
 
-    // (1LL << 34) through (1LL << 36) are occupied by
-    // SevenTVEmoteImage, SevenTVEmoteText, and BadgeSevenTV,
+    // Unused
+    // (1LL << 34)
+    // (1LL << 35)
 
-    Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
-              BttvEmoteImage | SevenTVEmoteImage | TwitchEmoteImage |
+    Default = Timestamp | Badges | Username | BitsStatic | EmoteImage |
               BitsAmount | Text | AlwaysShow,
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;

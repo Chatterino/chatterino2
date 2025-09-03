@@ -164,7 +164,7 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -176,14 +176,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/FFZEmote",
                         "images": {
                             "1x": "https://chatterino.com/FFZEmote.png"
                         },
                         "name": "FFZEmote",
+                        "providerID": "ffz",
                         "tooltip": "FFZEmote Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

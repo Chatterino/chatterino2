@@ -2,7 +2,7 @@
 
 #include "messages/Image.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "singletons/Resources.hpp"
 #include "Test.hpp"
 
@@ -19,12 +19,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmoteController() override
     {
-        return &this->emotes;
+        return &this->emoteController;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emoteController;
 };
 
 class ModerationActionTest : public ::testing::Test

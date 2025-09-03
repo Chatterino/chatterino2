@@ -30,13 +30,14 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
@@ -500,8 +501,8 @@ CommandModel *CommandController::createModel(QObject *parent)
 QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
-    QString text =
-        getApp()->getEmotes()->getEmojis()->replaceShortCodes(textNoEmoji);
+    QString text = getApp()->getEmoteController()->emojis()->replaceShortCodes(
+        textNoEmoji);
     QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
@@ -516,7 +517,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            text = getApp()->getEmotes()->getEmojis()->replaceShortCodes(
+            text = getApp()->getEmoteController()->emojis()->replaceShortCodes(
                 this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', Qt::SkipEmptyParts);

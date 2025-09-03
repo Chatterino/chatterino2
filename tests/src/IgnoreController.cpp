@@ -2,7 +2,8 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchIrc.hpp"
 #include "Test.hpp"
 
@@ -15,9 +16,9 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmoteController() override
     {
-        return &this->emotes;
+        return &this->emoteController;
     }
 
     AccountController *getAccounts() override
@@ -25,7 +26,7 @@ public:
         return &this->accounts;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emoteController;
     AccountController accounts;
 };
 
@@ -57,7 +58,8 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
         std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
-    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
+    auto *twitchEmotes =
+        this->mockApplication->getEmoteController()->twitchEmotes();
 
     auto emoteAt = [&](int at, const QString &name) {
         return TwitchEmoteOccurrence{

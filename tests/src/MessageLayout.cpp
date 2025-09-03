@@ -6,7 +6,6 @@
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"

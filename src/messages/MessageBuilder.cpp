@@ -5,6 +5,8 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -15,14 +17,12 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -33,7 +33,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "providers/twitch/UserColor.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -77,11 +76,6 @@ const QRegularExpression mentionRegex("^@" + regexHelpString);
 const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
-
-const QSet<QString> zeroWidthEmotes{
-    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
-    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
-};
 
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
@@ -376,8 +370,7 @@ bool doesWordContainATwitchEmote(
 }
 
 EmotePtr makeSharedChatBadge(const QString &sourceName,
-                             const QString &sourceProfileURL,
-                             const QString &sourceLogin)
+                             const QString &sourceProfileURL)
 {
     if (!sourceProfileURL.isEmpty())
     {
@@ -385,15 +378,6 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
         QString url28px = urlBegin % u"28x28" % urlEnd;
         QString url70px = urlBegin % u"70x70" % urlEnd;
         QString url150px = urlBegin % u"150x150" % urlEnd;
-
-        auto badgeLink = [&] {
-            if (sourceLogin.isEmpty())
-            {
-                return Url{"https://link.twitch.tv/SharedChatViewer"};
-            }
-
-            return Url{u"https://www.twitch.tv/%1"_s.arg(sourceLogin)};
-        }();
 
         return std::make_shared<Emote>(Emote{
             .name = EmoteName{},
@@ -407,7 +391,6 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             .tooltip =
                 Tooltip{"Shared Message" +
                         (sourceName.isEmpty() ? "" : " from " + sourceName)},
-            .homePage = badgeLink,
         });
     }
 
@@ -417,99 +400,27 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             getResources().twitch.sharedChat, 0.25)},
         .tooltip = Tooltip{"Shared Message" +
                            (sourceName.isEmpty() ? "" : " from " + sourceName)},
-        .homePage = Url{"https://link.twitch.tv/SharedChatViewer"},
     });
 }
 
-std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
-    TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
-    //  - FrankerFaceZ Channel
-    //  - BetterTTV Channel
-    //  - 7TV Channel
-    //  - FrankerFaceZ Global
-    //  - BetterTTV Global
-    //  - 7TV Global
+    //  - Channel emotes
+    //  - Global emotes
 
-    const auto *globalFfzEmotes = getApp()->getFfzEmotes();
-    const auto *globalBttvEmotes = getApp()->getBttvEmotes();
-    const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
-
-    std::optional<EmotePtr> emote{};
-
-    if (twitchChannel != nullptr)
+    auto channel = twitchChannel->emotes().resolve(name);
+    if (channel)
     {
-        // Check for channel emotes
-
-        emote = twitchChannel->ffzEmote(name);
-        if (emote)
-        {
-            return {
-                emote,
-                MessageElementFlag::FfzEmote,
-                false,
-            };
-        }
-
-        emote = twitchChannel->bttvEmote(name);
-        if (emote)
-        {
-            return {
-                emote,
-                MessageElementFlag::BttvEmote,
-                false,
-            };
-        }
-
-        emote = twitchChannel->seventvEmote(name);
-        if (emote)
-        {
-            return {
-                emote,
-                MessageElementFlag::SevenTVEmote,
-                emote.value()->zeroWidth,
-            };
-        }
+        return channel;
     }
 
-    // Check for global emotes
-
-    emote = globalFfzEmotes->emote(name);
-    if (emote)
+    auto global = getApp()->getEmoteController()->resolveGlobal(name);
+    if (global)
     {
-        return {
-            emote,
-            MessageElementFlag::FfzEmote,
-            false,
-        };
+        return global;
     }
-
-    emote = globalBttvEmotes->emote(name);
-    if (emote)
-    {
-        return {
-            emote,
-            MessageElementFlag::BttvEmote,
-            zeroWidthEmotes.contains(name.string),
-        };
-    }
-
-    emote = globalSeventvEmotes->globalEmote(name);
-    if (emote)
-    {
-        return {
-            emote,
-            MessageElementFlag::SevenTVEmote,
-            emote.value()->zeroWidth,
-        };
-    }
-
-    return {
-        {},
-        {},
-        false,
-    };
+    return nullptr;
 }
 
 }  // namespace
@@ -1136,7 +1047,7 @@ void MessageBuilder::appendChannelPointRewardMessage(
     if (reward.id == "CELEBRATION")
     {
         const auto emotePtr =
-            getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+            getApp()->getEmoteController()->twitchEmotes()->getOrCreateEmote(
                 EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
         this->emplace<EmoteElement>(emotePtr,
                                     MessageElementFlag::ChannelPointReward,
@@ -2240,14 +2151,14 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
-
+    auto emote = parseEmote(twitchChannel, name);
     if (!emote)
     {
         return Failure;
     }
 
-    if (zeroWidth && getSettings()->enableZeroWidthEmotes && !this->isEmpty())
+    if (emote->zeroWidth && getSettings()->enableZeroWidthEmotes &&
+        !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
         auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
@@ -2259,9 +2170,11 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
             auto baseEmoteElement = this->releaseBack();
 
             std::vector<LayeredEmoteElement::Emote> layers = {
-                {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
+                {baseEmote, baseEmoteElement->getFlags()},
+                {emote, MessageElementFlag::Emote}};
             this->emplace<LayeredEmoteElement>(
-                std::move(layers), baseEmoteElement->getFlags() | flags,
+                std::move(layers),
+                baseEmoteElement->getFlags() | MessageElementFlag::Emote,
                 this->textColor_);
             return Success;
         }
@@ -2269,15 +2182,16 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
         auto *asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
         if (asLayered)
         {
-            asLayered->addEmoteLayer({*emote, flags});
-            asLayered->addFlags(flags);
+            asLayered->addEmoteLayer({emote, MessageElementFlag::Emote});
+            asLayered->addFlags(MessageElementFlag::Emote);
             return Success;
         }
 
         // No emote to merge with, just show as regular emote
     }
 
-    this->emplace<EmoteElement>(*emote, flags, this->textColor_);
+    this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+                                this->textColor_);
     return Success;
 }
 
@@ -2306,7 +2220,7 @@ void MessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote,
+                                            MessageElementFlag::Emote,
                                             this->textColor_);
 
                 auto len = currentTwitchEmote.name.string.length();
@@ -2334,7 +2248,7 @@ void MessageBuilder::addWords(
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
             for (auto variant :
-                 getApp()->getEmotes()->getEmojis()->parse(preText))
+                 getApp()->getEmoteController()->emojis()->parse(preText))
             {
                 boost::apply_visitor(variant::Overloaded{
                                          [&](const EmotePtr &emote) {
@@ -2359,7 +2273,8 @@ void MessageBuilder::addWords(
         }
 
         // split words
-        for (auto variant : getApp()->getEmotes()->getEmojis()->parse(word))
+        for (auto variant :
+             getApp()->getEmoteController()->emojis()->parse(word))
         {
             boost::apply_visitor(variant::Overloaded{
                                      [&](const EmotePtr &emote) {
@@ -2390,7 +2305,6 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         const QString sourceId = tags["source-room-id"].toString();
         QString sourceName;
         QString sourceProfilePicture;
-        QString sourceLogin;
 
         if (sourceId.isEmpty())
         {
@@ -2400,7 +2314,6 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         {
             auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
             sourceProfilePicture = twitchUser->profilePictureUrl;
-            sourceLogin = twitchUser->name;
 
             if (twitchChannel->roomId() == sourceId)
             {
@@ -2414,7 +2327,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         }
 
         this->emplace<BadgeElement>(
-            makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
+            makeSharedChatBadge(sourceName, sourceProfilePicture),
             MessageElementFlag::BadgeSharedChannel);
     }
 

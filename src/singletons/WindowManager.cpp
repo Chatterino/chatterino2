@@ -209,7 +209,7 @@ void WindowManager::updateWordTypeMask()
     // emotes
     if (settings->enableEmoteImages)
     {
-        flags.set(MEF::EmoteImages);
+        flags.set(MEF::EmoteImage);
     }
     flags.set(MEF::EmoteText);
     flags.set(MEF::EmojiText);

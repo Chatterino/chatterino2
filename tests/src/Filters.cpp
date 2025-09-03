@@ -7,7 +7,7 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -34,9 +34,9 @@ public:
     {
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmoteController() override
     {
-        return &this->emotes;
+        return &this->emoteController;
     }
 
     IUserDataController *getUserData() override
@@ -81,7 +81,7 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
+    mock::EmoteController emoteController;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
