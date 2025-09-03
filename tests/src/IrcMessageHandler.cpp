@@ -427,7 +427,6 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
             .name = {},
             .images = {Url{"https://chatterino.com/ffz-vip1x.png"}},
             .tooltip = {"VIP"},
-            .homePage = {},
         }));
     }
     if (snapshot.param("ffzCustomModBadge").toBool())
@@ -436,7 +435,6 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
             .name = {},
             .images = {Url{"https://chatterino.com/ffz-mod1x.png"}},
             .tooltip = {"Moderator"},
-            .homePage = {},
         }));
     }
 

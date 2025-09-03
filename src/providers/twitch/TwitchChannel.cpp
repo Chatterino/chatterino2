@@ -1853,7 +1853,6 @@ void TwitchChannel::addTwitchBadgeSets(const HelixChannelBadges &channelBadges)
                                        BASE_BADGE_SIZE * 4),
                     },
                 .tooltip = Tooltip{version.title},
-                .homePage = version.clickURL,
             };
             (*badgeSets)[setID][version.id] = std::make_shared<Emote>(emote);
         }
@@ -1916,13 +1915,11 @@ void TwitchChannel::setCheerEmoteSets(
                 .name = EmoteName{u"cheer emote"_s},
                 .images = makeImageSet(tier.darkAnimated),
                 .tooltip = Tooltip{emoteTooltip},
-                .homePage = Url{},
             });
             cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
                 .name = EmoteName{u"cheer emote"_s},
                 .images = makeImageSet(tier.darkStatic),
                 .tooltip = Tooltip{emoteTooltip},
-                .homePage = Url{},
             });
 
             cheerEmoteSet.cheerEmotes.emplace_back(std::move(cheerEmote));
