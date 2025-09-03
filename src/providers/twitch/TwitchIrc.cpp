@@ -3,7 +3,8 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/QLogging.hpp"
-#include "singletons/Emotes.hpp"
+#include "controllers/emotes/EmoteController.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "util/IrcHelpers.hpp"
 
 namespace {
@@ -69,7 +70,8 @@ void appendTwitchEmoteOccurrences(const QString &emote,
         TwitchEmoteOccurrence emoteOccurrence{
             start,
             end,
-            app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id, name),
+            app->getEmoteController()->twitchEmotes()->getOrCreateEmote(id,
+                                                                        name),
             name,
         };
         if (emoteOccurrence.ptr == nullptr)

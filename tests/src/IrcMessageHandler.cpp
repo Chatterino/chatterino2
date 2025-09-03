@@ -11,7 +11,8 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "mocks/EmoteProvider.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -24,7 +25,6 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Emotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/VectorMessageSink.hpp"
@@ -72,11 +72,6 @@ public:
     {
     }
 
-    IEmotes *getEmotes() override
-    {
-        return &this->emotes;
-    }
-
     IUserDataController *getUserData() override
     {
         return &this->userData;
@@ -112,21 +107,6 @@ public:
         return &this->highlights;
     }
 
-    BttvEmotes *getBttvEmotes() override
-    {
-        return &this->bttvEmotes;
-    }
-
-    FfzEmotes *getFfzEmotes() override
-    {
-        return &this->ffzEmotes;
-    }
-
-    SeventvEmotes *getSeventvEmotes() override
-    {
-        return &this->seventvEmotes;
-    }
-
     ILogging *getChatLogger() override
     {
         return &this->logging;
@@ -147,27 +127,30 @@ public:
         return &this->sound;
     }
 
+    EmoteController *getEmoteController() override
+    {
+        return &this->emoteController;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
+    mock::EmoteController emoteController;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
-    BttvEmotes bttvEmotes;
-    FfzEmotes ffzEmotes;
-    SeventvEmotes seventvEmotes;
     TwitchBadges twitchBadges;
     mock::EmptyLinkResolver linkResolver;
     NullBackend sound;
 };
 
-std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote)
+std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote,
+                                               QString providerID)
 {
     auto ptr = std::make_shared<Emote>(std::move(emote));
-    ptr->homePage = {u"https://chatterino.com/" % ptr->name.string};
+    ptr->providerID = std::move(providerID);
     ptr->tooltip = {ptr->name.string % u" Tooltip"_s};
     ptr->author = {u"Chatterino"_s};
     ptr->images = {
@@ -177,93 +160,97 @@ std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote)
 
 using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
 
-EmoteMapPtr makeEmotes(auto &&...emotes)
+EmoteMapPtr makeEmotes(const QString &providerID, auto &&...emotes)
 {
     auto map = std::make_shared<EmoteMap>();
-    ((map->emplace(makeEmote(std::forward<decltype(emotes)>(emotes)))), ...);
+    ((map->emplace(
+         makeEmote(std::forward<decltype(emotes)>(emotes), providerID))),
+     ...);
     return map;
 }
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_CLANG("-Wmissing-field-initializers")
 
-struct MockEmotes {
-    EmoteMapPtr seventv;
-    EmoteMapPtr bttv;
-    EmoteMapPtr ffz;
-    EmoteMapPtr twitchAccount;
+EmoteMapPtr makeLocalTwitchEmotes()
+{
+    return makeEmotes({}, Emote{
+                              .name = {u"MyCoolTwitchEmote"_s},
+                              .id = {u"5678"_s},
+                          });
+}
 
-    static MockEmotes channel()
-    {
-        return {
-            .seventv = makeEmotes(
-                Emote{
-                    .name = {u"7TVEmote"_s},
-                    .id = {u"1"_s},
-                },
-                Emote{
-                    .name = {u"7TVEmote0w"_s},
-                    .zeroWidth = true,
-                    .id = {u"2"_s},
-                    .baseName = EmoteName{u"ZeroWidth"_s},
-                },
-                Emote{
-                    .name = {u"PogChamp"_s},
-                    .id = {u"3"_s},
-                }),
-            .bttv = makeEmotes(
-                Emote{
-                    .name = {u"BTTVEmote"_s},
-                },
-                Emote{
-                    .name = {u"Kappa"_s},
-                }),
-            .ffz = makeEmotes(
-                Emote{
-                    .name = {u"FFZEmote"_s},
-                },
-                Emote{
-                    .name = {u"Keepo"_s},
-                }),
-        };
-    }
+void initializeEmotes(mock::EmoteController &controller)
+{
+    auto seventvID = u"seventv"_s;
+    auto bttvID = u"bttv"_s;
+    auto ffzID = u"ffz"_s;
 
-    static MockEmotes twitchdev()
-    {
-        return {
-            .seventv = makeEmotes(Emote{
-                .name = {u"7TVTwitchDev"_s},
-                .id = {u"t5"_s},
-            }),
-            .bttv = makeEmotes(Emote{
-                .name = {u"BTTVTwitchDev"_s},
-            }),
-            .ffz = makeEmotes(Emote{
-                .name = {u"FFZTwitchDev"_s},
-            }),
-        };
-    }
+    auto seventv =
+        std::make_shared<mock::EmoteProvider>(u"7TV"_s, seventvID, 3);
+    seventv->setChannelFallback(
+        makeEmotes(seventvID,
+                   Emote{
+                       .name = {u"7TVEmote"_s},
+                       .id = {u"1"_s},
+                   },
+                   Emote{
+                       .name = {u"7TVEmote0w"_s},
+                       .zeroWidth = true,
+                       .id = {u"2"_s},
+                       .baseName = EmoteName{u"ZeroWidth"_s},
+                   },
+                   Emote{
+                       .name = {u"PogChamp"_s},
+                       .id = {u"3"_s},
+                   }));
+    seventv->setChannel("twitchdev",
+                        makeEmotes(seventvID, Emote{
+                                                  .name = {u"7TVTwitchDev"_s},
+                                                  .id = {u"t5"_s},
+                                              }));
+    seventv->setGlobalEmotes(makeEmotes(seventvID, Emote{
+                                                       .name = {u"7TVGlobal"_s},
+                                                       .id = {u"G1"_s},
+                                                   }));
+    controller.addProvider(seventv);
 
-    static MockEmotes global()
-    {
-        return {
-            .seventv = makeEmotes(Emote{
-                .name = {u"7TVGlobal"_s},
-                .id = {u"G1"_s},
-            }),
-            .bttv = makeEmotes(Emote{
-                .name = {u"BTTVGlobal"_s},
-            }),
-            .ffz = makeEmotes(Emote{
-                .name = {u"FFZGlobal"_s},
-            }),
-            .twitchAccount = makeEmotes(Emote{
-                .name = {u"MyCoolTwitchEmote"_s},
-                .id = {u"5678"_s},
-            }),
-        };
-    }
-};
+    auto bttv =
+        std::make_shared<mock::EmoteProvider>(u"BetterTTV"_s, bttvID, 1);
+    bttv->setChannelFallback(makeEmotes(bttvID,
+                                        Emote{
+                                            .name = {u"BTTVEmote"_s},
+                                        },
+                                        Emote{
+                                            .name = {u"Kappa"_s},
+                                        }));
+    bttv->setChannel("twitchdev",
+                     makeEmotes(bttvID, Emote{
+                                            .name = {u"BTTVTwitchDev"_s},
+                                        }));
+    bttv->setGlobalEmotes(makeEmotes(bttvID, Emote{
+                                                 .name = {u"BTTVGlobal"_s},
+                                             }));
+    controller.addProvider(bttv);
+
+    auto ffz =
+        std::make_shared<mock::EmoteProvider>(u"FrankerFaceZ"_s, ffzID, 2);
+    ffz->setChannelFallback(makeEmotes(ffzID,
+                                       Emote{
+                                           .name = {u"FFZEmote"_s},
+                                       },
+                                       Emote{
+                                           .name = {u"Keepo"_s},
+                                       }));
+    ffz->setChannel("twitchdev",
+                    makeEmotes(ffzID, Emote{
+                                          .name = {u"FFZTwitchDev"_s},
+                                      }));
+    ffz->setGlobalEmotes(makeEmotes(u"ffz"_s, Emote{
+                                                  .name = {u"FFZGlobal"_s},
+                                              }));
+    controller.addProvider(ffz);
+}
 
 const QByteArray CHEERMOTE_JSON{R"({
     "prefix": "Cheer",
@@ -342,10 +329,7 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
     const QString &name, const testlib::Snapshot &snapshot)
 {
     auto chan = std::make_shared<TwitchChannel>(name);
-    auto mocks = MockEmotes::channel();
-    chan->setSeventvEmotes(std::move(mocks.seventv));
-    chan->setBttvEmotes(std::move(mocks.bttv));
-    chan->setFfzEmotes(std::move(mocks.ffz));
+    chan->emotes().refresh(false);
 
     QJsonObject defaultImage{
         {u"url_1x"_s, u"https://chatterino.com/reward1x.png"_s},
@@ -427,7 +411,6 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
             .name = {},
             .images = {Url{"https://chatterino.com/ffz-vip1x.png"}},
             .tooltip = {"VIP"},
-            .homePage = {},
         }));
     }
     if (snapshot.param("ffzCustomModBadge").toBool())
@@ -436,7 +419,6 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
             .name = {},
             .images = {Url{"https://chatterino.com/ffz-mod1x.png"}},
             .tooltip = {"Moderator"},
-            .homePage = {},
         }));
     }
 
@@ -458,12 +440,9 @@ public:
         this->mockApplication =
             std::make_unique<MockApplication>(QString::fromUtf8(
                 this->snapshot->mergedSettings(SETTINGS_DEFAULT)));
-        auto mocks = MockEmotes::global();
-        this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
-        this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
-        this->mockApplication->ffzEmotes.setEmotes(mocks.ffz);
+        initializeEmotes(this->mockApplication->emoteController);
         this->mockApplication->getAccounts()->twitch.getCurrent()->setEmotes(
-            mocks.twitchAccount);
+            makeLocalTwitchEmotes());
         this->mockApplication->getUserData()->setUserColor(u"117691339"_s,
                                                            u"#DAA521"_s);
 
@@ -477,7 +456,7 @@ public:
                 .images = {Url{u"https://chatterino.com/" % platform %
                                u".png"}},
                 .tooltip = {platform % u" badge"},
-                .homePage = {},
+                .providerID = {},
                 .zeroWidth = false,
                 .id = {},
                 .author = {},
@@ -530,11 +509,7 @@ public:
 
         this->twitchdevChannel = std::make_shared<TwitchChannel>("twitchdev");
         this->twitchdevChannel->setRoomId("141981764");
-
-        auto tdMocks = MockEmotes::twitchdev();
-        this->twitchdevChannel->setSeventvEmotes(std::move(tdMocks.seventv));
-        this->twitchdevChannel->setBttvEmotes(std::move(tdMocks.bttv));
-        this->twitchdevChannel->setFfzEmotes(std::move(tdMocks.ffz));
+        this->twitchdevChannel->emotes().refresh(false);
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);

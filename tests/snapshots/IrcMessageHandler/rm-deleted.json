@@ -82,15 +82,15 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/7TVEmote",
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7TVEmote.png"
                         },
                         "name": "7TVEmote",
+                        "providerID": "seventv",
                         "tooltip": "7TVEmote Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -109,7 +109,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -137,15 +137,15 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/7TVEmote",
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7TVEmote.png"
                         },
                         "name": "7TVEmote",
+                        "providerID": "seventv",
                         "tooltip": "7TVEmote Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

@@ -82,14 +82,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/BTTVGlobal",
                         "images": {
                             "1x": "https://chatterino.com/BTTVGlobal.png"
                         },
                         "name": "BTTVGlobal",
+                        "providerID": "bttv",
                         "tooltip": "BTTVGlobal Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -123,7 +123,7 @@
                         "name": ":)",
                         "tooltip": ":)<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

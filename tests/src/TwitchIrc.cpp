@@ -1,8 +1,9 @@
 #include "providers/twitch/TwitchIrc.hpp"
 
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 
@@ -15,12 +16,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmoteController() override
     {
-        return &this->emotes;
+        return &this->emoteController;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emoteController;
 };
 
 }  // namespace
@@ -163,7 +164,8 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
         std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
-    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
+    auto *twitchEmotes =
+        this->mockApplication->getEmoteController()->twitchEmotes();
 
     std::vector<TestCase> testCases{
         {

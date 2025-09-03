@@ -100,14 +100,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/Kappa",
                         "images": {
                             "1x": "https://chatterino.com/Kappa.png"
                         },
                         "name": "Kappa",
+                        "providerID": "bttv",
                         "tooltip": "Kappa Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

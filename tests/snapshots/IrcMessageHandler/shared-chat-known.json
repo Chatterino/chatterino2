@@ -66,7 +66,6 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://link.twitch.tv/SharedChatViewer",
                         "images": {
                             "1x": ""
                         },
@@ -84,7 +83,6 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
                             "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",

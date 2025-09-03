@@ -10,12 +10,9 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"  // IWYU pragma: keep
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
@@ -940,36 +937,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
     }
-}
-
-void TwitchIrcServer::reloadAllBTTVChannelEmotes()
-{
-    this->forEachChannel([](const auto &chan) {
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
-        {
-            channel->refreshBTTVChannelEmotes(false);
-        }
-    });
-}
-
-void TwitchIrcServer::reloadAllFFZChannelEmotes()
-{
-    this->forEachChannel([](const auto &chan) {
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
-        {
-            channel->refreshFFZChannelEmotes(false);
-        }
-    });
-}
-
-void TwitchIrcServer::reloadAllSevenTVChannelEmotes()
-{
-    this->forEachChannel([](const auto &chan) {
-        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
-        {
-            channel->refreshSevenTVChannelEmotes(false);
-        }
-    });
 }
 
 void TwitchIrcServer::forEachSeventvEmoteSet(

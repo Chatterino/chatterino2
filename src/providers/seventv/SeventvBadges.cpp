@@ -2,7 +2,7 @@
 
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/seventv/SeventvEmoteProvider.hpp"
 
 #include <QJsonArray>
 #include <QUrl>
@@ -59,9 +59,8 @@ void SeventvBadges::registerBadge(const QJsonObject &badgeJson)
 
     auto emote = Emote{
         .name = EmoteName{},
-        .images = SeventvEmotes::createImageSet(badgeJson, true),
+        .images = SeventvEmoteProvider::createImageSet(badgeJson, true),
         .tooltip = Tooltip{badgeJson["tooltip"].toString()},
-        .homePage = Url{},
         .id = EmoteId{badgeID},
     };
 

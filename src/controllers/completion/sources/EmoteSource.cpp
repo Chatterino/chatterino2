@@ -3,15 +3,14 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "providers/emoji/Emojis.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
+
+#include <QStringBuilder>
 
 namespace chatterino::completion {
 
@@ -105,36 +104,25 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             auto user = getApp()->getAccounts()->twitch.getCurrent();
             addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
 
-            // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
-            if (auto bttv = tc->bttvEmotes())
+            for (const auto &item : tc->emotes().items())
             {
-                addEmotes(emotes, *bttv, "Channel BetterTTV");
-            }
-            if (auto ffz = tc->ffzEmotes())
-            {
-                addEmotes(emotes, *ffz, "Channel FrankerFaceZ");
-            }
-            if (auto seventv = tc->seventvEmotes())
-            {
-                addEmotes(emotes, *seventv, "Channel 7TV");
+                auto provider = item.provider.lock();
+                if (!provider)
+                {
+                    continue;
+                }
+                addEmotes(emotes, *item.emotes, u"Channel " % provider->name());
             }
         }
 
-        if (auto bttvG = app->getBttvEmotes()->emotes())
+        for (const auto &provider : app->getEmoteController()->providers())
         {
-            addEmotes(emotes, *bttvG, "Global BetterTTV");
-        }
-        if (auto ffzG = app->getFfzEmotes()->emotes())
-        {
-            addEmotes(emotes, *ffzG, "Global FrankerFaceZ");
-        }
-        if (auto seventvG = app->getSeventvEmotes()->globalEmotes())
-        {
-            addEmotes(emotes, *seventvG, "Global 7TV");
+            addEmotes(emotes, *provider->globalEmotes(),
+                      u"Global " % provider->name());
         }
     }
 
-    addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis());
+    addEmojis(emotes, app->getEmoteController()->emojis()->getEmojis());
 
     this->items_ = std::move(emotes);
 }

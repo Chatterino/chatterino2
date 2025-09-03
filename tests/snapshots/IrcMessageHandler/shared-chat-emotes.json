@@ -66,7 +66,6 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://link.twitch.tv/SharedChatViewer",
                         "images": {
                             "1x": ""
                         },
@@ -107,7 +106,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -134,14 +133,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/BTTVGlobal",
                         "images": {
                             "1x": "https://chatterino.com/BTTVGlobal.png"
                         },
                         "name": "BTTVGlobal",
+                        "providerID": "bttv",
                         "tooltip": "BTTVGlobal Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -168,15 +167,15 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/7TVGlobal",
                         "id": "G1",
                         "images": {
                             "1x": "https://chatterino.com/7TVGlobal.png"
                         },
                         "name": "7TVGlobal",
+                        "providerID": "seventv",
                         "tooltip": "7TVGlobal Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -203,14 +202,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/FFZGlobal",
                         "images": {
                             "1x": "https://chatterino.com/FFZGlobal.png"
                         },
                         "name": "FFZGlobal",
+                        "providerID": "ffz",
                         "tooltip": "FFZGlobal Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -222,14 +221,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/BTTVTwitchDev",
                         "images": {
                             "1x": "https://chatterino.com/BTTVTwitchDev.png"
                         },
                         "name": "BTTVTwitchDev",
+                        "providerID": "bttv",
                         "tooltip": "BTTVTwitchDev Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -241,15 +240,15 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/7TVTwitchDev",
                         "id": "t5",
                         "images": {
                             "1x": "https://chatterino.com/7TVTwitchDev.png"
                         },
                         "name": "7TVTwitchDev",
+                        "providerID": "seventv",
                         "tooltip": "7TVTwitchDev Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -261,14 +260,14 @@
                 {
                     "emote": {
                         "author": "Chatterino",
-                        "homePage": "https://chatterino.com/FFZTwitchDev",
                         "images": {
                             "1x": "https://chatterino.com/FFZTwitchDev.png"
                         },
                         "name": "FFZTwitchDev",
+                        "providerID": "ffz",
                         "tooltip": "FFZTwitchDev Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

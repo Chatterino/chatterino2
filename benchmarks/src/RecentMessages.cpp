@@ -4,18 +4,17 @@
 #include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "mocks/EmoteProvider.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/recentmessages/Impl.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/seventv/SeventvEmoteProvider.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
@@ -39,11 +38,6 @@ public:
     MockApplication()
         : highlights(this->settings, &this->accounts)
     {
-    }
-
-    IEmotes *getEmotes() override
-    {
-        return &this->emotes;
     }
 
     IUserDataController *getUserData() override
@@ -86,21 +80,6 @@ public:
         return &this->twitchBadges;
     }
 
-    BttvEmotes *getBttvEmotes() override
-    {
-        return &this->bttvEmotes;
-    }
-
-    FfzEmotes *getFfzEmotes() override
-    {
-        return &this->ffzEmotes;
-    }
-
-    SeventvEmotes *getSeventvEmotes() override
-    {
-        return &this->seventvEmotes;
-    }
-
     IStreamerMode *getStreamerMode() override
     {
         return &this->streamerMode;
@@ -116,20 +95,22 @@ public:
         return &this->logging;
     }
 
+    EmoteController *getEmoteController() override
+    {
+        return &this->emoteController;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::EmptyLinkResolver linkResolver;
+    mock::EmoteController emoteController;
     ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
     TwitchBadges twitchBadges;
-    BttvEmotes bttvEmotes;
-    FfzEmotes ffzEmotes;
-    SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
 };
 
@@ -170,32 +151,28 @@ public:
     {
         const auto seventvEmotes =
             tryReadJsonFile(u":/bench/seventvemotes-%1.json"_s.arg(this->name));
-        const auto bttvEmotes =
-            tryReadJsonFile(u":/bench/bttvemotes-%1.json"_s.arg(this->name));
-        const auto ffzEmotes =
-            tryReadJsonFile(u":/bench/ffzemotes-%1.json"_s.arg(this->name));
 
         if (seventvEmotes)
         {
-            this->chan.setSeventvEmotes(
-                std::make_shared<const EmoteMap>(seventv::detail::parseEmotes(
-                    seventvEmotes->object()["emote_set"_L1]
-                        .toObject()["emotes"_L1]
-                        .toArray(),
-                    false)));
-        }
+            auto map = std::make_shared<EmoteMap>();
+            for (const auto el : seventvEmotes->object()["emote_set"_L1]
+                                     .toObject()["emotes"_L1]
+                                     .toArray())
+            {
+                auto emote = seventv::detail::parseEmote(el.toObject(), false);
+                if (!emote)
+                {
+                    continue;
+                }
+                auto name = emote->name;
+                auto ptr = std::make_shared<const Emote>(*std::move(emote));
+                (*map)[name] = std::move(ptr);
+            }
 
-        if (bttvEmotes)
-        {
-            this->chan.setBttvEmotes(std::make_shared<const EmoteMap>(
-                bttv::detail::parseChannelEmotes(bttvEmotes->object(),
-                                                 this->name)));
-        }
-
-        if (ffzEmotes)
-        {
-            this->chan.setFfzEmotes(std::make_shared<const EmoteMap>(
-                ffz::detail::parseChannelEmotes(ffzEmotes->object())));
+            auto provider =
+                std::make_shared<mock::EmoteProvider>("7TV", "seventv", 3);
+            provider->setChannelFallback(std::move(map));
+            this->app.emoteController.addProvider(provider);
         }
 
         this->messages =

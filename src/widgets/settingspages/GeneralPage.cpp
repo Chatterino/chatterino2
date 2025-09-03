@@ -5,6 +5,7 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/seventv/SeventvEmoteProvider.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -629,17 +630,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
-            getApp()->getTwitch()->forEachChannelAndSpecialChannels(
-                [](const auto &c) {
-                    if (c->isTwitchChannel())
-                    {
-                        auto *channel = dynamic_cast<TwitchChannel *>(c.get());
-                        if (channel != nullptr)
-                        {
-                            channel->refreshSevenTVChannelEmotes(false);
-                        }
-                    }
-                });
+            auto seventv = SeventvEmoteProvider::instance();
+            if (seventv)
+            {
+                // refresh emotes
+                seventv->channelEmotesEnabled.invoke(
+                    seventv->hasChannelEmotes());
+            }
         },
         false);
 

@@ -1,6 +1,10 @@
 #include "messages/Emote.hpp"
 
+#include "Application.hpp"
 #include "common/Literals.hpp"
+#include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 
 #include <QJsonObject>
 
@@ -12,13 +16,22 @@ using namespace literals;
 
 bool operator==(const Emote &a, const Emote &b)
 {
-    return std::tie(a.homePage, a.name, a.tooltip, a.images) ==
-           std::tie(b.homePage, b.name, b.tooltip, b.images);
+    return std::tie(a.providerID, a.name, a.tooltip, a.images) ==
+           std::tie(b.providerID, b.name, b.tooltip, b.images);
 }
 
 bool operator!=(const Emote &a, const Emote &b)
 {
     return !(a == b);
+}
+
+std::shared_ptr<EmoteProvider> Emote::resolveProvider() const
+{
+    if (this->providerID.startsWith('+'))
+    {
+        return nullptr;
+    }
+    return getApp()->getEmoteController()->findProviderByID(this->providerID);
 }
 
 QJsonObject Emote::toJson() const
@@ -28,9 +41,9 @@ QJsonObject Emote::toJson() const
         {"images"_L1, this->images.toJson()},
         {"tooltip"_L1, this->tooltip.string},
     };
-    if (!this->homePage.string.isEmpty())
+    if (!this->providerID.isEmpty())
     {
-        obj["homePage"_L1] = this->homePage.string;
+        obj["providerID"_L1] = this->providerID;
     }
     if (this->zeroWidth)
     {

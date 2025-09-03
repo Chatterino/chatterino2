@@ -26,14 +26,13 @@ class TwitchBadges;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
+class EmoteController;
 
 class Theme;
 class WindowManager;
 class ILogging;
 class Logging;
 class Paths;
-class Emotes;
-class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
@@ -44,10 +43,7 @@ class SeventvBadges;
 class ImageUploader;
 class SeventvAPI;
 class CrashHandler;
-class BttvEmotes;
 class BttvLiveUpdates;
-class FfzEmotes;
-class SeventvEmotes;
 class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
@@ -77,7 +73,6 @@ public:
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
-    virtual IEmotes *getEmotes() = 0;
     virtual AccountController *getAccounts() = 0;
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
@@ -102,16 +97,14 @@ public:
     virtual PluginController *getPlugins() = 0;
 #endif
     virtual Updates &getUpdates() = 0;
-    virtual BttvEmotes *getBttvEmotes() = 0;
     virtual BttvLiveUpdates *getBttvLiveUpdates() = 0;
-    virtual FfzEmotes *getFfzEmotes() = 0;
-    virtual SeventvEmotes *getSeventvEmotes() = 0;
     virtual SeventvEventAPI *getSeventvEventAPI() = 0;
     virtual ILinkResolver *getLinkResolver() = 0;
     virtual IStreamerMode *getStreamerMode() = 0;
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
     virtual eventsub::IController *getEventSub() = 0;
+    virtual EmoteController *getEmoteController() = 0;
 };
 
 class Application : public IApplication
@@ -149,7 +142,7 @@ private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Logging> logging;
-    std::unique_ptr<Emotes> emotes;
+    std::unique_ptr<EmoteController> emoteController;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -170,10 +163,7 @@ private:
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;
-    std::unique_ptr<BttvEmotes> bttvEmotes;
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
-    std::unique_ptr<FfzEmotes> ffzEmotes;
-    std::unique_ptr<SeventvEmotes> seventvEmotes;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
@@ -194,7 +184,6 @@ public:
     }
     Theme *getThemes() override;
     Fonts *getFonts() override;
-    IEmotes *getEmotes() override;
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
@@ -220,13 +209,11 @@ public:
 #endif
     Updates &getUpdates() override;
 
-    BttvEmotes *getBttvEmotes() override;
     BttvLiveUpdates *getBttvLiveUpdates() override;
-    FfzEmotes *getFfzEmotes() override;
-    SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;
     pronouns::Pronouns *getPronouns() override;
     eventsub::IController *getEventSub() override;
+    EmoteController *getEmoteController() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;

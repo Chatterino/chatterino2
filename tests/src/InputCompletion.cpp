@@ -8,11 +8,11 @@
 #include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "mocks/EmoteProvider.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
@@ -52,38 +52,20 @@ public:
         return &this->twitch;
     }
 
-    IEmotes *getEmotes() override
-    {
-        return &this->emotes;
-    }
-
-    BttvEmotes *getBttvEmotes() override
-    {
-        return &this->bttvEmotes;
-    }
-
-    FfzEmotes *getFfzEmotes() override
-    {
-        return &this->ffzEmotes;
-    }
-
-    SeventvEmotes *getSeventvEmotes() override
-    {
-        return &this->seventvEmotes;
-    }
-
     ILogging *getChatLogger() override
     {
         return &this->logging;
     }
 
+    EmoteController *getEmoteController() override
+    {
+        return &this->emoteController;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
-    mock::Emotes emotes;
-    BttvEmotes bttvEmotes;
-    FfzEmotes ffzEmotes;
-    SeventvEmotes seventvEmotes;
+    mock::EmoteController emoteController;
 };
 
 void containsRoughly(std::span<EmoteItem> span, const std::set<QString> &values)
@@ -192,21 +174,28 @@ private:
         addEmote(*bttvEmotes, "B-)");
         addEmote(*bttvEmotes, "Clap");
         addEmote(*bttvEmotes, ":tf:");
-        this->mockApplication->bttvEmotes.setEmotes(std::move(bttvEmotes));
+        auto bttv =
+            std::make_shared<mock::EmoteProvider>("BetterTTV", "betterttv", 1);
+        bttv->setGlobalEmotes(std::move(bttvEmotes));
+        mockApplication->emoteController.addProvider(std::move(bttv));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
         addEmote(*ffzEmotes, "ManChicken");
         addEmote(*ffzEmotes, "CatBag");
-        this->mockApplication->ffzEmotes.setEmotes(std::move(ffzEmotes));
+        auto ffz = std::make_shared<mock::EmoteProvider>("FrankerFaceZ",
+                                                         "frankerfacez", 2);
+        ffz->setGlobalEmotes(std::move(ffzEmotes));
+        mockApplication->emoteController.addProvider(std::move(ffz));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
         addEmote(*seventvEmotes, "Clap2");
         addEmote(*seventvEmotes, "pajaW");
         addEmote(*seventvEmotes, "PAJAW");
-        this->mockApplication->seventvEmotes.setGlobalEmotes(
-            std::move(seventvEmotes));
+        auto stv = std::make_shared<mock::EmoteProvider>("7TV", "seventv", 3);
+        stv->setGlobalEmotes(std::move(seventvEmotes));
+        mockApplication->emoteController.addProvider(std::move(stv));
     }
 
 protected:
