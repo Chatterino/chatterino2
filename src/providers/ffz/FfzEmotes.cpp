@@ -153,7 +153,6 @@ std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
             .name = {""},
             .images = authorityBadgeImageSet,
             .tooltip = Tooltip{tooltip},
-            .homePage = authorityBadge1x,
         });
     }
     return authorityBadge;
