@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Removed unused URLs on badge emotes. (#6437)
+
 ## 2.5.4-beta.1
 
 - Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
