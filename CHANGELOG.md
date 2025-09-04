@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed crashes that could occur when Lua functions errored with values other than strings. (#6441)
+
 ## 2.5.4-beta.1
 
 - Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
