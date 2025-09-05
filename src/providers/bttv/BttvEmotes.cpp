@@ -30,6 +30,11 @@ const QString CHANNEL_HAS_NO_EMOTES(
 /// %1 being the emote ID (e.g. 566ca04265dbbdab32ec054a)
 constexpr QStringView EMOTE_LINK_FORMAT = u"https://betterttv.com/emotes/%1";
 
+const QSet<QStringView> ZERO_WIDTH_EMOTES{
+    u"SoSnowy",  u"IceCold",   u"SantaHat", u"TopHat",
+    u"ReinDeer", u"CandyCane", u"cvMask",   u"cvHazmat",
+};
+
 /// The emote CDN link template.
 ///
 /// %1 being the emote ID (e.g. 566ca04265dbbdab32ec054a)
@@ -71,15 +76,19 @@ std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
         auto name = EmoteName{jsonEmote.toObject().value("code").toString()};
 
         auto emote = Emote({
-            name,
-            ImageSet{
-                Image::fromUrl(getEmoteLinkV3(id, "1x"), 1, EMOTE_BASE_SIZE),
-                Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
-                               EMOTE_BASE_SIZE * 2),
-                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
-                               EMOTE_BASE_SIZE * 4)},
-            Tooltip{name.string + "<br>Global BetterTTV Emote"},
-            Url{EMOTE_LINK_FORMAT.arg(id.string)},
+            .name = name,
+            .images =
+                ImageSet{
+                    Image::fromUrl(getEmoteLinkV3(id, "1x"), 1,
+                                   EMOTE_BASE_SIZE),
+                    Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
+                                   EMOTE_BASE_SIZE * 2),
+                    Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
+                                   EMOTE_BASE_SIZE * 4),
+                },
+            .tooltip = Tooltip{name.string + "<br>Global BetterTTV Emote"},
+            .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
+            .zeroWidth = ZERO_WIDTH_EMOTES.contains(name.string),
         });
 
         emotes[name] = cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
