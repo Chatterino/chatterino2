@@ -77,12 +77,15 @@ std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
 
         auto emote = Emote({
             .name = name,
-            .images = ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1,
-                                              EMOTE_BASE_SIZE),
-                               Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
-                                              EMOTE_BASE_SIZE * 2),
-                               Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
-                                              EMOTE_BASE_SIZE * 4)},
+            .images =
+                ImageSet{
+                    Image::fromUrl(getEmoteLinkV3(id, "1x"), 1,
+                                   EMOTE_BASE_SIZE),
+                    Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
+                                   EMOTE_BASE_SIZE * 2),
+                    Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
+                                   EMOTE_BASE_SIZE * 4),
+                },
             .tooltip = Tooltip{name.string + "<br>Global BetterTTV Emote"},
             .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
             .zeroWidth = ZERO_WIDTH_EMOTES.contains(name.string),
