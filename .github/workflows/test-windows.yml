@@ -115,6 +115,7 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=On `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO

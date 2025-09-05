@@ -273,6 +273,9 @@ set(SOURCE_FILES
         controllers/sound/NullBackend.cpp
         controllers/sound/NullBackend.hpp
 
+        controllers/spellcheck/SpellChecker.cpp
+        controllers/spellcheck/SpellChecker.hpp
+
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
 
@@ -879,6 +882,11 @@ target_link_libraries(${LIBRARY_PROJECT}
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
+endif()
+
+if (CHATTERINO_SPELLCHECK)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
+    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
 endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)

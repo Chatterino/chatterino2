@@ -199,6 +199,11 @@ public:
         return nullptr;
     }
 
+    SpellChecker *getSpellChecker() override
+    {
+        return nullptr;
+    }
+
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *getPlugins() override
     {

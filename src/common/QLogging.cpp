@@ -47,6 +47,7 @@ Q_LOGGING_CATEGORY(chatterinoSeventv, "chatterino.seventv", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSeventvEventAPI, "chatterino.seventv.eventapi",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoSound, "chatterino.sound", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoSpellcheck, "chatterino.spellcheck", logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamerMode, "chatterino.streamermode",
                    logThreshold);
 Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);

@@ -905,6 +905,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
         split->setFilters(splitNode.filters_);
+        split->setCheckSpellingOverride(splitNode.spellCheckOverride);
 
         this->insertSplit(split);
 
@@ -940,6 +941,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 split->setFilters(splitNode.filters_);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
+                split->setCheckSpellingOverride(splitNode.spellCheckOverride);
 
                 auto *node = new Node();
                 node->parent_ = baseNode;

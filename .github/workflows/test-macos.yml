@@ -45,8 +45,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # brew install openssl rapidjson p7zip create-dmg cmake boost
-          brew install openssl rapidjson p7zip create-dmg boost
+          # brew install openssl rapidjson p7zip create-dmg cmake boost hunspell
+          brew install openssl rapidjson p7zip create-dmg boost hunspell
 
       - name: Install httpbox
         run: |
@@ -64,6 +64,7 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

@@ -13,6 +13,7 @@
     "boost-json",
     "boost-signals2",
     "boost-variant",
+    "hunspell",
     {
       "name": "qt5compat",
       "default-features": false,
