@@ -60,6 +60,8 @@ private:
     lua_State *state_;
 };
 
+QString errorResultToString(const sol::protected_function_result &result);
+
 /// @brief Attempts to call @a function with @a args
 ///
 /// @a T is expected to be returned.
@@ -79,9 +81,8 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         function(std::forward<Args>(args)...);
     if (!result.valid())
     {
-        sol::error err = result;
         return nonstd::expected_lite::make_unexpected(
-            QString::fromUtf8(err.what()));
+            errorResultToString(result));
     }
 
     if constexpr (std::is_same_v<T, void>)
