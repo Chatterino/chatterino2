@@ -36,6 +36,11 @@ bool shouldIgnore(TwitchChannel *twitch, const QString &word)
         {
             return true;
         }
+
+        if (twitch->accessChatters()->contains(word))
+        {
+            return true;
+        }
     }
     if (getApp()->getBttvEmotes()->emote(name) ||
         getApp()->getFfzEmotes()->emote(name) ||
