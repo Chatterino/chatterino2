@@ -1492,7 +1492,12 @@ void SplitNotebook::addCustomButtons()
     // updates
     auto *updateBtn = this->addCustomButton<PixmapButton>();
 
-    initUpdateButton(*updateBtn, this->signalHolder_);
+    initUpdateButton(
+        *updateBtn,
+        [this] {
+            this->performLayout(false);
+        },
+        this->signalHolder_);
 
     // streamer mode
     this->streamerModeIcon_ = this->addCustomButton<PixmapButton>();
