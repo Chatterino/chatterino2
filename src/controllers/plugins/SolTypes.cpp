@@ -42,7 +42,7 @@ QString errorResultToString(const sol::protected_function_result &result)
 
     // If we get here, the stack didn't contain a string at the top. This is
     // valid in Lua, but unconventional. Error handlers typically expect a
-    // string at the top of the stack.s
+    // string at the top of the stack.
     //
     // There can be many reasons for this; here are three:
     // - A C++ function was not wrapped in a trampoline (i.e. try{} catch{}).
