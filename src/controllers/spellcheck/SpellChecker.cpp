@@ -23,7 +23,7 @@ using namespace chatterino;
 
 bool shouldIgnore(TwitchChannel *twitch, const QString &word)
 {
-    EmoteName name(word);
+    EmoteName name{word};
     if (twitch)
     {
         if (twitch->bttvEmote(name) || twitch->ffzEmote(name) ||
@@ -89,7 +89,7 @@ std::unique_ptr<SpellCheckerPrivate> SpellCheckerPrivate::tryLoad()
     {
         qCInfo(chatterinoSpellcheck)
             << "Failed to canonicalize" << stdPathToQString(aff)
-            << "error:" << ec.message();
+            << "error:" << QUtf8StringView(ec.message());
         return nullptr;
     }
     auto dicCanonical = std::filesystem::weakly_canonical(dic, ec);
@@ -97,7 +97,7 @@ std::unique_ptr<SpellCheckerPrivate> SpellCheckerPrivate::tryLoad()
     {
         qCInfo(chatterinoSpellcheck)
             << "Failed to canonicalize" << stdPathToQString(dic)
-            << "error:" << ec.message();
+            << "error:" << QUtf8StringView(ec.message());
         return nullptr;
     }
 
