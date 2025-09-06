@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed crashes that could occur when Lua functions errored with values other than strings. (#6441)
+- Bugfix: Fixed zero-width global BTTV emotes not showing in the `:~` completions. (#6440)
 
 ## 2.5.4-beta.1
 
