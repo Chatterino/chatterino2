@@ -152,7 +152,9 @@ if(CHATTERINO_SPELLCHECK)
     # Find from package manager
     find_package(hunspell QUIET CONFIG)
     if(NOT hunspell_FOUND)
-        find_package(Hunspell REQUIRED MODULE)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(hunspell REQUIRED IMPORTED_TARGET hunspell)
+        add_library(hunspell::hunspell ALIAS PkgConfig::hunspell)
     endif()
 endif()
 
