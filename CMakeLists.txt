@@ -149,7 +149,11 @@ find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 
 if(CHATTERINO_SPELLCHECK)
-    find_package(hunspell REQUIRED)
+    # Find from package manager
+    find_package(hunspell QUIET CONFIG)
+    if(NOT hunspell_FOUND)
+        find_package(Hunspell REQUIRED MODULE)
+    endif()
 endif()
 
 find_library(LIBRT rt)
