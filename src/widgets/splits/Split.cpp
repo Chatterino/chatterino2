@@ -894,6 +894,16 @@ bool Split::getModerationMode() const
     return this->moderationMode_;
 }
 
+std::optional<bool> Split::checkSpellingOverride() const
+{
+    return this->input_->checkSpellingOverride();
+}
+
+void Split::setCheckSpellingOverride(std::optional<bool> override)
+{
+    this->input_->setCheckSpellingOverride(override);
+}
+
 void Split::insertTextToInput(const QString &text)
 {
     this->input_->insertText(text);

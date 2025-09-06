@@ -1,0 +1,49 @@
+#pragma once
+
+#include <QRegularExpression>
+#include <QSyntaxHighlighter>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+class QTextDocument;
+
+namespace chatterino {
+
+class TwitchChannel;
+
+class SpellCheckerPrivate;
+class SpellChecker
+{
+public:
+    SpellChecker();
+    ~SpellChecker();
+
+    bool isLoaded() const;
+    void reload();
+
+    bool check(QStringView word);
+    std::vector<std::string> suggestions(const QString &word);
+
+private:
+    std::unique_ptr<SpellCheckerPrivate> private_;
+};
+
+class SpellCheckHighlighter : public QSyntaxHighlighter
+{
+public:
+    SpellCheckHighlighter(QObject *parent);
+
+    void setTwitchChannel(TwitchChannel *channel);
+
+protected:
+    void highlightBlock(const QString &text) override;
+
+private:
+    QRegularExpression wordRegex;
+    QTextCharFormat spellFmt;
+    TwitchChannel *channel = nullptr;
+};
+
+}  // namespace chatterino

@@ -135,6 +135,10 @@ AboutPage::AboutPage()
                        ":/licenses/howard-hinnant-date.txt");
             addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
                        ":/licenses/fmtlib.txt");
+#ifdef CHATTERINO_WITH_SPELLCHECK
+            addLicense(form.getElement(), "Hunsppell",
+                       "https://hunspell.github.io", ":/licenses/hunspell.txt");
+#endif
         }
 
         // Attributions

@@ -44,6 +44,8 @@ struct SplitDescriptor {
     // Whether "Moderation Mode" (the sword icon) is enabled in this split or not
     bool moderationMode_{false};
 
+    std::optional<bool> spellCheckOverride;
+
     QList<QUuid> filters_;
 
     static void loadFromJSON(SplitDescriptor &descriptor,
