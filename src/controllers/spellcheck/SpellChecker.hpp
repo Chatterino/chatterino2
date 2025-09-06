@@ -23,7 +23,7 @@ public:
     bool isLoaded() const;
     void reload();
 
-    bool check(QStringView word);
+    bool check(const QString &word);
     std::vector<std::string> suggestions(const QString &word);
 
 private:

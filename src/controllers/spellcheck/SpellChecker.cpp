@@ -136,7 +136,7 @@ void SpellChecker::reload()
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-bool SpellChecker::check(QStringView word)
+bool SpellChecker::check(const QString &word)
 {
 #ifdef CHATTERINO_WITH_SPELLCHECK
     if (!this->private_)
@@ -144,7 +144,7 @@ bool SpellChecker::check(QStringView word)
         return true;
     }
 
-    return this->private_->hunspell.spell(word.toUtf8().toStdString());
+    return this->private_->hunspell.spell(word.toStdString());
 #else
     (void)word;
     return true;
@@ -197,15 +197,18 @@ void SpellCheckHighlighter::highlightBlock(const QString &text)
     }
 
     QStringView textView = text;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto it = this->wordRegex.globalMatchView(textView);
+#else
+    auto it = this->wordRegex.globalMatch(textView);
+#endif
     while (it.hasNext())
     {
         auto match = it.next();
-        auto text = match.capturedView();
-        if (!shouldIgnore(this->channel, text.toString()) &&
-            !spellChecker->check(text))
+        auto text = match.captured();
+        if (!shouldIgnore(this->channel, text) && !spellChecker->check(text))
         {
-            this->setFormat(static_cast<int>(text.data() - textView.data()),
+            this->setFormat(static_cast<int>(match.capturedStart()),
                             static_cast<int>(text.size()), this->spellFmt);
         }
     }
