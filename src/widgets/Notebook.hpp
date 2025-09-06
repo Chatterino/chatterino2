@@ -17,10 +17,8 @@ namespace chatterino {
 
 class Button;
 class PixmapButton;
-class SvgButton;
 class Window;
 class DrawnButton;
-class UpdateDialog;
 class NotebookTab;
 class SplitContainer;
 class Split;
