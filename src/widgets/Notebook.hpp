@@ -138,7 +138,6 @@ protected:
     {
         auto *btn = new T(std::forward<decltype(args)>(args)..., this);
         this->customButtons_.push_back(btn);
-        this->performLayout();
 
         return btn;
     }

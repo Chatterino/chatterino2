@@ -1510,6 +1510,8 @@ void SplitNotebook::addCustomButtons()
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
+
+    this->performLayout(false);
 }
 
 void SplitNotebook::updateStreamerModeIcon()
