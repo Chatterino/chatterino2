@@ -225,7 +225,7 @@ ModerationPage::ModerationPage()
     {
         // clang-format off
         auto label = modMode.emplace<QLabel>(
-            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
+            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/moderationDisabledDarkMode18x18.png'> in a channel that you moderate.<br><br>"
             "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
             "For deleting messages use /delete {msg.id}.<br><br>"
             "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
