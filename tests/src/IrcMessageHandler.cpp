@@ -38,6 +38,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
+#include <QStringBuilder>
 
 #include <unordered_map>
 #include <vector>

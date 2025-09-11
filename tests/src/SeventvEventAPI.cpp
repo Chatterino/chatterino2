@@ -45,7 +45,7 @@ TEST(SeventvEventAPI, AllEvents)
     });
 
     eventAPI.subscribeUser("", EMOTE_SET_A);
-    QTest::qWait(500ms);
+    QTest::qWait(500);
 
     ASSERT_EQ(eventAPI.diag().connectionsOpened, 1);
     ASSERT_EQ(eventAPI.diag().connectionsClosed, 0);
@@ -75,7 +75,7 @@ TEST(SeventvEventAPI, AllEvents)
     removeDispatch = std::nullopt;
 
     eventAPI.subscribeUser(TARGET_USER_ID, "");
-    QTest::qWait(50ms);
+    QTest::qWait(50);
 
     ASSERT_EQ(addDispatch.has_value(), false);
     ASSERT_EQ(updateDispatch.has_value(), false);
@@ -105,7 +105,7 @@ TEST(SeventvEventAPI, NoHeartbeat)
     SeventvEventAPI eventApi(host, std::chrono::milliseconds(1000));
 
     eventApi.subscribeUser("", EMOTE_SET_A);
-    QTest::qWait(1250ms);
+    QTest::qWait(1250);
     ASSERT_EQ(eventApi.diag().connectionsOpened, 2);
     ASSERT_EQ(eventApi.diag().connectionsClosed, 1);
     ASSERT_EQ(eventApi.diag().connectionsFailed, 0);

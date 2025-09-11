@@ -39,7 +39,7 @@ TEST(BttvLiveUpdates, AllEvents)
     });
 
     liveUpdates.joinChannel(TARGET_USER_ID, TARGET_USER_NAME);
-    QTest::qWait(500ms);
+    QTest::qWait(500);
 
     ASSERT_EQ(liveUpdates.diag().connectionsOpened, 1);
     ASSERT_EQ(liveUpdates.diag().connectionsClosed, 0);

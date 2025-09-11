@@ -70,10 +70,6 @@ private:
      * @lua@field on_binary fun(data: string)|nil Handler called when the socket receives a binary message.
      */
     sol::main_function onBinary;
-    /**
-     * @lua@field on_open fun()|nil Handler called when the websocket handshake has been completed successfully.
-     */
-    sol::main_function onOpen;
     WebSocketHandle handle;
     // Note: this class lives inside the plugin -> this pointer will be valid.
     Plugin *plugin = nullptr;

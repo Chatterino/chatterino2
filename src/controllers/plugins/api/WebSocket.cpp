@@ -16,7 +16,6 @@ class WebSocketListenerProxy final : public WebSocketListener
 public:
     WebSocketListenerProxy(std::weak_ptr<WebSocket> target);
 
-    void onOpen() override;
     void onClose(std::unique_ptr<WebSocketListener> self) override;
     void onBinaryMessage(QByteArray data) override;
     void onTextMessage(QByteArray data) override;
@@ -155,19 +154,6 @@ void WebSocket::sendBinary(const QByteArray &data)
 WebSocketListenerProxy::WebSocketListenerProxy(std::weak_ptr<WebSocket> target)
     : target(std::move(target))
 {
-}
-
-void WebSocketListenerProxy::onOpen()
-{
-    auto target = this->target;
-    runInGuiThread([target] {
-        auto strong = target.lock();
-        if (strong && strong->onOpen)
-        {
-            loggedVoidCall(strong->onOpen, u"WebSocket.on_open",
-                           strong->plugin);
-        }
-    });
 }
 
 void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)

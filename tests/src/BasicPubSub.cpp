@@ -147,7 +147,7 @@ TEST(BasicPubSub, SubscriptionCycle)
     const QString host("wss://127.0.0.1:9050/liveupdates/sub-unsub");
     MyManager manager(host);
     manager.sub({1, "foo"});
-    QTest::qWait(500ms);
+    QTest::qWait(500);
     ASSERT_EQ(manager.diag.connectionsClosed, 0);
     ASSERT_EQ(manager.diag.connectionsFailed, 0);
     ASSERT_EQ(manager.messagesReceived, 1);
@@ -155,7 +155,7 @@ TEST(BasicPubSub, SubscriptionCycle)
     ASSERT_EQ(manager.popMessage(), QString("ack-sub-1-foo"));
 
     manager.unsub({1, "foo"});
-    QTest::qWait(50ms);
+    QTest::qWait(50);
 
     ASSERT_EQ(manager.diag.connectionsOpened, 1);
     ASSERT_EQ(manager.diag.connectionsClosed, 0);

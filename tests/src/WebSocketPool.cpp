@@ -19,11 +19,6 @@ struct Listener : public WebSocketListener {
     {
     }
 
-    void onOpen() override
-    {
-        this->openFlag.set();
-    }
-
     void onClose(std::unique_ptr<WebSocketListener> /*self*/) override
     {
         this->closeFlag.set();
@@ -39,6 +34,11 @@ struct Listener : public WebSocketListener {
     {
         // no flag to know when the initial queue is empty
         messages.emplace_back(false, std::move(data));
+    }
+
+    void onOpen() override
+    {
+        this->openFlag.set();
     }
 
     std::vector<std::pair<bool, QByteArray>> &messages;
