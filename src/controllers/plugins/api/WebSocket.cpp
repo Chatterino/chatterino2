@@ -90,14 +90,6 @@ void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
         }),
         // Note: These properties could be pointers to members, but Clang 18
         // specifically can't compile these - see https://github.com/ThePhD/sol2/issues/1581
-        "on_open",
-        sol::property(
-            [](WebSocket &ws) {
-                return ws.onOpen;
-            },
-            [](WebSocket &ws, sol::main_function fn) {
-                ws.onOpen = std::move(fn);
-            }),
         "on_close",
         sol::property(
             [](WebSocket &ws) {
