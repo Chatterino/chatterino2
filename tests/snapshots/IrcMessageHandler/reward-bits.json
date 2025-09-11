@@ -84,21 +84,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "MyBitsEmote"
-                        ]
-                    },
                     "tooltip": "MyBitsEmote<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -258,6 +243,7 @@
                 }
             ],
             "flags": "Collapsed|RedeemedChannelPointReward",
+            "frozen": false,
             "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
             "localizedName": "",
             "loginName": "nerixyz",

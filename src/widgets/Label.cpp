@@ -15,6 +15,7 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
     : BaseWidget(parent)
     , text_(std::move(text))
     , fontStyle_(style)
+    , basePadding_(8, 0, 8, 0)
 {
     this->connections_.managedConnect(getApp()->getFonts()->fontChanged,
                                       [this] {
@@ -33,6 +34,11 @@ void Label::setText(const QString &text)
     if (this->text_ != text)
     {
         this->text_ = text;
+        if (this->shouldElide_)
+        {
+            this->updateElidedText(this->getFontMetrics(),
+                                   this->textRect().width());
+        }
         this->updateSize();
         this->update();
     }
@@ -54,14 +60,9 @@ void Label::setCentered(bool centered)
     this->updateSize();
 }
 
-bool Label::getHasOffset() const
+void Label::setPadding(QMargins padding)
 {
-    return this->hasOffset_;
-}
-
-void Label::setHasOffset(bool hasOffset)
-{
-    this->hasOffset_ = hasOffset;
+    this->basePadding_ = padding;
     this->updateSize();
 }
 
@@ -76,42 +77,56 @@ void Label::setWordWrap(bool wrap)
     this->update();
 }
 
+void Label::setShouldElide(bool shouldElide)
+{
+    this->shouldElide_ = shouldElide;
+    this->updateSize();
+    this->update();
+}
+
 void Label::setFontStyle(FontStyle style)
 {
     this->fontStyle_ = style;
     this->updateSize();
 }
 
-void Label::scaleChangedEvent(float scale)
+void Label::scaleChangedEvent(float /*scale*/)
 {
     this->updateSize();
 }
 
 QSize Label::sizeHint() const
 {
-    return this->preferedSize_;
+    return this->sizeHint_;
 }
 
 QSize Label::minimumSizeHint() const
 {
-    return this->preferedSize_;
+    return this->minimumSizeHint_;
 }
 
-void Label::paintEvent(QPaintEvent *)
+void Label::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    auto metrics = getApp()->getFonts()->getFontMetrics(this->getFontStyle(),
-                                                        this->scale());
+    auto metrics = this->getFontMetrics();
+
     painter.setFont(
         getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
-    int offset = this->getOffset();
-
     // draw text
-    QRect textRect(offset, 0, this->width() - offset - offset, this->height());
+    QRectF textRect = this->textRect();
 
-    int width = static_cast<int>(metrics.horizontalAdvance(this->text_));
+    auto text = [this] {
+        if (this->shouldElide_)
+        {
+            return this->elidedText_;
+        }
+
+        return this->text_;
+    }();
+
+    qreal width = metrics.horizontalAdvance(text);
     Qt::Alignment alignment = !this->centered_ || width > textRect.width()
                                   ? Qt::AlignLeft | Qt::AlignVCenter
                                   : Qt::AlignCenter;
@@ -127,7 +142,7 @@ void Label::paintEvent(QPaintEvent *)
     {
         option.setWrapMode(QTextOption::NoWrap);
     }
-    painter.drawText(textRect, this->text_, option);
+    painter.drawText(textRect, text, option);
 
 #if 0
     painter.setPen(QColor(255, 0, 0));
@@ -135,22 +150,71 @@ void Label::paintEvent(QPaintEvent *)
 #endif
 }
 
+void Label::resizeEvent(QResizeEvent *event)
+{
+    if (this->shouldElide_)
+    {
+        auto metrics = this->getFontMetrics();
+        if (this->updateElidedText(metrics, this->textRect().width()))
+        {
+            this->update();
+        }
+    }
+
+    BaseWidget::resizeEvent(event);
+}
+
+QFontMetricsF Label::getFontMetrics() const
+{
+    return getApp()->getFonts()->getFontMetrics(this->fontStyle_,
+                                                this->scale());
+}
+
 void Label::updateSize()
 {
-    auto metrics =
-        getApp()->getFonts()->getFontMetrics(this->fontStyle_, this->scale());
+    this->currentPadding_ = this->basePadding_.toMarginsF() * this->scale();
 
-    auto width =
-        metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());
-    auto height = metrics.height();
-    this->preferedSize_ = QSizeF(width, height).toSize();
+    auto metrics = this->getFontMetrics();
+
+    auto yPadding =
+        this->currentPadding_.top() + this->currentPadding_.bottom();
+    auto height = metrics.height() + yPadding;
+    if (this->shouldElide_)
+    {
+        this->updateElidedText(metrics, this->textRect().width());
+        this->sizeHint_ = QSizeF(-1, height).toSize();
+        this->minimumSizeHint_ = this->sizeHint_;
+    }
+    else
+    {
+        auto width = metrics.horizontalAdvance(this->text_) +
+                     this->currentPadding_.left() +
+                     this->currentPadding_.right();
+        this->sizeHint_ = QSizeF(width, height).toSize();
+        this->minimumSizeHint_ = this->sizeHint_;
+    }
 
     this->updateGeometry();
 }
 
-int Label::getOffset()
+bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
 {
-    return this->hasOffset_ ? int(8 * this->scale()) : 0;
+    assert(this->shouldElide_ == true);
+    auto elidedText = fontMetrics.elidedText(
+        this->text_, Qt::TextElideMode::ElideRight, width);
+
+    if (elidedText != this->elidedText_)
+    {
+        this->elidedText_ = elidedText;
+        return true;
+    }
+
+    return false;
+}
+
+QRectF Label::textRect() const
+{
+    return this->rect().toRectF().marginsRemoved(this->currentPadding_);
 }
 
 }  // namespace chatterino

@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchIrc.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
+#include "providers/twitch/UserColor.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -76,11 +77,6 @@ const QRegularExpression mentionRegex("^@" + regexHelpString);
 const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
-
-const QSet<QString> zeroWidthEmotes{
-    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
-    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
-};
 
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
@@ -391,7 +387,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
                 return Url{"https://link.twitch.tv/SharedChatViewer"};
             }
 
-            return Url{u"https://twitch.tv/%1"_s.arg(sourceLogin)};
+            return Url{u"https://www.twitch.tv/%1"_s.arg(sourceLogin)};
         }();
 
         return std::make_shared<Emote>(Emote{
@@ -420,7 +416,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
+std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
     TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
@@ -444,31 +440,19 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
         emote = twitchChannel->ffzEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::FfzEmote,
-                false,
-            };
+            return {emote, MessageElementFlag::FfzEmote};
         }
 
         emote = twitchChannel->bttvEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::BttvEmote,
-                false,
-            };
+            return {emote, MessageElementFlag::BttvEmote};
         }
 
         emote = twitchChannel->seventvEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::SevenTVEmote,
-                emote.value()->zeroWidth,
-            };
+            return {emote, MessageElementFlag::SevenTVEmote};
         }
     }
 
@@ -477,38 +461,22 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
     emote = globalFfzEmotes->emote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::FfzEmote,
-            false,
-        };
+        return {emote, MessageElementFlag::FfzEmote};
     }
 
     emote = globalBttvEmotes->emote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::BttvEmote,
-            zeroWidthEmotes.contains(name.string),
-        };
+        return {emote, MessageElementFlag::BttvEmote};
     }
 
     emote = globalSeventvEmotes->globalEmote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::SevenTVEmote,
-            emote.value()->zeroWidth,
-        };
+        return {emote, MessageElementFlag::SevenTVEmote};
     }
 
-    return {
-        {},
-        {},
-        false,
-    };
+    return {{}, {}};
 }
 
 }  // namespace
@@ -587,8 +555,12 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
 
 MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
                                                  const QVariantMap &tags,
-                                                 const QTime &time)
+                                                 const QTime &time,
+                                                 TwitchChannel *channel)
 {
+    const auto *userDataController = getApp()->getUserData();
+    assert(userDataController != nullptr);
+
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
 
@@ -598,11 +570,16 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     {
         gifterDisplayName = gifterLogin;
     }
-    MessageColor gifterColor = MessageColor::System;
-    if (auto colorTag = tags.value("color").value<QColor>(); colorTag.isValid())
-    {
-        gifterColor = MessageColor(colorTag);
-    }
+
+    auto gifterColor =
+        twitch::getUserColor({
+                                 .userLogin = gifterLogin,
+                                 .userID = tags.value("user-id").toString(),
+                                 .userDataController = userDataController,
+                                 .channelChatters = channel,
+                                 .color = tags.value("color").value<QColor>(),
+                             })
+            .value_or(MessageColor::System);
 
     auto recipientLogin =
         tags.value("msg-param-recipient-user-name").toString();
@@ -616,6 +593,17 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     {
         recipientDisplayName = recipientLogin;
     }
+
+    auto recipientColor =
+        twitch::getUserColor(
+            {
+                .userLogin = recipientLogin,
+                .userID = tags.value("msg-param-recipient-id").toString(),
+
+                .userDataController = userDataController,
+                .channelChatters = channel,
+            })
+            .value_or(MessageColor::System);
 
     const auto textFragments = text.split(SPACE_REGEX, Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
@@ -632,8 +620,7 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
         {
             builder
                 .emplace<MentionElement>(recipientDisplayName, recipientLogin,
-                                         MessageColor::System,
-                                         MessageColor::System)
+                                         MessageColor::System, recipientColor)
                 ->setTrailingSpace(false);
             builder.emplace<TextElement>(u"!"_s, MessageElementFlag::Text,
                                          MessageColor::System);
@@ -2220,14 +2207,15 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
+    auto [emote, flags] = parseEmote(twitchChannel, name);
 
     if (!emote)
     {
         return Failure;
     }
 
-    if (zeroWidth && getSettings()->enableZeroWidthEmotes && !this->isEmpty())
+    if ((*emote)->zeroWidth && getSettings()->enableZeroWidthEmotes &&
+        !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
         auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());

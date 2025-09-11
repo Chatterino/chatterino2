@@ -4,12 +4,18 @@
 #include "util/OnceFlag.hpp"
 #include "util/ThreadGuard.hpp"
 
-#include <boost/asio.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <QByteArray>
 #include <QString>
 #include <QUrl>
 
+#include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <memory>
+#include <thread>
 #include <vector>
 
 struct ma_engine;
@@ -26,6 +32,15 @@ namespace chatterino {
  **/
 class MiniaudioBackend : public ISoundController
 {
+    enum class State : std::uint8_t {
+        Uninitialized,
+        Initialized,
+        Failed,
+        Stopping,
+    };
+
+    std::atomic<State> state{State::Uninitialized};
+
 public:
     MiniaudioBackend();
     ~MiniaudioBackend() override;
@@ -62,8 +77,6 @@ private:
     std::unique_ptr<std::thread> audioThread;
     OnceFlag stoppedFlag;
     boost::asio::steady_timer sleepTimer;
-
-    bool initialized{false};
 
     friend class Application;
 };

@@ -31,6 +31,7 @@ using ImagePtr = std::shared_ptr<Image>;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
+/** @exposeenum c2.MessageElementFlag [flags] */
 enum class MessageElementFlag : int64_t {
     None = 0LL,
     Misc = (1LL << 0),
@@ -397,7 +398,12 @@ protected:
                                                          QSizeF size);
 
 private:
+    void ensureText(bool asFallback);
+
     std::unique_ptr<TextElement> textElement_;
+    MessageColor textColor_;
+    bool usingFallbackColor_ = false;
+
     EmotePtr emote_;
 };
 

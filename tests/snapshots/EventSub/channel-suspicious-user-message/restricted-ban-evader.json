@@ -91,6 +91,7 @@
                 }
             ],
             "flags": "LowTrustUsers|RestrictedMessage|EventSub",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "",
@@ -197,6 +198,7 @@
                 }
             ],
             "flags": "PubSub|LowTrustUsers|RestrictedMessage|EventSub",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

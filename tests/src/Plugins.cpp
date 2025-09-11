@@ -10,6 +10,8 @@
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "lib/Snapshot.hpp"
+#    include "messages/Message.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/Emotes.hpp"
@@ -31,6 +33,8 @@ using namespace chatterino;
 using chatterino::mock::MockChannel;
 
 namespace {
+
+constexpr bool UPDATE_SNAPSHOTS = false;
 
 const QString TEST_SETTINGS = R"(
 {
@@ -104,7 +108,7 @@ public:
     }
 
     PluginController plugins;
-    mock::EmptyLogging logging;
+    mock::Logging logging;
     CommandController commands;
     mock::Emotes emotes;
     MockTwitch twitch;
@@ -645,11 +649,18 @@ TEST_F(PluginTest, testTcpWebSocket)
 
     RequestWaiter waiter;
     std::vector<std::pair<bool, QByteArray>> messages;
+    bool open = false;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
+    });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
     });
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
@@ -671,6 +682,9 @@ TEST_F(PluginTest, testTcpWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -682,6 +696,7 @@ TEST_F(PluginTest, testTcpWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 7);
     ASSERT_EQ(messages[0].first, true);
@@ -709,12 +724,19 @@ TEST_F(PluginTest, testTlsWebSocket)
     configure({PluginPermission{{{"type", "Network"}}}});
 
     RequestWaiter waiter;
+    bool open = false;
     std::vector<std::pair<bool, QByteArray>> messages;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
+    });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
     });
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
@@ -744,6 +766,9 @@ TEST_F(PluginTest, testTlsWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -755,6 +780,7 @@ TEST_F(PluginTest, testTlsWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 9);
     ASSERT_EQ(messages[0].first, true);
@@ -814,6 +840,175 @@ TEST_F(PluginTest, testWebSocketApi)
     )lua");
 
     ASSERT_TRUE(ok);
+}
+
+TEST_F(PluginTest, testWebSocketUnsetFns)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    RequestWaiter waiter;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+
+    lua->script(R"lua(
+        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        ws.on_close = function()
+            done()
+        end
+        ws:send_text("message1")
+        ws:send_text("message2")
+        ws:send_binary("message3")
+        ws:send_binary("/CLOSE")
+    )lua");
+
+    waiter.waitForRequest();
+}
+
+TEST_F(PluginTest, MessageElementFlag)
+{
+    configure();
+    lua->script(R"lua(
+        values = {}
+        for k, v in pairs(c2.MessageElementFlag) do
+            table.insert(values, ("%s=0x%x"):format(k, v))
+        end
+        table.sort(values, function(a, b) return a:lower() < b:lower() end)
+        out = table.concat(values, ",")
+    )lua");
+
+    const char *VALUES = "AlwaysShow=0x2000000,"
+                         "BadgeChannelAuthority=0x8000,"
+                         "BadgeChatterino=0x40000,"
+                         "BadgeFfz=0x80000,"
+                         "BadgeGlobalAuthority=0x2000,"
+                         "BadgePredictions=0x4000,"
+                         "BadgeSevenTV=0x1000000000,"
+                         "BadgeSharedChannel=0x2000000000,"
+                         "BadgeSubscription=0x10000,"
+                         "BadgeVanity=0x20000,"
+                         "BitsAmount=0x200000,"
+                         "BitsAnimated=0x1000,"
+                         "BitsStatic=0x800,"
+                         "BttvEmoteImage=0x40,"
+                         "BttvEmoteText=0x80,"
+                         "ChannelName=0x100000,"
+                         "ChannelPointReward=0x100,"
+                         "Collapsed=0x4000000,"
+                         "EmojiImage=0x800000,"
+                         "EmojiText=0x1000000,"
+                         "FfzEmoteImage=0x200,"
+                         "FfzEmoteText=0x400,"
+                         "LowercaseLinks=0x20000000,"
+                         "Mention=0x8000000,"
+                         "Misc=0x1,"
+                         "ModeratorTools=0x400000,"
+                         "RepliedMessage=0x100000000,"
+                         "ReplyButton=0x200000000,"
+                         "SevenTVEmoteImage=0x400000000,"
+                         "SevenTVEmoteText=0x800000000,"
+                         "Text=0x2,"
+                         "Timestamp=0x8,"
+                         "TwitchEmoteImage=0x10,"
+                         "TwitchEmoteText=0x20,"
+                         "Username=0x4";
+
+    std::string got = (*lua)["out"];
+    ASSERT_EQ(got, VALUES);
+}
+
+TEST_F(PluginTest, ChannelAddMessage)
+{
+    configure();
+    lua->script(R"lua(
+        function do_it(chan)
+            local Repost = c2.MessageContext.Repost
+            local Original = c2.MessageContext.Original
+            chan:add_message(c2.Message.new({ id = "1" }))
+            chan:add_message(c2.Message.new({ id = "2" }), Repost)
+            chan:add_message(c2.Message.new({ id = "3" }), Original, nil)
+            chan:add_message(c2.Message.new({ id = "4" }), Repost, c2.MessageFlag.DoNotLog)
+            chan:add_message(c2.Message.new({ id = "5" }), Original, c2.MessageFlag.DoNotLog)
+            chan:add_message(c2.Message.new({ id = "6" }), Original, c2.MessageFlag.System)
+        end
+    )lua");
+
+    auto chan = std::make_shared<MockChannel>("mock");
+
+    std::vector<MessagePtr> logged;
+    EXPECT_CALL(this->app->logging, addMessage)
+        .Times(3)
+        .WillRepeatedly(
+            [&](const auto &, const auto &msg, const auto &, const auto &) {
+                logged.emplace_back(msg);
+            });
+
+    std::vector<std::pair<MessagePtr, std::optional<MessageFlags>>> added;
+    std::ignore = chan->messageAppended.connect([&](auto &&...args) {
+        added.emplace_back(std::forward<decltype(args)>(args)...);
+    });
+
+    (*lua)["do_it"](lua::api::ChannelRef(chan));
+
+    ASSERT_EQ(added.size(), 6);
+    ASSERT_EQ(added[0].first->id, "1");
+    ASSERT_FALSE(added[0].second.has_value());
+    ASSERT_EQ(added[1].first->id, "2");
+    ASSERT_FALSE(added[1].second.has_value());
+    ASSERT_EQ(added[2].first->id, "3");
+    ASSERT_FALSE(added[2].second.has_value());
+    ASSERT_EQ(added[3].first->id, "4");
+    ASSERT_EQ(added[3].second, MessageFlags{MessageFlag::DoNotLog});
+    ASSERT_EQ(added[4].first->id, "5");
+    ASSERT_EQ(added[4].second, MessageFlags{MessageFlag::DoNotLog});
+    ASSERT_EQ(added[5].first->id, "6");
+    ASSERT_EQ(added[5].second, MessageFlags{MessageFlag::System});
+
+    ASSERT_EQ(logged.size(), 3);
+    ASSERT_EQ(added[0].first, logged[0]);
+    ASSERT_EQ(added[2].first, logged[1]);
+    ASSERT_EQ(added[5].first, logged[2]);
+}
+
+class PluginMessageConstructionTest
+    : public PluginTest,
+      public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginMessageConstructionTest, Run)
+{
+    auto fixture = testlib::Snapshot::read("PluginMessageCtor", GetParam());
+
+    configure();
+    std::string script;
+    if (fixture->input().isArray())
+    {
+        for (auto line : fixture->input().toArray())
+        {
+            script += line.toString().toStdString() + '\n';
+        }
+    }
+    else
+    {
+        script = fixture->inputString().toStdString() + '\n';
+    }
+
+    script += "out = c2.Message.new(msg)";
+    lua->script(script);
+
+    Message *got = (*lua)["out"];
+
+    ASSERT_TRUE(fixture->run(got->toJson(), UPDATE_SNAPSHOTS));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    PluginMessageConstruction, PluginMessageConstructionTest,
+    testing::ValuesIn(testlib::Snapshot::discover("PluginMessageCtor")));
+
+// verify that all snapshots are included
+TEST(PluginMessageConstructionTest, Integrity)
+{
+    ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
 
 #endif

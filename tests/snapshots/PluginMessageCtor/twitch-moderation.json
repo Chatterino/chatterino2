@@ -1,0 +1,72 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'twitch-moderation' },",
+        "  { type = 'twitch-moderation', flags = c2.MessageElementFlag.BttvEmote },",
+        "  { type = 'twitch-moderation', tooltip = 't' },",
+        "  { type = 'twitch-moderation', trailing_space = false },",
+        "}}"
+    ],
+    "output": {
+        "badgeInfos": {
+        },
+        "badges": [
+        ],
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "flags": "ModeratorTools",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TwitchModerationElement"
+            },
+            {
+                "flags": "ModeratorTools",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TwitchModerationElement"
+            },
+            {
+                "flags": "ModeratorTools",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "t",
+                "trailingSpace": true,
+                "type": "TwitchModerationElement"
+            },
+            {
+                "flags": "ModeratorTools",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": false,
+                "type": "TwitchModerationElement"
+            }
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

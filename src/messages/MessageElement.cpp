@@ -20,6 +20,10 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#ifdef CHATTERINO_WITH_PRIVATE_QT_API
+#    include <QtGui/private/qtextengine_p.h>
+#endif
+
 namespace chatterino {
 
 using namespace literals;
@@ -177,11 +181,9 @@ QJsonObject CircularImageElement::toJson() const
 EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
                            const MessageColor &textElementColor)
     : MessageElement(flags)
+    , textColor_(textElementColor)
     , emote_(emote)
 {
-    this->textElement_.reset(new TextElement(
-        emote->getCopyString(), MessageElementFlag::Misc, textElementColor));
-
     this->setTooltip(emote->tooltip.string);
 }
 
@@ -193,39 +195,61 @@ EmotePtr EmoteElement::getEmote() const
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasNone(this->getFlags()))
     {
-        if (ctx.flags.has(MessageElementFlag::EmoteImages))
-        {
-            auto image = this->emote_->images.getImageOrLoaded(
-                container.getImageScale());
-            if (image->isEmpty())
-            {
-                return;
-            }
+        return;
+    }
 
+    if (ctx.flags.has(MessageElementFlag::EmoteImages))
+    {
+        auto image =
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
+
+        if (image->isEmpty())
+        {
+            this->ensureText(true);
+        }
+        else
+        {
             auto emoteScale = getSettings()->emoteScale.getValue();
 
             auto size = image->size() * container.getScale() * emoteScale;
 
             container.addElement(this->makeImageLayoutElement(image, size));
-        }
-        else
-        {
-            if (this->textElement_)
-            {
-                auto textCtx = ctx;
-                textCtx.flags = MessageElementFlag::Misc;
-                this->textElement_->addToContainer(container, textCtx);
-            }
+            return;
         }
     }
+    else
+    {
+        this->ensureText(false);
+    }
+
+    auto textCtx = ctx;
+    textCtx.flags = MessageElementFlag::Misc;
+    this->textElement_->addToContainer(container, textCtx);
 }
 
 MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     const ImagePtr &image, QSizeF size)
 {
     return new ImageLayoutElement(*this, image, size);
+}
+
+void EmoteElement::ensureText(bool asFallback)
+{
+    if (this->textElement_ && asFallback == this->usingFallbackColor_)
+    {
+        return;
+    }
+
+    auto color = this->textColor_;
+    if (asFallback)
+    {
+        color = MessageColor::System;
+    }
+    this->textElement_ = std::make_unique<TextElement>(
+        this->emote_->getCopyString(), MessageElementFlag::Misc, color);
+    this->usingFallbackColor_ = asFallback;
 }
 
 QJsonObject EmoteElement::toJson() const
@@ -621,12 +645,92 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 }
             }
 
-            // we done goofed, we need to wrap the text
+            // We done goofed, we need to wrap the text.
+            // If we allow the use of private Qt APIs, we can use Qt's text
+            // engine to accurately calculate the width of the text. Otherwise,
+            // we have to fall back to using horizontalAdvance which has some
+            // corner cases when processing whole words (see #5944).
+#ifdef CHATTERINO_WITH_PRIVATE_QT_API
+            auto font =
+                app->getFonts()->getFont(this->style_, container.getScale());
+
+            // This code is similar to the one from QTextEngine::elidedText in
+            // the mode Qt::ElideRight (because that's essentially what we're
+            // doing here): https://github.com/qt/qtbase/blob/560bf5a07720eaa8cc589f424743db8ed1f1d902/src/gui/text/qtextengine.cpp#L3145
+            // A difference is that, once we detected EOL, we start again.
+
+            // The start of the current line in `word`
+            qsizetype actualStart = 0;
+            // This is treated like a view (from `actualStart`) over the word.
+            // It's a QString because QStackTextEngine doesn't support
+            // QStringViews as arguments.
+            QString view = word;
+
+            // This is essentially a loop over every line of text.
+            do
+            {
+                QStackTextEngine engine(view, font);
+                engine.validate();  // initialize the internal state
+
+                int pos = 0;
+                int nextBreak = 0;
+                QFixed currentWidth = 0;
+                int to = static_cast<int>(view.size());
+                bool needsBreak = false;
+
+                // Find the next grapheme boundary (`nextBreak`) at which we
+                // need to break because the text wouldn't fit into the
+                // container anymore.
+                do
+                {
+                    pos = nextBreak;
+
+                    ++nextBreak;
+                    while (nextBreak < engine.layoutData->string.size() &&
+                           !engine.attributes()[nextBreak].graphemeBoundary)
+                    {
+                        ++nextBreak;
+                    }
+
+                    auto nextWidth =
+                        currentWidth + engine.width(pos, nextBreak - pos);
+                    if (!container.fitsInLine(nextWidth.toReal()))
+                    {
+                        needsBreak = true;
+                        if (pos == 0)
+                        {
+                            // Make sure that we consume at least one glyph.
+                            // So this element will overflow
+                            currentWidth = nextWidth;
+                        }
+                        else
+                        {
+                            // We didn't consume the glyph, it's for the next line
+                            nextBreak = pos;
+                        }
+                        break;
+                    }
+                    currentWidth = nextWidth;
+                } while (nextBreak < to);
+                // Now we either processed the whole text or we need to break
+                container.addElementNoLineBreak(getTextLayoutElement(
+                    word.sliced(actualStart, nextBreak), currentWidth.toReal(),
+                    !needsBreak && this->hasTrailingSpace()));
+                if (needsBreak)
+                {
+                    container.breakLine();
+                }
+
+                actualStart += nextBreak;
+                // Update the view
+                view = QString::fromRawData(word.constData() + actualStart,
+                                            word.size() - actualStart);
+                assert(needsBreak || view.isEmpty());
+            } while (!view.isEmpty());
+#else
             auto textLength = word.length();
             int wordStart = 0;
             width = 0;
-
-            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
             for (int i = 0; i < textLength; i++)
             {
@@ -663,6 +767,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             //add the final piece of wrapped text
             container.addElementNoLineBreak(getTextLayoutElement(
                 word.mid(wordStart), width, this->hasTrailingSpace()));
+#endif
         }
     }
 }

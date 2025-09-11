@@ -57,7 +57,7 @@ public:
     [[nodiscard]] bool mouseOver() const noexcept;
 
     /// Returns true if the left mouse button is held down
-    [[nodiscard]] bool mouseDown() const noexcept;
+    [[nodiscard]] bool leftMouseButtonDown() const noexcept;
 
     /// @brief Returns true if the menu is visible
     ///
@@ -100,7 +100,13 @@ public:
     /// Setter for #menu()
     void setMenu(std::unique_ptr<QMenu> menu);
 
+    /// Enable drops for this button
+    void enableDrops(const std::vector<QString> &acceptedDropMimes_);
+
 Q_SIGNALS:
+    /// Emitted when a successful drop event has occurred on the button.
+    void dropEvent(QDropEvent *event) override;
+
     /// @brief Emitted after the user left-clicked the button.
     ///
     /// A click is only emitted if the user released the mouse above the button
@@ -121,6 +127,8 @@ Q_SIGNALS:
     void leftMousePress();
 
 protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+
     void paintEvent(QPaintEvent * /*event*/) override;
 
     /// @brief Paint the contents to be shown below the button
@@ -183,6 +191,11 @@ protected:
     /// Queue up the click animation at the given position
     void addClickEffect(QPoint position);
 
+    /// This is fired when the mouse over state changes
+    virtual void mouseOverUpdated()
+    {
+    }
+
 private:
     void onMouseEffectTimeout();
     void showMenu();
@@ -202,13 +215,20 @@ private:
 
     bool enabled_ = true;
     bool mouseOver_ = false;
-    bool mouseDown_ = false;
+    bool leftMouseButtonDown_ = false;
+    bool rightMouseButtonDown_ = false;
+    bool middleMouseButtonDown_ = false;
     bool menuVisible_ = false;
 
     QPixmap cachedPixmap_;
     bool pixmapValid_ = false;
     bool cachePixmap_ = false;
     bool opaqueContent_ = false;
+
+    /// List of Mimes (e.g. chatterino/split) that are accepted as drop events on this button
+    ///
+    /// Controlled by the enableDrops function
+    std::vector<QString> acceptedDropMimes;
 };
 
 }  // namespace chatterino

@@ -141,6 +141,7 @@
                 }
             ],
             "flags": "System|EventSub",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "uint128",

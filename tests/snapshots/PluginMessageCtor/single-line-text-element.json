@@ -1,0 +1,189 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'single-line-text', text = '' },",
+        "  { type = 'single-line-text', text = 'foo' },",
+        "  { type = 'single-line-text', text = 'foo bar' },",
+        "  { type = 'single-line-text', text = 'foo\\nbar' },",
+        "  { type = 'single-line-text', text = 'foo', flags = c2.MessageElementFlag.Text | c2.MessageElementFlag.Timestamp },",
+        "  { type = 'single-line-text', text = 'foo', color = 'text' },",
+        "  { type = 'single-line-text', text = 'foo', color = 'system' },",
+        "  { type = 'single-line-text', text = 'foo', color = 'link' },",
+        "  { type = 'single-line-text', text = 'foo', color = 'green' },",
+        "  { type = 'single-line-text', text = 'foo', style = c2.FontStyle.ChatSmall },",
+        "}}"
+    ],
+    "output": {
+        "badgeInfos": {
+        },
+        "badges": [
+        ],
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    ""
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo",
+                    "bar"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo\nbar"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text|Timestamp",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "System",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Link",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "#ff008000",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatSmall",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "SingleLineTextElement",
+                "words": [
+                    "foo"
+                ]
+            }
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

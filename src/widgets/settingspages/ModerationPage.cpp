@@ -13,6 +13,7 @@
 #include "util/PostToThread.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/IconDelegate.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -150,6 +151,33 @@ ModerationPage::ModerationPage()
                                            }).result());
             });
 
+        auto logsTimestampFormatLayout =
+            logs.emplace<QHBoxLayout>().withoutMargin();
+        auto logsTimestampFormatLabel =
+            logsTimestampFormatLayout.emplace<QLabel>();
+        logsTimestampFormatLabel->setText(
+            QString("Log file timestamp format: "));
+
+        QComboBox *logTimestampFormat = this->createComboBox(
+            {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss",
+             "hh:mm:ss", "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz",
+             "h:mm:ss.zzz a", "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
+            getSettings()->logTimestampFormat);
+        logTimestampFormat->setToolTip("a = am/pm, zzz = milliseconds");
+        logsTimestampFormatLayout.append(logTimestampFormat);
+
+        SettingWidget::checkbox("Use Twitch's timestamps",
+                                getSettings()->tryUseTwitchTimestamps)
+            ->setTooltip(
+                "Try to use Twitch's timestamp (the time when the message was "
+                "received by Twitch's chat server), rather than your "
+                "computer's local timestamp.\nNote that using this setting can "
+                "result in out-of-order timestamps in the log files, and that "
+                "if Twitch's timestamp was unavailable for a message, it will "
+                "fall back to your computer's local timestamp.")
+            ->conditionallyEnabledBy(getSettings()->enableLogging)
+            ->addToLayout(logs->layout());
+
         QCheckBox *onlyLogListedChannels =
             this->createCheckBox("Only log channels listed below",
                                  getSettings()->onlyLogListedChannels);
@@ -197,7 +225,7 @@ ModerationPage::ModerationPage()
     {
         // clang-format off
         auto label = modMode.emplace<QLabel>(
-            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
+            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/moderationDisabledDarkMode18x18.png'> in a channel that you moderate.<br><br>"
             "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
             "For deleting messages use /delete {msg.id}.<br><br>"
             "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");

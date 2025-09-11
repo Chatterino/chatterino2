@@ -76,8 +76,8 @@ TEST(WebSocketPool, tcpEcho)
     handle.sendBinary("message3");
     handle.sendText("message4");
 
-    ASSERT_TRUE(openFlag.waitFor(1s));
-    ASSERT_TRUE(messageFlag.waitFor(100ms));
+    ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");
@@ -137,8 +137,8 @@ TEST(WebSocketPool, tlsEcho)
     handle.sendBinary("message3");
     handle.sendText("message4");
 
-    ASSERT_TRUE(openFlag.waitFor(1s));
-    ASSERT_TRUE(messageFlag.waitFor(100ms));
+    ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");

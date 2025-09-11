@@ -107,6 +107,7 @@ QJsonObject Message::toJson() const
         {"count"_L1, static_cast<qint64>(this->count)},
         {"serverReceivedTime"_L1,
          this->serverReceivedTime.toString(Qt::ISODate)},
+        {"frozen"_L1, this->frozen},
     };
 
     QJsonArray badges;

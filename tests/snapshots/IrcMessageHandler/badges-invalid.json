@@ -215,6 +215,7 @@
                 }
             ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131",
             "localizedName": "",
             "loginName": "badgy",

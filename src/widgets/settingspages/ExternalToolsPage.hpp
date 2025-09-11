@@ -15,7 +15,7 @@ public:
 private:
     void initLayout(GeneralPageView &layout);
 
-    GeneralPageView *view;
+    GeneralPageView *view{};
 };
 
 }  // namespace chatterino

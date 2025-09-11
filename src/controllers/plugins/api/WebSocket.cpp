@@ -20,6 +20,7 @@ public:
     void onClose(std::unique_ptr<WebSocketListener> self) override;
     void onBinaryMessage(QByteArray data) override;
     void onTextMessage(QByteArray data) override;
+    void onOpen() override;
 
 private:
     std::weak_ptr<WebSocket> target;
@@ -122,6 +123,14 @@ void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
             [](WebSocket &ws, sol::main_function fn) {
                 ws.onBinary = std::move(fn);
             }),
+        "on_open",
+        sol::property(
+            [](WebSocket &ws) {
+                return ws.onOpen;
+            },
+            [](WebSocket &ws, sol::main_function fn) {
+                ws.onOpen = std::move(fn);
+            }),
         "close", &WebSocket::close,            //
         "send_text", &WebSocket::sendText,     //
         "send_binary", &WebSocket::sendBinary  //
@@ -171,7 +180,10 @@ void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)
             auto cb = std::move(strong->onClose);
             strong->onText.reset();
             strong->onBinary.reset();
-            loggedVoidCall(cb, u"WebSocket.on_close", strong->plugin);
+            if (cb)
+            {
+                loggedVoidCall(cb, u"WebSocket.on_close", strong->plugin);
+            }
         }
     });
 }
@@ -181,7 +193,7 @@ void WebSocketListenerProxy::onTextMessage(QByteArray data)
     auto target = this->target;
     runInGuiThread([target, data{std::move(data)}] {
         auto strong = target.lock();
-        if (strong)
+        if (strong && strong->onText)
         {
             loggedVoidCall(strong->onText, u"WebSocket.on_text", strong->plugin,
                            data);
@@ -194,10 +206,23 @@ void WebSocketListenerProxy::onBinaryMessage(QByteArray data)
     auto target = this->target;
     runInGuiThread([target, data{std::move(data)}] {
         auto strong = target.lock();
-        if (strong)
+        if (strong && strong->onBinary)
         {
             loggedVoidCall(strong->onBinary, u"WebSocket.on_binary",
                            strong->plugin, data);
+        }
+    });
+}
+
+void WebSocketListenerProxy::onOpen()
+{
+    auto target = this->target;
+    runInGuiThread([target] {
+        auto strong = target.lock();
+        if (strong && strong->onOpen)
+        {
+            loggedVoidCall(strong->onOpen, u"WebSocket.on_open",
+                           strong->plugin);
         }
     });
 }

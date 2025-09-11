@@ -2,6 +2,8 @@
 
 #include <nonstd/expected.hpp>
 
+#include <type_traits>
+
 class QString;
 
 namespace chatterino {

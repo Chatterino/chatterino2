@@ -94,21 +94,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "BTTVGlobal"
-                        ]
-                    },
                     "tooltip": "BTTVGlobal Tooltip",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -143,21 +128,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            ":)"
-                        ]
-                    },
                     "tooltip": ":)<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -177,6 +147,7 @@
                 }
             ],
             "flags": "Collapsed|RedeemedHighlight",
+            "frozen": false,
             "id": "c5a927a2-1f68-41f7-9137-809a37e58e61",
             "localizedName": "",
             "loginName": "nerixyz",

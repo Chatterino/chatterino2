@@ -604,9 +604,9 @@ void ChannelView::themeChangedEvent()
     BaseWidget::themeChangedEvent();
 
     this->setupHighlightAnimationColors();
-    this->queueLayout();
     this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
                                     getSettings()->overlayBackgroundOpacity);
+    this->invalidateBuffers();
 }
 
 void ChannelView::updateColorTheme()
@@ -659,6 +659,7 @@ void ChannelView::invalidateBuffers()
 {
     this->bufferInvalidationQueued_ = true;
     this->queueLayout();
+    this->update();
 }
 
 void ChannelView::queueLayout()
@@ -735,8 +736,8 @@ void ChannelView::layoutVisibleMessages(
 
             y += message->getHeight();
         }
+        this->bufferInvalidationQueued_ = false;
     }
-    this->bufferInvalidationQueued_ = false;
 
     if (redrawRequired)
     {
@@ -974,6 +975,7 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                 }
                 this->channel_->addMessage(message, MessageContext::Repost,
                                            overridingFlags);
+                this->messageAddedToChannel(message);
             }
         });
 
@@ -2046,7 +2048,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         if (badgeElement || emoteElement || layeredEmoteElement)
         {
             auto showThumbnailSetting =
-                getSettings()->emotesTooltipPreview.getValue();
+                getSettings()->emotesTooltipPreview.getEnum();
 
             bool showThumbnail =
                 showThumbnailSetting == ThumbnailPreviewMode::AlwaysShow ||
@@ -2131,10 +2133,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     element->getTooltip(), getTooltipScale(scale)));
             }
         }
-        else
+        else if (auto *linkElement = dynamic_cast<LinkElement *>(element))
         {
             auto thumbnailSize = getSettings()->thumbnailSize;
-            auto *linkElement = dynamic_cast<LinkElement *>(element);
             if (linkElement)
             {
                 if (linkElement->linkInfo()->isPending())
@@ -2144,6 +2145,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 }
                 this->setLinkInfoTooltip(linkElement->linkInfo());
             }
+        }
+        else
+        {
+            this->tooltipWidget_->setOne(TooltipEntry{
+                .image = nullptr,
+                .text = element->getTooltip(),
+            });
         }
 
         this->tooltipWidget_->moveTo(
@@ -2808,13 +2816,21 @@ void ChannelView::addTwitchLinkContextMenuItems(
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Streamlink);
         });
+
+        if (!getSettings()->customURIScheme.getValue().isEmpty())
+        {
+            menu->addAction("Open in custom &player", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::CustomPlayer);
+            });
+        }
     }
 }
 
 void ChannelView::addCommandExecutionContextMenuItems(
     QMenu *menu, const MessageLayoutPtr &layout)
 {
-    /* Get commands to be displayed in context menu; 
+    /* Get commands to be displayed in context menu;
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
     for (const auto &cmd : getApp()->getCommands()->items)

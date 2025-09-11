@@ -114,21 +114,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -148,6 +133,7 @@
                 }
             ],
             "flags": "Collapsed|FirstMessage",
+            "frozen": false,
             "id": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b",
             "localizedName": "",
             "loginName": "jammehcow",

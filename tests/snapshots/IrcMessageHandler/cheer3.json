@@ -113,22 +113,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
-                    },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -147,22 +131,6 @@
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "cheer",
-                            "emote"
-                        ]
                     },
                     "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
@@ -198,6 +166,7 @@
                 }
             ],
             "flags": "Collapsed|CheerMessage",
+            "frozen": false,
             "id": "fd6c5507-3a4e-4d24-8f6e-fadf07f520d3",
             "localizedName": "",
             "loginName": "slyckity",

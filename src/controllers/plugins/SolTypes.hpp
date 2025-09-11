@@ -1,5 +1,6 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "util/FunctionRef.hpp"
 #    include "util/QMagicEnum.hpp"
 #    include "util/TypeName.hpp"
 
@@ -59,6 +60,8 @@ private:
     lua_State *state_;
 };
 
+QString errorResultToString(const sol::protected_function_result &result);
+
 /// @brief Attempts to call @a function with @a args
 ///
 /// @a T is expected to be returned.
@@ -78,9 +81,8 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         function(std::forward<Args>(args)...);
     if (!result.valid())
     {
-        sol::error err = result;
         return nonstd::expected_lite::make_unexpected(
-            QString::fromUtf8(err.what()));
+            errorResultToString(result));
     }
 
     if constexpr (std::is_same_v<T, void>)
@@ -174,12 +176,13 @@ void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#    define SOL_STACK_FUNCTIONS(TYPE)                                      \
-        bool sol_lua_check(sol::types<TYPE>, lua_State *L, int index,      \
-                           std::function<sol::check_handler_type> handler, \
-                           sol::stack::record &tracking);                  \
-        TYPE sol_lua_get(sol::types<TYPE>, lua_State *L, int index,        \
-                         sol::stack::record &tracking);                    \
+#    define SOL_STACK_FUNCTIONS(TYPE)                                 \
+        bool sol_lua_check(                                           \
+            sol::types<TYPE>, lua_State *L, int index,                \
+            chatterino::FunctionRef<sol::check_handler_type> handler, \
+            sol::stack::record &tracking);                            \
+        TYPE sol_lua_get(sol::types<TYPE>, lua_State *L, int index,   \
+                         sol::stack::record &tracking);               \
         int sol_lua_push(sol::types<TYPE>, lua_State *L, const TYPE &value);
 
 SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
