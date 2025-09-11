@@ -7,6 +7,7 @@
 - Bugfix: Fixed an issue where the update button would be unclickable on macOS and Linux. (#6447, #6453)
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
+- Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308)
 
 ## 2.5.4-beta.1
 

@@ -8,9 +8,9 @@ Message::Message(QJsonObject _json)
 {
 }
 
-std::optional<Message> parseBaseMessage(const QString &blob)
+std::optional<Message> parseBaseMessage(const QByteArray &blob)
 {
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob));
 
     if (jsonDoc.isNull())
     {

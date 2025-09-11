@@ -12,6 +12,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"  // IWYU pragma: keep
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"  // IWYU pragma: keep
@@ -880,8 +881,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                     },
                     this);
             });
-
-        bttvLiveUpdates->start();
     }
     else
     {
@@ -932,8 +931,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                                              chan.updateSeventvUser(data);
                                          });
             });
-
-        seventvEventAPI->start();
     }
     else
     {
