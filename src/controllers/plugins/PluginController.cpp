@@ -234,6 +234,8 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
+    c2["LinkType"] =
+        lua::createEnumTable<lua::api::message::ExposedLinkType>(lua);
 
     sol::table io = g["io"];
     io.set_function(
