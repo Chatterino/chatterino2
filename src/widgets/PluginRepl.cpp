@@ -596,8 +596,7 @@ void PluginRepl::logResult(const sol::protected_function_result &res,
 {
     if (!res.valid())
     {
-        sol::error err = res;
-        this->log(lua::api::LogLevel::Critical, err.what());
+        this->log(lua::api::LogLevel::Critical, lua::errorResultToString(res));
         return;
     }
     if (res.return_count() == 0)

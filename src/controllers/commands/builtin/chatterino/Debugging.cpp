@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
@@ -195,6 +196,11 @@ QString debugTest(const CommandContext &ctx)
             ctx.twitchChannel->getName(), title);
         ctx.channel->addSystemMessage(
             QString("debug-test sent desktop notification"));
+    }
+    else if (command == "update-check")
+    {
+        getApp()->getUpdates().checkForUpdates();
+        ctx.channel->addSystemMessage(QString("checking for updates"));
     }
     else
     {

@@ -221,7 +221,7 @@ void Window::addCustomTitlebarButtons()
     // updates
     auto *update = this->addTitleBarButton<PixmapButton>([] {});
 
-    initUpdateButton(*update, this->signalHolder_);
+    initUpdateButton(*update, [] {}, this->signalHolder_);
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {

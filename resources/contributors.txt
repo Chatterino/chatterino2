@@ -89,6 +89,7 @@ knobby-tires | https://github.com/knobby-tires | :/avatars/knobby-tires.jpg
 droidicus | https://github.com/droidicus | :/avatars/droidicus.png
 vincent0955 | https://github.com/vincent0955 | :/avatars/vincent0955.png
 isgkm | https://github.com/isgkm |
+otaviobia | https://github.com/otaviobia | :/avatars/otaviobia.png
 
 # If you are a contributor add yourself above this line
 

@@ -801,7 +801,9 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
     // set size of custom buttons (settings, user, ...)
     for (auto *btn : this->customButtons_)
     {
-        if (!btn->isVisible())
+        // We use isHidden here since the layout can happen when the button has
+        // been added but before it's shown
+        if (btn->isHidden())
         {
             continue;
         }
@@ -925,7 +927,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
              btnIt != this->customButtons_.rend(); ++btnIt)
         {
             auto *btn = *btnIt;
-            if (!btn->isVisible())
+            if (btn->isHidden())
             {
                 continue;
             }
@@ -945,7 +947,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
         {
-            if (!btn->isVisible())
+            if (btn->isHidden())
             {
                 continue;
             }
@@ -1203,7 +1205,7 @@ size_t Notebook::visibleButtonCount() const
     size_t i = 0;
     for (auto *btn : this->customButtons_)
     {
-        if (btn->isVisible())
+        if (!btn->isHidden())
         {
             ++i;
         }
@@ -1492,7 +1494,12 @@ void SplitNotebook::addCustomButtons()
     // updates
     auto *updateBtn = this->addCustomButton<PixmapButton>();
 
-    initUpdateButton(*updateBtn, this->signalHolder_);
+    initUpdateButton(
+        *updateBtn,
+        [this] {
+            this->performLayout(false);
+        },
+        this->signalHolder_);
 
     // streamer mode
     this->streamerModeIcon_ = this->addCustomButton<PixmapButton>();
@@ -1503,6 +1510,8 @@ void SplitNotebook::addCustomButtons()
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
+
+    this->performLayout(false);
 }
 
 void SplitNotebook::updateStreamerModeIcon()
