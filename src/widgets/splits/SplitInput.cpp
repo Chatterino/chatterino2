@@ -217,8 +217,8 @@ void SplitInput::initLayout()
         app->getFonts()->fontChanged, [=, this]() {
             this->ui_.textEdit->setFont(
                 app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
-            this->ui_.textEditLength->setFont(
-                app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
+            this->ui_.textEditLength->setFont(app->getFonts()->getFont(
+                FontStyle::TimestampMedium, this->scale()));
             this->ui_.replyLabel->setFont(app->getFonts()->getFont(
                 FontStyle::ChatMediumBold, this->scale()));
         });
