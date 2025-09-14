@@ -8,6 +8,7 @@
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
+- Bugfix: Update the message length font when updating your chat font. (#6462)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
 
 ## 2.5.4-beta.1
