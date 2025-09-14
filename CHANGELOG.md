@@ -6,6 +6,7 @@
 - Bugfix: Fixed zero-width global BTTV emotes not showing in the `:~` completions. (#6440)
 - Bugfix: Fixed an issue where the update button would be unclickable on macOS and Linux. (#6447, #6453)
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
+- Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
 
