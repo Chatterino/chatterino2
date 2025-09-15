@@ -1270,7 +1270,7 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
 
     const auto deletionText =
         QString("A message from %1 was deleted: %2")
-            .arg(originalMessage->displayName, deletedMessageText);
+            .arg(originalMessage->loginName, deletedMessageText);
     builder.message().messageText = deletionText;
     builder.message().searchText = deletionText;
 
