@@ -1255,21 +1255,24 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
         ->setLink({Link::UserInfo, originalMessage->loginName});
     builder.emplace<TextElement>("was deleted:", MessageElementFlag::Text,
                                  MessageColor::System);
-    if (originalMessage->messageText.length() > 50)
+
+    auto deletedMessageText = originalMessage->messageText;
+    if (deletedMessageText.length() > 50)
     {
-        builder
-            .emplace<TextElement>(originalMessage->messageText.left(50) + "…",
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
+        deletedMessageText = deletedMessageText.left(50) + "…";
     }
-    else
-    {
-        builder
-            .emplace<TextElement>(originalMessage->messageText,
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
-    }
+
+    builder
+        .emplace<TextElement>(deletedMessageText, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, originalMessage->id});
     builder.message().timeoutUser = "msg:" + originalMessage->id;
+
+    const auto deletionText =
+        QString("A message from %1 was deleted: %2")
+            .arg(originalMessage->displayName, deletedMessageText);
+    builder.message().messageText = deletionText;
+    builder.message().searchText = deletionText;
 
     return builder.release();
 }
