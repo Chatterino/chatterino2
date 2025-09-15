@@ -8,7 +8,7 @@
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
-- Bugfix: Fixed "*A message from X has been deleted*" messages logging empty messages to disk. (#6465)
+- Bugfix: Fixed "_A message from X has been deleted_" messages logging empty messages to disk. (#6465)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
 
 ## 2.5.4-beta.1
