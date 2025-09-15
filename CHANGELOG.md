@@ -9,6 +9,7 @@
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
+- Dev: Enable the hardened runtime on macOS. (#6467)
 
 ## 2.5.4-beta.1
 
