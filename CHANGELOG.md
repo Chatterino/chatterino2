@@ -10,6 +10,7 @@
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
 - Bugfix: Fixed "_A message from X has been deleted_" messages logging empty messages to disk. (#6465)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
+- Dev: Enable the hardened runtime on macOS. (#6467)
 
 ## 2.5.4-beta.1
 
