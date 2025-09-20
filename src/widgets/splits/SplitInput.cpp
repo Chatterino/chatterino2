@@ -1331,6 +1331,9 @@ void SplitInput::updateFonts()
     auto *app = getApp();
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+
+    // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
+    // meaning numbers get equal width & don't bounce around while the user is typing.
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
     this->ui_.replyLabel->setFont(

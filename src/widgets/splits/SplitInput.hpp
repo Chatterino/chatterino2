@@ -188,7 +188,6 @@ protected:
 
     QPropertyAnimation backgroundColorAnimation;
 
-private:
     void updateFonts();
 
 private Q_SLOTS:
