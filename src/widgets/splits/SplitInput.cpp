@@ -217,6 +217,8 @@ void SplitInput::initLayout()
         app->getFonts()->fontChanged, [=, this]() {
             this->ui_.textEdit->setFont(
                 app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+            this->ui_.textEditLength->setFont(app->getFonts()->getFont(
+                FontStyle::TimestampMedium, this->scale()));
             this->ui_.replyLabel->setFont(app->getFonts()->getFont(
                 FontStyle::ChatMediumBold, this->scale()));
         });
@@ -275,16 +277,13 @@ void SplitInput::scaleChangedEvent(float scale)
             this->ui_.vbox->setSpacing(this->marginForTheme());
         }
     }
-    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
 
-    // TODO: This font does _not_ get updated when you change your chat font
     // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
     // meaning numbers get equal width & don't bounce around while the user is typing.
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::TimestampMedium, scale));
-    // TODO: This font does _not_ get updated when you change your chat font
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
 }
