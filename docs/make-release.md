@@ -5,13 +5,15 @@ I will be using `2.3.4` as the example release in this document.
 ## In the release PR
 
 - [ ] Updated version code in `src/common/Version.hpp`
+
   ```diff
   - inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.4-beta.1");
   + inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.4");
   ```
 
 - [ ] Updated version code in `CMakeLists.txt`  
-  If you made a beta release, this step will not be necessary.
+      If you made a beta release, this step will not be necessary.
+
   ```diff
     project(chatterino
   -     VERSION 2.3.3
@@ -22,7 +24,8 @@ I will be using `2.3.4` as the example release in this document.
   ```
 
 - [ ] Add a new release at the top of the `releases` key in `resources/com.chatterino.chatterino.appdata.xml`  
-  The format for beta releases here differs, you have to use a tilde instead, and omit the period before the beta number.
+      The format for beta releases here differs, you have to use a tilde instead, and omit the period before the beta number.
+
   ```diff
     <releases>
   +   <release version="2.3.4" date="2020-02-03">
@@ -34,7 +37,8 @@ I will be using `2.3.4` as the example release in this document.
   ```
 
 - [ ] Updated version code in `.CI/chatterino-installer.iss`  
-  If you made a beta release, this step will not be necessary.
+      If you made a beta release, this step will not be necessary.
+
   ```diff
     #define MyAppName "Chatterino"
   - #define MyAppVersion "2.3.3"
@@ -43,7 +47,8 @@ I will be using `2.3.4` as the example release in this document.
   ```
 
 - [ ] Update the changelog `## Unversioned` section to the new version `CHANGELOG.md`  
-  Make sure to leave the `## Unversioned` line unchanged for easier merges
+      Make sure to leave the `## Unversioned` line unchanged for easier merges
+
   ```diff
    # Changelog
 
@@ -58,12 +63,12 @@ I will be using `2.3.4` as the example release in this document.
 ## After the PR has been created
 
 - [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid  
-  TODO: Add steps for how you can validate this, and for how to recreate the credentials. Also probably what exact credentials we need
+      TODO: Add steps for how you can validate this, and for how to recreate the credentials. Also probably what exact credentials we need
 
 ## After the PR has been merged
 
 - [ ] Tag the release  
-  Ensure you're on the correct release locally
+      Ensure you're on the correct release locally
   ```sh
   git tag v2.3.4 --annotate --message v2.3.4
   git push origin v2.3.4
@@ -79,18 +84,18 @@ I will be using `2.3.4` as the example release in this document.
 ### Prepare the binaries
 
 - [ ] Make a new directory in your `chatterino-releases` directory
-- [ ] Find the Create installer action for the release-tagged commit and download:  
+- [ ] Find the Create installer action for the release-tagged commit and download:
   - `Chatterino.Installer.exe`
-- [ ] Find the Build action for the release-tagged commit and download:  
+- [ ] Find the Build action for the release-tagged commit and download:
   - `Chatterino-ubuntu-20.04-*.deb`, renamed to `Chatterino-Ubuntu-20.04.deb`
   - `Chatterino-ubuntu-22.04-*.deb`, renamed to `Chatterino-Ubuntu-22.04.deb`
   - `Chatterino-ubuntu-24.04-*.deb`, renamed to `Chatterino-Ubuntu-24.04.deb`
   - `chatterino-windows-x86-64-*-symbols.pdb.7z`, renamed to `Chatterino-Windows-debug-symbols.pdb.7z`
   - `chatterino-windows-x86-64-*.zip`
-- [ ] Massage the portable release:  
+- [ ] Massage the portable release:
   - Unzip `chatterino-windows-x86-64-*.zip`
   - Edit the `modes` file to say `portable` and nothing else
-  - Copy the `updater.1` directory from an old portable release. Tree structure should look like this:  
+  - Copy the `updater.1` directory from an old portable release. Tree structure should look like this:
     ```
     Chatterino2
     ├── chatterino.exe
@@ -101,7 +106,7 @@ I will be using `2.3.4` as the example release in this document.
     │   └── SharpZipLib_LICENSE.txt
     ...
     ```
-  - Zip up the portable release again:  
+  - Zip up the portable release again:
   ```sh
   zip -r Chatterino.Portable.zip Chatterino2
   ```
