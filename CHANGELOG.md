@@ -8,6 +8,7 @@
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
+- Bugfix: Fixed "_A message from X has been deleted_" messages logging empty messages to disk. (#6465)
 - Bugfix: Do not set default hotkeys for focusing splits on macOS, as <kbd>Option</kbd> + <kbd>Arrows</kbd> are used for cursor navigation. (#6470)
 - Bugfix: Fixed <kbd>CMD</kbd>+<kbd>Backspace</kbd> not working in the input on macOS if there was a selection. (#6469)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
