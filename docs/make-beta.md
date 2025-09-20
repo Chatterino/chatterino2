@@ -12,7 +12,7 @@ I will be using `2.3.4-beta.1` as the example release in this document.
   ```
 
 - [ ] Updated version code in `CMakeLists.txt`  
-      This can only be "whole versions", so we have to "round it" to the next stable release.
+       This can only be "whole versions", so we have to "round it" to the next stable release.
 
   ```diff
     project(chatterino
@@ -24,7 +24,7 @@ I will be using `2.3.4-beta.1` as the example release in this document.
   ```
 
 - [ ] Add a new release at the top of the `releases` key in `resources/com.chatterino.chatterino.appdata.xml`  
-      The format for beta releases here differs, you have to use a tilde instead, and omit the period before the beta number.
+       The format for beta releases here differs, you have to use a tilde instead, and omit the period before the beta number.
 
   ```diff
     <releases>
@@ -37,7 +37,7 @@ I will be using `2.3.4-beta.1` as the example release in this document.
   ```
 
 - [ ] Updated version code in `.CI/chatterino-installer.iss`  
-      This can only be "whole versions", so we have to "round it" to the next stable release.
+       This can only be "whole versions", so we have to "round it" to the next stable release.
 
   ```diff
     #define MyAppName "Chatterino"
@@ -47,7 +47,7 @@ I will be using `2.3.4-beta.1` as the example release in this document.
   ```
 
 - [ ] Update the changelog `## Unversioned` section to the new version `CHANGELOG.md`  
-      Make sure to leave the `## Unversioned` line unchanged for easier merges
+       Make sure to leave the `## Unversioned` line unchanged for easier merges
 
   ```diff
    # Changelog
@@ -63,7 +63,7 @@ I will be using `2.3.4-beta.1` as the example release in this document.
 ## After the PR has been merged
 
 - [ ] Tag the release  
-      Ensure you're on the correct release locally
+       Ensure you're on the correct release locally
   ```sh
   git tag v2.3.4-beta.1 --annotate --message v2.3.4-beta.1
   git push origin v2.3.4-beta.1
