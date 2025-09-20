@@ -71,7 +71,7 @@ public:
      *
      * Obeys the HighlightsEnabled setting and the highlight state hierarchy and tracks the highlight state update sources
      */
-    void updateHighlightState(HighlightState style,
+    bool updateHighlightState(HighlightState style,
                               const ChannelView &channelViewSource);
     void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);

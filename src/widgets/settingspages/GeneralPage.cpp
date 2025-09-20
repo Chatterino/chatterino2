@@ -238,12 +238,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addDropdown<std::underlying_type_t<NotebookTabVisibility>>(
-        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
+        "Tab visibility", {"All tabs", "Only live tabs", "Only unread tabs", "Live + unread tabs"}, s.tabVisibility,
         [](auto val) {
             switch (val)
             {
                 case NotebookTabVisibility::LiveOnly:
                     return "Only live tabs";
+                case NotebookTabVisibility::UnreadOnly:
+                    return "Only unread tabs";
+                case NotebookTabVisibility::LiveOnly | NotebookTabVisibility::UnreadOnly:
+                    return "Live + unread tabs";
                 case NotebookTabVisibility::AllTabs:
                 default:
                     return "All tabs";
@@ -252,11 +256,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             if (args.value == "Only live tabs")
             {
-                return NotebookTabVisibility::LiveOnly;
+                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::LiveOnly);
+            }
+            else if (args.value == "Only unread tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::UnreadOnly);
+            }
+            else if (args.value == "Live + unread tabs")
+            {
+                return NotebookTabVisibility::LiveOnly | NotebookTabVisibility::UnreadOnly;
             }
             else
             {
-                return NotebookTabVisibility::AllTabs;
+                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::AllTabs);
             }
         },
         false, "Choose which tabs are visible in the notebook");
