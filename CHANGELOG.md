@@ -9,6 +9,7 @@
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
 - Bugfix: Do not set default hotkeys for focusing splits on macOS, as <kbd>Option</kbd> + <kbd>Arrows</kbd> are used for cursor navigation. (#6470)
+- Bugfix: Fixed <kbd>CMD</kbd>+<kbd>Backspace</kbd> not working in the input on macOS if there was a selection. (#6469)
 - Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
 - Dev: Enable the hardened runtime on macOS. (#6467)
 
