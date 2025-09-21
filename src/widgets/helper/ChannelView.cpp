@@ -78,8 +78,7 @@ using namespace chatterino;
 
 constexpr int SCROLLBAR_PADDING = 8;
 
-void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
-                              MessageElementFlags creatorFlags)
+void addEmoteContextMenuItems(QMenu *menu, const Emote &emote, QStringView kind)
 {
     auto *openAction = menu->addAction("&Open");
     auto *openMenu = new QMenu(menu);
@@ -116,31 +115,19 @@ void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
     addImageLink(emote.images.getImage3());
 
     // Copy and open emote page link
-    auto addPageLink = [&](const QString &name) {
+    if (!emote.homePage.string.isEmpty())
+    {
         copyMenu->addSeparator();
         openMenu->addSeparator();
 
-        copyMenu->addAction("Copy " + name + " &emote link",
+        copyMenu->addAction(u"Copy &" % kind % u" link",
                             [url = emote.homePage] {
                                 crossPlatformCopy(url.string);
                             });
-        openMenu->addAction("Open " + name + " &emote link",
+        openMenu->addAction(u"Open &" % kind % u" link",
                             [url = emote.homePage] {
                                 QDesktopServices::openUrl(QUrl(url.string));
                             });
-    };
-
-    if (creatorFlags.has(MessageElementFlag::BttvEmote))
-    {
-        addPageLink("BTTV");
-    }
-    else if (creatorFlags.has(MessageElementFlag::FfzEmote))
-    {
-        addPageLink("FFZ");
-    }
-    else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
-    {
-        addPageLink("7TV");
     }
 }
 
@@ -161,8 +148,7 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *badgeElement =
                 dynamic_cast<const BadgeElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *badgeElement->getEmote(),
-                                     creatorFlags);
+            addEmoteContextMenuItems(menu, *badgeElement->getEmote(), u"badge");
         }
     }
 
@@ -173,8 +159,7 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *emoteElement =
                 dynamic_cast<const EmoteElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *emoteElement->getEmote(),
-                                     creatorFlags);
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
         }
         else if (const auto *layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
@@ -185,7 +170,7 @@ void addImageContextMenuItems(QMenu *menu,
                 auto *emoteAction = menu->addAction(emote.ptr->name.string);
                 auto *emoteMenu = new QMenu(menu);
                 emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(emoteMenu, *emote.ptr, emote.flags);
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
             }
         }
     }
