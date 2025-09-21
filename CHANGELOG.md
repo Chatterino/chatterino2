@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.4
+
 - Bugfix: Fixed crashes that could occur when Lua functions errored with values other than strings. (#6441)
 - Bugfix: Fixed zero-width global BTTV emotes not showing in the `:~` completions. (#6440)
 - Bugfix: Fixed an issue where the update button would be unclickable on macOS and Linux. (#6447, #6453)
