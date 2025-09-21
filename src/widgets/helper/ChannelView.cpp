@@ -62,6 +62,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
+#include <QStringBuilder>
 #include <QVariantAnimation>
 
 #include <algorithm>
