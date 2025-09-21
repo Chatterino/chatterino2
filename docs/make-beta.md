@@ -1,18 +1,18 @@
-# Checklist for making a stable release (e.g. 2.5.4)
+# Checklist for making a beta release (e.g. 2.3.4-beta.1)
 
-I will be using `2.3.4` as the example release in this document.
+I will be using `2.3.4-beta.1` as the example release in this document.
 
 ## In the release PR
 
 - [ ] Updated version code in `src/common/Version.hpp`
 
   ```diff
-  - inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.4-beta.1");
-  + inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.4");
+  - inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.3");
+  + inline const QString CHATTERINO_VERSION = QStringLiteral("2.3.4-beta.1");
   ```
 
 - [ ] Updated version code in `CMakeLists.txt`  
-       If you made a beta release, this step will not be necessary.
+       This can only be "whole versions", so we have to "round it" to the next stable release.
 
   ```diff
     project(chatterino
@@ -28,16 +28,16 @@ I will be using `2.3.4` as the example release in this document.
 
   ```diff
     <releases>
-  +   <release version="2.3.4" date="2020-02-03">
-  +       <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.3.4</url>
+  +   <release version="2.3.4~beta1" date="2020-02-02">
+  +       <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.3.4-beta.1</url>
   +   </release>
-        <release version="2.3.4~beta1" date="2020-02-02">
-            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.3.4-beta.1</url>
+        <release version="2.3.3" date="2020-01-01">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.3.3</url>
         </release>
   ```
 
 - [ ] Updated version code in `.CI/chatterino-installer.iss`  
-       If you made a beta release, this step will not be necessary.
+       This can only be "whole versions", so we have to "round it" to the next stable release.
 
   ```diff
     #define MyAppName "Chatterino"
@@ -54,29 +54,22 @@ I will be using `2.3.4` as the example release in this document.
 
    ## Unversioned
   +
-  + ## 2.3.4
+  + ## 2.3.4-beta.1
 
-   - Bugfix: Foo (#2)
+   - Bugfix: Foo (#1)
 
   ```
-
-## After the PR has been created
-
-- [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid  
-       TODO: Add steps for how you can validate this, and for how to recreate the credentials. Also probably what exact credentials we need
 
 ## After the PR has been merged
 
 - [ ] Tag the release  
        Ensure you're on the correct release locally
   ```sh
-  git tag v2.3.4 --annotate --message v2.3.4
-  git push origin v2.3.4
+  git tag v2.3.4-beta.1 --annotate --message v2.3.4-beta.1
+  git push origin v2.3.4-beta.1
   ```
 - [ ] Manually run the [create-installer](https://github.com/Chatterino/chatterino2/actions/workflows/create-installer.yml) workflow.  
        This is only necessary if the tag was created after the CI in the main branch finished.
-- [ ] If the winget releaser action doesn't work as expected, you can run this manually using [Komac](https://github.com/russellbanks/Komac), replacing `v2.5.2` with the current release:  
-       `komac update ChatterinoTeam.Chatterino --version 2.5.2 --urls https://github.com/Chatterino/chatterino2/releases/download/v2.5.2/Chatterino.Installer.exe`
 - [ ] Ensure changelog on website is up-to-date
 
 ## After all GitHub actions have ran
@@ -139,8 +132,3 @@ I will be using `2.3.4` as the example release in this document.
 
 - [ ] Create a GitHub release & upload all files in your release directory
 - [ ] Link the release to fourtf and ask him to start the release process from his end
-
-## After the binaries have been uploaded to fourtf's bucket
-
-- [ ] Re-run the Publish Homebrew Cask on Release action
-- [ ] Update links in the Chatterino website to point to the new release
