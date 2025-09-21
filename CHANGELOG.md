@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Badges now link to their home page like emotes. (#6437)
+- Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 
 ## 2.5.4
 
