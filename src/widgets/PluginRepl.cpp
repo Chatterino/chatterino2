@@ -148,7 +148,7 @@ std::optional<QString> HistoricTextEdit::nextHistoryItem(qsizetype diff)
     bool wasUnfinishedInput = this->historyIdx >= this->history.size();
 
     auto nextIdx =
-        std::clamp(this->historyIdx + diff, 0LL, this->history.size());
+        std::clamp<qsizetype>(this->historyIdx + diff, 0, this->history.size());
     if (nextIdx == this->historyIdx)
     {
         return {};  // nothing changed
