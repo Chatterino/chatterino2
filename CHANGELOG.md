@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added Markdown support to user notes. (#)
+
 ## 2.5.4
 
 - Bugfix: Fixed crashes that could occur when Lua functions errored with values other than strings. (#6441)
