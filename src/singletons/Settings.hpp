@@ -321,7 +321,7 @@ public:
     };
 
     IntSetting messageTruncationLimit = {"/behaviour/messageTruncationLimit",
-                                        50};
+                                         50};
 
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {

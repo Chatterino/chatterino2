@@ -558,11 +558,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     layout.addDropdown<int>(
         "Limit truncation of deleted messages",
-        {"No limit", "50 characters", "100 characters", "200 characters", "300 characters",
-         "400 characters"},
+        {"No limit", "50 characters", "100 characters", "200 characters",
+         "300 characters", "400 characters"},
         s.messageTruncationLimit,
         [](auto val) {
-            return val ? QString::number(val) + " characters" : QString("No limit");
+            return val ? QString::number(val) + " characters"
+                       : QString("No limit");
         },
         [](auto args) {
             return fuzzyToInt(args.value, 0);
