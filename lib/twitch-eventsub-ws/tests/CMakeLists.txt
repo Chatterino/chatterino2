@@ -9,11 +9,7 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(CHATTERINO_SANITIZER_SUPPORT)
-    if(COMMAND add_sanitizers)
-        add_sanitizers(${PROJECT_NAME})
-    else()
-        message(FATAL_ERROR "CHATTERINO_SANITIZER_SUPPORT enabled, but did not find add_sanitizers command")
-    endif()
+    add_sanitizers(${PROJECT_NAME})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE twitch-eventsub-ws GTest::gtest_main)

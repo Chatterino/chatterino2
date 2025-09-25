@@ -923,11 +923,7 @@ if (BUILD_APP)
     endif()
 
     if(CHATTERINO_SANITIZER_SUPPORT)
-        if(COMMAND add_sanitizers)
-            add_sanitizers(${EXECUTABLE_PROJECT})
-        else()
-            message(FATAL_ERROR "CHATTERINO_SANITIZER_SUPPORT enabled, but did not find add_sanitizers command")
-        endif()
+        add_sanitizers(${EXECUTABLE_PROJECT})
     endif()
 
     if (CHATTERINO_STATIC_QT_BUILD)

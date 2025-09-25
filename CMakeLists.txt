@@ -41,6 +41,7 @@ if(CHATTERINO_SANITIZER_SUPPORT)
     list(APPEND CMAKE_MODULE_PATH
         "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
+    find_package(Sanitizers REQUIRED)
 endif()
 
 if(BUILD_TESTS)
@@ -144,8 +145,6 @@ message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 if (WIN32)
     add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
-
-find_package(Sanitizers QUIET)
 
 # Find boost on the system
 find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)

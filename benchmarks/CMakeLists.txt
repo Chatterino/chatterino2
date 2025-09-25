@@ -16,11 +16,7 @@ set(benchmark_SOURCES
 add_executable(${PROJECT_NAME} ${benchmark_SOURCES})
 
 if(CHATTERINO_SANITIZER_SUPPORT)
-    if(COMMAND add_sanitizers)
-        add_sanitizers(${PROJECT_NAME})
-    else()
-        message(FATAL_ERROR "CHATTERINO_SANITIZER_SUPPORT enabled, but did not find add_sanitizers command")
-    endif()
+    add_sanitizers(${PROJECT_NAME})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
