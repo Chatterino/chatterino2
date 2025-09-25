@@ -546,6 +546,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -556,6 +557,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+
+    layout.addDropdown<int>(
+        "Limit truncation of deleted messages",
+        {"No limit", "50 characters", "100 characters", "200 characters", "300 characters",
+         "400 characters"},
+        s.messageTruncationLimit,
+        [](auto val) {
+            return val ? QString::number(val) + " characters" : QString("No limit");
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 0);
+        });
+
     layout.addSeparator();
 
     SettingWidget::checkbox("Draw a line below the most recent message before "
