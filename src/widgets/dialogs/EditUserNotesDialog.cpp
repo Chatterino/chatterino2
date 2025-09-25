@@ -2,8 +2,11 @@
 
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/Label.hpp"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QSplitter>
 #include <QTextEdit>
 
 namespace chatterino {
@@ -17,12 +20,26 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
           },
           parent)
 {
-    this->setScaleIndependentSize(500, 350);
+    this->setScaleIndependentSize(700, 450);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
 
-    auto edit = layout.emplace<QTextEdit>().assign(&this->textEdit_);
+    auto previewCheckBox = layout.emplace<QCheckBox>("Show Markdown Preview")
+                               .assign(&this->previewCheckBox_);
+
+    auto splitter =
+        layout.emplace<QSplitter>(Qt::Horizontal).assign(&this->splitter_);
+
+    auto edit = splitter.emplace<QTextEdit>().assign(&this->textEdit_);
+
+    auto preview = splitter.emplace<Label>().assign(&this->previewLabel_);
+    preview->setMarkdownEnabled(true);
+    preview->setWordWrap(true);
+    preview->setPadding(QMargins(10, 10, 10, 10));
+
+    this->splitter_->setSizes({350, 350});
+    this->previewLabel_->setVisible(false);
 
     layout
         .emplace<QDialogButtonBox>(QDialogButtonBox::Ok |
@@ -35,6 +52,29 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         .connect(&QDialogButtonBox::rejected, this, [this] {
             this->close();
         });
+
+    // Connect preview toggle
+    QObject::connect(this->previewCheckBox_, &QCheckBox::toggled, this,
+                     [this](bool checked) {
+                         this->previewLabel_->setVisible(checked);
+                         if (checked)
+                         {
+                             this->updatePreview();
+                             this->splitter_->setSizes({350, 350});
+                         }
+                         else
+                         {
+                             this->splitter_->setSizes({700, 0});
+                         }
+                     });
+
+    // Connect text changes to preview update
+    QObject::connect(this->textEdit_, &QTextEdit::textChanged, this, [this] {
+        if (this->previewCheckBox_->isChecked())
+        {
+            this->updatePreview();
+        }
+    });
 
     this->themeChangedEvent();
 }
@@ -75,6 +115,28 @@ void EditUserNotesDialog::themeChangedEvent()
     if (this->textEdit_)
     {
         this->textEdit_->setPalette(palette);
+    }
+
+    if (this->previewLabel_)
+    {
+        this->previewLabel_->setPalette(palette);
+    }
+}
+
+void EditUserNotesDialog::updatePreview()
+{
+    if (this->previewLabel_ && this->textEdit_)
+    {
+        QString text = this->textEdit_->toPlainText();
+        if (text.isEmpty())
+        {
+            this->previewLabel_->setText(
+                "*Preview will appear here when you type markdown text...*");
+        }
+        else
+        {
+            this->previewLabel_->setText(text);
+        }
     }
 }
 
