@@ -565,7 +565,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return val ? QString::number(val) + " characters"
                        : QString("No limit");
         },
-        [](auto args) {
+        [](const auto &args) {
             return fuzzyToInt(args.value, 0);
         });
 
