@@ -242,11 +242,9 @@ void Label::updateSize()
     if (this->markdownEnabled_ && this->markdownDocument_ &&
         !this->text_.isEmpty())
     {
-        // Size based on Markdown document
         this->markdownDocument_->setDefaultFont(
             getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
-        // Ensure markdown content is set
         this->markdownDocument_->setMarkdown(this->text_);
 
         // Use word wrap width if enabled, otherwise use a reasonable default
@@ -265,7 +263,6 @@ void Label::updateSize()
     }
     else
     {
-        // Original sizing logic
         auto height = metrics.height() + yPadding;
         if (this->shouldElide_)
         {
