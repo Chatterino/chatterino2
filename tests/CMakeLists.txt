@@ -66,7 +66,14 @@ set(test_SOURCES
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})
-add_sanitizers(${PROJECT_NAME})
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    if(COMMAND add_sanitizers)
+        add_sanitizers(${PROJECT_NAME})
+    else()
+        message(FATAL_ERROR "CHATTERINO_SANITIZER_SUPPORT enabled, but did not find add_sanitizers command")
+    endif()
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
