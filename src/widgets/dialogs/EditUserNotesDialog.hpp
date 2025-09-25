@@ -3,9 +3,13 @@
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BasePopup.hpp"
 
+class QCheckBox;
+class QSplitter;
 class QTextEdit;
 
 namespace chatterino {
+
+class Label;
 
 class EditUserNotesDialog : public BasePopup
 {
@@ -24,7 +28,12 @@ protected:
     void themeChangedEvent() override;
 
 private:
+    void updatePreview();
+
     QTextEdit *textEdit_{};
+    QCheckBox *previewCheckBox_{};
+    QSplitter *splitter_{};
+    Label *previewLabel_{};
 };
 
 }  // namespace chatterino
