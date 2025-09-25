@@ -8,7 +8,6 @@ include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
-    "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
 option(BUILD_APP "Build Chatterino" ON)
@@ -32,8 +31,19 @@ option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
 
+option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
+mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
+add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPORT "")
+
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    list(APPEND CMAKE_MODULE_PATH
+        "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
+    )
+    find_package(Sanitizers REQUIRED)
+endif()
 
 if(BUILD_TESTS)
     list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -136,8 +146,6 @@ message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 if (WIN32)
     add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
-
-find_package(Sanitizers QUIET)
 
 # Find boost on the system
 find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
