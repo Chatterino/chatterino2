@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added Markdown support to user notes. (#)
+- Minor: Added Markdown support to user notes. (#6490)
 
 ## 2.5.4
 
