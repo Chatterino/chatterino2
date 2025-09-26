@@ -2,8 +2,8 @@
 
 ## Unversioned
 
-- Minor: Added spell checking to the chat input. (#6446)
 - Bugfix: Fixed zero-width global BTTV emotes not showing in the `:~` completions. (#6440)
+- Dev: Started work on spell checking. (#6446)
 
 ## 2.5.4-beta.1
 
