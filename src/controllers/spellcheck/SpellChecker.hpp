@@ -11,6 +11,7 @@ class QTextDocument;
 
 namespace chatterino {
 
+class Channel;
 class TwitchChannel;
 
 class SpellCheckerPrivate;
@@ -35,7 +36,7 @@ class SpellCheckHighlighter : public QSyntaxHighlighter
 public:
     SpellCheckHighlighter(QObject *parent);
 
-    void setTwitchChannel(TwitchChannel *channel);
+    void setChannel(const std::shared_ptr<Channel> &channel);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -43,7 +44,7 @@ protected:
 private:
     QRegularExpression wordRegex;
     QTextCharFormat spellFmt;
-    TwitchChannel *channel = nullptr;
+    std::weak_ptr<TwitchChannel> channel;
 };
 
 }  // namespace chatterino

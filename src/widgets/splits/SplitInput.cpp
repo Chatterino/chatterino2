@@ -75,15 +75,14 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
     // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
     this->spellcheckHighlighter = new SpellCheckHighlighter(this);
-    this->spellcheckHighlighter->setTwitchChannel(
-        dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()));
+    this->spellcheckHighlighter->setChannel(this->split_->getChannel());
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
         auto channel = this->split_->getChannel();
         auto *completer = new QCompleter(channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
-        this->spellcheckHighlighter->setTwitchChannel(
-            dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()));
+        this->spellcheckHighlighter->setChannel(this->split_->getChannel());
+        this->spellcheckHighlighter->setChannel(this->split_->getChannel());
     });
 
     getSettings()->enableSpellChecking.connect(

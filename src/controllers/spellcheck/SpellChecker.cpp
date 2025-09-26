@@ -182,9 +182,10 @@ SpellCheckHighlighter::SpellCheckHighlighter(QObject *parent)
     this->spellFmt.setUnderlineColor(Qt::red);
 }
 
-void SpellCheckHighlighter::setTwitchChannel(TwitchChannel *channel)
+void SpellCheckHighlighter::setChannel(const std::shared_ptr<Channel> &channel)
 {
-    this->channel = channel;
+    auto twitch = std::dynamic_pointer_cast<TwitchChannel>(channel);
+    this->channel = twitch;
     this->rehighlight();
 }
 
@@ -195,6 +196,7 @@ void SpellCheckHighlighter::highlightBlock(const QString &text)
     {
         return;
     }
+    auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
@@ -206,7 +208,7 @@ void SpellCheckHighlighter::highlightBlock(const QString &text)
     {
         auto match = it.next();
         auto text = match.captured();
-        if (!shouldIgnore(this->channel, text) && !spellChecker->check(text))
+        if (!shouldIgnore(channel, text) && !spellChecker->check(text))
         {
             this->setFormat(static_cast<int>(match.capturedStart()),
                             static_cast<int>(text.size()), this->spellFmt);
