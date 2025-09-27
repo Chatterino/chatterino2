@@ -1257,9 +1257,10 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
                                  MessageColor::System);
 
     auto deletedMessageText = originalMessage->messageText;
-    if (deletedMessageText.length() > 50)
+    auto limit = getSettings()->messageTruncationLimit.getValue();
+    if (limit > 0 && deletedMessageText.length() > limit)
     {
-        deletedMessageText = deletedMessageText.left(50) + "…";
+        deletedMessageText = deletedMessageText.left(limit) + "…";
     }
 
     builder

@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
+- Minor: Added setting for character limit of deleted messages. (#6491)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
