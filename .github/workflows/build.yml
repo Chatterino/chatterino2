@@ -165,7 +165,7 @@ jobs:
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: qtimageformats
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
