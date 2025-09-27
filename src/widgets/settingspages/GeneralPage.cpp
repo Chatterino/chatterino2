@@ -557,7 +557,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToInt(args.value, 0);
         });
     layout.addDropdown<int>(
-        "Limit truncation of deleted messages",
+        "Limit length of deleted messages",
         {"No limit", "50 characters", "100 characters", "200 characters",
          "300 characters", "400 characters"},
         s.messageTruncationLimit,
@@ -567,7 +567,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](const auto &args) {
             return fuzzyToInt(args.value, 0);
-        });
+        },
+        true,
+        {"Limits the amount of characters displayed in deleted messages "
+         "when announced via system message."});
 
     layout.addSeparator();
 
