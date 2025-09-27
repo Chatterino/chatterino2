@@ -331,7 +331,7 @@ void makeModerateMessage(
 
     builder.emplaceSystemTextAndUpdate("saying:", text);
 
-    auto limit = getSettings()->messageTruncationLimit;
+    auto limit = getSettings()->messageTruncationLimit.getValue();
     if (limit > 0 && action.messageBody.view().length() > limit)
     {
         builder
