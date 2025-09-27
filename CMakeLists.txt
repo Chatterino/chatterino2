@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
-if (POLICY CMP0167)
-    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
-endif ()
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -148,7 +145,7 @@ if (WIN32)
 endif ()
 
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
