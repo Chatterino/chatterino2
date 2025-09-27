@@ -2,7 +2,14 @@
 
 ## Unversioned
 
+- Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added Markdown support to user notes. (#6490)
+- Dev: Update release documentation. (#6498)
+- Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
+- Dev: Remove unused QTextCodec includes. (#6487)
+- Dev: Find Boost's CMake Config file instead of module file. (#6499)
+- Dev: Fix 32-bit compile in PluginRepl. (#6483)
+- Dev: Fix the WinGet release workflow. (#6497)
 
 ## 2.5.4
 
