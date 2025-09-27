@@ -11,7 +11,6 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QStringLiteral>
-#include <QTextCodec>
 #include <QtGlobal>
 
 #include <unordered_set>
