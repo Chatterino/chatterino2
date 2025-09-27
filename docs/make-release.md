@@ -62,8 +62,10 @@ I will be using `2.3.4` as the example release in this document.
 
 ## After the PR has been created
 
+You will need to add the `skip-changelog-checker` label to the PR since we are doing something you're not meant to do in a normal PR.
+
 - [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid  
-       TODO: Add steps for how you can validate this, and for how to recreate the credentials. Also probably what exact credentials we need
+       Sign into the `chatterino-ci` user and validate that the `WinGet` and `Homebrew` Personal access tokens are valid: https://github.com/settings/tokens
 
 ## After the PR has been merged
 
@@ -129,9 +131,9 @@ I will be using `2.3.4` as the example release in this document.
   ```
 - [ ] Notarize the macOS releases
   ```sh
-  xcrun notarytool submit Chatterino-10.15.dmg --wait --keychain-profile notarytool-password --keychain / Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
+  xcrun notarytool submit Chatterino-10.15.dmg --wait --keychain-profile notarytool-password --keychain /Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
   ...
-  xcrun notarytool submit Chatterino.dmg --wait --keychain-profile notarytool-password --keychain / Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
+  xcrun notarytool submit Chatterino.dmg --wait --keychain-profile notarytool-password --keychain /Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
   ...
   ```
 
