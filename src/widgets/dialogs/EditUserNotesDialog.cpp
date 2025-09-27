@@ -3,6 +3,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 
 #include <QCheckBox>
 #include <QDialogButtonBox>
@@ -25,8 +26,155 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
 
-    auto previewCheckBox = layout.emplace<QCheckBox>("Show Markdown Preview")
+    auto headerLayout = layout.emplace<QHBoxLayout>();
+
+    auto previewCheckBox = headerLayout.emplace<QCheckBox>("Show Markdown Preview")
                                .assign(&this->previewCheckBox_);
+
+    auto headingButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/heading-darkMode.svg",
+            ":/buttons/heading-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(headingButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("### " + selectedText);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("### ");
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    headingButton->setToolTip("Insert a heading at the start of the line");
+
+    auto boldButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/bold-darkMode.svg",
+            ":/buttons/bold-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(boldButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("**" + selectedText + "**");
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("****");
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::MoveAnchor,
+                2);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    boldButton->setToolTip("Make selected text bold");
+
+    auto italicButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/italic-darkMode.svg",
+            ":/buttons/italic-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(italicButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("*" + selectedText + "*");
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("**");
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::MoveAnchor,
+                1);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    italicButton->setToolTip("Make selected text italic");
+
+    auto quoteButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/quote-darkMode.svg",
+            ":/buttons/quote-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(quoteButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("> " + selectedText);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("> ");
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    quoteButton->setToolTip("Insert a blockquote");
+
+    auto linkButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/link-darkMode.svg",
+            ":/buttons/link-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(linkButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("[" + selectedText + "](url)");
+            // select "url" for easy replacement
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::MoveAnchor,
+                1);
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::KeepAnchor,
+                3);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("[](url)");
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::MoveAnchor,
+                1);
+            cursor.movePosition(
+                QTextCursor::Left, QTextCursor::KeepAnchor,
+                3);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    linkButton->setToolTip("Insert a hyperlink");
+
+    auto listButton = headerLayout
+        .emplace<SvgButton>(SvgButton::Src{
+            ":/buttons/bullet-list-darkMode.svg",
+            ":/buttons/bullet-list-lightMode.svg",
+        })
+        .getElement();
+    QObject::connect(listButton, &Button::leftClicked, [this] {
+        auto cursor = this->textEdit_->textCursor();
+        if (cursor.hasSelection()) {
+            auto selectedText = cursor.selectedText();
+            cursor.insertText("- " + selectedText);
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        } else {
+            cursor.insertText("- ");
+            this->textEdit_->setTextCursor(cursor);
+            this->textEdit_->setFocus();
+        }
+    });
+    listButton->setToolTip("Insert a bullet list item");
 
     auto splitter =
         layout.emplace<QSplitter>(Qt::Horizontal).assign(&this->splitter_);
@@ -61,10 +209,12 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                          {
                              this->updatePreview();
                              this->splitter_->setSizes({350, 350});
+                             this->textEdit_->setFocus();
                          }
                          else
                          {
                              this->splitter_->setSizes({700, 0});
+                             this->textEdit_->setFocus();
                          }
                      });
 
