@@ -922,10 +922,8 @@ if (BUILD_APP)
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
 
-    if(COMMAND add_sanitizers)
+    if(CHATTERINO_SANITIZER_SUPPORT)
         add_sanitizers(${EXECUTABLE_PROJECT})
-    else()
-        message(WARNING "Sanitizers support is disabled")
     endif()
 
     if (CHATTERINO_STATIC_QT_BUILD)
