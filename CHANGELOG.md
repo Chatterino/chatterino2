@@ -9,6 +9,7 @@
 - Dev: Find Boost's CMake Config file instead of module file. (#6499)
 - Dev: Fix 32-bit compile in PluginRepl. (#6483)
 - Dev: Fix the WinGet release workflow. (#6497)
+- Dev: Correct handling of eventsubs without any account (#6503)
 
 ## 2.5.4
 
