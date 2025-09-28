@@ -54,7 +54,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             this->textEdit_->setFocus();
         }
     });
-    headingButton->setToolTip("Insert a heading at the start of the line");
+    headingButton->setToolTip("Insert a heading");
 
     auto *boldButton = headerLayout
                            .emplace<SvgButton>(SvgButton::Src{
