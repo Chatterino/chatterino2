@@ -132,8 +132,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
     auto *linkButton = headerLayout
                            .emplace<SvgButton>(SvgButton::Src{
-                               .dark = ":/buttons/quote-darkMode.svg",
-                               .light = ":/buttons/quote-lightMode.svg",
+                               .dark = ":/buttons/link-darkMode.svg",
+                               .light = ":/buttons/link-lightMode.svg",
                            })
                            .getElement();
     QObject::connect(linkButton, &Button::leftClicked, [this] {
