@@ -320,6 +320,8 @@ public:
         true,
     };
 
+    /// The maximum length the contents of a deleted message can be
+    /// before we truncate it in the chat
     IntSetting deletedMessageLengthLimit = {
         "/behaviour/deletedMessageLengthLimit",
         50,
