@@ -10,6 +10,7 @@
 - Dev: Find Boost's CMake Config file instead of module file. (#6499)
 - Dev: Fix 32-bit compile in PluginRepl. (#6483)
 - Dev: Fix the WinGet release workflow. (#6497)
+- Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 
 ## 2.5.4
 
