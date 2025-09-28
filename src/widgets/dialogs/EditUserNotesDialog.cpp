@@ -33,11 +33,11 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             .assign(&this->previewCheckBox_);
 
     auto *headingButton = headerLayout
-                            .emplace<SvgButton>(SvgButton::Src{
-                                .dark = ":/buttons/heading-darkMode.svg",
-                                .light = ":/buttons/heading-lightMode.svg",
-                            })
-                            .getElement();
+                              .emplace<SvgButton>(SvgButton::Src{
+                                  .dark = ":/buttons/heading-darkMode.svg",
+                                  .light = ":/buttons/heading-lightMode.svg",
+                              })
+                              .getElement();
     QObject::connect(headingButton, &Button::leftClicked, [this] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
@@ -57,11 +57,11 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     headingButton->setToolTip("Insert a heading at the start of the line");
 
     auto *boldButton = headerLayout
-                            .emplace<SvgButton>(SvgButton::Src{
-                                .dark = ":/buttons/bold-darkMode.svg",
-                                .light = ":/buttons/bold-lightMode.svg",
-                            })
-                            .getElement();
+                           .emplace<SvgButton>(SvgButton::Src{
+                               .dark = ":/buttons/bold-darkMode.svg",
+                               .light = ":/buttons/bold-lightMode.svg",
+                           })
+                           .getElement();
     QObject::connect(boldButton, &Button::leftClicked, [this] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
@@ -74,9 +74,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         else
         {
             cursor.insertText("****");
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::MoveAnchor,
-                2);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
@@ -84,11 +82,11 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     boldButton->setToolTip("Make selected text bold");
 
     auto *italicButton = headerLayout
-                            .emplace<SvgButton>(SvgButton::Src{
-                                .dark = ":/buttons/italic-darkMode.svg",
-                                .light = ":/buttons/italic-lightMode.svg",
-                            })
-                            .getElement();
+                             .emplace<SvgButton>(SvgButton::Src{
+                                 .dark = ":/buttons/italic-darkMode.svg",
+                                 .light = ":/buttons/italic-lightMode.svg",
+                             })
+                             .getElement();
     QObject::connect(italicButton, &Button::leftClicked, [this] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
@@ -101,9 +99,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         else
         {
             cursor.insertText("**");
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::MoveAnchor,
-                1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
@@ -147,24 +143,16 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             auto selectedText = cursor.selectedText();
             cursor.insertText("[" + selectedText + "](url)");
             // select "url" for easy replacement
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::MoveAnchor,
-                1);
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::KeepAnchor,
-                3);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("[](url)");
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::MoveAnchor,
-                1);
-            cursor.movePosition(
-                QTextCursor::Left, QTextCursor::KeepAnchor,
-                3);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
