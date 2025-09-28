@@ -309,32 +309,33 @@ QRectF Label::textRect() const
 
 void Label::mousePressEvent(QMouseEvent *event)
 {
-    if (this->markdownEnabled_ && this->markdownDocument_ && 
+    if (this->markdownEnabled_ && this->markdownDocument_ &&
         event->button() == Qt::LeftButton)
     {
         QRectF textRect = this->textRect();
         QPointF pos = event->pos() - textRect.topLeft();
-        
-        QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+
+        QString anchor =
+            this->markdownDocument_->documentLayout()->anchorAt(pos);
         if (!anchor.isEmpty())
         {
             QUrl url(anchor);
-            
+
             // Validate the URL and add scheme if missing
             if (!url.isValid())
             {
                 return;
             }
-            
+
             // If the URL doesn't have a scheme, assume it's http
             if (url.scheme().isEmpty())
             {
                 url.setScheme("http");
             }
-            
+
             // Only open URLs with safe schemes
             QString scheme = url.scheme().toLower();
-            if (scheme == "http" || scheme == "https" || scheme == "ftp" || 
+            if (scheme == "http" || scheme == "https" || scheme == "ftp" ||
                 scheme == "file" || scheme == "mailto")
             {
                 QDesktopServices::openUrl(url);
@@ -342,7 +343,7 @@ void Label::mousePressEvent(QMouseEvent *event)
             return;
         }
     }
-    
+
     BaseWidget::mousePressEvent(event);
 }
 
@@ -352,8 +353,9 @@ void Label::mouseMoveEvent(QMouseEvent *event)
     {
         QRectF textRect = this->textRect();
         QPointF pos = event->pos() - textRect.topLeft();
-        
-        QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+
+        QString anchor =
+            this->markdownDocument_->documentLayout()->anchorAt(pos);
         if (!anchor.isEmpty())
         {
             this->setCursor(Qt::PointingHandCursor);
@@ -363,7 +365,7 @@ void Label::mouseMoveEvent(QMouseEvent *event)
             this->setCursor(Qt::ArrowCursor);
         }
     }
-    
+
     BaseWidget::mouseMoveEvent(event);
 }
 
