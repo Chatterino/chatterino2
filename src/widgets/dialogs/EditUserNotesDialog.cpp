@@ -31,10 +31,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     auto previewCheckBox = headerLayout.emplace<QCheckBox>("Show Markdown Preview")
                                .assign(&this->previewCheckBox_);
 
-    auto headingButton = headerLayout
+    auto *headingButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/heading-darkMode.svg",
-            ":/buttons/heading-lightMode.svg",
+            .dark = ":/buttons/heading-darkMode.svg",
+            .light = ":/buttons/heading-lightMode.svg",
         })
         .getElement();
     QObject::connect(headingButton, &Button::leftClicked, [this] {
@@ -52,10 +52,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     headingButton->setToolTip("Insert a heading at the start of the line");
 
-    auto boldButton = headerLayout
+    auto *boldButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/bold-darkMode.svg",
-            ":/buttons/bold-lightMode.svg",
+            .dark = ":/buttons/bold-darkMode.svg",
+            .light = ":/buttons/bold-lightMode.svg",
         })
         .getElement();
     QObject::connect(boldButton, &Button::leftClicked, [this] {
@@ -76,10 +76,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     boldButton->setToolTip("Make selected text bold");
 
-    auto italicButton = headerLayout
+    auto *italicButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/italic-darkMode.svg",
-            ":/buttons/italic-lightMode.svg",
+            .dark = ":/buttons/italic-darkMode.svg",
+            .light = ":/buttons/italic-lightMode.svg",
         })
         .getElement();
     QObject::connect(italicButton, &Button::leftClicked, [this] {
@@ -100,10 +100,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     italicButton->setToolTip("Make selected text italic");
 
-    auto quoteButton = headerLayout
+    auto *quoteButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/quote-darkMode.svg",
-            ":/buttons/quote-lightMode.svg",
+            .dark = ":/buttons/quote-darkMode.svg",
+            .light = ":/buttons/quote-lightMode.svg",
         })
         .getElement();
     QObject::connect(quoteButton, &Button::leftClicked, [this] {
@@ -121,10 +121,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     quoteButton->setToolTip("Insert a blockquote");
 
-    auto linkButton = headerLayout
+    auto *linkButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/link-darkMode.svg",
-            ":/buttons/link-lightMode.svg",
+            .dark = ":/buttons/link-darkMode.svg",
+            .light = ":/buttons/link-lightMode.svg",
         })
         .getElement();
     QObject::connect(linkButton, &Button::leftClicked, [this] {
@@ -155,10 +155,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     linkButton->setToolTip("Insert a hyperlink");
 
-    auto listButton = headerLayout
+    auto *listButton = headerLayout
         .emplace<SvgButton>(SvgButton::Src{
-            ":/buttons/bullet-list-darkMode.svg",
-            ":/buttons/bullet-list-lightMode.svg",
+            .dark = ":/buttons/bullet-list-darkMode.svg",
+            .light = ":/buttons/bullet-list-lightMode.svg",
         })
         .getElement();
     QObject::connect(listButton, &Button::leftClicked, [this] {
