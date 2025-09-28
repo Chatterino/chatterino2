@@ -320,8 +320,8 @@ public:
         true,
     };
 
-    IntSetting messageTruncationLimit = {
-        "/behaviour/messageTruncationLimit",
+    IntSetting deletedMessageLengthLimit = {
+        "/behaviour/deletedMessageLengthLimit",
         50,
     };
 

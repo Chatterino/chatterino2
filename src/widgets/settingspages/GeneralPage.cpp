@@ -560,7 +560,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Limit length of deleted messages",
         {"No limit", "50 characters", "100 characters", "200 characters",
          "300 characters", "400 characters"},
-        s.messageTruncationLimit,
+        s.deletedMessageLengthLimit,
         [](auto val) {
             return val ? QString::number(val) + " characters"
                        : QString("No limit");
