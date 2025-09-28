@@ -2,8 +2,12 @@
 
 #include "Application.hpp"
 
+#include <QAbstractTextDocumentLayout>
+#include <QDesktopServices>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QTextDocument>
+#include <QUrl>
 
 namespace chatterino {
 
@@ -300,7 +304,69 @@ bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
 
 QRectF Label::textRect() const
 {
-    return this->rect().toRectF().marginsRemoved(this->currentPadding_);
+    return QRectF(this->rect()).marginsRemoved(this->currentPadding_);
+}
+
+void Label::mousePressEvent(QMouseEvent *event)
+{
+    if (this->markdownEnabled_ && this->markdownDocument_ &&
+        event->button() == Qt::LeftButton)
+    {
+        QRectF textRect = this->textRect();
+        QPointF pos = event->pos() - textRect.topLeft();
+
+        QString anchor =
+            this->markdownDocument_->documentLayout()->anchorAt(pos);
+        if (!anchor.isEmpty())
+        {
+            QUrl url(anchor);
+
+            // Validate the URL and add scheme if missing
+            if (!url.isValid())
+            {
+                return;
+            }
+
+            // If the URL doesn't have a scheme, assume it's http
+            if (url.scheme().isEmpty())
+            {
+                url.setScheme("http");
+            }
+
+            // Only open URLs with safe schemes
+            QString scheme = url.scheme().toLower();
+            if (scheme == "http" || scheme == "https" || scheme == "ftp" ||
+                scheme == "file" || scheme == "mailto")
+            {
+                QDesktopServices::openUrl(url);
+            }
+            return;
+        }
+    }
+
+    BaseWidget::mousePressEvent(event);
+}
+
+void Label::mouseMoveEvent(QMouseEvent *event)
+{
+    if (this->markdownEnabled_ && this->markdownDocument_)
+    {
+        QRectF textRect = this->textRect();
+        QPointF pos = event->pos() - textRect.topLeft();
+
+        QString anchor =
+            this->markdownDocument_->documentLayout()->anchorAt(pos);
+        if (!anchor.isEmpty())
+        {
+            this->setCursor(Qt::PointingHandCursor);
+        }
+        else
+        {
+            this->setCursor(Qt::ArrowCursor);
+        }
+    }
+
+    BaseWidget::mouseMoveEvent(event);
 }
 
 }  // namespace chatterino
