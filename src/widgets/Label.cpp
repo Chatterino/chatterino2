@@ -2,8 +2,12 @@
 
 #include "Application.hpp"
 
+#include <QAbstractTextDocumentLayout>
+#include <QDesktopServices>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QTextDocument>
+#include <QUrl>
 
 namespace chatterino {
 
@@ -300,7 +304,47 @@ bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
 
 QRectF Label::textRect() const
 {
-    return this->rect().toRectF().marginsRemoved(this->currentPadding_);
+    return QRectF(this->rect()).marginsRemoved(this->currentPadding_);
+}
+
+void Label::mousePressEvent(QMouseEvent *event)
+{
+    if (this->markdownEnabled_ && this->markdownDocument_ && 
+        event->button() == Qt::LeftButton)
+    {
+        QRectF textRect = this->textRect();
+        QPointF pos = event->pos() - textRect.topLeft();
+        
+        QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+        if (!anchor.isEmpty())
+        {
+            QDesktopServices::openUrl(QUrl(anchor));
+            return;
+        }
+    }
+    
+    BaseWidget::mousePressEvent(event);
+}
+
+void Label::mouseMoveEvent(QMouseEvent *event)
+{
+    if (this->markdownEnabled_ && this->markdownDocument_)
+    {
+        QRectF textRect = this->textRect();
+        QPointF pos = event->pos() - textRect.topLeft();
+        
+        QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+        if (!anchor.isEmpty())
+        {
+            this->setCursor(Qt::PointingHandCursor);
+        }
+        else
+        {
+            this->setCursor(Qt::ArrowCursor);
+        }
+    }
+    
+    BaseWidget::mouseMoveEvent(event);
 }
 
 }  // namespace chatterino
