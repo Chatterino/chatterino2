@@ -318,7 +318,27 @@ void Label::mousePressEvent(QMouseEvent *event)
         QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
         if (!anchor.isEmpty())
         {
-            QDesktopServices::openUrl(QUrl(anchor));
+            QUrl url(anchor);
+            
+            // Validate the URL and add scheme if missing
+            if (!url.isValid())
+            {
+                return;
+            }
+            
+            // If the URL doesn't have a scheme, assume it's http
+            if (url.scheme().isEmpty())
+            {
+                url.setScheme("http");
+            }
+            
+            // Only open URLs with safe schemes
+            QString scheme = url.scheme().toLower();
+            if (scheme == "http" || scheme == "https" || scheme == "ftp" || 
+                scheme == "file" || scheme == "mailto")
+            {
+                QDesktopServices::openUrl(url);
+            }
             return;
         }
     }
