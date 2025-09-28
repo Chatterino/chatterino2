@@ -1555,6 +1555,8 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
+    getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
+
     if (currentAccount->isAnon())
     {
         this->eventSubChannelModerateHandle.reset();
@@ -1704,8 +1706,6 @@ void TwitchChannel::refreshPubSub()
                     },
             });
     }
-
-    getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()
