@@ -1,3 +1,4 @@
+#include "singletons/Theme.hpp"
 #include "widgets/Label.hpp"
 
 #include "Application.hpp"
@@ -156,18 +157,28 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     if (this->markdownEnabled_ && this->markdownDocument_ &&
         !this->text_.isEmpty())
     {
-        painter.setBrush(this->palette().windowText());
+        QColor textColor = this->theme ? this->theme->messages.textColors.regular : Qt::black;
 
         this->markdownDocument_->setTextWidth(textRect.width());
         this->markdownDocument_->setDefaultFont(
             getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
         this->markdownDocument_->setMarkdown(this->text_);
 
+        QPalette docPalette = this->palette();
+        docPalette.setColor(QPalette::Text, textColor);
+        docPalette.setColor(QPalette::WindowText, textColor);
+
+        painter.setPen(textColor);
+
         painter.save();
         painter.translate(textRect.topLeft());
 
-        this->markdownDocument_->drawContents(
-            &painter, QRectF(0, 0, textRect.width(), textRect.height()));
+        // create a rendering context using our text color and document palette
+        QAbstractTextDocumentLayout::PaintContext paintContext;
+        paintContext.palette = docPalette;
+        paintContext.clip = QRectF(0, 0, textRect.width(), textRect.height());
+        this->markdownDocument_->documentLayout()->draw(
+            &painter, paintContext);
 
         painter.restore();
     }
@@ -187,7 +198,9 @@ void Label::paintEvent(QPaintEvent * /*event*/)
                                       ? Qt::AlignLeft | Qt::AlignVCenter
                                       : Qt::AlignCenter;
 
-        painter.setBrush(this->palette().windowText());
+        // Use theme color for text instead of palette
+        QColor textColor = this->theme ? this->theme->messages.textColors.regular : Qt::black;
+        painter.setBrush(textColor);
 
         QTextOption option(alignment);
         if (this->wordWrap_)
