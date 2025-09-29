@@ -46,7 +46,6 @@ protected:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-protected:
     virtual void updateSize();
     QRectF textRect() const;
 
