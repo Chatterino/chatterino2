@@ -67,7 +67,15 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            cursor.insertText("**" + selectedText + "**");
+            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+            {
+                selectedText.chop(1);
+            }
+            cursor.insertText("**" + selectedText + "**" + "\u2029");
+            // restore selection
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 3);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                selectedText.length());
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
@@ -92,7 +100,15 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            cursor.insertText("*" + selectedText + "*");
+            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+            {
+                selectedText.chop(1);
+            }
+            cursor.insertText("*" + selectedText + "*" + "\u2029");
+            // restore selection
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                selectedText.length());
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
         }
@@ -141,9 +157,13 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            cursor.insertText("[" + selectedText + "](url)");
+            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+            {
+                selectedText.chop(1);
+            }
+            cursor.insertText("[" + selectedText + "](url)" + "\u2029");
             // select "url" for easy replacement
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
             this->textEdit_->setTextCursor(cursor);
             this->textEdit_->setFocus();
