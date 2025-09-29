@@ -2,7 +2,9 @@
 
 ## Unversioned
 
+- Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
+- Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added Markdown support to user notes. (#6490)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
@@ -10,6 +12,8 @@
 - Dev: Find Boost's CMake Config file instead of module file. (#6499)
 - Dev: Fix 32-bit compile in PluginRepl. (#6483)
 - Dev: Fix the WinGet release workflow. (#6497)
+- Dev: Correct handling of eventsubs without any account. (#6503)
+- Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 
 ## 2.5.4
 
