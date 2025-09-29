@@ -157,8 +157,8 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     if (this->markdownEnabled_ && this->markdownDocument_ &&
         !this->text_.isEmpty())
     {
-        QColor textColor = this->theme ?
-            this->theme->messages.textColors.regular : Qt::black;
+        QColor textColor =
+            this->theme ? this->theme->messages.textColors.regular : Qt::black;
 
         this->markdownDocument_->setTextWidth(textRect.width());
         this->markdownDocument_->setDefaultFont(
@@ -198,10 +198,7 @@ void Label::paintEvent(QPaintEvent * /*event*/)
                                       ? Qt::AlignLeft | Qt::AlignVCenter
                                       : Qt::AlignCenter;
 
-        // Use theme color for text instead of palette
-        QColor textColor = this->theme ?
-            this->theme->messages.textColors.regular : Qt::black;
-        painter.setBrush(textColor);
+        painter.setBrush(this->palette().windowText());
 
         QTextOption option(alignment);
         if (this->wordWrap_)
