@@ -9,7 +9,7 @@ class QTextEdit;
 
 namespace chatterino {
 
-class Label;
+class MarkdownLabel;
 
 class EditUserNotesDialog : public BasePopup
 {
@@ -33,7 +33,7 @@ private:
     QTextEdit *textEdit_{};
     QCheckBox *previewCheckBox_{};
     QSplitter *splitter_{};
-    Label *previewLabel_{};
+    MarkdownLabel *previewLabel_{};
 };
 
 }  // namespace chatterino

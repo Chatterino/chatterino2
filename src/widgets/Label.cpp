@@ -1,14 +1,8 @@
 #include "widgets/Label.hpp"
 
 #include "Application.hpp"
-#include "singletons/Theme.hpp"
 
-#include <QAbstractTextDocumentLayout>
-#include <QDesktopServices>
-#include <QMouseEvent>
 #include <QPainter>
-#include <QTextDocument>
-#include <QUrl>
 
 namespace chatterino {
 
@@ -44,10 +38,6 @@ void Label::setText(const QString &text)
         {
             this->updateElidedText(this->getFontMetrics(),
                                    this->textRect().width());
-        }
-        if (this->markdownEnabled_ && this->markdownDocument_)
-        {
-            this->markdownDocument_->setMarkdown(text);
         }
         this->updateSize();
         this->update();
@@ -94,33 +84,6 @@ void Label::setShouldElide(bool shouldElide)
     this->update();
 }
 
-bool Label::getMarkdownEnabled() const
-{
-    return this->markdownEnabled_;
-}
-
-void Label::setMarkdownEnabled(bool enabled)
-{
-    this->markdownEnabled_ = enabled;
-    if (enabled)
-    {
-        if (!this->markdownDocument_)
-        {
-            this->markdownDocument_ = std::make_unique<QTextDocument>();
-        }
-        if (!this->text_.isEmpty())
-        {
-            this->markdownDocument_->setMarkdown(this->text_);
-        }
-    }
-    else
-    {
-        this->markdownDocument_.reset();
-    }
-    this->updateSize();
-    this->update();
-}
-
 void Label::setFontStyle(FontStyle style)
 {
     this->fontStyle_ = style;
@@ -154,63 +117,32 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     // draw text
     QRectF textRect = this->textRect();
 
-    if (this->markdownEnabled_ && this->markdownDocument_ &&
-        !this->text_.isEmpty())
+    auto text = [this] {
+        if (this->shouldElide_)
+        {
+            return this->elidedText_;
+        }
+
+        return this->text_;
+    }();
+
+    qreal width = metrics.horizontalAdvance(text);
+    Qt::Alignment alignment = !this->centered_ || width > textRect.width()
+                                  ? Qt::AlignLeft | Qt::AlignVCenter
+                                  : Qt::AlignCenter;
+
+    painter.setBrush(this->palette().windowText());
+
+    QTextOption option(alignment);
+    if (this->wordWrap_)
     {
-        QColor textColor =
-            this->theme ? this->theme->messages.textColors.regular : Qt::black;
-
-        this->markdownDocument_->setTextWidth(textRect.width());
-        this->markdownDocument_->setDefaultFont(
-            getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
-        this->markdownDocument_->setMarkdown(this->text_);
-
-        QPalette docPalette = this->palette();
-        docPalette.setColor(QPalette::Text, textColor);
-        docPalette.setColor(QPalette::WindowText, textColor);
-
-        painter.setPen(textColor);
-
-        painter.save();
-        painter.translate(textRect.topLeft());
-
-        // create a rendering context using our text color and document palette
-        QAbstractTextDocumentLayout::PaintContext paintContext;
-        paintContext.palette = docPalette;
-        paintContext.clip = QRectF(0, 0, textRect.width(), textRect.height());
-        this->markdownDocument_->documentLayout()->draw(&painter, paintContext);
-
-        painter.restore();
+        option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     }
     else
     {
-        auto text = [this] {
-            if (this->shouldElide_)
-            {
-                return this->elidedText_;
-            }
-
-            return this->text_;
-        }();
-
-        qreal width = metrics.horizontalAdvance(text);
-        Qt::Alignment alignment = !this->centered_ || width > textRect.width()
-                                      ? Qt::AlignLeft | Qt::AlignVCenter
-                                      : Qt::AlignCenter;
-
-        painter.setBrush(this->palette().windowText());
-
-        QTextOption option(alignment);
-        if (this->wordWrap_)
-        {
-            option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-        }
-        else
-        {
-            option.setWrapMode(QTextOption::NoWrap);
-        }
-        painter.drawText(textRect, text, option);
+        option.setWrapMode(QTextOption::NoWrap);
     }
+    painter.drawText(textRect, text, option);
 
 #if 0
     painter.setPen(QColor(255, 0, 0));
@@ -247,45 +179,20 @@ void Label::updateSize()
     auto yPadding =
         this->currentPadding_.top() + this->currentPadding_.bottom();
 
-    if (this->markdownEnabled_ && this->markdownDocument_ &&
-        !this->text_.isEmpty())
+    auto height = metrics.height() + yPadding;
+    if (this->shouldElide_)
     {
-        this->markdownDocument_->setDefaultFont(
-            getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
-
-        this->markdownDocument_->setMarkdown(this->text_);
-
-        // Use word wrap width if enabled, otherwise use a reasonable default
-        qreal testWidth = this->wordWrap_
-                              ? 400.0 * this->scale()
-                              : this->markdownDocument_->idealWidth();
-        this->markdownDocument_->setTextWidth(testWidth);
-
-        auto height = this->markdownDocument_->size().height() + yPadding;
-        auto width = qMin(this->markdownDocument_->idealWidth(), testWidth) +
-                     this->currentPadding_.left() +
-                     this->currentPadding_.right();
-
-        this->sizeHint_ = QSizeF(width, height).toSize();
+        this->updateElidedText(metrics, this->textRect().width());
+        this->sizeHint_ = QSizeF(-1, height).toSize();
         this->minimumSizeHint_ = this->sizeHint_;
     }
     else
     {
-        auto height = metrics.height() + yPadding;
-        if (this->shouldElide_)
-        {
-            this->updateElidedText(metrics, this->textRect().width());
-            this->sizeHint_ = QSizeF(-1, height).toSize();
-            this->minimumSizeHint_ = this->sizeHint_;
-        }
-        else
-        {
-            auto width = metrics.horizontalAdvance(this->text_) +
-                         this->currentPadding_.left() +
-                         this->currentPadding_.right();
-            this->sizeHint_ = QSizeF(width, height).toSize();
-            this->minimumSizeHint_ = this->sizeHint_;
-        }
+        auto width = metrics.horizontalAdvance(this->text_) +
+                     this->currentPadding_.left() +
+                     this->currentPadding_.right();
+        this->sizeHint_ = QSizeF(width, height).toSize();
+        this->minimumSizeHint_ = this->sizeHint_;
     }
 
     this->updateGeometry();
@@ -309,68 +216,6 @@ bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
 QRectF Label::textRect() const
 {
     return QRectF(this->rect()).marginsRemoved(this->currentPadding_);
-}
-
-void Label::mousePressEvent(QMouseEvent *event)
-{
-    if (this->markdownEnabled_ && this->markdownDocument_ &&
-        event->button() == Qt::LeftButton)
-    {
-        QRectF textRect = this->textRect();
-        QPointF pos = event->pos() - textRect.topLeft();
-
-        QString anchor =
-            this->markdownDocument_->documentLayout()->anchorAt(pos);
-        if (!anchor.isEmpty())
-        {
-            QUrl url(anchor);
-
-            // Validate the URL and add scheme if missing
-            if (!url.isValid())
-            {
-                return;
-            }
-
-            // If the URL doesn't have a scheme, assume it's http
-            if (url.scheme().isEmpty())
-            {
-                url.setScheme("http");
-            }
-
-            // Only open URLs with safe schemes
-            QString scheme = url.scheme().toLower();
-            if (scheme == "http" || scheme == "https" || scheme == "ftp" ||
-                scheme == "file" || scheme == "mailto")
-            {
-                QDesktopServices::openUrl(url);
-            }
-            return;
-        }
-    }
-
-    BaseWidget::mousePressEvent(event);
-}
-
-void Label::mouseMoveEvent(QMouseEvent *event)
-{
-    if (this->markdownEnabled_ && this->markdownDocument_)
-    {
-        QRectF textRect = this->textRect();
-        QPointF pos = event->pos() - textRect.topLeft();
-
-        QString anchor =
-            this->markdownDocument_->documentLayout()->anchorAt(pos);
-        if (!anchor.isEmpty())
-        {
-            this->setCursor(Qt::PointingHandCursor);
-        }
-        else
-        {
-            this->setCursor(Qt::ArrowCursor);
-        }
-    }
-
-    BaseWidget::mouseMoveEvent(event);
 }
 
 }  // namespace chatterino

@@ -36,6 +36,7 @@
 #include "widgets/helper/LiveIndicator.hpp"
 #include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/MarkdownLabel.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
@@ -498,10 +499,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         });
     }
 
-    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    auto notesPreview =
+        layout.emplace<MarkdownLabel>().assign(&ui_.notesPreview);
     notesPreview->setVisible(false);
     notesPreview->setShouldElide(true);
-    notesPreview->setMarkdownEnabled(true);
 
     auto lineMod = layout.emplace<Line>(false);
 
