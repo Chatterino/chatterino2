@@ -889,10 +889,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
-#ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
+#ifdef Q_OS_WIN
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with Chatterino.");
+#else
+    layout.addDescription("The browser extension updates the /watching "
+                          "split on Chatterino when Twitch.tv is open.");
+#endif
 
     {
         if (auto err = nmIpcError().get())
@@ -938,7 +942,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                 "Extension;IDs;separated;by;semicolons")
             ->addTo(layout, form);
     }
-#endif
 
     layout.addTitle("AppData & Cache");
 
