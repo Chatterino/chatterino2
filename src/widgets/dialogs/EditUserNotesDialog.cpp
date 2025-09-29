@@ -76,7 +76,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             // restore selection
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 3);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
-                                selectedText.length());
+                                static_cast<int>(selectedText.length()));
         }
         else
         {
@@ -111,7 +111,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             // restore selection
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
-                                selectedText.length());
+                                static_cast<int>(selectedText.length()));
         }
         else
         {
