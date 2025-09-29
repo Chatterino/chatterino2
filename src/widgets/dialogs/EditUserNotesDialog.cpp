@@ -101,7 +101,6 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             auto selectedText = cursor.selectedText();
             QChar newLine(0x2029);  // QTextEdit uses this sequence for newlines
 
-            // QTextEdit uses this for newlines
             if (selectedText.back() == newLine)
             {
                 selectedText.chop(1);
@@ -158,7 +157,6 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             auto selectedText = cursor.selectedText();
             QChar newLine(0x2029);  // QTextEdit uses this sequence for newlines
 
-            // QTextEdit uses this for newlines
             if (selectedText.back() == newLine)
             {
                 selectedText.chop(1);
