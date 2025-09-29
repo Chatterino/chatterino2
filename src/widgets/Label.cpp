@@ -1,7 +1,7 @@
-#include "singletons/Theme.hpp"
 #include "widgets/Label.hpp"
 
 #include "Application.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QAbstractTextDocumentLayout>
 #include <QDesktopServices>
@@ -157,7 +157,8 @@ void Label::paintEvent(QPaintEvent * /*event*/)
     if (this->markdownEnabled_ && this->markdownDocument_ &&
         !this->text_.isEmpty())
     {
-        QColor textColor = this->theme ? this->theme->messages.textColors.regular : Qt::black;
+        QColor textColor = this->theme ?
+            this->theme->messages.textColors.regular : Qt::black;
 
         this->markdownDocument_->setTextWidth(textRect.width());
         this->markdownDocument_->setDefaultFont(
@@ -177,8 +178,7 @@ void Label::paintEvent(QPaintEvent * /*event*/)
         QAbstractTextDocumentLayout::PaintContext paintContext;
         paintContext.palette = docPalette;
         paintContext.clip = QRectF(0, 0, textRect.width(), textRect.height());
-        this->markdownDocument_->documentLayout()->draw(
-            &painter, paintContext);
+        this->markdownDocument_->documentLayout()->draw(&painter, paintContext);
 
         painter.restore();
     }
@@ -199,7 +199,8 @@ void Label::paintEvent(QPaintEvent * /*event*/)
                                       : Qt::AlignCenter;
 
         // Use theme color for text instead of palette
-        QColor textColor = this->theme ? this->theme->messages.textColors.regular : Qt::black;
+        QColor textColor = this->theme ?
+            this->theme->messages.textColors.regular : Qt::black;
         painter.setBrush(textColor);
 
         QTextOption option(alignment);
