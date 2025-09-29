@@ -44,15 +44,13 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         {
             auto selectedText = cursor.selectedText();
             cursor.insertText("### " + selectedText);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("### ");
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     headingButton->setToolTip("Insert a heading");
 
@@ -67,25 +65,26 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+
+            // QTextEdit uses this sequence for newlines
+            if (selectedText.back() == "\u2029")
             {
                 selectedText.chop(1);
             }
             cursor.insertText("**" + selectedText + "**" + "\u2029");
+
             // restore selection
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 3);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 selectedText.length());
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("****");
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     boldButton->setToolTip("Make selected text bold");
 
@@ -100,25 +99,26 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+
+            // QTextEdit uses this for newlines
+            if (selectedText.back() == "\u2029")
             {
                 selectedText.chop(1);
             }
             cursor.insertText("*" + selectedText + "*" + "\u2029");
+
             // restore selection
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 selectedText.length());
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("**");
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     italicButton->setToolTip("Make selected text italic");
 
@@ -134,15 +134,13 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         {
             auto selectedText = cursor.selectedText();
             cursor.insertText("> " + selectedText);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("> ");
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     quoteButton->setToolTip("Insert a blockquote");
 
@@ -157,25 +155,26 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            if (selectedText.back() == "\u2029")  // QTextEdit uses this for newlines
+
+            // QTextEdit uses this for newlines
+            if (selectedText.back() == "\u2029")
             {
                 selectedText.chop(1);
             }
             cursor.insertText("[" + selectedText + "](url)" + "\u2029");
+
             // select "url" for easy replacement
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("[](url)");
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     linkButton->setToolTip("Insert a hyperlink");
 
@@ -191,15 +190,13 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         {
             auto selectedText = cursor.selectedText();
             cursor.insertText("- " + selectedText);
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
         else
         {
             cursor.insertText("- ");
-            this->textEdit_->setTextCursor(cursor);
-            this->textEdit_->setFocus();
         }
+        this->textEdit_->setTextCursor(cursor);
+        this->textEdit_->setFocus();
     });
     listButton->setToolTip("Insert a bullet list item");
 
