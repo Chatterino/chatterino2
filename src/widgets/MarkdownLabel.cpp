@@ -80,11 +80,6 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
         Label::paintEvent(nullptr);
         return;
     }
-
-#if 0
-    painter.setPen(QColor(255, 0, 0));
-    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
-#endif
 }
 
 void MarkdownLabel::mousePressEvent(QMouseEvent *event)
