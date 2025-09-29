@@ -416,8 +416,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
-    TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -440,19 +439,19 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
         emote = twitchChannel->ffzEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::FfzEmote};
+            return *emote;
         }
 
         emote = twitchChannel->bttvEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::BttvEmote};
+            return *emote;
         }
 
         emote = twitchChannel->seventvEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::SevenTVEmote};
+            return *emote;
         }
     }
 
@@ -461,22 +460,22 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
     emote = globalFfzEmotes->emote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::FfzEmote};
+        return *emote;
     }
 
     emote = globalBttvEmotes->emote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::BttvEmote};
+        return *emote;
     }
 
     emote = globalSeventvEmotes->globalEmote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::SevenTVEmote};
+        return *emote;
     }
 
-    return {{}, {}};
+    return {};
 }
 
 }  // namespace
@@ -2211,14 +2210,14 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto [emote, flags] = parseEmote(twitchChannel, name);
+    auto emote = parseEmote(twitchChannel, name);
 
     if (!emote)
     {
         return Failure;
     }
 
-    if ((*emote)->zeroWidth && getSettings()->enableZeroWidthEmotes &&
+    if (emote->zeroWidth && getSettings()->enableZeroWidthEmotes &&
         !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
@@ -2231,9 +2230,12 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
             auto baseEmoteElement = this->releaseBack();
 
             std::vector<LayeredEmoteElement::Emote> layers = {
-                {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
+                {baseEmote, baseEmoteElement->getFlags()},
+                {emote, MessageElementFlag::Emote},
+            };
             this->emplace<LayeredEmoteElement>(
-                std::move(layers), baseEmoteElement->getFlags() | flags,
+                std::move(layers),
+                baseEmoteElement->getFlags() | MessageElementFlag::Emote,
                 this->textColor_);
             return Success;
         }
@@ -2241,15 +2243,16 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
         auto *asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
         if (asLayered)
         {
-            asLayered->addEmoteLayer({*emote, flags});
-            asLayered->addFlags(flags);
+            asLayered->addEmoteLayer({emote, MessageElementFlag::Emote});
+            asLayered->addFlags(MessageElementFlag::Emote);
             return Success;
         }
 
         // No emote to merge with, just show as regular emote
     }
 
-    this->emplace<EmoteElement>(*emote, flags, this->textColor_);
+    this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+                                this->textColor_);
     return Success;
 }
 
@@ -2278,7 +2281,7 @@ void MessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote,
+                                            MessageElementFlag::Emote,
                                             this->textColor_);
 
                 auto len = currentTwitchEmote.name.string.length();

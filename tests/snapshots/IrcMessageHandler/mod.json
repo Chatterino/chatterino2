@@ -114,7 +114,7 @@
                         "name": "Kreygasm",
                         "tooltip": "Kreygasm<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -148,7 +148,7 @@
                         "name": "Kreygasm",
                         "tooltip": "Kreygasm<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

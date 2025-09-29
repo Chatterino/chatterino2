@@ -116,25 +116,21 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             auto it = accemotes->find({words[i]});
             if (it != accemotes->end())
             {
-                b.emplace<EmoteElement>(it->second,
-                                        MessageElementFlag::TwitchEmote);
+                b.emplace<EmoteElement>(it->second, MessageElementFlag::Emote);
                 continue;
             }
         }  // Twitch emote
 
         {  // bttv/ffz emote
-            if ((emote = bttvemotes->emote({words[i]})))
+            emote = bttvemotes->emote({words[i]});
+            if (!emote)
             {
-                flags = MessageElementFlag::BttvEmote;
-            }
-            else if ((emote = ffzemotes->emote({words[i]})))
-            {
-                flags = MessageElementFlag::FfzEmote;
+                emote = ffzemotes->emote({words[i]});
             }
             // TODO: Load 7tv global emotes
             if (emote)
             {
-                b.emplace<EmoteElement>(*emote, flags);
+                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
                 continue;
             }
         }  // bttv/ffz emote
