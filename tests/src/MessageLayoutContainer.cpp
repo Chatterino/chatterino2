@@ -78,7 +78,7 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
                 .baseName = {},
             });
             elements.emplace_back(std::make_shared<EmoteElement>(
-                emote, MessageElementFlag::TwitchEmote));
+                emote, MessageElementFlag::Emote));
             continue;
         }
 
@@ -114,7 +114,7 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
             {
                 MessageElementFlag::Text,
                 MessageElementFlag::Username,
-                MessageElementFlag::TwitchEmote,
+                MessageElementFlag::Emote,
             },
         .width = 10000,
         .scale = 1.0F,
