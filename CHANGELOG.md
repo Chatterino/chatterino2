@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Minor: Addded a description for the logging option under moderation tab. (#6514)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added setting for character limit of deleted messages. (#6491)
@@ -15,6 +14,7 @@
 - Dev: Correct handling of eventsubs without any account. (#6503)
 - Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 - Dev: Merged emote element flags from different providers into two. (#6511)
+- Minor: Addded a description for the logging option under moderation tab. (#6514)
 
 ## 2.5.4
 
