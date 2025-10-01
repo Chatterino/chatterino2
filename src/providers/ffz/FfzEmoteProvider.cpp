@@ -131,12 +131,6 @@ FfzEmoteProvider::FfzEmoteProvider()
 {
 }
 
-QString FfzEmoteProvider::emoteUrl(const Emote &emote) const
-{
-    return u"https://www.frankerfacez.com/emoticon/" % emote.id.string % '-' %
-           emote.name.string;
-}
-
 std::optional<EmoteMap> FfzEmoteProvider::parseChannelEmotes(
     TwitchChannel &twitch, const QJsonValue &json)
 {
@@ -218,7 +212,8 @@ void FfzEmoteProvider::parseEmoteSetInto(const QJsonObject &emoteSet,
                         QString("%1<br>%2 FFZ Emote<br>By: %3")
                             .arg(name.string, kind, author.string),
                         emote);
-        emote.providerID = PROVIDER_ID;
+        emote.homePage = Url{u"https://www.frankerfacez.com/emoticon/" %
+                             id.string % '-' % name.string};
         emote.id = std::move(id);
 
         map[name] = this->createEmote(std::move(emote));

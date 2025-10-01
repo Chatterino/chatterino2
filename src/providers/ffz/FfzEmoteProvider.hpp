@@ -28,8 +28,6 @@ class FfzEmoteProvider : public BuiltinEmoteProvider
 public:
     FfzEmoteProvider();
 
-    QString emoteUrl(const Emote &emote) const override;
-
 protected:
     std::optional<EmoteMap> parseChannelEmotes(TwitchChannel &twitch,
                                                const QJsonValue &json) override;

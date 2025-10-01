@@ -20,8 +20,6 @@ public:
 
     void initialize() override;
 
-    QString emoteUrl(const Emote &emote) const override;
-
     EmotePtr addEmote(TwitchChannel *channel,
                       const BttvLiveUpdateEmoteUpdateAddMessage &message);
     std::optional<std::pair<EmotePtr, EmotePtr>> updateEmote(

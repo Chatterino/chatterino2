@@ -38,8 +38,6 @@ public:
 
     void initialize() override;
 
-    QString emoteUrl(const Emote &emote) const override;
-
     EmotePtr addEmote(TwitchChannel *channel,
                       const seventv::eventapi::EmoteAddDispatch &message);
     std::optional<std::pair<EmotePtr, EmotePtr>> updateEmote(

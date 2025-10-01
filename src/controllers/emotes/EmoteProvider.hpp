@@ -61,8 +61,6 @@ public:
     virtual bool hasGlobalEmotes() const = 0;
     pajlada::Signals::Signal<bool> channelEmotesEnabled;
 
-    virtual QString emoteUrl(const Emote &emote) const = 0;
-
 protected:
     EmotePtr createEmote(Emote &&emote);
 

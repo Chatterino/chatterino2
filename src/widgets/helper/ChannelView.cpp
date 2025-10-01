@@ -168,6 +168,9 @@ void addImageContextMenuItems(QMenu *menu,
             // Give each emote its own submenu
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
+                auto *emoteAction = menu->addAction(emote.ptr->name.string);
+                auto *emoteMenu = new QMenu(menu);
+                emoteAction->setMenu(emoteMenu);
                 addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
             }
         }

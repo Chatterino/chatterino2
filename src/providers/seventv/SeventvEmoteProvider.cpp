@@ -157,7 +157,7 @@ CreateEmoteResult createSeventvEmote(const QJsonObject &activeEmote,
         emoteName,
         imageSet,
         tooltip,
-        PROVIDER_ID,
+        Url{EMOTE_LINK_FORMAT.arg(emoteId.string)},
         zeroWidth,
         emoteId,
         author,
@@ -192,7 +192,7 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
              ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
              : createAliasedTooltip(dispatch.emoteName, baseName.string,
                                     oldEmote->author.string, false),
-         oldEmote->providerID, oldEmote->zeroWidth, oldEmote->id,
+         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
          oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
     return emote;
 }
@@ -254,11 +254,6 @@ void SeventvEmoteProvider::initialize()
     assert(INSTANCE.expired());
     INSTANCE = this->shared();
     BuiltinEmoteProvider::initialize();
-}
-
-QString SeventvEmoteProvider::emoteUrl(const Emote &emote) const
-{
-    return EMOTE_LINK_FORMAT.arg(emote.id.string);
 }
 
 std::optional<EmoteMap> SeventvEmoteProvider::parseChannelEmotes(

@@ -91,7 +91,7 @@ CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
                     .arg(author.string.isEmpty() ? "Channel" : "Shared")
                     .arg(author.string.isEmpty() ? channelDisplayName
                                                  : author.string)},
-        .providerID = PROVIDER_ID,
+        .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
         .zeroWidth = false,
         .id = id,
         .author = {},
@@ -158,11 +158,6 @@ void BttvEmoteProvider::initialize()
         std::static_pointer_cast<BttvEmoteProvider>(this->shared_from_this());
 
     BuiltinEmoteProvider::initialize();
-}
-
-QString BttvEmoteProvider::emoteUrl(const Emote &emote) const
-{
-    return EMOTE_LINK_FORMAT.arg(emote.id.string);
 }
 
 EmotePtr BttvEmoteProvider::addEmote(
@@ -247,7 +242,7 @@ std::optional<EmoteMap> BttvEmoteProvider::parseGlobalEmotes(
                                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
                                               EMOTE_BASE_SIZE * 4)},
             .tooltip = Tooltip{name.string + "<br>Global BetterTTV Emote"},
-            .providerID = PROVIDER_ID,
+            .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
             .zeroWidth = ZERO_WIDTH_GLOBALS.contains(name.string),
             .id = id,
             .author = {},

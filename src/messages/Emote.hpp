@@ -19,7 +19,7 @@ struct Emote {
     EmoteName name;
     ImageSet images;
     Tooltip tooltip;
-    QString providerID;
+    Url homePage;
     bool zeroWidth{};
     EmoteId id;
     EmoteAuthor author;
@@ -34,8 +34,6 @@ struct Emote {
     {
         return name.string;
     }
-
-    std::shared_ptr<EmoteProvider> resolveProvider() const;
 
     QJsonObject toJson() const;
 };
