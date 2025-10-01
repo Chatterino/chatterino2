@@ -36,6 +36,7 @@
 #include "widgets/helper/LiveIndicator.hpp"
 #include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/MarkdownLabel.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
@@ -498,7 +499,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         });
     }
 
-    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    auto notesPreview =
+        layout.emplace<MarkdownLabel>().assign(&ui_.notesPreview);
     notesPreview->setVisible(false);
     notesPreview->setShouldElide(true);
 
@@ -1190,11 +1192,7 @@ void UserInfoPopup::updateNotes()
         return;
     }
 
-    static QRegularExpression spaceRegex{"\\s+"};
-
-    auto previewText = "Notes: " + userData->notes.replace(spaceRegex, " ");
-
-    this->ui_.notesPreview->setText(previewText);
+    this->ui_.notesPreview->setText(userData->notes);
     this->ui_.notesPreview->setVisible(true);
 }
 
