@@ -370,7 +370,8 @@ bool doesWordContainATwitchEmote(
 }
 
 EmotePtr makeSharedChatBadge(const QString &sourceName,
-                             const QString &sourceProfileURL)
+                             const QString &sourceProfileURL,
+                             const QString &sourceLogin)
 {
     if (!sourceProfileURL.isEmpty())
     {
@@ -378,6 +379,14 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
         QString url28px = urlBegin % u"28x28" % urlEnd;
         QString url70px = urlBegin % u"70x70" % urlEnd;
         QString url150px = urlBegin % u"150x150" % urlEnd;
+
+        auto badgeLink = [&] {
+            if (sourceLogin.isEmpty())
+            {
+                return Url{"https://link.twitch.tv/SharedChatViewer"};
+            }
+            return Url{u"https://www.twitch.tv/%1"_s.arg(sourceLogin)};
+        }();
 
         return std::make_shared<Emote>(Emote{
             .name = EmoteName{},
@@ -391,6 +400,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             .tooltip =
                 Tooltip{"Shared Message" +
                         (sourceName.isEmpty() ? "" : " from " + sourceName)},
+            .homePage = badgeLink,
         });
     }
 
@@ -2156,6 +2166,7 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
     auto emote = parseEmote(twitchChannel, name);
+
     if (!emote)
     {
         return Failure;
@@ -2310,6 +2321,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         const QString sourceId = tags["source-room-id"].toString();
         QString sourceName;
         QString sourceProfilePicture;
+        QString sourceLogin;
 
         if (sourceId.isEmpty())
         {
@@ -2319,6 +2331,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         {
             auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
             sourceProfilePicture = twitchUser->profilePictureUrl;
+            sourceLogin = twitchUser->name;
 
             if (twitchChannel->roomId() == sourceId)
             {
@@ -2332,7 +2345,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         }
 
         this->emplace<BadgeElement>(
-            makeSharedChatBadge(sourceName, sourceProfilePicture),
+            makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
             MessageElementFlag::BadgeSharedChannel);
     }
 

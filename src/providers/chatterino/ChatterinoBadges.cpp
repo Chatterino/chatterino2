@@ -63,6 +63,7 @@ void ChatterinoBadges::loadChatterinoBadges()
                                 baseSize * 4),
                         },
                     .tooltip = Tooltip{jsonBadge.value("tooltip").toString()},
+                    .homePage = Url{},
                 };
 
                 emotes.push_back(

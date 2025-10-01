@@ -61,6 +61,7 @@ void SeventvBadges::registerBadge(const QJsonObject &badgeJson)
         .name = EmoteName{},
         .images = SeventvEmoteProvider::createImageSet(badgeJson, true),
         .tooltip = Tooltip{badgeJson["tooltip"].toString()},
+        .homePage = Url{},
         .id = EmoteId{badgeID},
     };
 

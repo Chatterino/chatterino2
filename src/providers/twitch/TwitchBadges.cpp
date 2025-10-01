@@ -53,6 +53,7 @@ void TwitchBadges::loadTwitchBadges()
                                                BADGE_BASE_SIZE * 4),
                             },
                         .tooltip = Tooltip{version.title},
+                        .homePage = version.clickURL,
                     };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
@@ -122,6 +123,7 @@ void TwitchBadges::loadLocalBadges()
                                            BADGE_BASE_SIZE * 4),
                         },
                     .tooltip = Tooltip{versionObj["title"].toString()},
+                    .homePage = Url{versionObj["url"].toString()},
                 };
 
                 (*badgeSets)[key][id] = std::make_shared<Emote>(emote);

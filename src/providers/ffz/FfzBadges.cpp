@@ -76,8 +76,7 @@ void FfzBadges::load()
                              Image::fromUrl(
                                  parseFfzUrl(jsonUrls.value("4").toString()),
                                  0.25, baseSize * 4)},
-                    Tooltip{jsonBadge.value("title").toString()},
-                };
+                    Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
                 Badge badge;
 

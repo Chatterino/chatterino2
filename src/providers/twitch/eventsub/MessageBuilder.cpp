@@ -97,6 +97,8 @@ EmotePtr makeAutoModBadge()
         .images =
             ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
         .tooltip = Tooltip{"AutoMod"},
+        .homePage =
+            Url{"https://dashboard.twitch.tv/settings/moderation/automod"},
     });
 }
 

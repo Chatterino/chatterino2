@@ -86,6 +86,7 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://link.twitch.tv/blizzardofbits",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/a539dc18-ae19-49b0-98c4-8391a594332b/1",
                             "2x": "https://static-cdn.jtvnw.net/badges/v1/a539dc18-ae19-49b0-98c4-8391a594332b/2",

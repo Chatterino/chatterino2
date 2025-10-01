@@ -65,6 +65,7 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://bits.twitch.tv",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/f1d2aab6-b647-47af-965b-84909cf303aa/1",
                             "2x": "https://static-cdn.jtvnw.net/badges/v1/f1d2aab6-b647-47af-965b-84909cf303aa/2",

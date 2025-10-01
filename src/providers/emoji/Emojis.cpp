@@ -291,10 +291,10 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emote = std::make_shared<Emote>(
-                Emote{EmoteName{emoji->value},
-                      ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
-                      Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}});
+            emoji->emote = std::make_shared<Emote>(Emote{
+                EmoteName{emoji->value},
+                ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
+                Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         }
     });
 }

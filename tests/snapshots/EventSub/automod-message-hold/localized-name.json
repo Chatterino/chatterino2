@@ -44,6 +44,7 @@
             "elements": [
                 {
                     "emote": {
+                        "homePage": "https://dashboard.twitch.tv/settings/moderation/automod",
                         "images": {
                             "1x": ""
                         },
