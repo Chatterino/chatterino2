@@ -81,6 +81,11 @@ ModerationPage::ModerationPage()
             "Enable logging", getSettings()->enableLogging);
         logs.append(enableLogging);
 
+		auto description = logs.emplace<QLabel>(
+				"Logging saves the chat history in plain text "
+				"with time and date and emote codes.");
+		description->setStyleSheet("color: #bbb");
+
         auto logsPathLabel = logs.emplace<QLabel>();
 
         // Logs (copied from LoggingMananger)
