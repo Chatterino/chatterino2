@@ -90,7 +90,7 @@ ModerationPage::ModerationPage()
 
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect(
-            [logsPathLabel, logDescription](const QString &logPath, auto) mutable {
+            [logsPathLabel, logExplanation](const QString &logPath, auto) mutable {
                 QString pathOriginal =
                     logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
                                       : logPath;
