@@ -66,6 +66,7 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://link.twitch.tv/SharedChatViewer",
                         "images": {
                             "1x": ""
                         },

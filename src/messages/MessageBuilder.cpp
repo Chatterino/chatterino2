@@ -410,6 +410,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             getResources().twitch.sharedChat, 0.25)},
         .tooltip = Tooltip{"Shared Message" +
                            (sourceName.isEmpty() ? "" : " from " + sourceName)},
+        .homePage = Url{"https://link.twitch.tv/SharedChatViewer"},
     });
 }
 
