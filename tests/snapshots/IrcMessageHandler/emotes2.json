@@ -82,11 +82,11 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/BTTVEmote",
                         "images": {
                             "1x": "https://chatterino.com/BTTVEmote.png"
                         },
                         "name": "BTTVEmote",
-                        "providerID": "bttv",
                         "tooltip": "BTTVEmote Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",
@@ -122,12 +122,12 @@
                         {
                             "emote": {
                                 "author": "Chatterino",
+                                "homePage": "https://chatterino.com/7TVEmote",
                                 "id": "1",
                                 "images": {
                                     "1x": "https://chatterino.com/7TVEmote.png"
                                 },
                                 "name": "7TVEmote",
-                                "providerID": "seventv",
                                 "tooltip": "7TVEmote Tooltip"
                             },
                             "flags": "EmoteImage|EmoteText"
@@ -136,12 +136,12 @@
                             "emote": {
                                 "author": "Chatterino",
                                 "baseName": "ZeroWidth",
+                                "homePage": "https://chatterino.com/7TVEmote0w",
                                 "id": "2",
                                 "images": {
                                     "1x": "https://chatterino.com/7TVEmote0w.png"
                                 },
                                 "name": "7TVEmote0w",
-                                "providerID": "seventv",
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
@@ -151,12 +151,12 @@
                             "emote": {
                                 "author": "Chatterino",
                                 "baseName": "ZeroWidth",
+                                "homePage": "https://chatterino.com/7TVEmote0w",
                                 "id": "2",
                                 "images": {
                                     "1x": "https://chatterino.com/7TVEmote0w.png"
                                 },
                                 "name": "7TVEmote0w",
-                                "providerID": "seventv",
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
@@ -248,12 +248,12 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/7TVGlobal",
                         "id": "G1",
                         "images": {
                             "1x": "https://chatterino.com/7TVGlobal.png"
                         },
                         "name": "7TVGlobal",
-                        "providerID": "seventv",
                         "tooltip": "7TVGlobal Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",
@@ -287,11 +287,11 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/FFZEmote",
                         "images": {
                             "1x": "https://chatterino.com/FFZEmote.png"
                         },
                         "name": "FFZEmote",
-                        "providerID": "ffz",
                         "tooltip": "FFZEmote Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",
@@ -306,11 +306,11 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/FFZGlobal",
                         "images": {
                             "1x": "https://chatterino.com/FFZGlobal.png"
                         },
                         "name": "FFZGlobal",
-                        "providerID": "ffz",
                         "tooltip": "FFZGlobal Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",

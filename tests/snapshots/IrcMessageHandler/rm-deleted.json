@@ -82,12 +82,12 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/7TVEmote",
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7TVEmote.png"
                         },
                         "name": "7TVEmote",
-                        "providerID": "seventv",
                         "tooltip": "7TVEmote Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",
@@ -137,12 +137,12 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/7TVEmote",
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7TVEmote.png"
                         },
                         "name": "7TVEmote",
-                        "providerID": "seventv",
                         "tooltip": "7TVEmote Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",

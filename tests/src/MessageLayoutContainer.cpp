@@ -72,7 +72,7 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
                 .images = ImageSet{Image::fromResourcePixmap(
                     getResources().twitch.automod)},
                 .tooltip = {},
-                .providerID = {},
+                .homePage = {},
                 .id = {},
                 .author = {},
                 .baseName = {},

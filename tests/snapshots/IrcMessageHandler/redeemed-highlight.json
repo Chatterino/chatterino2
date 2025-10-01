@@ -82,11 +82,11 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/BTTVGlobal",
                         "images": {
                             "1x": "https://chatterino.com/BTTVGlobal.png"
                         },
                         "name": "BTTVGlobal",
-                        "providerID": "bttv",
                         "tooltip": "BTTVGlobal Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",

@@ -78,11 +78,6 @@ public:
         return true;
     }
 
-    QString emoteUrl(const Emote &emote) const override
-    {
-        return u"https://chatterino.com/" % emote.name.string;
-    }
-
     std::unordered_map<QString, EmoteMapPtr> channels;
     EmoteMapPtr channelFallback;
 };

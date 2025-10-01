@@ -146,11 +146,10 @@ public:
     NullBackend sound;
 };
 
-std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote,
-                                               QString providerID)
+std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote)
 {
     auto ptr = std::make_shared<Emote>(std::move(emote));
-    ptr->providerID = std::move(providerID);
+    ptr->homePage = {u"https://chatterino.com/" % ptr->name.string};
     ptr->tooltip = {ptr->name.string % u" Tooltip"_s};
     ptr->author = {u"Chatterino"_s};
     ptr->images = {
@@ -160,12 +159,10 @@ std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote,
 
 using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
 
-EmoteMapPtr makeEmotes(const QString &providerID, auto &&...emotes)
+EmoteMapPtr makeEmotes(auto &&...emotes)
 {
     auto map = std::make_shared<EmoteMap>();
-    ((map->emplace(
-         makeEmote(std::forward<decltype(emotes)>(emotes), providerID))),
-     ...);
+    ((map->emplace(makeEmote(std::forward<decltype(emotes)>(emotes)))), ...);
     return map;
 }
 
@@ -174,10 +171,10 @@ QT_WARNING_DISABLE_CLANG("-Wmissing-field-initializers")
 
 EmoteMapPtr makeLocalTwitchEmotes()
 {
-    return makeEmotes({}, Emote{
-                              .name = {u"MyCoolTwitchEmote"_s},
-                              .id = {u"5678"_s},
-                          });
+    return makeEmotes(Emote{
+        .name = {u"MyCoolTwitchEmote"_s},
+        .id = {u"5678"_s},
+    });
 }
 
 void initializeEmotes(mock::EmoteController &controller)
@@ -188,67 +185,63 @@ void initializeEmotes(mock::EmoteController &controller)
 
     auto seventv =
         std::make_shared<mock::EmoteProvider>(u"7TV"_s, seventvID, 3);
-    seventv->setChannelFallback(
-        makeEmotes(seventvID,
-                   Emote{
-                       .name = {u"7TVEmote"_s},
-                       .id = {u"1"_s},
-                   },
-                   Emote{
-                       .name = {u"7TVEmote0w"_s},
-                       .zeroWidth = true,
-                       .id = {u"2"_s},
-                       .baseName = EmoteName{u"ZeroWidth"_s},
-                   },
-                   Emote{
-                       .name = {u"PogChamp"_s},
-                       .id = {u"3"_s},
-                   }));
-    seventv->setChannel("twitchdev",
-                        makeEmotes(seventvID, Emote{
-                                                  .name = {u"7TVTwitchDev"_s},
-                                                  .id = {u"t5"_s},
-                                              }));
-    seventv->setGlobalEmotes(makeEmotes(seventvID, Emote{
-                                                       .name = {u"7TVGlobal"_s},
-                                                       .id = {u"G1"_s},
-                                                   }));
+    seventv->setChannelFallback(makeEmotes(
+        Emote{
+            .name = {u"7TVEmote"_s},
+            .id = {u"1"_s},
+        },
+        Emote{
+            .name = {u"7TVEmote0w"_s},
+            .zeroWidth = true,
+            .id = {u"2"_s},
+            .baseName = EmoteName{u"ZeroWidth"_s},
+        },
+        Emote{
+            .name = {u"PogChamp"_s},
+            .id = {u"3"_s},
+        }));
+    seventv->setChannel("twitchdev", makeEmotes(Emote{
+                                         .name = {u"7TVTwitchDev"_s},
+                                         .id = {u"t5"_s},
+                                     }));
+    seventv->setGlobalEmotes(makeEmotes(Emote{
+        .name = {u"7TVGlobal"_s},
+        .id = {u"G1"_s},
+    }));
     controller.addProvider(seventv);
 
     auto bttv =
         std::make_shared<mock::EmoteProvider>(u"BetterTTV"_s, bttvID, 1);
-    bttv->setChannelFallback(makeEmotes(bttvID,
-                                        Emote{
-                                            .name = {u"BTTVEmote"_s},
-                                        },
-                                        Emote{
-                                            .name = {u"Kappa"_s},
-                                        }));
-    bttv->setChannel("twitchdev",
-                     makeEmotes(bttvID, Emote{
-                                            .name = {u"BTTVTwitchDev"_s},
-                                        }));
-    bttv->setGlobalEmotes(makeEmotes(bttvID, Emote{
-                                                 .name = {u"BTTVGlobal"_s},
-                                             }));
+    bttv->setChannelFallback(makeEmotes(
+        Emote{
+            .name = {u"BTTVEmote"_s},
+        },
+        Emote{
+            .name = {u"Kappa"_s},
+        }));
+    bttv->setChannel("twitchdev", makeEmotes(Emote{
+                                      .name = {u"BTTVTwitchDev"_s},
+                                  }));
+    bttv->setGlobalEmotes(makeEmotes(Emote{
+        .name = {u"BTTVGlobal"_s},
+    }));
     controller.addProvider(bttv);
 
     auto ffz =
         std::make_shared<mock::EmoteProvider>(u"FrankerFaceZ"_s, ffzID, 2);
-    ffz->setChannelFallback(makeEmotes(ffzID,
-                                       Emote{
-                                           .name = {u"FFZEmote"_s},
-                                       },
-                                       Emote{
-                                           .name = {u"Keepo"_s},
-                                       }));
-    ffz->setChannel("twitchdev",
-                    makeEmotes(ffzID, Emote{
-                                          .name = {u"FFZTwitchDev"_s},
-                                      }));
-    ffz->setGlobalEmotes(makeEmotes(u"ffz"_s, Emote{
-                                                  .name = {u"FFZGlobal"_s},
-                                              }));
+    ffz->setChannelFallback(makeEmotes(
+        Emote{
+            .name = {u"FFZEmote"_s},
+        },
+        Emote{
+            .name = {u"Keepo"_s},
+        }));
+    ffz->setChannel("twitchdev", makeEmotes(Emote{
+                                     .name = {u"FFZTwitchDev"_s},
+                                 }));
+    ffz->setGlobalEmotes(makeEmotes(Emote{
+        .name = {u"FFZGlobal"_s},
+    }));
     controller.addProvider(ffz);
 }
 
@@ -456,7 +449,7 @@ public:
                 .images = {Url{u"https://chatterino.com/" % platform %
                                u".png"}},
                 .tooltip = {platform % u" badge"},
-                .providerID = {},
+                .homePage = {},
                 .zeroWidth = false,
                 .id = {},
                 .author = {},

@@ -225,6 +225,7 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/MyCoolTwitchEmote",
                         "id": "5678",
                         "images": {
                             "1x": "https://chatterino.com/MyCoolTwitchEmote.png"

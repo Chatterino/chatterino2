@@ -176,11 +176,11 @@
                 {
                     "emote": {
                         "author": "Chatterino",
+                        "homePage": "https://chatterino.com/FFZEmote",
                         "images": {
                             "1x": "https://chatterino.com/FFZEmote.png"
                         },
                         "name": "FFZEmote",
-                        "providerID": "ffz",
                         "tooltip": "FFZEmote Tooltip"
                     },
                     "flags": "EmoteImage|EmoteText",
