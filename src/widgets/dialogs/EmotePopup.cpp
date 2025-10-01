@@ -42,8 +42,7 @@ auto makeTitleMessage(const QString &title)
     return builder.release();
 }
 
-auto makeEmoteMessage(std::vector<EmotePtr> emotes,
-                      const MessageElementFlag &emoteFlag)
+auto makeEmoteMessage(std::vector<EmotePtr> emotes)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -64,15 +63,15 @@ auto makeEmoteMessage(std::vector<EmotePtr> emotes,
     {
         builder
             .emplace<EmoteElement>(
-                emote,
-                MessageElementFlags{MessageElementFlag::AlwaysShow, emoteFlag})
+                emote, MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                           MessageElementFlag::Emote})
             ->setLink(Link(Link::InsertText, emote->name.string));
     }
 
     return builder.release();
 }
 
-auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
+auto makeEmoteMessage(const EmoteMap &map)
 {
     if (map.empty())
     {
@@ -91,7 +90,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     {
         vec.emplace_back(ptr);
     }
-    return makeEmoteMessage(std::move(vec), emoteFlag);
+    return makeEmoteMessage(std::move(vec));
 }
 
 auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
@@ -117,8 +116,7 @@ auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
 void addEmotes(Channel &channel, auto &&emotes, const QString &title)
 {
     channel.addMessage(makeTitleMessage(title), MessageContext::Original);
-    channel.addMessage(makeEmoteMessage(std::forward<decltype(emotes)>(emotes),
-                                        MessageElementFlag::Emote),
+    channel.addMessage(makeEmoteMessage(std::forward<decltype(emotes)>(emotes)),
                        MessageContext::Original);
 }
 

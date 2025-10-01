@@ -12,6 +12,8 @@
 
 namespace chatterino::lua {
 
+using namespace Qt::Literals;
+
 Plugin *ThisPluginState::plugin()
 {
     if (this->plugptr_ != nullptr)
@@ -25,6 +27,51 @@ Plugin *ThisPluginState::plugin()
     }
     this->plugptr_ = pl;
     return pl;
+}
+
+QString errorResultToString(const sol::protected_function_result &result)
+{
+    assert(!result.valid() &&
+           "This function must be called on invalid/error results");
+
+    auto optString = sol::stack::check_get<QString>(result.lua_state(), -1);
+    if (optString)
+    {
+        return *std::move(optString);
+    }
+
+    // If we get here, the stack didn't contain a string at the top. This is
+    // valid in Lua, but unconventional. Error handlers typically expect a
+    // string at the top of the stack.
+    //
+    // There can be many reasons for this; here are three:
+    // - A C++ function was not wrapped in a trampoline (i.e. try{} catch{}).
+    //   sol usually does this for us, but there are some exceptions.
+    //   If that's the case, then Lua will catch our error in a catch(...).
+    //   It effectively swallows the error. This won't always cause us to end up
+    //   here. For example, a function that takes a string as an argument will
+    //   have this string at the top of the stack. When the error is swallowed,
+    //   we'd return that argument as the error. Unfortunately, we can't detect
+    //   this.
+    //   The workaround here is to use luaL_error() instead of C++ exceptions.
+    //   That function will eventually throw an error too, so the stack is
+    //   properly unwound (requires Lua being compiled as C++).
+    //
+    // - The error is popped _during unwinding_ (due to RAII).
+    //   If an error is thrown and a function in the C++ call stack has
+    //   variables with a destructor that pops a value from the Lua stack, this
+    //   might occur.
+    //   You can detect where the error is removed by setting a breakpoint
+    //   in lua_settop() (lapi.c) once the unwinding begins (most debuggers
+    //   allow breaking on C++ exceptions).
+    //
+    // - One can also raise an error from Lua by calling
+    //   `error(message[, level])`. The `message` is the "error object". As with
+    //   `lua_error()`, the object passed doesn't need to be a string, but it's
+    //   one by convention. If we get here because of this, that's not a bug.
+    return u"(no error message) "
+           "Unless an error without a message string was explicitly thrown, "
+           "this is a bug in Chatterino. Please report this."_s;
 }
 
 void logError(Plugin *plugin, QStringView context, const QString &msg)

@@ -1199,21 +1199,25 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
         ->setLink({Link::UserInfo, originalMessage->loginName});
     builder.emplace<TextElement>("was deleted:", MessageElementFlag::Text,
                                  MessageColor::System);
-    if (originalMessage->messageText.length() > 50)
+
+    auto deletedMessageText = originalMessage->messageText;
+    auto limit = getSettings()->deletedMessageLengthLimit.getValue();
+    if (limit > 0 && deletedMessageText.length() > limit)
     {
-        builder
-            .emplace<TextElement>(originalMessage->messageText.left(50) + "…",
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
+        deletedMessageText = deletedMessageText.left(limit) + "…";
     }
-    else
-    {
-        builder
-            .emplace<TextElement>(originalMessage->messageText,
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
-    }
+
+    builder
+        .emplace<TextElement>(deletedMessageText, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, originalMessage->id});
     builder.message().timeoutUser = "msg:" + originalMessage->id;
+
+    const auto deletionText =
+        QString("A message from %1 was deleted: %2")
+            .arg(originalMessage->loginName, deletedMessageText);
+    builder.message().messageText = deletionText;
+    builder.message().searchText = deletionText;
 
     return builder.release();
 }
@@ -2171,7 +2175,8 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
 
             std::vector<LayeredEmoteElement::Emote> layers = {
                 {baseEmote, baseEmoteElement->getFlags()},
-                {emote, MessageElementFlag::Emote}};
+                {emote, MessageElementFlag::Emote},
+            };
             this->emplace<LayeredEmoteElement>(
                 std::move(layers),
                 baseEmoteElement->getFlags() | MessageElementFlag::Emote,

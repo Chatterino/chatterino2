@@ -123,7 +123,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             emote = emoteController->resolveGlobal(EmoteName{words[i]});
             if (emote)
             {
-                b.emplace<EmoteElement>(*emote, flags);
+                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
                 continue;
             }
         }  // third party emotes

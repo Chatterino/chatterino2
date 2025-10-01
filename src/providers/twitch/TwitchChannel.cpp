@@ -1410,6 +1410,20 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
+    getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
+
+    if (currentAccount->isAnon())
+    {
+        this->eventSubChannelModerateHandle.reset();
+        this->eventSubAutomodMessageHoldHandle.reset();
+        this->eventSubAutomodMessageUpdateHandle.reset();
+        this->eventSubSuspiciousUserMessageHandle.reset();
+        this->eventSubSuspiciousUserUpdateHandle.reset();
+        this->eventSubChannelChatUserMessageHoldHandle.reset();
+        this->eventSubChannelChatUserMessageUpdateHandle.reset();
+        return;
+    }
+
     const auto &currentTwitchUserID = currentAccount->getUserId();
 
     if (this->hasModRights())
@@ -1547,8 +1561,6 @@ void TwitchChannel::refreshPubSub()
                     },
             });
     }
-
-    getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()

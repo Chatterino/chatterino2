@@ -557,6 +557,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+    layout.addDropdown<int>(
+        "Limit length of deleted messages",
+        {"No limit", "50 characters", "100 characters", "200 characters",
+         "300 characters", "400 characters"},
+        s.deletedMessageLengthLimit,
+        [](auto val) {
+            return val ? QString::number(val) + " characters"
+                       : QString("No limit");
+        },
+        [](const auto &args) {
+            return fuzzyToInt(args.value, 0);
+        },
+        true,
+        {"Limits the amount of characters displayed in deleted messages "
+         "when announced via system message."});
+
     layout.addSeparator();
 
     SettingWidget::checkbox("Draw a line below the most recent message before "

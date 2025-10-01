@@ -17,10 +17,8 @@ namespace chatterino {
 
 class Button;
 class PixmapButton;
-class SvgButton;
 class Window;
 class DrawnButton;
-class UpdateDialog;
 class NotebookTab;
 class SplitContainer;
 class Split;
@@ -140,7 +138,6 @@ protected:
     {
         auto *btn = new T(std::forward<decltype(args)>(args)..., this);
         this->customButtons_.push_back(btn);
-        this->performLayout();
 
         return btn;
     }

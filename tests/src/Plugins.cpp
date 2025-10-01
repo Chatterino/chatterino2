@@ -309,6 +309,15 @@ TEST_F(PluginTest, testChannel)
         lua->script(R"lua( return chn:is_twitch_channel() )lua").get<bool>(0),
         true);
 
+    ASSERT_TRUE(lua->script(R"lua(
+        assert(c2.Channel.by_name("mm2pl") == c2.Channel.by_name("mm2pl"))
+        assert(not c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("mm2pl"))
+        assert(c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("other")) -- empty channel
+    )lua")
+                    .valid());
+
     // this is not a TwitchChannel
     const auto *shouldThrow1 = R"lua(
         return chn:is_broadcaster()

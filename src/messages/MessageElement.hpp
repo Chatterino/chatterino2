@@ -44,16 +44,14 @@ enum class MessageElementFlag : int64_t {
     EmoteText = (1LL << 5),
     Emote = EmoteImage | EmoteText,
 
-    // Unused:
-    // (1LL << 6)
-    // (1LL << 7)
+    // unused: (1LL << 6),
+    // unused: (1LL << 7),
 
     ChannelPointReward = (1LL << 8),
     ChannelPointRewardImage = ChannelPointReward | EmoteImage,
 
-    // Unused:
-    // (1LL << 9)
-    // (1LL << 10)
+    // unused: (1LL << 9),
+    // unused: (1LL << 10),
 
     BitsStatic = (1LL << 11),
     BitsAnimated = (1LL << 12),
@@ -149,9 +147,7 @@ enum class MessageElementFlag : int64_t {
     // for the reply button element
     ReplyButton = (1LL << 33),
 
-    // Unused
-    // (1LL << 34)
-    // (1LL << 35)
+    // (1LL << 36) is occupied by BadgeSevenTV
 
     Default = Timestamp | Badges | Username | BitsStatic | EmoteImage |
               BitsAmount | Text | AlwaysShow,

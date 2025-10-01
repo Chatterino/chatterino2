@@ -62,6 +62,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
+#include <QStringBuilder>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -78,7 +79,7 @@ using namespace chatterino;
 
 constexpr int SCROLLBAR_PADDING = 8;
 
-void addEmoteContextMenuItems(QMenu *menu, const Emote &emote)
+void addEmoteContextMenuItems(QMenu *menu, const Emote &emote, QStringView kind)
 {
     auto *openAction = menu->addAction("&Open");
     auto *openMenu = new QMenu(menu);
@@ -115,26 +116,19 @@ void addEmoteContextMenuItems(QMenu *menu, const Emote &emote)
     addImageLink(emote.images.getImage3());
 
     // Copy and open emote page link
-    auto addPageLink = [&](const QString &name, const QString &url) {
+    if (!emote.homePage.string.isEmpty())
+    {
         copyMenu->addSeparator();
         openMenu->addSeparator();
 
-        copyMenu->addAction("Copy " + name + " &emote link", [url] {
-            crossPlatformCopy(url);
-        });
-        openMenu->addAction("Open " + name + " &emote link", [url] {
-            QDesktopServices::openUrl(QUrl(url));
-        });
-    };
-
-    auto provider = emote.resolveProvider();
-    if (provider)
-    {
-        auto url = provider->emoteUrl(emote);
-        if (!url.isEmpty())
-        {
-            addPageLink(provider->name(), url);
-        }
+        copyMenu->addAction(u"Copy &" % kind % u" link",
+                            [url = emote.homePage] {
+                                crossPlatformCopy(url.string);
+                            });
+        openMenu->addAction(u"Open &" % kind % u" link",
+                            [url = emote.homePage] {
+                                QDesktopServices::openUrl(QUrl(url.string));
+                            });
     }
 }
 
@@ -155,7 +149,7 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *badgeElement =
                 dynamic_cast<const BadgeElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *badgeElement->getEmote());
+            addEmoteContextMenuItems(menu, *badgeElement->getEmote(), u"badge");
         }
     }
 
@@ -166,7 +160,7 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *emoteElement =
                 dynamic_cast<const EmoteElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *emoteElement->getEmote());
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
         }
         else if (const auto *layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
@@ -174,10 +168,7 @@ void addImageContextMenuItems(QMenu *menu,
             // Give each emote its own submenu
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
-                auto *emoteAction = menu->addAction(emote.ptr->name.string);
-                auto *emoteMenu = new QMenu(menu);
-                emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(emoteMenu, *emote.ptr);
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
             }
         }
     }
