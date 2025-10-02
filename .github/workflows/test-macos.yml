@@ -27,7 +27,7 @@ jobs:
         qt-version: [6.4.3, 6.7.1]
       fail-fast: false
     env:
-      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+      QT_MODULES: qtimageformats
 
     steps:
       - uses: actions/checkout@v5
@@ -45,7 +45,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake boost
+          # brew install openssl rapidjson p7zip create-dmg cmake boost
+          brew install openssl rapidjson p7zip create-dmg boost
 
       - name: Install httpbox
         run: |

@@ -2,6 +2,38 @@
 
 ## Unversioned
 
+- Minor: Badges now link to their home page like emotes in the context menu. (#6437)
+- Minor: Fixed usercard resizing improperly without recent messages. (#6496)
+- Minor: Added setting for character limit of deleted messages. (#6491)
+- Minor: Added link support to plugin message API. (#6386)
+- Dev: Update release documentation. (#6498)
+- Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
+- Dev: Remove unused QTextCodec includes. (#6487)
+- Dev: Find Boost's CMake Config file instead of module file. (#6499)
+- Dev: Fix 32-bit compile in PluginRepl. (#6483)
+- Dev: Fix the WinGet release workflow. (#6497)
+- Dev: Correct handling of eventsubs without any account. (#6503)
+- Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
+- Dev: Merged emote element flags from different providers into two. (#6511)
+- Dev: Fixed warnings on Qt 6.10. (#6422)
+
+## 2.5.4
+
+- Bugfix: Fixed crashes that could occur when Lua functions errored with values other than strings. (#6441)
+- Bugfix: Fixed zero-width global BTTV emotes not showing in the `:~` completions. (#6440)
+- Bugfix: Fixed an issue where the update button would be unclickable on macOS and Linux. (#6447, #6453)
+- Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
+- Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
+- Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
+- Bugfix: Update the message length font when updating your chat font. (#6462)
+- Bugfix: Fixed "_A message from X has been deleted_" messages logging empty messages to disk. (#6465)
+- Bugfix: Do not set default hotkeys for focusing splits on macOS, as <kbd>Option</kbd> + <kbd>Arrows</kbd> are used for cursor navigation. (#6470)
+- Bugfix: Fixed <kbd>CMD</kbd>+<kbd>Backspace</kbd> not working in the input on macOS if there was a selection. (#6469)
+- Dev: Added documentation for WebSockets to `wip-plugins.md`. (#6432)
+- Dev: Enable the hardened runtime on macOS. (#6467)
+
+## 2.5.4-beta.1
+
 - Minor: Added `Open in custom player` to `twitch.tv/<channel>` link context menus. (#6403)
 - Minor: Added user notes to the user info dialog (when clicking a username). (#6122, #6318)
 - Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
@@ -20,7 +52,7 @@
 - Minor: Made commands searchable using the Settings dialog search bar. (#5891)
 - Minor: Added hotkey Action for opening account selector. (#6192)
 - Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
-- Minor: Add an import and export button to image uploader settings. (#6284, #6394)
+- Minor: Add an import and export button to image uploader settings. (#6284, #6394, #6387)
 - Minor: Message character length label is now monospaced. (#6366)
 - Minor: Add a setting under Moderation -> Logs to customize the timestamp used for chat logs. (#6338)
 - Minor: Add a setting under Moderation -> Logs to use server timestamp from the message instead of the local clock time for logging. (#6346)
@@ -97,12 +129,12 @@
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
-- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334, #6371, #6372)
+- Dev: Refactored `Button` and friends. (#6102, #6255, #6266, #6302, #6268, #6334, #6371, #6372, #6423)
 - Dev: Made "add split" button (part of the split header) a natively rendered button. (#6349, #6385)
 - Dev: Made Settings & Account button on Linux/macOS SVGs. (#6267)
 - Dev: Made "Chatters" button an SVG. (#6397)
 - Dev: Made "Moderation" button an SVG. (#6398, #6412, #6414)
-- Dev: Made user card "pin" button SVGs. (#6399)
+- Dev: Made user card "pin" button SVGs. (#6399, #6426)
 - Dev: Some more setting widget refactors. (#6317)
 - Dev: Emoji style / set is now stored lowercase (and matched case-insensitively). Changing emoji style from this point on and then running an old version might mean you will use the Twitter emoji style by default. (#6300)
 - Dev: Refactored `OnceFlag`. (#6237, #6316)
@@ -116,7 +148,7 @@
 - Dev: Added an explicit `frozen` flag to `Message`. (#6367)
 - Dev: Stop sending `JOIN`/`PART` commands for channels starting with `/`. (#6376)
 - Dev: Error handlers for Sol check functions now take a function reference over an owning type. (#6393)
-- Dev: Fixed warnings on Qt 6.10. (#6422)
+- Dev: Fix macOS CI build issues. (#6430)
 
 ## 2.5.3
 

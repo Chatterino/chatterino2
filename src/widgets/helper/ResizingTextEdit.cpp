@@ -136,7 +136,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         (event->key() == Qt::Key_Backspace))
     {
         QTextCursor cursor = this->textCursor();
-        cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+        if (!cursor.hasSelection())
+        {
+            cursor.movePosition(QTextCursor::StartOfLine,
+                                QTextCursor::KeepAnchor);
+        }
         cursor.removeSelectedText();
         this->setTextCursor(cursor);
         return;
