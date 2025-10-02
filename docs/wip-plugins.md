@@ -521,6 +521,58 @@ request:execute()
 -- ConnectionRefusedError
 ```
 
+#### `WebSocket`
+
+This API allows you to connect to WebSocket servers. For example, you can do the following:
+
+```lua
+local ws = c2.WebSocket.new("wss://echo.websocket.org",
+  -- this object is optional
+  {
+    on_open = function()
+      print("Connection established")
+    end,
+    on_close = function()
+      print("Connection closed")
+    end
+  }
+)
+-- handlers can be passed in the constructor or set here
+ws.on_text = function(data)
+  print("Got text: " .. data)
+end
+
+ws:send_text("Hello, World!")
+```
+
+##### `WebSocket.new(url[, options])`
+
+Create and connect to a WebSocket server specified by `url`.
+
+`options`, if specified, has to be a table with the following members (all optional):
+
+| Key         | Type                    | Description                                                                                                                             |
+| ----------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers`   | `table<string, string>` | Additional headers to set when connecting to the server. Any headers specified here will overwrite the ones Chatterino sets by default. |
+| `on_open`   | `fun()`                 | Called when the WebSocket handshake completed.                                                                                          |
+| `on_text`   | `fun(data: string)`     | Handler for text messages.                                                                                                              |
+| `on_binary` | `fun(data: string)`     | Handler for binary messages. Here, the data might not be valid UTF-8.                                                                   |
+| `on_close`  | `fun()`                 | Handler for a close event. This handler is also called if the connection failed.                                                        |
+
+The returned object has writable properties for the `on_close`, `on_text`, `on_binary`, and `on_open` handlers.
+
+##### `WebSocket:send_text(data)`
+
+Sends a text messsage to the server. If the socket is not yet connected, this message is queued and sent once a connection is established.
+
+##### `WebSocket:send_binary(data)`
+
+Sends a binary message to the server. If the socket is not yet connected, this message is queued and sent once a connection is established.
+
+##### `WebSocket:close()`
+
+Closes the WebSocket connection.
+
 #### `Message`
 
 Allows creation of rich chat messages. This is currently limited but is expected to be expanded soon.
