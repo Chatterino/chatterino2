@@ -285,6 +285,11 @@ public:
         false,
     };
 
+    BoolSetting pulseTextInputOnSelfMessage = {
+        "/appearance/pulseTextInputOnSelfMessage",
+        false,
+    };
+
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
@@ -313,6 +318,13 @@ public:
     BoolSetting autoSubToParticipatedThreads = {
         "/behaviour/autoSubToParticipatedThreads",
         true,
+    };
+
+    /// The maximum length the contents of a deleted message can be
+    /// before we truncate it in the chat
+    IntSetting deletedMessageLengthLimit = {
+        "/behaviour/deletedMessageLengthLimit",
+        50,
     };
 
     // Auto-completion

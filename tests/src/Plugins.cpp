@@ -310,6 +310,15 @@ TEST_F(PluginTest, testChannel)
         lua->script(R"lua( return chn:is_twitch_channel() )lua").get<bool>(0),
         true);
 
+    ASSERT_TRUE(lua->script(R"lua(
+        assert(c2.Channel.by_name("mm2pl") == c2.Channel.by_name("mm2pl"))
+        assert(not c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("mm2pl"))
+        assert(c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("other")) -- empty channel
+    )lua")
+                    .valid());
+
     // this is not a TwitchChannel
     const auto *shouldThrow1 = R"lua(
         return chn:is_broadcaster()
@@ -891,27 +900,21 @@ TEST_F(PluginTest, MessageElementFlag)
                          "BitsAmount=0x200000,"
                          "BitsAnimated=0x1000,"
                          "BitsStatic=0x800,"
-                         "BttvEmoteImage=0x40,"
-                         "BttvEmoteText=0x80,"
                          "ChannelName=0x100000,"
                          "ChannelPointReward=0x100,"
                          "Collapsed=0x4000000,"
                          "EmojiImage=0x800000,"
                          "EmojiText=0x1000000,"
-                         "FfzEmoteImage=0x200,"
-                         "FfzEmoteText=0x400,"
+                         "EmoteImage=0x10,"
+                         "EmoteText=0x20,"
                          "LowercaseLinks=0x20000000,"
                          "Mention=0x8000000,"
                          "Misc=0x1,"
                          "ModeratorTools=0x400000,"
                          "RepliedMessage=0x100000000,"
                          "ReplyButton=0x200000000,"
-                         "SevenTVEmoteImage=0x400000000,"
-                         "SevenTVEmoteText=0x800000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
-                         "TwitchEmoteImage=0x10,"
-                         "TwitchEmoteText=0x20,"
                          "Username=0x4";
 
     std::string got = (*lua)["out"];

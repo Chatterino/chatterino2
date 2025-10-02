@@ -10,10 +10,12 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
@@ -158,6 +160,12 @@ QString invalidateBuffers(const CommandContext & /*ctx*/)
     return {};
 }
 
+QString eventsub(const CommandContext & /*ctx*/)
+{
+    getApp()->getEventSub()->debug();
+    return {};
+}
+
 QString debugTest(const CommandContext &ctx)
 {
     if (!ctx.channel)
@@ -188,6 +196,11 @@ QString debugTest(const CommandContext &ctx)
             ctx.twitchChannel->getName(), title);
         ctx.channel->addSystemMessage(
             QString("debug-test sent desktop notification"));
+    }
+    else if (command == "update-check")
+    {
+        getApp()->getUpdates().checkForUpdates();
+        ctx.channel->addSystemMessage(QString("checking for updates"));
     }
     else
     {

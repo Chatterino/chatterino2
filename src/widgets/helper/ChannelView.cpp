@@ -62,6 +62,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
+#include <QStringBuilder>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -78,8 +79,7 @@ using namespace chatterino;
 
 constexpr int SCROLLBAR_PADDING = 8;
 
-void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
-                              MessageElementFlags creatorFlags)
+void addEmoteContextMenuItems(QMenu *menu, const Emote &emote, QStringView kind)
 {
     auto *openAction = menu->addAction("&Open");
     auto *openMenu = new QMenu(menu);
@@ -116,31 +116,19 @@ void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
     addImageLink(emote.images.getImage3());
 
     // Copy and open emote page link
-    auto addPageLink = [&](const QString &name) {
+    if (!emote.homePage.string.isEmpty())
+    {
         copyMenu->addSeparator();
         openMenu->addSeparator();
 
-        copyMenu->addAction("Copy " + name + " &emote link",
+        copyMenu->addAction(u"Copy &" % kind % u" link",
                             [url = emote.homePage] {
                                 crossPlatformCopy(url.string);
                             });
-        openMenu->addAction("Open " + name + " &emote link",
+        openMenu->addAction(u"Open &" % kind % u" link",
                             [url = emote.homePage] {
                                 QDesktopServices::openUrl(QUrl(url.string));
                             });
-    };
-
-    if (creatorFlags.has(MessageElementFlag::BttvEmote))
-    {
-        addPageLink("BTTV");
-    }
-    else if (creatorFlags.has(MessageElementFlag::FfzEmote))
-    {
-        addPageLink("FFZ");
-    }
-    else if (creatorFlags.has(MessageElementFlag::SevenTVEmote))
-    {
-        addPageLink("7TV");
     }
 }
 
@@ -161,20 +149,18 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *badgeElement =
                 dynamic_cast<const BadgeElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *badgeElement->getEmote(),
-                                     creatorFlags);
+            addEmoteContextMenuItems(menu, *badgeElement->getEmote(), u"badge");
         }
     }
 
     // Emote actions
     if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
+            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}))
     {
         if (const auto *emoteElement =
                 dynamic_cast<const EmoteElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *emoteElement->getEmote(),
-                                     creatorFlags);
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
         }
         else if (const auto *layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
@@ -185,7 +171,7 @@ void addImageContextMenuItems(QMenu *menu,
                 auto *emoteAction = menu->addAction(emote.ptr->name.string);
                 auto *emoteMenu = new QMenu(menu);
                 emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(emoteMenu, *emote.ptr, emote.flags);
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
             }
         }
     }
@@ -975,6 +961,7 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                 }
                 this->channel_->addMessage(message, MessageContext::Repost,
                                            overridingFlags);
+                this->messageAddedToChannel(message);
             }
         });
 
@@ -2815,13 +2802,21 @@ void ChannelView::addTwitchLinkContextMenuItems(
             this->openChannelIn.invoke(twitchUsername,
                                        FromTwitchLinkOpenChannelIn::Streamlink);
         });
+
+        if (!getSettings()->customURIScheme.getValue().isEmpty())
+        {
+            menu->addAction("Open in custom &player", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::CustomPlayer);
+            });
+        }
     }
 }
 
 void ChannelView::addCommandExecutionContextMenuItems(
     QMenu *menu, const MessageLayoutPtr &layout)
 {
-    /* Get commands to be displayed in context menu; 
+    /* Get commands to be displayed in context menu;
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
     for (const auto &cmd : getApp()->getCommands()->items)

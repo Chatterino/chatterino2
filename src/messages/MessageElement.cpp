@@ -210,7 +210,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         return;
     }
 
-    if (ctx.flags.has(MessageElementFlag::EmoteImages))
+    if (ctx.flags.has(MessageElementFlag::EmoteImage))
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -301,7 +301,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        if (ctx.flags.has(MessageElementFlag::EmoteImages))
+        if (ctx.flags.has(MessageElementFlag::EmoteImage))
         {
             auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())

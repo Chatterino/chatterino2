@@ -136,7 +136,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         (event->key() == Qt::Key_Backspace))
     {
         QTextCursor cursor = this->textCursor();
-        cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+        if (!cursor.hasSelection())
+        {
+            cursor.movePosition(QTextCursor::StartOfLine,
+                                QTextCursor::KeepAnchor);
+        }
         cursor.removeSelectedText();
         this->setTextCursor(cursor);
         return;
@@ -301,6 +305,7 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
                     prefixSize);
     tc.insertText(completion);
     this->setTextCursor(tc);
+    this->updateGeometry();
 }
 
 bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const

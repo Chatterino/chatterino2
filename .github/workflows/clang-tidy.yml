@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -34,7 +34,7 @@ jobs:
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: qtimageformats
           version: ${{ matrix.qt-version }}
           dir: ${{ github.workspace }}/.qtinstall
           set-env: false

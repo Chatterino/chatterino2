@@ -496,6 +496,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"scroll bar"})
         ->addTo(layout);
 
+    SettingWidget::checkbox(
+        "Pulse text input when one of your messages is successfully sent",
+        s.pulseTextInputOnSelfMessage)
+        ->setTooltip(
+            "Pulses the text input in a green color whenever a message of "
+            "yours is successfully sent in the matching channel.")
+        ->addTo(layout);
+
     layout.addTitle("Messages");
 
     SettingWidget::checkbox("Separate with lines", s.separateMessages)
@@ -548,6 +556,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+    layout.addDropdown<int>(
+        "Limit length of deleted messages",
+        {"No limit", "50 characters", "100 characters", "200 characters",
+         "300 characters", "400 characters"},
+        s.deletedMessageLengthLimit,
+        [](auto val) {
+            return val ? QString::number(val) + " characters"
+                       : QString("No limit");
+        },
+        [](const auto &args) {
+            return fuzzyToInt(args.value, 0);
+        },
+        true,
+        {"Limits the amount of characters displayed in deleted messages "
+         "when announced via system message."});
+
     layout.addSeparator();
 
     SettingWidget::checkbox("Draw a line below the most recent message before "
@@ -896,7 +920,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     {
-        auto *note = new QLabel(
+        auto *note = layout.addDescription(
             "A semicolon-separated list of Chrome or Firefox extension IDs "
             "allowed to interact with Chatterino's browser integration "
             "(requires restart).\n"

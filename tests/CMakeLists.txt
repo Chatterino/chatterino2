@@ -58,6 +58,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/ImageUploader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchChannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchUserColor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FunctionRef.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp
@@ -65,7 +66,10 @@ set(test_SOURCES
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})
-add_sanitizers(${PROJECT_NAME})
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    add_sanitizers(${PROJECT_NAME})
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
