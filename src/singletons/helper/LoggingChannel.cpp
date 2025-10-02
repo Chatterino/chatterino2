@@ -128,7 +128,12 @@ void LoggingChannel::openLogFile()
     qCDebug(chatterinoHelper) << "Logging to" << fileName;
     this->fileHandle.setFileName(fileName);
 
-    this->fileHandle.open(QIODevice::Append);
+    if (!this->fileHandle.open(QIODevice::Append))
+    {
+        qCDebug(chatterinoHelper)
+            << "Failed to open file" << this->fileHandle.errorString();
+        return;
+    }
 
     appendLine(this->fileHandle, generateOpeningString(now));
 }
@@ -159,7 +164,13 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
     qCDebug(chatterinoHelper) << "Logging stream to" << fileName;
     this->currentStreamFileHandle.setFileName(fileName);
 
-    this->currentStreamFileHandle.open(QIODevice::Append);
+    if (!this->currentStreamFileHandle.open(QIODevice::Append))
+    {
+        qCDebug(chatterinoHelper)
+            << "Failed to open file"
+            << this->currentStreamFileHandle.errorString();
+        return;
+    }
     appendLine(this->currentStreamFileHandle, generateOpeningString(now));
 }
 
