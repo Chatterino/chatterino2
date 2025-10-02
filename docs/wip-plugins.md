@@ -609,6 +609,19 @@ end)
 
 The full range of options can be found in the typing files ([LuaLS](./plugin-meta.lua), [TypeScript](./chatterino.d.ts)).
 
+#### `LinkType` enum
+
+This table describes links available to plugins.
+
+| `LinkType`        | `c2.Link.value` content            | Action on click                                                                      | Example                               |
+| ----------------- | ---------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------- |
+| `Url`             | Any URI that makes sense to open   | Open Link in browser                                                                 | `https://example.org`                 |
+| `UserInfo`        | A Twitch username or `id:TwitchID` | Open a usercard                                                                      | `mm2pl`, `id:117691339`               |
+| `UserAction`      | Command to run or message to send  | Send command/message                                                                 | `/timeout mm2pl 1s test`, `!spoilers` |
+| `JumpToChannel`   | [Channel name](#channelget_name)   | Go to already open split with given channel                                          | `#pajlada`                            |
+| `CopyToClipboard` | Any Unicode text                   | Copy value to clipboard                                                              | n/a                                   |
+| `JumpToMessage`   | ID of the message                  | Highlight the message with given ID in current split, do nothing if it was not found | n/a                                   |
+
 ### Input/Output API
 
 These functions are wrappers for Lua's I/O library. Functions on file pointer
