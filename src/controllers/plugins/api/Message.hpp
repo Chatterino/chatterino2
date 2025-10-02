@@ -1,8 +1,11 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "messages/Link.hpp"
 #    include "messages/Message.hpp"
 
 #    include <sol/forward.hpp>
+
+#    include <cstdint>
 
 namespace chatterino::lua::api::message {
 
@@ -12,6 +15,7 @@ namespace chatterino::lua::api::message {
 ---@field flags c2.MessageElementFlag The element's flags
 ---@field tooltip string The tooltip (if any)
 ---@field trailing_space boolean Whether to add a trailing space after the element
+---@field link c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
 c2.MessageElementBase = {}
 -- ^^^ this is kinda fake - this table doesn't exist in Lua, we only declare it to add methods
 
@@ -24,6 +28,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class MessageElementInitBase
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
+---@field link? c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
 
 ---@class c2.TextElement : c2.MessageElementBase
 ---@field type "text"
@@ -184,6 +189,20 @@ function c2.Message:append_element(init) end
 ---@return c2.Message msg The new message
 function c2.Message.new(init) end
 */
+
+/** @lua@alias c2.Link { type: c2.LinkType, value: string } A link on a message element. */
+
+// We only want certain links to be usable
+// Note: code dependant on this needs these values to be meaningful `Link::Type`s
+/** @exposeenum c2.LinkType */
+enum class ExposedLinkType : std::uint8_t {
+    Url = Link::Type::Url,
+    UserInfo = Link::Type::UserInfo,
+    UserAction = Link::Type::UserAction,  // run a command/send message
+    JumpToChannel = Link::Type::JumpToChannel,
+    CopyToClipboard = Link::Type::CopyToClipboard,
+    JumpToMessage = Link::Type::JumpToMessage,
+};
 
 /**
  * @includefile singletons/Fonts.hpp 

@@ -1,8 +1,8 @@
-#include "controllers/plugins/api/Message.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/api/Message.hpp"
 
 #    include "Application.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
@@ -100,10 +100,49 @@ std::unique_ptr<ReplyCurveElement> replyCurveElementFromTable()
     return std::make_unique<ReplyCurveElement>();
 }
 
+void setLinkOn(MessageElement *el, const Link &link)
+{
+    el->setLink(link);
+    QString tooltip;
+
+    switch (link.type)
+    {
+        case Link::Url:
+            tooltip = QString("<b>URL:</b> %1").arg(link.value);
+            break;
+        case Link::UserAction:
+            tooltip = QString("<b>Command:</b> %1").arg(link.value);
+            break;
+        case Link::CopyToClipboard:
+            tooltip = "<b>Copy to clipboard</b>";
+            break;
+
+        // these links should be safe to click as they don't have any immediate action associated with them
+        case Link::JumpToChannel:
+        case Link::JumpToMessage:
+        case Link::UserInfo:
+        case Link::UserWhisper:
+        case Link::ReplyToMessage:
+            break;
+
+        // these types are not exposed to plugins
+        case Link::None:
+        case Link::AutoModAllow:
+        case Link::AutoModDeny:
+        case Link::InsertText:
+        case Link::OpenAccountsPage:
+        case Link::Reconnect:
+        case Link::ViewThread:
+            throw std::runtime_error("Invalid link type. How'd this happen?");
+    }
+    el->setTooltip(tooltip);
+}
+
 std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
 {
     auto type = requiredGet<std::string>(tbl, "type");
     std::unique_ptr<MessageElement> el;
+    bool linksAllowed = true;
     if (type == TextElement::TYPE)
     {
         el = textElementFromTable(tbl);
@@ -115,6 +154,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     else if (type == MentionElement::TYPE)
     {
         el = mentionElementFromTable(tbl);
+        linksAllowed = false;
     }
     else if (type == TimestampElement::TYPE)
     {
@@ -131,6 +171,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     else if (type == ReplyCurveElement::TYPE)
     {
         el = replyCurveElementFromTable();
+        linksAllowed = false;
     }
     else
     {
@@ -139,7 +180,21 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     assert(el);
 
     el->setTrailingSpace(tbl.get_or("trailing_space", true));
-    el->setTooltip(tbl.get_or("tooltip", QString{}));
+
+    auto link = tbl.get<sol::optional<Link>>("link");
+    if (link)
+    {
+        if (!linksAllowed)
+        {
+            throw std::runtime_error("'link' not supported on type='" + type +
+                                     '\'');
+        }
+        setLinkOn(el.get(), *link);
+    }
+    else
+    {
+        el->setTooltip(tbl.get_or("tooltip", QString{}));
+    }
 
     return el;
 }
@@ -315,6 +370,12 @@ struct ElementRef {
             return sol::nullopt;
         }
         return *el;
+    }
+
+    template <typename T>
+    bool is() const
+    {
+        return dynamic_cast<const T *>(&cref()) != nullptr;
     }
 
     /// Visit this element by dynamic casting
@@ -577,6 +638,19 @@ void createUserType(sol::table &c2)
         [](const ElementRef &el, MessageElementFlag flag) {
             el.ref().addFlags(flag);
         },
+        "link",
+        sol::property(
+            [](const ElementRef &el) {
+                return el.cref().getLink();
+            },
+            [](const ElementRef &el, const Link &link) {
+                if (el.is<MentionElement>() || el.is<LinkElement>())
+                {
+                    throw std::runtime_error(
+                        "Setting a link on this element is unsupported");
+                }
+                setLinkOn(&el.ref(), link);
+            }),
         "tooltip",
         sol::property(
             [](const ElementRef &el) {

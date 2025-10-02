@@ -1159,6 +1159,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
+        this->setTooltip(this->getTooltip());
         if (getSettings()->timestampFormat != this->format_)
         {
             this->format_ = getSettings()->timestampFormat.getValue();
@@ -1175,8 +1176,19 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
-    return new TextElement(format, MessageElementFlag::Timestamp,
-                           MessageColor::System, FontStyle::TimestampMedium);
+    auto *text =
+        new TextElement(format, MessageElementFlag::Timestamp,
+                        MessageColor::System, FontStyle::TimestampMedium);
+    text->setLink(this->getLink());
+    text->setTooltip(this->getTooltip());
+    return text;
+}
+
+MessageElement *TimestampElement::setLink(const Link &link)
+{
+    MessageElement::setLink(link);
+    this->element_->setLink(link);
+    return this;
 }
 
 QJsonObject TimestampElement::toJson() const

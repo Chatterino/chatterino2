@@ -204,12 +204,14 @@ declare namespace c2 {
         flags: MessageElementFlag;
         tooltip: string;
         trailing_space: boolean;
+        link: Link;
         add_flags(flags: MessageElementFlag): void;
     }
 
     interface MessageElementInitBase {
         tooltip?: string;
         trailing_space?: boolean;
+        link?: Link;
     }
 
     type MessageColor = "text" | "link" | "system" | string;
@@ -363,6 +365,20 @@ declare namespace c2 {
 
     interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
         type: "ffz-badge";
+    }
+
+    interface Link {
+        type: LinkType;
+        value: string;
+    }
+
+    enum LinkType {
+        Url,
+        UserInfo,
+        UserAction,
+        JumpToChannel,
+        CopyToClipboard,
+        JumpToMessage,
     }
 
     enum MessageFlag {
