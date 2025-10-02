@@ -1274,6 +1274,12 @@ TEST_F(PluginTest, MessageElementAccess)
     ASSERT_TRUE(nonExistent[2].is<std::nullptr_t>());
     ASSERT_TRUE(nonExistent[3].is<std::nullptr_t>());
 
+    auto links = getAll("link");
+    ASSERT_TRUE(links[0].is<Link>());
+    ASSERT_TRUE(links[1].is<Link>());
+    ASSERT_TRUE(links[2].is<Link>());
+    ASSERT_TRUE(links[3].is<Link>());
+
     // test that accessing anything outside the elements vector causes an error
     auto res = pfn(msg, 0, "flags");
     ASSERT_FALSE(res.valid());
@@ -1309,7 +1315,7 @@ TEST_F(PluginTest, MessageElementModification)
     auto setAll = [&](std::string_view key, auto value) {
         for (size_t i = 1; i <= 4; i++)
         {
-            pfn(msg, i, key, value);
+            EXPECT_TRUE(pfn(msg, i, key, value).valid());
         }
     };
     setAll("tooltip", "tool");
@@ -1324,6 +1330,21 @@ TEST_F(PluginTest, MessageElementModification)
     ASSERT_FALSE(msg->elements[2]->hasTrailingSpace());
     ASSERT_FALSE(msg->elements[3]->hasTrailingSpace());
 
+    pfn(msg, 1, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 2, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 3, "link", Link{Link::CopyToClipboard, "foo"});
+    // can't modify links of mention elements
+    ASSERT_FALSE(
+        pfn(msg, 4, "link", Link{Link::CopyToClipboard, "foo"}).valid());
+
+    ASSERT_EQ(msg->elements[0]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[0]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[0]->getTooltip(), "<b>Copy to clipboard</b>");
+    ASSERT_EQ(msg->elements[1]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[1]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[2]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[2]->getLink().value, "foo");
+
     auto expectErr = [&](std::string_view key, auto value) {
         for (size_t i = 1; i <= 4; i++)
         {
@@ -1333,6 +1354,10 @@ TEST_F(PluginTest, MessageElementModification)
     };
     expectErr("type", "something");
     expectErr("trailing_space", "something");
+
+    // can't set these types
+    expectErr("link", Link{Link::ViewThread, "foo"});
+    expectErr("link", Link{Link::AutoModAllow, "foo"});
 
     // We can't modify these yet
     expectErr("padding", 1);
