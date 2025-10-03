@@ -7,7 +7,6 @@
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 
-
 using namespace chatterino;
 
 namespace {
