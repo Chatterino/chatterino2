@@ -15,6 +15,7 @@
 - Dev: Correct handling of eventsubs without any account. (#6503)
 - Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 - Dev: Merged emote element flags from different providers into two. (#6511)
+- Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 
 ## 2.5.4
 
