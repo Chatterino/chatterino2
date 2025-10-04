@@ -1,7 +1,5 @@
 #pragma once
 
-#include <pajlada/signals/signal.hpp>
-
 #include <memory>
 
 namespace chatterino {
