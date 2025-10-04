@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # TODO: Investigate if the -fno-sized-deallocation flag is still necessary
-# TODO: Test appimage/deb creation
+# TODO: Test deb creation
 
 set -e
 
@@ -33,5 +33,4 @@ cmake \
     .
 cmake --build build
 
-# sh ./../.CI/CreateAppImage.sh
 # sh ./../.CI/CreateUbuntuDeb.sh
