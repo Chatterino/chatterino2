@@ -891,8 +891,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Browser Integration");
 #ifdef Q_OS_WIN
-    layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with Chatterino.");
+    layout.addDescription(
+        "The browser extension replaces the default "
+        "Twitch.tv chat with Chatterino, and updates the /watching split on "
+        "Chatterino when Twitch.tv is open.");
 #else
     layout.addDescription("The browser extension updates the /watching "
                           "split on Chatterino when Twitch.tv is open.");
