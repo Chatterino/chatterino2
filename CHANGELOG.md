@@ -17,6 +17,7 @@
 - Dev: Merged emote element flags from different providers into two. (#6511)
 - Dev: Removed unused method in `Emojis`. (#6517)
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
+- Dev: Added Qt keyword and warning flags project wide. (#6520)
 
 ## 2.5.4
 
