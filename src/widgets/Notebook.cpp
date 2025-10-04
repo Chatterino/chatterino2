@@ -1325,17 +1325,19 @@ SplitNotebook::SplitNotebook(Window *parent)
             // Note that selected tabs are always shown regardless of what the tab
             // filter returns, so no need to include `tab->isSelected()` in the
             // predicate. See Notebook::setTabVisibilityFilter.
-            switch (visibility)
-            {
-                case NotebookTabVisibility::LiveOnly:
-                    this->setTabVisibilityFilter([](const NotebookTab *tab) {
-                        return tab->isLive();
-                    });
-                    break;
-                case NotebookTabVisibility::AllTabs:
-                default:
-                    this->setTabVisibilityFilter(nullptr);
-                    break;
+            if ((visibility & (NotebookTabVisibility::LiveOnly | NotebookTabVisibility::UnreadOnly)) != 0) {
+                this->setTabVisibilityFilter([visibility](const NotebookTab *tab) {
+                    bool showTab = false;
+                    if ((visibility & NotebookTabVisibility::LiveOnly) == NotebookTabVisibility::LiveOnly) {
+                        showTab |= tab->isLive();
+                    }
+                    if ((visibility & NotebookTabVisibility::UnreadOnly) == NotebookTabVisibility::UnreadOnly) {
+                        showTab |= tab->highlightState() != HighlightState::None;
+                    }
+                    return showTab;
+                });
+            } else {
+                this->setTabVisibilityFilter(nullptr);
             }
         },
         this->signalHolder_, true);
