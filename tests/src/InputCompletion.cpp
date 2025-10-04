@@ -52,14 +52,14 @@ public:
         return &this->twitch;
     }
 
-    ILogging *getChatLogger() override
-    {
-        return &this->logging;
-    }
-
     EmoteController *getEmotes() override
     {
         return &this->emotes;
+    }
+
+    ILogging *getChatLogger() override
+    {
+        return &this->logging;
     }
 
     mock::EmptyLogging logging;

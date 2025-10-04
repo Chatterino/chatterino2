@@ -31,6 +31,7 @@
 #include <utility>
 
 namespace {
+
 using namespace chatterino;
 
 auto makeTitleMessage(const QString &title)

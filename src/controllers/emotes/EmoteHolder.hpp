@@ -34,7 +34,7 @@ class EmoteHolder
 public:
     using Item = EmoteHolderItem;
 
-    EmoteHolder(EmoteChannel *Channel);
+    EmoteHolder(EmoteChannel *channel);
 
     void initialize(const EmoteController &controller);
 
