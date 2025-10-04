@@ -2,7 +2,8 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchIrc.hpp"
 #include "Test.hpp"
 
@@ -15,7 +16,7 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -25,7 +26,7 @@ public:
         return &this->accounts;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     AccountController accounts;
 };
 

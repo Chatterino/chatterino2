@@ -16,6 +16,7 @@
 - Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 - Dev: Merged emote element flags from different providers into two. (#6511)
 - Dev: Removed unused method in `Emojis`. (#6517)
+- Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 
 ## 2.5.4
 
