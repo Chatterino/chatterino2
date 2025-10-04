@@ -916,6 +916,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDescription(
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 
+#ifdef Q_OS_WIN
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
@@ -924,6 +925,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "Attempt to force the Chatterino Browser Extension to work in "
             "certain browsers that do not work automatically.\ne.g. Librewolf")
         ->addTo(layout);
+#endif
 
     {
         auto *note = layout.addDescription(
