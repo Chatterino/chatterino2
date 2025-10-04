@@ -56,7 +56,7 @@ public:
         return nullptr;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         assert(
             false &&

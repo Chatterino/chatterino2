@@ -158,6 +158,9 @@ set(SOURCE_FILES
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
+        controllers/emotes/EmoteController.cpp
+        controllers/emotes/EmoteController.hpp
+
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
         controllers/filters/FilterRecord.cpp
@@ -473,8 +476,6 @@ set(SOURCE_FILES
 
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
-        singletons/Emotes.cpp
-        singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
         singletons/ImageUploader.cpp

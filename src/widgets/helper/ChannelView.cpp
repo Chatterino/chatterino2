@@ -155,7 +155,7 @@ void addImageContextMenuItems(QMenu *menu,
 
     // Emote actions
     if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
+            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}))
     {
         if (const auto *emoteElement =
                 dynamic_cast<const EmoteElement *>(&creator))

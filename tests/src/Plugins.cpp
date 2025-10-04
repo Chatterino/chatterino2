@@ -14,7 +14,7 @@
 #    include "messages/Message.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
-#    include "mocks/Emotes.hpp"
+#    include "mocks/EmoteController.hpp"
 #    include "mocks/Logging.hpp"
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
@@ -92,7 +92,7 @@ public:
         return &this->commands;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -110,7 +110,7 @@ public:
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     MockTwitch twitch;
 };
 
@@ -899,27 +899,21 @@ TEST_F(PluginTest, MessageElementFlag)
                          "BitsAmount=0x200000,"
                          "BitsAnimated=0x1000,"
                          "BitsStatic=0x800,"
-                         "BttvEmoteImage=0x40,"
-                         "BttvEmoteText=0x80,"
                          "ChannelName=0x100000,"
                          "ChannelPointReward=0x100,"
                          "Collapsed=0x4000000,"
                          "EmojiImage=0x800000,"
                          "EmojiText=0x1000000,"
-                         "FfzEmoteImage=0x200,"
-                         "FfzEmoteText=0x400,"
+                         "EmoteImage=0x10,"
+                         "EmoteText=0x20,"
                          "LowercaseLinks=0x20000000,"
                          "Mention=0x8000000,"
                          "Misc=0x1,"
                          "ModeratorTools=0x400000,"
                          "RepliedMessage=0x100000000,"
                          "ReplyButton=0x200000000,"
-                         "SevenTVEmoteImage=0x400000000,"
-                         "SevenTVEmoteText=0x800000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
-                         "TwitchEmoteImage=0x10,"
-                         "TwitchEmoteText=0x20,"
                          "Username=0x4";
 
     std::string got = (*lua)["out"];
