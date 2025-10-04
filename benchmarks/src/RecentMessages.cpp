@@ -40,6 +40,11 @@ public:
     {
     }
 
+    EmoteController *getEmotes() override
+    {
+        return &this->emotes;
+    }
+
     IUserDataController *getUserData() override
     {
         return &this->userData;
@@ -95,13 +100,9 @@ public:
         return &this->logging;
     }
 
-    EmoteController *getEmoteController() override
-    {
-        return &this->emoteController;
-    }
-
     mock::EmptyLogging logging;
     AccountController accounts;
+    mock::EmoteController emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::EmptyLinkResolver linkResolver;

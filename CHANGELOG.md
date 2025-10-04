@@ -5,6 +5,7 @@
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added setting for character limit of deleted messages. (#6491)
+- Minor: Added link support to plugin message API. (#6386)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
@@ -15,6 +16,8 @@
 - Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 - Dev: Merged emote element flags from different providers into two. (#6511)
 - Dev: Refactored thrid party emotes. (#6436)
+- Dev: Removed unused method in `Emojis`. (#6517)
+- Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 
 ## 2.5.4
 

@@ -389,7 +389,7 @@ void TwitchAccount::reloadEmotes(void *caller)
     auto emoteMap = std::make_shared<EmoteMap>();
     auto nCalls = std::make_shared<size_t>();
 
-    auto *twitchEmotes = getApp()->getEmoteController()->twitchEmotes();
+    auto *twitchEmotes = getApp()->getEmotes()->getTwitchEmotes();
     auto *twitchUsers = getApp()->getTwitchUsers();
 
     auto addEmote = [sets, emoteMap, twitchEmotes,

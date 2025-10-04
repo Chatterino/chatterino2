@@ -206,7 +206,7 @@ TwitchChannel::TwitchChannel(const QString &name)
             }
         });
 
-    this->emotes().initialize(*getApp()->getEmoteController());
+    this->emotes().initialize(*getApp()->getEmotes());
 
     // debugging
 #if 0
@@ -305,12 +305,10 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
             {
                 continue;
             }
-            map.emplace(EmoteName{emote.name},
-                        getApp()
-                            ->getEmoteController()
-                            ->twitchEmotes()
-                            ->getOrCreateEmote(EmoteId{emote.id},
-                                               EmoteName{emote.name}));
+            map.emplace(
+                EmoteName{emote.name},
+                getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                    EmoteId{emote.id}, EmoteName{emote.name}));
         }
         return map;
     };
@@ -629,7 +627,7 @@ QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto *app = getApp();
     QString parsedMessage =
-        app->getEmoteController()->emojis()->replaceShortCodes(message);
+        app->getEmotes()->getEmojis()->replaceShortCodes(message);
 
     parsedMessage = parsedMessage.simplified();
 

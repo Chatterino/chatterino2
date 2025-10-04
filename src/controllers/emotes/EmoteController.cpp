@@ -70,22 +70,22 @@ EmotePtr EmoteController::resolveGlobal(const EmoteName &query) const
     return nullptr;
 }
 
-std::span<const EmoteProviderPtr> EmoteController::providers() const
+std::span<const EmoteProviderPtr> EmoteController::getProviders() const
 {
     return this->providers_;
 }
 
-TwitchEmotes *EmoteController::twitchEmotes() const
+TwitchEmotes *EmoteController::getTwitchEmotes() const
 {
     return this->twitchEmotes_.get();
 }
 
-Emojis *EmoteController::emojis() const
+Emojis *EmoteController::getEmojis() const
 {
     return this->emojis_.get();
 }
 
-GIFTimer *EmoteController::gifTimer() const
+GIFTimer *EmoteController::getGIFTimer() const
 {
     return this->gifTimer_.get();
 }

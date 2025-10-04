@@ -45,9 +45,9 @@ public:
         return &this->commands;
     }
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
     ILogging *getChatLogger() override
@@ -59,7 +59,7 @@ public:
     AccountController accounts;
     CommandController commands;
     mock::MockTwitchIrcServer twitch;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
 };
 
 }  // namespace

@@ -34,9 +34,9 @@ public:
     {
     }
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
     IUserDataController *getUserData() override
@@ -81,7 +81,7 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;

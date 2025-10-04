@@ -22,6 +22,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/sound/MiniaudioBackend.hpp"
 #include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
@@ -160,7 +161,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , logging(new Logging(_settings))
-    , emoteController(new EmoteController)
+    , emotes(new EmoteController)
     , accounts(new AccountController)
     , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
@@ -227,9 +228,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
-
     // Load global emotes
-    this->emoteController->initialize();
+    this->emotes->initialize();
 
     this->accounts->load();
 
@@ -319,6 +319,13 @@ Fonts *Application::getFonts()
     return this->fonts.get();
 }
 
+EmoteController *Application::getEmotes()
+{
+    assertInGuiThread();
+    assert(this->emotes);
+
+    return this->emotes.get();
+}
 AccountController *Application::getAccounts()
 {
     assertInGuiThread();
@@ -540,14 +547,6 @@ eventsub::IController *Application::getEventSub()
     return this->eventSub.get();
 }
 
-EmoteController *Application::getEmoteController()
-{
-    assertInGuiThread();
-    assert(this->emoteController);
-
-    return this->emoteController.get();
-}
-
 void Application::aboutToQuit()
 {
     ABOUT_TO_QUIT.store(true);
@@ -593,7 +592,7 @@ void Application::stop()
     this->hotkeys.reset();
     this->eventSub.reset();
     this->accounts.reset();
-    this->emoteController.reset();
+    this->emotes.reset();
     this->logging.reset();
     this->fonts.reset();
     this->themes.reset();

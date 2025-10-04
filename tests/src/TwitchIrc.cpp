@@ -16,12 +16,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
 };
 
 }  // namespace
@@ -164,8 +164,7 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
         std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
-    auto *twitchEmotes =
-        this->mockApplication->getEmoteController()->twitchEmotes();
+    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
 
     std::vector<TestCase> testCases{
         {

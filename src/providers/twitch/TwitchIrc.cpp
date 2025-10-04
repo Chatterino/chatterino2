@@ -70,8 +70,7 @@ void appendTwitchEmoteOccurrences(const QString &emote,
         TwitchEmoteOccurrence emoteOccurrence{
             start,
             end,
-            app->getEmoteController()->twitchEmotes()->getOrCreateEmote(id,
-                                                                        name),
+            app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id, name),
             name,
         };
         if (emoteOccurrence.ptr == nullptr)

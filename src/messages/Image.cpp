@@ -58,7 +58,7 @@ Frames::Frames(QList<Frame> &&frames)
         DebugCount::increase("animated images");
 
         this->gifTimerConnection_ =
-            app->getEmoteController()->gifTimer()->signal.connect([this] {
+            app->getEmotes()->getGIFTimer()->signal.connect([this] {
                 this->advance();
             });
 
@@ -75,8 +75,7 @@ Frames::Frames(QList<Frame> &&frames)
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(app->getEmoteController()->gifTimer()->position() %
-                    totalLength),
+                int(app->getEmotes()->getGIFTimer()->position() % totalLength),
                 60000);
         }
         this->processOffset();

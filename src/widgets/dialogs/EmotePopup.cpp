@@ -31,7 +31,6 @@
 #include <utility>
 
 namespace {
-
 using namespace chatterino;
 
 auto makeTitleMessage(const QString &title)
@@ -289,7 +288,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     loadEmojis(*this->viewEmojis_,
-               getApp()->getEmoteController()->emojis()->getEmojis());
+               getApp()->getEmotes()->getEmojis()->getEmojis());
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
@@ -461,7 +460,7 @@ void EmotePopup::reloadEmotes()
         }
     }
 
-    for (const auto &provider : getApp()->getEmoteController()->providers())
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
     {
         if (!provider->hasGlobalEmotes())
         {
@@ -521,7 +520,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         }
     }
 
-    for (const auto &provider : getApp()->getEmoteController()->providers())
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
     {
         auto filtered = filterEmoteMap(searchText, provider->globalEmotes());
         if (filtered.empty())
@@ -574,7 +573,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
     std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    const auto &emojis = getApp()->getEmoteController()->emojis()->getEmojis();
+    const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
     for (const auto &emoji : emojis)
     {
         if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))

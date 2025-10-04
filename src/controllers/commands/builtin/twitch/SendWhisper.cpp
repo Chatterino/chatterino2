@@ -105,7 +105,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     const auto &acc = app->getAccounts()->twitch.getCurrent();
     const auto &accemotes = *acc->accessEmotes();
-    const auto *emoteController = app->getEmoteController();
+    const auto *emoteController = app->getEmotes();
     auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
@@ -128,7 +128,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             }
         }  // third party emotes
         {  // emoji/text
-            for (auto &variant : emoteController->emojis()->parse(words[i]))
+            for (auto &variant : emoteController->getEmojis()->parse(words[i]))
             {
                 constexpr const static struct {
                     void operator()(EmotePtr emote, MessageBuilder &b) const

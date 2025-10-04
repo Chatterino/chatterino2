@@ -29,7 +29,7 @@ EmoteHolder::EmoteHolder(EmoteChannel *channel)
 
 void EmoteHolder::initialize(const EmoteController &controller)
 {
-    for (const auto &provider : controller.providers())
+    for (const auto &provider : controller.getProviders())
     {
         if (!provider->supportsChannel(channel))
         {

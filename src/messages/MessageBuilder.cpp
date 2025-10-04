@@ -426,7 +426,7 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
         return channel;
     }
 
-    auto global = getApp()->getEmoteController()->resolveGlobal(name);
+    auto global = getApp()->getEmotes()->resolveGlobal(name);
     if (global)
     {
         return global;
@@ -1058,7 +1058,7 @@ void MessageBuilder::appendChannelPointRewardMessage(
     if (reward.id == "CELEBRATION")
     {
         const auto emotePtr =
-            getApp()->getEmoteController()->twitchEmotes()->getOrCreateEmote(
+            getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
                 EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
         this->emplace<EmoteElement>(emotePtr,
                                     MessageElementFlag::ChannelPointReward,
@@ -2265,7 +2265,7 @@ void MessageBuilder::addWords(
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
             for (auto variant :
-                 getApp()->getEmoteController()->emojis()->parse(preText))
+                 getApp()->getEmotes()->getEmojis()->parse(preText))
             {
                 boost::apply_visitor(variant::Overloaded{
                                          [&](const EmotePtr &emote) {
@@ -2290,8 +2290,7 @@ void MessageBuilder::addWords(
         }
 
         // split words
-        for (auto variant :
-             getApp()->getEmoteController()->emojis()->parse(word))
+        for (auto variant : getApp()->getEmotes()->getEmojis()->parse(word))
         {
             boost::apply_visitor(variant::Overloaded{
                                      [&](const EmotePtr &emote) {

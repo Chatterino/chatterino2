@@ -192,7 +192,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
     this->updateScale();
 
     this->triggerFirstActivation();
-    getApp()->getEmoteController()->gifTimer()->registerOpenOverlayWindow();
+    getApp()->getEmotes()->getGIFTimer()->registerOpenOverlayWindow();
 }
 
 OverlayWindow::~OverlayWindow()
@@ -200,7 +200,7 @@ OverlayWindow::~OverlayWindow()
 #ifdef Q_OS_WIN
     ::DestroyCursor(this->sizeAllCursor_);
 #endif
-    getApp()->getEmoteController()->gifTimer()->unregisterOpenOverlayWindow();
+    getApp()->getEmotes()->getGIFTimer()->unregisterOpenOverlayWindow();
 }
 
 void OverlayWindow::applyTheme()

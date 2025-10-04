@@ -92,6 +92,11 @@ public:
         return &this->commands;
     }
 
+    EmoteController *getEmotes() override
+    {
+        return &this->emotes;
+    }
+
     mock::MockTwitchIrcServer *getTwitch() override
     {
         return &this->twitch;
@@ -102,15 +107,10 @@ public:
         return &this->logging;
     }
 
-    EmoteController *getEmoteController() override
-    {
-        return &this->emoteController;
-    }
-
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
     MockTwitch twitch;
 };
 

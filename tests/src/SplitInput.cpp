@@ -54,16 +54,16 @@ public:
         return &this->commands;
     }
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
     HotkeyController hotkeys;
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
 };
 
 class SplitInputTest

@@ -115,14 +115,14 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             }
         }
 
-        for (const auto &provider : app->getEmoteController()->providers())
+        for (const auto &provider : app->getEmotes()->getProviders())
         {
             addEmotes(emotes, *provider->globalEmotes(),
                       u"Global " % provider->name());
         }
     }
 
-    addEmojis(emotes, app->getEmoteController()->emojis()->getEmojis());
+    addEmojis(emotes, app->getEmotes()->getEmojis()->getEmojis());
 
     this->items_ = std::move(emotes);
 }

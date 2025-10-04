@@ -26,13 +26,13 @@ class TwitchBadges;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
-class EmoteController;
 
 class Theme;
 class WindowManager;
 class ILogging;
 class Logging;
 class Paths;
+class EmoteController;
 class Settings;
 class Fonts;
 class Toasts;
@@ -73,6 +73,7 @@ public:
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
+    virtual EmoteController *getEmotes() = 0;
     virtual AccountController *getAccounts() = 0;
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
@@ -104,7 +105,6 @@ public:
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
     virtual eventsub::IController *getEventSub() = 0;
-    virtual EmoteController *getEmoteController() = 0;
 };
 
 class Application : public IApplication
@@ -142,7 +142,7 @@ private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Logging> logging;
-    std::unique_ptr<EmoteController> emoteController;
+    std::unique_ptr<EmoteController> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -184,6 +184,7 @@ public:
     }
     Theme *getThemes() override;
     Fonts *getFonts() override;
+    EmoteController *getEmotes() override;
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
@@ -213,7 +214,6 @@ public:
     SeventvEventAPI *getSeventvEventAPI() override;
     pronouns::Pronouns *getPronouns() override;
     eventsub::IController *getEventSub() override;
-    EmoteController *getEmoteController() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;

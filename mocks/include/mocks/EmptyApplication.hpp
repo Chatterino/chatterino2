@@ -56,6 +56,14 @@ public:
         return nullptr;
     }
 
+    EmoteController *getEmotes() override
+    {
+        assert(
+            false &&
+            "EmptyApplication::getEmotes was called without being initialized");
+        return nullptr;
+    }
+
     AccountController *getAccounts() override
     {
         assert(false && "EmptyApplication::getAccounts was called without "
@@ -183,14 +191,6 @@ public:
     {
         assert(false && "EmptyApplication::getImageUploader was called without "
                         "being initialized");
-        return nullptr;
-    }
-
-    EmoteController *getEmoteController() override
-    {
-        assert(false &&
-               "EmptyApplication::getEmoteController was called without "
-               "being initialized");
         return nullptr;
     }
 

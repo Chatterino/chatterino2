@@ -16,6 +16,7 @@ using EmoteProviderPtr = std::shared_ptr<EmoteProvider>;
 class TwitchEmotes;
 class Emojis;
 class GIFTimer;
+
 class EmoteController
 {
 public:
@@ -29,13 +30,13 @@ public:
 
     EmotePtr resolveGlobal(const EmoteName &query) const;
 
-    std::span<const EmoteProviderPtr> providers() const;
+    std::span<const EmoteProviderPtr> getProviders() const;
 
-    TwitchEmotes *twitchEmotes() const;
+    TwitchEmotes *getTwitchEmotes() const;
 
-    Emojis *emojis() const;
+    Emojis *getEmojis() const;
 
-    GIFTimer *gifTimer() const;
+    GIFTimer *getGIFTimer() const;
 
 protected:
     void sort();

@@ -57,15 +57,15 @@ public:
         return &this->logging;
     }
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
 };
 
 void containsRoughly(std::span<EmoteItem> span, const std::set<QString> &values)
@@ -177,7 +177,7 @@ private:
         auto bttv =
             std::make_shared<mock::EmoteProvider>("BetterTTV", "betterttv", 1);
         bttv->setGlobalEmotes(std::move(bttvEmotes));
-        mockApplication->emoteController.addProvider(std::move(bttv));
+        mockApplication->emotes.addProvider(std::move(bttv));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
@@ -186,7 +186,7 @@ private:
         auto ffz = std::make_shared<mock::EmoteProvider>("FrankerFaceZ",
                                                          "frankerfacez", 2);
         ffz->setGlobalEmotes(std::move(ffzEmotes));
-        mockApplication->emoteController.addProvider(std::move(ffz));
+        mockApplication->emotes.addProvider(std::move(ffz));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
@@ -195,7 +195,7 @@ private:
         addEmote(*seventvEmotes, "PAJAW");
         auto stv = std::make_shared<mock::EmoteProvider>("7TV", "seventv", 3);
         stv->setGlobalEmotes(std::move(seventvEmotes));
-        mockApplication->emoteController.addProvider(std::move(stv));
+        mockApplication->emotes.addProvider(std::move(stv));
     }
 
 protected:

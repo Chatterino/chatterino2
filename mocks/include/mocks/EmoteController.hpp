@@ -10,7 +10,7 @@ class EmoteController : public chatterino::EmoteController
 public:
     EmoteController()
     {
-        this->emojis()->load();
+        this->getEmojis()->load();
     }
 
     void addProvider(EmoteProviderPtr provider)

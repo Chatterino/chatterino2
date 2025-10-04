@@ -72,6 +72,11 @@ public:
     {
     }
 
+    EmoteController *getEmotes() override
+    {
+        return &this->emotes;
+    }
+
     IUserDataController *getUserData() override
     {
         return &this->userData;
@@ -127,14 +132,9 @@ public:
         return &this->sound;
     }
 
-    EmoteController *getEmoteController() override
-    {
-        return &this->emoteController;
-    }
-
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
@@ -433,7 +433,7 @@ public:
         this->mockApplication =
             std::make_unique<MockApplication>(QString::fromUtf8(
                 this->snapshot->mergedSettings(SETTINGS_DEFAULT)));
-        initializeEmotes(this->mockApplication->emoteController);
+        initializeEmotes(this->mockApplication->emotes);
         this->mockApplication->getAccounts()->twitch.getCurrent()->setEmotes(
             makeLocalTwitchEmotes());
         this->mockApplication->getUserData()->setUserColor(u"117691339"_s,

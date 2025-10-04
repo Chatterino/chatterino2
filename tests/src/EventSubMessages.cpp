@@ -209,7 +209,7 @@ public:
         return &this->highlights;
     }
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
         return &this->emoteController;
     }

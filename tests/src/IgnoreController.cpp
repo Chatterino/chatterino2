@@ -16,9 +16,9 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
     AccountController *getAccounts() override
@@ -26,7 +26,7 @@ public:
         return &this->accounts;
     }
 
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
     AccountController accounts;
 };
 
@@ -58,8 +58,7 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
         std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
-    auto *twitchEmotes =
-        this->mockApplication->getEmoteController()->twitchEmotes();
+    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
 
     auto emoteAt = [&](int at, const QString &name) {
         return TwitchEmoteOccurrence{

@@ -19,12 +19,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    EmoteController *getEmoteController() override
+    EmoteController *getEmotes() override
     {
-        return &this->emoteController;
+        return &this->emotes;
     }
 
-    mock::EmoteController emoteController;
+    mock::EmoteController emotes;
 };
 
 class ModerationActionTest : public ::testing::Test
