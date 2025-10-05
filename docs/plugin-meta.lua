@@ -292,6 +292,7 @@ c2.Message = {}
 ---@class MessageElementInitBase
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
+---@field link? c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
 
 ---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
 
@@ -344,6 +345,17 @@ c2.Message = {}
 ---@param init MessageInit The message initialization table
 ---@return c2.Message msg The new message
 function c2.Message.new(init) end
+---@alias c2.Link { type: c2.LinkType, value: string } A link on a message element.
+---@enum c2.LinkType
+c2.LinkType = {
+    Url = {}, ---@type c2.LinkType.Url
+    UserInfo = {}, ---@type c2.LinkType.UserInfo
+    UserAction = {}, ---@type c2.LinkType.UserAction
+    JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
+    CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
+    JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
+}
+
 -- Begin src/singletons/Fonts.hpp
 
 ---@enum c2.FontStyle

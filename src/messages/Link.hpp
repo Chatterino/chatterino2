@@ -9,13 +9,9 @@ public:
     enum Type {
         None,
         Url,
-        CloseCurrentSplit,
         UserInfo,
-        UserTimeout,
-        UserBan,
         UserWhisper,
         InsertText,
-        ShowMessage,
         UserAction,
         AutoModAllow,
         AutoModDeny,

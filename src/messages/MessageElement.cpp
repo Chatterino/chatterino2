@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
@@ -10,7 +11,7 @@
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/emoji/Emojis.hpp"
-#include "singletons/Emotes.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
@@ -1106,6 +1107,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
+        this->setTooltip(this->getTooltip());
         if (getSettings()->timestampFormat != this->format_)
         {
             this->format_ = getSettings()->timestampFormat.getValue();
@@ -1122,8 +1124,19 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
-    return new TextElement(format, MessageElementFlag::Timestamp,
-                           MessageColor::System, FontStyle::TimestampMedium);
+    auto *text =
+        new TextElement(format, MessageElementFlag::Timestamp,
+                        MessageColor::System, FontStyle::TimestampMedium);
+    text->setLink(this->getLink());
+    text->setTooltip(this->getTooltip());
+    return text;
+}
+
+MessageElement *TimestampElement::setLink(const Link &link)
+{
+    MessageElement::setLink(link);
+    this->element_->setLink(link);
+    return this;
 }
 
 QJsonObject TimestampElement::toJson() const
