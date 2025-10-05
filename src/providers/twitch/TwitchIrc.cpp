@@ -3,7 +3,8 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/QLogging.hpp"
-#include "singletons/Emotes.hpp"
+#include "controllers/emotes/EmoteController.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "util/IrcHelpers.hpp"
 
 namespace {
