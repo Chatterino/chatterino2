@@ -870,13 +870,24 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Signals
         websocketpp::websocketpp
         Threads::Threads
-        RapidJSON::RapidJSON
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
         twitch-eventsub-ws
         BoostCertify
         )
+
+if(TARGET rapidjson)
+    message(DEBUG "Linking to rapidjson target")
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            rapidjson
+            )
+else()
+    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+endif()
+
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
@@ -1171,8 +1182,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
