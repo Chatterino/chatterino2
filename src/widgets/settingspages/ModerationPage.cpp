@@ -83,14 +83,15 @@ ModerationPage::ModerationPage()
 
         auto logsPathLabel = logs.emplace<QLabel>();
 
-		QString logExplanation =
-			"<span style=\"color:#bbb\"> They are saved as plain "
-			"text files per channel, containing the messages with "
-			"timestamps.</span>";
+        QString logExplanation =
+            "<span style=\"color:#bbb\"> They are saved as plain "
+            "text files per channel, containing the messages with "
+            "timestamps.</span>";
 
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect(
-            [logsPathLabel, logExplanation](const QString &logPath, auto) mutable {
+            [logsPathLabel, logExplanation](const QString &logPath,
+                                            auto) mutable {
                 QString pathOriginal =
                     logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
                                       : logPath;
@@ -102,7 +103,7 @@ ModerationPage::ModerationPage()
 
                 logsPathLabel->setText(pathShortened + logExplanation);
                 logsPathLabel->setToolTip(pathOriginal);
-				logsPathLabel->setWordWrap(true);
+                logsPathLabel->setWordWrap(true);
             });
 
         logsPathLabel->setTextFormat(Qt::RichText);
