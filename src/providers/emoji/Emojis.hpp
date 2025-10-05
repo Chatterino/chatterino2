@@ -58,7 +58,6 @@ public:
 class Emojis : public IEmojis
 {
 public:
-    void initialize();
     void load();
     std::vector<boost::variant<EmotePtr, QString>> parse(
         const QString &text) const override;
