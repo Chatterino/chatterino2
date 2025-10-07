@@ -33,7 +33,6 @@
 - Bugfix: Fixed flickering tooltips on Wayland when the mouse cursor is over them. (#6451)
 - Bugfix: Fixed `c2.Channel` comparing `false` to the same channel. (#6456)
 - Bugfix: Fixed an issue where the moderation icon was missing from the Moderation tab. (#6457)
-- Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308)
 
 ## 2.5.4-beta.1
 
