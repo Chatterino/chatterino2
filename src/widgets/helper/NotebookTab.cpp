@@ -958,22 +958,12 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
                 this->closeMultipleTabsMenu_->setEnabled(
                     this->notebook_->getPageCount() > 1);
 
-                int tabIndex = -1;
-                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
-                {
-                    if (this->notebook_->getPageAt(i) == this->page)
-                    {
-                        tabIndex = i;
-                        break;
-                    }
-                }
+                const int tabIndex =
+                    this->notebook_->visibleIndexOf(this->page);
 
-                if (tabIndex != -1)
-                {
-                    this->closeTabsToLeftAction_->setEnabled(tabIndex > 0);
-                    this->closeTabsToRightAction_->setEnabled(
-                        tabIndex < this->notebook_->getPageCount() - 1);
-                }
+                this->closeTabsToLeftAction_->setEnabled(tabIndex > 0);
+                this->closeTabsToRightAction_->setEnabled(
+                    tabIndex < this->notebook_->getPageCount() - 1);
             }
             break;
             default:;
