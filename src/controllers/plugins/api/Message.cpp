@@ -188,6 +188,9 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             case Link::CopyToClipboard:
                 tooltip = "<b>Copy to clipboard</b>";
                 break;
+            case Link::InsertText:
+                tooltip = QString("<b>Insert text:</b> %1").arg(link->value);
+                break;
 
             // these links should be safe to click as they don't have any immediate action associated with them
             case Link::JumpToChannel:
@@ -201,7 +204,6 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             case Link::None:
             case Link::AutoModAllow:
             case Link::AutoModDeny:
-            case Link::InsertText:
             case Link::OpenAccountsPage:
             case Link::Reconnect:
                 throw std::runtime_error(
