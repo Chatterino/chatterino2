@@ -6,7 +6,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -54,7 +54,7 @@ public:
         return &this->commands;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -63,7 +63,7 @@ public:
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
 };
 
 class SplitInputTest

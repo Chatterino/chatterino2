@@ -13,7 +13,6 @@
 #    include <QFileInfo>
 #    include <QList>
 #    include <QLoggingCategory>
-#    include <QTextCodec>
 #    include <QUrl>
 #    include <sol/forward.hpp>
 #    include <sol/protected_function_result.hpp>

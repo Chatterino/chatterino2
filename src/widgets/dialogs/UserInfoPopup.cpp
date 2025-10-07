@@ -587,6 +587,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     {
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
+        this->ui_.noMessagesLabel->setSizePolicy(QSizePolicy::Expanding,
+                                                 QSizePolicy::Expanding);
 
         this->ui_.latestMessages =
             new ChannelView(this, this->split_, ChannelView::Context::UserCard,

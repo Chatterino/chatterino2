@@ -87,7 +87,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

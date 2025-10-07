@@ -89,7 +89,7 @@
                         "name": "BTTVEmote",
                         "tooltip": "BTTVEmote Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -108,7 +108,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -130,7 +130,7 @@
                                 "name": "7TVEmote",
                                 "tooltip": "7TVEmote Tooltip"
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         },
                         {
                             "emote": {
@@ -145,7 +145,7 @@
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         },
                         {
                             "emote": {
@@ -160,10 +160,10 @@
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         }
                     ],
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -236,7 +236,7 @@
                         "name": "PogChamp",
                         "tooltip": "PogChamp<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -256,7 +256,7 @@
                         "name": "7TVGlobal",
                         "tooltip": "7TVGlobal Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -275,7 +275,7 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -294,7 +294,7 @@
                         "name": "FFZEmote",
                         "tooltip": "FFZEmote Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -313,7 +313,7 @@
                         "name": "FFZGlobal",
                         "tooltip": "FFZGlobal Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

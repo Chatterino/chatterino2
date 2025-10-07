@@ -14,11 +14,6 @@
     "boost-signals2",
     "boost-variant",
     {
-      "name": "qt5compat",
-      "default-features": false,
-      "features": ["textcodec"]
-    },
-    {
       "name": "qtbase",
       "default-features": false,
       "features": [

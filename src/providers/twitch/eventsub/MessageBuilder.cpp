@@ -331,14 +331,15 @@ void makeModerateMessage(
 
     builder.emplaceSystemTextAndUpdate("saying:", text);
 
-    if (action.messageBody.view().length() > 50)
+    auto limit = getSettings()->deletedMessageLengthLimit.getValue();
+    if (limit > 0 && action.messageBody.view().length() > limit)
     {
         builder
-            .emplace<TextElement>(action.messageBody.qt().left(50) + "…",
+            .emplace<TextElement>(action.messageBody.qt().left(limit) + "…",
                                   MessageElementFlag::Text, MessageColor::Text)
             ->setLink({Link::JumpToMessage, action.messageID.qt()});
 
-        text.append(action.messageBody.qt().left(50) + "…");
+        text.append(action.messageBody.qt().left(limit) + "…");
     }
     else
     {

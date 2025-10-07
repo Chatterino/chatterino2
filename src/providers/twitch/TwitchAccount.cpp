@@ -5,6 +5,7 @@
 #include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Emote.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -12,7 +13,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
-#include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"  // IWYU pragma: keep
 

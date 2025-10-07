@@ -122,9 +122,9 @@ I will be using `2.3.4-beta.1` as the example release in this document.
   ```
 - [ ] Notarize the macOS releases
   ```sh
-  xcrun notarytool submit Chatterino-10.15.dmg --wait --keychain-profile notarytool-password --keychain / Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
+  xcrun notarytool submit Chatterino-10.15.dmg --wait --keychain-profile notarytool-password --keychain /Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
   ...
-  xcrun notarytool submit Chatterino.dmg --wait --keychain-profile notarytool-password --keychain / Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
+  xcrun notarytool submit Chatterino.dmg --wait --keychain-profile notarytool-password --keychain /Users/pajlada/Library/Keychains/chatterino-2025.keychain-db
   ...
   ```
 

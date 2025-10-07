@@ -4,7 +4,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/common/ChannelAction.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -45,7 +45,7 @@ public:
         return &this->commands;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -59,7 +59,7 @@ public:
     AccountController accounts;
     CommandController commands;
     mock::MockTwitchIrcServer twitch;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
 };
 
 }  // namespace

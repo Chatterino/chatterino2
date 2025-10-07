@@ -38,7 +38,6 @@ jobs:
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
-            build-appimage: false
             build-deb: true
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
@@ -46,7 +45,6 @@ jobs:
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
-            build-appimage: true
             build-deb: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
@@ -54,7 +52,6 @@ jobs:
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
-            build-appimage: false
             build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
@@ -102,19 +99,6 @@ jobs:
         run: |
           git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
           git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
-
-      - name: Package - AppImage (Ubuntu)
-        if: matrix.build-appimage
-        run: |
-          cd build
-          sh ./../.CI/CreateAppImage.sh
-
-      - name: Upload artifact - AppImage (Ubuntu)
-        if: matrix.build-appimage
-        uses: actions/upload-artifact@v4
-        with:
-          name: Chatterino-x86_64-Qt-${{ matrix.qt-version }}.AppImage
-          path: build/Chatterino-x86_64.AppImage
 
       - name: Package - .deb (Ubuntu)
         if: matrix.build-deb
@@ -165,7 +149,7 @@ jobs:
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: qtimageformats
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
@@ -175,7 +159,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.18
+        uses: hendrikmuhs/ccache-action@v1.2.19
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -350,12 +334,6 @@ jobs:
 
       # Linux
       - uses: actions/download-artifact@v5
-        name: Linux AppImage
-        with:
-          name: Chatterino-x86_64-Qt-6.7.2.AppImage
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v5
         name: Ubuntu 20.04 deb
         with:
           name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
@@ -379,7 +357,7 @@ jobs:
         shell: bash
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -395,7 +373,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.18.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           replacesArtifacts: true
           allowUpdates: true

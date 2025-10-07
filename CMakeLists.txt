@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
-if (POLICY CMP0167)
-    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
-endif ()
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -132,14 +129,18 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
 
 find_package(Qt${MAJOR_QT_VERSION} REQUIRED
-        COMPONENTS
-        Core
-        Widgets
-        Gui
-        Network
-        Svg
-        Concurrent
-)
+    COMPONENTS
+    Core
+    Widgets
+    Gui
+    Network
+    Svg
+    Concurrent
+    )
+if(CHATTERINO_ALLOW_PRIVATE_QT_API)
+    # Only exists since 6.10 and prints a warning regarding private headers
+    find_package(Qt${MAJOR_QT_VERSION} COMPONENTS GuiPrivate)
+endif()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
@@ -148,7 +149,7 @@ if (WIN32)
 endif ()
 
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)

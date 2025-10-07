@@ -3,7 +3,7 @@ freebsd_instance:
 
 task:
   install_script:
-    - pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
+    - pkg install -y boost-libs git libnotify qt6-base qt6-svg qtkeychain-qt6 cmake pkgconf
   script: |
     git submodule init
     git submodule update
