@@ -124,42 +124,44 @@ NotebookTab::NotebookTab(Notebook *notebook)
                               this->notebook_->removePage(this->page);
                           });
 
-    auto *closeMultipleTabsMenu = new QMenu("Close Multiple Tabs", this);
-    this->menu_.addMenu(closeMultipleTabsMenu);
+    this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
+    this->menu_.addMenu(closeMultipleTabsMenu_);
 
-    closeMultipleTabsMenu->addAction("Close All Tabs", [this]() {
+    closeMultipleTabsMenu_->addAction("Close All Tabs", [this]() {
         while (this->notebook_->getPageCount() > 0)
         {
             this->notebook_->removePage(this->notebook_->getPageAt(0));
         }
     });
 
-    closeMultipleTabsMenu->addAction("Close Left", [this]() {
-        while (this->notebook_->getPageAt(0) != this->page)
-        {
-            this->notebook_->removePage(this->notebook_->getPageAt(0));
-        }
-    });
+    this->closeTabsToLeftAction_ =
+        this->closeMultipleTabsMenu_->addAction("Close Left", [this]() {
+            while (this->notebook_->getPageAt(0) != this->page)
+            {
+                this->notebook_->removePage(this->notebook_->getPageAt(0));
+            }
+        });
 
-    closeMultipleTabsMenu->addAction("Close Right", [this]() {
+    this->closeTabsToRightAction_ =
+        this->closeMultipleTabsMenu_->addAction("Close Right", [this]() {
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            {
+                auto *p = this->notebook_->getPageAt(i);
+                if (p != this->page)
+                {
+                    this->notebook_->removePage(p);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        });
+
+    this->closeMultipleTabsMenu_->addAction("Close Other Tabs", [this]() {
         for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
         {
-            QWidget *p = this->notebook_->getPageAt(i);
-            if (p != this->page)
-            {
-                this->notebook_->removePage(p);
-            }
-            else
-            {
-                break;
-            }
-        }
-    });
-
-    closeMultipleTabsMenu->addAction("Close Other Tabs", [this]() {
-        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
-        {
-            QWidget *p = this->notebook_->getPageAt(i);
+            auto *p = this->notebook_->getPageAt(i);
             if (p != this->page)
             {
                 this->notebook_->removePage(p);
@@ -952,6 +954,26 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
             case Qt::RightButton: {
                 this->menu_.popup(event->globalPosition().toPoint() +
                                   QPoint(0, 8));
+
+                this->closeMultipleTabsMenu_->setEnabled(
+                    this->notebook_->getPageCount() > 1);
+
+                int tabIndex = -1;
+                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
+                {
+                    if (this->notebook_->getPageAt(i) == this->page)
+                    {
+                        tabIndex = i;
+                        break;
+                    }
+                }
+
+                if (tabIndex != -1)
+                {
+                    this->closeTabsToLeftAction_->setEnabled(tabIndex > 0);
+                    this->closeTabsToRightAction_->setEnabled(
+                        tabIndex < this->notebook_->getPageCount() - 1);
+                }
             }
             break;
             default:;
