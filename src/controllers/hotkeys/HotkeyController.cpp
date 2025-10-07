@@ -378,6 +378,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Alt+x"), "createClip",
                             std::vector<QString>(), "create clip");
 
+#ifndef Q_OS_MACOS
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Alt+left"), "focus", {"left"},
                             "focus left");
@@ -390,6 +391,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Alt+right"), "focus", {"right"},
                             "focus right");
+#endif
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("PgUp"), "scrollPage", {"up"},
