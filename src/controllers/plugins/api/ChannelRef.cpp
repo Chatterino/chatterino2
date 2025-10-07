@@ -7,6 +7,7 @@
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "util/WeakPtrHelpers.hpp"
 
 #    include <sol/sol.hpp>
 
@@ -157,6 +158,11 @@ QString ChannelRef::to_string()
         return "<c2.Channel expired>";
     }
     return QStringView(u"<c2.Channel %1>").arg(chan->getName());
+}
+
+bool ChannelRef::operator==(const ChannelRef &other) const noexcept
+{
+    return weakOwnerEquals(this->weak, other.weak);
 }
 
 std::optional<ChannelRef> ChannelRef::get_by_name(const QString &name)

@@ -94,7 +94,12 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
         return false;
     }
     QFile infoFile(infojson.absoluteFilePath());
-    infoFile.open(QIODevice::ReadOnly);
+    if (!infoFile.open(QIODevice::ReadOnly))
+    {
+        qCWarning(chatterinoLua)
+            << "Could not open info.json" << infoFile.errorString();
+        return false;
+    }
     auto everything = infoFile.readAll();
     auto doc = QJsonDocument::fromJson(everything);
     if (!doc.isObject())
@@ -236,6 +241,8 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
+    c2["LinkType"] =
+        lua::createEnumTable<lua::api::message::ExposedLinkType>(lua);
 
     c2["json_parse"] = lua::api::jsonParse;
     c2["json_stringify"] = lua::api::jsonStringify;

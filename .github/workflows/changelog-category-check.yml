@@ -14,7 +14,7 @@ jobs:
   changelog-category-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         id: label-checker
         with:
           result-encoding: "string"

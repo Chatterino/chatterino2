@@ -203,7 +203,7 @@ TEST(QMagicEnum, open)
     static_assert(checkConst(OpenOne, u"OpenOne"));
     static_assert(checkConst(OpenTwo, u"OpenTwo"));
     static_assert(checkConst(OpenThree, u"OpenThree"));
-    static_assert(eq(enumName(static_cast<MyOpen>(16)), u""));
+    static_assert(eq(enumName(static_cast<MyOpen>(10)), u""));
     static_assert(checkValues<MyOpen>({u"OpenOne", u"OpenTwo", u"OpenThree"}));
 }
 

@@ -2,7 +2,7 @@
     "input": [
         "msg = {elements={",
         "  { type = 'linebreak' },",
-        "  { type = 'linebreak', flags = c2.MessageElementFlag.BttvEmoteImage },",
+        "  { type = 'linebreak', flags = c2.MessageElementFlag.EmoteImage },",
         "  { type = 'linebreak', tooltip = 't' },",
         "  { type = 'linebreak', trailing_space = false },",
         "}}"
@@ -27,7 +27,7 @@
                 "type": "LinebreakElement"
             },
             {
-                "flags": "BttvEmoteImage",
+                "flags": "EmoteImage",
                 "link": {
                     "type": "None",
                     "value": ""

@@ -5,6 +5,7 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -18,6 +19,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -33,7 +35,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "providers/twitch/UserColor.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -77,11 +78,6 @@ const QRegularExpression mentionRegex("^@" + regexHelpString);
 const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
-
-const QSet<QString> zeroWidthEmotes{
-    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
-    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
-};
 
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
@@ -421,8 +417,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
-    TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -445,31 +440,19 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
         emote = twitchChannel->ffzEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::FfzEmote,
-                false,
-            };
+            return *emote;
         }
 
         emote = twitchChannel->bttvEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::BttvEmote,
-                false,
-            };
+            return *emote;
         }
 
         emote = twitchChannel->seventvEmote(name);
         if (emote)
         {
-            return {
-                emote,
-                MessageElementFlag::SevenTVEmote,
-                emote.value()->zeroWidth,
-            };
+            return *emote;
         }
     }
 
@@ -478,38 +461,22 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
     emote = globalFfzEmotes->emote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::FfzEmote,
-            false,
-        };
+        return *emote;
     }
 
     emote = globalBttvEmotes->emote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::BttvEmote,
-            zeroWidthEmotes.contains(name.string),
-        };
+        return *emote;
     }
 
     emote = globalSeventvEmotes->globalEmote(name);
     if (emote)
     {
-        return {
-            emote,
-            MessageElementFlag::SevenTVEmote,
-            emote.value()->zeroWidth,
-        };
+        return *emote;
     }
 
-    return {
-        {},
-        {},
-        false,
-    };
+    return {};
 }
 
 }  // namespace
@@ -1288,21 +1255,25 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
         ->setLink({Link::UserInfo, originalMessage->loginName});
     builder.emplace<TextElement>("was deleted:", MessageElementFlag::Text,
                                  MessageColor::System);
-    if (originalMessage->messageText.length() > 50)
+
+    auto deletedMessageText = originalMessage->messageText;
+    auto limit = getSettings()->deletedMessageLengthLimit.getValue();
+    if (limit > 0 && deletedMessageText.length() > limit)
     {
-        builder
-            .emplace<TextElement>(originalMessage->messageText.left(50) + "…",
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
+        deletedMessageText = deletedMessageText.left(limit) + "…";
     }
-    else
-    {
-        builder
-            .emplace<TextElement>(originalMessage->messageText,
-                                  MessageElementFlag::Text, MessageColor::Text)
-            ->setLink({Link::JumpToMessage, originalMessage->id});
-    }
+
+    builder
+        .emplace<TextElement>(deletedMessageText, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, originalMessage->id});
     builder.message().timeoutUser = "msg:" + originalMessage->id;
+
+    const auto deletionText =
+        QString("A message from %1 was deleted: %2")
+            .arg(originalMessage->loginName, deletedMessageText);
+    builder.message().messageText = deletionText;
+    builder.message().searchText = deletionText;
 
     return builder.release();
 }
@@ -2240,14 +2211,15 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
+    auto emote = parseEmote(twitchChannel, name);
 
     if (!emote)
     {
         return Failure;
     }
 
-    if (zeroWidth && getSettings()->enableZeroWidthEmotes && !this->isEmpty())
+    if (emote->zeroWidth && getSettings()->enableZeroWidthEmotes &&
+        !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
         auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
@@ -2259,9 +2231,12 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
             auto baseEmoteElement = this->releaseBack();
 
             std::vector<LayeredEmoteElement::Emote> layers = {
-                {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
+                {baseEmote, baseEmoteElement->getFlags()},
+                {emote, MessageElementFlag::Emote},
+            };
             this->emplace<LayeredEmoteElement>(
-                std::move(layers), baseEmoteElement->getFlags() | flags,
+                std::move(layers),
+                baseEmoteElement->getFlags() | MessageElementFlag::Emote,
                 this->textColor_);
             return Success;
         }
@@ -2269,15 +2244,16 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
         auto *asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
         if (asLayered)
         {
-            asLayered->addEmoteLayer({*emote, flags});
-            asLayered->addFlags(flags);
+            asLayered->addEmoteLayer({emote, MessageElementFlag::Emote});
+            asLayered->addFlags(MessageElementFlag::Emote);
             return Success;
         }
 
         // No emote to merge with, just show as regular emote
     }
 
-    this->emplace<EmoteElement>(*emote, flags, this->textColor_);
+    this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+                                this->textColor_);
     return Success;
 }
 
@@ -2306,7 +2282,7 @@ void MessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote,
+                                            MessageElementFlag::Emote,
                                             this->textColor_);
 
                 auto len = currentTwitchEmote.name.string.length();

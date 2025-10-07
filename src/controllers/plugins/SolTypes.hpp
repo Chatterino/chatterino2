@@ -25,6 +25,7 @@ constexpr bool IsOptional<std::optional<T>> = true;
 namespace chatterino {
 
 class Plugin;
+struct Link;
 
 }  // namespace chatterino
 
@@ -60,6 +61,8 @@ private:
     lua_State *state_;
 };
 
+QString errorResultToString(const sol::protected_function_result &result);
+
 /// @brief Attempts to call @a function with @a args
 ///
 /// @a T is expected to be returned.
@@ -79,9 +82,8 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         function(std::forward<Args>(args)...);
     if (!result.valid())
     {
-        sol::error err = result;
         return nonstd::expected_lite::make_unexpected(
-            QString::fromUtf8(err.what()));
+            errorResultToString(result));
     }
 
     if constexpr (std::is_same_v<T, void>)
@@ -187,6 +189,12 @@ void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
 SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
 
 }  // namespace chatterino::lua
+
+namespace chatterino {
+
+SOL_STACK_FUNCTIONS(chatterino::Link)
+
+}  // namespace chatterino
 
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)
