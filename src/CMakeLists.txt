@@ -343,6 +343,8 @@ set(SOURCE_FILES
         providers/bttv/BttvLiveUpdates.cpp
         providers/bttv/BttvLiveUpdates.hpp
 
+        providers/bttv/liveupdates/BttvLiveUpdateClient.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateClient.hpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
         providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
@@ -375,7 +377,6 @@ set(SOURCE_FILES
 
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp
-        providers/liveupdates/BasicPubSubWebsocket.hpp
 
         providers/pronouns/Pronouns.cpp
         providers/pronouns/Pronouns.hpp

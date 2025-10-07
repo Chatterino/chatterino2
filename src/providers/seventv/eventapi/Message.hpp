@@ -28,6 +28,6 @@ std::optional<InnerClass> Message::toInner()
     return InnerClass{this->data};
 }
 
-std::optional<Message> parseBaseMessage(const QString &blob);
+std::optional<Message> parseBaseMessage(const QByteArray &blob);
 
 }  // namespace chatterino::seventv::eventapi
