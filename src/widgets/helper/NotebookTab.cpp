@@ -124,32 +124,45 @@ NotebookTab::NotebookTab(Notebook *notebook)
                               this->notebook_->removePage(this->page);
                           });
 
-    this->menu_.addAction("Close All Tabs", [this]() {
-        if (QMessageBox::question(this, "Close All Tabs",
-                                  "Are you sure you want to close all tabs?",
-                                  QMessageBox::Yes | QMessageBox::No,
-                                  QMessageBox::No) == QMessageBox::Yes)
+    auto *closeMultipleTabsMenu = new QMenu("Close Multiple Tabs", this);
+    this->menu_.addMenu(closeMultipleTabsMenu);
+
+    closeMultipleTabsMenu->addAction("Close All Tabs", [this]() {
+        while (this->notebook_->getPageCount() > 0)
         {
-            while (this->notebook_->getPageCount() > 0)
+            this->notebook_->removePage(this->notebook_->getPageAt(0));
+        }
+    });
+
+    closeMultipleTabsMenu->addAction("Close Left", [this]() {
+        while (this->notebook_->getPageAt(0) != this->page)
+        {
+            this->notebook_->removePage(this->notebook_->getPageAt(0));
+        }
+    });
+
+    closeMultipleTabsMenu->addAction("Close Right", [this]() {
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+        {
+            QWidget *p = this->notebook_->getPageAt(i);
+            if (p != this->page)
             {
-                this->notebook_->removePage(this->notebook_->getPageAt(0));
+                this->notebook_->removePage(p);
+            }
+            else
+            {
+                break;
             }
         }
     });
 
-    this->menu_.addAction("Close Other Tabs", [this]() {
-        if (QMessageBox::question(this, "Close Other Tabs",
-                                  "Are you sure you want to close the other tabs?",
-                                  QMessageBox::Yes | QMessageBox::No,
-                                  QMessageBox::No) == QMessageBox::Yes)
+    closeMultipleTabsMenu->addAction("Close Other Tabs", [this]() {
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
         {
-            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            QWidget *p = this->notebook_->getPageAt(i);
+            if (p != this->page)
             {
-                QWidget *p = this->notebook_->getPageAt(i);
-                if (p != this->page)
-                {
-                    this->notebook_->removePage(p);
-                }
+                this->notebook_->removePage(p);
             }
         }
     });
