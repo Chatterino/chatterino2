@@ -102,6 +102,7 @@ enum class ExposedLinkType : std::uint8_t {
     JumpToChannel = Link::Type::JumpToChannel,
     CopyToClipboard = Link::Type::CopyToClipboard,
     JumpToMessage = Link::Type::JumpToMessage,
+    InsertText = Link::Type::InsertText,
 };
 
 /**

@@ -354,6 +354,7 @@ c2.LinkType = {
     JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
     CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
     JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
+    InsertText = {}, ---@type c2.LinkType.InsertText
 }
 
 -- Begin src/singletons/Fonts.hpp

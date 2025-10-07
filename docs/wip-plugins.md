@@ -621,6 +621,7 @@ This table describes links available to plugins.
 | `JumpToChannel`   | [Channel name](#channelget_name)   | Go to already open split with given channel                                          | `#pajlada`                            |
 | `CopyToClipboard` | Any Unicode text                   | Copy value to clipboard                                                              | n/a                                   |
 | `JumpToMessage`   | ID of the message                  | Highlight the message with given ID in current split, do nothing if it was not found | n/a                                   |
+| `InsertText`      | Any text, command or emote         | Insert text into split input                                                         | n/a                                   |
 
 ### Input/Output API
 
