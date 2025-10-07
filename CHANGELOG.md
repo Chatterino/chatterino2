@@ -23,6 +23,7 @@
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: Fixed compilation warnings on clang-cl. (#6528)
 
 ## 2.5.4
 

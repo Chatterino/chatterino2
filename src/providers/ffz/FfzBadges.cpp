@@ -66,17 +66,21 @@ void FfzBadges::load()
                                jsonBadge["height"].toInt(18));
 
                 auto emote = Emote{
-                    EmoteName{},
-                    ImageSet{Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("1").toString()),
-                                 1.0, baseSize),
-                             Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("2").toString()),
-                                 0.5, baseSize * 2),
-                             Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("4").toString()),
-                                 0.25, baseSize * 4)},
-                    Tooltip{jsonBadge.value("title").toString()}, Url{}};
+                    .name = EmoteName{},
+                    .images =
+                        ImageSet{
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("1").toString()),
+                                1.0, baseSize),
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("2").toString()),
+                                0.5, baseSize * 2),
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("4").toString()),
+                                0.25, baseSize * 4)},
+                    .tooltip = Tooltip{jsonBadge.value("title").toString()},
+                    .homePage = Url{},
+                };
 
                 Badge badge;
 

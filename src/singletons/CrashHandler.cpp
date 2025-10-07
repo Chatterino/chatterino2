@@ -36,12 +36,12 @@ const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad-handler.exe");
 
 /// Converts a QString into the platform string representation.
 #if defined(Q_OS_UNIX)
-std::string nativeString(const QString &s)
+[[maybe_unused]] std::string nativeString(const QString &s)
 {
     return s.toStdString();
 }
 #elif defined(Q_OS_WINDOWS)
-std::wstring nativeString(const QString &s)
+[[maybe_unused]] std::wstring nativeString(const QString &s)
 {
     return s.toStdWString();
 }
@@ -82,7 +82,8 @@ std::optional<bool> readRecoverySettings(const Paths &paths)
     return shouldRecover.toBool();
 }
 
-bool canRestart(const Paths &paths, const Args &args)
+[[maybe_unused]] bool canRestart(const Paths &paths,
+                                 [[maybe_unused]] const Args &args)
 {
 #ifdef NDEBUG
     if (args.isFramelessEmbed || args.shouldRunBrowserExtensionHost)
@@ -108,7 +109,7 @@ bool canRestart(const Paths &paths, const Args &args)
 /// additional plus ('++' -> '+').
 ///
 /// The decoding happens in crash-handler/src/CommandLine.cpp
-std::string encodeArguments(const Args &appArgs)
+[[maybe_unused]] std::string encodeArguments(const Args &appArgs)
 {
     std::string args;
     for (auto arg : appArgs.currentArguments())

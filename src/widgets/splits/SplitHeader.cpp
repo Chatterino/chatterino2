@@ -353,7 +353,6 @@ void SplitHeader::initializeLayout()
     QObject::connect(
         this->moderationButton_, &Button::clicked, this,
         [this](Qt::MouseButton button) mutable {
-            auto *w = this->moderationButton_;
             switch (button)
             {
                 case Qt::LeftButton:
@@ -377,6 +376,9 @@ void SplitHeader::initializeLayout()
                 case Qt::MiddleButton:
                     getApp()->getWindows()->showSettingsDialog(
                         this, SettingsDialogPreference::ModerationActions);
+                    break;
+
+                default:
                     break;
             }
         });

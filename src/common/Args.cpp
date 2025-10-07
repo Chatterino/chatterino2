@@ -306,7 +306,10 @@ void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
 
             // Set first tab as selected
             tab.selected_ = window.tabs_.empty();
-            tab.rootNode_ = SplitNodeDescriptor{{"twitch", channelName}};
+            tab.rootNode_ = SplitNodeDescriptor{{
+                .type_ = "twitch",
+                .channelName_ = channelName,
+            }};
 
             window.tabs_.emplace_back(std::move(tab));
         }
