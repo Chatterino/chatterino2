@@ -56,25 +56,26 @@ int getUsernameBoldness()
 #endif
 }
 
-float fontSize(FontStyle style, QFont const &base)
+float fontSize(FontStyle style)
 {
-    auto chatSize = static_cast<float>(base.pointSize());
-
+    auto chatSize = [] {
+        return static_cast<float>(getSettings()->chatFontSize);
+    };
     switch (style)
     {
         case FontStyle::ChatSmall:
-            return 0.6F * chatSize;
+            return 0.6F * chatSize();
         case FontStyle::ChatMediumSmall:
-            return 0.8F * chatSize;
+            return 0.8F * chatSize();
         case FontStyle::ChatMedium:
         case FontStyle::ChatMediumBold:
         case FontStyle::ChatMediumItalic:
         case FontStyle::TimestampMedium:
-            return chatSize;
+            return chatSize();
         case FontStyle::ChatLarge:
-            return 1.2F * chatSize;
+            return 1.2F * chatSize();
         case FontStyle::ChatVeryLarge:
-            return 1.4F * chatSize;
+            return 1.4F * chatSize();
 
         case FontStyle::Tiny:
             return 8;
@@ -89,7 +90,7 @@ float fontSize(FontStyle style, QFont const &base)
     return 9;
 }
 
-int fontWeight(FontStyle style, QFont const &base)
+int fontWeight(FontStyle style)
 {
     switch (style)
     {
@@ -100,7 +101,7 @@ int fontWeight(FontStyle style, QFont const &base)
         case FontStyle::ChatLarge:
         case FontStyle::ChatVeryLarge:
         case FontStyle::TimestampMedium:
-            return base.weight();
+            return getSettings()->chatFontWeight.getValue();
 
         case FontStyle::ChatMediumBold:
             return getUsernameBoldness();
@@ -145,14 +146,8 @@ bool isItalic(FontStyle style)
     return false;
 }
 
-QString fontFamily(FontStyle style, QFont const &base)
+QString fontFamily(FontStyle style)
 {
-    static const QString defaultFamily = []() {
-        QFont font;
-        font.fromString(DEFAULT_FONT);
-        return font.family();
-    }();
-
     switch (style)
     {
         case FontStyle::Tiny:
@@ -166,17 +161,17 @@ QString fontFamily(FontStyle style, QFont const &base)
         case FontStyle::ChatLarge:
         case FontStyle::ChatVeryLarge:
         case FontStyle::TimestampMedium:
-            return base.family();
+            return getSettings()->chatFontFamily.getValue();
 
         case FontStyle::UiMedium:
         case FontStyle::UiMediumBold:
         case FontStyle::UiTabs:
         case FontStyle::EndType:
-            return defaultFamily;
+            return QStringLiteral(DEFAULT_FONT_FAMILY);
     }
 
     assert(false);
-    return defaultFamily;
+    return QStringLiteral(DEFAULT_FONT_FAMILY);
 }
 
 }  // namespace
@@ -196,7 +191,9 @@ Fonts::Fonts(Settings &settings)
         }
         this->fontChanged.invoke();
     });
-    this->fontChangedListener.addSetting(settings.chatFont);
+    this->fontChangedListener.addSetting(settings.chatFontFamily);
+    this->fontChangedListener.addSetting(settings.chatFontSize);
+    this->fontChangedListener.addSetting(settings.chatFontWeight);
     this->fontChangedListener.addSetting(settings.boldScale);
 }
 
@@ -228,23 +225,18 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
     }
 
     // emplace new element
-    QFont base;
-    base.fromString(getSettings()->chatFont);
-
-    auto result =
-        map.emplace(scale, Fonts::createFontData(type, scale, base));
+    auto result = map.emplace(scale, Fonts::createFontData(type, scale));
     assert(result.second);
 
     return result.first->second;
 }
 
-Fonts::FontData Fonts::createFontData(FontStyle type, float scale,
-                                      QFont const &base)
+Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
     QFont font{
-        fontFamily(type, base),
-        static_cast<int>(fontSize(type, base) * scale),
-        fontWeight(type, base),
+        fontFamily(type),
+        static_cast<int>(fontSize(type) * scale),
+        fontWeight(type),
         isItalic(type),
     };
 

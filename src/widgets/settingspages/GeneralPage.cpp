@@ -81,7 +81,9 @@ public:
 
             if (ok)
             {
-                getSettings()->chatFont = font.toString();
+                getSettings()->chatFontFamily = font.family();
+                getSettings()->chatFontSize = font.pointSize();
+                getSettings()->chatFontWeight = font.weight();
             }
         });
 
@@ -95,7 +97,11 @@ public:
         layout->addWidget(button);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        listener.addSetting(getSettings()->chatFont);
+        auto *settings = getSettings();
+
+        listener.addSetting(settings->chatFontFamily);
+        listener.addSetting(settings->chatFontSize);
+        listener.addSetting(settings->chatFontWeight);
         listener.setCB([this] {
             this->updateCurrentLabel();
         });
