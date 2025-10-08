@@ -48,6 +48,69 @@ const QStringList ZOOM_LEVELS = {
     "1.6x", "1.8x", "2x",   "2.33x", "2.66x", "3x",      "3.5x", "4x",
 };
 
+class FontSettingWidget : public QWidget
+{
+    QLabel *currentLabel;
+    pajlada::SettingListener listener;
+
+private:
+    void updateCurrentLabel()
+    {
+        QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
+        auto family = font.family();
+        auto ptSize = QString::number(font.pointSize());
+        currentLabel->setText(family + ", " + ptSize + "pt");
+    }
+
+public:
+    FontSettingWidget(QWidget *parent = nullptr)
+        : QWidget(parent)
+        , currentLabel(new QLabel)
+    {
+        auto *button = new QPushButton;
+
+        button->setIcon(QIcon(":/buttons/edit.svg"));
+        button->setMaximumWidth(21);
+        button->setMaximumHeight(22);
+
+        QObject::connect(button, &QPushButton::clicked, this, [this]() {
+            bool ok = false;
+            QFont prev =
+                getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
+            QFont font = QFontDialog::getFont(&ok, prev, this);
+
+            if (ok)
+            {
+                getSettings()->chatFontFamily = font.family();
+                getSettings()->chatFontSize = font.pointSize();
+                getSettings()->chatFontWeight = font.weight();
+            }
+        });
+
+        auto *layout = new QHBoxLayout;
+
+        auto *label = new QLabel("Font:");
+
+        layout->addWidget(label);
+        layout->addStretch(1);
+        layout->addWidget(currentLabel);
+        layout->addWidget(button);
+        layout->setContentsMargins(0, 0, 0, 0);
+
+        auto *settings = getSettings();
+
+        listener.addSetting(settings->chatFontFamily);
+        listener.addSetting(settings->chatFontSize);
+        listener.addSetting(settings->chatFontWeight);
+        listener.setCB([this] {
+            this->updateCurrentLabel();
+        });
+
+        this->updateCurrentLabel();
+        this->setLayout(layout);
+    }
+};
+
 void addKeyboardModifierSetting(GeneralPageView &layout, const QString &title,
                                 EnumSetting<Qt::KeyboardModifier> &setting)
 {
@@ -153,34 +216,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     }
 
-    layout.addDropdown<QString>(
-        "Font", {"Segoe UI", "Arial", "Choose..."}, s.chatFontFamily,
-        [](auto val) {
-            return val;
-        },
-        [this](auto args) {
-            return this->getFont(args);
-        },
-        true, "", true);
-    layout.addDropdown<int>(
-        "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        s.chatFontSize,
-        [](auto val) {
-            return QString::number(val) + "pt";
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 10);
-        });
-    layout.addDropdown<int>(
-        "Font weight",
-        {"100", "200", "300", "400", "500", "600", "700", "800", "900"},
-        s.chatFontWeight,
-        [](auto val) {
-            return QString::number(val);
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 400);
-        });
     layout.addDropdown<float>(
         "Zoom", ZOOM_LEVELS, s.uiScale,
         [](auto val) {
@@ -262,6 +297,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+
+    layout.addWidget(new FontSettingWidget, {"font"});
 
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
@@ -1539,27 +1576,6 @@ void GeneralPage::initExtra()
                 cachePath->setToolTip(newPath);
             });
     }
-}
-
-QString GeneralPage::getFont(const DropdownArgs &args) const
-{
-    if (args.combobox->currentIndex() == args.combobox->count() - 1)
-    {
-        args.combobox->setEditText("Choosing...");
-
-        auto ok = bool();
-        auto previousFont =
-            getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.);
-        auto font = QFontDialog::getFont(&ok, previousFont, this->window());
-
-        if (ok)
-        {
-            return font.family();
-        }
-
-        return previousFont.family();
-    }
-    return args.value;
 }
 
 }  // namespace chatterino
