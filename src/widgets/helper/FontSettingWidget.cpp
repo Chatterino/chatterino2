@@ -5,8 +5,8 @@
 #include "singletons/Settings.hpp"
 
 #include <QFontDialog>
-#include <QPushButton>
 #include <QHBoxLayout>
+#include <QPushButton>
 
 namespace chatterino {
 
