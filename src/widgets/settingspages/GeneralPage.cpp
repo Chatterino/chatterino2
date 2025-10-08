@@ -19,6 +19,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
+#include "widgets/helper/FontSettingWidget.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -46,63 +47,6 @@ const QString META_KEY = u"Meta"_s;
 const QStringList ZOOM_LEVELS = {
     "0.5x", "0.6x", "0.7x", "0.8x",  "0.9x",  "Default", "1.2x", "1.4x",
     "1.6x", "1.8x", "2x",   "2.33x", "2.66x", "3x",      "3.5x", "4x",
-};
-
-class FontSettingWidget : public QWidget
-{
-    QLabel *currentLabel;
-    pajlada::SettingListener listener;
-
-private:
-    void updateCurrentLabel()
-    {
-        QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
-        auto family = font.family();
-        auto ptSize = QString::number(font.pointSize());
-        this->currentLabel->setText(family + ", " + ptSize + "pt");
-    }
-
-public:
-    FontSettingWidget(QWidget *parent = nullptr)
-        : QWidget(parent)
-        , currentLabel(new QLabel)
-    {
-        auto *button = new QPushButton;
-
-        button->setIcon(QIcon(":/buttons/edit.svg"));
-
-        QObject::connect(button, &QPushButton::clicked, this, [this]() {
-            bool ok = false;
-            QFont prev =
-                getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
-            QFont font = QFontDialog::getFont(&ok, prev, this);
-
-            if (ok)
-            {
-                getSettings()->chatFontFamily = font.family();
-                getSettings()->chatFontSize = font.pointSize();
-                getSettings()->chatFontWeight = font.weight();
-            }
-        });
-
-        auto *layout = new QHBoxLayout;
-
-        layout->addWidget(new QLabel("Font:"));
-        layout->addStretch(1);
-        layout->addWidget(this->currentLabel);
-        layout->addWidget(button);
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        this->listener.addSetting(getSettings()->chatFontFamily);
-        this->listener.addSetting(getSettings()->chatFontSize);
-        this->listener.addSetting(getSettings()->chatFontWeight);
-        this->listener.setCB([this] {
-            this->updateCurrentLabel();
-        });
-
-        this->updateCurrentLabel();
-        this->setLayout(layout);
-    }
 };
 
 void addKeyboardModifierSetting(GeneralPageView &layout, const QString &title,
