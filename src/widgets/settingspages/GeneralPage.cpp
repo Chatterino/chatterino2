@@ -70,8 +70,6 @@ public:
         auto *button = new QPushButton;
 
         button->setIcon(QIcon(":/buttons/edit.svg"));
-        button->setMaximumWidth(21);
-        button->setMaximumHeight(22);
 
         QObject::connect(button, &QPushButton::clicked, this, [this]() {
             bool ok = false;
