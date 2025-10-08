@@ -113,7 +113,7 @@ runtime.
 ## LuaLS type definitions
 
 Type definitions for LuaLS are available in
-[the `/plugin-meta.lua` file](./plugin-meta.lua). These are generated from [the C++
+[the `/lua-meta` directory](./lua-meta). These are generated from [the C++
 headers](../src/controllers/plugins/LuaAPI.hpp) of Chatterino using [a
 script](../scripts/make_luals_meta.py).
 
@@ -607,7 +607,7 @@ c2.register_command("/testing", function(ctx)
 end)
 ```
 
-The full range of options can be found in the typing files ([LuaLS](./plugin-meta.lua), [TypeScript](./chatterino.d.ts)).
+The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
 
 #### `LinkType` enum
 
