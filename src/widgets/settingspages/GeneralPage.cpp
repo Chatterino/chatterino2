@@ -17,9 +17,9 @@
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
-#include "widgets/helper/FontSettingWidget.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>

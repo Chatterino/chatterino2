@@ -1,4 +1,5 @@
 #include "widgets/helper/FontSettingWidget.hpp"
+
 #include "Application.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
