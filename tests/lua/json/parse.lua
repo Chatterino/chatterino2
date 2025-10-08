@@ -1,3 +1,5 @@
+local JSON = require('json')
+
 local function compare_v(lhs, rhs)
     if type(lhs) == "table" then
         if type(rhs) ~= "table" then
@@ -28,7 +30,7 @@ local function compare_v(lhs, rhs)
 end
 
 local function check_err(...)
-    local ok = pcall(c2.json_parse, ...)
+    local ok = pcall(JSON.parse, ...)
     local arg0 = ...
     if arg0 == nil then
         arg0 = "(nil)"
@@ -40,7 +42,7 @@ end
 ---@param expected any
 ---@vararg {allow_comments?: boolean, allow_trailing_commas?: boolean}|any
 local function check_ok(input, expected, ...)
-    local parsed = c2.json_parse(input, ...)
+    local parsed = JSON.parse(input, ...)
     assert(compare_v(parsed, expected), "parsing '" .. input .. "' didn't yield the expected value")
 end
 
@@ -213,13 +215,13 @@ check_ok([[
 
 -- limits
 local big = string.rep('[', 256) .. string.rep(']', 256)
-c2.json_parse(big)
+JSON.parse(big)
 
 local too_big = string.rep('[', 257) .. string.rep(']', 257)
 check_err(too_big)
 
 big = string.rep('{"x":', 256) .. "1" .. string.rep('}', 256)
-c2.json_parse(big)
+JSON.parse(big)
 
 too_big = string.rep('{"x":', 257) .. "1" .. string.rep('}', 257)
 check_err(too_big)

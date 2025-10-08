@@ -5,7 +5,7 @@
 
 namespace chatterino::lua::api {
 
-int jsonStringify(lua_State *L);
+sol::object loadJson(sol::state_view lua);
 
 }  // namespace chatterino::lua::api
 

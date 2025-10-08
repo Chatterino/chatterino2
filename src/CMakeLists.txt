@@ -252,6 +252,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/JSON.cpp
+        controllers/plugins/api/JSON.hpp
         controllers/plugins/api/JSONParse.cpp
         controllers/plugins/api/JSONParse.hpp
         controllers/plugins/api/JSONStringify.cpp

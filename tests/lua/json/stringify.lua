@@ -1,5 +1,7 @@
+local JSON = require('json')
+
 local function check_err(...)
-    local ok = pcall(c2.json_stringify, ...)
+    local ok = pcall(JSON.stringify, ...)
     assert(not ok, "expected an error")
 end
 
@@ -7,7 +9,7 @@ end
 ---@param expected string|string[]
 ---@vararg { pretty: boolean, indent_char: string, indent_size: number }|any
 local function check_ok(input, expected, ...)
-    local got = c2.json_stringify(input, ...)
+    local got = JSON.stringify(input, ...)
     if type(expected) == "string" then
         assert(got == expected, "Failed:\n\texpected: " .. expected .. "\n\tgot: " .. got .. "\n")
     else
@@ -22,11 +24,11 @@ local function check_ok(input, expected, ...)
     end
 end
 
-assert(type(c2.json_null) == "userdata")
+assert(type(JSON.null) == "userdata")
 
 -- empty
 check_ok({}, "{}")
-check_ok({ [0] = c2.json_null }, '[]')
+check_ok({ [0] = JSON.null }, '[]')
 
 -- scalars
 check_ok(1, "1")
@@ -35,13 +37,13 @@ check_ok("foo\n", '"foo\\n"')
 check_ok(true, "true")
 check_ok(false, "false")
 check_ok(nil, "null")
-check_ok(c2.json_null, "null")
+check_ok(JSON.null, "null")
 check_ok(1.23, "1.23")
 
 -- arrays
 check_ok({ 1, 2 }, "[1,2]")
 check_ok({ 1, 2, nil }, "[1,2]")
-check_ok({ 1, 2, c2.json_null }, "[1,2,null]")
+check_ok({ 1, 2, JSON.null }, "[1,2,null]")
 check_ok({ 1, nil, 2 }, "[1,null,2]")
 check_ok({ 1, [10] = 2 }, "[1,null,null,null,null,null,null,null,null,2]")
 check_ok({ [10 / 2] = 1 }, '[null,null,null,null,1]')
@@ -56,7 +58,7 @@ check_ok({ ok = { baz = "str", [""] = { 1, 2 } } }, {
 check_ok({ ok = { 1, 2 } }, '{"ok":[1,2]}')
 check_ok({ ['\n\tlol'] = { 1, 2 } }, '{"\\n\\tlol":[1,2]}')
 check_ok({ foo = nil }, '{}')
-check_ok({ foo = c2.json_null }, '{"foo":null}')
+check_ok({ foo = JSON.null }, '{"foo":null}')
 
 local meta_haver = {}
 local my_meta = {
@@ -103,7 +105,7 @@ check_err({ 1, 2, bar = "lol" })
 check_err({ [-1] = 3 })
 check_err({ [0] = 3 })
 check_err({ [0] = "42" })
-check_err({ [-1] = c2.json_null })
+check_err({ [-1] = JSON.null })
 check_err({ [1.1] = 3 })
 check_err()
 local recurse = {}

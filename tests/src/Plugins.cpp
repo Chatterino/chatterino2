@@ -152,7 +152,7 @@ public:
 
     static void openLibrariesFor(Plugin *plugin)
     {
-        return PluginController::openLibrariesFor(plugin);
+        getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
     static std::map<QString, std::unique_ptr<Plugin>> &plugins()
