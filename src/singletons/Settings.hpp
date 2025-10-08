@@ -38,10 +38,12 @@ class Args;
 // format: https://doc.qt.io/qt-6/qfont.html#toString
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT "Segoe UI,10"
-#elif Q_OS_MACOS
-#    define DEFAULT_FONT "Helvetica Neue,12"
 #else
-#    define DEFAULT_FONT "Arial,11"
+#    ifdef Q_OS_MACOS
+#        define DEFAULT_FONT "Helvetica Neue,12"
+#    else
+#        define DEFAULT_FONT "Arial,11"
+#    endif
 #endif
 
 void _actuallyRegisterSetting(
