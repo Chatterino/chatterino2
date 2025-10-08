@@ -35,17 +35,13 @@ namespace chatterino {
 
 class Args;
 
+// format: https://doc.qt.io/qt-6/qfont.html#toString
 #ifdef Q_OS_WIN32
-#    define DEFAULT_FONT_FAMILY "Segoe UI"
-#    define DEFAULT_FONT_SIZE 10
+#    define DEFAULT_FONT "Segoe UI,10"
+#elif Q_OS_MACOS
+#    define DEFAULT_FONT "Helvetica Neue,12"
 #else
-#    ifdef Q_OS_MACOS
-#        define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#        define DEFAULT_FONT_SIZE 12
-#    else
-#        define DEFAULT_FONT_FAMILY "Arial"
-#        define DEFAULT_FONT_SIZE 11
-#    endif
+#    define DEFAULT_FONT "Arial,11"
 #endif
 
 void _actuallyRegisterSetting(
@@ -189,17 +185,9 @@ public:
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
-    QStringSetting chatFontFamily{
-        "/appearance/currentFontFamily",
-        DEFAULT_FONT_FAMILY,
-    };
-    IntSetting chatFontSize{
-        "/appearance/currentFontSize",
-        DEFAULT_FONT_SIZE,
-    };
-    IntSetting chatFontWeight = {
-        "/appearance/currentFontWeight",
-        QFont::Normal,
+    QStringSetting chatFont{
+        "/appearance/chatFont",
+        DEFAULT_FONT,
     };
     BoolSetting hideReplyContext = {"/appearance/hideReplyContext", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};

@@ -76,7 +76,7 @@ private:
     };
 
     FontData &getOrCreateFontData(FontStyle type, float scale);
-    static FontData createFontData(FontStyle type, float scale);
+    static FontData createFontData(FontStyle type, float scale, QFont const &baseFont);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;
 
