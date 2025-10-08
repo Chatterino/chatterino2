@@ -124,6 +124,51 @@ NotebookTab::NotebookTab(Notebook *notebook)
                               this->notebook_->removePage(this->page);
                           });
 
+    this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
+    this->menu_.addMenu(closeMultipleTabsMenu_);
+
+    closeMultipleTabsMenu_->addAction("Close All Tabs", [this]() {
+        while (this->notebook_->getPageCount() > 0)
+        {
+            this->notebook_->removePage(this->notebook_->getPageAt(0));
+        }
+    });
+
+    this->closeTabsToLeftAction_ =
+        this->closeMultipleTabsMenu_->addAction("Close Left", [this]() {
+            while (this->notebook_->getPageAt(0) != this->page)
+            {
+                this->notebook_->removePage(this->notebook_->getPageAt(0));
+            }
+        });
+
+    this->closeTabsToRightAction_ =
+        this->closeMultipleTabsMenu_->addAction("Close Right", [this]() {
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            {
+                auto *p = this->notebook_->getPageAt(i);
+                if (p != this->page)
+                {
+                    this->notebook_->removePage(p);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        });
+
+    this->closeMultipleTabsMenu_->addAction("Close Other Tabs", [this]() {
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+        {
+            auto *p = this->notebook_->getPageAt(i);
+            if (p != this->page)
+            {
+                this->notebook_->removePage(p);
+            }
+        }
+    });
+
     this->menu_.addAction(
         "Popup Tab",
         getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
@@ -909,6 +954,16 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
             case Qt::RightButton: {
                 this->menu_.popup(event->globalPosition().toPoint() +
                                   QPoint(0, 8));
+
+                this->closeMultipleTabsMenu_->setEnabled(
+                    this->notebook_->getPageCount() > 1);
+
+                const int tabIndex =
+                    this->notebook_->visibleIndexOf(this->page);
+
+                this->closeTabsToLeftAction_->setEnabled(tabIndex > 0);
+                this->closeTabsToRightAction_->setEnabled(
+                    tabIndex < this->notebook_->getPageCount() - 1);
             }
             break;
             default:;
