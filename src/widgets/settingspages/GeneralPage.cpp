@@ -95,9 +95,7 @@ public:
         layout->addWidget(button);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        auto *settings = getSettings();
-
-        listener.addSetting(settings->chatFont);
+        listener.addSetting(getSettings()->chatFont);
         listener.setCB([this] {
             this->updateCurrentLabel();
         });
