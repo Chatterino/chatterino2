@@ -59,7 +59,7 @@ private:
         QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
         auto family = font.family();
         auto ptSize = QString::number(font.pointSize());
-        currentLabel->setText(family + ", " + ptSize + "pt");
+        this->currentLabel->setText(family + ", " + ptSize + "pt");
     }
 
 public:
@@ -87,20 +87,16 @@ public:
 
         auto *layout = new QHBoxLayout;
 
-        auto *label = new QLabel("Font:");
-
-        layout->addWidget(label);
+        layout->addWidget(new QLabel("Font:"));
         layout->addStretch(1);
-        layout->addWidget(currentLabel);
+        layout->addWidget(this->currentLabel);
         layout->addWidget(button);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        auto *settings = getSettings();
-
-        listener.addSetting(settings->chatFontFamily);
-        listener.addSetting(settings->chatFontSize);
-        listener.addSetting(settings->chatFontWeight);
-        listener.setCB([this] {
+        this->listener.addSetting(getSettings()->chatFontFamily);
+        this->listener.addSetting(getSettings()->chatFontSize);
+        this->listener.addSetting(getSettings()->chatFontWeight);
+        this->listener.setCB([this] {
             this->updateCurrentLabel();
         });
 
