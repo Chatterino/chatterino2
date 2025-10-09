@@ -6,13 +6,18 @@
 
 #include <QDebug>
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QFontDatabase>
 #include <QHBoxLayout>
+#include <QLineEdit>
 #include <QListWidget>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
 #include <QStringListModel>
+#include <QTextCharFormat>
+#include <QTextCursor>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 namespace chatterino {
