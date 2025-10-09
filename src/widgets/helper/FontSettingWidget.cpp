@@ -233,7 +233,23 @@ class FontWeightWidget : public QWidget
     Q_OBJECT
 
     QListWidget *list = new QListWidget;
-    int currentWeight = 0;
+
+    void setListTo(int weight)
+    {
+        int n = this->list->count();
+        int i = 0;
+        for (; i < n; ++i)
+        {
+            auto *item = dynamic_cast<IntItem *>(this->list->item(i));
+            assert(item);
+
+            if (item->getValue() == weight)
+            {
+                this->list->setCurrentItem(item);
+                return;
+            }
+        }
+    }
 
 public:
     FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
@@ -250,19 +266,12 @@ public:
 
         QObject::connect(
             list, &QListWidget::currentRowChanged, this, [this](int row) {
-                if (row < 0)
-                {
-                    return;
-                }
-
-                auto *cast = dynamic_cast<IntItem *>(this->list->item(row));
-                assert(cast);
-                this->currentWeight = cast->getValue();
-
+                assert(row >= 0);
                 Q_EMIT this->selectedChanged();
             });
 
         this->setFamily(initialFont.family());
+        this->setListTo(initialFont.weight());
     }
 
     void setFamily(QString const &family)
@@ -292,7 +301,9 @@ public:
 
     int getSelected() const
     {
-        return this->currentWeight;
+        auto *cast = dynamic_cast<IntItem *>(this->list->currentItem());
+        assert(cast);
+        return cast ? cast->getValue() : 0;
     }
 
 Q_SIGNALS:
