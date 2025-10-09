@@ -258,8 +258,10 @@ public:
 
         QObject::connect(list, &QListWidget::currentRowChanged, this,
                          [this](int row) {
-                             assert(row >= 0);
-                             Q_EMIT this->selectedChanged();
+                             if (row > 0)
+                             {
+                                 Q_EMIT this->selectedChanged();
+                             }
                          });
 
         this->setFamily(initialFont.family());
