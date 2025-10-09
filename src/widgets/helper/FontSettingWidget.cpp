@@ -335,17 +335,17 @@ public:
 
         this->setWindowTitle("Pick Font");
         this->setLayout(layout);
-        this->resize(400, 200);
+        this->resize(450, 450);
         this->sampleBox->setAcceptRichText(false);
         this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
 
-        layout->addLayout(choiceLayout, 2);
+        layout->addLayout(choiceLayout, 5);
         layout->addWidget(new QLabel("Sample"));
         layout->addWidget(this->sampleBox, 1);
         layout->addWidget(buttons);
 
-        choiceLayout->addWidget(this->fontFamiliesW, 3);
-        choiceLayout->addLayout(choiceSideLayout, 1);
+        choiceLayout->addWidget(this->fontFamiliesW, 5);
+        choiceLayout->addLayout(choiceSideLayout, 3);
 
         choiceSideLayout->addWidget(this->fontSizeW);
         choiceSideLayout->addWidget(this->fontWeightW);
