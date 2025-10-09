@@ -228,7 +228,7 @@ Q_SIGNALS:
     void selectedChanged();
 };
 
-class FontStylesWidget : public QWidget
+class FontWeightWidget : public QWidget
 {
     Q_OBJECT
 
@@ -236,7 +236,7 @@ class FontStylesWidget : public QWidget
     int currentWeight = 0;
 
 public:
-    FontStylesWidget(QFont const &initialFont, QWidget *parent = nullptr)
+    FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
     {
         auto *layout = new QVBoxLayout;
@@ -307,7 +307,7 @@ class FontDialog : public QDialog
 
     FontFamiliesWidget *fontFamiliesW;
     FontSizeWidget *fontSizeW;
-    FontStylesWidget *fontWeightW;
+    FontWeightWidget *fontWeightW;
 
     void updateSampleFont()
     {
@@ -324,7 +324,7 @@ public:
         : QDialog(parent)
         , fontFamiliesW(new FontFamiliesWidget(initialFont))
         , fontSizeW(new FontSizeWidget(initialFont))
-        , fontWeightW(new FontStylesWidget(initialFont))
+        , fontWeightW(new FontWeightWidget(initialFont))
     {
         auto *layout = new QVBoxLayout;
         auto *choiceLayout = new QHBoxLayout;
@@ -366,7 +366,7 @@ public:
                              this->updateSampleFont();
                          });
 
-        QObject::connect(this->fontWeightW, &FontStylesWidget::selectedChanged,
+        QObject::connect(this->fontWeightW, &FontWeightWidget::selectedChanged,
                          this, [this]() {
                              this->updateSampleFont();
                          });
