@@ -256,11 +256,11 @@ public:
         layout->addWidget(list);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        QObject::connect(
-            list, &QListWidget::currentRowChanged, this, [this](int row) {
-                assert(row >= 0);
-                Q_EMIT this->selectedChanged();
-            });
+        QObject::connect(list, &QListWidget::currentRowChanged, this,
+                         [this](int row) {
+                             assert(row >= 0);
+                             Q_EMIT this->selectedChanged();
+                         });
 
         this->setFamily(initialFont.family());
 
