@@ -133,13 +133,8 @@ public:
     int getSelected() const
     {
         auto *item = dynamic_cast<IntItem *>(this->list->currentItem());
-
-        if (!item)
-        {
-            return -1;
-        }
-
-        return item->getValue();
+        assert(item);  // is item now never null?
+        return item ? item->getValue() : -1;
     }
 
 Q_SIGNALS:
@@ -165,6 +160,12 @@ public:
 
         this->setLayout(layout);
 
+        this->list->setModel(this->proxy);
+        this->list->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+        this->proxy->setSourceModel(this->model);
+        this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
         layout->addLayout(header);
         layout->addWidget(this->list);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -174,12 +175,6 @@ public:
         header->setContentsMargins(0, 0, 0, 0);
 
         search->setPlaceholderText("Search...");
-
-        this->list->setModel(this->proxy);
-        this->list->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        this->proxy->setSourceModel(this->model);
-        this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
         QObject::connect(search, &QLineEdit::textChanged, this->proxy,
                          &QSortFilterProxyModel::setFilterFixedString);
@@ -243,11 +238,12 @@ public:
     {
         auto *layout = new QVBoxLayout;
 
+        this->setLayout(layout);
+        this->list->setSortingEnabled(true);
+
         layout->addWidget(new QLabel("Weight"));
         layout->addWidget(list);
         layout->setContentsMargins(0, 0, 0, 0);
-
-        this->list->setSortingEnabled(true);
 
         QObject::connect(
             list, &QListWidget::currentRowChanged, this, [this](int row) {
@@ -263,22 +259,19 @@ public:
                 Q_EMIT this->selectedChanged();
             });
 
-        this->setLayout(layout);
         this->setFamily(initialFont.family());
     }
 
     void setFamily(QString const &family)
     {
         QSet<int> weights;
-
-        this->list->clear();
-
         int defaultWeight = QFont(family).weight();
         auto *defaultItem = new IntItem(defaultWeight);
 
-        weights.insert(defaultWeight);
-
+        this->list->clear();
         this->list->addItem(defaultItem);
+
+        weights.insert(defaultWeight);
 
         for (auto const &style : QFontDatabase::styles(family))
         {
@@ -330,18 +323,18 @@ public:
         , fontSizeW(new FontSizeWidget(initialFont))
         , fontWeightW(new FontStylesWidget(initialFont))
     {
-        this->setWindowTitle("Pick Font");
-        this->sampleBox->setAcceptRichText(false);
-        this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
-
-        this->resize(400, 200);
-
         auto *layout = new QVBoxLayout;
         auto *choiceLayout = new QHBoxLayout;
-        auto *choiceLayout2 = new QVBoxLayout;
+        auto *choiceSideLayout = new QVBoxLayout;
         auto *buttons = new QDialogButtonBox;
         auto *confirmBtn = new QPushButton("Ok");
         auto *cancelBtn = new QPushButton("Cancel");
+
+        this->setWindowTitle("Pick Font");
+        this->setLayout(layout);
+        this->resize(400, 200);
+        this->sampleBox->setAcceptRichText(false);
+        this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
 
         layout->addLayout(choiceLayout, 2);
         layout->addWidget(new QLabel("Sample"));
@@ -349,10 +342,10 @@ public:
         layout->addWidget(buttons);
 
         choiceLayout->addWidget(this->fontFamiliesW, 3);
-        choiceLayout->addLayout(choiceLayout2, 1);
+        choiceLayout->addLayout(choiceSideLayout, 1);
 
-        choiceLayout2->addWidget(this->fontSizeW);
-        choiceLayout2->addWidget(this->fontWeightW);
+        choiceSideLayout->addWidget(this->fontSizeW);
+        choiceSideLayout->addWidget(this->fontWeightW);
 
         buttons->addButton(confirmBtn, QDialogButtonBox::AcceptRole);
         buttons->addButton(cancelBtn, QDialogButtonBox::RejectRole);
@@ -379,8 +372,8 @@ public:
                          this, [this]() {
                              this->updateSampleFont();
                          });
+
         this->updateSampleFont();
-        this->setLayout(layout);
     }
 
     QFont getSelected()
