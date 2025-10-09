@@ -56,6 +56,24 @@ public:
     }
 };
 
+IntItem *findIntItemInList(QListWidget *list, int value)
+{
+    int n = list->count();
+    int i = 0;
+    for (; i < n; ++i)
+    {
+        auto *item = dynamic_cast<IntItem *>(list->item(i));
+        assert(item);
+
+        if (item->getValue() == value)
+        {
+            return item;
+        }
+    }
+
+    return nullptr;
+}
+
 class FontSizeWidget : public QWidget
 {
     Q_OBJECT
@@ -66,19 +84,11 @@ class FontSizeWidget : public QWidget
 
     void setListTo(int size)
     {
-        int n = this->list->count();
-        int i = 0;
-        for (; i < n; ++i)
+        if (IntItem *item = findIntItemInList(this->list, size))
         {
-            auto *item = dynamic_cast<IntItem *>(this->list->item(i));
-            assert(item);
-
-            if (item->getValue() == size)
-            {
-                this->customItem->setHidden(item != customItem);
-                this->list->setCurrentItem(item);
-                return;
-            }
+            this->customItem->setHidden(item != customItem);
+            this->list->setCurrentItem(item);
+            return;
         }
 
         this->customItem->setValue(size);
@@ -234,23 +244,6 @@ class FontWeightWidget : public QWidget
 
     QListWidget *list = new QListWidget;
 
-    void setListTo(int weight)
-    {
-        int n = this->list->count();
-        int i = 0;
-        for (; i < n; ++i)
-        {
-            auto *item = dynamic_cast<IntItem *>(this->list->item(i));
-            assert(item);
-
-            if (item->getValue() == weight)
-            {
-                this->list->setCurrentItem(item);
-                return;
-            }
-        }
-    }
-
 public:
     FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
@@ -271,7 +264,11 @@ public:
             });
 
         this->setFamily(initialFont.family());
-        this->setListTo(initialFont.weight());
+
+        if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
+        {
+            this->list->setCurrentItem(item);
+        }
     }
 
     void setFamily(QString const &family)
