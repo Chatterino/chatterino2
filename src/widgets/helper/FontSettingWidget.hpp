@@ -1,5 +1,3 @@
-#include "pajlada/settings/settinglistener.hpp"
-
 #include <QLabel>
 
 namespace chatterino {
@@ -7,7 +5,6 @@ namespace chatterino {
 class FontSettingWidget : public QWidget
 {
     QLabel *currentLabel;
-    pajlada::SettingListener listener;
 
     void updateCurrentLabel();
 

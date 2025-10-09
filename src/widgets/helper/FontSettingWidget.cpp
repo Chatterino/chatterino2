@@ -425,6 +425,8 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
         getSettings()->chatFontFamily = font.family();
         getSettings()->chatFontSize = font.pointSize();
         getSettings()->chatFontWeight = font.weight();
+
+        this->updateCurrentLabel();
     });
 
     auto *layout = new QHBoxLayout;
@@ -434,13 +436,6 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
     layout->addWidget(this->currentLabel);
     layout->addWidget(button);
     layout->setContentsMargins(0, 0, 0, 0);
-
-    this->listener.addSetting(getSettings()->chatFontFamily);
-    this->listener.addSetting(getSettings()->chatFontSize);
-    this->listener.addSetting(getSettings()->chatFontWeight);
-    this->listener.setCB([this] {
-        this->updateCurrentLabel();
-    });
 
     this->updateCurrentLabel();
     this->setLayout(layout);
