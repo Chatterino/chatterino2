@@ -146,7 +146,6 @@ public:
     int getSelected() const
     {
         auto *item = dynamic_cast<IntItem *>(this->list->currentItem());
-        assert(item);  // is item now never null?
         return item ? item->getValue() : -1;
     }
 
@@ -299,8 +298,7 @@ public:
     int getSelected() const
     {
         auto *cast = dynamic_cast<IntItem *>(this->list->currentItem());
-        assert(cast);
-        return cast ? cast->getValue() : 0;
+        return cast ? cast->getValue() : -1;
     }
 
 Q_SIGNALS:
