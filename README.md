@@ -60,3 +60,8 @@ For more contribution guidelines, take a look at [the wiki](https://wiki.chatter
 ## Doxygen
 
 Doxygen is used to generate project information daily and is available [here](https://doxygen.chatterino.com).
+
+## Special Thanks
+
+Arjan Prandeep as contributor
+
