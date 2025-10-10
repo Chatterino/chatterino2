@@ -30,8 +30,8 @@ class IntItem : public QListWidgetItem
 public:
     void setText(const QString &) = delete;
 
-    IntItem(int v = 0)
-        : QListWidgetItem(QString::number(v))
+    IntItem(int v = 0, QListWidget *parent = nullptr)
+        : QListWidgetItem(QString::number(v), parent, IntItem::typeId())
         , value(v)
     {
     }
@@ -52,6 +52,11 @@ public:
     int getValue() const
     {
         return this->value;
+    }
+
+    static int typeId()
+    {
+        return QListWidgetItem::UserType + 123;
     }
 
 private:
