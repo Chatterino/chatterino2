@@ -257,7 +257,7 @@ public:
 
         QObject::connect(list, &QListWidget::currentRowChanged, this,
                          [this](int row) {
-                             if (row > 0)
+                             if (row >= 0)
                              {
                                  Q_EMIT this->selectedChanged();
                              }
