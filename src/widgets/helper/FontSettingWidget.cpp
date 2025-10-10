@@ -28,7 +28,7 @@ namespace {
 class IntItem : public QListWidgetItem
 {
 public:
-    void setText(QString const &) = delete;
+    void setText(const QString &) = delete;
 
     IntItem(int v = 0)
         : QListWidgetItem(QString::number(v))
@@ -36,9 +36,9 @@ public:
     {
     }
 
-    bool operator<(QListWidgetItem const &other) const override
+    bool operator<(const QListWidgetItem &other) const override
     {
-        auto const *cast = dynamic_cast<const IntItem *>(&other);
+        const auto *cast = dynamic_cast<const IntItem *>(&other);
         assert(cast);
         return this->value < cast->value;
     }
@@ -46,7 +46,7 @@ public:
     void setValue(int v)
     {
         this->value = v;
-        this->QListWidgetItem::setText(QString::number(v));
+        QListWidgetItem::setText(QString::number(v));
     }
 
     int getValue() const
@@ -61,8 +61,7 @@ private:
 IntItem *findIntItemInList(QListWidget *list, int value)
 {
     int n = list->count();
-    int i = 0;
-    for (; i < n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         auto *item = dynamic_cast<IntItem *>(list->item(i));
         assert(item);
@@ -81,21 +80,24 @@ class FontSizeWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontSizeWidget(QFont const &initialFont, QWidget *parent = nullptr);
+    FontSizeWidget(const QFont &initialFont, QWidget *parent = nullptr);
     int getSelected() const;
 
 Q_SIGNALS:
     void selectedChanged();
 
 private:
-    void setListTo(int size);
+    void setSelectedTo(int size);
 
+    // item used to display value from `edit`,
+    // gets hidden from the list when not needed.
     IntItem *customItem;
+
     QListWidget *list;
     QSpinBox *edit;
 };
 
-FontSizeWidget::FontSizeWidget(QFont const &initialFont, QWidget *parent)
+FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
     : QWidget(parent)
     , customItem(new IntItem)
     , list(new QListWidget)
@@ -123,12 +125,12 @@ FontSizeWidget::FontSizeWidget(QFont const &initialFont, QWidget *parent)
     header->setContentsMargins(0, 0, 0, 0);
 
     this->edit->setValue(initialFont.pointSize());
-    this->setListTo(initialFont.pointSize());
+    this->setSelectedTo(initialFont.pointSize());
 
     QObject::connect(this->edit, &QSpinBox::valueChanged, this,
                      [this](int value) {
                          this->list->blockSignals(true);
-                         this->setListTo(value);
+                         this->setSelectedTo(value);
                          this->list->blockSignals(false);
                          Q_EMIT this->selectedChanged();
                      });
@@ -150,7 +152,7 @@ int FontSizeWidget::getSelected() const
     return item ? item->getValue() : -1;
 }
 
-void FontSizeWidget::setListTo(int size)
+void FontSizeWidget::setSelectedTo(int size)
 {
     if (IntItem *item = findIntItemInList(this->list, size))
     {
@@ -176,8 +178,8 @@ class FontFamiliesWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontFamiliesWidget(QFont const &initialFont, QWidget *parent = nullptr);
-    void setSelected(QString const &family);
+    FontFamiliesWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    void setSelected(const QString &family);
     QString getSelected() const;
 
 Q_SIGNALS:
@@ -189,7 +191,7 @@ private:
     QSortFilterProxyModel *proxy;
 };
 
-FontFamiliesWidget::FontFamiliesWidget(QFont const &initialFont,
+FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
                                        QWidget *parent)
     : QWidget(parent)
     , list(new QListView)
@@ -223,17 +225,17 @@ FontFamiliesWidget::FontFamiliesWidget(QFont const &initialFont,
 
     QObject::connect(
         this->list->selectionModel(), &QItemSelectionModel::currentChanged,
-        this, [this](QModelIndex const &modelIndex, QModelIndex const &) {
+        this, [this](const QModelIndex &modelIndex, const QModelIndex &) {
             if (modelIndex.isValid())
             {
-                Q_EMIT selectedChanged();
+                Q_EMIT this->selectedChanged();
             }
         });
 
     this->setSelected(initialFont.family());
 }
 
-void FontFamiliesWidget::setSelected(QString const &family)
+void FontFamiliesWidget::setSelected(const QString &family)
 {
     qsizetype row = this->model->stringList().indexOf(family);
 
@@ -267,8 +269,8 @@ class FontWeightWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr);
-    void setFamily(QString const &family);
+    FontWeightWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    void setFamily(const QString &family);
     int getSelected() const;
 
 Q_SIGNALS:
@@ -278,7 +280,7 @@ private:
     QListWidget *list;
 };
 
-FontWeightWidget::FontWeightWidget(QFont const &initialFont, QWidget *parent)
+FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
     : QWidget(parent)
     , list(new QListWidget)
 {
@@ -307,7 +309,7 @@ FontWeightWidget::FontWeightWidget(QFont const &initialFont, QWidget *parent)
     }
 }
 
-void FontWeightWidget::setFamily(QString const &family)
+void FontWeightWidget::setFamily(const QString &family)
 {
     QSet<int> weights;
     int defaultWeight = QFont(family).weight();
@@ -322,7 +324,7 @@ void FontWeightWidget::setFamily(QString const &family)
 
     // the goal is to only display valid weights and this gets close, but
     // is not perfect for all fonts.
-    for (auto const &style : QFontDatabase::styles(family))
+    for (const auto &style : QFontDatabase::styles(family))
     {
         int weight = QFontDatabase::weight(family, style);
 
@@ -349,7 +351,7 @@ class FontDialog : public QDialog
     Q_OBJECT
 
 public:
-    FontDialog(QFont const &initialFont, QWidget *parent = nullptr);
+    FontDialog(const QFont &initialFont, QWidget *parent = nullptr);
     QFont getSelected() const;
 
 private:
@@ -361,7 +363,7 @@ private:
     FontWeightWidget *fontWeightW;
 };
 
-FontDialog::FontDialog(QFont const &initialFont, QWidget *parent)
+FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     : QDialog(parent)
     , sampleBox(new QTextEdit)
     , fontFamiliesW(new FontFamiliesWidget(initialFont))
