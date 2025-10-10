@@ -222,7 +222,8 @@ void SeventvEmotes::loadGlobalEmotes()
     }
 
     readProviderEmotesCache("global", "seventv", [this](auto jsonDoc) {
-        auto emoteMap = parseEmotes(jsonDoc.object()["emotes"].toArray(), true);
+        auto emoteMap =
+            parseEmotes(jsonDoc.toObject()["emotes"].toArray(), true);
         this->setGlobalEmotes(std::make_shared<EmoteMap>(std::move(emoteMap)));
     });
 

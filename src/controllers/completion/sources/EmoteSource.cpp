@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
@@ -12,6 +13,8 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
+
+#include <QStringBuilder>
 
 namespace chatterino::completion {
 
@@ -105,6 +108,16 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             auto user = getApp()->getAccounts()->twitch.getCurrent();
             addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
 
+            for (const auto &item : tc->emotes().items())
+            {
+                auto provider = item.provider.lock();
+                if (!provider)
+                {
+                    continue;
+                }
+                addEmotes(emotes, *item.emotes, u"Channel " % provider->name());
+            }
+
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
             {
@@ -118,6 +131,12 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             {
                 addEmotes(emotes, *seventv, "Channel 7TV");
             }
+        }
+
+        for (const auto &provider : app->getEmotes()->getProviders())
+        {
+            addEmotes(emotes, *provider->globalEmotes(),
+                      u"Global " % provider->name());
         }
 
         if (auto bttvG = app->getBttvEmotes()->emotes())

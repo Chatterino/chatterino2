@@ -1,5 +1,6 @@
 #include "controllers/emotes/EmoteController.hpp"
 
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
@@ -18,6 +19,55 @@ void EmoteController::initialize()
 {
     this->emojis_->load();
     this->gifTimer_->initialize();
+
+    this->sort();
+
+    for (const auto &provider : this->providers_)
+    {
+        provider->initialize();
+    }
+}
+
+EmoteProviderPtr EmoteController::findProviderByName(QStringView name) const
+{
+    auto it = std::ranges::find_if(this->providers_, [&](const auto &provider) {
+        return provider->name() == name;
+    });
+    if (it == this->providers_.end())
+    {
+        return nullptr;
+    }
+    return *it;
+}
+
+EmoteProviderPtr EmoteController::findProviderByID(QStringView id) const
+{
+    auto it = std::ranges::find_if(this->providers_, [&](const auto &provider) {
+        return provider->id() == id;
+    });
+    if (it == this->providers_.end())
+    {
+        return nullptr;
+    }
+    return *it;
+}
+
+EmotePtr EmoteController::resolveGlobal(const EmoteName &query) const
+{
+    for (const auto &provider : this->providers_)
+    {
+        auto emote = provider->globalEmote(query);
+        if (emote)
+        {
+            return emote;
+        }
+    }
+    return nullptr;
+}
+
+std::span<const EmoteProviderPtr> EmoteController::getProviders() const
+{
+    return this->providers_;
 }
 
 TwitchEmotes *EmoteController::getTwitchEmotes() const
@@ -33,6 +83,13 @@ Emojis *EmoteController::getEmojis() const
 GIFTimer *EmoteController::getGIFTimer() const
 {
     return this->gifTimer_.get();
+}
+
+void EmoteController::sort()
+{
+    std::ranges::sort(this->providers_, {}, [](const auto &provider) {
+        return provider->priority();
+    });
 }
 
 }  // namespace chatterino

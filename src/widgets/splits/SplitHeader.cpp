@@ -1125,6 +1125,11 @@ void SplitHeader::reloadChannelEmotes()
 
     auto channel = this->split_->getChannel();
 
+    if (auto *emoteChannel = dynamic_cast<EmoteChannel *>(channel.get()))
+    {
+        emoteChannel->emotes().refresh(true);
+    }
+
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         twitchChannel->refreshFFZChannelEmotes(true);

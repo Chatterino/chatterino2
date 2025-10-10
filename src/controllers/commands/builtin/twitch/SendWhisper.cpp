@@ -109,6 +109,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &accemotes = *acc->accessEmotes();
     const auto *bttvemotes = app->getBttvEmotes();
     const auto *ffzemotes = app->getFfzEmotes();
+    const auto *emoteController = app->getEmotes();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
@@ -134,8 +135,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                 continue;
             }
         }  // bttv/ffz emote
+        {  // third party emotes
+            emote = emoteController->resolveGlobal(EmoteName{words[i]});
+            if (emote)
+            {
+                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
+                continue;
+            }
+        }  // third party emotes
         {  // emoji/text
-            for (auto &variant : app->getEmotes()->getEmojis()->parse(words[i]))
+            for (auto &variant : emoteController->getEmojis()->parse(words[i]))
             {
                 constexpr const static struct {
                     void operator()(EmotePtr emote, MessageBuilder &b) const

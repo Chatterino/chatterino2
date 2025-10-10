@@ -13,6 +13,7 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Notebook;
 class TwitchChannel;
+class EmoteChannel;
 
 class EmotePopup : public BasePopup
 {
@@ -43,6 +44,7 @@ private:
 
     ChannelPtr channel_;
     TwitchChannel *twitchChannel_{};
+    EmoteChannel *emoteChannel_ = nullptr;
 
     QLineEdit *search_;
     Notebook *notebook_;

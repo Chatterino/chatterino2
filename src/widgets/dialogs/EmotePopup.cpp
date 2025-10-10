@@ -4,6 +4,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
@@ -415,6 +416,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->channel_ = std::move(channel);
     this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    this->emoteChannel_ = dynamic_cast<EmoteChannel *>(this->channel_.get());
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
@@ -466,6 +468,20 @@ void EmotePopup::reloadEmotes()
                       "7TV");
         }
     }
+
+    if (this->emoteChannel_)
+    {
+        for (const auto &item : this->emoteChannel_->emotes().items())
+        {
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*channelChannel, *item.emotes, provider->name());
+        }
+    }
+
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
@@ -481,6 +497,15 @@ void EmotePopup::reloadEmotes()
     {
         addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
                   "7TV");
+    }
+
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
+    {
+        if (!provider->hasGlobalEmotes())
+        {
+            continue;
+        }
+        addEmotes(*globalChannel, *provider->globalEmotes(), provider->name());
     }
 
     if (subChannel->getMessageSnapshot().size() == 0)
@@ -553,6 +578,37 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     if (!seventvGlobalEmotes.empty())
     {
         addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)");
+    }
+
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
+    {
+        auto filtered = filterEmoteMap(searchText, provider->globalEmotes());
+        if (filtered.empty())
+        {
+            continue;
+        }
+
+        addEmotes(*searchChannel, std::move(filtered),
+                  provider->name() % u" (Global)");
+    }
+
+    if (this->emoteChannel_)
+    {
+        for (const auto &item : this->emoteChannel_->emotes().items())
+        {
+            auto filtered = filterEmoteMap(searchText, item.emotes);
+            if (filtered.empty())
+            {
+                continue;
+            }
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*searchChannel, std::move(filtered),
+                      provider->name() % u" (Channel)");
+        }
     }
 
     if (this->twitchChannel_ == nullptr)

@@ -1250,6 +1250,11 @@ void Split::reloadChannelAndSubscriberEmotes()
 {
     auto channel = this->getChannel();
 
+    if (auto *emoteChannel = dynamic_cast<EmoteChannel *>(channel.get()))
+    {
+        emoteChannel->emotes().refresh(true);
+    }
+
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         twitchChannel->refreshTwitchChannelEmotes(true);
