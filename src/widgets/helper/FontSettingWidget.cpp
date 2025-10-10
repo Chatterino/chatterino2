@@ -351,8 +351,6 @@ public:
         auto *choiceLayout = new QHBoxLayout;
         auto *choiceSideLayout = new QVBoxLayout;
         auto *buttons = new QDialogButtonBox;
-        auto *confirmBtn = new QPushButton("Ok");
-        auto *cancelBtn = new QPushButton("Cancel");
 
         this->setWindowTitle("Pick Font");
         this->setLayout(layout);
@@ -371,8 +369,8 @@ public:
         choiceSideLayout->addWidget(this->fontSizeW);
         choiceSideLayout->addWidget(this->fontWeightW);
 
-        buttons->addButton(confirmBtn, QDialogButtonBox::AcceptRole);
-        buttons->addButton(cancelBtn, QDialogButtonBox::RejectRole);
+        buttons->addButton("Ok", QDialogButtonBox::AcceptRole);
+        buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
 
         QObject::connect(buttons, &QDialogButtonBox::accepted, this,
                          &QDialog::accept);
