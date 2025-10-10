@@ -4,12 +4,12 @@ namespace chatterino {
 
 class FontSettingWidget : public QWidget
 {
-    QLabel *currentLabel;
-
-    void updateCurrentLabel();
-
 public:
     FontSettingWidget(QWidget *parent = nullptr);
+
+private:
+    void updateCurrentLabel();
+    QLabel *currentLabel;
 };
 
 }  // namespace chatterino

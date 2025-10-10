@@ -27,8 +27,6 @@ namespace {
 
 class IntItem : public QListWidgetItem
 {
-    int value;
-
 public:
     void setText(QString const &) = delete;
 
@@ -55,6 +53,9 @@ public:
     {
         return this->value;
     }
+
+private:
+    int value;
 };
 
 IntItem *findIntItemInList(QListWidget *list, int value)
@@ -78,24 +79,6 @@ IntItem *findIntItemInList(QListWidget *list, int value)
 class FontSizeWidget : public QWidget
 {
     Q_OBJECT
-
-    IntItem *customItem = new IntItem;
-    QListWidget *list = new QListWidget;
-    QSpinBox *edit = new QSpinBox;
-
-    void setListTo(int size)
-    {
-        if (IntItem *item = findIntItemInList(this->list, size))
-        {
-            this->customItem->setHidden(item != this->customItem);
-            this->list->setCurrentItem(item);
-            return;
-        }
-
-        this->customItem->setValue(size);
-        this->customItem->setHidden(false);
-        this->list->setCurrentItem(this->customItem);
-    }
 
 public:
     FontSizeWidget(QFont const &initialFont, QWidget *parent = nullptr)
@@ -152,6 +135,25 @@ public:
 
 Q_SIGNALS:
     void selectedChanged();
+
+private:
+    void setListTo(int size)
+    {
+        if (IntItem *item = findIntItemInList(this->list, size))
+        {
+            this->customItem->setHidden(item != this->customItem);
+            this->list->setCurrentItem(item);
+            return;
+        }
+
+        this->customItem->setValue(size);
+        this->customItem->setHidden(false);
+        this->list->setCurrentItem(this->customItem);
+    }
+
+    IntItem *customItem = new IntItem;
+    QListWidget *list = new QListWidget;
+    QSpinBox *edit = new QSpinBox;
 };
 
 QStringList getFontFamilies()
@@ -164,10 +166,6 @@ QStringList getFontFamilies()
 class FontFamiliesWidget : public QWidget
 {
     Q_OBJECT
-
-    QListView *list = new QListView;
-    QStringListModel *model = new QStringListModel(getFontFamilies(), this);
-    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
 
 public:
     FontFamiliesWidget(QFont const &initialFont, QWidget *parent = nullptr)
@@ -241,14 +239,16 @@ public:
 
 Q_SIGNALS:
     void selectedChanged();
+
+private:
+    QListView *list = new QListView;
+    QStringListModel *model = new QStringListModel(getFontFamilies(), this);
+    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
 };
 
 class FontWeightWidget : public QWidget
 {
     Q_OBJECT
-
-    QListWidget *list = new QListWidget;
-
 public:
     FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
@@ -317,28 +317,14 @@ public:
 
 Q_SIGNALS:
     void selectedChanged();
+
+private:
+    QListWidget *list = new QListWidget;
 };
 
 class FontDialog : public QDialog
 {
     Q_OBJECT
-
-    QTextEdit *sampleBox = new QTextEdit;
-
-    FontFamiliesWidget *fontFamiliesW;
-    FontSizeWidget *fontSizeW;
-    FontWeightWidget *fontWeightW;
-
-    void updateSampleFont()
-    {
-        QTextCursor cursor = this->sampleBox->textCursor();
-        QTextCharFormat format;
-
-        cursor.select(QTextCursor::Document);
-        format.setFont(this->getSelected());
-        cursor.setCharFormat(format);
-    }
-
 public:
     FontDialog(QFont const &initialFont, QWidget *parent = nullptr)
         : QDialog(parent)
@@ -399,6 +385,23 @@ public:
                 this->fontSizeW->getSelected(),
                 this->fontWeightW->getSelected()};
     }
+
+private:
+    void updateSampleFont()
+    {
+        QTextCursor cursor = this->sampleBox->textCursor();
+        QTextCharFormat format;
+
+        cursor.select(QTextCursor::Document);
+        format.setFont(this->getSelected());
+        cursor.setCharFormat(format);
+    }
+
+    QTextEdit *sampleBox = new QTextEdit;
+
+    FontFamiliesWidget *fontFamiliesW;
+    FontSizeWidget *fontSizeW;
+    FontWeightWidget *fontWeightW;
 };
 
 }  // namespace
