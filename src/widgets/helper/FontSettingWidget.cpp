@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <QDebug>
 #include <QDialog>
@@ -436,6 +437,7 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
         getSettings()->chatFontWeight = font.weight();
 
         this->updateCurrentLabel();
+        getApp()->getWindows()->forceLayoutChannelViews();
     });
 
     auto *layout = new QHBoxLayout;
