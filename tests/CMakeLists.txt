@@ -121,6 +121,4 @@ if (CHATTERINO_STATIC_QT_BUILD)
     )
 endif ()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE QT_NO_KEYWORDS)
-
 gtest_discover_tests(${PROJECT_NAME})

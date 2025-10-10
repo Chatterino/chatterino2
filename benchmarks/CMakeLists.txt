@@ -35,8 +35,6 @@ set_target_properties(${PROJECT_NAME}
     AUTORCC ON
     )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE QT_NO_KEYWORDS)
-
 if (CHATTERINO_STATIC_QT_BUILD)
     qt_import_plugins(${PROJECT_NAME} INCLUDE_BY_TYPE
         platforms Qt::QXcbIntegrationPlugin
