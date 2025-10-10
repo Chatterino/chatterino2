@@ -728,6 +728,8 @@ set(SOURCE_FILES
         widgets/helper/TableStyles.hpp
         widgets/helper/TrimRegExpValidator.cpp
         widgets/helper/TrimRegExpValidator.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
 
         widgets/layout/FlowLayout.cpp
         widgets/layout/FlowLayout.hpp
