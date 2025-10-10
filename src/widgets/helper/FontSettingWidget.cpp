@@ -129,9 +129,8 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
 
     QObject::connect(this->edit, &QSpinBox::valueChanged, this,
                      [this](int value) {
-                         this->list->blockSignals(true);
+                         QSignalBlocker listSignalBlocker(this->list);
                          this->setSelectedTo(value);
-                         this->list->blockSignals(false);
                          Q_EMIT this->selectedChanged();
                      });
 
@@ -139,9 +138,8 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
                      [this](QListWidgetItem *item) {
                          auto *cast = dynamic_cast<IntItem *>(item);
                          assert(cast);
-                         this->edit->blockSignals(true);
+                         QSignalBlocker editSignalBlocker(this->edit);
                          this->edit->setValue(cast->getValue());
-                         this->edit->blockSignals(false);
                          Q_EMIT this->selectedChanged();
                      });
 }
@@ -315,7 +313,8 @@ void FontWeightWidget::setFamily(const QString &family)
     int defaultWeight = QFont(family).weight();
     auto *defaultItem = new IntItem(defaultWeight);
 
-    this->list->blockSignals(true);  // redundant signals
+    // redundant signals will be emitted
+    QSignalBlocker listSignalBlocker(this->list);
 
     this->list->clear();
     this->list->addItem(defaultItem);
@@ -336,8 +335,6 @@ void FontWeightWidget::setFamily(const QString &family)
     }
 
     this->list->setCurrentItem(defaultItem);
-
-    this->list->blockSignals(false);
 }
 
 int FontWeightWidget::getSelected() const
