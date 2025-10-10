@@ -1,6 +1,10 @@
 #include "messages/Emote.hpp"
 
+#include "Application.hpp"
 #include "common/Literals.hpp"
+#include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 
 #include <QJsonObject>
 

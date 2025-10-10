@@ -4,12 +4,14 @@
 #include "lib/Snapshot.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "providers/twitch/eventsub/Connection.hpp"
 #include "Test.hpp"
 #include "util/QCompareTransparent.hpp"
 
+#include <QJsonArray>
 #include <QString>
 
 using namespace chatterino;
@@ -207,10 +209,16 @@ public:
         return &this->highlights;
     }
 
+    EmoteController *getEmotes() override
+    {
+        return &this->emoteController;
+    }
+
     mock::EmptyLogging logging;
     mock::MockTwitchIrcServer twitch;
     AccountController accounts;
     HighlightController highlights;
+    mock::EmoteController emoteController;
 };
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)

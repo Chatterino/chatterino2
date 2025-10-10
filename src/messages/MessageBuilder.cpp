@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -16,15 +17,12 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -387,7 +385,6 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             {
                 return Url{"https://link.twitch.tv/SharedChatViewer"};
             }
-
             return Url{u"https://www.twitch.tv/%1"_s.arg(sourceLogin)};
         }();
 
@@ -420,63 +417,21 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
 EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
-    //  - FrankerFaceZ Channel
-    //  - BetterTTV Channel
-    //  - 7TV Channel
-    //  - FrankerFaceZ Global
-    //  - BetterTTV Global
-    //  - 7TV Global
+    //  - Channel emotes
+    //  - Global emotes
 
-    const auto *globalFfzEmotes = getApp()->getFfzEmotes();
-    const auto *globalBttvEmotes = getApp()->getBttvEmotes();
-    const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
-
-    std::optional<EmotePtr> emote{};
-
-    if (twitchChannel != nullptr)
+    auto channel = twitchChannel->emotes().resolve(name);
+    if (channel)
     {
-        // Check for channel emotes
-
-        emote = twitchChannel->ffzEmote(name);
-        if (emote)
-        {
-            return *emote;
-        }
-
-        emote = twitchChannel->bttvEmote(name);
-        if (emote)
-        {
-            return *emote;
-        }
-
-        emote = twitchChannel->seventvEmote(name);
-        if (emote)
-        {
-            return *emote;
-        }
+        return channel;
     }
 
-    // Check for global emotes
-
-    emote = globalFfzEmotes->emote(name);
-    if (emote)
+    auto global = getApp()->getEmotes()->resolveGlobal(name);
+    if (global)
     {
-        return *emote;
+        return global;
     }
-
-    emote = globalBttvEmotes->emote(name);
-    if (emote)
-    {
-        return *emote;
-    }
-
-    emote = globalSeventvEmotes->globalEmote(name);
-    if (emote)
-    {
-        return *emote;
-    }
-
-    return {};
+    return nullptr;
 }
 
 }  // namespace

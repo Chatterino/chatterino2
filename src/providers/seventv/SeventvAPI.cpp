@@ -1,21 +1,18 @@
 #include "providers/seventv/SeventvAPI.hpp"
 
-#include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 
-namespace {
-
-using namespace chatterino::literals;
-
-const QString API_URL_USER = u"https://7tv.io/v3/users/twitch/%1"_s;
-const QString API_URL_EMOTE_SET = u"https://7tv.io/v3/emote-sets/%1"_s;
-const QString API_URL_PRESENCES = u"https://7tv.io/v3/users/%1/presences"_s;
-
-}  // namespace
-
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 namespace chatterino {
+
+using namespace Qt::Literals;
+
+const QString SeventvAPI::API_URL_USER = u"https://7tv.io/v3/users/twitch/%1"_s;
+const QString SeventvAPI::API_URL_EMOTE_SET =
+    u"https://7tv.io/v3/emote-sets/%1"_s;
+const QString SeventvAPI::API_URL_PRESENCES =
+    u"https://7tv.io/v3/users/%1/presences"_s;
 
 void SeventvAPI::getUserByTwitchID(
     const QString &twitchID, SuccessCallback<const QJsonObject &> &&onSuccess,

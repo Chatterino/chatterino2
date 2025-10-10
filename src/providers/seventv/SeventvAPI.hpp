@@ -16,6 +16,10 @@ class SeventvAPI final
     using SuccessCallback = std::function<void(T...)>;
 
 public:
+    static const QString API_URL_USER;
+    static const QString API_URL_EMOTE_SET;
+    static const QString API_URL_PRESENCES;
+
     SeventvAPI() = default;
     ~SeventvAPI() = default;
 
