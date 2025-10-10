@@ -153,13 +153,19 @@ Q_SIGNALS:
     void selectedChanged();
 };
 
+QStringList getFontFamilies()
+{
+    QStringList families = QFontDatabase::families();
+    families.removeIf(QFontDatabase::isPrivateFamily);
+    return families;
+}
+
 class FontFamiliesWidget : public QWidget
 {
     Q_OBJECT
 
     QListView *list = new QListView;
-    QStringListModel *model =
-        new QStringListModel(QFontDatabase::families(), this);
+    QStringListModel *model = new QStringListModel(getFontFamilies(), this);
     QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
 
 public:
