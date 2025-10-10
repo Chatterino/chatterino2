@@ -63,23 +63,6 @@ private:
     int value;
 };
 
-IntItem *findIntItemInList(QListWidget *list, int value)
-{
-    int n = list->count();
-    for (int i = 0; i < n; ++i)
-    {
-        auto *item = dynamic_cast<IntItem *>(list->item(i));
-        assert(item);
-
-        if (item->getValue() == value)
-        {
-            return item;
-        }
-    }
-
-    return nullptr;
-}
-
 class FontSizeWidget : public QWidget
 {
     Q_OBJECT
@@ -101,6 +84,23 @@ private:
     QListWidget *list;
     QSpinBox *edit;
 };
+
+IntItem *findIntItemInList(QListWidget *list, int value)
+{
+    int n = list->count();
+    for (int i = 0; i < n; ++i)
+    {
+        auto *item = dynamic_cast<IntItem *>(list->item(i));
+        assert(item);
+
+        if (item->getValue() == value)
+        {
+            return item;
+        }
+    }
+
+    return nullptr;
+}
 
 FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
     : QWidget(parent)
@@ -169,13 +169,6 @@ void FontSizeWidget::setSelectedTo(int size)
     this->list->setCurrentItem(this->customItem);
 }
 
-QStringList getFontFamilies()
-{
-    QStringList families = QFontDatabase::families();
-    families.removeIf(QFontDatabase::isPrivateFamily);
-    return families;
-}
-
 class FontFamiliesWidget : public QWidget
 {
     Q_OBJECT
@@ -193,6 +186,13 @@ private:
     QStringListModel *model;
     QSortFilterProxyModel *proxy;
 };
+
+QStringList getFontFamilies()
+{
+    QStringList families = QFontDatabase::families();
+    families.removeIf(QFontDatabase::isPrivateFamily);
+    return families;
+}
 
 FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
                                        QWidget *parent)
