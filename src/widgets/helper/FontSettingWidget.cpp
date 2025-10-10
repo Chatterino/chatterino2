@@ -86,7 +86,7 @@ class FontSizeWidget : public QWidget
     {
         if (IntItem *item = findIntItemInList(this->list, size))
         {
-            this->customItem->setHidden(item != customItem);
+            this->customItem->setHidden(item != this->customItem);
             this->list->setCurrentItem(item);
             return;
         }
@@ -209,19 +209,6 @@ public:
         this->setSelected(initialFont.family());
     }
 
-    QString getSelected()
-    {
-        QModelIndex proxyIndex = this->list->currentIndex();
-
-        if (!proxyIndex.isValid())
-        {
-            return {};
-        }
-
-        QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
-        return this->model->data(modelIndex).toString();
-    }
-
     void setSelected(QString const &family)
     {
         qsizetype row = this->model->stringList().indexOf(family);
@@ -236,6 +223,19 @@ public:
 
         this->list->selectionModel()->setCurrentIndex(
             proxyIndex, QItemSelectionModel::ClearAndSelect);
+    }
+
+    QString getSelected() const
+    {
+        QModelIndex proxyIndex = this->list->currentIndex();
+
+        if (!proxyIndex.isValid())
+        {
+            return {};
+        }
+
+        QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
+        return this->model->data(modelIndex).toString();
     }
 
 Q_SIGNALS:
@@ -258,10 +258,10 @@ public:
         this->list->setSortingEnabled(true);
 
         layout->addWidget(new QLabel("Weight"));
-        layout->addWidget(list);
+        layout->addWidget(this->list);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        QObject::connect(list, &QListWidget::currentRowChanged, this,
+        QObject::connect(this->list, &QListWidget::currentRowChanged, this,
                          [this](int row) {
                              if (row >= 0)
                              {
@@ -288,6 +288,9 @@ public:
 
         weights.insert(defaultWeight);
 
+        /* the goal is to only display valid weights and this gets close, but
+         * is not perfect for all fonts.
+         */
         for (auto const &style : QFontDatabase::styles(family))
         {
             int weight = QFontDatabase::weight(family, style);
@@ -373,31 +376,26 @@ public:
                          &QDialog::reject);
 
         QObject::connect(this->fontFamiliesW,
-                         &FontFamiliesWidget::selectedChanged, this, [this]() {
+                         &FontFamiliesWidget::selectedChanged, this, [this] {
                              this->fontWeightW->setFamily(
                                  this->fontFamiliesW->getSelected());
                              this->updateSampleFont();
                          });
 
         QObject::connect(this->fontWeightW, &FontWeightWidget::selectedChanged,
-                         this, [this]() {
-                             this->updateSampleFont();
-                         });
+                         this, &FontDialog::updateSampleFont);
 
         QObject::connect(this->fontSizeW, &FontSizeWidget::selectedChanged,
-                         this, [this]() {
-                             this->updateSampleFont();
-                         });
+                         this, &FontDialog::updateSampleFont);
 
         this->updateSampleFont();
     }
 
-    QFont getSelected()
+    QFont getSelected() const
     {
-        auto const &family = this->fontFamiliesW->getSelected();
-        auto pointSize = this->fontSizeW->getSelected();
-        auto weight = this->fontWeightW->getSelected();
-        return {family, pointSize, weight};
+        return {this->fontFamiliesW->getSelected(),
+                this->fontSizeW->getSelected(),
+                this->fontWeightW->getSelected()};
     }
 };
 
@@ -406,8 +404,8 @@ public:
 void FontSettingWidget::updateCurrentLabel()
 {
     QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
-    auto family = font.family();
-    auto ptSize = QString::number(font.pointSize());
+    QString family = font.family();
+    QString ptSize = QString::number(font.pointSize());
     this->currentLabel->setText(family + ", " + ptSize + "pt");
 }
 
