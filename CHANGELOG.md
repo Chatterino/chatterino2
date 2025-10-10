@@ -7,6 +7,7 @@
 - Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added link support to plugin message API. (#6386)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
+- Minor: Consolidate font picking into one dialog. (#6531)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
