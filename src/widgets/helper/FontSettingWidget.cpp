@@ -176,77 +176,9 @@ class FontFamiliesWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontFamiliesWidget(QFont const &initialFont, QWidget *parent = nullptr)
-        : QWidget(parent)
-        , list(new QListView)
-        , model(new QStringListModel(getFontFamilies(), this))
-        , proxy(new QSortFilterProxyModel(this))
-    {
-        auto *layout = new QVBoxLayout;
-        auto *header = new QHBoxLayout;
-        auto *search = new QLineEdit;
-
-        this->setLayout(layout);
-
-        this->list->setModel(this->proxy);
-        this->list->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        this->proxy->setSourceModel(this->model);
-        this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-
-        layout->addLayout(header);
-        layout->addWidget(this->list);
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        header->addWidget(new QLabel("Font"));
-        header->addWidget(search);
-        header->setContentsMargins(0, 0, 0, 0);
-
-        search->setPlaceholderText("Search...");
-
-        QObject::connect(search, &QLineEdit::textChanged, this->proxy,
-                         &QSortFilterProxyModel::setFilterFixedString);
-
-        QObject::connect(
-            this->list->selectionModel(), &QItemSelectionModel::currentChanged,
-            this, [this](QModelIndex const &modelIndex, QModelIndex const &) {
-                if (modelIndex.isValid())
-                {
-                    Q_EMIT selectedChanged();
-                }
-            });
-
-        this->setSelected(initialFont.family());
-    }
-
-    void setSelected(QString const &family)
-    {
-        qsizetype row = this->model->stringList().indexOf(family);
-
-        if (row < 0)
-        {
-            return;
-        }
-
-        QModelIndex modelIndex = this->model->index(static_cast<int>(row));
-        QModelIndex proxyIndex = this->proxy->mapFromSource(modelIndex);
-
-        this->list->selectionModel()->setCurrentIndex(
-            proxyIndex, QItemSelectionModel::ClearAndSelect);
-    }
-
-    QString getSelected() const
-    {
-        QModelIndex proxyIndex = this->list->currentIndex();
-
-        if (!proxyIndex.isValid())
-        {
-            return {};
-        }
-
-        QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
-        return this->model->data(modelIndex).toString();
-    }
+    FontFamiliesWidget(QFont const &initialFont, QWidget *parent = nullptr);
+    void setSelected(QString const &family);
+    QString getSelected() const;
 
 Q_SIGNALS:
     void selectedChanged();
@@ -256,6 +188,79 @@ private:
     QStringListModel *model;
     QSortFilterProxyModel *proxy;
 };
+
+FontFamiliesWidget::FontFamiliesWidget(QFont const &initialFont,
+                                       QWidget *parent)
+    : QWidget(parent)
+    , list(new QListView)
+    , model(new QStringListModel(getFontFamilies(), this))
+    , proxy(new QSortFilterProxyModel(this))
+{
+    auto *layout = new QVBoxLayout;
+    auto *header = new QHBoxLayout;
+    auto *search = new QLineEdit;
+
+    this->setLayout(layout);
+
+    this->list->setModel(this->proxy);
+    this->list->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    this->proxy->setSourceModel(this->model);
+    this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    layout->addLayout(header);
+    layout->addWidget(this->list);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    header->addWidget(new QLabel("Font"));
+    header->addWidget(search);
+    header->setContentsMargins(0, 0, 0, 0);
+
+    search->setPlaceholderText("Search...");
+
+    QObject::connect(search, &QLineEdit::textChanged, this->proxy,
+                     &QSortFilterProxyModel::setFilterFixedString);
+
+    QObject::connect(
+        this->list->selectionModel(), &QItemSelectionModel::currentChanged,
+        this, [this](QModelIndex const &modelIndex, QModelIndex const &) {
+            if (modelIndex.isValid())
+            {
+                Q_EMIT selectedChanged();
+            }
+        });
+
+    this->setSelected(initialFont.family());
+}
+
+void FontFamiliesWidget::setSelected(QString const &family)
+{
+    qsizetype row = this->model->stringList().indexOf(family);
+
+    if (row < 0)
+    {
+        return;
+    }
+
+    QModelIndex modelIndex = this->model->index(static_cast<int>(row));
+    QModelIndex proxyIndex = this->proxy->mapFromSource(modelIndex);
+
+    this->list->selectionModel()->setCurrentIndex(
+        proxyIndex, QItemSelectionModel::ClearAndSelect);
+}
+
+QString FontFamiliesWidget::getSelected() const
+{
+    QModelIndex proxyIndex = this->list->currentIndex();
+
+    if (!proxyIndex.isValid())
+    {
+        return {};
+    }
+
+    QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
+    return this->model->data(modelIndex).toString();
+}
 
 class FontWeightWidget : public QWidget
 {
