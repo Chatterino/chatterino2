@@ -1,9 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
-add_compile_definitions(QT_NO_KEYWORDS)
+# used for QT_DISABLE_DEPRECATED_BEFORE/QT_WARN_DEPRECATED_UP_TO
+set(CHATTERINO_MIN_QT_VERSION 0x060403)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
@@ -1086,6 +1085,14 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
     )
+
+set(_c2_qt_defs
+    QT_DISABLE_DEPRECATED_BEFORE=${CHATTERINO_MIN_QT_VERSION}
+    QT_WARN_DEPRECATED_UP_TO=${CHATTERINO_MIN_QT_VERSION}
+    QT_NO_KEYWORDS
+)
+target_compile_definitions(${VERSION_PROJECT} PUBLIC ${_c2_qt_defs})
+target_compile_definitions(${LIBRARY_PROJECT} PUBLIC ${_c2_qt_defs})
 
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC

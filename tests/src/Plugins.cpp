@@ -479,7 +479,7 @@ TEST_F(PluginTest, ioNoPerms)
     configure();
     auto file = rawpl->dataDirectory().filePath("testfile");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(TEST_FILE_DATA);
     f.close();
 
@@ -531,7 +531,7 @@ TEST_F(PluginTest, requireNoData)
 
     auto file = rawpl->dataDirectory().filePath("thisiscode.lua");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(R"lua(print("Data was executed"))lua");
     f.close();
 

@@ -6,9 +6,12 @@
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added link support to plugin message API. (#6386)
+- Minor: Added a description for the logging option under moderation tab. (#6514)
+- Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
+- Dev: Stopped building AppImage in CI. (#6504)
 - Dev: Find Boost's CMake Config file instead of module file. (#6499)
 - Dev: Fix 32-bit compile in PluginRepl. (#6483)
 - Dev: Fix the WinGet release workflow. (#6497)
@@ -16,8 +19,12 @@
 - Dev: Removed dependency to Qt5 Compatibility module by updating libcommuni. (#6500)
 - Dev: Merged emote element flags from different providers into two. (#6511)
 - Dev: Refactored thrid party emotes. (#6436)
+- Dev: Fixed warnings on Qt 6.10. (#6422)
 - Dev: Removed unused method in `Emojis`. (#6517)
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
+- Dev: Added Qt keyword and warning flags project wide. (#6520)
+- Def: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
 
 ## 2.5.4
 
