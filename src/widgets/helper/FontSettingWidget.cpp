@@ -283,6 +283,8 @@ public:
         int defaultWeight = QFont(family).weight();
         auto *defaultItem = new IntItem(defaultWeight);
 
+        this->list->blockSignals(true);  // redundant signals
+
         this->list->clear();
         this->list->addItem(defaultItem);
 
@@ -303,6 +305,8 @@ public:
         }
 
         this->list->setCurrentItem(defaultItem);
+
+        this->list->blockSignals(false);
     }
 
     int getSelected() const
