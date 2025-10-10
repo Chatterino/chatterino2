@@ -265,72 +265,11 @@ QString FontFamiliesWidget::getSelected() const
 class FontWeightWidget : public QWidget
 {
     Q_OBJECT
+
 public:
-    FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
-        : QWidget(parent)
-        , list(new QListWidget)
-    {
-        auto *layout = new QVBoxLayout;
-
-        this->setLayout(layout);
-        this->list->setSortingEnabled(true);
-
-        layout->addWidget(new QLabel("Weight"));
-        layout->addWidget(this->list);
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        QObject::connect(this->list, &QListWidget::currentRowChanged, this,
-                         [this](int row) {
-                             if (row >= 0)
-                             {
-                                 Q_EMIT this->selectedChanged();
-                             }
-                         });
-
-        this->setFamily(initialFont.family());
-
-        if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
-        {
-            this->list->setCurrentItem(item);
-        }
-    }
-
-    void setFamily(QString const &family)
-    {
-        QSet<int> weights;
-        int defaultWeight = QFont(family).weight();
-        auto *defaultItem = new IntItem(defaultWeight);
-
-        this->list->blockSignals(true);  // redundant signals
-
-        this->list->clear();
-        this->list->addItem(defaultItem);
-
-        weights.insert(defaultWeight);
-
-        // the goal is to only display valid weights and this gets close, but
-        // is not perfect for all fonts.
-        for (auto const &style : QFontDatabase::styles(family))
-        {
-            int weight = QFontDatabase::weight(family, style);
-
-            if (!weights.contains(weight))
-            {
-                weights.insert(weight);
-                this->list->addItem(new IntItem(weight));
-            }
-        }
-
-        this->list->setCurrentItem(defaultItem);
-
-        this->list->blockSignals(false);
-    }
-
-    int getSelected() const
-    {
-        auto *cast = dynamic_cast<IntItem *>(this->list->currentItem());
-        return cast ? cast->getValue() : -1;
-    }
+    FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr);
+    void setFamily(QString const &family);
+    int getSelected() const;
 
 Q_SIGNALS:
     void selectedChanged();
@@ -338,6 +277,72 @@ Q_SIGNALS:
 private:
     QListWidget *list;
 };
+
+FontWeightWidget::FontWeightWidget(QFont const &initialFont, QWidget *parent)
+    : QWidget(parent)
+    , list(new QListWidget)
+{
+    auto *layout = new QVBoxLayout;
+
+    this->setLayout(layout);
+    this->list->setSortingEnabled(true);
+
+    layout->addWidget(new QLabel("Weight"));
+    layout->addWidget(this->list);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QObject::connect(this->list, &QListWidget::currentRowChanged, this,
+                     [this](int row) {
+                         if (row >= 0)
+                         {
+                             Q_EMIT this->selectedChanged();
+                         }
+                     });
+
+    this->setFamily(initialFont.family());
+
+    if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
+    {
+        this->list->setCurrentItem(item);
+    }
+}
+
+void FontWeightWidget::setFamily(QString const &family)
+{
+    QSet<int> weights;
+    int defaultWeight = QFont(family).weight();
+    auto *defaultItem = new IntItem(defaultWeight);
+
+    this->list->blockSignals(true);  // redundant signals
+
+    this->list->clear();
+    this->list->addItem(defaultItem);
+
+    weights.insert(defaultWeight);
+
+    // the goal is to only display valid weights and this gets close, but
+    // is not perfect for all fonts.
+    for (auto const &style : QFontDatabase::styles(family))
+    {
+        int weight = QFontDatabase::weight(family, style);
+
+        if (!weights.contains(weight))
+        {
+            weights.insert(weight);
+            this->list->addItem(new IntItem(weight));
+        }
+    }
+
+    this->list->setCurrentItem(defaultItem);
+
+    this->list->blockSignals(false);
+}
+
+int FontWeightWidget::getSelected() const
+{
+    auto *cast = dynamic_cast<IntItem *>(this->list->currentItem());
+    return cast ? cast->getValue() : -1;
+}
 
 class FontDialog : public QDialog
 {
