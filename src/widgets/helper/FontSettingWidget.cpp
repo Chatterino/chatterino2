@@ -83,6 +83,9 @@ class FontSizeWidget : public QWidget
 public:
     FontSizeWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
+        , customItem(new IntItem)
+        , list(new QListWidget)
+        , edit(new QSpinBox)
     {
         auto *layout = new QVBoxLayout;
         auto *header = new QHBoxLayout;
@@ -151,9 +154,9 @@ private:
         this->list->setCurrentItem(this->customItem);
     }
 
-    IntItem *customItem = new IntItem;
-    QListWidget *list = new QListWidget;
-    QSpinBox *edit = new QSpinBox;
+    IntItem *customItem;
+    QListWidget *list;
+    QSpinBox *edit;
 };
 
 QStringList getFontFamilies()
@@ -170,6 +173,9 @@ class FontFamiliesWidget : public QWidget
 public:
     FontFamiliesWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
+        , list(new QListView)
+        , model(new QStringListModel(getFontFamilies(), this))
+        , proxy(new QSortFilterProxyModel(this))
     {
         auto *layout = new QVBoxLayout;
         auto *header = new QHBoxLayout;
@@ -241,9 +247,9 @@ Q_SIGNALS:
     void selectedChanged();
 
 private:
-    QListView *list = new QListView;
-    QStringListModel *model = new QStringListModel(getFontFamilies(), this);
-    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
+    QListView *list;
+    QStringListModel *model;
+    QSortFilterProxyModel *proxy;
 };
 
 class FontWeightWidget : public QWidget
@@ -252,6 +258,7 @@ class FontWeightWidget : public QWidget
 public:
     FontWeightWidget(QFont const &initialFont, QWidget *parent = nullptr)
         : QWidget(parent)
+        , list(new QListWidget)
     {
         auto *layout = new QVBoxLayout;
 
@@ -319,7 +326,7 @@ Q_SIGNALS:
     void selectedChanged();
 
 private:
-    QListWidget *list = new QListWidget;
+    QListWidget *list;
 };
 
 class FontDialog : public QDialog
@@ -328,6 +335,7 @@ class FontDialog : public QDialog
 public:
     FontDialog(QFont const &initialFont, QWidget *parent = nullptr)
         : QDialog(parent)
+        , sampleBox(new QTextEdit)
         , fontFamiliesW(new FontFamiliesWidget(initialFont))
         , fontSizeW(new FontSizeWidget(initialFont))
         , fontWeightW(new FontWeightWidget(initialFont))
@@ -397,8 +405,7 @@ private:
         cursor.setCharFormat(format);
     }
 
-    QTextEdit *sampleBox = new QTextEdit;
-
+    QTextEdit *sampleBox;
     FontFamiliesWidget *fontFamiliesW;
     FontSizeWidget *fontSizeW;
     FontWeightWidget *fontWeightW;
