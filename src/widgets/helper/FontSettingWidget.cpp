@@ -81,83 +81,88 @@ class FontSizeWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontSizeWidget(QFont const &initialFont, QWidget *parent = nullptr)
-        : QWidget(parent)
-        , customItem(new IntItem)
-        , list(new QListWidget)
-        , edit(new QSpinBox)
-    {
-        auto *layout = new QVBoxLayout;
-        auto *header = new QHBoxLayout;
-
-        this->setLayout(layout);
-        this->list->setSortingEnabled(true);
-        this->list->addItem(this->customItem);
-        this->customItem->setHidden(true);
-
-        for (int size : QFontDatabase::standardSizes())
-        {
-            this->list->addItem(new IntItem(size));
-        }
-
-        layout->addLayout(header);
-        layout->addWidget(this->list);
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        header->addWidget(new QLabel("Size"));
-        header->addWidget(this->edit);
-        header->setContentsMargins(0, 0, 0, 0);
-
-        this->edit->setValue(initialFont.pointSize());
-        this->setListTo(initialFont.pointSize());
-
-        QObject::connect(this->edit, &QSpinBox::valueChanged, this,
-                         [this](int value) {
-                             this->list->blockSignals(true);
-                             this->setListTo(value);
-                             this->list->blockSignals(false);
-                             Q_EMIT this->selectedChanged();
-                         });
-
-        QObject::connect(this->list, &QListWidget::currentItemChanged, this,
-                         [this](QListWidgetItem *item) {
-                             auto *cast = dynamic_cast<IntItem *>(item);
-                             assert(cast);
-                             this->edit->blockSignals(true);
-                             this->edit->setValue(cast->getValue());
-                             this->edit->blockSignals(false);
-                             Q_EMIT this->selectedChanged();
-                         });
-    }
-
-    int getSelected() const
-    {
-        auto *item = dynamic_cast<IntItem *>(this->list->currentItem());
-        return item ? item->getValue() : -1;
-    }
+    FontSizeWidget(QFont const &initialFont, QWidget *parent = nullptr);
+    int getSelected() const;
 
 Q_SIGNALS:
     void selectedChanged();
 
 private:
-    void setListTo(int size)
-    {
-        if (IntItem *item = findIntItemInList(this->list, size))
-        {
-            this->customItem->setHidden(item != this->customItem);
-            this->list->setCurrentItem(item);
-            return;
-        }
-
-        this->customItem->setValue(size);
-        this->customItem->setHidden(false);
-        this->list->setCurrentItem(this->customItem);
-    }
+    void setListTo(int size);
 
     IntItem *customItem;
     QListWidget *list;
     QSpinBox *edit;
 };
+
+FontSizeWidget::FontSizeWidget(QFont const &initialFont, QWidget *parent)
+    : QWidget(parent)
+    , customItem(new IntItem)
+    , list(new QListWidget)
+    , edit(new QSpinBox)
+{
+    auto *layout = new QVBoxLayout;
+    auto *header = new QHBoxLayout;
+
+    this->setLayout(layout);
+    this->list->setSortingEnabled(true);
+    this->list->addItem(this->customItem);
+    this->customItem->setHidden(true);
+
+    for (int size : QFontDatabase::standardSizes())
+    {
+        this->list->addItem(new IntItem(size));
+    }
+
+    layout->addLayout(header);
+    layout->addWidget(this->list);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    header->addWidget(new QLabel("Size"));
+    header->addWidget(this->edit);
+    header->setContentsMargins(0, 0, 0, 0);
+
+    this->edit->setValue(initialFont.pointSize());
+    this->setListTo(initialFont.pointSize());
+
+    QObject::connect(this->edit, &QSpinBox::valueChanged, this,
+                     [this](int value) {
+                         this->list->blockSignals(true);
+                         this->setListTo(value);
+                         this->list->blockSignals(false);
+                         Q_EMIT this->selectedChanged();
+                     });
+
+    QObject::connect(this->list, &QListWidget::currentItemChanged, this,
+                     [this](QListWidgetItem *item) {
+                         auto *cast = dynamic_cast<IntItem *>(item);
+                         assert(cast);
+                         this->edit->blockSignals(true);
+                         this->edit->setValue(cast->getValue());
+                         this->edit->blockSignals(false);
+                         Q_EMIT this->selectedChanged();
+                     });
+}
+
+int FontSizeWidget ::getSelected() const
+{
+    auto *item = dynamic_cast<IntItem *>(this->list->currentItem());
+    return item ? item->getValue() : -1;
+}
+
+void FontSizeWidget::setListTo(int size)
+{
+    if (IntItem *item = findIntItemInList(this->list, size))
+    {
+        this->customItem->setHidden(item != this->customItem);
+        this->list->setCurrentItem(item);
+        return;
+    }
+
+    this->customItem->setValue(size);
+    this->customItem->setHidden(false);
+    this->list->setCurrentItem(this->customItem);
+}
 
 QStringList getFontFamilies()
 {
