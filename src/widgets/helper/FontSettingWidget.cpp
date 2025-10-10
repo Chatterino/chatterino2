@@ -347,84 +347,89 @@ int FontWeightWidget::getSelected() const
 class FontDialog : public QDialog
 {
     Q_OBJECT
+
 public:
-    FontDialog(QFont const &initialFont, QWidget *parent = nullptr)
-        : QDialog(parent)
-        , sampleBox(new QTextEdit)
-        , fontFamiliesW(new FontFamiliesWidget(initialFont))
-        , fontSizeW(new FontSizeWidget(initialFont))
-        , fontWeightW(new FontWeightWidget(initialFont))
-    {
-        auto *layout = new QVBoxLayout;
-        auto *choiceLayout = new QHBoxLayout;
-        auto *choiceSideLayout = new QVBoxLayout;
-        auto *buttons = new QDialogButtonBox;
-
-        this->setWindowTitle("Pick Font");
-        this->setLayout(layout);
-        this->resize(450, 450);
-        this->sampleBox->setAcceptRichText(false);
-        this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
-
-        layout->addLayout(choiceLayout, 5);
-        layout->addWidget(new QLabel("Sample"));
-        layout->addWidget(this->sampleBox, 1);
-        layout->addWidget(buttons);
-
-        choiceLayout->addWidget(this->fontFamiliesW, 5);
-        choiceLayout->addLayout(choiceSideLayout, 3);
-
-        choiceSideLayout->addWidget(this->fontSizeW);
-        choiceSideLayout->addWidget(this->fontWeightW);
-
-        buttons->addButton("Ok", QDialogButtonBox::AcceptRole);
-        buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
-
-        QObject::connect(buttons, &QDialogButtonBox::accepted, this,
-                         &QDialog::accept);
-
-        QObject::connect(buttons, &QDialogButtonBox::rejected, this,
-                         &QDialog::reject);
-
-        QObject::connect(this->fontFamiliesW,
-                         &FontFamiliesWidget::selectedChanged, this, [this] {
-                             this->fontWeightW->setFamily(
-                                 this->fontFamiliesW->getSelected());
-                             this->updateSampleFont();
-                         });
-
-        QObject::connect(this->fontWeightW, &FontWeightWidget::selectedChanged,
-                         this, &FontDialog::updateSampleFont);
-
-        QObject::connect(this->fontSizeW, &FontSizeWidget::selectedChanged,
-                         this, &FontDialog::updateSampleFont);
-
-        this->updateSampleFont();
-    }
-
-    QFont getSelected() const
-    {
-        return {this->fontFamiliesW->getSelected(),
-                this->fontSizeW->getSelected(),
-                this->fontWeightW->getSelected()};
-    }
+    FontDialog(QFont const &initialFont, QWidget *parent = nullptr);
+    QFont getSelected() const;
 
 private:
-    void updateSampleFont()
-    {
-        QTextCursor cursor = this->sampleBox->textCursor();
-        QTextCharFormat format;
-
-        cursor.select(QTextCursor::Document);
-        format.setFont(this->getSelected());
-        cursor.setCharFormat(format);
-    }
+    void updateSampleFont();
 
     QTextEdit *sampleBox;
     FontFamiliesWidget *fontFamiliesW;
     FontSizeWidget *fontSizeW;
     FontWeightWidget *fontWeightW;
 };
+
+FontDialog::FontDialog(QFont const &initialFont, QWidget *parent)
+    : QDialog(parent)
+    , sampleBox(new QTextEdit)
+    , fontFamiliesW(new FontFamiliesWidget(initialFont))
+    , fontSizeW(new FontSizeWidget(initialFont))
+    , fontWeightW(new FontWeightWidget(initialFont))
+{
+    auto *layout = new QVBoxLayout;
+    auto *choiceLayout = new QHBoxLayout;
+    auto *choiceSideLayout = new QVBoxLayout;
+    auto *buttons = new QDialogButtonBox;
+
+    this->setWindowTitle("Pick Font");
+    this->setLayout(layout);
+    this->resize(450, 450);
+    this->sampleBox->setAcceptRichText(false);
+    this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
+
+    layout->addLayout(choiceLayout, 5);
+    layout->addWidget(new QLabel("Sample"));
+    layout->addWidget(this->sampleBox, 1);
+    layout->addWidget(buttons);
+
+    choiceLayout->addWidget(this->fontFamiliesW, 5);
+    choiceLayout->addLayout(choiceSideLayout, 3);
+
+    choiceSideLayout->addWidget(this->fontSizeW);
+    choiceSideLayout->addWidget(this->fontWeightW);
+
+    buttons->addButton("Ok", QDialogButtonBox::AcceptRole);
+    buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
+
+    QObject::connect(buttons, &QDialogButtonBox::accepted, this,
+                     &QDialog::accept);
+
+    QObject::connect(buttons, &QDialogButtonBox::rejected, this,
+                     &QDialog::reject);
+
+    QObject::connect(
+        this->fontFamiliesW, &FontFamiliesWidget::selectedChanged, this,
+        [this] {
+            this->fontWeightW->setFamily(this->fontFamiliesW->getSelected());
+            this->updateSampleFont();
+        });
+
+    QObject::connect(this->fontWeightW, &FontWeightWidget::selectedChanged,
+                     this, &FontDialog::updateSampleFont);
+
+    QObject::connect(this->fontSizeW, &FontSizeWidget::selectedChanged, this,
+                     &FontDialog::updateSampleFont);
+
+    this->updateSampleFont();
+}
+
+QFont FontDialog::getSelected() const
+{
+    return {this->fontFamiliesW->getSelected(), this->fontSizeW->getSelected(),
+            this->fontWeightW->getSelected()};
+}
+
+void FontDialog::updateSampleFont()
+{
+    QTextCursor cursor = this->sampleBox->textCursor();
+    QTextCharFormat format;
+
+    cursor.select(QTextCursor::Document);
+    format.setFont(this->getSelected());
+    cursor.setCharFormat(format);
+}
 
 }  // namespace
 
