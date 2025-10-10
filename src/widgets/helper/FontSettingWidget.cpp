@@ -47,7 +47,7 @@ public:
     void setValue(int v)
     {
         this->value = v;
-        QListWidgetItem::setText(QString::number(v));
+        this->QListWidgetItem::setText(QString::number(v));
     }
 
     int getValue() const
@@ -194,11 +194,10 @@ public:
         QObject::connect(
             this->list->selectionModel(), &QItemSelectionModel::currentChanged,
             this, [this](QModelIndex const &modelIndex, QModelIndex const &) {
-                if (!modelIndex.isValid())
+                if (modelIndex.isValid())
                 {
-                    return;
+                    Q_EMIT selectedChanged();
                 }
-                Q_EMIT selectedChanged();
             });
 
         this->setSelected(initialFont.family());
