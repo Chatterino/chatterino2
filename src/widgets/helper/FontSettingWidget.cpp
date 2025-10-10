@@ -291,9 +291,8 @@ public:
 
         weights.insert(defaultWeight);
 
-        /* the goal is to only display valid weights and this gets close, but
-         * is not perfect for all fonts.
-         */
+        // the goal is to only display valid weights and this gets close, but
+        // is not perfect for all fonts.
         for (auto const &style : QFontDatabase::styles(family))
         {
             int weight = QFontDatabase::weight(family, style);
