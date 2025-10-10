@@ -144,7 +144,7 @@ FontSizeWidget::FontSizeWidget(QFont const &initialFont, QWidget *parent)
                      });
 }
 
-int FontSizeWidget ::getSelected() const
+int FontSizeWidget::getSelected() const
 {
     auto *item = dynamic_cast<IntItem *>(this->list->currentItem());
     return item ? item->getValue() : -1;
