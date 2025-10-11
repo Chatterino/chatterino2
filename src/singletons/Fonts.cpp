@@ -56,40 +56,6 @@ int getUsernameBoldness()
 #endif
 }
 
-float fontSize(FontStyle style)
-{
-    auto chatSize = [] {
-        return static_cast<float>(getSettings()->chatFontSize);
-    };
-    switch (style)
-    {
-        case FontStyle::ChatSmall:
-            return 0.6F * chatSize();
-        case FontStyle::ChatMediumSmall:
-            return 0.8F * chatSize();
-        case FontStyle::ChatMedium:
-        case FontStyle::ChatMediumBold:
-        case FontStyle::ChatMediumItalic:
-        case FontStyle::TimestampMedium:
-            return chatSize();
-        case FontStyle::ChatLarge:
-            return 1.2F * chatSize();
-        case FontStyle::ChatVeryLarge:
-            return 1.4F * chatSize();
-
-        case FontStyle::Tiny:
-            return 8;
-        case FontStyle::UiMedium:
-        case FontStyle::UiMediumBold:
-        case FontStyle::UiTabs:
-        case FontStyle::EndType:
-            return 9;
-    }
-
-    assert(false);
-    return 9;
-}
-
 int fontWeight(FontStyle style)
 {
     switch (style)
@@ -207,6 +173,48 @@ QFontMetricsF Fonts::getFontMetrics(FontStyle type, float scale)
     return this->getOrCreateFontData(type, scale).metrics;
 }
 
+float Fonts::scaleFontSize(FontStyle style, float size, float scale)
+{
+    float initial = 9;
+
+    switch (style)
+    {
+        case FontStyle::ChatSmall:
+            initial = 0.6F * size;
+            break;
+        case FontStyle::ChatMediumSmall:
+            initial = 0.8F * size;
+            break;
+        case FontStyle::ChatMedium:
+        case FontStyle::ChatMediumBold:
+        case FontStyle::ChatMediumItalic:
+        case FontStyle::TimestampMedium:
+            initial = size;
+            break;
+        case FontStyle::ChatLarge:
+            initial = 1.2F * size;
+            break;
+        case FontStyle::ChatVeryLarge:
+            initial = 1.4F * size;
+            break;
+        case FontStyle::Tiny:
+            initial = 8;
+            break;
+        case FontStyle::UiMedium:
+        case FontStyle::UiMediumBold:
+        case FontStyle::UiTabs:
+        case FontStyle::EndType:
+            initial = 9;
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return initial * scale;
+}
+
 Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 {
     assertInGuiThread();
@@ -235,7 +243,8 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
     QFont font{
         fontFamily(type),
-        static_cast<int>(fontSize(type) * scale),
+        static_cast<int>(Fonts::scaleFontSize(
+            type, static_cast<float>(getSettings()->chatFontSize), scale)),
         fontWeight(type),
         isItalic(type),
     };
