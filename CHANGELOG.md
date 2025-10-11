@@ -24,6 +24,7 @@
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
+- Dev: Expose the font size scaling function. (#6537)
 
 ## 2.5.4
 
