@@ -63,28 +63,6 @@ private:
     int value;
 };
 
-class FontSizeWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    FontSizeWidget(const QFont &initialFont, QWidget *parent = nullptr);
-    int getSelected() const;
-
-Q_SIGNALS:
-    void selectedChanged();
-
-private:
-    void setSelectedTo(int size);
-
-    // item used to display value from `edit`,
-    // gets hidden from the list when not needed.
-    IntItem *customItem;
-
-    QListWidget *list;
-    QSpinBox *edit;
-};
-
 IntItem *findIntItemInList(QListWidget *list, int value)
 {
     int n = list->count();
@@ -102,6 +80,25 @@ IntItem *findIntItemInList(QListWidget *list, int value)
     return nullptr;
 }
 
+class FontSizeWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    FontSizeWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    int getSelected() const;
+
+Q_SIGNALS:
+    void selectedChanged();
+
+private:
+    void setListSelected(int size);
+
+    IntItem *customItem;  // displays the value from `edit`
+    QListWidget *list;
+    QSpinBox *edit;
+};
+
 FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
     : QWidget(parent)
     , customItem(new IntItem)
@@ -112,14 +109,17 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
     auto *header = new QHBoxLayout;
 
     this->setLayout(layout);
+
     this->list->setSortingEnabled(true);
     this->list->addItem(this->customItem);
-    this->customItem->setHidden(true);
 
     for (int size : QFontDatabase::standardSizes())
     {
         this->list->addItem(new IntItem(size));
     }
+
+    this->setListSelected(initialFont.pointSize());
+    this->edit->setValue(initialFont.pointSize());
 
     layout->addLayout(header);
     layout->addWidget(this->list);
@@ -129,13 +129,10 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
     header->addWidget(this->edit);
     header->setContentsMargins(0, 0, 0, 0);
 
-    this->edit->setValue(initialFont.pointSize());
-    this->setSelectedTo(initialFont.pointSize());
-
     QObject::connect(this->edit, &QSpinBox::valueChanged, this,
                      [this](int value) {
                          QSignalBlocker listSignalBlocker(this->list);
-                         this->setSelectedTo(value);
+                         this->setListSelected(value);
                          Q_EMIT this->selectedChanged();
                      });
 
@@ -155,7 +152,7 @@ int FontSizeWidget::getSelected() const
     return item ? item->getValue() : -1;
 }
 
-void FontSizeWidget::setSelectedTo(int size)
+void FontSizeWidget::setListSelected(int size)
 {
     if (IntItem *item = findIntItemInList(this->list, size))
     {
@@ -175,13 +172,14 @@ class FontFamiliesWidget : public QWidget
 
 public:
     FontFamiliesWidget(const QFont &initialFont, QWidget *parent = nullptr);
-    void setSelected(const QString &family);
     QString getSelected() const;
 
 Q_SIGNALS:
     void selectedChanged();
 
 private:
+    void setSelected(const QString &family);
+
     QListView *list;
     QStringListModel *model;
     QSortFilterProxyModel *proxy;
@@ -213,6 +211,8 @@ FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
     this->proxy->setSourceModel(this->model);
     this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
+    this->setSelected(initialFont.family());
+
     layout->addLayout(header);
     layout->addWidget(this->list);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -228,14 +228,12 @@ FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
 
     QObject::connect(
         this->list->selectionModel(), &QItemSelectionModel::currentChanged,
-        this, [this](const QModelIndex &modelIndex, const QModelIndex &) {
-            if (modelIndex.isValid())
+        this, [this](const QModelIndex &proxyIndex, const QModelIndex &) {
+            if (proxyIndex.isValid())
             {
                 Q_EMIT this->selectedChanged();
             }
         });
-
-    this->setSelected(initialFont.family());
 }
 
 void FontFamiliesWidget::setSelected(const QString &family)
@@ -292,6 +290,13 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
     this->setLayout(layout);
     this->list->setSortingEnabled(true);
 
+    this->setFamily(initialFont.family());
+
+    if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
+    {
+        this->list->setCurrentItem(item);
+    }
+
     layout->addWidget(new QLabel("Weight"));
     layout->addWidget(this->list);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -303,13 +308,6 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
                              Q_EMIT this->selectedChanged();
                          }
                      });
-
-    this->setFamily(initialFont.family());
-
-    if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
-    {
-        this->list->setCurrentItem(item);
-    }
 }
 
 void FontWeightWidget::setFamily(const QString &family)
@@ -318,7 +316,6 @@ void FontWeightWidget::setFamily(const QString &family)
     int defaultWeight = QFont(family).weight();
     auto *defaultItem = new IntItem(defaultWeight);
 
-    // redundant signals will be emitted
     QSignalBlocker listSignalBlocker(this->list);
 
     this->list->clear();
@@ -380,8 +377,10 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     this->setWindowTitle("Pick Font");
     this->setLayout(layout);
     this->resize(450, 450);
+
     this->sampleBox->setAcceptRichText(false);
     this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
+    this->updateSampleFont();
 
     layout->addLayout(choiceLayout, 5);
     layout->addWidget(new QLabel("Sample"));
@@ -415,8 +414,6 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
 
     QObject::connect(this->fontSizeW, &FontSizeWidget::selectedChanged, this,
                      &FontDialog::updateSampleFont);
-
-    this->updateSampleFont();
 }
 
 QFont FontDialog::getSelected() const
@@ -449,11 +446,21 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
     : QWidget(parent)
     , currentLabel(new QLabel)
 {
+    auto *layout = new QHBoxLayout;
     auto *button = new QPushButton;
+
+    this->setLayout(layout);
+    this->updateCurrentLabel();
+
+    layout->addWidget(new QLabel("Font:"));
+    layout->addStretch(1);
+    layout->addWidget(this->currentLabel);
+    layout->addWidget(button);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     button->setIcon(QIcon(":/buttons/edit.svg"));
 
-    QObject::connect(button, &QPushButton::clicked, this, [this]() {
+    QObject::connect(button, &QPushButton::clicked, this, [this] {
         FontDialog dialog(
             getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1), this);
 
@@ -470,17 +477,6 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
         this->updateCurrentLabel();
         getApp()->getWindows()->forceLayoutChannelViews();
     });
-
-    auto *layout = new QHBoxLayout;
-
-    layout->addWidget(new QLabel("Font:"));
-    layout->addStretch(1);
-    layout->addWidget(this->currentLabel);
-    layout->addWidget(button);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->updateCurrentLabel();
-    this->setLayout(layout);
 }
 
 }  // namespace chatterino
