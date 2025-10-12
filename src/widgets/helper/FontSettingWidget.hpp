@@ -11,6 +11,7 @@ public:
 
 private:
     void updateCurrentLabel();
+
     QLabel *currentLabel;
 };
 
