@@ -31,7 +31,7 @@ void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
     {
         return;  // clicked on header or invalid hotkey
     }
-    EditHotkeyDialog dialog(hotkey, false, view);
+    EditHotkeyDialog dialog(hotkey, view);
     bool wasAccepted = dialog.exec() == 1;
 
     if (wasAccepted)
@@ -66,7 +66,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([view] {
-        EditHotkeyDialog dialog(nullptr, false, view);
+        EditHotkeyDialog dialog(nullptr, view);
         bool wasAccepted = dialog.exec() == 1;
 
         if (wasAccepted)
