@@ -236,7 +236,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
 
-    layout.addWidget(new FontSettingWidget, {"font"});
+    layout.addWidget(new FontSettingWidget, {"font", "weight", "size"});
 
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
