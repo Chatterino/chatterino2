@@ -118,8 +118,10 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
         this->list->addItem(new IntItem(size));
     }
 
-    this->setListSelected(initialFont.pointSize());
     this->edit->setValue(initialFont.pointSize());
+    this->edit->setMinimum(1);
+
+    this->setListSelected(initialFont.pointSize());
 
     layout->addLayout(header);
     layout->addWidget(this->list);
