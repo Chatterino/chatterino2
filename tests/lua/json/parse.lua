@@ -71,12 +71,13 @@ check_ok('-0', 0)
 check_ok('42', 42)
 check_ok('-42', -42)
 check_ok('1.23456', 1.23456)
-check_ok('null', nil)
+check_ok('null', JSON.null)
 
 -- objects
 check_ok('{"foo": 1}', { foo = 1 })
 check_ok('{"foo": [1, 2, {"bar": false}]}', { foo = { 1, 2, { bar = false } } })
-check_ok('{"foo": 1, "bar": "hey", "baz": {"obj": true}, "a": null}', { foo = 1, bar = "hey", baz = { obj = true } })
+check_ok('{"foo": 1, "bar": "hey", "baz": {"obj": true}, "a": null}',
+    { foo = 1, bar = "hey", baz = { obj = true }, a = JSON.null })
 check_ok('{"esc\\naped": "a string"}', { ["esc\naped"] = "a string" })
 check_ok('{"": 1}', { [""] = 1 })
 check_ok('{"": {"": 0}, "": 0}', { [""] = 0 })
@@ -85,8 +86,8 @@ check_ok('{"": {"": 0}, "": 0}', { [""] = 0 })
 check_ok('[]', {})
 check_ok('[1]', { 1 })
 check_ok('["string"]', { "string" })
-check_ok('[null]', {})
-check_ok('[null, 1, null]', { nil, 1 })
+check_ok('[null]', { JSON.null })
+check_ok('[null, 1, null]', { JSON.null, 1, JSON.null })
 check_ok('[{}]', { {} })
 check_ok('[{}, {}]', { {}, {} })
 check_ok('[{}, "foo", 1, false, true]', { {}, "foo", 1, false, true })
@@ -164,7 +165,7 @@ check_ok([[
     -42,
     true,
     false,
-    nil,
+    JSON.null,
     {
         integer = 1234567890,
         real = -9876.543210,
@@ -186,6 +187,7 @@ check_ok([[
         hex = "\u{0123}\u{4567}\u{89AB}\u{CDEF}\u{abcd}\u{ef4A}",
         ["true"] = true,
         ["false"] = false,
+        null = JSON.null,
         array = {},
         object = {},
         address = "50 St. James Street",

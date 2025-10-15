@@ -224,7 +224,7 @@ struct SaxHandler {
 
     bool on_null(boost::system::error_code &ec)
     {
-        lua_pushnil(this->state);
+        lua_pushlightuserdata(this->state, nullptr);  // json.null
         return this->appendValue(ec);
     }
 
