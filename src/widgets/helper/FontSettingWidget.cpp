@@ -12,13 +12,13 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
 #include <QStringListModel>
 #include <QTextCharFormat>
 #include <QTextCursor>
-#include <QTextEdit>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -358,7 +358,7 @@ public:
 private:
     void updateSampleFont();
 
-    QTextEdit *sampleBox;
+    QPlainTextEdit *sampleBox;
     FontFamiliesWidget *fontFamiliesW;
     FontSizeWidget *fontSizeW;
     FontWeightWidget *fontWeightW;
@@ -366,7 +366,7 @@ private:
 
 FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     : QDialog(parent)
-    , sampleBox(new QTextEdit)
+    , sampleBox(new QPlainTextEdit)
     , fontFamiliesW(new FontFamiliesWidget(initialFont))
     , fontSizeW(new FontSizeWidget(initialFont))
     , fontWeightW(new FontWeightWidget(initialFont))
@@ -380,8 +380,8 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     this->setLayout(layout);
     this->resize(450, 450);
 
-    this->sampleBox->setAcceptRichText(false);
-    this->sampleBox->setText("The quick brown fox jumps over the lazy dog");
+    this->sampleBox->setPlainText(
+        "The quick brown fox jumps over the lazy dog");
     this->updateSampleFont();
 
     layout->addLayout(choiceLayout, 5);
