@@ -426,12 +426,16 @@ QFont FontDialog::getSelected() const
 
 void FontDialog::updateSampleFont()
 {
-    QTextCursor cursor = this->sampleBox->textCursor();
     QTextCharFormat format;
+    QTextCursor cursor = this->sampleBox->textCursor();
+    QFont font = this->getSelected();
+
+    format.setFont(font);
 
     cursor.select(QTextCursor::Document);
-    format.setFont(this->getSelected());
     cursor.setCharFormat(format);
+
+    this->sampleBox->document()->setDefaultFont(font);
 }
 
 }  // namespace
