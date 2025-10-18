@@ -8,6 +8,7 @@
 - Minor: Added link support to plugin message API. (#6386)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
+- Bugfix: Fixed scrollbar rect cmputation potentially resulting in overflows. (#6547)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
