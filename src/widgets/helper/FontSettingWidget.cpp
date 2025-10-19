@@ -445,7 +445,7 @@ void FontSettingWidget::updateCurrentLabel()
     QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
     QString family = font.family();
     QString ptSize = QString::number(font.pointSize());
-    this->currentLabel->setText(family + ", " + ptSize + "pt");
+    this->currentLabel->setText(family % ", " % ptSize % "pt");
 }
 
 FontSettingWidget::FontSettingWidget(QWidget *parent)
