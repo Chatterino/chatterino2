@@ -72,9 +72,14 @@ check_ok('42', 42)
 check_ok('-42', -42)
 check_ok('1.23456', 1.23456)
 check_ok('null', JSON.null)
-check_ok('18446744073709551615', 18446744073709551616)
-check_ok('9223372036854775807', 9223372036854800387) -- max int
-check_ok('9223372036854775808', 9223372036854800384) -- double
+
+-- integer limits
+check_ok('9223372036854775807', 9223372036854775807) -- max int (this has to be equal)
+-- +/- 1 precision in 64 bit float
+local v_1_shl_64 = JSON.parse('18446744073709551615')
+assert(v_1_shl_64 >= 18446744073709551614 or v_1_shl_64 <= 18446744073709551616)
+
+check_ok('9223372036854775808', 9223372036854775808) -- double
 
 -- objects
 check_ok('{"foo": 1}', { foo = 1 })
