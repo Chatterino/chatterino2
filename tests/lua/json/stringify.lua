@@ -112,6 +112,11 @@ local recurse = {}
 recurse.recurse = recurse
 check_err(recurse) -- hits the depth limit
 
+check_err(math.huge)
+check_err(-math.huge)
+check_err(0/0)
+check_err(-(0/0))
+
 -- ✨ pretty ✨
 
 check_ok(1, "1", { pretty = true })

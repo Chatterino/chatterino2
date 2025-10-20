@@ -79,13 +79,24 @@ std::optional<size_t> inferArraySize(lua_State *L)
     return max;
 }
 
+/// luaL_error but with [[noreturn]]
+[[noreturn]]
+void fail(lua_State *L, const char *msg, auto &&...args)
+{
+    luaL_error(L, msg, std::forward<decltype(args)>(args)...);
+    std::terminate();
+}
+
 void stringifyValue(lua_State *L, auto &writer, uint16_t depth);
 
 void stringifyArray(lua_State *L, auto &writer, uint16_t depth, size_t length)
 {
     lua_checkstack(L, 2);  // value + potential error
 
-    writer.StartArray();
+    if (!writer.StartArray())
+    {
+        fail(L, "Failed to write array start");
+    }
 
     for (size_t i = 0; i < length; i++)
     {
@@ -94,14 +105,20 @@ void stringifyArray(lua_State *L, auto &writer, uint16_t depth, size_t length)
         lua_pop(L, 1);  // pop value
     }
 
-    writer.EndArray();
+    if (!writer.EndArray())
+    {
+        fail(L, "Failed to write array end");
+    }
 }
 
 void stringifyObject(lua_State *L, auto &writer, uint16_t depth)
 {
     lua_checkstack(L, 3);  // key + value + potential error
 
-    writer.StartObject();
+    if (!writer.StartObject())
+    {
+        fail(L, "Failed to write object start");
+    }
 
     size_t items = 0;
     lua_pushnil(L);
@@ -110,8 +127,7 @@ void stringifyObject(lua_State *L, auto &writer, uint16_t depth)
         items++;
         if (items > ENCODE_MAX_TABLE_LENGTH)
         {
-            luaL_error(L, "Too many items in table");
-            std::terminate();
+            fail(L, "Too many items in table");
         }
         // Stack:
         // [-3] table
@@ -120,54 +136,60 @@ void stringifyObject(lua_State *L, auto &writer, uint16_t depth)
         auto keyType = lua_type(L, -2);
         if (keyType != LUA_TSTRING)
         {
-            luaL_error(L, "Object key was not a string, got %s",
-                       lua_typename(L, keyType));
-            std::terminate();
+            fail(L, "Object key was not a string, got %s",
+                 lua_typename(L, keyType));
         }
         size_t len = 0;
         const char *str = lua_tolstring(L, -2, &len);
-        writer.Key(str, len, /*copy=*/true);
+
+        if (!writer.Key(str, len, /*copy=*/true))
+        {
+            fail(L, "Failed to write object key");
+        }
 
         stringifyValue(L, writer, depth);
         lua_pop(L, 1);  // pop value
     }
 
-    writer.EndObject();
+    if (!writer.EndObject())
+    {
+        fail(L, "Failed to write object end");
+    }
 }
 
 void stringifyValue(lua_State *L, auto &writer, uint16_t depth)
 {
     auto typeId = lua_type(L, -1);
+    bool ok = true;
     switch (typeId)
     {
         case LUA_TNIL:
-            writer.Null();
+            ok = writer.Null();
             break;
         case LUA_TBOOLEAN:
-            writer.Bool(lua_toboolean(L, -1) != 0);
+            ok = writer.Bool(lua_toboolean(L, -1) != 0);
             break;
         case LUA_TNUMBER: {
             if (lua_isinteger(L, -1))
             {
-                writer.Int64(lua_tointeger(L, -1));
+                ok = writer.Int64(lua_tointeger(L, -1));
             }
             else
             {
-                writer.Double(lua_tonumber(L, -1));
+                ok = writer.Double(lua_tonumber(L, -1));
             }
         }
         break;
         case LUA_TSTRING: {
             size_t len = 0;
             const char *str = lua_tolstring(L, -1, &len);
-            writer.String(str, len, /*copy=*/true);
+            ok = writer.String(str, len, /*copy=*/true);
         }
         break;
         case LUA_TTABLE: {
             if (depth >= ENCODE_MAX_DEPTH)
             {
-                luaL_error(L, "Too deep");
-                std::terminate();
+                fail(L, "Too deep");
             }
 
             auto arraySize = inferArraySize(L);
@@ -185,12 +207,11 @@ void stringifyValue(lua_State *L, auto &writer, uint16_t depth)
             auto *ptr = lua_touserdata(L, -1);
             if (ptr == nullptr)
             {
-                writer.Null();
+                ok = writer.Null();
             }
             else
             {
-                luaL_error(L, "Non-null lightuserdata not supported");
-                std::terminate();
+                fail(L, "Unsupported type: lightuserdata");
             }
         }
         break;
@@ -198,8 +219,12 @@ void stringifyValue(lua_State *L, auto &writer, uint16_t depth)
         case LUA_TUSERDATA:
         case LUA_TTHREAD:
         default:
-            luaL_error(L, "Unsupported type: %s", lua_typename(L, typeId));
-            std::terminate();
+            fail(L, "Unsupported type: %s", lua_typename(L, typeId));
+    }
+
+    if (!ok)
+    {
+        fail(L, "Failed to format %s", lua_typename(L, typeId));
     }
 }
 

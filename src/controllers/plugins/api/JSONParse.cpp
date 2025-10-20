@@ -5,6 +5,8 @@
 #include <QVarLengthArray>
 #include <sol/sol.hpp>
 
+#include <limits>
+
 namespace {
 
 // NOLINTNEXTLINE(performance-enum-size) -- we want `int` because that's what boost::system::error_code takes
@@ -95,7 +97,7 @@ struct SaxHandler {
         if (this->elements.empty())
         {
             ec = makeCode(ParseError::NoElements);
-            assert(false && "We shouldn't hit this");
+            assert(false && "No information about current on object on stack");
             return false;
         }
         assert(this->elements.back().isObject);
@@ -127,7 +129,7 @@ struct SaxHandler {
         if (this->elements.empty())
         {
             ec = makeCode(ParseError::NoElements);
-            assert(false && "We shouldn't hit this");
+            assert(false && "No information about current array on stack");
             return false;
         }
         assert(!this->elements.back().isObject);
@@ -205,7 +207,14 @@ struct SaxHandler {
     bool on_uint64(uint64_t i, boost::json::string_view /* source */,
                    boost::system::error_code &ec)
     {
-        lua_pushinteger(this->state, static_cast<lua_Integer>(i));
+        if (i <= static_cast<uint64_t>(std::numeric_limits<lua_Integer>::max()))
+        {
+            lua_pushinteger(this->state, static_cast<lua_Integer>(i));
+        }
+        else
+        {
+            lua_pushnumber(this->state, static_cast<lua_Number>(i));
+        }
         return this->appendValue(ec);
     }
 
