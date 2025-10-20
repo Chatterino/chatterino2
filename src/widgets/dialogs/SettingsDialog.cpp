@@ -449,7 +449,6 @@ void SettingsDialog::onOkClicked()
 void SettingsDialog::onCancelClicked()
 {
     getSettings()->restoreSnapshot();
-    getApp()->getWindows()->forceLayoutChannelViews();
 
     this->close();
 }
