@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/SignalListener.hpp"
+
 #include <QLabel>
 
 namespace chatterino {
@@ -13,6 +15,7 @@ private:
     void updateCurrentLabel();
 
     QLabel *currentLabel;
+    SignalListener listener;
 };
 
 }  // namespace chatterino

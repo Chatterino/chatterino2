@@ -451,12 +451,17 @@ void FontSettingWidget::updateCurrentLabel()
 FontSettingWidget::FontSettingWidget(QWidget *parent)
     : QWidget(parent)
     , currentLabel(new QLabel)
+    , listener([this] {
+        this->updateCurrentLabel();
+    })
 {
     auto *layout = new QHBoxLayout;
     auto *button = new QPushButton;
 
     this->setLayout(layout);
     this->updateCurrentLabel();
+
+    this->listener.add(getApp()->getFonts()->fontChanged);
 
     layout->addWidget(new QLabel("Font:"));
     layout->addStretch(1);
@@ -480,7 +485,6 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
         getSettings()->chatFontSize = font.pointSize();
         getSettings()->chatFontWeight = font.weight();
 
-        this->updateCurrentLabel();
         getApp()->getWindows()->forceLayoutChannelViews();
     });
 }
