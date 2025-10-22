@@ -23,6 +23,7 @@
 
 #include <boost/foreach.hpp>
 #include <QActionGroup>
+#include <QCollator>
 #include <QDebug>
 #include <QFile>
 #include <QFormLayout>
@@ -1247,8 +1248,11 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
 
 void Notebook::sortTabsAlphabetically()
 {
-    std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
-        return a.tab->getTitle() < b.tab->getTitle();
+    QCollator cmp;
+    cmp.setCaseSensitivity(Qt::CaseInsensitive);
+
+    std::ranges::sort(this->items_, [cmp](const Item &a, const Item &b) {
+        return cmp(a.tab->getTitle(), b.tab->getTitle());
     });
 
     getApp()->getWindows()->queueSave();
