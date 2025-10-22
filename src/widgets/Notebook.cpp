@@ -105,20 +105,6 @@ Notebook::Notebook(QWidget *parent)
             << "Notebook must be created within a BaseWindow";
     }
 
-    this->sortTabsAlphaAction_ = new QAction("Sort Tabs Alphabetically", this);
-
-    QObject::connect(this->sortTabsAlphaAction_, &QAction::triggered, [this] {
-        if (!this->isNotebookLayoutLocked())
-        {
-            std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
-                return a.tab->getTitle() < b.tab->getTitle();
-            });
-
-            getApp()->getWindows()->queueSave();
-            this->performLayout(true);
-        }
-    });
-
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
     // tab rendering.
@@ -1200,8 +1186,6 @@ void Notebook::addNotebookActionsToMenu(QMenu *menu)
     menu->addAction(this->lockNotebookLayoutAction_);
 
     menu->addAction(this->toggleTopMostAction_);
-
-    menu->addAction(this->sortTabsAlphaAction_);
 }
 
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
@@ -1259,6 +1243,16 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
     }
 
     return true;
+}
+
+void Notebook::sortTabsAlphabetically()
+{
+    std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
+        return a.tab->getTitle() < b.tab->getTitle();
+    });
+
+    getApp()->getWindows()->queueSave();
+    this->performLayout(true);
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1321,6 +1315,11 @@ SplitNotebook::SplitNotebook(Window *parent)
                          this->hideAllTabsAction->setChecked(true);
                      });
     tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
+
+    this->sortTabsAlphaAction_ = new QAction("Sort Tabs Alphabetically", this);
+    QObject::connect(this->sortTabsAlphaAction_, &QAction::triggered, [this] {
+        this->sortTabsAlphabetically();
+    });
 
     switch (getSettings()->tabVisibility.getEnum())
     {
@@ -1409,6 +1408,8 @@ SplitNotebook::SplitNotebook(Window *parent)
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
 {
     Notebook::addNotebookActionsToMenu(menu);
+
+    menu->addAction(this->sortTabsAlphaAction_);
 
     auto *submenu = menu->addMenu("Tab visibility");
     submenu->addAction(this->showAllTabsAction);

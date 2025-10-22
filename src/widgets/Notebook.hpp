@@ -122,6 +122,8 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    void sortTabsAlphabetically();
+
 protected:
     bool getShowTabs() const;
     void setShowTabs(bool value);
@@ -229,7 +231,6 @@ private:
 
     QAction *lockNotebookLayoutAction_;
     QAction *toggleTopMostAction_;
-    QAction *sortTabsAlphaAction_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
@@ -265,6 +266,8 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
+    QAction *sortTabsAlphaAction_;
+
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
