@@ -105,9 +105,9 @@ Notebook::Notebook(QWidget *parent)
             << "Notebook must be created within a BaseWindow";
     }
 
-    this->sortTabsAlpha_ = new QAction("Sort Tabs Alphabetically", this);
+    this->sortTabsAlphaAction_ = new QAction("Sort Tabs Alphabetically", this);
 
-    QObject::connect(this->sortTabsAlpha_, &QAction::triggered, [this] {
+    QObject::connect(this->sortTabsAlphaAction_, &QAction::triggered, [this] {
         if (!this->isNotebookLayoutLocked())
         {
             std::ranges::sort(this->items_, [](Item &a, Item &b) {
@@ -1201,7 +1201,7 @@ void Notebook::addNotebookActionsToMenu(QMenu *menu)
 
     menu->addAction(this->toggleTopMostAction_);
 
-    menu->addAction(this->sortTabsAlpha_);
+    menu->addAction(this->sortTabsAlphaAction_);
 }
 
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
