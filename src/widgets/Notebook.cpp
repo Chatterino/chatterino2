@@ -110,7 +110,7 @@ Notebook::Notebook(QWidget *parent)
     QObject::connect(this->sortTabsAlphaAction_, &QAction::triggered, [this] {
         if (!this->isNotebookLayoutLocked())
         {
-            std::ranges::sort(this->items_, [](Item &a, Item &b) {
+            std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
                 return a.tab->getTitle() < b.tab->getTitle();
             });
 
