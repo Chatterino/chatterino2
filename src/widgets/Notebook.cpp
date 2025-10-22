@@ -32,6 +32,7 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <ranges>
 #include <utility>
 
 namespace chatterino {
@@ -103,6 +104,20 @@ Notebook::Notebook(QWidget *parent)
         qCWarning(chatterinoApp)
             << "Notebook must be created within a BaseWindow";
     }
+
+    this->sortTabsAlpha_ = new QAction("Sort Tabs Alphabetically", this);
+
+    QObject::connect(this->sortTabsAlpha_, &QAction::triggered, [this] {
+        if (!this->isNotebookLayoutLocked())
+        {
+            std::ranges::sort(this->items_, [](Item &a, Item &b) {
+                return a.tab->getTitle() < b.tab->getTitle();
+            });
+
+            getApp()->getWindows()->queueSave();
+            this->performLayout(true);
+        }
+    });
 
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
@@ -1185,6 +1200,8 @@ void Notebook::addNotebookActionsToMenu(QMenu *menu)
     menu->addAction(this->lockNotebookLayoutAction_);
 
     menu->addAction(this->toggleTopMostAction_);
+
+    menu->addAction(this->sortTabsAlpha_);
 }
 
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
