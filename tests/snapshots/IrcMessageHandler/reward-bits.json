@@ -105,7 +105,7 @@
                     ]
                 },
                 {
-                    "flags": "TwitchEmoteImage|ChannelPointReward",
+                    "flags": "EmoteImage|ChannelPointReward",
                     "image": "https://chatterino.com/reward1x.png",
                     "link": {
                         "type": "None",

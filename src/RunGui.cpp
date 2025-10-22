@@ -114,7 +114,7 @@ void createRunningFile(const QString &path)
 {
     QFile runningFile(path);
 
-    runningFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    std::ignore = runningFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     runningFile.flush();
     runningFile.close();
 }
