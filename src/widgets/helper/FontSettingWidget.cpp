@@ -19,6 +19,7 @@
 #include <QStringListModel>
 #include <QTextCharFormat>
 #include <QTextCursor>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -462,7 +463,7 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
     })
 {
     auto *layout = new QHBoxLayout;
-    auto *button = new QPushButton;
+    auto *button = new QToolButton;
 
     this->setLayout(layout);
     this->updateCurrentLabel();
