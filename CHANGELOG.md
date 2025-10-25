@@ -5,7 +5,7 @@
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added setting for character limit of deleted messages. (#6491)
-- Minor: Added link support to plugin message API. (#6386)
+- Minor: Added link support to plugin message API. (#6386, #6527)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
