@@ -1318,10 +1318,12 @@ SplitNotebook::SplitNotebook(Window *parent)
                      });
     tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
 
-    this->sortTabsAlphaAction_ = new QAction("Sort Tabs Alphabetically", this);
-    QObject::connect(this->sortTabsAlphaAction_, &QAction::triggered, [this] {
-        this->sortTabsAlphabetically();
-    });
+    this->sortTabsAlphabeticallyAction_ =
+        new QAction("Sort Tabs Alphabetically", this);
+    QObject::connect(this->sortTabsAlphabeticallyAction_, &QAction::triggered,
+                     [this] {
+                         this->sortTabsAlphabetically();
+                     });
 
     switch (getSettings()->tabVisibility.getEnum())
     {
@@ -1411,7 +1413,7 @@ void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
 {
     Notebook::addNotebookActionsToMenu(menu);
 
-    menu->addAction(this->sortTabsAlphaAction_);
+    menu->addAction(this->sortTabsAlphabeticallyAction_);
 
     auto *submenu = menu->addMenu("Tab visibility");
     submenu->addAction(this->showAllTabsAction);

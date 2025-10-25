@@ -266,7 +266,7 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
-    QAction *sortTabsAlphaAction_;
+    QAction *sortTabsAlphabeticallyAction_;
 
     void addCustomButtons();
 
