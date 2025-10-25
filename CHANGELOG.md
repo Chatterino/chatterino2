@@ -9,6 +9,7 @@
 - Minor: Added a description for the logging option under moderation tab. (#6514)
 - Minor: Added a JSON API for plugins (`require('json')`). (#6420)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
+- Bugfix: Fixed scrollbar rect computation potentially resulting in overflows. (#6547)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
@@ -23,7 +24,8 @@
 - Dev: Removed unused method in `Emojis`. (#6517)
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
-- Def: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
 
 ## 2.5.4
 
