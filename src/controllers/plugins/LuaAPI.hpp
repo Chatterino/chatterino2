@@ -82,6 +82,7 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev);
 
 /**
  * @includefile common/Channel.hpp
+ * @includefile controllers/plugins/api/Accounts.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
  * @includefile controllers/plugins/api/HTTPResponse.hpp
  * @includefile controllers/plugins/api/HTTPRequest.hpp

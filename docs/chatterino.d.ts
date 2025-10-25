@@ -376,4 +376,17 @@ declare namespace c2 {
         Original,
         Repost,
     }
+
+    namespace accounts {
+        namespace twitch {
+            class TwitchAccount {
+                user_name(): string;
+                user_id(): string;
+                color(): string;
+                is_anon(): boolean;
+            }
+
+            function current(): TwitchAccount;
+        }
+    }
 }
