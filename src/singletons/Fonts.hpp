@@ -49,6 +49,8 @@ public:
     QFont getFont(FontStyle type, float scale);
     QFontMetricsF getFontMetrics(FontStyle type, float scale);
 
+    static float getStylePointSize(FontStyle style, float baseChatSize);
+
     pajlada::Signals::NoArgSignal fontChanged;
 
 private:
