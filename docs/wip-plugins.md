@@ -828,7 +828,7 @@ local str = json.stringify({ foo = 1 }, { pretty = true })
 `options` can be an optional table with the following optional keys:
 
 - `pretty` (boolean): Use newlines and indentation when stringifying
-- `indent_char` (string, default: ` `): Character to use when indenting object/array items
+- `indent_char` (string, default: space): Character to use when indenting object/array items
 - `indent_size` (number, default: 4): Amount of times `indent_char` is repeated per nesting-level
 
 #### `null`
