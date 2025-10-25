@@ -321,31 +321,35 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
 
 void FontWeightWidget::setFamily(const QString &family)
 {
-    QSet<int> weights;
-    int defaultWeight = QFont(family).weight();
-    auto *defaultItem = new IntItem(defaultWeight);
+    constexpr int weightTarget = 400;
 
     QSignalBlocker listSignalBlocker(this->list);
+    QSet<int> weights;
+    unsigned closest = -1;
 
     this->list->clear();
-    this->list->addItem(defaultItem);
-
-    weights.insert(defaultWeight);
 
     // the goal is to only display valid weights and this gets close, but
     // is not perfect for all fonts.
     for (const auto &style : QFontDatabase::styles(family))
     {
         int weight = QFontDatabase::weight(family, style);
-
-        if (!weights.contains(weight))
+        if (weights.contains(weight))
         {
-            weights.insert(weight);
-            this->list->addItem(new IntItem(weight));
+            continue;
+        }
+
+        auto *item = new IntItem(weight);
+        this->list->addItem(item);
+        weights.insert(weight);
+
+        unsigned diff = std::abs(weight - weightTarget);
+        if (diff < closest)
+        {
+            this->list->setCurrentItem(item);
+            closest = diff;
         }
     }
-
-    this->list->setCurrentItem(defaultItem);
 }
 
 int FontWeightWidget::getSelected() const
