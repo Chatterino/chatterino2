@@ -22,6 +22,7 @@ class Chatterino(ConanFile):
     generators = "CMakeDeps"
 
     def requirements(self):
+        self.requires("rapidjson/cci.20230929")
         if self.options.get_safe("with_benchmark", False):
             self.requires("benchmark/1.9.0")
 
