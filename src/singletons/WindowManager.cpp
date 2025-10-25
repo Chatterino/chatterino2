@@ -163,9 +163,9 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.streamerModeHideModActions);
     this->forceLayoutChannelViewsListener.add(
         settings.streamerModeHideRestrictedUsers);
+    this->forceLayoutChannelViewsListener.add(fonts.fontChanged);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
-    this->layoutChannelViewsListener.add(fonts.fontChanged);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
     this->invalidateChannelViewBuffersListener.add(settings.separateMessages);

@@ -9,6 +9,7 @@
 - Minor: Added a description for the logging option under moderation tab. (#6514)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
+- Bugfix: Fixed font change not resulting in forced layout update. (#6536)
 - Bugfix: Fixed scrollbar rect computation potentially resulting in overflows. (#6547)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
