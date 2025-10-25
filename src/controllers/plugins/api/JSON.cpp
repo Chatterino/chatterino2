@@ -4,12 +4,18 @@
 
 #    include "controllers/plugins/api/JSONParse.hpp"
 #    include "controllers/plugins/api/JSONStringify.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <sol/sol.hpp>
 
 namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+
+/// `__tostring` implementation for lightuserdata
+///
+/// If the value is `nullptr`, returns "null", otherwise the pointer value in
+/// hex (like in '%p').
 int stringifyLightuserdata(lua_State *L)
 {
     luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
@@ -33,22 +39,45 @@ int stringifyLightuserdata(lua_State *L)
 }
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
+/// Sets the global metatable for lightuserdata
+///
+/// `nullptr` is used as a sentinel for "null" values in both parsing and
+/// stringifying. To allow users to get a proper string representation of
+/// this value, we add a `__tostring` method on lightuserdata. As individual
+/// lightuserdata values don't have metatables, this is done on the global
+/// one.
+void setLightuserdataMetatable(lua_State *L)
+{
+    chatterino::lua::StackGuard g(L);
+
+    lua_checkstack(L, 4);
+
+    lua_pushlightuserdata(L, nullptr);
+    lua_createtable(L, 0, 1);
+    lua_pushstring(L, "__tostring");
+    lua_pushcfunction(L, &stringifyLightuserdata);
+
+    // [-4] lightuserdata (nullptr)
+    // [-3] table {}
+    // [-2] "__tostring"
+    // [-1] &stringifyLightuserdata
+    lua_rawset(L, -3);  // tbl.__tostring = fn
+
+    // [-2] lightuserdata (nullptr)
+    // [-1] table { __tostring = fn }
+    lua_setmetatable(L, -2);  // setmeta(lightuserdata) = tbl
+
+    // [-1] lightuserdata (nullptr)
+    lua_pop(L, 1);
+}
+
 }  // namespace
 
 namespace chatterino::lua::api {
 
 sol::object loadJson(sol::state_view lua)
 {
-    // Set the metatable for all lightuserdata
-    auto *L = lua.lua_state();
-    lua_checkstack(L, 4);
-    lua_pushlightuserdata(L, nullptr);
-    lua_createtable(L, 0, 1);
-    lua_pushstring(L, "__tostring");
-    lua_pushcfunction(L, &stringifyLightuserdata);
-    lua_rawset(L, -3);        // tbl.__tostring = fn
-    lua_setmetatable(L, -2);  // setmeta(lightuserd) = tbl
-    lua_pop(L, 1);            // pop lightuserdata
+    setLightuserdataMetatable(lua.lua_state());
 
     return lua.create_table_with(    //
         "parse", jsonParse,          //

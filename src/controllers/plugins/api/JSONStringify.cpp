@@ -1,15 +1,30 @@
 #include "controllers/plugins/api/JSONStringify.hpp"
 
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/writer.h>
-#include <sol/sol.hpp>
+#ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include "controllers/plugins/LuaUtilities.hpp"
+
+#    include <rapidjson/prettywriter.h>
+#    include <rapidjson/writer.h>
+#    include <sol/sol.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg) -- luaL_error is a vararg function
 
 namespace {
 
+using namespace chatterino::lua;
+
 constexpr size_t ENCODE_MAX_TABLE_LENGTH = 1 << 20;  // about 1 mil
 constexpr uint16_t ENCODE_MAX_DEPTH = 256;
+
+/// Reserve at least `size` slots on the Lua stack.
+void reserveStack(lua_State *L, int size)
+{
+    if (lua_checkstack(L, size) == 0)
+    {
+        fail(L, "Failed to reserve %d more stack slots (stack overflow)", size);
+    }
+}
 
 /// Get the size of an "array" (table at index -1)
 ///
@@ -17,16 +32,16 @@ constexpr uint16_t ENCODE_MAX_DEPTH = 256;
 /// table an array if it only has positive non-zero integer keys. One notable
 /// exception is an empty array. An empty table is considered an empty object.
 /// If the user wants to specify an empty array, they specify a table with
-/// `json_null` at item `0` (i.e. `{ [0] = c2.json_null }`). `json_null` is a
+/// `json.null` at item `0` (i.e. `{ [0] = json.null }`). `json.null` is a
 /// `nullptr` lightuserdata.
 ///
 /// Arrays might have holes in them (e.g. `{1, [10]=2}` or `{1, nil, 2}`), so we
 /// keep track of the maximum index we saw.
 ///
-/// @returns The size of the array if  it is one - otherwise it's an object.
+/// @returns The size of the array if it is one - otherwise it's an object.
 std::optional<size_t> inferArraySize(lua_State *L)
 {
-    lua_checkstack(L, 3);  // key + value + potential error
+    reserveStack(L, 3);  // key + value + potential error
 
     size_t max = 0;
     bool hasNull = false;
@@ -53,8 +68,7 @@ std::optional<size_t> inferArraySize(lua_State *L)
             }
             else
             {
-                luaL_error(L, "Table keys can't be negative integers");
-                std::terminate();
+                fail(L, "Table keys can't be negative integers");
             }
         }
         else
@@ -67,8 +81,7 @@ std::optional<size_t> inferArraySize(lua_State *L)
 
     if (max > ENCODE_MAX_TABLE_LENGTH)
     {
-        luaL_error(L, "Table is too big");
-        std::terminate();
+        fail(L, "Table is too big");
     }
 
     if (max == 0 && !hasNull)
@@ -79,19 +92,11 @@ std::optional<size_t> inferArraySize(lua_State *L)
     return max;
 }
 
-/// luaL_error but with [[noreturn]]
-[[noreturn]]
-void fail(lua_State *L, const char *msg, auto &&...args)
-{
-    luaL_error(L, msg, std::forward<decltype(args)>(args)...);
-    std::terminate();
-}
-
 void stringifyValue(lua_State *L, auto &writer, uint16_t depth);
 
 void stringifyArray(lua_State *L, auto &writer, uint16_t depth, size_t length)
 {
-    lua_checkstack(L, 2);  // value + potential error
+    reserveStack(L, 2);  // value + potential error
 
     if (!writer.StartArray())
     {
@@ -113,7 +118,7 @@ void stringifyArray(lua_State *L, auto &writer, uint16_t depth, size_t length)
 
 void stringifyObject(lua_State *L, auto &writer, uint16_t depth)
 {
-    lua_checkstack(L, 3);  // key + value + potential error
+    reserveStack(L, 3);  // key + value + potential error
 
     if (!writer.StartObject())
     {
@@ -275,3 +280,5 @@ int jsonStringify(lua_State *L)
 }  // namespace chatterino::lua::api
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
+
+#endif  // CHATTERINO_HAVE_PLUGINS

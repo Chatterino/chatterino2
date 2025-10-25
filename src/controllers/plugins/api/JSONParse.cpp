@@ -1,19 +1,26 @@
 #include "controllers/plugins/api/JSONParse.hpp"
 
-#include <boost/json/basic_parser.hpp>
-#include <boost/json/serialize.hpp>
-#include <QVarLengthArray>
-#include <sol/sol.hpp>
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include <limits>
+#    include "controllers/plugins/LuaUtilities.hpp"
+
+#    include <boost/json/basic_parser.hpp>
+#    include <boost/json/serialize.hpp>
+#    include <QVarLengthArray>
+#    include <sol/sol.hpp>
+
+#    include <limits>
 
 namespace {
+
+using namespace chatterino::lua;
 
 // NOLINTNEXTLINE(performance-enum-size) -- we want `int` because that's what boost::system::error_code takes
 enum class ParseError : int {
     MoreThanOneTopLevel = 1,
     TooMuchNesting,
     NoElements,
+    StackExhausted,
 };
 
 class ParseErrorCategory final : public boost::system::error_category
@@ -36,6 +43,8 @@ public:
                 return "Too much nesting";
             case ParseError::NoElements:
                 return "Invalid state: no elements on stack";
+            case ParseError::StackExhausted:
+                return "Exhausted Lua stack (stack overflow)";
         }
         return "Unknown error code";
     }
@@ -46,6 +55,18 @@ constexpr ParseErrorCategory CATEGORY;
 boost::system::error_code makeCode(ParseError kind)
 {
     return {static_cast<int>(kind), CATEGORY};
+}
+
+/// Reserve at least `size` slots on the Lua stack.
+[[nodiscard]] bool reserveStack(lua_State *state, int size,
+                                boost::system::error_code &ec)
+{
+    if (lua_checkstack(state, size) == 0)
+    {
+        ec = makeCode(ParseError::StackExhausted);
+        return false;
+    }
+    return true;
 }
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
@@ -86,7 +107,11 @@ struct SaxHandler {
             return false;
         }
 
-        lua_checkstack(this->state, 3);  // grow stack by 3 (table, key, value)
+        // grow stack by 3 (table, key, value)
+        if (!reserveStack(this->state, 3, ec))
+        {
+            return false;
+        }
         lua_newtable(this->state);
 
         return true;
@@ -118,7 +143,11 @@ struct SaxHandler {
             return false;
         }
 
-        lua_checkstack(this->state, 2);  // grow stack by 2 (table, value)
+        // grow stack by 2 (table, value)
+        if (!reserveStack(this->state, 2, ec))
+        {
+            return false;
+        }
         lua_newtable(this->state);
 
         return true;
@@ -326,18 +355,15 @@ public:
         auto nRead = this->parser.write_some(false, sv.data(), sv.length(), ec);
         if (ec)
         {
-            luaL_error(this->parser.handler().state,
-                       "Failed to parse JSON: %s (at %s) pos: %d",
-                       ec.message().c_str(), ec.location().to_string().c_str(),
-                       static_cast<int>(nRead));
-            std::terminate();
+            fail(this->parser.handler().state,
+                 "Failed to parse JSON: %s (at %s) pos: %d",
+                 ec.message().c_str(), ec.location().to_string().c_str(),
+                 static_cast<int>(nRead));
         }
         if (nRead != sv.size())
         {
-            luaL_error(this->parser.handler().state,
-                       "Failed to parse JSON: trailing junk",
-                       ec.message().c_str());
-            std::terminate();
+            fail(this->parser.handler().state,
+                 "Failed to parse JSON: trailing junk", ec.message().c_str());
         }
     }
 
@@ -361,9 +387,9 @@ int jsonParse(lua_State *L)
     boost::json::parse_options opts;
     opts.max_depth = SaxHandler::MAX_NESTING;
     opts.allow_invalid_utf8 = true;
-#if BOOST_VERSION >= 108700  // 1.87
+#    if BOOST_VERSION >= 108700  // 1.87
     opts.allow_invalid_utf16 = true;
-#endif
+#    endif
     if (nArgs >= 2)
     {
         auto tbl = sol::stack::check_get<sol::table>(L, 2);
@@ -385,4 +411,6 @@ int jsonParse(lua_State *L)
 
 }  // namespace chatterino::lua::api
 
-#include <boost/json/src.hpp>
+#    include <boost/json/src.hpp>
+
+#endif  // CHATTERINO_HAVE_PLUGINS

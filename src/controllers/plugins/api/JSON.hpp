@@ -5,6 +5,10 @@
 
 namespace chatterino::lua::api {
 
+/// Loads the 'json' module as a table.
+///
+/// Because `nullptr` is used as a sentinel for "null", this also adds a
+/// `__tostring` method on lightuserdata.
 sol::object loadJson(sol::state_view lua);
 
 }  // namespace chatterino::lua::api
