@@ -10,10 +10,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
@@ -415,6 +412,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->channel_ = std::move(channel);
     this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    this->emoteChannel_ = dynamic_cast<EmoteChannel *>(this->channel_.get());
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
@@ -448,39 +446,28 @@ void EmotePopup::reloadEmotes()
             *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets(),
             *globalChannel, *subChannel, twitchChannel_->roomId(),
             twitchChannel_->getName());
+    }
 
-        // channel
-        if (Settings::instance().enableBTTVChannelEmotes)
+    if (this->emoteChannel_)
+    {
+        for (const auto &item : this->emoteChannel_->emotes().items())
         {
-            addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                      "BetterTTV");
-        }
-        if (Settings::instance().enableFFZChannelEmotes)
-        {
-            addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                      "FrankerFaceZ");
-        }
-        if (Settings::instance().enableSevenTVChannelEmotes)
-        {
-            addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                      "7TV");
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*channelChannel, *item.emotes, provider->name());
         }
     }
-    // global
-    if (Settings::instance().enableBTTVGlobalEmotes)
+
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
     {
-        addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
-                  "BetterTTV");
-    }
-    if (Settings::instance().enableFFZGlobalEmotes)
-    {
-        addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
-                  "FrankerFaceZ");
-    }
-    if (Settings::instance().enableSevenTVGlobalEmotes)
-    {
-        addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
-                  "7TV");
+        if (!provider->hasGlobalEmotes())
+        {
+            continue;
+        }
+        addEmotes(*globalChannel, *provider->globalEmotes(), provider->name());
     }
 
     if (subChannel->getMessageSnapshot().size() == 0)
@@ -534,51 +521,35 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         }
     }
 
-    auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getBttvEmotes()->emotes());
-    auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getFfzEmotes()->emotes());
-    auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->getSeventvEmotes()->globalEmotes());
+    for (const auto &provider : getApp()->getEmotes()->getProviders())
+    {
+        auto filtered = filterEmoteMap(searchText, provider->globalEmotes());
+        if (filtered.empty())
+        {
+            continue;
+        }
 
-    // global
-    if (!bttvGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, bttvGlobalEmotes, "BetterTTV (Global)");
-    }
-    if (!ffzGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, ffzGlobalEmotes, "FrankerFaceZ (Global)");
-    }
-    if (!seventvGlobalEmotes.empty())
-    {
-        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)");
+        addEmotes(*searchChannel, std::move(filtered),
+                  provider->name() % u" (Global)");
     }
 
-    if (this->twitchChannel_ == nullptr)
+    if (this->emoteChannel_)
     {
-        return;
-    }
-
-    auto bttvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
-    auto ffzChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
-    auto seventvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
-
-    // channel
-    if (!bttvChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, bttvChannelEmotes, "BetterTTV (Channel)");
-    }
-    if (!ffzChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, ffzChannelEmotes, "FrankerFaceZ (Channel)");
-    }
-    if (!seventvChannelEmotes.empty())
-    {
-        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)");
+        for (const auto &item : this->emoteChannel_->emotes().items())
+        {
+            auto filtered = filterEmoteMap(searchText, item.emotes);
+            if (filtered.empty())
+            {
+                continue;
+            }
+            auto provider = item.provider.lock();
+            if (!provider || !provider->hasChannelEmotes())
+            {
+                continue;
+            }
+            addEmotes(*searchChannel, std::move(filtered),
+                      provider->name() % u" (Channel)");
+        }
     }
 }
 

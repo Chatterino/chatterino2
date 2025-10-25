@@ -13,6 +13,8 @@ class QJsonObject;
 
 namespace chatterino {
 
+class EmoteProvider;
+
 struct Emote {
     EmoteName name;
     ImageSet images;
@@ -59,7 +61,9 @@ public:
                                        const QString &emoteID) const;
 };
 
-inline const std::shared_ptr<const EmoteMap> EMPTY_EMOTE_MAP = std::make_shared<
+using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
+
+inline const EmoteMapPtr EMPTY_EMOTE_MAP = std::make_shared<
     const EmoteMap>();  // NOLINT(cert-err58-cpp) -- assume this doesn't throw an exception
 
 EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache);

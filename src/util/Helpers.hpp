@@ -222,9 +222,8 @@ void removeLastQS(QString &str);
 void writeProviderEmotesCache(const QString &id, const QString &provider,
                               const QByteArray &bytes);
 
-bool readProviderEmotesCache(
-    const QString &id, const QString &provider,
-    const std::function<void(QJsonDocument)> &callback);
+bool readProviderEmotesCache(const QString &id, const QString &provider,
+                             const std::function<void(QJsonValue)> &callback);
 
 /// Splits `haystack` by `needle`. If `needle` doesn't occur in `haystack`,
 /// `{haystack, {}}` is returned.

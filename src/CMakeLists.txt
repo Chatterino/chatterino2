@@ -157,8 +157,16 @@ set(SOURCE_FILES
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
+        controllers/emotes/BuiltinEmoteProvider.cpp
+        controllers/emotes/BuiltinEmoteProvider.hpp
+        controllers/emotes/EmoteChannel.cpp
+        controllers/emotes/EmoteChannel.hpp
         controllers/emotes/EmoteController.cpp
         controllers/emotes/EmoteController.hpp
+        controllers/emotes/EmoteHolder.cpp
+        controllers/emotes/EmoteHolder.hpp
+        controllers/emotes/EmoteProvider.cpp
+        controllers/emotes/EmoteProvider.hpp
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
@@ -338,8 +346,8 @@ set(SOURCE_FILES
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
-        providers/bttv/BttvEmotes.cpp
-        providers/bttv/BttvEmotes.hpp
+        providers/bttv/BttvEmoteProvider.cpp
+        providers/bttv/BttvEmoteProvider.hpp
         providers/bttv/BttvLiveUpdates.cpp
         providers/bttv/BttvLiveUpdates.hpp
 
@@ -360,8 +368,8 @@ set(SOURCE_FILES
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
-        providers/ffz/FfzEmotes.cpp
-        providers/ffz/FfzEmotes.hpp
+        providers/ffz/FfzEmoteProvider.cpp
+        providers/ffz/FfzEmoteProvider.hpp
         providers/ffz/FfzUtil.cpp
         providers/ffz/FfzUtil.hpp
 
@@ -394,8 +402,8 @@ set(SOURCE_FILES
         providers/seventv/SeventvBadges.cpp
         providers/seventv/SeventvBadges.hpp
         providers/seventv/SeventvCosmetics.hpp
-        providers/seventv/SeventvEmotes.cpp
-        providers/seventv/SeventvEmotes.hpp
+        providers/seventv/SeventvEmoteProvider.cpp
+        providers/seventv/SeventvEmoteProvider.hpp
         providers/seventv/SeventvEventAPI.cpp
         providers/seventv/SeventvEventAPI.hpp
 
