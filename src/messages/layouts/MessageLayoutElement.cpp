@@ -480,7 +480,8 @@ int TextLayoutElement::getMouseOverIndex(QPointF abs) const
         // accept mouse to be at only 50%+ of character width to increase index
         if (x + (width * 0.5) > abs.x())
         {
-            if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
+            if (text.size() > i + 1 &&
+                QChar::isLowSurrogate(static_cast<char32_t>(text[i].unicode())))
             {
                 i++;
             }

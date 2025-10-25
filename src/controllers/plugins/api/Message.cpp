@@ -190,6 +190,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
                 break;
 
             // these links should be safe to click as they don't have any immediate action associated with them
+            case Link::InsertText:
             case Link::JumpToChannel:
             case Link::JumpToMessage:
             case Link::UserInfo:
@@ -201,8 +202,8 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             case Link::None:
             case Link::AutoModAllow:
             case Link::AutoModDeny:
-            case Link::InsertText:
             case Link::OpenAccountsPage:
+            case Link::ViewThread:
             case Link::Reconnect:
                 throw std::runtime_error(
                     "Invalid link type. How'd this happen?");
