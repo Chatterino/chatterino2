@@ -1248,11 +1248,10 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
 
 void Notebook::sortTabsAlphabetically()
 {
-    QCollator cmp;
-    cmp.setCaseSensitivity(Qt::CaseInsensitive);
-
-    std::ranges::sort(this->items_, [cmp](const Item &a, const Item &b) {
-        return cmp(a.tab->getTitle(), b.tab->getTitle());
+    std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
+        const QString &lhs = a.tab->getTitle();
+        const QString &rhs = b.tab->getTitle();
+        return QString::compare(lhs, rhs, Qt::CaseInsensitive);
     });
 
     getApp()->getWindows()->queueSave();
