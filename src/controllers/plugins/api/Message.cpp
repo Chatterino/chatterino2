@@ -203,6 +203,7 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
             case Link::AutoModAllow:
             case Link::AutoModDeny:
             case Link::OpenAccountsPage:
+            case Link::ViewThread:
             case Link::Reconnect:
                 throw std::runtime_error(
                     "Invalid link type. How'd this happen?");

@@ -27,6 +27,8 @@
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 - Dev: Fix Arch Linux partial upgrade error in CI. (#6553)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
+- Def: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
 
