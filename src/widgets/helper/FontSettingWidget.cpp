@@ -308,7 +308,7 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
 
     infoLabel->setStyleSheet(
         "font-size: " +
-        QString::number(infoLabel->fontInfo().pointSize() * 0.7) + "pt");
+        QString::number(infoLabel->fontInfo().pointSize() * 0.85) + "pt");
 
     QObject::connect(this->list, &QListWidget::currentRowChanged, this,
                      [this](int row) {
