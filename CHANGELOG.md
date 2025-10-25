@@ -23,6 +23,7 @@
 - Dev: Fixed warnings on Qt 6.10. (#6422)
 - Dev: Removed unused method in `Emojis`. (#6517)
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
+- Dev: Fix Arch Linux partial upgrade error in CI. (#6553)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
