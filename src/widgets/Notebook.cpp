@@ -23,7 +23,6 @@
 
 #include <boost/foreach.hpp>
 #include <QActionGroup>
-#include <QCollator>
 #include <QDebug>
 #include <QFile>
 #include <QFormLayout>
@@ -1251,7 +1250,7 @@ void Notebook::sortTabsAlphabetically()
     std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
         const QString &lhs = a.tab->getTitle();
         const QString &rhs = b.tab->getTitle();
-        return QString::compare(lhs, rhs, Qt::CaseInsensitive);
+        return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
     });
 
     getApp()->getWindows()->queueSave();
