@@ -126,6 +126,17 @@ sol::table createEnumTable(sol::state_view &lua)
     return out;
 }
 
+/// luaL_error but with [[noreturn]]
+[[noreturn]]
+void fail(lua_State *L, const char *fmt, auto &&...args)
+{
+    luaL_error(L, fmt, std::forward<decltype(args)>(args)...);
+    // luaL_error is not annotated with [[noreturn]] for backwards
+    // compatibility, but it will never return. If we ever get here, something
+    // is seriously wrong, so abort.
+    std::terminate();
+}
+
 }  // namespace chatterino::lua
 
 #endif

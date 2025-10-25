@@ -376,4 +376,33 @@ declare namespace c2 {
         Original,
         Repost,
     }
+
+    function json_parse(
+        text: string,
+        opts?: { allow_comments?: boolean; allow_trailing_commas?: boolean }
+    ): any;
+    function json_stringify(
+        item: any,
+        opts?: { pretty?: boolean; indent_char?: string; indent_size?: number }
+    ): string;
+}
+
+declare module "json" {
+    class _Dummy {}
+
+    function parse(
+        text: string,
+        opts?: { allow_comments?: boolean; allow_trailing_commas?: boolean }
+    ): any;
+    function stringify(
+        item: any,
+        opts?: { pretty?: boolean; indent_char?: string; indent_size?: number }
+    ): string;
+
+    let exports: {
+        null: _Dummy;
+        parse: typeof parse;
+        stringify: typeof stringify;
+    };
+    export = exports;
 }
