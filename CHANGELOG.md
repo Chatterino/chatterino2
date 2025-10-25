@@ -9,6 +9,7 @@
 - Minor: Added a description for the logging option under moderation tab. (#6514)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
+- Bugfix: Fixed some commands and filters not working as expected in seach popups. (#6539)
 - Bugfix: Fixed settings occasionally not opening when clicking on "Manage Accounts" in the account switcher. (#6543)
 - Bugfix: Fixed font change not resulting in forced layout update. (#6536)
 - Bugfix: Fixed scrollbar rect computation potentially resulting in overflows. (#6547)
