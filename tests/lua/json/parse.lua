@@ -1,4 +1,4 @@
-local JSON = require('json')
+local json = require('json')
 
 local function compare_v(lhs, rhs)
     if type(lhs) == "table" then
@@ -30,7 +30,7 @@ local function compare_v(lhs, rhs)
 end
 
 local function check_err(...)
-    local ok = pcall(JSON.parse, ...)
+    local ok = pcall(json.parse, ...)
     local arg0 = ...
     if arg0 == nil then
         arg0 = "(nil)"
@@ -42,7 +42,7 @@ end
 ---@param expected any
 ---@vararg {allow_comments?: boolean, allow_trailing_commas?: boolean}|any
 local function check_ok(input, expected, ...)
-    local parsed = JSON.parse(input, ...)
+    local parsed = json.parse(input, ...)
     assert(compare_v(parsed, expected), "parsing '" .. input .. "' didn't yield the expected value")
 end
 
@@ -71,12 +71,12 @@ check_ok('-0', 0)
 check_ok('42', 42)
 check_ok('-42', -42)
 check_ok('1.23456', 1.23456)
-check_ok('null', JSON.null)
+check_ok('null', json.null)
 
 -- integer limits
 check_ok('9223372036854775807', 9223372036854775807) -- max int (this has to be equal)
 -- +/- 1 precision in 64 bit float
-local v_1_shl_64 = JSON.parse('18446744073709551615')
+local v_1_shl_64 = json.parse('18446744073709551615')
 assert(v_1_shl_64 >= 18446744073709551614 or v_1_shl_64 <= 18446744073709551616)
 
 check_ok('9223372036854775808', 9223372036854775808) -- double
@@ -85,7 +85,7 @@ check_ok('9223372036854775808', 9223372036854775808) -- double
 check_ok('{"foo": 1}', { foo = 1 })
 check_ok('{"foo": [1, 2, {"bar": false}]}', { foo = { 1, 2, { bar = false } } })
 check_ok('{"foo": 1, "bar": "hey", "baz": {"obj": true}, "a": null}',
-    { foo = 1, bar = "hey", baz = { obj = true }, a = JSON.null })
+    { foo = 1, bar = "hey", baz = { obj = true }, a = json.null })
 check_ok('{"esc\\naped": "a string"}', { ["esc\naped"] = "a string" })
 check_ok('{"": 1}', { [""] = 1 })
 check_ok('{"": {"": 0}, "": 0}', { [""] = 0 })
@@ -94,8 +94,8 @@ check_ok('{"": {"": 0}, "": 0}', { [""] = 0 })
 check_ok('[]', {})
 check_ok('[1]', { 1 })
 check_ok('["string"]', { "string" })
-check_ok('[null]', { JSON.null })
-check_ok('[null, 1, null]', { JSON.null, 1, JSON.null })
+check_ok('[null]', { json.null })
+check_ok('[null, 1, null]', { json.null, 1, json.null })
 check_ok('[{}]', { {} })
 check_ok('[{}, {}]', { {}, {} })
 check_ok('[{}, "foo", 1, false, true]', { {}, "foo", 1, false, true })
@@ -104,7 +104,7 @@ check_ok('[[[[[[{"foo": 1}]]]]]]', { { { { { { { foo = 1 } } } } } } })
 -- From Qt
 check_ok([[
 [
-    "JSON Test Pattern pass1",
+    "json Test Pattern pass1",
     {"object with 1 member":["array with 1 element"]},
     {},
     [],
@@ -166,14 +166,14 @@ check_ok([[
 ]
 
 ]], {
-    "JSON Test Pattern pass1",
+    "json Test Pattern pass1",
     { ["object with 1 member"] = { "array with 1 element" } },
     {},
     {},
     -42,
     true,
     false,
-    JSON.null,
+    json.null,
     {
         integer = 1234567890,
         real = -9876.543210,
@@ -195,7 +195,7 @@ check_ok([[
         hex = "\u{0123}\u{4567}\u{89AB}\u{CDEF}\u{abcd}\u{ef4A}",
         ["true"] = true,
         ["false"] = false,
-        null = JSON.null,
+        null = json.null,
         array = {},
         object = {},
         address = "50 St. James Street",
@@ -225,13 +225,13 @@ check_ok([[
 
 -- limits
 local big = string.rep('[', 256) .. string.rep(']', 256)
-JSON.parse(big)
+json.parse(big)
 
 local too_big = string.rep('[', 257) .. string.rep(']', 257)
 check_err(too_big)
 
 big = string.rep('{"x":', 256) .. "1" .. string.rep('}', 256)
-JSON.parse(big)
+json.parse(big)
 
 too_big = string.rep('{"x":', 257) .. "1" .. string.rep('}', 257)
 check_err(too_big)

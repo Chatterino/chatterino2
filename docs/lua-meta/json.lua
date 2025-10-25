@@ -19,7 +19,7 @@ function json.parse(input, opts) end
 ---@return string
 function json.stringify(input, opts) end
 
----Helper type to inidicate a `null` value when serializing.
+---Helper type to indicate a `null` value when serializing.
 ---This is useful if `nil` would hide the value (such as in tables).
 ---See `json.stringify` for more info.
 ---@type lightuserdata
