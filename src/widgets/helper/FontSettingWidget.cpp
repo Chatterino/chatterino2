@@ -316,27 +316,28 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
                      });
 }
 
-QVector<int> getWeights(const QString &family)
+QList<int> getWeights(const QString &family)
 {
-    QVector<int> vector;
+    QList<int> weights;
     QStringList styles = QFontDatabase::styles(family);
 
     for (const QString &style : styles)
     {
         int weight = QFontDatabase::weight(family, style);
-        if (!vector.contains(weight))
+        if (!weights.contains(weight))
         {
-            vector.append(weight);
+            weights.append(weight);
         }
     }
-    return vector;
+
+    return weights;
 }
 
 void FontWeightWidget::setFamily(const QString &family)
 {
     QSignalBlocker listSignalBlocker{this->list};
 
-    QVector<int> weights = getWeights(family);
+    QList<int> weights = getWeights(family);
     int currentCount = this->list->count();
     int newCount = static_cast<int>(weights.count());
     int leastCount = std::min(currentCount, newCount);
