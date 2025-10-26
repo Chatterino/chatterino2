@@ -323,7 +323,7 @@ void FontWeightWidget::setFamily(const QString &family)
     constexpr int weightTarget = 400;
 
     QSignalBlocker listSignalBlocker(this->list);
-    QSet<int> weights;
+    QVector<int> weights;
     unsigned closest = -1;
 
     this->list->clear();
@@ -340,7 +340,7 @@ void FontWeightWidget::setFamily(const QString &family)
 
         auto *item = new IntItem(weight);
         this->list->addItem(item);
-        weights.insert(weight);
+        weights.append(weight);
 
         unsigned diff = std::abs(weight - weightTarget);
         if (diff < closest)
