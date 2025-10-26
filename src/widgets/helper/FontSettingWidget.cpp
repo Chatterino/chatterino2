@@ -291,8 +291,6 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
     auto *infoLabel = new QLabel("Not all weights are supported.");
 
     this->setLayout(layout);
-    this->list->setSortingEnabled(true);
-
     this->setFamily(initialFont.family());
 
     if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
@@ -318,35 +316,61 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
                      });
 }
 
-void FontWeightWidget::setFamily(const QString &family)
+QVector<int> getWeights(const QString &family)
 {
-    QSignalBlocker listSignalBlocker(this->list);
-    QVector<int> weights;
-    unsigned closest = -1;
+    QVector<int> vector;
+    QStringList styles = QFontDatabase::styles(family);
 
-    this->list->clear();
-
-    // the goal is to only display valid weights and this gets close, but
-    // is not perfect for all fonts.
-    for (const auto &style : QFontDatabase::styles(family))
+    for (const QString &style : styles)
     {
         int weight = QFontDatabase::weight(family, style);
-        if (weights.contains(weight))
+        if (!vector.contains(weight))
         {
-            continue;
-        }
-
-        auto *item = new IntItem(weight);
-        this->list->addItem(item);
-        weights.append(weight);
-
-        unsigned diff = std::abs(weight - QFont::Normal);
-        if (diff < closest)
-        {
-            this->list->setCurrentItem(item);
-            closest = diff;
+            vector.append(weight);
         }
     }
+    return vector;
+}
+
+void FontWeightWidget::setFamily(const QString &family)
+{
+    QSignalBlocker listSignalBlocker{this->list};
+
+    QVector<int> weights = getWeights(family);
+    int currentCount = this->list->count();
+    int newCount = static_cast<int>(weights.count());
+    int leastCount = std::min(currentCount, newCount);
+
+    std::ranges::sort(weights);
+
+    for (int i = 0; i < leastCount; ++i)
+    {
+        auto *cast = dynamic_cast<IntItem *>(this->list->item(i));
+        assert(cast);
+        cast->setValue(weights[i]);
+        cast->setHidden(false);
+    }
+    for (int i = currentCount; i < newCount; ++i)
+    {
+        this->list->addItem(new IntItem(weights[i]));
+    }
+    for (int i = newCount; i < currentCount; ++i)
+    {
+        this->list->item(i)->setHidden(true);
+    }
+
+    int startRow = 0;
+    for (int closest = INT_MAX, i = 0; i < weights.count(); ++i)
+    {
+        int diff = std::abs(weights[i] - QFont::Normal);
+        if (diff < closest)
+        {
+            closest = diff;
+            startRow = i;
+        }
+    }
+
+    this->list->setCurrentRow(startRow);
 }
 
 int FontWeightWidget::getSelected() const
