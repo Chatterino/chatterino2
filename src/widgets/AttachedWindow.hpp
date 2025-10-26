@@ -15,7 +15,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 
 class AttachedWindow : public QWidget
 {
-    AttachedWindow(void *_target, int _yOffset);
+    AttachedWindow(void *_target);
 
 public:
     struct GetArgs {
@@ -60,8 +60,6 @@ private:
     void updateWindowRect(void *attached);
 
     void *target_;
-    int yOffset_;
-    int currentYOffset_{};
     double x_ = -1;
     double pixelRatio_ = -1;
     int width_ = 360;

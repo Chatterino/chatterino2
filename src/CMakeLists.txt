@@ -1236,6 +1236,14 @@ if (MSVC)
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
+
+    # Warnings on clang-cl
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-missing-designated-field-initializers
+        )
+    endif()
+
     # Disable min/max macros from Windows.h
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()

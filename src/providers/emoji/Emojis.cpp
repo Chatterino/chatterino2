@@ -297,9 +297,11 @@ void Emojis::loadEmojiSet()
             }
             QString url = urlPrefix + code + ".png";
             emoji->emote = std::make_shared<Emote>(Emote{
-                EmoteName{emoji->value},
-                ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
-                Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
+                .name = EmoteName{emoji->value},
+                .images = ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
+                .tooltip = Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"},
+                .homePage = Url{},
+            });
         }
     });
 }

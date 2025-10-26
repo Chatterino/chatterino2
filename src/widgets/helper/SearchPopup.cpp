@@ -114,8 +114,8 @@ void SearchPopup::addChannel(ChannelView &channel)
 {
     if (this->searchChannels_.empty())
     {
-        this->channelView_->setSourceChannel(channel.channel());
-        this->channelName_ = channel.channel()->getName();
+        this->channelView_->setSourceChannel(channel.underlyingChannel());
+        this->channelName_ = channel.underlyingChannel()->getName();
     }
     else if (this->searchChannels_.size() == 1)
     {
@@ -137,7 +137,7 @@ void SearchPopup::goToMessage(const MessagePtr &message)
 {
     for (const auto &view : this->searchChannels_)
     {
-        const auto type = view.get().channel()->getType();
+        const auto type = view.get().underlyingChannel()->getType();
         if (type == Channel::Type::TwitchMentions ||
             type == Channel::Type::TwitchAutomod)
         {
@@ -253,7 +253,8 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
 
         for (const auto &message : snapshot)
         {
-            if (filterSet && !filterSet->filter(message, sharedView.channel()))
+            if (filterSet &&
+                !filterSet->filter(message, sharedView.underlyingChannel()))
             {
                 continue;
             }
