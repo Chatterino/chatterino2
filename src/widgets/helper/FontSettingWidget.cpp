@@ -380,7 +380,7 @@ int FontWeightWidget::getSelected() const
     return cast ? cast->getValue() : -1;
 }
 
-class SampleWidget : public QWidget
+class PreviewWidget : public QWidget
 {
 public:
     void paintEvent(QPaintEvent * /* event */) override
@@ -414,20 +414,20 @@ public:
     QFont getSelected() const;
 
 private:
-    void updateSampleFont();
+    void updatePreview();
 
-    SampleWidget *sampleBox;
-    FontFamiliesWidget *fontFamiliesW;
-    FontSizeWidget *fontSizeW;
-    FontWeightWidget *fontWeightW;
+    PreviewWidget *preview;
+    FontFamiliesWidget *fontFamilies;
+    FontSizeWidget *fontSize;
+    FontWeightWidget *fontWeight;
 };
 
 FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     : QDialog(parent)
-    , sampleBox(new SampleWidget)
-    , fontFamiliesW(new FontFamiliesWidget(initialFont))
-    , fontSizeW(new FontSizeWidget(initialFont))
-    , fontWeightW(new FontWeightWidget(initialFont))
+    , preview(new PreviewWidget)
+    , fontFamilies(new FontFamiliesWidget(initialFont))
+    , fontSize(new FontSizeWidget(initialFont))
+    , fontWeight(new FontWeightWidget(initialFont))
 {
     auto *layout = new QVBoxLayout;
     auto *choiceLayout = new QHBoxLayout;
@@ -438,18 +438,18 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     this->setLayout(layout);
     this->resize(450, 450);
 
-    this->updateSampleFont();
+    this->updatePreview();
 
     layout->addLayout(choiceLayout, 5);
-    layout->addWidget(new QLabel("Sample"));
-    layout->addWidget(this->sampleBox, 1);
+    layout->addWidget(new QLabel("Preview"));
+    layout->addWidget(this->preview, 1);
     layout->addWidget(buttons);
 
-    choiceLayout->addWidget(this->fontFamiliesW, 5);
+    choiceLayout->addWidget(this->fontFamilies, 5);
     choiceLayout->addLayout(choiceSideLayout, 3);
 
-    choiceSideLayout->addWidget(this->fontSizeW);
-    choiceSideLayout->addWidget(this->fontWeightW);
+    choiceSideLayout->addWidget(this->fontSize);
+    choiceSideLayout->addWidget(this->fontWeight);
 
     buttons->addButton("Ok", QDialogButtonBox::AcceptRole);
     buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
@@ -461,28 +461,27 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
                      &QDialog::reject);
 
     QObject::connect(
-        this->fontFamiliesW, &FontFamiliesWidget::selectedChanged, this,
-        [this] {
-            this->fontWeightW->setFamily(this->fontFamiliesW->getSelected());
-            this->updateSampleFont();
+        this->fontFamilies, &FontFamiliesWidget::selectedChanged, this, [this] {
+            this->fontWeight->setFamily(this->fontFamilies->getSelected());
+            this->updatePreview();
         });
 
-    QObject::connect(this->fontWeightW, &FontWeightWidget::selectedChanged,
-                     this, &FontDialog::updateSampleFont);
+    QObject::connect(this->fontWeight, &FontWeightWidget::selectedChanged, this,
+                     &FontDialog::updatePreview);
 
-    QObject::connect(this->fontSizeW, &FontSizeWidget::selectedChanged, this,
-                     &FontDialog::updateSampleFont);
+    QObject::connect(this->fontSize, &FontSizeWidget::selectedChanged, this,
+                     &FontDialog::updatePreview);
 }
 
 QFont FontDialog::getSelected() const
 {
-    return {this->fontFamiliesW->getSelected(), this->fontSizeW->getSelected(),
-            this->fontWeightW->getSelected()};
+    return {this->fontFamilies->getSelected(), this->fontSize->getSelected(),
+            this->fontWeight->getSelected()};
 }
 
-void FontDialog::updateSampleFont()
+void FontDialog::updatePreview()
 {
-    this->sampleBox->setFont(this->getSelected());
+    this->preview->setFont(this->getSelected());
 }
 
 }  // namespace
