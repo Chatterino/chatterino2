@@ -289,7 +289,6 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
     , list(new QListWidget)
 {
     auto *layout = new QVBoxLayout;
-    auto *infoLabel = new QLabel("Not all weights are supported.");
 
     this->setLayout(layout);
     this->setFamily(initialFont.family());
@@ -300,13 +299,8 @@ FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
     }
 
     layout->addWidget(new QLabel("Weight"));
-    layout->addWidget(infoLabel);
     layout->addWidget(this->list);
     layout->setContentsMargins(0, 0, 0, 0);
-
-    infoLabel->setStyleSheet(
-        "font-size: " +
-        QString::number(infoLabel->fontInfo().pointSize() * 0.85) + "pt");
 
     QObject::connect(this->list, &QListWidget::currentRowChanged, this,
                      [this](int row) {
