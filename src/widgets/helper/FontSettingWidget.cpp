@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QPainter>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
