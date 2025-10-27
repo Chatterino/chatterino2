@@ -380,6 +380,31 @@ int FontWeightWidget::getSelected() const
     return cast ? cast->getValue() : -1;
 }
 
+class SampleWidget : public QWidget
+{
+public:
+    void paintEvent(QPaintEvent * /* event */) override
+    {
+        QPainter painter{this};
+
+        painter.fillRect(this->rect(), this->palette().base());
+        painter.setFont(this->font);
+        painter.drawText(
+            this->rect().adjusted(5, 0, -5, 0),
+            Qt::AlignCenter | Qt::TextSingleLine,
+            QStringLiteral("The quick brown fox jumps over the lazy dog"));
+    }
+
+    void setFont(const QFont &newFont)
+    {
+        this->font = newFont;
+        this->update();
+    }
+
+private:
+    QFont font;
+};
+
 class FontDialog : public QDialog
 {
     Q_OBJECT
@@ -391,7 +416,7 @@ public:
 private:
     void updateSampleFont();
 
-    QPlainTextEdit *sampleBox;
+    SampleWidget *sampleBox;
     FontFamiliesWidget *fontFamiliesW;
     FontSizeWidget *fontSizeW;
     FontWeightWidget *fontWeightW;
@@ -399,7 +424,7 @@ private:
 
 FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     : QDialog(parent)
-    , sampleBox(new QPlainTextEdit)
+    , sampleBox(new SampleWidget)
     , fontFamiliesW(new FontFamiliesWidget(initialFont))
     , fontSizeW(new FontSizeWidget(initialFont))
     , fontWeightW(new FontWeightWidget(initialFont))
@@ -413,8 +438,6 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     this->setLayout(layout);
     this->resize(450, 450);
 
-    this->sampleBox->setPlainText(
-        "The quick brown fox jumps over the lazy dog");
     this->updateSampleFont();
 
     layout->addLayout(choiceLayout, 5);
@@ -459,16 +482,7 @@ QFont FontDialog::getSelected() const
 
 void FontDialog::updateSampleFont()
 {
-    QTextCharFormat format;
-    QTextCursor cursor = this->sampleBox->textCursor();
-    QFont font = this->getSelected();
-
-    format.setFont(font);
-
-    cursor.select(QTextCursor::Document);
-    cursor.setCharFormat(format);
-
-    this->sampleBox->document()->setDefaultFont(font);
+    this->sampleBox->setFont(this->getSelected());
 }
 
 }  // namespace
