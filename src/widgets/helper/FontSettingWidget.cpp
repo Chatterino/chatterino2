@@ -390,7 +390,7 @@ public:
         painter.fillRect(this->rect(), this->palette().base());
         painter.setFont(this->font);
         painter.drawText(
-            this->rect().adjusted(5, 0, -5, 0),
+            this->rect().adjusted(3, 3, -3, -3),
             Qt::AlignCenter | Qt::TextSingleLine,
             QStringLiteral("The quick brown fox jumps over the lazy dog"));
     }
