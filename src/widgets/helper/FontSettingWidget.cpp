@@ -408,6 +408,9 @@ public:
     FontDialog(const QFont &initialFont, QWidget *parent = nullptr);
     QFont getSelected() const;
 
+Q_SIGNALS:
+    void applyRequested();
+
 private:
     void updatePreview();
 
@@ -427,7 +430,11 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     auto *layout = new QVBoxLayout;
     auto *choiceLayout = new QHBoxLayout;
     auto *choiceSideLayout = new QVBoxLayout;
-    auto *buttons = new QDialogButtonBox;
+    auto *buttonLayout = new QHBoxLayout;
+
+    auto *applyButton = new QPushButton("Apply");
+    auto *acceptButton = new QPushButton("Accept");
+    auto *rejectButton = new QPushButton("Cancel");
 
     this->setWindowTitle("Pick Font");
     this->setLayout(layout);
@@ -438,7 +445,7 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     layout->addLayout(choiceLayout, 5);
     layout->addWidget(new QLabel("Preview"));
     layout->addWidget(this->preview, 1);
-    layout->addWidget(buttons);
+    layout->addLayout(buttonLayout);
 
     choiceLayout->addWidget(this->fontFamilies, 5);
     choiceLayout->addLayout(choiceSideLayout, 3);
@@ -446,13 +453,18 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     choiceSideLayout->addWidget(this->fontSize);
     choiceSideLayout->addWidget(this->fontWeight);
 
-    buttons->addButton("Ok", QDialogButtonBox::AcceptRole);
-    buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
+    buttonLayout->addWidget(applyButton);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(acceptButton);
+    buttonLayout->addWidget(rejectButton);
 
-    QObject::connect(buttons, &QDialogButtonBox::accepted, this,
+    QObject::connect(applyButton, &QPushButton::clicked, this,
+                     &FontDialog::applyRequested);
+
+    QObject::connect(acceptButton, &QPushButton::clicked, this,
                      &QDialog::accept);
 
-    QObject::connect(buttons, &QDialogButtonBox::rejected, this,
+    QObject::connect(rejectButton, &QPushButton::clicked, this,
                      &QDialog::reject);
 
     QObject::connect(
@@ -478,6 +490,50 @@ void FontDialog::updatePreview()
 {
     this->preview->setFont(this->getSelected());
 }
+
+class FontSettingDialog : public FontDialog
+{
+    Q_OBJECT
+
+public:
+    FontSettingDialog(QWidget *parent = nullptr)
+        : FontDialog(getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1),
+                     parent)
+        , oldFont(getSettings()->chatFontFamily)
+        , oldSize(getSettings()->chatFontSize)
+        , oldWeight(getSettings()->chatFontWeight)
+    {
+        QObject::connect(this, &FontDialog::applyRequested, [this] {
+            this->needRestore = true;
+            this->setSettings();
+        });
+        QObject::connect(this, &FontDialog::rejected, [this] {
+            if (this->needRestore)
+            {
+                getSettings()->chatFontFamily = this->oldFont;
+                getSettings()->chatFontSize = this->oldSize;
+                getSettings()->chatFontWeight = this->oldWeight;
+            }
+        });
+        QObject::connect(this, &FontDialog::accepted, [this] {
+            this->setSettings();
+        });
+    }
+
+private:
+    void setSettings()
+    {
+        QFont selected = this->getSelected();
+        getSettings()->chatFontFamily = selected.family();
+        getSettings()->chatFontSize = selected.pointSize();
+        getSettings()->chatFontWeight = selected.weight();
+    }
+
+    QString oldFont;
+    int oldSize;
+    int oldWeight;
+    bool needRestore{};
+};
 
 }  // namespace
 
@@ -513,18 +569,7 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
     button->setIcon(QIcon(":/buttons/edit.svg"));
 
     QObject::connect(button, &QPushButton::clicked, this, [this] {
-        FontDialog dialog(
-            getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1), this);
-
-        if (dialog.exec() != QDialog::Accepted)
-        {
-            return;
-        }
-
-        QFont font = dialog.getSelected();
-        getSettings()->chatFontFamily = font.family();
-        getSettings()->chatFontSize = font.pointSize();
-        getSettings()->chatFontWeight = font.weight();
+        FontSettingDialog{this}.exec();
     });
 }
 
