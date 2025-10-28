@@ -456,6 +456,7 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     buttonLayout->addWidget(acceptButton);
     buttonLayout->addWidget(rejectButton);
 
+    this->preview->setMinimumHeight(60);
     this->updatePreview();
 
     QObject::connect(applyButton, &QPushButton::clicked, this,
