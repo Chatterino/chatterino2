@@ -374,6 +374,13 @@ int FontWeightWidget::getSelected() const
 class PreviewWidget : public QWidget
 {
 public:
+    PreviewWidget(const QFont &initialFont, QWidget *parent = nullptr)
+        : QWidget(parent)
+        , font(initialFont)
+    {
+        this->setMinimumHeight(60);
+    }
+
     void paintEvent(QPaintEvent * /* event */) override
     {
         QPainter painter{this};
@@ -418,7 +425,7 @@ private:
 
 FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     : QDialog(parent)
-    , preview(new PreviewWidget)
+    , preview(new PreviewWidget(initialFont))
     , fontFamilies(new FontFamiliesWidget(initialFont))
     , fontSize(new FontSizeWidget(initialFont))
     , fontWeight(new FontWeightWidget(initialFont))
@@ -451,9 +458,6 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     buttonLayout->addStretch();
     buttonLayout->addWidget(acceptButton);
     buttonLayout->addWidget(rejectButton);
-
-    this->preview->setMinimumHeight(60);
-    this->updatePreview();
 
     QObject::connect(applyButton, &QPushButton::clicked, this,
                      &FontDialog::applyRequested);
