@@ -12,13 +12,10 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPainter>
-#include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
 #include <QStringListModel>
-#include <QTextCharFormat>
-#include <QTextCursor>
 #include <QToolButton>
 #include <QVBoxLayout>
 
