@@ -253,7 +253,7 @@ QString FontFamilyWidget::getSelected() const
     }
 
     QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
-    return this->model->data(this->proxy->mapToSource(proxyIndex)).toString();
+    return this->model->data(modelIndex).toString();
 }
 
 class FontWeightWidget : public QWidget
