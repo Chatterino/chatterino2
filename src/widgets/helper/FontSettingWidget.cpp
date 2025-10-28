@@ -63,8 +63,7 @@ private:
 
 IntItem *findIntItemInList(QListWidget *list, int value)
 {
-    int n = list->count();
-    for (int i = 0; i < n; ++i)
+    for (int n = list->count(), i = 0; i < n; ++i)
     {
         auto *item = dynamic_cast<IntItem *>(list->item(i));
         assert(item);
