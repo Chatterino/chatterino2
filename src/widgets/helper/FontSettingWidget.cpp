@@ -82,7 +82,7 @@ class FontSizeWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontSizeWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    FontSizeWidget(const QFont &startFont, QWidget *parent = nullptr);
     int getSelected() const;
 
 Q_SIGNALS:
@@ -96,7 +96,7 @@ private:
     QSpinBox *edit;
 };
 
-FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
+FontSizeWidget::FontSizeWidget(const QFont &startFont, QWidget *parent)
     : QWidget(parent)
     , customItem(new IntItem)
     , list(new QListWidget)
@@ -107,6 +107,7 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
 
     this->setLayout(layout);
 
+    this->edit->setMinimum(1);
     this->list->setSortingEnabled(true);
     this->list->addItem(this->customItem);
 
@@ -115,10 +116,8 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
         this->list->addItem(new IntItem(size));
     }
 
-    this->edit->setValue(initialFont.pointSize());
-    this->edit->setMinimum(1);
-
-    this->setListSelected(initialFont.pointSize());
+    this->edit->setValue(startFont.pointSize());
+    this->setListSelected(startFont.pointSize());
 
     layout->addLayout(header);
     layout->addWidget(this->list);
@@ -126,7 +125,6 @@ FontSizeWidget::FontSizeWidget(const QFont &initialFont, QWidget *parent)
 
     header->addWidget(new QLabel("Size"));
     header->addWidget(this->edit);
-    header->setContentsMargins(0, 0, 0, 0);
 
     QObject::connect(this->edit, &QSpinBox::valueChanged, this,
                      [this](int value) {
@@ -165,12 +163,12 @@ void FontSizeWidget::setListSelected(int size)
     this->list->setCurrentItem(this->customItem);
 }
 
-class FontFamiliesWidget : public QWidget
+class FontFamilyWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    FontFamiliesWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    FontFamilyWidget(const QFont &startFont, QWidget *parent = nullptr);
     QString getSelected() const;
 
 Q_SIGNALS:
@@ -191,8 +189,7 @@ QStringList getFontFamilies()
     return families;
 }
 
-FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
-                                       QWidget *parent)
+FontFamilyWidget::FontFamilyWidget(const QFont &startFont, QWidget *parent)
     : QWidget(parent)
     , list(new QListView)
     , model(new QStringListModel(getFontFamilies(), this))
@@ -210,7 +207,7 @@ FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
     this->proxy->setSourceModel(this->model);
     this->proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    this->setSelected(initialFont.family());
+    this->setSelected(startFont.family());
 
     layout->addLayout(header);
     layout->addWidget(this->list);
@@ -218,7 +215,6 @@ FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
 
     header->addWidget(new QLabel("Font"));
     header->addWidget(search);
-    header->setContentsMargins(0, 0, 0, 0);
 
     search->setPlaceholderText("Search...");
 
@@ -235,33 +231,29 @@ FontFamiliesWidget::FontFamiliesWidget(const QFont &initialFont,
         });
 }
 
-void FontFamiliesWidget::setSelected(const QString &family)
+void FontFamilyWidget::setSelected(const QString &family)
 {
     qsizetype row = this->model->stringList().indexOf(family);
-
-    if (row < 0)
+    if (row >= 0)
     {
-        return;
+        QModelIndex modelIndex = this->model->index(static_cast<int>(row));
+        QModelIndex proxyIndex = this->proxy->mapFromSource(modelIndex);
+
+        this->list->selectionModel()->setCurrentIndex(
+            proxyIndex, QItemSelectionModel::ClearAndSelect);
     }
-
-    QModelIndex modelIndex = this->model->index(static_cast<int>(row));
-    QModelIndex proxyIndex = this->proxy->mapFromSource(modelIndex);
-
-    this->list->selectionModel()->setCurrentIndex(
-        proxyIndex, QItemSelectionModel::ClearAndSelect);
 }
 
-QString FontFamiliesWidget::getSelected() const
+QString FontFamilyWidget::getSelected() const
 {
     QModelIndex proxyIndex = this->list->currentIndex();
-
     if (!proxyIndex.isValid())
     {
         return {};
     }
 
     QModelIndex modelIndex = this->proxy->mapToSource(proxyIndex);
-    return this->model->data(modelIndex).toString();
+    return this->model->data(this->proxy->mapToSource(proxyIndex)).toString();
 }
 
 class FontWeightWidget : public QWidget
@@ -269,7 +261,8 @@ class FontWeightWidget : public QWidget
     Q_OBJECT
 
 public:
-    FontWeightWidget(const QFont &initialFont, QWidget *parent = nullptr);
+    FontWeightWidget(const QFont &startFont, QWidget *parent = nullptr);
+
     void setFamily(const QString &family);
     int getSelected() const;
 
@@ -280,16 +273,16 @@ private:
     QListWidget *list;
 };
 
-FontWeightWidget::FontWeightWidget(const QFont &initialFont, QWidget *parent)
+FontWeightWidget::FontWeightWidget(const QFont &startFont, QWidget *parent)
     : QWidget(parent)
     , list(new QListWidget)
 {
     auto *layout = new QVBoxLayout;
 
     this->setLayout(layout);
-    this->setFamily(initialFont.family());
 
-    if (IntItem *item = findIntItemInList(this->list, initialFont.weight()))
+    this->setFamily(startFont.family());
+    if (IntItem *item = findIntItemInList(this->list, startFont.weight()))
     {
         this->list->setCurrentItem(item);
     }
@@ -374,9 +367,9 @@ int FontWeightWidget::getSelected() const
 class PreviewWidget : public QWidget
 {
 public:
-    PreviewWidget(const QFont &initialFont, QWidget *parent = nullptr)
+    PreviewWidget(const QFont &startFont, QWidget *parent = nullptr)
         : QWidget(parent)
-        , font(initialFont)
+        , font(startFont)
     {
         this->setMinimumHeight(60);
     }
@@ -393,9 +386,9 @@ public:
             QStringLiteral("The quick brown fox jumps over the lazy dog"));
     }
 
-    void setFont(const QFont &newFont)
+    void setFont(const QFont &font)
     {
-        this->font = newFont;
+        this->font = font;
         this->update();
     }
 
@@ -408,27 +401,27 @@ class FontDialog : public QDialog
     Q_OBJECT
 
 public:
-    FontDialog(const QFont &initialFont, QWidget *parent = nullptr);
+    FontDialog(const QFont &startFont, QWidget *parent = nullptr);
     QFont getSelected() const;
 
 Q_SIGNALS:
-    void applyRequested();
+    void applied();
 
 private:
     void updatePreview();
 
     PreviewWidget *preview;
-    FontFamiliesWidget *fontFamilies;
-    FontSizeWidget *fontSize;
-    FontWeightWidget *fontWeight;
+    FontFamilyWidget *familyW;
+    FontSizeWidget *sizeW;
+    FontWeightWidget *weightW;
 };
 
-FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
+FontDialog::FontDialog(const QFont &startFont, QWidget *parent)
     : QDialog(parent)
-    , preview(new PreviewWidget(initialFont))
-    , fontFamilies(new FontFamiliesWidget(initialFont))
-    , fontSize(new FontSizeWidget(initialFont))
-    , fontWeight(new FontWeightWidget(initialFont))
+    , preview(new PreviewWidget(startFont))
+    , familyW(new FontFamilyWidget(startFont))
+    , sizeW(new FontSizeWidget(startFont))
+    , weightW(new FontWeightWidget(startFont))
 {
     auto *layout = new QVBoxLayout;
     auto *choiceLayout = new QHBoxLayout;
@@ -448,11 +441,11 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     layout->addWidget(this->preview, 1);
     layout->addLayout(buttonLayout);
 
-    choiceLayout->addWidget(this->fontFamilies, 5);
+    choiceLayout->addWidget(this->familyW, 5);
     choiceLayout->addLayout(choiceSideLayout, 3);
 
-    choiceSideLayout->addWidget(this->fontSize);
-    choiceSideLayout->addWidget(this->fontWeight);
+    choiceSideLayout->addWidget(this->sizeW);
+    choiceSideLayout->addWidget(this->weightW);
 
     buttonLayout->addWidget(applyButton);
     buttonLayout->addStretch();
@@ -460,31 +453,31 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     buttonLayout->addWidget(rejectButton);
 
     QObject::connect(applyButton, &QPushButton::clicked, this,
-                     &FontDialog::applyRequested);
+                     &FontDialog::applied);
 
     QObject::connect(acceptButton, &QPushButton::clicked, this,
-                     &QDialog::accept);
+                     &FontDialog::accept);
 
     QObject::connect(rejectButton, &QPushButton::clicked, this,
-                     &QDialog::reject);
+                     &FontDialog::reject);
 
-    QObject::connect(
-        this->fontFamilies, &FontFamiliesWidget::selectedChanged, this, [this] {
-            this->fontWeight->setFamily(this->fontFamilies->getSelected());
-            this->updatePreview();
-        });
+    QObject::connect(this->familyW, &FontFamilyWidget::selectedChanged, this,
+                     [this] {
+                         this->weightW->setFamily(this->familyW->getSelected());
+                         this->updatePreview();
+                     });
 
-    QObject::connect(this->fontWeight, &FontWeightWidget::selectedChanged, this,
+    QObject::connect(this->weightW, &FontWeightWidget::selectedChanged, this,
                      &FontDialog::updatePreview);
 
-    QObject::connect(this->fontSize, &FontSizeWidget::selectedChanged, this,
+    QObject::connect(this->sizeW, &FontSizeWidget::selectedChanged, this,
                      &FontDialog::updatePreview);
 }
 
 QFont FontDialog::getSelected() const
 {
-    return {this->fontFamilies->getSelected(), this->fontSize->getSelected(),
-            this->fontWeight->getSelected()};
+    return {this->familyW->getSelected(), this->sizeW->getSelected(),
+            this->weightW->getSelected()};
 }
 
 void FontDialog::updatePreview()
@@ -500,18 +493,18 @@ public:
     FontSettingDialog(QWidget *parent = nullptr)
         : FontDialog(getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1),
                      parent)
-        , oldFont(getSettings()->chatFontFamily)
+        , oldFamily(getSettings()->chatFontFamily)
         , oldSize(getSettings()->chatFontSize)
         , oldWeight(getSettings()->chatFontWeight)
     {
-        QObject::connect(this, &FontDialog::applyRequested, [this] {
+        QObject::connect(this, &FontDialog::applied, [this] {
             this->needRestore = true;
             this->setSettings();
         });
         QObject::connect(this, &FontDialog::rejected, [this] {
             if (this->needRestore)
             {
-                getSettings()->chatFontFamily = this->oldFont;
+                getSettings()->chatFontFamily = this->oldFamily;
                 getSettings()->chatFontSize = this->oldSize;
                 getSettings()->chatFontWeight = this->oldWeight;
             }
@@ -530,7 +523,7 @@ private:
         getSettings()->chatFontWeight = selected.weight();
     }
 
-    QString oldFont;
+    QString oldFamily;
     int oldSize;
     int oldWeight;
     bool needRestore{};
