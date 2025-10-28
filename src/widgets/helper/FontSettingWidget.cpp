@@ -440,8 +440,6 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     this->setLayout(layout);
     this->resize(450, 450);
 
-    this->updatePreview();
-
     layout->addLayout(choiceLayout, 5);
     layout->addWidget(new QLabel("Preview"));
     layout->addWidget(this->preview, 1);
@@ -457,6 +455,8 @@ FontDialog::FontDialog(const QFont &initialFont, QWidget *parent)
     buttonLayout->addStretch();
     buttonLayout->addWidget(acceptButton);
     buttonLayout->addWidget(rejectButton);
+
+    this->updatePreview();
 
     QObject::connect(applyButton, &QPushButton::clicked, this,
                      &FontDialog::applyRequested);
