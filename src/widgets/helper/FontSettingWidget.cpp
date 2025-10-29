@@ -429,7 +429,7 @@ FontDialog::FontDialog(const QFont &startFont, QWidget *parent)
     auto *buttonLayout = new QHBoxLayout;
 
     auto *applyButton = new QPushButton("Apply");
-    auto *acceptButton = new QPushButton("Accept");
+    auto *acceptButton = new QPushButton("Ok");
     auto *rejectButton = new QPushButton("Cancel");
 
     this->setWindowTitle("Pick Font");
