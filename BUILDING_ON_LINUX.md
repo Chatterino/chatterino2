@@ -14,10 +14,16 @@ Use <https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubunt
 
 The built binary should be exportable from the final image & able to run on your system assuming you perform a static build. See our [build.yml GitHub workflow file](.github/workflows/build.yml) for the CMake line used for Ubuntu builds.
 
-### Debian 12 (bookworm) or later
+### Debian 12 (bookworm)
 
 ```sh
 sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81-dev libnotify-dev libssl-dev cmake g++ git
+```
+
+### Debian 13 (trixie) or later
+
+```sh
+sudo apt install qt6-base-dev qt6-svg-dev libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git
 ```
 
 ### Arch Linux
