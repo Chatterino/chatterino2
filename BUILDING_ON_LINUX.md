@@ -23,7 +23,7 @@ sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81
 ### Debian 13 (trixie) or later
 
 ```sh
-sudo apt install qt6-base-dev qt6-svg-dev libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git
+sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git
 ```
 
 ### Arch Linux
