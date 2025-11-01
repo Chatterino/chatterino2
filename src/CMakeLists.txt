@@ -376,6 +376,7 @@ set(SOURCE_FILES
         providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubListener.hpp
         providers/liveupdates/BasicPubSubManager.hpp
 
         providers/pronouns/Pronouns.cpp

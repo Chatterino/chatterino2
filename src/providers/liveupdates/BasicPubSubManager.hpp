@@ -2,10 +2,10 @@
 
 #include "common/QLogging.hpp"
 #include "common/websockets/WebSocketPool.hpp"
+#include "providers/liveupdates/BasicPubSubListener.hpp"
 #include "providers/liveupdates/Diag.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
-#include "util/PostToThread.hpp"
 
 #include <QPointer>
 #include <QTimer>
@@ -19,20 +19,21 @@
 
 namespace chatterino {
 
-template <typename Manager>
-struct BasicPubSubListener : public WebSocketListener {
-    BasicPubSubListener(std::weak_ptr<typename Manager::Client> client,
-                        QPointer<Manager> manager, size_t id);
+namespace liveupdates {
 
-    void onOpen() override;
-    void onTextMessage(QByteArray msg) override;
-    void onBinaryMessage(QByteArray msg) override;
-    void onClose(std::unique_ptr<WebSocketListener> self) override;
-
-    std::weak_ptr<typename Manager::Client> client;
-    QPointer<Manager> manager;
-    size_t id;
+template <typename Manager, typename Client>
+concept IsManager = requires(Manager &manager) {
+    { manager.makeClient() } -> std::same_as<std::shared_ptr<Client>>;
 };
+
+template <typename Client>
+concept IsClient = requires(Client &client, const QByteArray &msg) {
+    { client.onOpen() } -> std::same_as<void>;
+    { client.onMessage(msg) } -> std::same_as<void>;
+    { client.close() } -> std::same_as<void>;
+};
+
+}  // namespace liveupdates
 
 /**
  * This class is the basis for connecting and interacting with
@@ -50,8 +51,9 @@ struct BasicPubSubListener : public WebSocketListener {
  * The derived class. Used to dispatch to makeClient().
  *
  * @tparam ClientT
- * The client type. Must be a BasicPubSubClient. Used to dispatch to the correct
- * methods there and to get the subscription type.
+ * The client type. Must confirm to the IsClient above. Use BasicPubSubClient 
+ * for a common implementation. Used to dispatch to the correct methods there 
+ * and to get the subscription type.
  *
  * @see BasicPubSubClient
  */
@@ -67,6 +69,11 @@ public:
         , host_(std::move(host))
         , shortName_(std::move(shortName))
     {
+        // We do this here, because `Derived` needs to be a complete type. If we
+        // did it as a requires clause on the class, the type would be
+        // incomplete.
+        static_assert(liveupdates::IsManager<Derived, Client>);
+        static_assert(liveupdates::IsClient<Client>);
     }
 
     ~BasicPubSubManager() override
@@ -286,58 +293,5 @@ private:
 
     friend BasicPubSubListener<Derived>;
 };
-
-template <typename Manager>
-BasicPubSubListener<Manager>::BasicPubSubListener(
-    std::weak_ptr<typename Manager::Client> client, QPointer<Manager> manager,
-    size_t id)
-    : client(std::move(client))
-    , manager(std::move(manager))
-    , id(id)
-{
-}
-
-template <typename Derived>
-void BasicPubSubListener<Derived>::onOpen()
-{
-    runInGuiThread([manager = this->manager, id = this->id] {
-        if (manager)
-        {
-            manager->onConnectionOpen(id);
-        }
-    });
-}
-
-template <typename Derived>
-void BasicPubSubListener<Derived>::onTextMessage(QByteArray msg)
-{
-    auto sp = this->client.lock();
-    if (sp)
-    {
-        sp->onMessage(msg);
-    }
-}
-
-template <typename Derived>
-void BasicPubSubListener<Derived>::onBinaryMessage(QByteArray msg)
-{
-    auto sp = this->client.lock();
-    if (sp)
-    {
-        sp->onMessage(msg);
-    }
-}
-
-template <typename Derived>
-void BasicPubSubListener<Derived>::onClose(
-    std::unique_ptr<WebSocketListener> /*self*/)
-{
-    runInGuiThread([manager = this->manager, id = this->id] {
-        if (manager)
-        {
-            manager->onConnectionClose(id);
-        }
-    });
-}
 
 }  // namespace chatterino
