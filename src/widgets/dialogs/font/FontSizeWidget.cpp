@@ -5,6 +5,7 @@
 #include <QBoxLayout>
 #include <QFontDatabase>
 #include <QLabel>
+#include <QSignalBlocker>
 
 namespace chatterino {
 

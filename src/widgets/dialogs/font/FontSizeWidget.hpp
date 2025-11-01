@@ -9,12 +9,16 @@ namespace chatterino {
 
 class IntItem;
 
+/// FontSizeWidget shows a subset of the possible font sizes in a list,
+/// alongside a spinbox where the user can enter their exact font size.
 class FontSizeWidget : public QWidget
 {
     Q_OBJECT
 
 public:
     FontSizeWidget(const QFont &startFont, QWidget *parent = nullptr);
+
+    /// Gets the currently selected font size.
     int getSelected() const;
 
 Q_SIGNALS:
