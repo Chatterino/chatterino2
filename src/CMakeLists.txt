@@ -646,6 +646,22 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+
+        widgets/dialogs/font/FontDialog.cpp
+        widgets/dialogs/font/FontDialog.hpp
+        widgets/dialogs/font/FontFamilyWidget.cpp
+        widgets/dialogs/font/FontFamilyWidget.hpp
+        widgets/dialogs/font/FontSettingDialog.cpp
+        widgets/dialogs/font/FontSettingDialog.hpp
+        widgets/dialogs/font/FontSizeWidget.cpp
+        widgets/dialogs/font/FontSizeWidget.hpp
+        widgets/dialogs/font/FontWeightWidget.cpp
+        widgets/dialogs/font/FontWeightWidget.hpp
+        widgets/dialogs/font/IntItem.cpp
+        widgets/dialogs/font/IntItem.hpp
+        widgets/dialogs/font/PreviewWidget.cpp
+        widgets/dialogs/font/PreviewWidget.hpp
+
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
@@ -700,6 +716,8 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
