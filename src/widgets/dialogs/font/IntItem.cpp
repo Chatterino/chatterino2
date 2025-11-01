@@ -11,7 +11,12 @@ IntItem::IntItem(int v, QListWidget *parent)
 bool IntItem::operator<(const QListWidgetItem &other) const
 {
     const auto *cast = dynamic_cast<const IntItem *>(&other);
-    assert(cast);
+    if (cast == nullptr)
+    {
+        assert(cast && "IntItem may only be compared with other list items");
+        return false;
+    }
+
     return this->value < cast->value;
 }
 
