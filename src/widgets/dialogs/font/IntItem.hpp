@@ -9,6 +9,7 @@ namespace chatterino {
 class IntItem : public QListWidgetItem
 {
 public:
+    static constexpr int TYPE_ID = QListWidgetItem::UserType + 101;
     void setText(const QString &) = delete;
 
     IntItem(int v = 0, QListWidget *parent = nullptr);
@@ -17,7 +18,6 @@ public:
 
     void setValue(int v);
     int getValue() const;
-    static int typeId();
 
 private:
     int value;

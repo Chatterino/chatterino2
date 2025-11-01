@@ -3,7 +3,7 @@
 namespace chatterino {
 
 IntItem::IntItem(int v, QListWidget *parent)
-    : QListWidgetItem(QString::number(v), parent, IntItem::typeId())
+    : QListWidgetItem(QString::number(v), parent, IntItem::TYPE_ID)
     , value(v)
 {
 }
@@ -24,11 +24,6 @@ void IntItem::setValue(int v)
 int IntItem::getValue() const
 {
     return this->value;
-}
-
-int IntItem::typeId()
-{
-    return QListWidgetItem::UserType + 123;
 }
 
 IntItem *findIntItemInList(QListWidget *list, int value)
