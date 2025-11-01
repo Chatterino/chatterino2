@@ -12,33 +12,12 @@
 
 namespace chatterino {
 
-void FontSettingWidget::updateCurrentLabel()
-{
-    QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
-    QString family = font.family();
-    QString ptSize = QString::number(font.pointSize());
-    this->currentLabel->setText(family + ", " + ptSize + "pt");
-}
-
-void FontSettingWidget::showDialog()
-{
-    static FontSettingDialog *instance = nullptr;
-
-    if (!instance)
-    {
-        instance = new FontSettingDialog(getSettings()->chatFontFamily,
-                                         getSettings()->chatFontSize,
-                                         getSettings()->chatFontWeight, this);
-        QObject::connect(instance, &QObject::destroyed, [&] {
-            instance = nullptr;
-        });
-    }
-
-    instance->show();
-}
-
-FontSettingWidget::FontSettingWidget(QWidget *parent)
+FontSettingWidget::FontSettingWidget(QStringSetting &family, IntSetting &size,
+                                     IntSetting &weight, QWidget *parent)
     : QWidget(parent)
+    , familySetting(family)
+    , sizeSetting(size)
+    , weightSetting(weight)
     , currentLabel(new QLabel)
     , listener([this] {
         this->updateCurrentLabel();
@@ -62,6 +41,29 @@ FontSettingWidget::FontSettingWidget(QWidget *parent)
 
     QObject::connect(button, &QToolButton::clicked, this,
                      &FontSettingWidget::showDialog);
+}
+
+void FontSettingWidget::updateCurrentLabel()
+{
+    QFont font = getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1);
+    QString family = font.family();
+    QString ptSize = QString::number(font.pointSize());
+    this->currentLabel->setText(family + ", " + ptSize + "pt");
+}
+
+void FontSettingWidget::showDialog()
+{
+    if (!this->dialog)
+    {
+        this->dialog = new FontSettingDialog(
+            this->familySetting, this->sizeSetting, this->weightSetting, this);
+
+        QObject::connect(this->dialog, &QObject::destroyed, [this] {
+            this->dialog = nullptr;
+        });
+    }
+
+    this->dialog->show();
 }
 
 }  // namespace chatterino

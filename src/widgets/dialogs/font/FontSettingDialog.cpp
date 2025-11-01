@@ -14,13 +14,15 @@ FontSettingDialog::FontSettingDialog(QStringSetting &family, IntSetting &size,
     , oldSize(size)
     , oldWeight(weight)
 {
-    QObject::connect(this, &FontDialog::applied,
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
+    QObject::connect(this, &FontDialog::applied, this,
                      &FontSettingDialog::setSettings);
 
-    QObject::connect(this, &FontDialog::rejected,
+    QObject::connect(this, &FontDialog::rejected, this,
                      &FontSettingDialog::restoreSettings);
 
-    QObject::connect(this, &FontDialog::accepted,
+    QObject::connect(this, &FontDialog::accepted, this,
                      &FontSettingDialog::setSettings);
 }
 
