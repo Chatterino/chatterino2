@@ -32,6 +32,7 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <ranges>
 #include <utility>
 
 namespace chatterino {
@@ -1244,6 +1245,18 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
     return true;
 }
 
+void Notebook::sortTabsAlphabetically()
+{
+    std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
+        const QString &lhs = a.tab->getTitle();
+        const QString &rhs = b.tab->getTitle();
+        return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
+    });
+
+    getApp()->getWindows()->queueSave();
+    this->performLayout(true);
+}
+
 SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
@@ -1304,6 +1317,13 @@ SplitNotebook::SplitNotebook(Window *parent)
                          this->hideAllTabsAction->setChecked(true);
                      });
     tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
+
+    this->sortTabsAlphabeticallyAction_ =
+        new QAction("Sort Tabs Alphabetically", this);
+    QObject::connect(this->sortTabsAlphabeticallyAction_, &QAction::triggered,
+                     [this] {
+                         this->sortTabsAlphabetically();
+                     });
 
     switch (getSettings()->tabVisibility.getEnum())
     {
@@ -1392,6 +1412,8 @@ SplitNotebook::SplitNotebook(Window *parent)
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
 {
     Notebook::addNotebookActionsToMenu(menu);
+
+    menu->addAction(this->sortTabsAlphabeticallyAction_);
 
     auto *submenu = menu->addMenu("Tab visibility");
     submenu->addAction(this->showAllTabsAction);

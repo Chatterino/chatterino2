@@ -258,7 +258,6 @@ void SplitInput::triggerSelfMessageReceived()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();

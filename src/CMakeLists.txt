@@ -1078,6 +1078,10 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
+    # Disable min/max macros from Windows.h
+    $<$<BOOL:${WIN32}>:NOMINMAX>
+    # Exclude some headers when including Windows.h
+    $<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>
     )
 
 set(_c2_qt_defs
@@ -1236,8 +1240,13 @@ if (MSVC)
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
-    # Disable min/max macros from Windows.h
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
+
+    # Warnings on clang-cl
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-missing-designated-field-initializers
+        )
+    endif()
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall
