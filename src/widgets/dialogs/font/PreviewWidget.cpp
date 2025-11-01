@@ -1,20 +1,6 @@
 #include "widgets/dialogs/font/PreviewWidget.hpp"
 
-#include <QDebug>
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QFontDatabase>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QListWidget>
 #include <QPainter>
-#include <QPaintEvent>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
-#include <QSpinBox>
-#include <QStringListModel>
-#include <QToolButton>
-#include <QVBoxLayout>
 
 namespace chatterino {
 
