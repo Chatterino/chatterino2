@@ -1,10 +1,19 @@
 #pragma once
 
-#include <QListView>
+#include <QDebug>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFontDatabase>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPainter>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
-#include <QString>
+#include <QSpinBox>
 #include <QStringListModel>
-#include <QWidget>
+#include <QToolButton>
+#include <QVBoxLayout>
 
 namespace chatterino {
 

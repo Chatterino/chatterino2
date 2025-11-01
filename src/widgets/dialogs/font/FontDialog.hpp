@@ -4,9 +4,20 @@
 #include "widgets/dialogs/font/FontWeightWidget.hpp"
 #include "widgets/dialogs/font/PreviewWidget.hpp"
 
+#include <QDebug>
 #include <QDialog>
-#include <QFont>
-#include <QWidget>
+#include <QDialogButtonBox>
+#include <QFontDatabase>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPainter>
+#include <QPushButton>
+#include <QSortFilterProxyModel>
+#include <QSpinBox>
+#include <QStringListModel>
+#include <QToolButton>
+#include <QVBoxLayout>
 
 namespace chatterino {
 

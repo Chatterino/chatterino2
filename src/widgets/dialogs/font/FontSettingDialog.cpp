@@ -1,9 +1,19 @@
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
-#include <QWidget>
-
-// TODO: weird compile error without
-#include "singletons/Settings.hpp"
+#include <QDebug>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFontDatabase>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPainter>
+#include <QPushButton>
+#include <QSortFilterProxyModel>
+#include <QSpinBox>
+#include <QStringListModel>
+#include <QToolButton>
+#include <QVBoxLayout>
 
 namespace chatterino {
 
