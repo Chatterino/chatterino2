@@ -167,13 +167,18 @@ void WebSocketConnectionHelper<Derived, Inner>::doWsHandshake()
 
     auto host = this->options.url.host(QUrl::FullyEncoded).toStdString() + ':' +
                 std::to_string(this->options.url.port(Derived::DEFAULT_PORT));
-    auto path = this->options.url.path(QUrl::FullyEncoded).toStdString();
-    if (path.empty())
+    auto path = this->options.url.path(QUrl::FullyEncoded);
+    if (path.isEmpty())
     {
         path = "/";
     }
+    if (this->options.url.hasQuery())
+    {
+        path += '?';
+        path += this->options.url.query(QUrl::FullyEncoded);
+    }
     this->stream.async_handshake(
-        host, path,
+        host, path.toStdString(),
         beast::bind_front_handler(&WebSocketConnectionHelper::onWsHandshake,
                                   this->shared_from_this()));
 }
