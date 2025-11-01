@@ -6,7 +6,9 @@
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
 #include <QFont>
+#include <QHBoxLayout>
 #include <QString>
+#include <QToolButton>
 
 namespace chatterino {
 

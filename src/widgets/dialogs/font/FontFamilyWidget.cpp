@@ -1,20 +1,9 @@
 #include "widgets/dialogs/font/FontFamilyWidget.hpp"
 
-#include <QDebug>
-#include <QDialog>
-#include <QDialogButtonBox>
+#include <QBoxLayout>
 #include <QFontDatabase>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListWidget>
-#include <QPainter>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
-#include <QSpinBox>
-#include <QStringListModel>
-#include <QToolButton>
-#include <QVBoxLayout>
 
 namespace chatterino {
 

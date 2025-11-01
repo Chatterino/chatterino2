@@ -1,20 +1,10 @@
 #include "widgets/dialogs/font/FontSizeWidget.hpp"
 
-#include <QDebug>
-#include <QDialog>
-#include <QDialogButtonBox>
+#include "widgets/dialogs/font/IntItem.hpp"
+
+#include <QBoxLayout>
 #include <QFontDatabase>
-#include <QHBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QPainter>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
-#include <QSpinBox>
-#include <QStringListModel>
-#include <QToolButton>
-#include <QVBoxLayout>
 
 namespace chatterino {
 
