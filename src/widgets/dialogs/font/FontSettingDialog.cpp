@@ -14,17 +14,14 @@ FontSettingDialog::FontSettingDialog(QStringSetting &family, IntSetting &size,
     , oldSize(size)
     , oldWeight(weight)
 {
-    QObject::connect(this, &FontDialog::applied, [this] {
-        this->setSettings();
-    });
+    QObject::connect(this, &FontDialog::applied,
+                     &FontSettingDialog::setSettings);
 
-    QObject::connect(this, &FontDialog::rejected, [this] {
-        this->restoreSettings();
-    });
+    QObject::connect(this, &FontDialog::rejected,
+                     &FontSettingDialog::restoreSettings);
 
-    QObject::connect(this, &FontDialog::accepted, [this] {
-        this->setSettings();
-    });
+    QObject::connect(this, &FontDialog::accepted,
+                     &FontSettingDialog::setSettings);
 }
 
 void FontSettingDialog::setSettings()
