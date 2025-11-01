@@ -34,6 +34,7 @@
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
+- Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 
 ## 2.5.4
 
