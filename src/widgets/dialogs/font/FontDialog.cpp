@@ -71,8 +71,11 @@ FontDialog::FontDialog(const QFont &startFont, QWidget *parent)
 
 QFont FontDialog::getSelected() const
 {
-    return {this->familyW->getSelected(), this->sizeW->getSelected(),
-            this->weightW->getSelected()};
+    return {
+        this->familyW->getSelected(),
+        this->sizeW->getSelected(),
+        this->weightW->getSelected(),
+    };
 }
 
 void FontDialog::updatePreview()
