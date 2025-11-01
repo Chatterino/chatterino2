@@ -33,7 +33,9 @@ int IntItem::getValue() const
 
 IntItem *findIntItemInList(QListWidget *list, int value)
 {
-    for (int n = list->count(), i = 0; i < n; ++i)
+    int numItems = list->count();
+
+    for (int i = 0; i < numItems; ++i)
     {
         auto *item = dynamic_cast<IntItem *>(list->item(i));
         if (item && item->getValue() == value)
