@@ -27,6 +27,8 @@ private:
     int value;
 };
 
+/// Iterate through all items in the given list and return the item
+/// matching the given value
 IntItem *findIntItemInList(QListWidget *list, int value);
 
 }  // namespace chatterino
