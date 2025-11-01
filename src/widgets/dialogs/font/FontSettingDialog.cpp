@@ -2,21 +2,6 @@
 
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
-#include <QDebug>
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QFontDatabase>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QPainter>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
-#include <QSpinBox>
-#include <QStringListModel>
-#include <QToolButton>
-#include <QVBoxLayout>
-
 namespace chatterino {
 
 FontSettingDialog::FontSettingDialog(QStringSetting &family, IntSetting &size,
