@@ -1,5 +1,7 @@
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
+#include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+
 #include <QDebug>
 #include <QDialog>
 #include <QDialogButtonBox>

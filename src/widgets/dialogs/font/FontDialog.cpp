@@ -5,6 +5,7 @@
 #include <QDialogButtonBox>
 #include <QFontDatabase>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPainter>
