@@ -9,6 +9,7 @@ namespace chatterino {
 
 namespace {
 
+/// Gets a list of available font families available on this system
 QStringList getFontFamilies()
 {
     QStringList families = QFontDatabase::families();
