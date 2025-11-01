@@ -65,19 +65,17 @@ namespace chatterino::lua::api {
 
 void createAccounts(sol::table &c2)
 {
-    sol::table accounts = c2.create("accounts");
-    sol::table twitch = accounts.create("twitch");
-    twitch.new_usertype<WeakTwitchAccount>(
+    c2.new_usertype<WeakTwitchAccount>(
         "TwitchAccount", sol::no_constructor,  //
         sol::meta_function::to_string,
-        &WeakTwitchAccount::userName,               //
-        "user_name", &WeakTwitchAccount::userName,  //
-        "user_id", &WeakTwitchAccount::userID,      //
-        "color", &WeakTwitchAccount::color,         //
-        "is_anon", &WeakTwitchAccount::isAnon       //
+        &WeakTwitchAccount::userName,                //
+        "user_login", &WeakTwitchAccount::userName,  //
+        "user_id", &WeakTwitchAccount::userID,       //
+        "color", &WeakTwitchAccount::color,          //
+        "is_anon", &WeakTwitchAccount::isAnon        //
     );
 
-    twitch.set_function("current", [] {
+    c2.set_function("current_account", [] {
         return WeakTwitchAccount(getApp()->getAccounts()->twitch.getCurrent());
     });
 }

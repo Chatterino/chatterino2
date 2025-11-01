@@ -377,16 +377,12 @@ declare namespace c2 {
         Repost,
     }
 
-    namespace accounts {
-        namespace twitch {
-            class TwitchAccount {
-                user_name(): string;
-                user_id(): string;
-                color(): string;
-                is_anon(): boolean;
-            }
-
-            function current(): TwitchAccount;
-        }
+    class TwitchAccount {
+        user_login(): string;
+        user_id(): string;
+        color(): string;
+        is_anon(): boolean;
     }
+
+    function current_account(): TwitchAccount;
 }

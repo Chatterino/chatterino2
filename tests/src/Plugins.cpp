@@ -1038,15 +1038,14 @@ TEST_F(PluginTest, testAccounts)
 {
     configure();
 
-    bool ok = lua->script(R"lua(
-        local current = c2.accounts.twitch.current()
-        assert(current:user_name() == "testaccount_420")
+    auto res = lua->script(R"lua(
+        local current = c2.current_account()
+        assert(current:user_login() == "testaccount_420")
         assert(current:user_id() == "117166826")
         assert(current:color() == "#ff000000") -- unset
         assert(not current:is_anon())
-    )lua")
-                  .valid();
-    ASSERT_TRUE(ok);
+    )lua");
+    ASSERT_TRUE(res.valid()) << sol::error(res).what();
 }
 
 #endif
