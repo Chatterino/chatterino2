@@ -16,16 +16,19 @@ public:
                       IntSetting &weight, QWidget *parent = nullptr);
 
 private:
+    /// Apply the current dialog's values to the font settings
     void setSettings();
 
-    QStringSetting &familyOpt;
-    IntSetting &sizeOpt;
-    IntSetting &weightOpt;
+    /// Restore the original setting values to the font settings
+    void restoreSettings();
+
+    QStringSetting &familySetting;
+    IntSetting &sizeSetting;
+    IntSetting &weightSetting;
 
     QString oldFamily;
     int oldSize;
     int oldWeight;
-    bool needRestore{};
 };
 
 }  // namespace chatterino

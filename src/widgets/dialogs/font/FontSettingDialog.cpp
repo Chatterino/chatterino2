@@ -7,25 +7,21 @@ namespace chatterino {
 FontSettingDialog::FontSettingDialog(QStringSetting &family, IntSetting &size,
                                      IntSetting &weight, QWidget *parent)
     : FontDialog({family, size, weight}, parent)
-    , familyOpt(family)
-    , sizeOpt(size)
-    , weightOpt(weight)
+    , familySetting(family)
+    , sizeSetting(size)
+    , weightSetting(weight)
     , oldFamily(family)
     , oldSize(size)
     , oldWeight(weight)
 {
     QObject::connect(this, &FontDialog::applied, [this] {
-        this->needRestore = true;
         this->setSettings();
     });
+
     QObject::connect(this, &FontDialog::rejected, [this] {
-        if (this->needRestore)
-        {
-            this->familyOpt = this->oldFamily;
-            this->sizeOpt = this->oldSize;
-            this->weightOpt = this->oldWeight;
-        }
+        this->restoreSettings();
     });
+
     QObject::connect(this, &FontDialog::accepted, [this] {
         this->setSettings();
     });
@@ -33,9 +29,18 @@ FontSettingDialog::FontSettingDialog(QStringSetting &family, IntSetting &size,
 
 void FontSettingDialog::setSettings()
 {
-    QFont selected = this->getSelected();
-    this->familyOpt = selected.family();
-    this->sizeOpt = selected.pointSize();
-    this->weightOpt = selected.weight();
+    const auto selected = this->getSelected();
+
+    this->familySetting.setValue(selected.family());
+    this->sizeSetting.setValue(selected.pointSize());
+    this->weightSetting.setValue(selected.weight());
 }
+
+void FontSettingDialog::restoreSettings()
+{
+    this->familySetting.setValue(this->oldFamily);
+    this->sizeSetting.setValue(this->oldSize);
+    this->weightSetting.setValue(this->oldWeight);
+}
+
 }  // namespace chatterino
