@@ -3,7 +3,6 @@
 #include <QFontDatabase>
 #include <QHBoxLayout>
 #include <QSignalBlocker>
-#include <QSpinBox>
 #include <QVBoxLayout>
 
 namespace chatterino {

@@ -2,7 +2,9 @@
 
 #include <QListView>
 #include <QSortFilterProxyModel>
+#include <QString>
 #include <QStringListModel>
+#include <QWidget>
 
 namespace chatterino {
 

@@ -1,5 +1,7 @@
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
+#include <QWidget>
+
 // TODO: weird compile error without
 #include "singletons/Settings.hpp"
 

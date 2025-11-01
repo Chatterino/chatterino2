@@ -2,6 +2,7 @@
 #include "widgets/dialogs/font/IntItem.hpp"
 
 #include <QFont>
+#include <QSpinBox>
 #include <QWidget>
 
 namespace chatterino {
