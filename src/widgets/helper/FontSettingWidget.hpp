@@ -13,6 +13,7 @@ public:
 
 private:
     void updateCurrentLabel();
+    void showDialog();
 
     QLabel *currentLabel;
     SignalListener listener;
