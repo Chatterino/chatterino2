@@ -222,8 +222,13 @@ void SplitContainer::addSplit(Split *split)
                          [this, split](HighlightState state) {
                              if (this->tab_ != nullptr)
                              {
-                                 this->tab_->updateHighlightState(
-                                     state, split->getChannelView());
+                                 if (this->tab_->updateHighlightState(state, split->getChannelView()))
+                                 {
+                                     if (auto *notebook = dynamic_cast<Notebook *>(this->parentWidget()))
+                                     {
+                                         notebook->refresh();
+                                     }
+                                 }
                              }
                          });
 
