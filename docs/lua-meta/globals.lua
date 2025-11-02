@@ -60,7 +60,7 @@ c2.ChannelType = {
 ---@class c2.TwitchAccount
 c2.TwitchAccount = {}
 
----@return string user_name The (login) name of the account
+---@return string user_login The (login) name of the account
 function c2.TwitchAccount:user_login() end
 
 ---@return string user_id The Twitch user ID of the account
