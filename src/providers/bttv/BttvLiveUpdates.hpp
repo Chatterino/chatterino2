@@ -47,7 +47,15 @@ public:
      */
     void partChannel(const QString &id);
 
+    /// Stop the manager
+    ///
+    /// Used in tests to check that connections are closed (through #diag()).
+    /// Otherwise, calling the destructor is sufficient.
     void stop();
+
+    /// Statistics about the opened/closed connections and received messages
+    ///
+    /// Used in tests.
     const liveupdates::Diag &diag() const;
 
 private:
