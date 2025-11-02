@@ -1,9 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
-add_compile_definitions(QT_NO_KEYWORDS)
+# used for QT_DISABLE_DEPRECATED_BEFORE/QT_WARN_DEPRECATED_UP_TO
+set(CHATTERINO_MIN_QT_VERSION 0x060403)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
@@ -157,6 +156,9 @@ set(SOURCE_FILES
         controllers/completion/strategies/Strategy.hpp
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
+
+        controllers/emotes/EmoteController.cpp
+        controllers/emotes/EmoteController.hpp
 
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
@@ -473,8 +475,6 @@ set(SOURCE_FILES
 
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
-        singletons/Emotes.cpp
-        singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
         singletons/ImageUploader.cpp
@@ -646,6 +646,22 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+
+        widgets/dialogs/font/FontDialog.cpp
+        widgets/dialogs/font/FontDialog.hpp
+        widgets/dialogs/font/FontFamilyWidget.cpp
+        widgets/dialogs/font/FontFamilyWidget.hpp
+        widgets/dialogs/font/FontSettingDialog.cpp
+        widgets/dialogs/font/FontSettingDialog.hpp
+        widgets/dialogs/font/FontSizeWidget.cpp
+        widgets/dialogs/font/FontSizeWidget.hpp
+        widgets/dialogs/font/FontWeightWidget.cpp
+        widgets/dialogs/font/FontWeightWidget.hpp
+        widgets/dialogs/font/IntItem.cpp
+        widgets/dialogs/font/IntItem.hpp
+        widgets/dialogs/font/PreviewWidget.cpp
+        widgets/dialogs/font/PreviewWidget.hpp
+
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
@@ -700,6 +716,8 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
@@ -922,10 +940,8 @@ if (BUILD_APP)
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
 
-    if(COMMAND add_sanitizers)
+    if(CHATTERINO_SANITIZER_SUPPORT)
         add_sanitizers(${EXECUTABLE_PROJECT})
-    else()
-        message(WARNING "Sanitizers support is disabled")
     endif()
 
     if (CHATTERINO_STATIC_QT_BUILD)
@@ -1078,7 +1094,19 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
+    # Disable min/max macros from Windows.h
+    $<$<BOOL:${WIN32}>:NOMINMAX>
+    # Exclude some headers when including Windows.h
+    $<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>
     )
+
+set(_c2_qt_defs
+    QT_DISABLE_DEPRECATED_BEFORE=${CHATTERINO_MIN_QT_VERSION}
+    QT_WARN_DEPRECATED_UP_TO=${CHATTERINO_MIN_QT_VERSION}
+    QT_NO_KEYWORDS
+)
+target_compile_definitions(${VERSION_PROJECT} PUBLIC ${_c2_qt_defs})
+target_compile_definitions(${LIBRARY_PROJECT} PUBLIC ${_c2_qt_defs})
 
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
@@ -1228,8 +1256,13 @@ if (MSVC)
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
-    # Disable min/max macros from Windows.h
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
+
+    # Warnings on clang-cl
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-missing-designated-field-initializers
+        )
+    endif()
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall

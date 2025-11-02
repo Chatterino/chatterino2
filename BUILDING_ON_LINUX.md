@@ -14,16 +14,16 @@ Use <https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubunt
 
 The built binary should be exportable from the final image & able to run on your system assuming you perform a static build. See our [build.yml GitHub workflow file](.github/workflows/build.yml) for the CMake line used for Ubuntu builds.
 
-### Debian 12 (bookworm) or later
+### Debian 13 (trixie) or later
 
 ```sh
-sudo apt install qt6-base-dev qt6-5compat-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81-dev libnotify-dev libssl-dev cmake g++ git
+sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost libnotify rapidjson pkgconf cmake
+sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-svg boost libnotify rapidjson pkgconf cmake
 ```
 
 If you use Wayland, you will also need to ensure `qt6-wayland` is installed.
@@ -35,7 +35,7 @@ Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packag
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
 ```sh
-sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel libnotify-devel cmake
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel g++ git openssl-devel boost-devel libnotify-devel cmake
 ```
 
 ### NixOS 18.09+

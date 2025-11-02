@@ -28,7 +28,7 @@ jobs:
         skip-crashpad: [false]
       fail-fast: false
     env:
-      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+      QT_MODULES: qtimageformats
       C2_USE_OPENSSL3: ${{ startsWith(matrix.qt-version, '6.') && 'True' || 'False' }}
       C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Setup sccache
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.18
+        uses: hendrikmuhs/ccache-action@v1.2.19
         with:
           variant: sccache
           # only save on the default (master) branch

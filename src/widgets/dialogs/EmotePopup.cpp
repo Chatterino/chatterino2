@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
@@ -10,11 +11,11 @@
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -44,8 +45,7 @@ auto makeTitleMessage(const QString &title)
     return builder.release();
 }
 
-auto makeEmoteMessage(std::vector<EmotePtr> emotes,
-                      const MessageElementFlag &emoteFlag)
+auto makeEmoteMessage(std::vector<EmotePtr> emotes)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -66,15 +66,15 @@ auto makeEmoteMessage(std::vector<EmotePtr> emotes,
     {
         builder
             .emplace<EmoteElement>(
-                emote,
-                MessageElementFlags{MessageElementFlag::AlwaysShow, emoteFlag})
+                emote, MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                           MessageElementFlag::Emote})
             ->setLink(Link(Link::InsertText, emote->name.string));
     }
 
     return builder.release();
 }
 
-auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
+auto makeEmoteMessage(const EmoteMap &map)
 {
     if (map.empty())
     {
@@ -93,7 +93,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     {
         vec.emplace_back(ptr);
     }
-    return makeEmoteMessage(std::move(vec), emoteFlag);
+    return makeEmoteMessage(std::move(vec));
 }
 
 auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
@@ -116,13 +116,11 @@ auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
     return builder.release();
 }
 
-void addEmotes(Channel &channel, auto &&emotes, const QString &title,
-               const MessageElementFlag &emoteFlag)
+void addEmotes(Channel &channel, auto &&emotes, const QString &title)
 {
     channel.addMessage(makeTitleMessage(title), MessageContext::Original);
-    channel.addMessage(
-        makeEmoteMessage(std::forward<decltype(emotes)>(emotes), emoteFlag),
-        MessageContext::Original);
+    channel.addMessage(makeEmoteMessage(std::forward<decltype(emotes)>(emotes)),
+                       MessageContext::Original);
 }
 
 void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
@@ -133,8 +131,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 {
     if (!local->empty())
     {
-        addEmotes(subChannel, *local, channelName % u" (Follower)",
-                  MessageElementFlag::TwitchEmote);
+        addEmotes(subChannel, *local, channelName % u" (Follower)");
     }
 
     std::vector<
@@ -146,8 +143,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
         if (set.owner->id == currentChannelID)
         {
             // Put current channel emotes at the top
-            addEmotes(subChannel, set.emotes, set.title(),
-                      MessageElementFlag::TwitchEmote);
+            addEmotes(subChannel, set.emotes, set.title());
         }
         else
         {
@@ -162,7 +158,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
     for (const auto &[title, set] : sortedSets)
     {
         addEmotes(set.get().isSubLike ? subChannel : globalChannel,
-                  set.get().emotes, title, MessageElementFlag::TwitchEmote);
+                  set.get().emotes, title);
     }
 }
 
@@ -269,7 +265,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
-            MessageElementFlag::EmoteImages});
+            MessageElementFlag::EmoteImage});
         view->setEnableScrollingToBottom(false);
         // We can safely ignore this signal connection since the ChannelView is deleted
         // either when the notebook is deleted, or when our main layout is deleted.
@@ -457,34 +453,34 @@ void EmotePopup::reloadEmotes()
         if (Settings::instance().enableBTTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
-                      "BetterTTV", MessageElementFlag::BttvEmote);
+                      "BetterTTV");
         }
         if (Settings::instance().enableFFZChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
-                      "FrankerFaceZ", MessageElementFlag::FfzEmote);
+                      "FrankerFaceZ");
         }
         if (Settings::instance().enableSevenTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
-                      "7TV", MessageElementFlag::SevenTVEmote);
+                      "7TV");
         }
     }
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
-                  "BetterTTV", MessageElementFlag::BttvEmote);
+                  "BetterTTV");
     }
     if (Settings::instance().enableFFZGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
-                  "FrankerFaceZ", MessageElementFlag::FfzEmote);
+                  "FrankerFaceZ");
     }
     if (Settings::instance().enableSevenTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
-                  "7TV", MessageElementFlag::SevenTVEmote);
+                  "7TV");
     }
 
     if (subChannel->getMessageSnapshot().size() == 0)
@@ -524,8 +520,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         if (!local.empty())
         {
             addEmotes(*searchChannel, local,
-                      this->twitchChannel_->getName() % u" (Follower)",
-                      MessageElementFlag::TwitchEmote);
+                      this->twitchChannel_->getName() % u" (Follower)");
         }
 
         for (const auto &[_id, set] :
@@ -534,8 +529,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
             auto filtered = filterEmoteVec(searchText, set.emotes);
             if (!filtered.empty())
             {
-                addEmotes(*searchChannel, std::move(filtered), set.title(),
-                          MessageElementFlag::TwitchEmote);
+                addEmotes(*searchChannel, std::move(filtered), set.title());
             }
         }
     }
@@ -550,18 +544,15 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     // global
     if (!bttvGlobalEmotes.empty())
     {
-        addEmotes(*searchChannel, bttvGlobalEmotes, "BetterTTV (Global)",
-                  MessageElementFlag::BttvEmote);
+        addEmotes(*searchChannel, bttvGlobalEmotes, "BetterTTV (Global)");
     }
     if (!ffzGlobalEmotes.empty())
     {
-        addEmotes(*searchChannel, ffzGlobalEmotes, "FrankerFaceZ (Global)",
-                  MessageElementFlag::FfzEmote);
+        addEmotes(*searchChannel, ffzGlobalEmotes, "FrankerFaceZ (Global)");
     }
     if (!seventvGlobalEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)",
-                  MessageElementFlag::SevenTVEmote);
+        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)");
     }
 
     if (this->twitchChannel_ == nullptr)
@@ -579,18 +570,15 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     // channel
     if (!bttvChannelEmotes.empty())
     {
-        addEmotes(*searchChannel, bttvChannelEmotes, "BetterTTV (Channel)",
-                  MessageElementFlag::BttvEmote);
+        addEmotes(*searchChannel, bttvChannelEmotes, "BetterTTV (Channel)");
     }
     if (!ffzChannelEmotes.empty())
     {
-        addEmotes(*searchChannel, ffzChannelEmotes, "FrankerFaceZ (Channel)",
-                  MessageElementFlag::FfzEmote);
+        addEmotes(*searchChannel, ffzChannelEmotes, "FrankerFaceZ (Channel)");
     }
     if (!seventvChannelEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)",
-                  MessageElementFlag::SevenTVEmote);
+        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)");
     }
 }
 

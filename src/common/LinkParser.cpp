@@ -1,6 +1,7 @@
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
+#include "common/QLogging.hpp"
 #include "util/QCompareTransparent.hpp"
 
 #include <QFile>
@@ -20,7 +21,12 @@ TldSet &tlds()
 {
     static TldSet tlds = [] {
         QFile file(QStringLiteral(":/tlds.txt"));
-        file.open(QFile::ReadOnly);
+        bool ok = file.open(QFile::ReadOnly);
+        if (!ok)
+        {
+            assert(false && "Resources not available");
+            qCWarning(chatterinoApp) << "Resources not available";
+        }
         QTextStream stream(&file);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

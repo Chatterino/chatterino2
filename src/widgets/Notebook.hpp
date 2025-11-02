@@ -17,10 +17,8 @@ namespace chatterino {
 
 class Button;
 class PixmapButton;
-class SvgButton;
 class Window;
 class DrawnButton;
-class UpdateDialog;
 class NotebookTab;
 class SplitContainer;
 class Split;
@@ -124,6 +122,8 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    void sortTabsAlphabetically();
+
 protected:
     bool getShowTabs() const;
     void setShowTabs(bool value);
@@ -140,7 +140,6 @@ protected:
     {
         auto *btn = new T(std::forward<decltype(args)>(args)..., this);
         this->customButtons_.push_back(btn);
-        this->performLayout();
 
         return btn;
     }
@@ -267,6 +266,8 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
+    QAction *sortTabsAlphabeticallyAction_;
+
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
