@@ -17,7 +17,7 @@ class WebSocketConnection;
 class WebSocketPoolImpl
 {
 public:
-    WebSocketPoolImpl();
+    WebSocketPoolImpl(const QString &shortName);
     ~WebSocketPoolImpl();
 
     WebSocketPoolImpl(const WebSocketPoolImpl &) = delete;

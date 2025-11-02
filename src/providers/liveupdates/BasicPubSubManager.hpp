@@ -65,9 +65,8 @@ public:
     using Client = ClientT;
 
     BasicPubSubManager(QString host, QString shortName)
-        : pool_(std::make_optional<WebSocketPool>())
+        : pool_(std::make_optional<WebSocketPool>(shortName))
         , host_(std::move(host))
-        , shortName_(std::move(shortName))
     {
         // We do this here, because `Derived` needs to be a complete type. If we
         // did it as a requires clause on the class, the type would be
@@ -282,9 +281,6 @@ private:
     std::unordered_map<size_t, std::shared_ptr<Client>> clients_;
 
     const QString host_;
-
-    /// Short name of the service (e.g. "7TV" or "BTTV")
-    const QString shortName_;
 
     size_t nextId_ = 0;
 
