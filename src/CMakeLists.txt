@@ -873,6 +873,17 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
+if(TARGET rapidjson)
+    message(DEBUG "Linking to rapidjson target")
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(DEBUG "RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
+else()
+    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -888,7 +899,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Signals
         websocketpp::websocketpp
         Threads::Threads
-        RapidJSON::RapidJSON
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
@@ -1193,8 +1203,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
