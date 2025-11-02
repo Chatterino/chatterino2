@@ -83,9 +83,15 @@ ModerationPage::ModerationPage()
 
         auto logsPathLabel = logs.emplace<QLabel>();
 
+        QString logExplanation =
+            "<span style=\"color:#bbb\"> They are saved as plain "
+            "text files per channel, containing the messages with "
+            "timestamps.</span>";
+
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect(
-            [logsPathLabel](const QString &logPath, auto) mutable {
+            [logsPathLabel, logExplanation](const QString &logPath,
+                                            auto) mutable {
                 QString pathOriginal =
                     logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
                                       : logPath;
@@ -93,10 +99,11 @@ ModerationPage::ModerationPage()
                 QString pathShortened =
                     "Logs are saved at <a href=\"file:///" + pathOriginal +
                     R"("><span style="color: white;">)" +
-                    shortenString(pathOriginal, 50) + "</span></a>";
+                    shortenString(pathOriginal, 50) + ".</span></a>";
 
-                logsPathLabel->setText(pathShortened);
+                logsPathLabel->setText(pathShortened + logExplanation);
                 logsPathLabel->setToolTip(pathOriginal);
+                logsPathLabel->setWordWrap(true);
             });
 
         logsPathLabel->setTextFormat(Qt::RichText);
@@ -225,7 +232,7 @@ ModerationPage::ModerationPage()
     {
         // clang-format off
         auto label = modMode.emplace<QLabel>(
-            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
+            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/moderationDisabledDarkMode18x18.png'> in a channel that you moderate.<br><br>"
             "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
             "For deleting messages use /delete {msg.id}.<br><br>"
             "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");

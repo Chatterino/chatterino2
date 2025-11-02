@@ -35,18 +35,21 @@ class ChannelView;
 /// index is computed by `scrollbarPos - minimum` - thus a scrollbar position
 /// of a message is at `index + minimum.
 ///
-/// @cond src-only
-///
 /// The following illustrates a scrollbar in a channel view with seven
 /// messages. The scrollbar is at the bottom. No animation is active, thus
 /// `currentValue = desiredValue`.
 ///
+/// ```text
 ///                ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐←╌╌╌ minimum
-///                  Alice: This message is quite           = 0
+///                  Bob: Ugh, I can't see this              = 0
+///                  message, it's outside of my
+///                  ChannelView
+///                ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+///                  Alice: Your message is quite
 ///             ┬  ╭─────────────────────────────────╮←╮
 ///             │  │ long, so it gets wrapped        │ ┆
 ///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤ ╰╌╌╌ currentValue
-///             │  │ Bob: are you sure?              │       = 0.5
+///             │  │ Bob: are you sure?              │       = 1.5
 ///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤       = desiredValue
 /// pageSize ╌╌╌┤  │ Alice: Works for me... try for  │       = maximum
 ///  = 6.5      │  │ yourself                        │         - pageSize
@@ -63,8 +66,8 @@ class ChannelView;
 ///             ┴╭→╰─────────────────────────────────╯
 ///              ┆
 ///           maximum
-///            = 7
-/// @endcond
+///            = 8
+/// ```
 ///
 /// When messages are added at the bottom, both maximum and minimum are offset
 /// by 1 and after a layout, the desired value is updated, causing the content

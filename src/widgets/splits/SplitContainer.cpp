@@ -639,6 +639,8 @@ void SplitContainer::paintSplitBorder(Node *node, QPainter *painter)
             }
         }
         break;
+        case Node::Type::EmptyRoot:
+            break;
     }
 }
 
@@ -1481,6 +1483,8 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             }
         }
         break;
+        case Node::Type::EmptyRoot:
+            break;
     }
 }
 
