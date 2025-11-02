@@ -1045,7 +1045,7 @@ TEST_F(PluginTest, testAccounts)
         assert(current:color() == "#ff000000") -- unset
         assert(not current:is_anon())
     )lua");
-    ASSERT_TRUE(res.valid()) << sol::error(res).what();
+    ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
 }
 
 #endif
