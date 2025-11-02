@@ -7,6 +7,7 @@
 - Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added link support to plugin message API. (#6386, #6527)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
+- Minor: Consolidate font picking into one dialog. (#6531)
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
@@ -33,6 +34,7 @@
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
+- Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 
 ## 2.5.4
 
