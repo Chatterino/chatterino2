@@ -34,7 +34,7 @@
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
-- Dev: Use CMake's `FetchContent` for RapidJSON, PajladaSignals, PajladaSerialize, and PajladaSettings. (#6560)
+- Dev: Use CMake's `FetchContent` for RapidJSON, PajladaSignals, PajladaSerialize, and PajladaSettings. (#6560, #6562)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
 - Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
