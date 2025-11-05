@@ -90,7 +90,7 @@
                         "name": "7TVEmote",
                         "tooltip": "7TVEmote Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -109,7 +109,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -145,7 +145,7 @@
                         "name": "7TVEmote",
                         "tooltip": "7TVEmote Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""

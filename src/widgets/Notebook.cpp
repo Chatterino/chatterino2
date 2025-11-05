@@ -32,6 +32,7 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <ranges>
 #include <utility>
 
 namespace chatterino {
@@ -801,7 +802,9 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
     // set size of custom buttons (settings, user, ...)
     for (auto *btn : this->customButtons_)
     {
-        if (!btn->isVisible())
+        // We use isHidden here since the layout can happen when the button has
+        // been added but before it's shown
+        if (btn->isHidden())
         {
             continue;
         }
@@ -925,7 +928,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
              btnIt != this->customButtons_.rend(); ++btnIt)
         {
             auto *btn = *btnIt;
-            if (!btn->isVisible())
+            if (btn->isHidden())
             {
                 continue;
             }
@@ -945,7 +948,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
         {
-            if (!btn->isVisible())
+            if (btn->isHidden())
             {
                 continue;
             }
@@ -1203,7 +1206,7 @@ size_t Notebook::visibleButtonCount() const
     size_t i = 0;
     for (auto *btn : this->customButtons_)
     {
-        if (btn->isVisible())
+        if (!btn->isHidden())
         {
             ++i;
         }
@@ -1240,6 +1243,18 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
     }
 
     return true;
+}
+
+void Notebook::sortTabsAlphabetically()
+{
+    std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
+        const QString &lhs = a.tab->getTitle();
+        const QString &rhs = b.tab->getTitle();
+        return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
+    });
+
+    getApp()->getWindows()->queueSave();
+    this->performLayout(true);
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1302,6 +1317,13 @@ SplitNotebook::SplitNotebook(Window *parent)
                          this->hideAllTabsAction->setChecked(true);
                      });
     tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
+
+    this->sortTabsAlphabeticallyAction_ =
+        new QAction("Sort Tabs Alphabetically", this);
+    QObject::connect(this->sortTabsAlphabeticallyAction_, &QAction::triggered,
+                     [this] {
+                         this->sortTabsAlphabetically();
+                     });
 
     switch (getSettings()->tabVisibility.getEnum())
     {
@@ -1390,6 +1412,8 @@ SplitNotebook::SplitNotebook(Window *parent)
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
 {
     Notebook::addNotebookActionsToMenu(menu);
+
+    menu->addAction(this->sortTabsAlphabeticallyAction_);
 
     auto *submenu = menu->addMenu("Tab visibility");
     submenu->addAction(this->showAllTabsAction);
@@ -1508,6 +1532,8 @@ void SplitNotebook::addCustomButtons()
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
+
+    this->performLayout(false);
 }
 
 void SplitNotebook::updateStreamerModeIcon()

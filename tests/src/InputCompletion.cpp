@@ -8,11 +8,10 @@
 #include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
@@ -52,7 +51,7 @@ public:
         return &this->twitch;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -80,7 +79,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;

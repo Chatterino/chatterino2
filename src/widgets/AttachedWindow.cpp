@@ -44,10 +44,9 @@ BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
 }
 #endif
 
-AttachedWindow::AttachedWindow(void *_target, int _yOffset)
+AttachedWindow::AttachedWindow(void *_target)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
     , target_(_target)
-    , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -86,7 +85,7 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
             }
         }
 
-        auto *window = new AttachedWindow(target, args.yOffset);
+        auto *window = new AttachedWindow(target);
         items.push_back(Item{target, window, args.winId});
         return window;
     }();

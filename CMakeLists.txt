@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
-if (POLICY CMP0167)
-    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
-endif ()
 include(FeatureSummary)
+include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
-    "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
 option(BUILD_APP "Build Chatterino" ON)
@@ -32,8 +29,19 @@ option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
 
+option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
+mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
+add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPORT "")
+
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    list(APPEND CMAKE_MODULE_PATH
+        "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
+    )
+    find_package(Sanitizers REQUIRED)
+endif()
 
 if(BUILD_TESTS)
     list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -130,6 +138,10 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Svg
     Concurrent
     )
+if(CHATTERINO_ALLOW_PRIVATE_QT_API)
+    # Only exists since 6.10 and prints a warning regarding private headers
+    find_package(Qt${MAJOR_QT_VERSION} COMPONENTS GuiPrivate)
+endif()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
@@ -137,10 +149,8 @@ if (WIN32)
     add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
 
-find_package(Sanitizers QUIET)
-
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -186,8 +196,6 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(RapidJSON REQUIRED)
-
 find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
@@ -215,22 +223,37 @@ if (BUILD_BENCHMARKS)
     find_package(benchmark REQUIRED)
 endif ()
 
-find_package(PajladaSerialize REQUIRED)
-find_package(PajladaSignals REQUIRED)
+FetchContent_Declare(
+    rapidjson
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/rapidjson
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS NAMES RapidJSON
+)
+set(RAPIDJSON_BUILD_EXAMPLES Off CACHE INTERNAL "")
+set(RAPIDJSON_BUILD_TESTS Off CACHE INTERNAL "")
+
+FetchContent_Declare(
+    PajladaSignals
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSerialize
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSettings
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
+    EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(rapidjson PajladaSignals PajladaSerialize PajladaSettings)
+
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
 find_package(Doxygen)
 find_package(BoostCertify REQUIRED)
-
-if (USE_SYSTEM_PAJLADA_SETTINGS)
-    find_package(PajladaSettings REQUIRED)
-else()
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/settings/CMakeLists.txt")
-        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/settings/CMakeLists.txt")
-    endif()
-
-    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
-endif()
 
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")

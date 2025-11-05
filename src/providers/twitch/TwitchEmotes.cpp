@@ -460,14 +460,15 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
         auto baseSize = getEmoteExpectedBaseSize(id);
         auto emote3xScaleFactor = getEmote3xScaleFactor(id);
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
-            EmoteName{name},
-            ImageSet{
-                Image::fromUrl(getEmoteLink(id, "1.0"), 1, baseSize),
-                Image::fromUrl(getEmoteLink(id, "2.0"), 0.5, baseSize * 2),
-                Image::fromUrl(getEmoteLink(id, "3.0"), emote3xScaleFactor,
-                               baseSize * (1.0 / emote3xScaleFactor)),
-            },
-            Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
+            .name = EmoteName{name},
+            .images =
+                ImageSet{
+                    Image::fromUrl(getEmoteLink(id, "1.0"), 1, baseSize),
+                    Image::fromUrl(getEmoteLink(id, "2.0"), 0.5, baseSize * 2),
+                    Image::fromUrl(getEmoteLink(id, "3.0"), emote3xScaleFactor,
+                                   baseSize * (1.0 / emote3xScaleFactor)),
+                },
+            .tooltip = Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
         });
     }
 

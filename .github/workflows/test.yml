@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.11
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
 
@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         if: github.repository_owner == 'Chatterino'
-        uses: codecov/codecov-action@v5.5.0
+        uses: codecov/codecov-action@v5.5.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           plugins: gcov

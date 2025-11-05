@@ -110,20 +110,7 @@ void showLastCrashDialog(const Args &args, const Paths &paths)
     dialog->exec();
 }
 
-void createRunningFile(const QString &path)
-{
-    QFile runningFile(path);
-
-    runningFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    runningFile.flush();
-    runningFile.close();
-}
-
-void removeRunningFile(const QString &path)
-{
-    QFile::remove(path);
-}
-
+#if defined(NDEBUG) && !defined(CHATTERINO_WITH_CRASHPAD)
 std::chrono::steady_clock::time_point signalsInitTime;
 
 [[noreturn]] void handleSignal(int signum)
@@ -135,7 +122,7 @@ std::chrono::steady_clock::time_point signalsInitTime;
     {
         QProcess proc;
 
-#ifdef Q_OS_MAC
+#    ifdef Q_OS_MAC
         // On macOS, programs are bundled into ".app" Application bundles,
         // when restarting Chatterino that bundle should be opened with the "open"
         // terminal command instead of directly starting the underlying executable,
@@ -152,16 +139,17 @@ std::chrono::steady_clock::time_point signalsInitTime;
 
         CFRelease(appUrlRef);
         CFRelease(macPath);
-#else
+#    else
         proc.setProgram(QApplication::applicationFilePath());
         proc.setArguments({"--crash-recovery"});
-#endif
+#    endif
 
         proc.startDetached();
     }
 
     std::_Exit(signum);
 }
+#endif
 
 // We want to restart Chatterino when it crashes and the setting is set to
 // true.
