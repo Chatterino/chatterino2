@@ -224,7 +224,7 @@ if (BUILD_BENCHMARKS)
 endif ()
 
 FetchContent_Declare(
-    rapidjson
+    rjlib
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/rapidjson
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS NAMES RapidJSON
@@ -248,7 +248,7 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
 )
 
-FetchContent_MakeAvailable(rapidjson PajladaSignals PajladaSerialize PajladaSettings)
+FetchContent_MakeAvailable(rjlib PajladaSignals PajladaSerialize PajladaSettings)
 
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
