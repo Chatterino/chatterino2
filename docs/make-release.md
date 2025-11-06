@@ -66,6 +66,7 @@ You will need to add the `skip-changelog-checker` label to the PR since we are d
 
 - [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid  
        Sign into the `chatterino-ci` user and validate that the `WinGet` and `Homebrew` Personal access tokens are valid: https://github.com/settings/tokens
+- [ ] Make a new tag on `pajlada/serialize`, `pajlada/signals`, and `pajlada/settings` called `chatterino/2.3.4` pointing at the commit hash Chatterino uses.
 
 ## After the PR has been merged
 
