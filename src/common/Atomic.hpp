@@ -71,7 +71,7 @@ public:
     {
     }
 
-    Atomic(std::shared_ptr<T> val)
+    Atomic(std::shared_ptr<T> &&val)
         : value_(std::move(val))
     {
     }
