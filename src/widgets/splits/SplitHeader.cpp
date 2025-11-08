@@ -6,6 +6,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -1125,9 +1126,9 @@ void SplitHeader::reloadChannelEmotes()
 
     auto channel = this->split_->getChannel();
 
-    if (auto *emoteChannel = dynamic_cast<EmoteChannel *>(channel.get()))
+    if (auto *holder = channel->emotes())
     {
-        emoteChannel->emotes().refresh(true);
+        holder->refresh(true);
     }
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))

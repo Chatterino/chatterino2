@@ -419,7 +419,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
 }
 
 bool readProviderEmotesCache(const QString &id, const QString &provider,
-                             const std::function<void(QJsonValue)> &callback)
+                             const std::function<void(QJsonDocument)> &callback)
 {
     QString cacheKey = id % "." % provider;
     QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
@@ -439,17 +439,7 @@ bool readProviderEmotesCache(const QString &id, const QString &provider,
 
         qCDebug(chatterinoCache)
             << "Loaded emote cache: " << id << "." << provider;
-
-        QJsonValue jv;
-        if (doc.isArray())
-        {
-            jv = doc.array();
-        }
-        else if (doc.isObject())
-        {
-            jv = doc.object();
-        }
-        callback(jv);
+        callback(doc);
         return true;
     }
 

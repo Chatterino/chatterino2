@@ -236,7 +236,7 @@ void BttvEmotes::loadEmotes()
 
     readProviderEmotesCache("global", "betterttv", [this](const auto &jsonDoc) {
         auto emotes = this->global_.get();
-        auto pair = parseGlobalEmotes(jsonDoc.toArray(), *emotes);
+        auto pair = parseGlobalEmotes(jsonDoc.array(), *emotes);
         if (pair.first)
         {
             this->setEmotes(std::make_shared<EmoteMap>(std::move(pair.second)));

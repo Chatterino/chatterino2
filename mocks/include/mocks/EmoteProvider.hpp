@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/emotes/EmoteChannel.hpp"
+#include "common/Channel.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 
 #include <QStringBuilder>
@@ -41,7 +41,7 @@ public:
     }
 
     void loadChannelEmotes(
-        const std::shared_ptr<EmoteChannel> &channel,
+        const std::shared_ptr<Channel> &channel,
         std::function<void(ExpectedStr<EmoteLoadResult>)> onDone,
         LoadChannelArgs /* args */) override
     {
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    bool supportsChannel(EmoteChannel * /*channel*/) override
+    bool supportsChannel(Channel * /*channel*/) override
     {
         return true;
     }

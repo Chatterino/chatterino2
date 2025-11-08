@@ -2,10 +2,10 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
 #include "common/Common.hpp"
 #include "common/UniqueAccess.hpp"
-#include "controllers/emotes/EmoteChannel.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
@@ -25,6 +25,7 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
+
 
 class TestIrcMessageHandlerP;
 class TestEventSubMessagesP;
@@ -82,7 +83,7 @@ bool isUnknownCommand(const QString &text);
 
 }  // namespace detail
 
-class TwitchChannel final : public EmoteChannel, public ChannelChatters
+class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
     /**

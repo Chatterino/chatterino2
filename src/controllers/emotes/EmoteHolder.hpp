@@ -17,7 +17,6 @@ class EmoteProvider;
 class EmoteMap;
 using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
 class EmoteController;
-class EmoteChannel;
 
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
@@ -29,12 +28,16 @@ struct EmoteHolderItem {
     EmoteMapPtr emotes;
 };
 
+/// Emote manager for one channel.
+///
+/// This stores the emotes for each provider. It takes care of initializing and
+/// reloading them. Providers are sorted by their priority.
 class EmoteHolder
 {
 public:
     using Item = EmoteHolderItem;
 
-    EmoteHolder(EmoteChannel *channel);
+    EmoteHolder(Channel *channel);
 
     void initialize(const EmoteController &controller);
 
@@ -56,14 +59,14 @@ public:
     }
 
 private:
-    static void refreshItem(const Item &item, EmoteChannel *channel,
+    static void refreshItem(const Item &item, Channel *channel,
                             bool manualRefresh);
 
     void sort();
 
     std::vector<Item> items_;
 
-    EmoteChannel *channel;
+    Channel *channel;
     pajlada::Signals::SignalHolder signalHolder;
 };
 

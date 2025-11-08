@@ -9,6 +9,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "messages/Emote.hpp"
@@ -110,7 +111,7 @@ constexpr QSize BASE_BADGE_SIZE(18, 18);
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
-    : EmoteChannel(name, Channel::Type::Twitch)
+    : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
     , nameOptions{name, name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
@@ -122,6 +123,8 @@ TwitchChannel::TwitchChannel(const QString &name)
     , seventvEmotes_(std::make_shared<EmoteMap>())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
+
+    this->emotes_ = std::make_unique<EmoteHolder>(this);
 
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.currentUserAboutToChange,
@@ -209,7 +212,7 @@ TwitchChannel::TwitchChannel(const QString &name)
             }
         });
 
-    this->emotes().initialize(*getApp()->getEmotes());
+    this->emotes_->initialize(*getApp()->getEmotes());
 
     // debugging
 #if 0
@@ -367,7 +370,7 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
             if (auto shared = weak.lock())
             {
                 auto emoteMap = bttv::detail::parseChannelEmotes(
-                    jsonDoc.toObject(), this->getLocalizedName());
+                    jsonDoc.object(), this->getLocalizedName());
                 this->setBttvEmotes(std::make_shared<const EmoteMap>(emoteMap));
             }
         });
@@ -393,7 +396,7 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 
     bool cacheHit = readProviderEmotesCache(
         this->roomId(), "frankerfacez", [this](const auto &jsonDoc) {
-            auto emoteMap = ffz::detail::parseChannelEmotes(jsonDoc.toObject());
+            auto emoteMap = ffz::detail::parseChannelEmotes(jsonDoc.object());
             this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
         });
 
@@ -440,7 +443,7 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
 
     bool cacheHit = readProviderEmotesCache(
         this->roomId(), "seventv", [this](auto jsonDoc) {
-            const auto json = jsonDoc.toObject();
+            const auto json = jsonDoc.object();
             const auto emoteSet = json["emote_set"].toObject();
             const auto parsedEmotes = emoteSet["emotes"].toArray();
             auto emoteMap = seventv::detail::parseEmotes(parsedEmotes, false);
@@ -748,7 +751,7 @@ void TwitchChannel::roomIdChanged()
     this->refreshFFZChannelEmotes(false);
     this->refreshBTTVChannelEmotes(false);
     this->refreshSevenTVChannelEmotes(false);
-    this->emotes().refresh(false);
+    this->emotes_->refresh(false);
     this->joinBttvChannel();
     this->listenSevenTVCosmetics();
     getApp()->getTwitchLiveController()->add(

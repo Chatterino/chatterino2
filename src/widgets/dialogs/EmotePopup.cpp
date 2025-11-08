@@ -4,6 +4,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
@@ -416,7 +417,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
     this->channel_ = std::move(channel);
     this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
-    this->emoteChannel_ = dynamic_cast<EmoteChannel *>(this->channel_.get());
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
@@ -469,9 +469,9 @@ void EmotePopup::reloadEmotes()
         }
     }
 
-    if (this->emoteChannel_)
+    if (auto *holder = this->channel_->emotes())
     {
-        for (const auto &item : this->emoteChannel_->emotes().items())
+        for (const auto &item : holder->items())
         {
             auto provider = item.provider.lock();
             if (!provider || !provider->hasChannelEmotes())
@@ -592,9 +592,9 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                   provider->name() % u" (Global)");
     }
 
-    if (this->emoteChannel_)
+    if (auto *holder = this->channel_->emotes())
     {
-        for (const auto &item : this->emoteChannel_->emotes().items())
+        for (const auto &item : holder->items())
         {
             auto filtered = filterEmoteMap(searchText, item.emotes);
             if (filtered.empty())

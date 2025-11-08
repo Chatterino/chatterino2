@@ -157,8 +157,6 @@ set(SOURCE_FILES
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
-        controllers/emotes/EmoteChannel.cpp
-        controllers/emotes/EmoteChannel.hpp
         controllers/emotes/EmoteController.cpp
         controllers/emotes/EmoteController.hpp
         controllers/emotes/EmoteHolder.cpp

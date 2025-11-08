@@ -6,6 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -1250,9 +1251,9 @@ void Split::reloadChannelAndSubscriberEmotes()
 {
     auto channel = this->getChannel();
 
-    if (auto *emoteChannel = dynamic_cast<EmoteChannel *>(channel.get()))
+    if (auto *holder = channel->emotes())
     {
-        emoteChannel->emotes().refresh(true);
+        holder->refresh(true);
     }
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))

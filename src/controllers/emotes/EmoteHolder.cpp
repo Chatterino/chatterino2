@@ -1,28 +1,19 @@
 #include "controllers/emotes/EmoteHolder.hpp"
 
-#include "controllers/emotes/EmoteChannel.hpp"
+#include "common/Channel.hpp"
 #include "controllers/emotes/EmoteController.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "util/Functional.hpp"
+#include "util/WeakPtrHelpers.hpp"
 
 #include <QStringBuilder>
-
-namespace {
-
-template <typename T>
-bool ownerEquals(const std::weak_ptr<T> &lhs, const std::weak_ptr<T> &rhs)
-{
-    return !lhs.owner_before(rhs) && !rhs.owner_before(lhs);
-}
-
-}  // namespace
 
 namespace chatterino {
 
 using namespace Qt::Literals;
 using namespace functional;
 
-EmoteHolder::EmoteHolder(EmoteChannel *channel)
+EmoteHolder::EmoteHolder(Channel *channel)
     : channel(channel)
 {
 }
@@ -88,7 +79,7 @@ EmoteHolder::Item *EmoteHolder::itemByProvider(
 {
     for (auto &item : this->items_)
     {
-        if (ownerEquals(item.provider, provider))
+        if (weakOwnerEquals(item.provider, provider))
         {
             return &item;
         }
@@ -96,7 +87,7 @@ EmoteHolder::Item *EmoteHolder::itemByProvider(
     return nullptr;
 }
 
-void EmoteHolder::refreshItem(const Item &item, EmoteChannel *channel,
+void EmoteHolder::refreshItem(const Item &item, Channel *channel,
                               bool manualRefresh)
 {
     auto provider = item.provider.lock();
@@ -104,21 +95,26 @@ void EmoteHolder::refreshItem(const Item &item, EmoteChannel *channel,
     {
         return;
     }
-    auto baseChannel = channel->shared_from_this();
-    if (!baseChannel)
+    auto channelSP = channel->shared_from_this();
+    if (!channelSP)
     {
         assert(false && "Channel without shared_from_this");
         return;
     }
-    auto sharedChannel = std::static_pointer_cast<EmoteChannel>(baseChannel);
 
     provider->loadChannelEmotes(
-        sharedChannel,
+        channelSP,
         weakGuarded(
             [provider = item.provider, manualRefresh, hasPreemptive = false](
-                const std::shared_ptr<EmoteChannel> &chan,
+                const std::shared_ptr<Channel> &chan,
                 ExpectedStr<EmoteLoadResult> result) mutable {
-                auto *item = chan->emotes().itemByProvider(provider);
+                auto *emotes = chan->emotes();
+                if (!emotes)
+                {
+                    return;
+                }
+
+                auto *item = emotes->itemByProvider(provider);
                 if (!item)
                 {
                     return;
@@ -173,7 +169,7 @@ void EmoteHolder::refreshItem(const Item &item, EmoteChannel *channel,
                     chan->addSystemMessage(message);
                 }
             },
-            sharedChannel),
+            channelSP),
         EmoteProvider::LoadChannelArgs{.manualRefresh = manualRefresh});
 }
 

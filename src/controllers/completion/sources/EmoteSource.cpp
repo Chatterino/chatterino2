@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
@@ -108,14 +109,18 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             auto user = getApp()->getAccounts()->twitch.getCurrent();
             addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
 
-            for (const auto &item : tc->emotes().items())
+            if (const auto *holder = tc->emotes())
             {
-                auto provider = item.provider.lock();
-                if (!provider)
+                for (const auto &item : holder->items())
                 {
-                    continue;
+                    auto provider = item.provider.lock();
+                    if (!provider)
+                    {
+                        continue;
+                    }
+                    addEmotes(emotes, *item.emotes,
+                              u"Channel " % provider->name());
                 }
-                addEmotes(emotes, *item.emotes, u"Channel " % provider->name());
             }
 
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.

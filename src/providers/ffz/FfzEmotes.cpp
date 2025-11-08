@@ -239,7 +239,7 @@ void FfzEmotes::loadEmotes()
     }
 
     readProviderEmotesCache("global", "frankerfacez", [this](auto jsonDoc) {
-        auto parsedSet = parseGlobalEmotes(jsonDoc.toObject());
+        auto parsedSet = parseGlobalEmotes(jsonDoc.object());
         this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
     });
 

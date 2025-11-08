@@ -10,7 +10,7 @@
 
 namespace chatterino {
 
-class EmoteChannel;
+class Channel;
 
 struct EmoteLoadResult {
     EmoteMapPtr emotes;
@@ -32,11 +32,11 @@ public:
     virtual void reloadGlobalEmotes(
         std::function<void(ExpectedStr<void>)> onDone) = 0;
     virtual void loadChannelEmotes(
-        const std::shared_ptr<EmoteChannel> &channel,
+        const std::shared_ptr<Channel> &channel,
         std::function<void(ExpectedStr<EmoteLoadResult>)> onDone,
         LoadChannelArgs args) = 0;
 
-    virtual bool supportsChannel(EmoteChannel *channel) = 0;
+    virtual bool supportsChannel(Channel *channel) = 0;
 
     EmoteMapPtr globalEmotes() const;
     EmotePtr globalEmote(

@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -430,10 +431,13 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     //  - BetterTTV Global
     //  - 7TV Global
 
-    auto channel = twitchChannel->emotes().resolve(name);
-    if (channel)
+    if (auto *holder = twitchChannel->emotes())
     {
-        return channel;
+        auto channel = holder->resolve(name);
+        if (channel)
+        {
+            return channel;
+        }
     }
 
     const auto *globalFfzEmotes = getApp()->getFfzEmotes();
