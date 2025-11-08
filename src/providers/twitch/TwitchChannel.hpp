@@ -26,7 +26,6 @@
 #include <optional>
 #include <unordered_map>
 
-
 class TestIrcMessageHandlerP;
 class TestEventSubMessagesP;
 
