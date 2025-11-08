@@ -648,6 +648,22 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+
+        widgets/dialogs/font/FontDialog.cpp
+        widgets/dialogs/font/FontDialog.hpp
+        widgets/dialogs/font/FontFamilyWidget.cpp
+        widgets/dialogs/font/FontFamilyWidget.hpp
+        widgets/dialogs/font/FontSettingDialog.cpp
+        widgets/dialogs/font/FontSettingDialog.hpp
+        widgets/dialogs/font/FontSizeWidget.cpp
+        widgets/dialogs/font/FontSizeWidget.hpp
+        widgets/dialogs/font/FontWeightWidget.cpp
+        widgets/dialogs/font/FontWeightWidget.hpp
+        widgets/dialogs/font/IntItem.cpp
+        widgets/dialogs/font/IntItem.hpp
+        widgets/dialogs/font/PreviewWidget.cpp
+        widgets/dialogs/font/PreviewWidget.hpp
+
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
@@ -702,6 +718,8 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
@@ -857,6 +875,17 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
+if(TARGET rapidjson)
+    message(DEBUG "Linking to rapidjson target")
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(DEBUG "RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
+else()
+    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -872,7 +901,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Signals
         websocketpp::websocketpp
         Threads::Threads
-        RapidJSON::RapidJSON
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
@@ -1177,8 +1205,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         OpenSSL::SSL
         OpenSSL::Crypto
         )
-
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
