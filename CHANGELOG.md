@@ -42,6 +42,7 @@
 - Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
+- Dev: Refactored emotes. (#6570)
 
 ## 2.5.4
 
