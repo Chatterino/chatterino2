@@ -70,6 +70,12 @@ void MessagePreferences::connectSettings(Settings *settings,
         },
         holder);
 
+    settings->enableWatchStreakHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableWatchStreakHighlight = newValue;
+        },
+        holder);
+
     settings->enableAutomodHighlight.connect(
         [this](const auto &newValue) {
             this->enableAutomodHighlight = newValue;
