@@ -34,6 +34,7 @@
 - Dev: Fix Arch Linux partial upgrade error in CI. (#6553)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
+- Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308)
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: Use CMake's `FetchContent` for RapidJSON, PajladaSignals, PajladaSerialize, and PajladaSettings. (#6560, #6567, #6569)
