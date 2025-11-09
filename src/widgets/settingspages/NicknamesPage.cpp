@@ -6,12 +6,14 @@
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "common/Version.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDateTime>
 #include <QMessageBox>
 #include <QTableView>
 namespace chatterino {
@@ -94,15 +96,26 @@ void NicknamesPage::importNicknames()
     QByteArray data = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data);
 
-    if (doc.isNull() || !doc.isArray())
+    if (doc.isNull() || !doc.isObject())
     {
         QMessageBox::critical(
             this, tr("Error"),
-            tr("Invalid JSON format. Expected an array of nicknames."));
+            tr("Invalid JSON format. Expected a nickname export object."));
         return;
     }
 
-    QJsonArray array = doc.array();
+    QJsonObject root = doc.object();
+    if (root["type"].toString() != "nickname_export" || 
+        root["version"].toString() != "1" || 
+        !root["data"].isArray())
+    {
+        QMessageBox::critical(
+            this, tr("Error"),
+            tr("Invalid nickname export format."));
+        return;
+    }
+
+    QJsonArray array = root["data"].toArray();
     for (const QJsonValueRef &value : array)
     {
         if (!value.isObject())
@@ -139,7 +152,16 @@ void NicknamesPage::exportNicknames()
         filePath += ".json";
     }
 
-    QJsonArray array;
+    QJsonObject root;
+    root["type"] = "nickname_export";
+    root["version"] = "1";
+    
+    QString currentTime = QDateTime::currentDateTime().toString(Qt::ISODate);
+    root["comment"] = QString("Exported from %1 at %2")
+                         .arg(Version::instance().buildString())
+                         .arg(currentTime);
+
+    QJsonArray data;
     const auto &nicknames = getSettings()->nicknames.raw();
 
     for (const auto &nickname : nicknames)
@@ -149,11 +171,12 @@ void NicknamesPage::exportNicknames()
         obj["nickname"] = nickname.replace();
         obj["regex"] = nickname.isRegex();
         obj["caseSensitive"] = nickname.isCaseSensitive();
-        array.append(obj);
+        data.append(obj);
     }
 
-    QJsonDocument doc(array);
-    QByteArray data = doc.toJson(QJsonDocument::Indented);
+    root["data"] = data;
+    QJsonDocument doc(root);
+    QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
 
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly))
@@ -163,7 +186,7 @@ void NicknamesPage::exportNicknames()
         return;
     }
 
-    if (file.write(data) == -1)
+    if (file.write(jsonData) == -1)
     {
         QMessageBox::critical(this, tr("Error"),
                               tr("Failed to write to file."));
