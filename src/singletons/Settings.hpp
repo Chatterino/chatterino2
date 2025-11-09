@@ -691,6 +691,8 @@ public:
                                                true};
     BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
     BoolSetting showPronouns = {"/misc/showPronouns", false};
+    BoolSetting showTitleInLiveMessage = {"/misc/showTitleInLiveMessage",
+                                          false};
 
     /// UI
 

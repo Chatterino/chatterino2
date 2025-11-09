@@ -138,7 +138,8 @@ void NotificationController::notifyTwitchChannelLive(
 
     // Message in /live channel
     getApp()->getTwitch()->getLiveChannel()->addMessage(
-        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId),
+        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId,
+                                        payload.title),
         MessageContext::Original);
 
     // Notify on all channels with a ping sound
