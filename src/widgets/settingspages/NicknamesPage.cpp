@@ -1,19 +1,19 @@
 #include "widgets/settingspages/NicknamesPage.hpp"
 
+#include "common/Version.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/nicknames/NicknamesModel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
-#include "common/Version.hpp"
 
+#include <QDateTime>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QDateTime>
 #include <QMessageBox>
 #include <QTableView>
 namespace chatterino {
@@ -105,13 +105,11 @@ void NicknamesPage::importNicknames()
     }
 
     QJsonObject root = doc.object();
-    if (root["type"].toString() != "nickname_export" || 
-        root["version"].toString() != "1" || 
-        !root["data"].isArray())
+    if (root["type"].toString() != "nickname_export" ||
+        root["version"].toString() != "1" || !root["data"].isArray())
     {
-        QMessageBox::critical(
-            this, tr("Error"),
-            tr("Invalid nickname export format."));
+        QMessageBox::critical(this, tr("Error"),
+                              tr("Invalid nickname export format."));
         return;
     }
 
@@ -155,11 +153,10 @@ void NicknamesPage::exportNicknames()
     QJsonObject root;
     root["type"] = "nickname_export";
     root["version"] = "1";
-    
     QString currentTime = QDateTime::currentDateTime().toString(Qt::ISODate);
     root["comment"] = QString("Exported from %1 at %2")
-                         .arg(Version::instance().buildString())
-                         .arg(currentTime);
+                          .arg(Version::instance().buildString())
+                          .arg(currentTime);
 
     QJsonArray data;
     const auto &nicknames = getSettings()->nicknames.raw();
