@@ -21,21 +21,20 @@ class EmoteController;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
-/// An entry for a single provider
-struct EmoteHolderItem {
-    std::weak_ptr<EmoteProvider> provider;
-    QString id;
-    EmoteMapPtr emotes;
-};
-
 /// Emote manager for one channel.
 ///
-/// This stores the emotes for each provider. It takes care of initializing and
-/// reloading them. Providers are sorted by their priority.
+/// Conceptually, this is a managed list of "instantiated" providers for a
+/// channel. It stores the emotes for each provider and takes care of
+/// initializing and reloading them. Providers are sorted by their priority.
 class EmoteHolder
 {
 public:
-    using Item = EmoteHolderItem;
+    /// An entry for a single provider
+    struct Item {
+        std::weak_ptr<EmoteProvider> provider;
+        QString id;
+        EmoteMapPtr emotes;
+    };
 
     EmoteHolder(Channel *channel);
 
