@@ -71,7 +71,6 @@ bool NicknamesPage::filterElements(const QString &query)
     std::array fields{0, 1};
 
     return this->view_->filterSearchResults(query, fields);
-
 }
 
 void NicknamesPage::importNicknames()
