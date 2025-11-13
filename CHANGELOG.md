@@ -19,6 +19,7 @@
 - Bugfix: Fixed Lua errors from handlers of HTTP requests not being logged. (#6452)
 - Bugfix: Fixed restore button not showing on Windows. (#6565)
 - Bugfix: Fixed popups and the overlay not being draggable on Wayland. (#6573)
+- Bugfix: Fixed middle-clicking usernames in a local channel opening an invalid viewercard. (#6577)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
