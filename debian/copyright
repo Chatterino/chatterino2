@@ -1,0 +1,68 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://github.com/Chatterino/chatterino2
+License: MIT and BSL-1.0 and BSD-3-Clause and zlib and GPL-2.0-or-later and LGPL-2.1-or-later and MPL-1.1
+
+# Boost Software License (v1.0) Boost Software License 1.0
+# -----------------------------------------------------------------------
+# resources/licenses/boost_boost.txt
+#
+# BSD 3-clause "New" or "Revised" License
+# ---------------------------------------
+# lib/libcommuni/
+#
+# Expat License
+# -------------
+# lib/serialize/
+# lib/signals/
+# resources/
+#
+# Mozilla Public License (v1.1) GNU General Public License (v2 or later) or GNU Lesser General Public License (v2.1 or later)
+# ---------------------------------------------------------------------------------------------------------------------------
+# lib/libcommuni/
+#
+# zlib/libpng license Aladdin Free Public License
+# -----------------------------------------------
+# lib/websocketpp/
+#
+
+Files:
+ *
+Copyright:  Chatterino contributors
+License: MIT
+
+Files:
+ debian/*
+Copyright: Chow Yoong Jin
+License: MIT
+
+Files:
+ lib/libcommuni/*
+Copyright: 2008-2020 The Communi Project
+License: BSD-3-Clause 
+
+
+Files:
+ lib/sol2/*
+Copyright: 2013-2022 Rapptz, ThePhD, and contributors
+License: MIT
+
+Files:
+ lib/certify/*
+Copyright: Chatterino contributors
+License: BSL-1.0
+
+Files:
+ lib/expected-lite/*
+Copyright: nonstd-lite
+License: BSL-1.0
+
+Files:
+ /lib/magic_enum/*
+Copyright: 2019-2023 Daniil Goncharov
+License: MIT
+
+
+Files:
+ lib/lua/src/*
+Copyright: 1994–2025 Lua.org, PUC-Rio. 
+License: MIT

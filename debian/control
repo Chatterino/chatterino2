@@ -1,0 +1,12 @@
+Source: chatterino2
+Maintainer: Chow Yoong Jin <solomoncyj@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 4.7.0
+Build-Depends: debhelper-compat (= 13), qt6-base-dev, qt6-svg-dev, qt6-image-formats-plugins, libboost-dev, libnotify-dev, qt6-5compat-dev, libssl-dev, libsecret-1-dev, pkg-config, cmake, g++, git, libwebsocketpp-dev, googletest, libminiaudio-dev, qtkeychain-qt6-dev, libcommuni-dev, rapidjson-dev, ninja-build
+
+
+Package: chatterino2
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Chatterino 2 is a chat client for Twitch.tv.
