@@ -95,6 +95,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Signals",
                        "https://github.com/pajlada/signals",
                        ":/licenses/pajlada_signals.txt");
+            addLicense(form.getElement(), "Pajlada/Serialize",
+                       "https://github.com/pajlada/serialize",
+                       ":/licenses/pajlada_serialize.txt");
             addLicense(form.getElement(), "Websocketpp",
                        "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
