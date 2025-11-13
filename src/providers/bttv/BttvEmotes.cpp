@@ -110,22 +110,26 @@ CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
     }
 
     auto emote = Emote({
-        name,
-        ImageSet{
-            Image::fromUrl(getEmoteLinkV3(id, "1x"), 1, EMOTE_BASE_SIZE),
-            Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5, EMOTE_BASE_SIZE * 2),
-            Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25, EMOTE_BASE_SIZE * 4),
-        },
-        Tooltip{
-            QString("%1<br>%2 BetterTTV Emote<br>By: %3")
-                .arg(name.string)
-                // when author is empty, it is a channel emote created by the broadcaster
-                .arg(author.string.isEmpty() ? "Channel" : "Shared")
-                .arg(author.string.isEmpty() ? channelDisplayName
-                                             : author.string)},
-        Url{EMOTE_LINK_FORMAT.arg(id.string)},
-        false,
-        id,
+        .name = name,
+        .images =
+            ImageSet{
+                Image::fromUrl(getEmoteLinkV3(id, "1x"), 1, EMOTE_BASE_SIZE),
+                Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
+                               EMOTE_BASE_SIZE * 2),
+                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
+                               EMOTE_BASE_SIZE * 4),
+            },
+        .tooltip =
+            Tooltip{
+                QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                    .arg(name.string)
+                    // when author is empty, it is a channel emote created by the broadcaster
+                    .arg(author.string.isEmpty() ? "Channel" : "Shared")
+                    .arg(author.string.isEmpty() ? channelDisplayName
+                                                 : author.string)},
+        .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
+        .zeroWidth = false,
+        .id = id,
     });
 
     return {id, name, emote};

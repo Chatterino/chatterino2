@@ -11,7 +11,7 @@
 namespace chatterino {
 
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
-                                   bool isAdd, QWidget *parent)
+                                   QWidget *parent)
     : QDialog(parent, Qt::WindowStaysOnTopHint)
     , ui_(new Ui::EditHotkeyDialog)
     , data_(hotkey)

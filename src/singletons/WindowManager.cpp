@@ -163,9 +163,9 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.streamerModeHideModActions);
     this->forceLayoutChannelViewsListener.add(
         settings.streamerModeHideRestrictedUsers);
+    this->forceLayoutChannelViewsListener.add(fonts.fontChanged);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
-    this->layoutChannelViewsListener.add(fonts.fontChanged);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
     this->invalidateChannelViewBuffersListener.add(settings.separateMessages);
@@ -314,6 +314,9 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     assertInGuiThread();
 
     auto *const realParent = [this, type, parent]() -> QWidget * {
+        (void)this;
+        (void)type;
+
         if (parent)
         {
             // If a parent is explicitly specified, we use that immediately.
@@ -687,7 +690,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
                            : "vertical");
 
             QJsonArray itemsArr;
-            for (const std::unique_ptr<SplitNode> &n : node->getChildren())
+            for (const auto &n : node->getChildren())
             {
                 QJsonObject subObj;
                 WindowManager::encodeNodeRecursively(n.get(), subObj);
@@ -696,6 +699,9 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("items", itemsArr);
         }
         break;
+
+        default:
+            break;
     }
 
     obj.insert("flexh", node->getHorizontalFlex());
@@ -737,6 +743,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "misc");
             obj.insert("name", channel.get()->getName());
         }
+        break;
+
+        default:
+            break;
     }
 }
 
@@ -923,6 +933,9 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 window.setWindowState(Qt::WindowMaximized);
             }
             break;
+
+            case WindowDescriptor::State::None:
+                break;
         }
     }
 }

@@ -4,6 +4,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
+#include <QString>
 
 #include <chrono>
 #include <memory>
@@ -17,7 +18,7 @@ class WebSocketConnection;
 class WebSocketPoolImpl
 {
 public:
-    WebSocketPoolImpl();
+    WebSocketPoolImpl(const QString &shortName);
     ~WebSocketPoolImpl();
 
     WebSocketPoolImpl(const WebSocketPoolImpl &) = delete;

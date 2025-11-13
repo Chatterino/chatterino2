@@ -371,8 +371,7 @@ SettingWidget *SettingWidget::dropdown(
         widget->managedConnections);
 
     QObject::connect(combo, &QComboBox::currentTextChanged,
-                     [label, combo, &setting](const auto &newText) {
-                         bool ok = true;
+                     [label, combo, &setting](const auto & /*newText*/) {
                          auto stringValue = combo->currentData().toString();
 
                          setting.setValue(stringValue);

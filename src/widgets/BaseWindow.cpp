@@ -612,7 +612,8 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
                 return recursiveCheckMouseTracking(widget->parentWidget());
             };
 
-            if (!recursiveCheckMouseTracking(widget))
+            if (!recursiveCheckMouseTracking(widget) &&
+                !this->windowHandle()->startSystemMove())
             {
                 this->moving = true;
             }

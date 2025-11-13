@@ -98,7 +98,6 @@ private:
     std::vector<QLayoutItem *> itemList_;
     int hSpace_ = -1;
     int vSpace_ = -1;
-    int lineSpacing_ = -1;
 };
 
 }  // namespace chatterino

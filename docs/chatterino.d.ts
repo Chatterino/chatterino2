@@ -255,6 +255,7 @@ declare namespace c2 {
         JumpToChannel,
         CopyToClipboard,
         JumpToMessage,
+        InsertText,
     }
 
     enum MessageFlag {

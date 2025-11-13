@@ -76,14 +76,16 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
                         const Config &config, const QJsonDocument &document)
 {
 #ifdef Q_OS_WIN
-    writeManifestTo(paths.miscDirectory, u"."_s, config.fileName, document);
+    std::ignore =
+        writeManifestTo(paths.miscDirectory, u"."_s, config.fileName, document);
 
     QSettings registry(config.registryKey, QSettings::NativeFormat);
     registry.setValue("Default",
                       QString(paths.miscDirectory % u'/' % config.fileName));
 #else
-    writeManifestTo(config.browserDirectory, config.nmDirectory,
-                    u"com.chatterino.chatterino.json"_s, document);
+    std::ignore =
+        writeManifestTo(config.browserDirectory, config.nmDirectory,
+                        u"com.chatterino.chatterino.json"_s, document);
 #endif
 }
 

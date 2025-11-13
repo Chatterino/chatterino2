@@ -6,7 +6,9 @@
 
 namespace chatterino {
 
-WebSocketPool::WebSocketPool() = default;
+WebSocketPool::WebSocketPool(QString shortName)
+    : shortName(std::move(shortName)) {};
+
 WebSocketPool::~WebSocketPool()
 {
     if (this->impl)
@@ -34,7 +36,8 @@ WebSocketHandle WebSocketPool::createSocket(
     {
         try
         {
-            this->impl = std::make_unique<ws::detail::WebSocketPoolImpl>();
+            this->impl = std::make_unique<ws::detail::WebSocketPoolImpl>(
+                this->shortName);
         }
         catch (const boost::system::system_error &err)
         {

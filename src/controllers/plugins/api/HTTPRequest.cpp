@@ -115,10 +115,9 @@ void HTTPRequest::execute(sol::this_state L)
     auto hack = this->weak_from_this();
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     pl->httpRequests.push_back(this->shared_from_this());
-    auto *mainState = pl->state().lua_state();
 
     std::move(this->req_)
-        .onSuccess([hack](const NetworkResult &res) {
+        .onSuccess([pl, hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -128,10 +127,12 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            (*self->cbSuccess)(HTTPResponse(res));
+
+            loggedVoidCall(*self->cbSuccess, u"HTTPRequest::on_success", pl,
+                           HTTPResponse(res));
             self->cbSuccess = std::nullopt;
         })
-        .onError([hack](const NetworkResult &res) {
+        .onError([pl, hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -141,17 +142,17 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            (*self->cbError)(HTTPResponse(res));
+            loggedVoidCall(*self->cbError, u"HTTPRequest::on_error", pl,
+                           HTTPResponse(res));
             self->cbError = std::nullopt;
         })
-        .finally([mainState, hack]() {
+        .finally([pl, hack]() {
             auto self = hack.lock();
             if (!self)
             {
                 // this could happen if the plugin was deleted
                 return;
             }
-            auto *pl = getApp()->getPlugins()->getPluginByStatePtr(mainState);
             for (auto it = pl->httpRequests.begin();
                  it < pl->httpRequests.end(); it++)
             {
@@ -166,7 +167,7 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            (*self->cbFinally)();
+            loggedVoidCall(*self->cbFinally, u"HTTPRequest::finally", pl);
             self->cbFinally = std::nullopt;
         })
         .timeout(this->timeout_)

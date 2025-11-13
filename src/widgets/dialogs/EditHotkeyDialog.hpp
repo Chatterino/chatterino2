@@ -20,7 +20,7 @@ class EditHotkeyDialog final : public QDialog
 
 public:
     explicit EditHotkeyDialog(const std::shared_ptr<Hotkey> data,
-                              bool isAdd = false, QWidget *parent = nullptr);
+                              QWidget *parent = nullptr);
     ~EditHotkeyDialog() final;
 
     std::shared_ptr<Hotkey> data();

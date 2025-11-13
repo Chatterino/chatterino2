@@ -2423,6 +2423,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if (link.type == Link::InsertText)
             {
                 this->linkClicked.invoke(link);
+
+                if (this->context_ == Context::None)
+                {
+                    auto *split = dynamic_cast<Split *>(this->parentWidget());
+                    if (split)
+                    {
+                        split->insertTextToInput(link.value);
+                    }
+                }
             }
         }
         break;

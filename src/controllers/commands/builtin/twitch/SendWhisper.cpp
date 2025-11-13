@@ -109,7 +109,6 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &accemotes = *acc->accessEmotes();
     const auto *bttvemotes = app->getBttvEmotes();
     const auto *ffzemotes = app->getFfzEmotes();
-    auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {

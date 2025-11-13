@@ -389,6 +389,9 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
             }
         }
         break;
+
+        case HighlightTab::Blacklist:
+            break;
     }
 }
 

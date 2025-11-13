@@ -1,105 +1,81 @@
 #pragma once
 
 #include "common/QLogging.hpp"
-#include "common/Version.hpp"
-#include "providers/liveupdates/BasicPubSubClient.hpp"
-#include "providers/liveupdates/BasicPubSubWebsocket.hpp"
-#include "providers/NetworkConfigurationProvider.hpp"
-#include "providers/twitch/PubSubHelpers.hpp"
+#include "common/websockets/WebSocketPool.hpp"
+#include "providers/liveupdates/BasicPubSubListener.hpp"
+#include "providers/liveupdates/Diag.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
-#include "util/OnceFlag.hpp"
-#include "util/RenameThread.hpp"
 
-#include <pajlada/signals/signal.hpp>
-#include <QJsonObject>
-#include <QScopeGuard>
-#include <QString>
-#include <QStringBuilder>
-#include <websocketpp/client.hpp>
+#include <QPointer>
+#include <QTimer>
 
 #include <algorithm>
-#include <atomic>
 #include <chrono>
-#include <exception>
-#include <map>
 #include <memory>
-#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 namespace chatterino {
 
+namespace liveupdates {
+
+template <typename Manager, typename Client>
+concept IsManager = requires(Manager &manager) {
+    { manager.makeClient() } -> std::same_as<std::shared_ptr<Client>>;
+};
+
+template <typename Client>
+concept IsClient = requires(Client &client, const QByteArray &msg) {
+    { client.onOpen() } -> std::same_as<void>;
+    { client.onMessage(msg) } -> std::same_as<void>;
+    { client.close() } -> std::same_as<void>;
+};
+
+}  // namespace liveupdates
+
 /**
  * This class is the basis for connecting and interacting with
  * simple PubSub servers over the Websocket protocol.
  * It acts as a pool for connections (see BasicPubSubClient).
  *
- * You can customize the clients, by creating your custom
- * client in ::createClient.
- *
- * You **must** implement #onMessage. The method gets called for every
- * received message on every connection.
- * If you want to get the connection this message was received on,
- * use #findClient.
+ * You **must** implement a method `makeClient()` that returns a shared pointer
+ * of the client. 
  *
  * You must expose your own subscribe and unsubscribe methods
  * (e.g. [un-]subscribeTopic).
  * This manager does not keep track of the subscriptions.
  *
- * @tparam Subscription
- * The subscription has the following requirements:
- * It must have the methods QByteArray encodeSubscribe(),
- * and QByteArray encodeUnsubscribe().
- * It must have an overload for
- * QDebug &operator<< (see tests/src/BasicPubSub.cpp),
- * a specialization for std::hash,
- * and and overload for operator== and operator!=.
+ * @tparam Derived
+ * The derived class. Used to dispatch to makeClient().
+ *
+ * @tparam ClientT
+ * The client type. Must confirm to the IsClient above. Use BasicPubSubClient 
+ * for a common implementation. Used to dispatch to the correct methods there 
+ * and to get the subscription type.
  *
  * @see BasicPubSubClient
  */
-template <typename Subscription>
-class BasicPubSubManager
+template <typename Derived, typename ClientT>
+class BasicPubSubManager : public QObject
 {
 public:
+    using Subscription = ClientT::Subscription;
+    using Client = ClientT;
+
     BasicPubSubManager(QString host, QString shortName)
-        : host_(std::move(host))
-        , shortName_(std::move(shortName))
+        : pool_(std::make_optional<WebSocketPool>(shortName))
+        , host_(std::move(host))
     {
-        this->websocketClient_.set_access_channels(
-            websocketpp::log::alevel::all);
-        this->websocketClient_.clear_access_channels(
-            websocketpp::log::alevel::frame_payload |
-            websocketpp::log::alevel::frame_header);
-
-        this->websocketClient_.init_asio();
-
-        // SSL Handshake
-        this->websocketClient_.set_tls_init_handler([this](auto hdl) {
-            return this->onTLSInit(hdl);
-        });
-
-        this->websocketClient_.set_message_handler([this](auto hdl, auto msg) {
-            this->onMessage(hdl, msg);
-        });
-        this->websocketClient_.set_open_handler([this](auto hdl) {
-            this->onConnectionOpen(hdl);
-        });
-        this->websocketClient_.set_close_handler([this](auto hdl) {
-            this->onConnectionClose(hdl);
-        });
-        this->websocketClient_.set_fail_handler([this](auto hdl) {
-            this->onConnectionFail(hdl);
-        });
-        this->websocketClient_.set_user_agent(
-            QStringLiteral("Chatterino/%1 (%2)")
-                .arg(Version::instance().version(),
-                     Version::instance().commitHash())
-                .toStdString());
+        // We do this here, because `Derived` needs to be a complete type. If we
+        // did it as a requires clause on the class, the type would be
+        // incomplete.
+        static_assert(liveupdates::IsManager<Derived, Client>);
+        static_assert(liveupdates::IsClient<Client>);
     }
 
-    virtual ~BasicPubSubManager()
+    ~BasicPubSubManager() override
     {
         // The derived class must call stop in its destructor
         assert(this->stopping_);
@@ -111,28 +87,7 @@ public:
     BasicPubSubManager &operator=(const BasicPubSubManager &&) = delete;
 
     /** This is only used for testing. */
-    struct {
-        std::atomic<uint32_t> connectionsClosed{0};
-        std::atomic<uint32_t> connectionsOpened{0};
-        std::atomic<uint32_t> connectionsFailed{0};
-    } diag;
-
-    void start()
-    {
-        this->work_ = std::make_shared<boost::asio::executor_work_guard<
-            boost::asio::io_context::executor_type>>(
-            this->websocketClient_.get_io_service().get_executor());
-        this->mainThread_.reset(new std::thread([this] {
-            // make sure we set in any case, even exceptions
-            auto guard = qScopeGuard([&] {
-                this->stoppedFlag_.set();
-            });
-
-            runThread();
-        }));
-
-        renameThread(*this->mainThread_.get(), "BPSM-" % this->shortName_);
-    }
+    liveupdates::Diag diag;
 
     void stop()
     {
@@ -142,74 +97,10 @@ public:
         }
 
         this->stopping_ = true;
-
-        for (const auto &client : this->clients_)
-        {
-            client.second->close("Shutting down");
-        }
-
-        this->work_.reset();
-
-        if (!this->mainThread_->joinable())
-        {
-            return;
-        }
-
-        // NOTE:
-        // There is a case where a new client was initiated but not added to the clients list.
-        // We just don't join the thread & let the operating system nuke the thread if joining fails
-        // within 1s.
-        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
-        {
-            this->mainThread_->join();
-            return;
-        }
-
-        qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish within 100ms, force-stop the client";
-        this->websocketClient_.stop();
-        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
-        {
-            this->mainThread_->join();
-            return;
-        }
-
-        qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish after stopping";
+        this->pool_.reset();
     }
 
 protected:
-    using WebsocketMessagePtr =
-        websocketpp::config::asio_tls_client::message_type::ptr;
-    using WebsocketContextPtr =
-        websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
-
-    virtual void onMessage(websocketpp::connection_hdl hdl,
-                           WebsocketMessagePtr msg) = 0;
-
-    virtual std::shared_ptr<BasicPubSubClient<Subscription>> createClient(
-        liveupdates::WebsocketClient &client, websocketpp::connection_hdl hdl)
-    {
-        return std::make_shared<BasicPubSubClient<Subscription>>(client, hdl);
-    }
-
-    /**
-     * @param hdl The handle of the client.
-     * @return The client managing this connection, empty shared_ptr otherwise.
-     */
-    std::shared_ptr<BasicPubSubClient<Subscription>> findClient(
-        websocketpp::connection_hdl hdl)
-    {
-        auto clientIt = this->clients_.find(hdl);
-
-        if (clientIt == this->clients_.end())
-        {
-            return {};
-        }
-
-        return clientIt->second;
-    }
-
     void unsubscribe(const Subscription &subscription)
     {
         for (auto &client : this->clients_)
@@ -233,8 +124,18 @@ protected:
         DebugCount::increase("LiveUpdates subscription backlog");
     }
 
+    const std::unordered_map<size_t, std::shared_ptr<Client>> &clients() const
+    {
+        return this->clients_;
+    }
+
 private:
-    void onConnectionOpen(websocketpp::connection_hdl hdl)
+    Derived *derived()
+    {
+        return static_cast<Derived *>(this);
+    }
+
+    void onConnectionOpen(size_t id)
     {
         DebugCount::increase("LiveUpdates connections");
         this->addingClient_ = false;
@@ -242,14 +143,8 @@ private:
 
         this->connectBackoff_.reset();
 
-        auto client = this->createClient(this->websocketClient_, hdl);
-
-        // We separate the starting from the constructor because we will want to use
-        // shared_from_this
-        client->start();
-
-        this->clients_.emplace(hdl, client);
-
+        auto *client = resolve(id);
+        client->onOpen();
         auto pendingSubsToTake = std::min(this->pendingSubscriptions_.size(),
                                           client->maxSubscriptions);
 
@@ -278,92 +173,64 @@ private:
         }
     }
 
-    void onConnectionFail(websocketpp::connection_hdl hdl)
+    void onConnectionClose(size_t id)
     {
-        DebugCount::increase("LiveUpdates failed connections");
-        this->diag.connectionsFailed.fetch_add(1, std::memory_order_acq_rel);
+        this->addingClient_ = false;
 
-        if (auto conn = this->websocketClient_.get_con_from_hdl(std::move(hdl)))
+        auto it = this->clients_.find(id);
+        if (it == this->clients_.end())
         {
-            qCDebug(chatterinoLiveupdates)
-                << "LiveUpdates connection attempt failed (error: "
-                << conn->get_ec().message().c_str() << ")";
+            qCWarning(chatterinoLiveupdates) << "Unknown client:" << id;
+            assert(false);
+            return;
+        }
+
+        DebugCount::decrease("LiveUpdates connections");
+        qCDebug(chatterinoLiveupdates) << "Connection" << id << "closed";
+
+        auto subs = std::move(it->second->subscriptions_);
+        bool wasOpen = it->second->isOpen();
+
+        if (wasOpen)
+        {
+            this->diag.connectionsClosed.fetch_add(1,
+                                                   std::memory_order::relaxed);
         }
         else
         {
-            qCDebug(chatterinoLiveupdates)
-                << "LiveUpdates connection attempt failed but we can't get the "
-                   "connection from a handle.";
+            this->diag.connectionsFailed.fetch_add(1,
+                                                   std::memory_order::relaxed);
         }
-        this->addingClient_ = false;
-        if (!this->pendingSubscriptions_.empty())
+
+        this->clients_.erase(it);
+        if (this->stopping_)
         {
-            runAfter(this->websocketClient_.get_io_service(),
-                     this->connectBackoff_.next(), [this](auto /*timer*/) {
-                         this->addClient();
-                     });
+            return;
         }
-    }
 
-    void onConnectionClose(websocketpp::connection_hdl hdl)
-    {
-        qCDebug(chatterinoLiveupdates) << "Connection closed";
-        DebugCount::decrease("LiveUpdates connections");
-        this->diag.connectionsClosed.fetch_add(1, std::memory_order_acq_rel);
-
-        auto clientIt = this->clients_.find(hdl);
-
-        // If this assert goes off, there's something wrong with the connection
-        // creation/preserving code KKona
-        assert(clientIt != this->clients_.end());
-
-        auto client = clientIt->second;
-
-        this->clients_.erase(clientIt);
-
-        client->stop();
-
-        if (!this->stopping_)
+        if (!wasOpen)
         {
-            for (const auto &sub : client->subscriptions_)
-            {
-                this->subscribe(sub);
-            }
+            qCWarning(chatterinoLiveupdates)
+                << "Retrying after" << id << "failed";
+            this->pendingSubscriptions_.insert(
+                this->pendingSubscriptions_.end(),
+                std::make_move_iterator(subs.begin()),
+                std::make_move_iterator(subs.end()));
+            QTimer::singleShot(this->connectBackoff_.next(), this, [this] {
+                this->addClient();
+            });
+            return;
         }
-    }
 
-    WebsocketContextPtr onTLSInit(const websocketpp::connection_hdl & /*hdl*/)
-    {
-        WebsocketContextPtr ctx(new boost::asio::ssl::context(
-            boost::asio::ssl::context::tls_client));
-
-        try
+        for (const auto &sub : subs)
         {
-            ctx->set_options(boost::asio::ssl::context::default_workarounds |
-                             boost::asio::ssl::context::no_tlsv1 |
-                             boost::asio::ssl::context::no_tlsv1_1 |
-                             boost::asio::ssl::context::single_dh_use);
+            this->subscribe(sub);
         }
-        catch (const std::exception &e)
-        {
-            qCDebug(chatterinoLiveupdates)
-                << "Exception caught in OnTLSInit:" << e.what();
-        }
-
-        return ctx;
-    }
-
-    void runThread()
-    {
-        qCDebug(chatterinoLiveupdates) << "Start LiveUpdates manager thread";
-        this->websocketClient_.run();
-        qCDebug(chatterinoLiveupdates)
-            << "Done with LiveUpdates manager thread";
     }
 
     void addClient()
     {
-        if (this->addingClient_)
+        if (this->addingClient_ || !this->pool_)
         {
             return;
         }
@@ -372,20 +239,17 @@ private:
 
         this->addingClient_ = true;
 
-        websocketpp::lib::error_code ec;
-        auto con = this->websocketClient_.get_connection(
-            this->host_.toStdString(), ec);
-
-        if (ec)
-        {
-            qCDebug(chatterinoLiveupdates)
-                << "Unable to establish connection:" << ec.message().c_str();
-            return;
-        }
-
-        NetworkConfigurationProvider::applyToWebSocket(con);
-
-        this->websocketClient_.connect(con);
+        auto id = this->nextId_++;
+        auto client = this->derived()->makeClient();
+        auto hdl = this->pool_->createSocket(
+            WebSocketOptions{
+                .url = this->host_,
+                .headers = {},
+            },
+            std::make_unique<BasicPubSubListener<Derived>>(
+                std::weak_ptr{client}, this->derived(), id));
+        client->ws_ = std::move(hdl);
+        this->clients_.emplace(id, std::move(client));
     }
 
     bool trySubscribe(const Subscription &subscription)
@@ -400,29 +264,30 @@ private:
         return false;
     }
 
+    Client *resolve(size_t id)
+    {
+        auto it = this->clients_.find(id);
+        if (it == this->clients_.end())
+        {
+            return nullptr;
+        }
+        return it->second.get();
+    }
+
     std::vector<Subscription> pendingSubscriptions_;
-    std::atomic<bool> addingClient_{false};
     ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
 
-    liveupdates::WebsocketClient websocketClient_;
-    std::unique_ptr<std::thread> mainThread_;
-    OnceFlag stoppedFlag_;
-
-    std::map<liveupdates::WebsocketHandle,
-             std::shared_ptr<BasicPubSubClient<Subscription>>,
-             std::owner_less<liveupdates::WebsocketHandle>>
-        clients_;
-
-    std::shared_ptr<boost::asio::executor_work_guard<
-        boost::asio::io_context::executor_type>>
-        work_{nullptr};
+    std::optional<WebSocketPool> pool_;
+    std::unordered_map<size_t, std::shared_ptr<Client>> clients_;
 
     const QString host_;
 
-    /// Short name of the service (e.g. "7TV" or "BTTV")
-    const QString shortName_;
+    size_t nextId_ = 0;
 
-    bool stopping_{false};
+    bool stopping_ = false;
+    bool addingClient_ = false;
+
+    friend BasicPubSubListener<Derived>;
 };
 
 }  // namespace chatterino

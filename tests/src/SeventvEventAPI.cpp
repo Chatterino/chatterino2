@@ -1,11 +1,14 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
+#include "mocks/BaseApplication.hpp"
+#include "providers/liveupdates/Diag.hpp"
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
 #include "Test.hpp"
 
 #include <QString>
+#include <QtCore/qtestsupport_core.h>
 
 #include <optional>
 
@@ -19,9 +22,9 @@ const QString TARGET_USER_ID = "60b39e943e203cc169dfc106";
 
 TEST(SeventvEventAPI, AllEvents)
 {
+    mock::BaseApplication app;
     const QString host("wss://127.0.0.1:9050/liveupdates/seventv/all-events");
     SeventvEventAPI eventAPI(host, std::chrono::milliseconds(1000));
-    eventAPI.start();
 
     std::optional<EmoteAddDispatch> addDispatch;
     std::optional<EmoteUpdateDispatch> updateDispatch;
@@ -41,13 +44,12 @@ TEST(SeventvEventAPI, AllEvents)
         userDispatch = d;
     });
 
-    std::this_thread::sleep_for(50ms);
     eventAPI.subscribeUser("", EMOTE_SET_A);
-    std::this_thread::sleep_for(500ms);
+    QTest::qWait(500);
 
-    ASSERT_EQ(eventAPI.diag.connectionsOpened, 1);
-    ASSERT_EQ(eventAPI.diag.connectionsClosed, 0);
-    ASSERT_EQ(eventAPI.diag.connectionsFailed, 0);
+    ASSERT_EQ(eventAPI.diag().connectionsOpened, 1);
+    ASSERT_EQ(eventAPI.diag().connectionsClosed, 0);
+    ASSERT_EQ(eventAPI.diag().connectionsFailed, 0);
 
     auto add = *addDispatch;
     ASSERT_EQ(add.emoteSetID, EMOTE_SET_A);
@@ -73,7 +75,7 @@ TEST(SeventvEventAPI, AllEvents)
     removeDispatch = std::nullopt;
 
     eventAPI.subscribeUser(TARGET_USER_ID, "");
-    std::this_thread::sleep_for(50ms);
+    QTest::qWait(50);
 
     ASSERT_EQ(addDispatch.has_value(), false);
     ASSERT_EQ(updateDispatch.has_value(), false);
@@ -87,23 +89,26 @@ TEST(SeventvEventAPI, AllEvents)
     ASSERT_EQ(user.connectionIndex, 0);
 
     eventAPI.stop();
-    ASSERT_EQ(eventAPI.diag.connectionsOpened, 1);
-    ASSERT_EQ(eventAPI.diag.connectionsClosed, 1);
-    ASSERT_EQ(eventAPI.diag.connectionsFailed, 0);
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    ASSERT_EQ(eventAPI.diag().connectionsOpened, 1);
+    ASSERT_EQ(eventAPI.diag().connectionsClosed, 1);
+    ASSERT_EQ(eventAPI.diag().connectionsFailed, 0);
 }
 
 TEST(SeventvEventAPI, NoHeartbeat)
 {
+    mock::BaseApplication app;
     const QString host("wss://127.0.0.1:9050/liveupdates/seventv/no-heartbeat");
     SeventvEventAPI eventApi(host, std::chrono::milliseconds(1000));
-    eventApi.start();
 
-    std::this_thread::sleep_for(50ms);
     eventApi.subscribeUser("", EMOTE_SET_A);
-    std::this_thread::sleep_for(1250ms);
-    ASSERT_EQ(eventApi.diag.connectionsOpened, 2);
-    ASSERT_EQ(eventApi.diag.connectionsClosed, 1);
-    ASSERT_EQ(eventApi.diag.connectionsFailed, 0);
+    QTest::qWait(1250);
+    ASSERT_EQ(eventApi.diag().connectionsOpened, 2);
+    ASSERT_EQ(eventApi.diag().connectionsClosed, 1);
+    ASSERT_EQ(eventApi.diag().connectionsFailed, 0);
 
     eventApi.stop();
 }
