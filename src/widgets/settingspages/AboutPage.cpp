@@ -141,6 +141,9 @@ AboutPage::AboutPage()
                        ":/licenses/howard-hinnant-date.txt");
             addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
                        ":/licenses/fmtlib.txt");
+            addLicense(form.getElement(), "Unicode",
+                       "https://www.unicode.org/copyright.html",
+                       ":/licenses/unicode.txt");
         }
 
         // Attributions
