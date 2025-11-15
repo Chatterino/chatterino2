@@ -39,6 +39,14 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
+    if (this->flags.has(MessageFlag::WatchStreak) &&
+        getSettings()->enableWatchStreakHighlight)
+    {
+        return {
+            ColorProvider::instance().color(ColorType::WatchStreak),
+        };
+    }
+
     if (this->flags.has(MessageFlag::Subscription) &&
         getSettings()->enableSubHighlight)
     {
