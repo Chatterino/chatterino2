@@ -10,7 +10,7 @@
 namespace chatterino {
 
 SwitchSplitItem::SwitchSplitItem(SplitContainer *container, Split *split)
-    : AbstractSwitcherItem(QIcon(":switcher/switch.svg"))
+    : AbstractSwitcherItem(QIcon(":switcher/switchIcon.svg"))
     , container_(container)
     , split_(split)
 {

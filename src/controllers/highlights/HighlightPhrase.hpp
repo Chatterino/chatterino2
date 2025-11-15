@@ -8,10 +8,23 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QUrl>
+#include <qvariant.h>
 
 #include <memory>
 
 namespace chatterino {
+
+struct HighlightData {
+    QString name;
+    QString pattern;
+    bool enabled;
+    bool showInMentions;
+    bool hasAlert;
+    bool hasSound;
+    bool isRegex;
+    bool isCaseSensitive;
+    QUrl soundUrl;
+};
 
 class HighlightPhrase
 {
@@ -36,6 +49,9 @@ public:
                     bool hasSound, bool isRegex, bool isCaseSensitive,
                     const QString &soundUrl, std::shared_ptr<QColor> color);
 
+    bool isEnabled() const;
+    QString getName() const;
+    QPixmap getType() const;
     const QString &getPattern() const;
     bool showInMentions() const;
     bool hasAlert() const;
@@ -176,3 +192,6 @@ struct Deserialize<chatterino::HighlightPhrase> {
 };
 
 }  // namespace pajlada
+
+// TODO: Confirm this is necessary for a stupid type
+Q_DECLARE_METATYPE(chatterino::HighlightData);

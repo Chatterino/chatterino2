@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qpixmap.h>
 #include <QStandardItem>
 #include <QUrl>
 
@@ -48,6 +49,17 @@ inline void setColorItem(QStandardItem *item, const QColor &value,
         Qt::ItemFlags(defaultItemFlags(selectable) |
                       (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));
 }
+
+inline void setIconItem(QStandardItem *item, const QPixmap &value,
+                        bool selectable = true)
+{
+    item->setData(QVariant::fromValue(value), Qt::DecorationRole);
+    item->setFlags(
+        Qt::ItemFlags(defaultItemFlags(selectable) |
+                      (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));
+}
+
+// TODO: setIconItem
 
 inline QStandardItem *emptyItem()
 {
