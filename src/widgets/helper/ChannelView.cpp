@@ -2360,7 +2360,9 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                     MessageElementFlag::Username))
             {
                 const auto userName = hoverLayoutElement->getLink().value;
-                const auto type = this->channel_->getType();
+                const auto type = this->hasSourceChannel()
+                                      ? this->sourceChannel_->getType()
+                                      : this->channel_->getType();
                 switch (type)
                 {
                     case Channel::Type::TwitchWhispers:
