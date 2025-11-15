@@ -6,8 +6,8 @@ include(FeatureSummary)
 include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
-    "${CMAKE_SOURCE_DIR}/cmake"
-    )
+        "${CMAKE_SOURCE_DIR}/cmake"
+)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
@@ -39,7 +39,7 @@ mark_as_advanced(CHATTERINO_UPDATER)
 
 if(CHATTERINO_SANITIZER_SUPPORT)
     list(APPEND CMAKE_MODULE_PATH
-        "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
+            "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
     find_package(Sanitizers REQUIRED)
 endif()
@@ -52,9 +52,9 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.4
-    DESCRIPTION "Chat client for twitch.tv"
-    HOMEPAGE_URL "https://chatterino.com/"
+        VERSION 2.5.4
+        DESCRIPTION "Chat client for twitch.tv"
+        HOMEPAGE_URL "https://chatterino.com/"
 )
 
 if(CHATTERINO_GENERATE_COVERAGE)
@@ -94,21 +94,21 @@ endif ()
 # Alternate linker code taken from heavyai/heavydb
 # https://github.com/heavyai/heavydb/blob/0517d99b467806f6af7b4c969e351368a667497d/CMakeLists.txt#L87-L103
 macro(set_alternate_linker linker)
-  find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
-  if(LINKER_EXECUTABLE)
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
-      add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+    find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+    if(LINKER_EXECUTABLE)
+        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
+            add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+        else()
+            add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        endif()
     else()
-      add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
     endif()
-  else()
-    set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
-  endif()
 endmacro()
 
 set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
 if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
-  set_alternate_linker(${USE_ALTERNATE_LINKER})
+    set_alternate_linker(${USE_ALTERNATE_LINKER})
 endif()
 
 if (_compiler_launcher)
@@ -257,10 +257,14 @@ find_package(Doxygen)
 find_package(BoostCertify REQUIRED)
 
 if (CHATTERINO_PLUGINS)
-    set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
-    add_subdirectory(lib/lua)
 
     find_package(Sol2 REQUIRED)
+    find_package(Lua 5.4)
+
+    if (!Lua_FOUND)
+        set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
+        add_subdirectory(lib/lua)
+    endif()
 endif()
 
 if (BUILD_WITH_CRASHPAD)
