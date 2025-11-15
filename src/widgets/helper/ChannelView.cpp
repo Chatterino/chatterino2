@@ -2359,18 +2359,22 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             if (hoverLayoutElement->getFlags().has(
                     MessageElementFlag::Username))
             {
-                auto type = this->channel_->getType();
-                if (type == Channel::Type::TwitchWhispers ||
-                    type == Channel::Type::TwitchLive)
+                const auto userName = hoverLayoutElement->getLink().value;
+                const auto type = this->channel_->getType();
+                switch (type)
                 {
-                    QDesktopServices::openUrl(
-                        QUrl(u"https://www.twitch.tv/" %
-                             hoverLayoutElement->getLink().value));
-                }
-                else
-                {
-                    openTwitchUsercard(layout->getMessage()->channelName,
-                                       hoverLayoutElement->getLink().value);
+                    case Channel::Type::TwitchWhispers:
+                    case Channel::Type::TwitchLive:
+                        QDesktopServices::openUrl(
+                            QUrl(u"https://www.twitch.tv/" % userName));
+                        break;
+                    case Channel::Type::TwitchMentions:
+                        openTwitchUsercard(layout->getMessage()->channelName,
+                                           userName);
+                        break;
+                    default:
+                        openTwitchUsercard(this->channel_->getName(), userName);
+                        break;
                 }
 
                 return;
