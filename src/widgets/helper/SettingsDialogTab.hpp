@@ -17,6 +17,7 @@ enum class SettingsTabId {
     None,
     General,
     Accounts,
+    Highlights,
     Moderation,
     About,
 };
