@@ -29,6 +29,7 @@ enum class SettingsDialogPreference {
     NoPreference,
     StreamerMode,
     Accounts,
+    Highlights,
     ModerationActions,
     About,
 };
