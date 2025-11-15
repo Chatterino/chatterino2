@@ -20,6 +20,7 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/settingspages/HighlightsBetaWidget.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>
@@ -31,6 +32,7 @@
 namespace chatterino {
 
 namespace {
+
 // Add additional badges for highlights here
 QList<DisplayBadge> availableBadges = {
     {"Broadcaster", "broadcaster"},
@@ -45,6 +47,7 @@ QList<DisplayBadge> availableBadges = {
     {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
     {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
 };
+
 }  // namespace
 
 HighlightingPage::HighlightingPage()
@@ -60,6 +63,9 @@ HighlightingPage::HighlightingPage()
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
         {
+            // BETA
+            tabs->addTab(new HighlightsBetaWidget, "Beta");
+
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {

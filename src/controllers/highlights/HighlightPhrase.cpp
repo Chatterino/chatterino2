@@ -4,6 +4,8 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 
+#include "singletons/Resources.hpp"
+
 #include <QStringBuilder>
 
 namespace chatterino {
@@ -82,6 +84,36 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))
 {
+}
+
+bool HighlightPhrase::isEnabled() const
+{
+    return true;
+}
+
+QString HighlightPhrase::getName() const
+{
+    return "highlight name";
+}
+
+QPixmap HighlightPhrase::getType() const
+{
+    if (this->getPattern() == "my phrase")
+    {
+        return getResources().buttons.settings_darkMode.scaled(24, 24);
+    }
+
+    if (this->getPattern() == "user")
+    {
+        return getResources().buttons.account_darkMode.scaled(24, 24);
+    }
+
+    if (this->getPattern() == "badge")
+    {
+        return getResources().buttons.vip.scaled(24, 24);
+    }
+
+    return getResources().buttons.text;
 }
 
 const QString &HighlightPhrase::getPattern() const
