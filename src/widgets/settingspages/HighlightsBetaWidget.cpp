@@ -5,6 +5,7 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/settingspages/HighlightsBetaConfigureDelegate.hpp"
+#include "widgets/settingspages/HighlightsBetaConfigureDialog.hpp"
 
 #include <qabstractitemview.h>
 #include <qboxlayout.h>
@@ -54,6 +55,7 @@ HighlightsBetaWidget::HighlightsBetaWidget()
             // Open a dialog that references the model (qmodelindex?)
             // data that isn't directly
             qInfo() << "XXX: CONFIGURE HIGHLIGHT CUZ DOUBLE CLICK";
+            this->openConfigureDialog(clicked);
             return;
         });
 
@@ -85,6 +87,7 @@ HighlightsBetaWidget::HighlightsBetaWidget()
                 // Open a dialog that references the model (qmodelindex?)
                 // data that isn't directly
                 qInfo() << "XXX: CONFIGURE HIGHLIGHT";
+                this->openConfigureDialog(clicked);
                 return;
             }
         });
@@ -98,6 +101,26 @@ HighlightsBetaWidget::HighlightsBetaWidget()
         HighlightBetaModel::Column::Name, QHeaderView::ResizeToContents);
 
     layout->addWidget(view);
+}
+
+void HighlightsBetaWidget::openConfigureDialog(const QModelIndex &index)
+{
+    if (this->configureDialog != nullptr)
+    {
+        qInfo() << "XXX: the configure dialog is already open";
+        return;
+    }
+
+    HighlightData data;  // TODO: fill this in based on the index
+
+    qInfo() << "XXX: show?";
+    this->configureDialog = new HighlightsBetaConfigureDialog(data, this);
+    QObject::connect(this->configureDialog, &QWidget::destroyed, this, [this] {
+        qInfo() << "XXX: closed";
+        this->configureDialog = nullptr;
+    });
+
+    this->configureDialog->show();
 }
 
 }  // namespace chatterino
