@@ -17,8 +17,6 @@ using namespace chatterino;
 
 constexpr auto MIN_PREDICT_DURATION = std::chrono::seconds(30);
 constexpr auto MAX_PREDICT_DURATION = std::chrono::seconds(1800);
-constexpr int MAX_PREDICT_TITLE_LENGTH = 45;
-constexpr int MAX_PREDICT_CHOICES = 10;
 
 }  // namespace
 
@@ -30,8 +28,7 @@ QString createPrediction(const CommandContext &ctx)
     const auto usage = QStringLiteral(
         R"(Usage: "/prediction --title "<title>" --choice "<choice1>" --choice "<choice2>" --duration <duration>[time unit]" - Creates a prediction for users to guess among the defined options. Title may not exceed 45 characters. There must be between two and ten choices. Duration must be a positive integer; time unit (optional, default=s) must be one of s, m; maximum duration is 30 minutes.)");
     const auto action = parseUserParticipationAction(
-        ctx, command, usage, MIN_PREDICT_DURATION, MAX_PREDICT_DURATION,
-        MAX_PREDICT_TITLE_LENGTH, MAX_PREDICT_CHOICES);
+        ctx, command, usage, MIN_PREDICT_DURATION, MAX_PREDICT_DURATION);
 
     if (!action.has_value())
     {

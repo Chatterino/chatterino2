@@ -70,7 +70,6 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
 
 ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
-    std::chrono::seconds minDuration, std::chrono::seconds maxDuration,
-    int maxTitleLength, int maxChoices);
+    std::chrono::seconds minDuration, std::chrono::seconds maxDuration);
 
 }  // namespace chatterino::commands

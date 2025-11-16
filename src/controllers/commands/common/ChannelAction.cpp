@@ -185,8 +185,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
 ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     const std::chrono::seconds minDuration,
-    const std::chrono::seconds maxDuration, const int maxTitleLength,
-    const int maxChoices)
+    const std::chrono::seconds maxDuration)
 {
     if (ctx.twitchChannel == nullptr)
     {

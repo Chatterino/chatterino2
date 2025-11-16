@@ -17,8 +17,6 @@ using namespace chatterino;
 
 constexpr auto MIN_POLL_DURATION = std::chrono::seconds(10);
 constexpr auto MAX_POLL_DURATION = std::chrono::seconds(1800);
-constexpr int MAX_POLL_TITLE_LENGTH = 60;
-constexpr int MAX_POLL_CHOICES = 5;
 
 }  // namespace
 
@@ -30,8 +28,7 @@ QString createPoll(const CommandContext &ctx)
     const auto usage = QStringLiteral(
         R"(Usage: "/poll --title "<title>" --duration <duration>[time unit] --choice "<choice1>" --choice "<choice2>" [options...]" - Creates a poll for users to vote among the defined options. Title may not exceed 60 characters. There must be between two and five poll choices. Duration must be a positive integer; time unit (optional, default=s) must be one of s, m; maximum duration is 30 minutes. Options: --points <points> to allow spending the specified channel points for each additional vote.)");
     const auto action = parseUserParticipationAction(
-        ctx, command, usage, MIN_POLL_DURATION, MAX_POLL_DURATION,
-        MAX_POLL_TITLE_LENGTH, MAX_POLL_CHOICES);
+        ctx, command, usage, MIN_POLL_DURATION, MAX_POLL_DURATION);
 
     if (!action.has_value())
     {
