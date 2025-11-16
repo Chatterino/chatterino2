@@ -3276,6 +3276,58 @@ void Helix::createPoll(QString broadcasterID, QString title,
         .execute();
 }
 
+void Helix::createPrediction(const QString broadcasterID, const QString title,
+                             QStringList outcomes, const int duration,
+                             ResultCallback<> successCallback,
+                             FailureCallback<QString> failureCallback)
+{
+    // Prepare request body
+    QJsonArray outcomeArray;
+    for (auto outcome : outcomes)
+    {
+        outcomeArray.append(QJsonObject{{{"title", outcome}}});
+    }
+
+    QJsonObject payload;
+    payload.insert("broadcaster_id", broadcasterID);
+    payload.insert("title", title);
+    payload.insert("prediction_window", duration);
+    payload.insert("outcomes", outcomeArray);
+
+    // Execute API call
+    this->makePost("predictions", {})
+        .json(payload)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for creating a prediction was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 void Helix::createEventSubSubscription(
     const eventsub::SubscriptionRequest &request, const QString &sessionID,
     ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,

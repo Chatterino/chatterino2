@@ -436,6 +436,13 @@ public:
                  FailureCallback<QString> failureCallback),
                 (override));
 
+    // create prediction
+    MOCK_METHOD(void, createPrediction,
+                (QString broadcasterID, QString title, QStringList outcomes,
+                 const int duration, ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
     MOCK_METHOD(void, createEventSubSubscription,
                 (const eventsub::SubscriptionRequest &request,
                  const QString &sessionID,

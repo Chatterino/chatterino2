@@ -101,6 +101,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetVIPs.hpp
         controllers/commands/builtin/twitch/Poll.cpp
         controllers/commands/builtin/twitch/Poll.hpp
+        controllers/commands/builtin/twitch/Prediction.cpp
+        controllers/commands/builtin/twitch/Prediction.hpp
         controllers/commands/builtin/twitch/Raid.cpp
         controllers/commands/builtin/twitch/Raid.hpp
         controllers/commands/builtin/twitch/RemoveModerator.cpp
