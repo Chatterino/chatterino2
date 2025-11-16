@@ -7,6 +7,7 @@
 #include "util/Twitch.hpp"
 
 #include <QCommandLineParser>
+#include <QProcess>
 #include <QStringBuilder>
 
 #include <algorithm>
@@ -179,6 +180,108 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     }
 
     return actions;
+}
+
+nonstd::expected<StartUserParticipationAction, QString>
+    parseUserParticipationAction(const CommandContext &ctx,
+                                 const QString &command, const QString &usage,
+                                 const int minDuration, const int maxDuration,
+                                 const int maxTitleLength, const int maxChoices)
+{
+    if (ctx.twitchChannel == nullptr)
+    {
+        // This action must be performed with a twitch channel as a context
+        return nonstd::make_unexpected(
+            "The " % command % " command only works in Twitch channels");
+    }
+
+    // Define arguments
+    QCommandLineParser parser;
+    parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    parser.setOptionsAfterPositionalArgumentsMode(
+        QCommandLineParser::ParseAsOptions);
+    QCommandLineOption titleOption(QStringList() << "t" << "title",
+                                   "The title of the " % command, "title");
+    QCommandLineOption durationOption(QStringList() << "d" << "duration",
+                                      "The duration of the " % command,
+                                      "duration");
+    QCommandLineOption pointsOption(QStringList() << "p" << "points",
+                                    "The channel points per vote", "points");
+    QCommandLineOption choiceOption(
+        QStringList() << "c" << "choice",
+        "A viewer-selectable choice for the " % command, "choice");
+    parser.addOptions({
+        titleOption,
+        durationOption,
+        choiceOption,
+        pointsOption,
+    });
+    const auto joined = ctx.words.join(" ");
+    parser.parse(QProcess::splitCommand(joined));
+
+    // Input validation
+    if (!parser.isSet(titleOption))
+    {
+        return nonstd::make_unexpected("Missing title - " % usage);
+    }
+    const auto title = parser.value(titleOption);
+    if (title.isEmpty() || title.length() > maxTitleLength)
+    {
+        return nonstd::make_unexpected("Invalid title length - " % usage);
+    }
+
+    if (!parser.isSet(durationOption))
+    {
+        return nonstd::make_unexpected("Missing duration - " % usage);
+    }
+
+    if (!parser.isSet(choiceOption))
+    {
+        return nonstd::make_unexpected("Missing choices - " % usage);
+    }
+    const auto choices = parser.values(choiceOption);
+    if (choices.size() < 2 || choices.size() > maxChoices)
+    {
+        return nonstd::make_unexpected("Invalid choice count - " % usage);
+    }
+    for (const auto &choice : choices)
+    {
+        if (choice.length() > 25)
+        {
+            return nonstd::make_unexpected(
+                "Choice cannot exceed 25 characters: " % choice);
+        }
+    }
+
+    // Build action
+    StartUserParticipationAction action{
+        .broadcasterId = ctx.twitchChannel->roomId(),
+        .title = title,
+        .choices = choices,
+        .duration = 0,
+        .pointsPerVote = 0,
+    };
+
+    const auto dur = parseDurationToSeconds(parser.value(durationOption));
+    if (dur <= 0)
+    {
+        return nonstd::make_unexpected("Invalid duration - " % usage);
+    }
+    action.duration =
+        std::clamp(static_cast<int>(dur), minDuration, maxDuration);
+
+    if (parser.isSet(pointsOption))
+    {
+        bool validPoints = true;
+        const int points = parser.value(pointsOption).toInt(&validPoints);
+        if (!validPoints)
+        {
+            return nonstd::make_unexpected("Invalid points - " % usage);
+        }
+        action.pointsPerVote = std::clamp(points, 0, 1000000);
+    }
+
+    return action;
 }
 
 }  // namespace chatterino::commands

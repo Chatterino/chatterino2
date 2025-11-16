@@ -1211,6 +1211,12 @@ public:
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference#create-poll
+    virtual void createPoll(QString broadcasterID, QString title,
+                            QStringList choices, int duration,
+                            int pointsPerVote, ResultCallback<> successCallback,
+                            FailureCallback<QString> failureCallback) = 0;
+
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     virtual void createEventSubSubscription(
         const eventsub::SubscriptionRequest &request, const QString &sessionID,
@@ -1565,6 +1571,12 @@ public:
         QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#create-poll
+    void createPoll(QString broadcasterID, QString title, QStringList choices,
+                    int duration, int pointsPerVote,
+                    ResultCallback<> successCallback,
+                    FailureCallback<QString> failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     void createEventSubSubscription(

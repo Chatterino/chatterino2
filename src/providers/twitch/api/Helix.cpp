@@ -3218,6 +3218,64 @@ void Helix::getFollowedChannel(
         .execute();
 }
 
+void Helix::createPoll(QString broadcasterID, QString title,
+                       QStringList choices, const int duration,
+                       const int pointsPerVote,
+                       ResultCallback<> successCallback,
+                       FailureCallback<QString> failureCallback)
+{
+    // Prepare request body
+    QJsonArray choiceArray;
+    for (auto choice : choices)
+    {
+        choiceArray.append(QJsonObject{{{"title", choice}}});
+    }
+
+    QJsonObject json{{{"broadcaster_id", broadcasterID},
+                      {"title", title},
+                      {"duration", duration},
+                      {"choices", choiceArray}}};
+
+    if (pointsPerVote > 0)
+    {
+        json["channel_points_voting_enabled"] = true;
+        json["channel_points_per_vote"] = pointsPerVote;
+    }
+
+    // Execute API call
+    this->makePost("polls", {})
+        .json(json)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for creating a poll was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 void Helix::createEventSubSubscription(
     const eventsub::SubscriptionRequest &request, const QString &sessionID,
     ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,

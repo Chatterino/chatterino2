@@ -428,6 +428,14 @@ public:
          FailureCallback<QString> failureCallback),
         (override));
 
+    // create poll
+    MOCK_METHOD(void, createPoll,
+                (QString broadcasterID, QString title, QStringList choices,
+                 const int duration, const int pointsPerVote,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
     MOCK_METHOD(void, createEventSubSubscription,
                 (const eventsub::SubscriptionRequest &request,
                  const QString &sessionID,

@@ -47,6 +47,14 @@ struct PerformChannelAction {
     }
 };
 
+struct StartUserParticipationAction {
+    QString broadcasterId;
+    QString title;
+    QStringList choices;
+    int duration;
+    int pointsPerVote{};
+};
+
 std::ostream &operator<<(std::ostream &os, const IncompleteHelixUser &u);
 // gtest printer
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -55,5 +63,11 @@ void PrintTo(const PerformChannelAction &a, std::ostream *os);
 nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     bool withDuration, bool withReason);
+
+nonstd::expected<StartUserParticipationAction, QString>
+    parseUserParticipationAction(const CommandContext &ctx,
+                                 const QString &command, const QString &usage,
+                                 int minDuration, int maxDuration,
+                                 int maxTitleLength, int maxChoices);
 
 }  // namespace chatterino::commands
