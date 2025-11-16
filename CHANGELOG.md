@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Add a separate highlight option for watchstreak notifications. (#6571)
+- Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
 - Minor: Added setting for character limit of deleted messages. (#6491)
