@@ -202,14 +202,13 @@ nonstd::expected<StartUserParticipationAction, QString>
         QCommandLineParser::ParseAsOptions);
     QCommandLineOption titleOption({"t", "title"},
                                    "The title of the " % command, "title");
-    QCommandLineOption durationOption(QStringList() << "d" << "duration",
-                                      "The duration of the " % command,
-                                      "duration");
-    QCommandLineOption pointsOption(QStringList() << "p" << "points",
+    QCommandLineOption durationOption(
+        {"d", "duration"}, "The duration of the " % command, "duration");
+    QCommandLineOption pointsOption({"p", "points"},
                                     "The channel points per vote", "points");
     QCommandLineOption choiceOption(
-        QStringList() << "c" << "choice",
-        "A viewer-selectable choice for the " % command, "choice");
+        {"c", "choice"}, "A viewer-selectable choice for the " % command,
+        "choice");
     parser.addOptions({
         titleOption,
         durationOption,
