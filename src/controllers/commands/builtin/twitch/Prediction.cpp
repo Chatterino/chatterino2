@@ -55,14 +55,6 @@ QString createPrediction(const CommandContext &ctx)
         return "";
     }
 
-    if (currentUser->getUserId() != ctx.twitchChannel->roomId())
-    {
-        ctx.channel->addSystemMessage(
-            "Only the broadcaster can create "
-            "predictions due to Twitch restrictions.");
-        return "";
-    }
-
     const auto &data = action.value();
     getHelix()->createPrediction(
         data.broadcasterId, data.title, data.choices, data.duration,

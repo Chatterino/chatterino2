@@ -223,11 +223,6 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     {
         return makeUnexpected("Missing title - " % usage);
     }
-    const auto title = parser.value(titleOption);
-    if (title.isEmpty() || title.length() > maxTitleLength)
-    {
-        return makeUnexpected("Invalid title length - " % usage);
-    }
 
     if (!parser.isSet(durationOption))
     {
@@ -245,37 +240,23 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     {
         return makeUnexpected("Missing choices - " % usage);
     }
-    const auto choices = parser.values(choiceOption);
-    if (choices.size() < 2 || choices.size() > maxChoices)
-    {
-        return makeUnexpected("Invalid choice count - " % usage);
-    }
-    for (const auto &choice : choices)
-    {
-        if (choice.length() > 25)
-        {
-            return makeUnexpected("Choice cannot exceed 25 characters: " %
-                                  choice);
-        }
-    }
 
     // Build action
     StartUserParticipationAction action{
         .broadcasterId = ctx.twitchChannel->roomId(),
-        .title = title,
-        .choices = choices,
+        .title = parser.value(titleOption),
+        .choices = parser.values(choiceOption),
         .duration = duration,
     };
 
     if (parser.isSet(pointsOption))
     {
         bool validPoints = true;
-        const int points = parser.value(pointsOption).toInt(&validPoints);
+        action.pointsPerVote = parser.value(pointsOption).toUInt(&validPoints);
         if (!validPoints)
         {
             return makeUnexpected("Invalid points - " % usage);
         }
-        action.pointsPerVote = std::clamp(points, 0, 1000000);
     }
 
     return action;

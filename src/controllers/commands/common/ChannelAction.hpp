@@ -56,7 +56,7 @@ struct StartUserParticipationAction {
     QString title;
     QStringList choices;
     std::chrono::seconds duration;
-    int pointsPerVote = 0;
+    uint pointsPerVote = 0;
 };
 
 std::ostream &operator<<(std::ostream &os, const IncompleteHelixUser &u);

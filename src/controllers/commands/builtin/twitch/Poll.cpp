@@ -55,13 +55,6 @@ QString createPoll(const CommandContext &ctx)
         return "";
     }
 
-    if (currentUser->getUserId() != ctx.twitchChannel->roomId())
-    {
-        ctx.channel->addSystemMessage("Only the broadcaster can create polls "
-                                      "due to Twitch restrictions.");
-        return "";
-    }
-
     const auto &poll = action.value();
     getHelix()->createPoll(
         poll.broadcasterId, poll.title, poll.choices, poll.duration,
