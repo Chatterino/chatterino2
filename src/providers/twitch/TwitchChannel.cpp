@@ -9,6 +9,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "messages/Emote.hpp"
@@ -42,6 +43,7 @@
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Functional.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
@@ -121,6 +123,8 @@ TwitchChannel::TwitchChannel(const QString &name)
     , seventvEmotes_(std::make_shared<EmoteMap>())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
+
+    this->emotes_ = std::make_unique<EmoteHolder>(this);
 
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.currentUserAboutToChange,
@@ -207,6 +211,8 @@ TwitchChannel::TwitchChannel(const QString &name)
                     result.error());
             }
         });
+
+    this->emotes_->initialize(*getApp()->getEmotes());
 
     // debugging
 #if 0
@@ -746,6 +752,7 @@ void TwitchChannel::roomIdChanged()
     this->refreshFFZChannelEmotes(false);
     this->refreshBTTVChannelEmotes(false);
     this->refreshSevenTVChannelEmotes(false);
+    this->emotes_->refresh(false);
     this->joinBttvChannel();
     this->listenSevenTVCosmetics();
     getApp()->getTwitchLiveController()->add(
