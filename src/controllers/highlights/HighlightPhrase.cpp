@@ -95,17 +95,17 @@ QPixmap HighlightPhrase::getType() const
 {
     if (this->getPattern() == "my phrase")
     {
-        return getResources().buttons.settings_darkMode;
+        return getResources().buttons.settings_darkMode.scaled(24, 24);
     }
 
     if (this->getPattern() == "user")
     {
-        return getResources().buttons.account_darkMode;
+        return getResources().buttons.account_darkMode.scaled(24, 24);
     }
 
     if (this->getPattern() == "badge")
     {
-        return getResources().buttons.vip;
+        return getResources().buttons.vip.scaled(24, 24);
     }
 
     return getResources().buttons.text;
@@ -167,3 +167,17 @@ const std::shared_ptr<QColor> HighlightPhrase::getColor() const
 }
 
 }  // namespace chatterino
+
+QDebug operator<<(QDebug dbg, const chatterino::HighlightData &v)
+{
+    dbg.nospace() << "HighlightData("
+                  << "name:" << v.name << ',' << "pattern:" << v.pattern << ','
+                  << "enabled:" << v.enabled << ','
+                  << "showInMentions:" << v.showInMentions << ','
+                  << "hasAlert:" << v.hasAlert << ','
+                  << "hasSound:" << v.hasSound << ',' << "isRegex:" << v.isRegex
+                  << ',' << "isCaseSensitive:" << v.isCaseSensitive << ','
+                  << "soundUrl:" << v.soundUrl << ')';
+
+    return dbg;
+}

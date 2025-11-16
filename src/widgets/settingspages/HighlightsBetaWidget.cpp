@@ -16,12 +16,15 @@
 
 namespace chatterino {
 
+using namespace Qt::StringLiterals;
+
 HighlightsBetaWidget::HighlightsBetaWidget()
 {
     auto *layout = new QVBoxLayout(this);
 
     // auto *model = new QStringListModel({"a", "b", "c"});
     auto *model = new HighlightBetaModel(this);
+    model->setObjectName("New Highlight Model");
     model->initialize(&getSettings()->highlightedMessages);
 
     QTableView *view = new QTableView(this);
@@ -55,39 +58,23 @@ HighlightsBetaWidget::HighlightsBetaWidget()
             // Open a dialog that references the model (qmodelindex?)
             // data that isn't directly
             qInfo() << "XXX: CONFIGURE HIGHLIGHT CUZ DOUBLE CLICK";
-            this->openConfigureDialog(clicked);
+            this->openConfigureDialog(view, clicked);
             return;
         });
 
     QObject::connect(
         view, &QTableView::clicked,
         [this, view, model](const QModelIndex &clicked) {
-            if (clicked.column() == HighlightBetaModel::Column::Color)
-            {
-                auto initial =
-                    model->data(clicked, Qt::DecorationRole).value<QColor>();
-
-                auto *dialog = new ColorPickerDialog(initial, this);
-                // TODO: The QModelIndex clicked is technically not safe to persist here since the model
-                // can be changed between the color dialog being created & the color dialog being closed
-                QObject::connect(dialog, &ColorPickerDialog::colorConfirmed,
-                                 this, [=](auto selected) {
-                                     if (selected.isValid())
-                                     {
-                                         model->setData(clicked, selected,
-                                                        Qt::DecorationRole);
-                                     }
-                                 });
-                dialog->show();
-                return;
-            }
-
             if (clicked.column() == HighlightBetaModel::Column::Configure)
             {
+                clicked.siblingAtColumn(0);
                 // Open a dialog that references the model (qmodelindex?)
                 // data that isn't directly
-                qInfo() << "XXX: CONFIGURE HIGHLIGHT";
-                this->openConfigureDialog(clicked);
+                qInfo() << "XXX: CONFIGURE HIGHLIGHT"
+                        << clicked.siblingAtColumn(0).data(
+                               HighlightBetaModel::DATA_ROLE);
+                auto *item = model->getItem(clicked.row(), clicked.column());
+                this->openConfigureDialog(view, clicked);
                 return;
             }
         });
@@ -103,7 +90,8 @@ HighlightsBetaWidget::HighlightsBetaWidget()
     layout->addWidget(view);
 }
 
-void HighlightsBetaWidget::openConfigureDialog(const QModelIndex &index)
+void HighlightsBetaWidget::openConfigureDialog(QTableView *view,
+                                               const QModelIndex &index)
 {
     if (this->configureDialog != nullptr)
     {
@@ -111,14 +99,36 @@ void HighlightsBetaWidget::openConfigureDialog(const QModelIndex &index)
         return;
     }
 
-    HighlightData data;  // TODO: fill this in based on the index
+    auto data =
+        index.siblingAtColumn(0)
+            .data(HighlightBetaModel::DATA_ROLE)
+            .value<HighlightData>();  // TODO: fill this in based on the index
 
-    qInfo() << "XXX: show?";
+    qInfo() << "XXX: show?" << data;
     this->configureDialog = new HighlightsBetaConfigureDialog(data, this);
     QObject::connect(this->configureDialog, &QWidget::destroyed, this, [this] {
         qInfo() << "XXX: closed";
         this->configureDialog = nullptr;
     });
+    QObject::connect(
+        this->configureDialog, &HighlightsBetaConfigureDialog::confirmed, this,
+        [this, index, view](HighlightData data) {
+            qInfo() << "XXX: confirmed" << data;
+            view->model()->setItemData(index.siblingAtColumn(HighlightBetaModel::Column::Sound),
+                                       {
+                                           {
+                                               HighlightBetaModel::DATA_ROLE,
+                                               QVariant::fromValue(data),
+                                           },
+                                       });
+            view->model()->setItemData(index.siblingAtColumn(0),
+                                       {
+                                           {
+                                               HighlightBetaModel::DATA_ROLE,
+                                               QVariant::fromValue(data),
+                                           },
+                                       });
+        });
 
     this->configureDialog->show();
 }

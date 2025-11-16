@@ -9,10 +9,37 @@
 #include <qlineedit.h>
 #include <qnamespace.h>
 #include <qtextedit.h>
+#include <QToolButton>
+#include "widgets/Label.hpp"
 
 namespace chatterino {
 
 using namespace Qt::StringLiterals;
+
+namespace {
+
+auto makeCheckbox(bool &value)
+{
+    auto *w = new QCheckBox();
+    w->setChecked(value);
+
+    QObject::connect(w, &QCheckBox::checkStateChanged, [&](auto checkstate) {
+        value = checkstate == Qt::CheckState::Checked;
+    });
+    return w;
+}
+
+auto makeLineEdit(QString &value)
+{
+    auto *w = new QLineEdit();
+    w->setText(value);
+    QObject::connect(w, &QLineEdit::textChanged, [&](const auto &newText) {
+        value = newText;
+    });
+    return w;
+}
+
+}  // namespace
 
 HighlightsBetaConfigureDialog::HighlightsBetaConfigureDialog(
     HighlightData _data, QWidget *parent)
@@ -27,6 +54,8 @@ HighlightsBetaConfigureDialog::HighlightsBetaConfigureDialog(
 {
     this->setWindowTitle(u"Chatterino - Highlight editor"_s);
     this->setAttribute(Qt::WA_DeleteOnClose);
+
+    this->resize(515, 600);
 
     auto *dialogLayout = new QVBoxLayout;
 
@@ -47,9 +76,12 @@ HighlightsBetaConfigureDialog::HighlightsBetaConfigureDialog(
 
     // this->setLayout(layout);
     auto *formLayout = new QFormLayout;
-    formLayout->addRow("Pattern", new QLineEdit());
+    formLayout->addRow("Name", makeLineEdit(this->data.name));
+    formLayout->addRow("Pattern", makeLineEdit(this->data.pattern));
 
     dialogLayout->addLayout(formLayout);
+
+    // TODO: Allow for customization of highlight color
 
     // TODO
     // Group of side effects
@@ -62,11 +94,31 @@ HighlightsBetaConfigureDialog::HighlightsBetaConfigureDialog(
         auto *group = new QGroupBox("Side effects");
 
         auto *l = new QFormLayout;
-        l->addRow("Show message in mentions", new QCheckBox());
-        l->addRow("Highlight message", new QCheckBox());
-        l->addRow("Flash taskbar", new QCheckBox());
-        l->addRow("Play sound", new QCheckBox());
-        l->addRow("Custom sound URL", new QLineEdit());
+        l->addRow("Show message in mentions",
+                  makeCheckbox(this->data.showInMentions));
+        // l->addRow("Highlight message", makeCheckbox(this->data.));
+        l->addRow("Enable regex", makeCheckbox(this->data.isRegex));
+        l->addRow("Case sensitive", makeCheckbox(this->data.isCaseSensitive));
+        l->addRow("Flash taskbar", makeCheckbox(this->data.hasAlert));
+        l->addRow("Play sound", makeCheckbox(this->data.hasSound));
+
+        {
+            auto *ll = new QHBoxLayout;
+
+            auto *label = new QLabel(this->data.soundUrl.toLocalFile());
+            ll->addWidget(label);
+
+            auto *edit = new QToolButton;
+            edit->setIcon(QIcon(":/buttons/edit.svg"));
+            ll->addWidget(edit);
+
+            auto *clear = new QToolButton;
+            clear->setIcon(QIcon(":/buttons/cancel.svg"));
+            ll->addWidget(clear);
+
+            l->addRow(new QLabel("Custom sound URL"));
+            l->addRow(ll);
+        }
 
         group->setLayout(l);
 
@@ -77,7 +129,7 @@ HighlightsBetaConfigureDialog::HighlightsBetaConfigureDialog(
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, [this] {
-        Q_EMIT this->confirmed(this->data);  // XD
+        Q_EMIT this->confirmed(this->data);
         this->close();
     });
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, this,

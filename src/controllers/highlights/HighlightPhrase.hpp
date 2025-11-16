@@ -5,6 +5,7 @@
 
 #include <pajlada/serialize.hpp>
 #include <QColor>
+#include <QDebug>
 #include <QRegularExpression>
 #include <QString>
 #include <QUrl>
@@ -195,3 +196,5 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
 // TODO: Confirm this is necessary for a stupid type
 Q_DECLARE_METATYPE(chatterino::HighlightData);
+
+QDebug operator<<(QDebug dbg, const chatterino::HighlightData &v);

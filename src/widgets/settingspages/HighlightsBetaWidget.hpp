@@ -3,6 +3,8 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <QModelIndex>
+#include <qstandarditemmodel.h>
+#include <qtableview.h>
 
 namespace chatterino {
 
@@ -14,7 +16,7 @@ public:
     HighlightsBetaWidget();
 
 private:
-    void openConfigureDialog(const QModelIndex &index);
+    void openConfigureDialog(QTableView *view, const QModelIndex &index);
 
     HighlightsBetaConfigureDialog *configureDialog = nullptr;
 };
