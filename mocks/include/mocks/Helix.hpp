@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <chrono>
 #include <functional>
 #include <vector>
 
@@ -431,7 +432,7 @@ public:
     // create poll
     MOCK_METHOD(void, createPoll,
                 (QString broadcasterID, QString title, QStringList choices,
-                 const int duration, const int pointsPerVote,
+                 std::chrono::seconds duration, const int pointsPerVote,
                  ResultCallback<> successCallback,
                  FailureCallback<QString> failureCallback),
                 (override));
@@ -439,7 +440,8 @@ public:
     // create prediction
     MOCK_METHOD(void, createPrediction,
                 (QString broadcasterID, QString title, QStringList outcomes,
-                 const int duration, ResultCallback<> successCallback,
+                 std::chrono::seconds duration,
+                 ResultCallback<> successCallback,
                  FailureCallback<QString> failureCallback),
                 (override));
 

@@ -6,6 +6,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <chrono>
 #include <ostream>
 #include <tuple>
 #include <vector>
@@ -54,7 +55,7 @@ struct StartUserParticipationAction {
     QString broadcasterId;
     QString title;
     QStringList choices;
-    int duration = 0;
+    std::chrono::seconds duration;
     int pointsPerVote = 0;
 };
 
@@ -69,6 +70,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
 
 ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
-    int minDuration, int maxDuration, int maxTitleLength, int maxChoices);
+    std::chrono::seconds minDuration, std::chrono::seconds maxDuration,
+    int maxTitleLength, int maxChoices);
 
 }  // namespace chatterino::commands

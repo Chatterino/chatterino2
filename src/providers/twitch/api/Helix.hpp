@@ -16,6 +16,7 @@
 #include <QUrl>
 #include <QUrlQuery>
 
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <unordered_set>
@@ -1213,13 +1214,14 @@ public:
 
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     virtual void createPoll(QString broadcasterID, QString title,
-                            QStringList choices, int duration,
+                            QStringList choices, std::chrono::seconds duration,
                             int pointsPerVote, ResultCallback<> successCallback,
                             FailureCallback<QString> failureCallback) = 0;
 
     /// https://dev.twitch.tv/docs/api/reference#create-prediction
     virtual void createPrediction(QString broadcasterID, QString title,
-                                  QStringList choices, int duration,
+                                  QStringList choices,
+                                  std::chrono::seconds duration,
                                   ResultCallback<> successCallback,
                                   FailureCallback<QString> failureCallback) = 0;
 
@@ -1580,13 +1582,13 @@ public:
 
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     void createPoll(QString broadcasterID, QString title, QStringList choices,
-                    int duration, int pointsPerVote,
+                    std::chrono::seconds duration, int pointsPerVote,
                     ResultCallback<> successCallback,
                     FailureCallback<QString> failureCallback) final;
 
     /// https://dev.twitch.tv/docs/api/reference#create-prediction
     void createPrediction(QString broadcasterID, QString title,
-                          QStringList outcomes, int duration,
+                          QStringList outcomes, std::chrono::seconds duration,
                           ResultCallback<> successCallback,
                           FailureCallback<QString> failureCallback) final;
 

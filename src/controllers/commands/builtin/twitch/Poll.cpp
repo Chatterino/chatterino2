@@ -9,12 +9,14 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include <chrono>
+
 namespace {
 
 using namespace chatterino;
 
-constexpr int MIN_POLL_DURATION = 15;    // seconds
-constexpr int MAX_POLL_DURATION = 1800;  // seconds
+constexpr auto MIN_POLL_DURATION = std::chrono::seconds(10);
+constexpr auto MAX_POLL_DURATION = std::chrono::seconds(1800);
 constexpr int MAX_POLL_TITLE_LENGTH = 60;
 constexpr int MAX_POLL_CHOICES = 5;
 

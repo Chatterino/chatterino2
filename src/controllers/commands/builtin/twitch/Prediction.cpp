@@ -9,12 +9,14 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include <chrono>
+
 namespace {
 
 using namespace chatterino;
 
-constexpr int MIN_PREDICT_DURATION = 30;    // seconds
-constexpr int MAX_PREDICT_DURATION = 1800;  // seconds
+constexpr auto MIN_PREDICT_DURATION = std::chrono::seconds(30);
+constexpr auto MAX_PREDICT_DURATION = std::chrono::seconds(1800);
 constexpr int MAX_PREDICT_TITLE_LENGTH = 45;
 constexpr int MAX_PREDICT_CHOICES = 10;
 

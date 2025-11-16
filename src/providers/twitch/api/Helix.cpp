@@ -3219,7 +3219,7 @@ void Helix::getFollowedChannel(
 }
 
 void Helix::createPoll(QString broadcasterID, QString title,
-                       QStringList choices, const int duration,
+                       QStringList choices, const std::chrono::seconds duration,
                        const int pointsPerVote,
                        ResultCallback<> successCallback,
                        FailureCallback<QString> failureCallback)
@@ -3233,7 +3233,7 @@ void Helix::createPoll(QString broadcasterID, QString title,
 
     QJsonObject json{{{"broadcaster_id", broadcasterID},
                       {"title", title},
-                      {"duration", duration},
+                      {"duration", static_cast<int>(duration.count())},
                       {"choices", choiceArray}}};
 
     if (pointsPerVote > 0)
@@ -3277,7 +3277,8 @@ void Helix::createPoll(QString broadcasterID, QString title,
 }
 
 void Helix::createPrediction(const QString broadcasterID, const QString title,
-                             QStringList outcomes, const int duration,
+                             QStringList outcomes,
+                             const std::chrono::seconds duration,
                              ResultCallback<> successCallback,
                              FailureCallback<QString> failureCallback)
 {
@@ -3291,7 +3292,7 @@ void Helix::createPrediction(const QString broadcasterID, const QString title,
     QJsonObject payload;
     payload.insert("broadcaster_id", broadcasterID);
     payload.insert("title", title);
-    payload.insert("prediction_window", duration);
+    payload.insert("prediction_window", static_cast<int>(duration.count()));
     payload.insert("outcomes", outcomeArray);
 
     // Execute API call

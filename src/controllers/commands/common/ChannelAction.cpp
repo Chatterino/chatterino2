@@ -184,7 +184,8 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
 
 ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
-    const int minDuration, const int maxDuration, const int maxTitleLength,
+    const std::chrono::seconds minDuration,
+    const std::chrono::seconds maxDuration, const int maxTitleLength,
     const int maxChoices)
 {
     if (ctx.twitchChannel == nullptr)
@@ -232,6 +233,13 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     {
         return makeUnexpected("Missing duration - " % usage);
     }
+    const auto dur = parseDurationToSeconds(parser.value(durationOption));
+    if (dur <= 0)
+    {
+        return makeUnexpected("Invalid duration - " % usage);
+    }
+    const auto duration =
+        std::clamp(std::chrono::seconds(dur), minDuration, maxDuration);
 
     if (!parser.isSet(choiceOption))
     {
@@ -256,17 +264,8 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
         .broadcasterId = ctx.twitchChannel->roomId(),
         .title = title,
         .choices = choices,
-        .duration = 0,
-        .pointsPerVote = 0,
+        .duration = duration,
     };
-
-    const auto dur = parseDurationToSeconds(parser.value(durationOption));
-    if (dur <= 0)
-    {
-        return makeUnexpected("Invalid duration - " % usage);
-    }
-    action.duration =
-        std::clamp(static_cast<int>(dur), minDuration, maxDuration);
 
     if (parser.isSet(pointsOption))
     {
