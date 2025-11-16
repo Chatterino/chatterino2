@@ -92,6 +92,7 @@ isgkm | https://github.com/isgkm |
 otaviobia | https://github.com/otaviobia | :/avatars/otaviobia.png
 obertura777 | https://github.com/obertura777 | :/avatars/obertura777.png
 Supa | https://github.com/0Supa | :/avatars/supa.jpg
+devPoland | https://github.com/devPoland | :/avatars/devpoland.png
 
 # If you are a contributor add yourself above this line
 
