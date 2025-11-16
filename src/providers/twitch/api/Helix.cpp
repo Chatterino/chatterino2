@@ -3220,7 +3220,7 @@ void Helix::getFollowedChannel(
 
 void Helix::createPoll(QString broadcasterID, QString title,
                        QStringList choices, const std::chrono::seconds duration,
-                       const int pointsPerVote,
+                       const uint pointsPerVote,
                        ResultCallback<> successCallback,
                        FailureCallback<QString> failureCallback)
 {
@@ -3239,7 +3239,7 @@ void Helix::createPoll(QString broadcasterID, QString title,
     if (pointsPerVote > 0)
     {
         json["channel_points_voting_enabled"] = true;
-        json["channel_points_per_vote"] = pointsPerVote;
+        json["channel_points_per_vote"] = static_cast<qint64>(pointsPerVote);
     }
 
     // Execute API call
