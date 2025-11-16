@@ -783,14 +783,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 parseTagString(messageText), tags,
                 calculateMessageTime(message).time(), channel);
 
-            if (msgType == "viewermilestone")
-            {
-                msg->flags.set(MessageFlag::WatchStreak);
-            }
-            else
-            {
-                msg->flags.set(MessageFlag::Subscription);
-            }
+            msg->flags.set(MessageFlag::Subscription);
 
             if (mirrored)
             {
