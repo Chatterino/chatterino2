@@ -2,6 +2,7 @@
 
 #include <nonstd/expected.hpp>
 #include <QString>
+#include <QStringList>
 
 #include <ostream>
 #include <tuple>

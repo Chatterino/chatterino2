@@ -60,7 +60,7 @@ QString createPoll(const CommandContext &ctx)
         return "";
     }
 
-    auto poll = action.value();
+    const auto &poll = action.value();
     getHelix()->createPoll(
         poll.broadcasterId, poll.title, poll.choices, poll.duration,
         poll.pointsPerVote,
