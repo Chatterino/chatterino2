@@ -200,7 +200,7 @@ nonstd::expected<StartUserParticipationAction, QString>
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.setOptionsAfterPositionalArgumentsMode(
         QCommandLineParser::ParseAsOptions);
-    QCommandLineOption titleOption(QStringList() << "t" << "title",
+    QCommandLineOption titleOption({"t", "title"},
                                    "The title of the " % command, "title");
     QCommandLineOption durationOption(QStringList() << "d" << "duration",
                                       "The duration of the " % command,
