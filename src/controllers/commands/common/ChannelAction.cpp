@@ -182,17 +182,16 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     return actions;
 }
 
-nonstd::expected<StartUserParticipationAction, QString>
-    parseUserParticipationAction(const CommandContext &ctx,
-                                 const QString &command, const QString &usage,
-                                 const int minDuration, const int maxDuration,
-                                 const int maxTitleLength, const int maxChoices)
+ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
+    const CommandContext &ctx, const QString &command, const QString &usage,
+    const int minDuration, const int maxDuration, const int maxTitleLength,
+    const int maxChoices)
 {
     if (ctx.twitchChannel == nullptr)
     {
         // This action must be performed with a twitch channel as a context
-        return nonstd::make_unexpected(
-            "The " % command % " command only works in Twitch channels");
+        return makeUnexpected("The " % command %
+                              " command only works in Twitch channels");
     }
 
     // Define arguments
@@ -221,34 +220,34 @@ nonstd::expected<StartUserParticipationAction, QString>
     // Input validation
     if (!parser.isSet(titleOption))
     {
-        return nonstd::make_unexpected("Missing title - " % usage);
+        return makeUnexpected("Missing title - " % usage);
     }
     const auto title = parser.value(titleOption);
     if (title.isEmpty() || title.length() > maxTitleLength)
     {
-        return nonstd::make_unexpected("Invalid title length - " % usage);
+        return makeUnexpected("Invalid title length - " % usage);
     }
 
     if (!parser.isSet(durationOption))
     {
-        return nonstd::make_unexpected("Missing duration - " % usage);
+        return makeUnexpected("Missing duration - " % usage);
     }
 
     if (!parser.isSet(choiceOption))
     {
-        return nonstd::make_unexpected("Missing choices - " % usage);
+        return makeUnexpected("Missing choices - " % usage);
     }
     const auto choices = parser.values(choiceOption);
     if (choices.size() < 2 || choices.size() > maxChoices)
     {
-        return nonstd::make_unexpected("Invalid choice count - " % usage);
+        return makeUnexpected("Invalid choice count - " % usage);
     }
     for (const auto &choice : choices)
     {
         if (choice.length() > 25)
         {
-            return nonstd::make_unexpected(
-                "Choice cannot exceed 25 characters: " % choice);
+            return makeUnexpected("Choice cannot exceed 25 characters: " %
+                                  choice);
         }
     }
 
@@ -264,7 +263,7 @@ nonstd::expected<StartUserParticipationAction, QString>
     const auto dur = parseDurationToSeconds(parser.value(durationOption));
     if (dur <= 0)
     {
-        return nonstd::make_unexpected("Invalid duration - " % usage);
+        return makeUnexpected("Invalid duration - " % usage);
     }
     action.duration =
         std::clamp(static_cast<int>(dur), minDuration, maxDuration);
@@ -275,7 +274,7 @@ nonstd::expected<StartUserParticipationAction, QString>
         const int points = parser.value(pointsOption).toInt(&validPoints);
         if (!validPoints)
         {
-            return nonstd::make_unexpected("Invalid points - " % usage);
+            return makeUnexpected("Invalid points - " % usage);
         }
         action.pointsPerVote = std::clamp(points, 0, 1000000);
     }

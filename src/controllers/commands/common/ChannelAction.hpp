@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Expected.hpp"
+
 #include <nonstd/expected.hpp>
 #include <QString>
 #include <QStringList>
@@ -65,10 +67,8 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     bool withDuration, bool withReason);
 
-nonstd::expected<StartUserParticipationAction, QString>
-    parseUserParticipationAction(const CommandContext &ctx,
-                                 const QString &command, const QString &usage,
-                                 int minDuration, int maxDuration,
-                                 int maxTitleLength, int maxChoices);
+ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
+    const CommandContext &ctx, const QString &command, const QString &usage,
+    int minDuration, int maxDuration, int maxTitleLength, int maxChoices);
 
 }  // namespace chatterino::commands
