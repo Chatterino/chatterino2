@@ -527,11 +527,9 @@ public:
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
     BoolSetting enableWatchStreakHighlight = {
-        "/highlighting/watchStreakHighlight/highlighted", true
-    };
+        "/highlighting/watchStreak/enabled", true};
     QStringSetting watchStreakHighlightColor = {
-        "/highlighting/watchStreakHighlightColor", ""
-    };
+        "/highlighting/watchStreak/color", ""};
 
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
