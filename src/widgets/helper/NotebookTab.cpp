@@ -127,7 +127,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
     this->menu_.addMenu(closeMultipleTabsMenu_);
 
-    closeMultipleTabsMenu_->addAction("Close All Tabs", [this]() {
+    closeMultipleTabsMenu_->addAction("Close All Visible Tabs", [this]() {
         while (this->notebook_->getPageCount() > 0)
         {
             this->notebook_->removePage(this->notebook_->getPageAt(0));
@@ -135,7 +135,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     });
 
     this->closeTabsToLeftAction_ =
-        this->closeMultipleTabsMenu_->addAction("Close Left", [this]() {
+        this->closeMultipleTabsMenu_->addAction("Close Visible Tabs to Left", [this]() {
             while (this->notebook_->getPageAt(0) != this->page)
             {
                 this->notebook_->removePage(this->notebook_->getPageAt(0));
@@ -143,7 +143,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
         });
 
     this->closeTabsToRightAction_ =
-        this->closeMultipleTabsMenu_->addAction("Close Right", [this]() {
+        this->closeMultipleTabsMenu_->addAction("Close Visible Tabs to Right", [this]() {
             for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
             {
                 auto *p = this->notebook_->getPageAt(i);
@@ -158,7 +158,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
             }
         });
 
-    this->closeMultipleTabsMenu_->addAction("Close Other Tabs", [this]() {
+    this->closeMultipleTabsMenu_->addAction("Close Other Visible Tabs", [this]() {
         for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
         {
             auto *p = this->notebook_->getPageAt(i);
