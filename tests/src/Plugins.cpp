@@ -973,6 +973,45 @@ TEST_F(PluginTest, ChannelAddMessage)
     ASSERT_EQ(added[5].first, logged[2]);
 }
 
+TEST_F(PluginTest, LuaUnwind)
+{
+    configure();
+
+    size_t i = 0;
+    lua->set_function(
+        "do_something",
+        [&](sol::this_state state, bool should_error, bool use_lua_error) {
+            auto g = qScopeGuard([&] {
+                ++i;
+            });
+            if (should_error)
+            {
+                if (use_lua_error)
+                {
+                    luaL_error(state.lua_state(), "My message");
+                }
+                else
+                {
+                    throw std::runtime_error("My message");
+                }
+            }
+        });
+
+    ASSERT_EQ(i, 0);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, false)").valid());
+    ASSERT_EQ(i, 1);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, true)").valid());
+    ASSERT_EQ(i, 2);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, false)").valid());
+    ASSERT_EQ(i, 3);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, true)").valid());
+    ASSERT_EQ(i, 4);
+}
+
 class PluginMessageConstructionTest
     : public PluginTest,
       public ::testing::WithParamInterface<QString>
