@@ -134,16 +134,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
-    this->closeTabsToLeftAction_ =
-        this->closeMultipleTabsMenu_->addAction("Close Visible Tabs to Left", [this]() {
+    this->closeTabsToLeftAction_ = this->closeMultipleTabsMenu_->addAction(
+        "Close Visible Tabs to Left", [this]() {
             while (this->notebook_->getPageAt(0) != this->page)
             {
                 this->notebook_->removePage(this->notebook_->getPageAt(0));
             }
         });
 
-    this->closeTabsToRightAction_ =
-        this->closeMultipleTabsMenu_->addAction("Close Visible Tabs to Right", [this]() {
+    this->closeTabsToRightAction_ = this->closeMultipleTabsMenu_->addAction(
+        "Close Visible Tabs to Right", [this]() {
             for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
             {
                 auto *p = this->notebook_->getPageAt(i);
@@ -158,16 +158,17 @@ NotebookTab::NotebookTab(Notebook *notebook)
             }
         });
 
-    this->closeMultipleTabsMenu_->addAction("Close Other Visible Tabs", [this]() {
-        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
-        {
-            auto *p = this->notebook_->getPageAt(i);
-            if (p != this->page)
+    this->closeMultipleTabsMenu_->addAction(
+        "Close Other Visible Tabs", [this]() {
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
             {
-                this->notebook_->removePage(p);
+                auto *p = this->notebook_->getPageAt(i);
+                if (p != this->page)
+                {
+                    this->notebook_->removePage(p);
+                }
             }
-        }
-    });
+        });
 
     this->menu_.addAction(
         "Popup Tab",
