@@ -128,44 +128,76 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->menu_.addMenu(closeMultipleTabsMenu_);
 
     closeMultipleTabsMenu_->addAction("Close All Visible Tabs", [this]() {
-        while (this->notebook_->getPageCount() > 0)
+        auto reply = QMessageBox::question(
+            this, "Close All Visible Tabs",
+            "Are you sure you want to close all visible tabs?",
+            QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes)
         {
-            this->notebook_->removePage(this->notebook_->getPageAt(0));
+            while (this->notebook_->getPageCount() > 0)
+            {
+                this->notebook_->removePage(this->notebook_->getPageAt(0));
+            }
         }
     });
 
     this->closeTabsToLeftAction_ = this->closeMultipleTabsMenu_->addAction(
         "Close Visible Tabs to Left", [this]() {
-            while (this->notebook_->getPageAt(0) != this->page)
+            auto reply = QMessageBox::question(
+                this, "Close Visible Tabs to Left",
+                "Are you sure you want to close all visible tabs to the left?",
+                QMessageBox::Yes | QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Yes)
             {
-                this->notebook_->removePage(this->notebook_->getPageAt(0));
+                while (this->notebook_->getPageAt(0) != this->page)
+                {
+                    this->notebook_->removePage(this->notebook_->getPageAt(0));
+                }
             }
         });
 
     this->closeTabsToRightAction_ = this->closeMultipleTabsMenu_->addAction(
         "Close Visible Tabs to Right", [this]() {
-            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            auto reply = QMessageBox::question(
+                this, "Close Visible Tabs to Right",
+                "Are you sure you want to close all visible tabs to the right?",
+                QMessageBox::Yes | QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Yes)
             {
-                auto *p = this->notebook_->getPageAt(i);
-                if (p != this->page)
+                for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
                 {
-                    this->notebook_->removePage(p);
-                }
-                else
-                {
-                    break;
+                    auto *p = this->notebook_->getPageAt(i);
+                    if (p != this->page)
+                    {
+                        this->notebook_->removePage(p);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
         });
 
     this->closeMultipleTabsMenu_->addAction(
         "Close Other Visible Tabs", [this]() {
-            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            auto reply = QMessageBox::question(
+                this, "Close Other Visible Tabs",
+                "Are you sure you want to close all other visible tabs?",
+                QMessageBox::Yes | QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Yes)
             {
-                auto *p = this->notebook_->getPageAt(i);
-                if (p != this->page)
+                for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
                 {
-                    this->notebook_->removePage(p);
+                    auto *p = this->notebook_->getPageAt(i);
+                    if (p != this->page)
+                    {
+                        this->notebook_->removePage(p);
+                    }
                 }
             }
         });
