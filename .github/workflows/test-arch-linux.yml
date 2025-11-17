@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.11
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
 
@@ -28,9 +28,8 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo pacman -Sy
-          sudo pacman -S --noconfirm 'qt6-base' 'qt6-tools' 'boost-libs' 'openssl' 'qt6-imageformats' 'qtkeychain-qt6' 'qt6-svg' 'libnotify'
-          sudo pacman -S --noconfirm 'git' 'boost' 'cmake' 'benchmark'
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm qt6-base qt6-tools boost-libs qt6-imageformats qtkeychain-qt6 qt6-svg libnotify git boost cmake benchmark
 
       - uses: actions/checkout@v5
         with:

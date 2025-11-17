@@ -23,6 +23,7 @@ public:
             settingsFile.flush();
             settingsFile.close();
         }
+        this->paths_.settingsDirectory = this->settingsDir.path();
     }
 
     ~EmptyApplication() override = default;
