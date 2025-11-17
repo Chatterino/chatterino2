@@ -47,6 +47,7 @@
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
 - Dev: Set settings directory to temporary one used in tests. (#6584)
+- Dev: Check Lua unwinding and version in tests. (#6586)
 
 ## 2.5.4
 
