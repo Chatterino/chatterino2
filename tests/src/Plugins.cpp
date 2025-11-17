@@ -973,6 +973,7 @@ TEST_F(PluginTest, ChannelAddMessage)
     ASSERT_EQ(added[5].first, logged[2]);
 }
 
+/// Test that both C++ exceptions and luaL_error properly unwind the stack.
 TEST_F(PluginTest, LuaUnwind)
 {
     configure();
@@ -1010,6 +1011,19 @@ TEST_F(PluginTest, LuaUnwind)
 
     ASSERT_FALSE(lua->do_string("do_something(true, true)").valid());
     ASSERT_EQ(i, 4);
+}
+
+/// Test that we're running with the Lua version we're compiled against.
+TEST_F(PluginTest, LuaVersion)
+{
+    configure();
+
+    lua->set_function("check_it", [](sol::this_state state) {
+        luaL_checkversion(state.lua_state());
+    });
+    ASSERT_TRUE(lua->script("check_it()").valid());
+
+    static_assert(LUA_VERSION_NUM >= 504);
 }
 
 class PluginMessageConstructionTest
