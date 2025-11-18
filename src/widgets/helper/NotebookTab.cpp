@@ -135,9 +135,26 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
         if (reply == QMessageBox::Yes)
         {
-            while (this->notebook_->getPageCount() > 0)
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
             {
-                this->notebook_->removePage(this->notebook_->getPageAt(0));
+                auto *page = this->notebook_->getPageAt(i);
+
+                auto *container = dynamic_cast<SplitContainer *>(page);
+                if (!container)
+                {
+                    continue;
+                }
+
+                auto *tab = container->getTab();
+                if (!tab)
+                {
+                    continue;
+                }
+
+                if (tab->isVisible())
+                {
+                    this->notebook_->removePage(page);
+                }
             }
         }
     });
@@ -151,9 +168,33 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
             if (reply == QMessageBox::Yes)
             {
-                while (this->notebook_->getPageAt(0) != this->page)
+                std::vector<QWidget *> pagesToRemove;
+                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
                 {
-                    this->notebook_->removePage(this->notebook_->getPageAt(0));
+                    auto *page = this->notebook_->getPageAt(i);
+                    if (page == this->page)
+                    {
+                        break;
+                    }
+
+                    auto *container = dynamic_cast<SplitContainer *>(page);
+                    if (!container)
+                    {
+                        continue;
+                    }
+
+                    auto *tab = container->getTab();
+                    if (!tab || !tab->isVisible())
+                    {
+                        continue;
+                    }
+
+                    pagesToRemove.push_back(page);
+                }
+
+                for (auto *page : pagesToRemove)
+                {
+                    this->notebook_->removePage(page);
                 }
             }
         });
@@ -170,14 +211,30 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
                 {
                     auto *p = this->notebook_->getPageAt(i);
-                    if (p != this->page)
-                    {
-                        this->notebook_->removePage(p);
-                    }
-                    else
+
+                    if (p == this->page)
                     {
                         break;
                     }
+
+                    auto *container = dynamic_cast<SplitContainer *>(p);
+                    if (!container)
+                    {
+                        continue;
+                    }
+
+                    auto *tab = container->getTab();
+                    if (!tab)
+                    {
+                        continue;
+                    }
+
+                    if (!tab->isVisible())
+                    {
+                        continue;
+                    }
+
+                    this->notebook_->removePage(p);
                 }
             }
         });
@@ -194,7 +251,24 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
                 {
                     auto *p = this->notebook_->getPageAt(i);
-                    if (p != this->page)
+                    if (p == this->page)
+                    {
+                        continue;
+                    }
+
+                    auto *container = dynamic_cast<SplitContainer *>(p);
+                    if (!container)
+                    {
+                        continue;
+                    }
+
+                    auto *tab = container->getTab();
+                    if (!tab)
+                    {
+                        continue;
+                    }
+
+                    if (tab->isVisible())
                     {
                         this->notebook_->removePage(p);
                     }
