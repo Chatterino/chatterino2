@@ -48,6 +48,7 @@
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
 - Dev: Set settings directory to temporary one used in tests. (#6584)
 - Dev: Check Lua unwinding and version in tests. (#6586)
+- Dev: Added options to close multiple visible tabs. (#6515)
 
 ## 2.5.4
 
