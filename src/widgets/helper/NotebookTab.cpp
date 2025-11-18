@@ -146,15 +146,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 }
 
                 auto *tab = container->getTab();
-                if (!tab)
+                if (!tab || !tab->isVisible())
                 {
                     continue;
                 }
 
-                if (tab->isVisible())
-                {
-                    this->notebook_->removePage(page);
-                }
+                this->notebook_->removePage(page);
             }
         }
     });
@@ -211,7 +208,6 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
                 {
                     auto *p = this->notebook_->getPageAt(i);
-
                     if (p == this->page)
                     {
                         break;
@@ -224,12 +220,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
                     }
 
                     auto *tab = container->getTab();
-                    if (!tab)
-                    {
-                        continue;
-                    }
-
-                    if (!tab->isVisible())
+                    if (!tab || !tab->isVisible())
                     {
                         continue;
                     }
@@ -263,15 +254,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
                     }
 
                     auto *tab = container->getTab();
-                    if (!tab)
+                    if (!tab || !tab->isVisible())
                     {
                         continue;
                     }
 
-                    if (tab->isVisible())
-                    {
-                        this->notebook_->removePage(p);
-                    }
+                    this->notebook_->removePage(p);
                 }
             }
         });
@@ -1062,15 +1050,38 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
                 this->menu_.popup(event->globalPosition().toPoint() +
                                   QPoint(0, 8));
 
-                this->closeMultipleTabsMenu_->setEnabled(
-                    this->notebook_->getPageCount() > 1);
+                std::vector<NotebookTab *> visibleTabs;
+                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
+                {
+                    auto *page = this->notebook_->getPageAt(i);
+                    if (auto *container = dynamic_cast<SplitContainer *>(page))
+                    {
+                        if (auto *tab = container->getTab();
+                            tab && tab->isVisible())
+                        {
+                            visibleTabs.push_back(tab);
+                        }
+                    }
+                }
 
-                const int tabIndex =
-                    this->notebook_->visibleIndexOf(this->page);
+                const int visibleTabCount = int(visibleTabs.size());
 
-                this->closeTabsToLeftAction_->setEnabled(tabIndex > 0);
+                int visibleTabIndex = -1;
+                for (int i = 0; i < visibleTabCount; ++i)
+                {
+                    if (visibleTabs[size_t(i)] == this)
+                    {
+                        visibleTabIndex = i;
+                        break;
+                    }
+                }
+
+                this->closeMultipleTabsMenu_->setEnabled(visibleTabCount > 1);
+
+                this->closeTabsToLeftAction_->setEnabled(visibleTabIndex > 0);
                 this->closeTabsToRightAction_->setEnabled(
-                    tabIndex < this->notebook_->getPageCount() - 1);
+                    visibleTabIndex != -1 &&
+                    visibleTabIndex < (visibleTabCount - 1));
             }
             break;
             default:;
