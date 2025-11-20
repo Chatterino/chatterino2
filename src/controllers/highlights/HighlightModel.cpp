@@ -259,6 +259,24 @@ void HighlightModel::afterInit()
     setColorItem(automodRow[Column::Color], *automodColor, false);
 
     this->insertCustomRow(automodRow, HighlightRowIndexes::AutomodRow);
+
+    std::vector<QStandardItem *> watchStreakRow = this->createRow();
+    setBoolItem(watchStreakRow[Column::Pattern],
+                getSettings()->enableWatchStreakHighlight.getValue(), true,
+                false);
+    watchStreakRow[Column::Pattern]->setData("Watch Streaks", Qt::DisplayRole);
+    watchStreakRow[Column::ShowInMentions]->setFlags({});
+    watchStreakRow[Column::FlashTaskbar]->setFlags({});
+    watchStreakRow[Column::PlaySound]->setFlags({});
+    watchStreakRow[Column::UseRegex]->setFlags({});
+    watchStreakRow[Column::CaseSensitive]->setFlags({});
+    watchStreakRow[Column::SoundPath]->setFlags(Qt::NoItemFlags);
+
+    auto watchStreakColor =
+        ColorProvider::instance().color(ColorType::WatchStreak);
+    setColorItem(watchStreakRow[Column::Color], *watchStreakColor, false);
+
+    this->insertCustomRow(watchStreakRow, HighlightRowIndexes::WatchStreakRow);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -282,6 +300,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
                     getSettings()->enableSubHighlight.setValue(value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::WatchStreakRow)
+                {
+                    getSettings()->enableWatchStreakHighlight.setValue(
+                        value.toBool());
                 }
                 else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
@@ -488,6 +511,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 {
                     setColor(getSettings()->subHighlightColor,
                              ColorType::Subscription);
+                }
+                else if (rowIndex == HighlightRowIndexes::WatchStreakRow)
+                {
+                    setColor(getSettings()->watchStreakHighlightColor,
+                             ColorType::WatchStreak);
                 }
                 else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {

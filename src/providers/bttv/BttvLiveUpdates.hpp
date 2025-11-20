@@ -1,25 +1,28 @@
 #pragma once
 
-#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
-#include "providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp"
-#include "providers/liveupdates/BasicPubSubManager.hpp"
-#include "util/QStringHash.hpp"
-
 #include <pajlada/signals/signal.hpp>
+#include <QString>
 
-#include <unordered_set>
+#include <memory>
 
 namespace chatterino {
 
-class BttvLiveUpdates : public BasicPubSubManager<BttvLiveUpdateSubscription>
+namespace liveupdates {
+struct Diag;
+}  // namespace liveupdates
+
+struct BttvLiveUpdateEmoteUpdateAddMessage;
+struct BttvLiveUpdateEmoteRemoveMessage;
+
+class BttvLiveUpdatesPrivate;
+class BttvLiveUpdates
 {
     template <typename T>
-    using Signal =
-        pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
+    using Signal = pajlada::Signals::Signal<T>;
 
 public:
     BttvLiveUpdates(QString host);
-    ~BttvLiveUpdates() override;
+    ~BttvLiveUpdates();
 
     struct {
         Signal<BttvLiveUpdateEmoteUpdateAddMessage> emoteAdded;
@@ -44,15 +47,19 @@ public:
      */
     void partChannel(const QString &id);
 
-protected:
-    void onMessage(
-        websocketpp::connection_hdl hdl,
-        BasicPubSubManager<BttvLiveUpdateSubscription>::WebsocketMessagePtr msg)
-        override;
+    /// Stop the manager
+    ///
+    /// Used in tests to check that connections are closed (through #diag()).
+    /// Otherwise, calling the destructor is sufficient.
+    void stop();
+
+    /// Statistics about the opened/closed connections and received messages
+    ///
+    /// Used in tests.
+    const liveupdates::Diag &diag() const;
 
 private:
-    // Contains all joined Twitch channel-ids
-    std::unordered_set<QString> joinedChannels_;
+    std::unique_ptr<BttvLiveUpdatesPrivate> private_;
 };
 
 }  // namespace chatterino

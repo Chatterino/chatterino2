@@ -1,3 +1,4 @@
+#include "mocks/BaseApplication.hpp"
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
 #include "Test.hpp"
@@ -6,6 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
+#include <QtCore/qtestsupport_core.h>
 
 #include <deque>
 #include <mutex>
@@ -13,6 +15,8 @@
 
 using namespace chatterino;
 using namespace std::chrono_literals;
+
+namespace {
 
 struct DummySubscription {
     int type;
@@ -54,6 +58,8 @@ struct DummySubscription {
     }
 };
 
+}  // namespace
+
 namespace std {
 template <>
 struct hash<DummySubscription> {
@@ -64,7 +70,24 @@ struct hash<DummySubscription> {
 };
 }  // namespace std
 
-class MyManager : public BasicPubSubManager<DummySubscription>
+namespace {
+
+class MyManager;
+class MyClient : public BasicPubSubClient<DummySubscription>
+{
+public:
+    MyClient(MyManager &manager)
+        : manager(manager)
+    {
+    }
+
+    void onMessage(const QByteArray &msg) /* override */;
+
+private:
+    MyManager &manager;
+};
+
+class MyManager : public BasicPubSubManager<MyManager, MyClient>
 {
 public:
     MyManager(QString host)
@@ -97,33 +120,34 @@ public:
         this->unsubscribe(sub);
     }
 
-protected:
-    void onMessage(
-        websocketpp::connection_hdl /*hdl*/,
-        BasicPubSubManager<DummySubscription>::WebsocketMessagePtr msg) override
+    std::shared_ptr<MyClient> makeClient()
     {
-        std::lock_guard<std::mutex> guard(this->messageMtx_);
-        this->messagesReceived.fetch_add(1, std::memory_order_acq_rel);
-        this->messageQueue_.emplace_back(
-            QString::fromStdString(msg->get_payload()));
+        return std::make_shared<MyClient>(*this);
     }
 
 private:
     std::mutex messageMtx_;
     std::deque<QString> messageQueue_;
+
+    friend MyClient;
 };
+
+void MyClient::onMessage(const QByteArray &msg)
+{
+    std::lock_guard<std::mutex> guard(this->manager.messageMtx_);
+    this->manager.messagesReceived.fetch_add(1, std::memory_order_acq_rel);
+    this->manager.messageQueue_.emplace_back(QString::fromUtf8(msg));
+}
+
+}  // namespace
 
 TEST(BasicPubSub, SubscriptionCycle)
 {
+    mock::BaseApplication app;
     const QString host("wss://127.0.0.1:9050/liveupdates/sub-unsub");
     MyManager manager(host);
-    manager.start();
-
-    std::this_thread::sleep_for(50ms);
     manager.sub({1, "foo"});
-    std::this_thread::sleep_for(500ms);
-
-    ASSERT_EQ(manager.diag.connectionsOpened, 1);
+    QTest::qWait(500);
     ASSERT_EQ(manager.diag.connectionsClosed, 0);
     ASSERT_EQ(manager.diag.connectionsFailed, 0);
     ASSERT_EQ(manager.messagesReceived, 1);
@@ -131,7 +155,7 @@ TEST(BasicPubSub, SubscriptionCycle)
     ASSERT_EQ(manager.popMessage(), QString("ack-sub-1-foo"));
 
     manager.unsub({1, "foo"});
-    std::this_thread::sleep_for(50ms);
+    QTest::qWait(50);
 
     ASSERT_EQ(manager.diag.connectionsOpened, 1);
     ASSERT_EQ(manager.diag.connectionsClosed, 0);
@@ -140,6 +164,9 @@ TEST(BasicPubSub, SubscriptionCycle)
     ASSERT_EQ(manager.popMessage(), QString("ack-unsub-1-foo"));
 
     manager.stop();
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
 
     ASSERT_EQ(manager.diag.connectionsOpened, 1);
     ASSERT_EQ(manager.diag.connectionsClosed, 1);

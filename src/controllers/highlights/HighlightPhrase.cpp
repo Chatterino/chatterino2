@@ -24,6 +24,7 @@ QColor HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR =
     QColor(143, 48, 24, 60);
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
 QColor HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR = QColor(64, 64, 64);
+QColor HighlightPhrase::FALLBACK_WATCH_STREAK_COLOR = QColor(0, 130, 255, 70);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
