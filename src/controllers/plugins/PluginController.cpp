@@ -41,7 +41,7 @@ namespace chatterino {
 PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
 {
-    this->loaders_.emplace_back("json", &lua::api::loadJson);
+    this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
 }
 
 void PluginController::initialize(Settings &settings)

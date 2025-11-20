@@ -772,10 +772,10 @@ The `print` global function is equivalent to calling `c2.log(c2.LogLevel.Debug, 
 
 ### JSON API
 
-Chatterino includes the `json` module for parsing and serializing JSON:
+Chatterino includes the `chatterino.json` module for parsing and serializing JSON:
 
 ```lua
-local json = require('json')
+local json = require('chatterino.json')
 
 local parsed = json.parse('{"foo": 1}')
 -- { foo = 1 }
@@ -789,7 +789,7 @@ local str = json.stringify({ foo = 1 })
 Parse a string as JSON. Errors if the input was invalid JSON. Use [`pcall`](https://www.lua.org/pil/8.4.html) when parsing untrusted/user input.
 
 ```lua
-local json = require('json')
+local json = require('chatterino.json')
 
 local parsed = json.parse('{"foo": 1}')
 -- { foo = 1 }
@@ -814,7 +814,7 @@ Tables with `nil` values like `{ foo = nil }` will be stringified as `{}` (they 
 To get `null` there, use `json.null`.
 
 ```lua
-local json = require('json')
+local json = require('chatterino.json')
 
 local str = json.stringify({ foo = 1, bar = nil, baz = json.null })
 -- '{"foo":1,"baz":null}'
@@ -837,7 +837,7 @@ A sentinel to indicate a `null` value.
 This is useful if `nil` would hide the value (such as in tables):
 
 ```lua
-local json = require('json')
+local json = require('chatterino.json')
 
 local str = json.stringify({ foo = 1, bar = nil, baz = json.null })
 -- '{"foo":1,"baz":null}'

@@ -1,4 +1,4 @@
----@meta json
+---@meta chatterino.json
 
 local json = {}
 

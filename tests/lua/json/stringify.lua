@@ -1,4 +1,4 @@
-local json = require('json')
+local json = require('chatterino.json')
 
 local function check_err(...)
     local ok = pcall(json.stringify, ...)

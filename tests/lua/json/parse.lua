@@ -1,4 +1,4 @@
-local json = require('json')
+local json = require('chatterino.json')
 
 local function compare_v(lhs, rhs)
     if type(lhs) == "table" then
