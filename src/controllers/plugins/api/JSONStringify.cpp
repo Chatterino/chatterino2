@@ -273,7 +273,7 @@ int jsonStringify(lua_State *L)
         stringifyValue(L, w, 0);
     }
 
-    lua_pushlstring(L, sb.GetString(), sb.GetLength());
+    lua_pushlstring(L, sb.GetString(), sb.GetSize());
     return 1;
 }
 
