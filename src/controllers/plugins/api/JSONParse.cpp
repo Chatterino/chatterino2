@@ -97,11 +97,11 @@ struct SaxHandler {
 
     bool on_object_begin(boost::system::error_code &ec)
     {
-        elements.append(Element{
+        this->elements.append(Element{
             .index = 0,
             .isObject = 1,
         });
-        if (elements.size() > MAX_NESTING)
+        if (this->elements.size() > MAX_NESTING)
         {
             ec = makeCode(ParseError::TooMuchNesting);
             return false;
@@ -133,11 +133,11 @@ struct SaxHandler {
 
     bool on_array_begin(boost::system::error_code &ec)
     {
-        elements.append(Element{
+        this->elements.append(Element{
             .index = 0,
             .isObject = 0,
         });
-        if (elements.size() > MAX_NESTING)
+        if (this->elements.size() > MAX_NESTING)
         {
             ec = makeCode(ParseError::TooMuchNesting);
             return false;
