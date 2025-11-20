@@ -378,7 +378,7 @@ declare namespace c2 {
     }
 }
 
-declare module "json" {
+declare module "chatterino.json" {
     class _Dummy {}
 
     function parse(
