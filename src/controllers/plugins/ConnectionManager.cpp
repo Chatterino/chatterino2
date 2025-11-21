@@ -2,6 +2,8 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include <algorithm>
+
 namespace chatterino::lua {
 
 api::ConnectionHandle ConnectionManager::add(
