@@ -8,6 +8,7 @@
 - Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added link support to plugin message API. (#6386, #6527)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
+- Minor: Added a JSON API for plugins (`require('chatterino.json')`). (#6420)
 - Minor: Consolidate font picking into one dialog. (#6531)
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
