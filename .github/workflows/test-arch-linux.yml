@@ -31,7 +31,7 @@ jobs:
           sudo pacman -Syu --noconfirm
           sudo pacman -S --noconfirm qt6-base qt6-tools boost-libs qt6-imageformats qtkeychain-qt6 qt6-svg libnotify git boost cmake benchmark
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
