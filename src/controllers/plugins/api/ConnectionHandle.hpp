@@ -2,7 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
-#    include <pajlada/signals/connection.hpp>
+#    include <pajlada/signals/scoped-connection.hpp>
 #    include <sol/forward.hpp>
 
 #    include <memory>
