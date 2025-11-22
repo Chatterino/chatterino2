@@ -3,6 +3,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "Application.hpp"
+#    include "common/QLogging.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
 #    include <QMessageBox>
@@ -33,26 +34,16 @@ Plugin *PluginRef::plugin() const noexcept
 
 void PluginRef::destroy()
 {
-    if (this->shared.use_count() <= 1)
+    auto useCount = this->shared.use_count();
+    if (useCount > 1)
     {
-        this->shared.reset();
-        return;
+        qCWarning(chatterinoLua)
+            << "Destroying PluginRef with" << useCount
+            << "strong references. Expected one reference (the plugin itself).";
+        assert(false && "Too many strong references.");
     }
 
-    auto *app = getApp();
-    if (app && !app->isTest())
-    {
-        QMessageBox::critical(
-            nullptr, "Chatterino - Plugins",
-            "While destroying " % this->plugin()->meta.name %
-                ":\nThe shared reference to the plugin was expected to have "
-                "one strong reference (the plugin itself). However, it had " %
-                QString::number(this->shared.use_count()) %
-                ". Thus, it's no longer safe to destroy the "
-                "plugin.\nChatterino will exit. You can now attach a debugger "
-                "to investigate.");
-    }
-    std::terminate();
+    this->shared.reset();
 }
 
 PluginWeakRef::PluginWeakRef(std::weak_ptr<Plugin> weak)
