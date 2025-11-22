@@ -8,6 +8,7 @@
 - Minor: Added setting for character limit of deleted messages. (#6491)
 - Minor: Added link support to plugin message API. (#6386, #6527)
 - Minor: Added a description for the logging option under moderation tab. (#6514)
+- Minor: Added a JSON API for plugins (`require('chatterino.json')`). (#6420)
 - Minor: Consolidate font picking into one dialog. (#6531)
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
@@ -48,6 +49,8 @@
 - Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
+- Dev: Set settings directory to temporary one used in tests. (#6584)
+- Dev: Check Lua unwinding and version in tests. (#6586)
 
 ## 2.5.4
 
