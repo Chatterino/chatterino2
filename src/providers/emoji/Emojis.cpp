@@ -221,8 +221,8 @@ void Emojis::loadEmojis()
                 parseEmoji(variationEmojiData, variation,
                            emojiData->shortCodes[0] + "_" + toneName);
 
-                // NOTE: After parsing an emoji variation, it's category gets set to ""
-                // We have to manually inherit the category from the original emojiData.
+                // NOTE: Emoji variations do not have a category.
+                // We have to manually inherit it from the original emojiData.
                 variationEmojiData->category = emojiData->category;
 
                 this->emojiShortCodeToEmoji_.insert(
