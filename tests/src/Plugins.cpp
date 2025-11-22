@@ -114,6 +114,30 @@ public:
     MockTwitch twitch;
 };
 
+QDir luaTestBaseDir(const QString &category)
+{
+    QDir snapshotDir(QStringLiteral(__FILE__));
+    snapshotDir.cd("../../lua/");
+    snapshotDir.cd(category);
+    return snapshotDir;
+}
+
+QStringList discoverLuaTests(const QString &category)
+{
+    auto files =
+        luaTestBaseDir(category).entryList(QDir::NoDotAndDotDot | QDir::Files);
+    for (auto &file : files)
+    {
+        file.remove(".lua");
+    }
+    return files;
+}
+
+std::string luaTestPath(const QString &category, const QString &entry)
+{
+    return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -128,7 +152,7 @@ public:
 
     static void openLibrariesFor(Plugin *plugin)
     {
-        return PluginController::openLibrariesFor(plugin);
+        getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
     static std::map<QString, std::unique_ptr<Plugin>> &plugins()
@@ -1060,6 +1084,39 @@ TEST_P(PluginMessageConstructionTest, Run)
 INSTANTIATE_TEST_SUITE_P(
     PluginMessageConstruction, PluginMessageConstructionTest,
     testing::ValuesIn(testlib::Snapshot::discover("PluginMessageCtor")));
+
+class PluginJsonTest : public PluginTest,
+                       public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginJsonTest, Run)
+{
+    configure();
+    auto reg = lua->registry().size();
+    auto globals = lua->globals().size();
+
+    auto pfr = lua->safe_script_file(luaTestPath("json", GetParam()));
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug() << "Test" << GetParam() << "failed:";
+        sol::error err = pfr;
+        qDebug() << err.what();
+        return;
+    }
+
+    for (size_t i = 0; i < 5; i++)
+    {
+        lua->collect_garbage();
+    }
+    // make sure we don't leak anything to globals or the registry
+    // but give the registry some room of 1 slot
+    EXPECT_LE(lua->registry().size(), reg + 1);
+    EXPECT_EQ(lua->globals().size(), globals);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginJson, PluginJsonTest,
+                         testing::ValuesIn(discoverLuaTests("json")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
