@@ -1215,8 +1215,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     virtual void createPoll(QString broadcasterID, QString title,
                             QStringList choices, std::chrono::seconds duration,
-                            int pointsPerVote,
-                            ResultCallback<> successCallback,
+                            int pointsPerVote, ResultCallback<> successCallback,
                             FailureCallback<QString> failureCallback) = 0;
 
     /// https://dev.twitch.tv/docs/api/reference#create-prediction
