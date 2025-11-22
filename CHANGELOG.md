@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Minor: Add categories to the emoji viewer. (#6598)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
@@ -14,6 +13,7 @@
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Minor: Added a setting to show the stream title in live messages. (#6572)
+- Minor: Add categories to the emoji viewer. (#6598)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Bugfix: Fixed some commands and filters not working as expected in seach popups. (#6539)
 - Bugfix: Fixed settings occasionally not opening when clicking on "Manage Accounts" in the account switcher. (#6543)
