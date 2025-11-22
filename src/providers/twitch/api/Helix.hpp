@@ -1215,7 +1215,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     virtual void createPoll(QString broadcasterID, QString title,
                             QStringList choices, std::chrono::seconds duration,
-                            uint pointsPerVote,
+                            int pointsPerVote,
                             ResultCallback<> successCallback,
                             FailureCallback<QString> failureCallback) = 0;
 
@@ -1583,7 +1583,7 @@ public:
 
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     void createPoll(QString broadcasterID, QString title, QStringList choices,
-                    std::chrono::seconds duration, uint pointsPerVote,
+                    std::chrono::seconds duration, int pointsPerVote,
                     ResultCallback<> successCallback,
                     FailureCallback<QString> failureCallback) final;
 

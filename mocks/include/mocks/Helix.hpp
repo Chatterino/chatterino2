@@ -432,7 +432,7 @@ public:
     // create poll
     MOCK_METHOD(void, createPoll,
                 (QString broadcasterID, QString title, QStringList choices,
-                 std::chrono::seconds duration, uint pointsPerVote,
+                 std::chrono::seconds duration, int pointsPerVote,
                  ResultCallback<> successCallback,
                  FailureCallback<QString> failureCallback),
                 (override));

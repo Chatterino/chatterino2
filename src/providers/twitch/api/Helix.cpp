@@ -3220,7 +3220,7 @@ void Helix::getFollowedChannel(
 
 void Helix::createPoll(QString broadcasterID, QString title,
                        QStringList choices, const std::chrono::seconds duration,
-                       const uint pointsPerVote,
+                       const int pointsPerVote,
                        ResultCallback<> successCallback,
                        FailureCallback<QString> failureCallback)
 {

@@ -251,7 +251,7 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
     if (parser.isSet(pointsOption))
     {
         bool validPoints = true;
-        action.pointsPerVote = parser.value(pointsOption).toUInt(&validPoints);
+        action.pointsPerVote = parser.value(pointsOption).toInt(&validPoints);
         if (!validPoints)
         {
             return makeUnexpected("Invalid points - " % usage);
