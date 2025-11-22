@@ -1,8 +1,12 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
+#include "mocks/BaseApplication.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
+#include "providers/liveupdates/Diag.hpp"
 #include "Test.hpp"
 
 #include <QString>
+#include <QtCore/qtestsupport_core.h>
 
 #include <optional>
 #include <tuple>
@@ -15,9 +19,10 @@ const QString TARGET_USER_NAME = "Alien";
 
 TEST(BttvLiveUpdates, AllEvents)
 {
+    mock::BaseApplication app;
+
     const QString host("wss://127.0.0.1:9050/liveupdates/bttv/all-events");
     chatterino::BttvLiveUpdates liveUpdates(host);
-    liveUpdates.start();
 
     std::optional<BttvLiveUpdateEmoteUpdateAddMessage> addMessage;
     std::optional<BttvLiveUpdateEmoteUpdateAddMessage> updateMessage;
@@ -33,13 +38,12 @@ TEST(BttvLiveUpdates, AllEvents)
         removeMessage = m;
     });
 
-    std::this_thread::sleep_for(50ms);
     liveUpdates.joinChannel(TARGET_USER_ID, TARGET_USER_NAME);
-    std::this_thread::sleep_for(500ms);
+    QTest::qWait(500);
 
-    ASSERT_EQ(liveUpdates.diag.connectionsOpened, 1);
-    ASSERT_EQ(liveUpdates.diag.connectionsClosed, 0);
-    ASSERT_EQ(liveUpdates.diag.connectionsFailed, 0);
+    ASSERT_EQ(liveUpdates.diag().connectionsOpened, 1);
+    ASSERT_EQ(liveUpdates.diag().connectionsClosed, 0);
+    ASSERT_EQ(liveUpdates.diag().connectionsFailed, 0);
 
     auto add = *addMessage;
     ASSERT_EQ(add.channelID, TARGET_USER_ID);
@@ -56,7 +60,11 @@ TEST(BttvLiveUpdates, AllEvents)
     ASSERT_EQ(rem.emoteID, QString("55898e122612142e6aaa935b"));
 
     liveUpdates.stop();
-    ASSERT_EQ(liveUpdates.diag.connectionsOpened, 1);
-    ASSERT_EQ(liveUpdates.diag.connectionsClosed, 1);
-    ASSERT_EQ(liveUpdates.diag.connectionsFailed, 0);
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    ASSERT_EQ(liveUpdates.diag().connectionsOpened, 1);
+    ASSERT_EQ(liveUpdates.diag().connectionsClosed, 1);
+    ASSERT_EQ(liveUpdates.diag().connectionsFailed, 0);
 }

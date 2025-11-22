@@ -122,6 +122,8 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    void sortTabsAlphabetically();
+
 protected:
     bool getShowTabs() const;
     void setShowTabs(bool value);
@@ -264,6 +266,8 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
+    QAction *sortTabsAlphabeticallyAction_;
+
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;

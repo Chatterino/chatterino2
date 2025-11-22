@@ -4,15 +4,16 @@
 #include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -108,7 +109,6 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &accemotes = *acc->accessEmotes();
     const auto *bttvemotes = app->getBttvEmotes();
     const auto *ffzemotes = app->getFfzEmotes();
-    auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {

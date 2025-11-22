@@ -5,6 +5,7 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -18,6 +19,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -33,7 +35,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "providers/twitch/UserColor.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -1152,6 +1153,7 @@ MessagePtr MessageBuilder::makeChannelPointRewardMessage(
 
 MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
                                            const QString &channelID,
+                                           const QString &title,
                                            MessageFlags extraFlags)
 {
     MessageBuilder builder;
@@ -1161,9 +1163,23 @@ MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
         .emplace<TextElement>(channelName, MessageElementFlag::Username,
                               MessageColor::Text, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, channelName});
-    builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
-                                 MessageColor::Text);
-    auto text = QString("%1 is live!").arg(channelName);
+
+    QString text;
+    if (getSettings()->showTitleInLiveMessage)
+    {
+        text = QString("%1 is live: %2").arg(channelName, title);
+        builder.emplace<TextElement>("is live:", MessageElementFlag::Text,
+                                     MessageColor::Text);
+        builder.emplace<TextElement>(title, MessageElementFlag::Text,
+                                     MessageColor::Text);
+    }
+    else
+    {
+        text = QString("%1 is live!").arg(channelName);
+        builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                     MessageColor::Text);
+    }
+
     builder.message().messageText = text;
     builder.message().searchText = text;
     builder.message().id = channelID;

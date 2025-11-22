@@ -118,6 +118,7 @@ void setLinkOn(MessageElement *el, const Link &link)
             break;
 
         // these links should be safe to click as they don't have any immediate action associated with them
+        case Link::InsertText:
         case Link::JumpToChannel:
         case Link::JumpToMessage:
         case Link::UserInfo:
@@ -129,7 +130,6 @@ void setLinkOn(MessageElement *el, const Link &link)
         case Link::None:
         case Link::AutoModAllow:
         case Link::AutoModDeny:
-        case Link::InsertText:
         case Link::OpenAccountsPage:
         case Link::Reconnect:
         case Link::ViewThread:

@@ -15,7 +15,7 @@
 #    include "messages/MessageElement.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
-#    include "mocks/Emotes.hpp"
+#    include "mocks/EmoteController.hpp"
 #    include "mocks/Logging.hpp"
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
@@ -93,7 +93,7 @@ public:
         return &this->commands;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -111,9 +111,33 @@ public:
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     MockTwitch twitch;
 };
+
+QDir luaTestBaseDir(const QString &category)
+{
+    QDir snapshotDir(QStringLiteral(__FILE__));
+    snapshotDir.cd("../../lua/");
+    snapshotDir.cd(category);
+    return snapshotDir;
+}
+
+QStringList discoverLuaTests(const QString &category)
+{
+    auto files =
+        luaTestBaseDir(category).entryList(QDir::NoDotAndDotDot | QDir::Files);
+    for (auto &file : files)
+    {
+        file.remove(".lua");
+    }
+    return files;
+}
+
+std::string luaTestPath(const QString &category, const QString &entry)
+{
+    return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
+}
 
 }  // namespace
 
@@ -129,7 +153,7 @@ public:
 
     static void openLibrariesFor(Plugin *plugin)
     {
-        return PluginController::openLibrariesFor(plugin);
+        getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
     static std::map<QString, std::unique_ptr<Plugin>> &plugins()
@@ -480,7 +504,7 @@ TEST_F(PluginTest, ioNoPerms)
     configure();
     auto file = rawpl->dataDirectory().filePath("testfile");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(TEST_FILE_DATA);
     f.close();
 
@@ -532,7 +556,7 @@ TEST_F(PluginTest, requireNoData)
 
     auto file = rawpl->dataDirectory().filePath("thisiscode.lua");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(R"lua(print("Data was executed"))lua");
     f.close();
 
@@ -1385,6 +1409,59 @@ TEST_F(PluginTest, MessageElementModification)
     expectErr("padding", 1);
 }
 
+/// Test that both C++ exceptions and luaL_error properly unwind the stack.
+TEST_F(PluginTest, LuaUnwind)
+{
+    configure();
+
+    size_t i = 0;
+    lua->set_function(
+        "do_something",
+        [&](sol::this_state state, bool should_error, bool use_lua_error) {
+            auto g = qScopeGuard([&] {
+                ++i;
+            });
+            if (should_error)
+            {
+                if (use_lua_error)
+                {
+                    luaL_error(state.lua_state(), "My message");
+                }
+                else
+                {
+                    throw std::runtime_error("My message");
+                }
+            }
+        });
+
+    ASSERT_EQ(i, 0);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, false)").valid());
+    ASSERT_EQ(i, 1);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, true)").valid());
+    ASSERT_EQ(i, 2);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, false)").valid());
+    ASSERT_EQ(i, 3);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, true)").valid());
+    ASSERT_EQ(i, 4);
+}
+
+/// Test that we're running with the Lua version we're compiled against.
+TEST_F(PluginTest, LuaVersion)
+{
+    configure();
+
+    lua->set_function("check_it", [](sol::this_state state) {
+        luaL_checkversion(state.lua_state());
+    });
+    ASSERT_TRUE(lua->script("check_it()").valid());
+
+    static_assert(LUA_VERSION_NUM >= 504);
+}
+
 class PluginMessageConstructionTest
     : public PluginTest,
       public ::testing::WithParamInterface<QString>
@@ -1419,6 +1496,39 @@ TEST_P(PluginMessageConstructionTest, Run)
 INSTANTIATE_TEST_SUITE_P(
     PluginMessageConstruction, PluginMessageConstructionTest,
     testing::ValuesIn(testlib::Snapshot::discover("PluginMessageCtor")));
+
+class PluginJsonTest : public PluginTest,
+                       public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginJsonTest, Run)
+{
+    configure();
+    auto reg = lua->registry().size();
+    auto globals = lua->globals().size();
+
+    auto pfr = lua->safe_script_file(luaTestPath("json", GetParam()));
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug() << "Test" << GetParam() << "failed:";
+        sol::error err = pfr;
+        qDebug() << err.what();
+        return;
+    }
+
+    for (size_t i = 0; i < 5; i++)
+    {
+        lua->collect_garbage();
+    }
+    // make sure we don't leak anything to globals or the registry
+    // but give the registry some room of 1 slot
+    EXPECT_LE(lua->registry().size(), reg + 1);
+    EXPECT_EQ(lua->globals().size(), globals);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginJson, PluginJsonTest,
+                         testing::ValuesIn(discoverLuaTests("json")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)

@@ -11,6 +11,7 @@
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
@@ -40,6 +41,7 @@ namespace chatterino {
 PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
 {
+    this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
 }
 
 void PluginController::initialize(Settings &settings)
@@ -92,7 +94,12 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
         return false;
     }
     QFile infoFile(infojson.absoluteFilePath());
-    infoFile.open(QIODevice::ReadOnly);
+    if (!infoFile.open(QIODevice::ReadOnly))
+    {
+        qCWarning(chatterinoLua)
+            << "Could not open info.json" << infoFile.errorString();
+        return false;
+    }
     auto everything = infoFile.readAll();
     auto doc = QJsonDocument::fromJson(everything);
     if (!doc.isObject())
@@ -259,6 +266,14 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 
     sol::table package = g["package"];
     package.set_function("loadlib", &lua::api::package_loadlib);
+
+    for (const auto &[name, fn] : this->loaders_)
+    {
+        package["preload"][name] = [fn](sol::this_main_state state) {
+            sol::state_view sv(state);
+            return fn(sv);
+        };
+    }
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -277,7 +292,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                  << " because safe mode is enabled.";
         return;
     }
-    PluginController::openLibrariesFor(temp);
+    this->openLibrariesFor(temp);
 
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
