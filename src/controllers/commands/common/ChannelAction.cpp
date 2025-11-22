@@ -242,7 +242,7 @@ ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
 
     // Build action
     StartUserParticipationAction action{
-        .broadcasterId = ctx.twitchChannel->roomId(),
+        .broadcasterID = ctx.twitchChannel->roomId(),
         .title = parser.value(titleOption),
         .choices = parser.values(choiceOption),
         .duration = duration,

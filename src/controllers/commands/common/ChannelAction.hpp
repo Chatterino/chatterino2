@@ -52,7 +52,7 @@ struct PerformChannelAction {
 };
 
 struct StartUserParticipationAction {
-    QString broadcasterId;
+    QString broadcasterID;
     QString title;
     QStringList choices;
     std::chrono::seconds duration;

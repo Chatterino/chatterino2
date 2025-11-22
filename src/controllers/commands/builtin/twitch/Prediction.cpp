@@ -54,7 +54,7 @@ QString createPrediction(const CommandContext &ctx)
 
     const auto &data = action.value();
     getHelix()->createPrediction(
-        data.broadcasterId, data.title, data.choices, data.duration,
+        data.broadcasterID, data.title, data.choices, data.duration,
         [channel = ctx.channel, data] {
             channel->addSystemMessage(
                 QString("Created prediction: '%1'").arg(data.title));

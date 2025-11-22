@@ -54,7 +54,7 @@ QString createPoll(const CommandContext &ctx)
 
     const auto &poll = action.value();
     getHelix()->createPoll(
-        poll.broadcasterId, poll.title, poll.choices, poll.duration,
+        poll.broadcasterID, poll.title, poll.choices, poll.duration,
         poll.pointsPerVote,
         [channel = ctx.channel, poll] {
             channel->addSystemMessage(
