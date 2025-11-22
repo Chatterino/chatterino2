@@ -1,6 +1,7 @@
 #include "widgets/dialogs/EmotePopup.hpp"
 
 #include "Application.hpp"
+#include "common/enums/MessageContext.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
@@ -164,11 +165,48 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 
 void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
+    static auto emoteCategoryMap = [&] {
+        std::map<QString, std::vector<EmojiPtr>> emoteCatMap;
+
+        for (const auto &emoji : emojiMap)
+        {
+            auto cat = emoteCatMap.find(emoji->category);
+            if (cat != emoteCatMap.end())
+            {
+                auto &vec = cat->second;
+                vec.push_back(emoji);
+            }
+            else
+            {
+                emoteCatMap.emplace(emoji->category,
+                                    std::vector<EmojiPtr>{emoji});
+            }
+        }
+        return emoteCatMap;
+    }();
+
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     // set the channel first to make sure the scrollbar is at the top
     view.setChannel(emojiChannel);
 
-    emojiChannel->addMessage(makeEmojiMessage(emojiMap),
+    for (auto &it : emoteCategoryMap)
+    {
+        // Skip the Component category for now.
+        if (it.first == "Component")
+        {
+            continue;
+        }
+
+        emojiChannel->addMessage(makeTitleMessage(it.first),
+                                 MessageContext::Original);
+        emojiChannel->addMessage(makeEmojiMessage(it.second),
+                                 MessageContext::Original);
+    }
+
+    // Add the Component category at the bottom of the picker.
+    emojiChannel->addMessage(makeTitleMessage("Component"),
+                             MessageContext::Original);
+    emojiChannel->addMessage(makeEmojiMessage(emoteCategoryMap["Component"]),
                              MessageContext::Original);
 }
 
