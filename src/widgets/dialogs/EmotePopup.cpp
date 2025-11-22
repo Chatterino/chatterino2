@@ -165,22 +165,25 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 
 void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
-    std::map<QString, std::vector<EmojiPtr>> emoteCategoryMap;
+    static auto emoteCategoryMap = [&] {
+        std::map<QString, std::vector<EmojiPtr>> emoteCatMap;
 
-    for (const auto &emoji : emojiMap)
-    {
-        auto cat = emoteCategoryMap.find(emoji->category);
-        if (cat != emoteCategoryMap.end())
+        for (const auto &emoji : emojiMap)
         {
-            auto &vec = cat->second;
-            vec.push_back(emoji);
+            auto cat = emoteCatMap.find(emoji->category);
+            if (cat != emoteCatMap.end())
+            {
+                auto &vec = cat->second;
+                vec.push_back(emoji);
+            }
+            else
+            {
+                emoteCatMap.emplace(emoji->category,
+                                         std::vector<EmojiPtr>{emoji});
+            }
         }
-        else
-        {
-            emoteCategoryMap.emplace(emoji->category,
-                                     std::vector<EmojiPtr>{emoji});
-        }
-    }
+        return emoteCatMap;
+    }();
 
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     // set the channel first to make sure the scrollbar is at the top
