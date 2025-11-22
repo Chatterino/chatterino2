@@ -5,6 +5,7 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/SignalCallback.hpp"
 #    include "util/QMagicEnum.hpp"
 
 #    include <lua.h>
@@ -216,6 +217,11 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
     return out;
 }
 
+lua::SignalCallback Plugin::createCallback(sol::main_protected_function pfn)
+{
+    return {this->selfRef_.weak(), std::move(pfn)};
+}
+
 Plugin::~Plugin()
 {
     this->onUnloaded();
@@ -225,6 +231,7 @@ Plugin::~Plugin()
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
         timer->deleteLater();
     }
+    this->selfRef_.destroy();
     this->httpRequests.clear();
     qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
                            << "timers for plugin" << this->id

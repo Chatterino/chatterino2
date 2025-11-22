@@ -3,8 +3,10 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
+#    include "controllers/plugins/ConnectionManager.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/PluginRef.hpp"
 
 #    include <boost/signals2/signal.hpp>
 #    include <QDir>
@@ -25,6 +27,10 @@ class QTimer;
 namespace chatterino::lua::api {
 enum class LogLevel;
 }  // namespace chatterino::lua::api
+
+namespace chatterino::lua {
+struct SignalCallback;
+}  // namespace chatterino::lua
 
 namespace chatterino {
 
@@ -79,6 +85,7 @@ public:
         , meta(std::move(meta))
         , loadDirectory_(loadDirectory)
         , state_(state)
+        , selfRef_(state ? this : nullptr)
     {
     }
 
@@ -127,6 +134,8 @@ public:
         return it->second;
     }
 
+    lua::SignalCallback createCallback(sol::main_protected_function pfn);
+
     /**
      * If the plugin crashes while evaluating the main file, this function will return the error
      */
@@ -134,6 +143,8 @@ public:
     {
         return this->error_;
     }
+
+    lua::PluginWeakRef weakRef() const;
 
     int addTimeout(QTimer *timer);
     void removeTimeout(QTimer *timer);
@@ -155,10 +166,13 @@ public:
 
     boost::signals2::signal<void()> onUnloaded;
     boost::signals2::signal<void(lua::api::LogLevel, const QString &)> onLog;
+    lua::ConnectionManager connections;
 
 private:
     QDir loadDirectory_;
     lua_State *state_;
+
+    lua::PluginRef selfRef_;
 
     QString error_;
 
