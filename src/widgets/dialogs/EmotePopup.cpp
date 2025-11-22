@@ -179,7 +179,7 @@ void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
             else
             {
                 emoteCatMap.emplace(emoji->category,
-                                         std::vector<EmojiPtr>{emoji});
+                                    std::vector<EmojiPtr>{emoji});
             }
         }
         return emoteCatMap;
