@@ -365,8 +365,10 @@ jobs:
         id: format-changes
         run: |
           delimiter=$(openssl rand -hex 32)
+          version=$(cmake -DC2_GIT_PRINT_VERSION=On -P cmake/GIT.cmake)
           {
             echo "changelog<<$delimiter"
+            echo "### $version"
             python3 ./.CI/format-recent-changes.py
             echo $delimiter
           } >> "$GITHUB_OUTPUT"
