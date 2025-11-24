@@ -51,6 +51,7 @@
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
 - Dev: Set settings directory to temporary one used in tests. (#6584)
 - Dev: Check Lua unwinding and version in tests. (#6586)
+- Dev: Nightly versions are now numbered. (#6600)
 
 ## 2.5.4
 
