@@ -23,9 +23,26 @@ Version::Version()
     }
 
     this->fullVersion_ += this->version_;
+    this->buildString_ = this->fullVersion_;
+
+#define C2_STRINGIFY_IMPL(x) #x
+#define C2_STRINGIFY(x) u"" C2_STRINGIFY_IMPL(x)  // NOLINT
+    if (CHATTERINO_GIT_NIGHTLY_COMMITS > 0)
+    {
+        this->buildString_ += '-';
+        this->buildString_ += C2_STRINGIFY(CHATTERINO_GIT_NIGHTLY_COMMITS);
+    }
+    if (CHATTERINO_GIT_FORK_COMMITS > 0)
+    {
+        this->buildString_ += '+';
+        this->buildString_ += C2_STRINGIFY(CHATTERINO_GIT_FORK_COMMITS);
+    }
+#undef C2_STRINGIFY_IMPL
+#undef C2_STRINGIFY
 
 #ifndef NDEBUG
     this->fullVersion_ += " DEBUG";
+    this->buildString_ += u" DEBUG";
 #endif
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
@@ -122,7 +139,7 @@ const QString &Version::runningString() const
 void Version::generateBuildString()
 {
     // e.g. Chatterino 2.3.5 or Chatterino Nightly 2.3.5
-    auto s = this->fullVersion();
+    auto s = std::move(this->buildString_);
 
     // Add commit information
     s +=
