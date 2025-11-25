@@ -133,11 +133,51 @@ NotebookTab::NotebookTab(Notebook *notebook)
             "Are you sure you want to close all visible tabs?",
             QMessageBox::Yes | QMessageBox::Cancel);
 
-        if (reply == QMessageBox::Yes)
+        if (reply != QMessageBox::Yes)
         {
-            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            return;
+        }
+
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+        {
+            auto *page = this->notebook_->getPageAt(i);
+
+            auto *container = dynamic_cast<SplitContainer *>(page);
+            if (!container)
+            {
+                continue;
+            }
+
+            auto *tab = container->getTab();
+            if (!tab || !tab->isVisible())
+            {
+                continue;
+            }
+
+            this->notebook_->removePage(page);
+        }
+    });
+
+    this->closeTabsToLeftAction_ = this->closeMultipleTabsMenu_->addAction(
+        "Close Visible Tabs to Left", [this]() {
+            auto reply = QMessageBox::question(
+                this, "Close Visible Tabs to Left",
+                "Are you sure you want to close all visible tabs to the left?",
+                QMessageBox::Yes | QMessageBox::Cancel);
+
+            if (reply != QMessageBox::Yes)
+            {
+                return;
+            }
+
+            std::vector<QWidget *> pagesToRemove;
+            for (int i = 0; i < this->notebook_->getPageCount(); ++i)
             {
                 auto *page = this->notebook_->getPageAt(i);
+                if (page == this->page)
+                {
+                    break;
+                }
 
                 auto *container = dynamic_cast<SplitContainer *>(page);
                 if (!container)
@@ -151,48 +191,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
                     continue;
                 }
 
-                this->notebook_->removePage(page);
+                pagesToRemove.push_back(page);
             }
-        }
-    });
 
-    this->closeTabsToLeftAction_ = this->closeMultipleTabsMenu_->addAction(
-        "Close Visible Tabs to Left", [this]() {
-            auto reply = QMessageBox::question(
-                this, "Close Visible Tabs to Left",
-                "Are you sure you want to close all visible tabs to the left?",
-                QMessageBox::Yes | QMessageBox::Cancel);
-
-            if (reply == QMessageBox::Yes)
+            for (auto *page : pagesToRemove)
             {
-                std::vector<QWidget *> pagesToRemove;
-                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
-                {
-                    auto *page = this->notebook_->getPageAt(i);
-                    if (page == this->page)
-                    {
-                        break;
-                    }
-
-                    auto *container = dynamic_cast<SplitContainer *>(page);
-                    if (!container)
-                    {
-                        continue;
-                    }
-
-                    auto *tab = container->getTab();
-                    if (!tab || !tab->isVisible())
-                    {
-                        continue;
-                    }
-
-                    pagesToRemove.push_back(page);
-                }
-
-                for (auto *page : pagesToRemove)
-                {
-                    this->notebook_->removePage(page);
-                }
+                this->notebook_->removePage(page);
             }
         });
 
@@ -203,30 +207,32 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 "Are you sure you want to close all visible tabs to the right?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
-            if (reply == QMessageBox::Yes)
+            if (reply != QMessageBox::Yes)
             {
-                for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+                return;
+            }
+
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            {
+                auto *p = this->notebook_->getPageAt(i);
+                if (p == this->page)
                 {
-                    auto *p = this->notebook_->getPageAt(i);
-                    if (p == this->page)
-                    {
-                        break;
-                    }
-
-                    auto *container = dynamic_cast<SplitContainer *>(p);
-                    if (!container)
-                    {
-                        continue;
-                    }
-
-                    auto *tab = container->getTab();
-                    if (!tab || !tab->isVisible())
-                    {
-                        continue;
-                    }
-
-                    this->notebook_->removePage(p);
+                    break;
                 }
+
+                auto *container = dynamic_cast<SplitContainer *>(p);
+                if (!container)
+                {
+                    continue;
+                }
+
+                auto *tab = container->getTab();
+                if (!tab || !tab->isVisible())
+                {
+                    continue;
+                }
+
+                this->notebook_->removePage(p);
             }
         });
 
@@ -237,30 +243,32 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 "Are you sure you want to close all other visible tabs?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
-            if (reply == QMessageBox::Yes)
+            if (reply != QMessageBox::Yes)
             {
-                for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+                return;
+            }
+
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            {
+                auto *p = this->notebook_->getPageAt(i);
+                if (p == this->page)
                 {
-                    auto *p = this->notebook_->getPageAt(i);
-                    if (p == this->page)
-                    {
-                        continue;
-                    }
-
-                    auto *container = dynamic_cast<SplitContainer *>(p);
-                    if (!container)
-                    {
-                        continue;
-                    }
-
-                    auto *tab = container->getTab();
-                    if (!tab || !tab->isVisible())
-                    {
-                        continue;
-                    }
-
-                    this->notebook_->removePage(p);
+                    continue;
                 }
+
+                auto *container = dynamic_cast<SplitContainer *>(p);
+                if (!container)
+                {
+                    continue;
+                }
+
+                auto *tab = container->getTab();
+                if (!tab || !tab->isVisible())
+                {
+                    continue;
+                }
+
+                this->notebook_->removePage(p);
             }
         });
 
