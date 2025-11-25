@@ -1050,38 +1050,17 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
                 this->menu_.popup(event->globalPosition().toPoint() +
                                   QPoint(0, 8));
 
-                std::vector<NotebookTab *> visibleTabs;
-                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
-                {
-                    auto *page = this->notebook_->getPageAt(i);
-                    if (auto *container = dynamic_cast<SplitContainer *>(page))
-                    {
-                        if (auto *tab = container->getTab();
-                            tab && tab->isVisible())
-                        {
-                            visibleTabs.push_back(tab);
-                        }
-                    }
-                }
-
-                const int visibleTabCount = int(visibleTabs.size());
-
-                int visibleTabIndex = -1;
-                for (int i = 0; i < visibleTabCount; ++i)
-                {
-                    if (visibleTabs[size_t(i)] == this)
-                    {
-                        visibleTabIndex = i;
-                        break;
-                    }
-                }
+                const int visibleTabCount =
+                    this->notebook_->getVisibleTabCount();
+                const int selectedTabIndex =
+                    this->notebook_->visibleIndexOf(this->page);
 
                 this->closeMultipleTabsMenu_->setEnabled(visibleTabCount > 1);
 
-                this->closeTabsToLeftAction_->setEnabled(visibleTabIndex > 0);
+                this->closeTabsToLeftAction_->setEnabled(selectedTabIndex > 0);
                 this->closeTabsToRightAction_->setEnabled(
-                    visibleTabIndex != -1 &&
-                    visibleTabIndex < (visibleTabCount - 1));
+                    selectedTabIndex != -1 &&
+                    selectedTabIndex < (visibleTabCount - 1));
             }
             break;
             default:;
