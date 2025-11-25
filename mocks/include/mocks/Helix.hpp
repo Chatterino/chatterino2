@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <chrono>
 #include <functional>
 #include <vector>
 
@@ -427,6 +428,22 @@ public:
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));
+
+    // create poll
+    MOCK_METHOD(void, createPoll,
+                (QString broadcasterID, QString title, QStringList choices,
+                 std::chrono::seconds duration, int pointsPerVote,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // create prediction
+    MOCK_METHOD(void, createPrediction,
+                (QString broadcasterID, QString title, QStringList outcomes,
+                 std::chrono::seconds duration,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
 
     MOCK_METHOD(void, createEventSubSubscription,
                 (const eventsub::SubscriptionRequest &request,
