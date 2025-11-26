@@ -264,3 +264,51 @@ TEST(LimitedQueue, Find)
                            })
                      .has_value());
 }
+
+TEST(LimitedQueue, LastN)
+{
+    LimitedQueue<int> queue(10);
+    queue.pushBack(1);
+    queue.pushBack(2);
+    queue.pushBack(3);
+    queue.pushBack(4);
+    queue.pushBack(5);
+    queue.pushBack(6);
+
+    SNAPSHOT_EQUALS(queue.lastN(0), {}, "no item");
+    SNAPSHOT_EQUALS(queue.lastN(1), {6}, "one item");
+    SNAPSHOT_EQUALS(queue.lastN(2), {5, 6}, "two items");
+    SNAPSHOT_EQUALS(queue.lastN(6), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.lastN(7), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.lastN(12), {1, 2, 3, 4, 5, 6}, "all items");
+
+    LimitedQueue<int> empty(10);
+    SNAPSHOT_EQUALS(empty.lastN(0), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(1), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(2), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(6), {}, "empty");
+}
+
+TEST(LimitedQueue, FirstN)
+{
+    LimitedQueue<int> queue(10);
+    queue.pushBack(1);
+    queue.pushBack(2);
+    queue.pushBack(3);
+    queue.pushBack(4);
+    queue.pushBack(5);
+    queue.pushBack(6);
+
+    SNAPSHOT_EQUALS(queue.firstN(0), {}, "no item");
+    SNAPSHOT_EQUALS(queue.firstN(1), {1}, "one item");
+    SNAPSHOT_EQUALS(queue.firstN(2), {1, 2}, "two items");
+    SNAPSHOT_EQUALS(queue.firstN(6), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.firstN(7), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.firstN(12), {1, 2, 3, 4, 5, 6}, "all items");
+
+    LimitedQueue<int> empty(10);
+    SNAPSHOT_EQUALS(empty.firstN(0), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(1), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(2), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(6), {}, "empty");
+}

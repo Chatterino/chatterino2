@@ -22,6 +22,24 @@ private:
     {
     }
 
+    static LimitedQueueSnapshot lastN(const boost::circular_buffer<T> &buf,
+                                      size_t n)
+    {
+        return {buf.end() - std::min(n, buf.size()), buf.end()};
+    }
+
+    static LimitedQueueSnapshot firstN(const boost::circular_buffer<T> &buf,
+                                       size_t n)
+    {
+        return {buf.begin(), buf.begin() + std::min(n, buf.size())};
+    }
+
+    template <typename It>
+    LimitedQueueSnapshot(It begin, It end)
+        : buffer_(std::move(begin), std::move(end))
+    {
+    }
+
 public:
     LimitedQueueSnapshot() = default;
 

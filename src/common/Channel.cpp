@@ -71,9 +71,15 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
-LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
+LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
+}
+
+LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot(
+    size_t nItems) const
+{
+    return this->messages_.lastN(nItems);
 }
 
 void Channel::addMessage(MessagePtr message, MessageContext context,
@@ -117,7 +123,7 @@ void Channel::addSystemMessage(const QString &contents)
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(), std::move(message), now,
+        this->getMessageSnapshot(20), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -130,7 +136,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelClear(
-        this->getMessageSnapshot(), std::move(message), now,
+        this->getMessageSnapshot(20), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
