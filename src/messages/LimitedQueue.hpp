@@ -324,6 +324,18 @@ public:
         return LimitedQueueSnapshot<T>(this->buffer_);
     }
 
+    [[nodiscard]] LimitedQueueSnapshot<T> lastN(size_t nItems) const
+    {
+        std::shared_lock lock(this->mutex_);
+        return LimitedQueueSnapshot<T>::lastN(this->buffer_, nItems);
+    }
+
+    [[nodiscard]] LimitedQueueSnapshot<T> firstN(size_t nItems) const
+    {
+        std::shared_lock lock(this->mutex_);
+        return LimitedQueueSnapshot<T>::firstN(this->buffer_, nItems);
+    }
+
     // Actions
 
     /**
