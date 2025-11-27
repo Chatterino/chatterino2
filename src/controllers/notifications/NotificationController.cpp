@@ -154,7 +154,7 @@ void NotificationController::notifyTwitchChannelLive(
 void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
-    const LimitedQueueSnapshot<MessagePtr> snapshot =
+    const std::vector<MessagePtr> snapshot =
         getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200);
 
     // Guard against empty snapshot to prevent underflow and invalid access
