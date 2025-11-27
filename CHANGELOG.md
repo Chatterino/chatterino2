@@ -51,7 +51,8 @@
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
 - Dev: Set settings directory to temporary one used in tests. (#6584)
 - Dev: Check Lua unwinding and version in tests. (#6586)
-- Dev: Added method to get the last N messages of a channel. (#6602)
+- Dev: Added method to get the last N messages of a channel. (#6602, #6604)
+- Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
 
 ## 2.5.4
 

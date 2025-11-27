@@ -108,7 +108,7 @@ bool checkMessageUserName(const QString &userName, MessagePtr message)
 
 ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
+    std::vector<MessagePtr> snapshot = channel->getMessageSnapshot();
 
     ChannelPtr channelPtr;
     if (channel->isTwitchChannel())

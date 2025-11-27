@@ -79,8 +79,8 @@ public:
     virtual const QString &getLocalizedName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
-    LimitedQueueSnapshot<MessagePtr> getMessageSnapshot() const;
-    LimitedQueueSnapshot<MessagePtr> getMessageSnapshot(size_t nItems) const;
+    std::vector<MessagePtr> getMessageSnapshot() const;
+    std::vector<MessagePtr> getMessageSnapshot(size_t nItems) const;
 
     // MESSAGES
     // overridingFlags can be filled in with flags that should be used instead
