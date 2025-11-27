@@ -437,6 +437,20 @@ public:
                  FailureCallback<QString> failureCallback),
                 (override));
 
+    // get polls
+    MOCK_METHOD(void, getPolls,
+                (QString broadcasterID, QStringList ids, int first,
+                 QString after, ResultCallback<HelixPolls> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // end poll
+    MOCK_METHOD(void, endPoll,
+                (QString broadcasterID, QString id, bool immediatelyHide,
+                 ResultCallback<HelixPoll> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
     // create prediction
     MOCK_METHOD(void, createPrediction,
                 (QString broadcasterID, QString title, QStringList outcomes,

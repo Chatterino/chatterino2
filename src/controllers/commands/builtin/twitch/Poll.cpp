@@ -67,4 +67,142 @@ QString createPoll(const CommandContext &ctx)
     return "";
 }
 
+QString endPoll(const CommandContext &ctx)
+{
+    const auto command = QStringLiteral("/endpoll");
+    if (ctx.twitchChannel == nullptr)
+    {
+        const auto err =
+            "The " % command % " command only works in Twitch channels";
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addSystemMessage(err);
+        }
+        else
+        {
+            qCWarning(chatterinoCommands) << "Error parsing command:" << err;
+        }
+        return "";
+    }
+
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addSystemMessage("You must be logged in to end a poll!");
+        return "";
+    }
+
+    const auto roomId = ctx.twitchChannel->roomId();
+    getHelix()->getPolls(
+        roomId, {}, 1, {},
+        [channel = ctx.channel, roomId](const auto &result) {
+            if (result.polls.empty())
+            {
+                channel->addSystemMessage("Failed to find any polls");
+                return;
+            }
+
+            auto poll = result.polls.front();
+            if (poll.status != "ACTIVE")
+            {
+                channel->addSystemMessage("Could not find an active poll");
+                return;
+            }
+
+            getHelix()->endPoll(
+                roomId, poll.id, false,
+                [channel](const HelixPoll &data) {
+                    // find most popular choice
+                    HelixPollChoice winner = data.choices.front();
+                    int totalVotes = 0;
+                    for (const auto &choice : data.choices)
+                    {
+                        totalVotes += choice.votes;
+                        if (choice.votes > winner.votes)
+                        {
+                            winner = choice;
+                        }
+                    }
+                    const double percent =
+                        100.0 * winner.votes / std::max(totalVotes, 1);
+
+                    channel->addSystemMessage(
+                        QString("Ended poll: '%1' - '%2' had %3 votes (%4%)")
+                            .arg(data.title, winner.title,
+                                 QString::number(winner.votes),
+                                 QString::number(percent, 'f', 1)));
+                },
+                [channel](const auto &error) {
+                    channel->addSystemMessage("Failed to end the poll - " +
+                                              error);
+                });
+        },
+        [channel = ctx.channel](const auto &error) {
+            channel->addSystemMessage("Failed to query polls - " + error);
+        });
+
+    return "";
+}
+
+QString cancelPoll(const CommandContext &ctx)
+{
+    const auto command = QStringLiteral("/cancelpoll");
+    if (ctx.twitchChannel == nullptr)
+    {
+        const auto err =
+            "The " % command % " command only works in Twitch channels";
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addSystemMessage(err);
+        }
+        else
+        {
+            qCWarning(chatterinoCommands) << "Error parsing command:" << err;
+        }
+        return "";
+    }
+
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addSystemMessage(
+            "You must be logged in to cancel a poll!");
+        return "";
+    }
+
+    const auto roomId = ctx.twitchChannel->roomId();
+    getHelix()->getPolls(
+        roomId, {}, 1, {},
+        [channel = ctx.channel, roomId](const auto &result) {
+            if (result.polls.empty())
+            {
+                channel->addSystemMessage("Failed to find any polls");
+                return;
+            }
+
+            auto poll = result.polls.front();
+            if (poll.status != "ACTIVE")
+            {
+                channel->addSystemMessage("Could not find an active poll");
+                return;
+            }
+
+            getHelix()->endPoll(
+                roomId, poll.id, true,
+                [channel](const HelixPoll &data) {
+                    channel->addSystemMessage(
+                        QString("Canceled poll: '%1'").arg(data.title));
+                },
+                [channel](const auto &error) {
+                    channel->addSystemMessage("Failed to cancel the poll - " +
+                                              error);
+                });
+        },
+        [channel = ctx.channel](const auto &error) {
+            channel->addSystemMessage("Failed to query polls - " + error);
+        });
+
+    return "";
+}
+
 }  // namespace chatterino::commands
