@@ -69,11 +69,10 @@ QString createPoll(const CommandContext &ctx)
 
 QString endPoll(const CommandContext &ctx)
 {
-    const auto command = QStringLiteral("/endpoll");
     if (ctx.twitchChannel == nullptr)
     {
-        const auto err =
-            "The " % command % " command only works in Twitch channels";
+        const QString err =
+            "The /endpoll command only works in Twitch channels";
         if (ctx.channel != nullptr)
         {
             ctx.channel->addSystemMessage(err);
@@ -146,11 +145,10 @@ QString endPoll(const CommandContext &ctx)
 
 QString cancelPoll(const CommandContext &ctx)
 {
-    const auto command = QStringLiteral("/cancelpoll");
     if (ctx.twitchChannel == nullptr)
     {
-        const auto err =
-            "The " % command % " command only works in Twitch channels";
+        const QString err =
+            "The /cancelpoll command only works in Twitch channels";
         if (ctx.channel != nullptr)
         {
             ctx.channel->addSystemMessage(err);
