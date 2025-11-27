@@ -156,9 +156,9 @@ void NotificationController::notifyTwitchChannelLive(
 void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
-    for (const auto &s :
-         getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200) |
-             std::views::reverse)
+    auto snapshot =
+        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200);
+    for (const auto &s : snapshot | std::views::reverse)
     {
         if (s->id == id)
         {

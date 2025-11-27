@@ -33,8 +33,8 @@ QString sendReply(const CommandContext &ctx)
     QString username = ctx.words[1];
     stripChannelName(username);
 
-    for (const auto &msg :
-         ctx.twitchChannel->getMessageSnapshot() | std::views::reverse)
+    auto snapshot = ctx.twitchChannel->getMessageSnapshot();
+    for (const auto &msg : snapshot | std::views::reverse)
     {
         if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
         {
