@@ -6,55 +6,12 @@
 
 using namespace chatterino;
 
-namespace chatterino {
-
 template <typename T>
-std::ostream &operator<<(std::ostream &os,
-                         const LimitedQueueSnapshot<T> &snapshot)
-{
-    os << "[ ";
-    for (size_t i = 0; i < snapshot.size(); ++i)
-    {
-        os << snapshot[i] << ' ';
-    }
-    os << "]";
-
-    return os;
-}
-
-}  // namespace chatterino
-
-namespace std {
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const vector<T> &vec)
-{
-    os << "[ ";
-    for (const auto &item : vec)
-    {
-        os << item << ' ';
-    }
-    os << "]";
-
-    return os;
-}
-}  // namespace std
-
-template <typename T>
-inline void SNAPSHOT_EQUALS(const LimitedQueueSnapshot<T> &snapshot,
+inline void SNAPSHOT_EQUALS(const std::vector<T> &snapshot,
                             const std::vector<T> &values,
                             const std::string &msg)
 {
-    SCOPED_TRACE(msg);
-    ASSERT_EQ(snapshot.size(), values.size())
-        << "snapshot = " << snapshot << " values = " << values;
-
-    if (snapshot.size() != values.size())
-        return;
-
-    for (size_t i = 0; i < snapshot.size(); ++i)
-    {
-        EXPECT_EQ(snapshot[i], values[i]) << "i = " << i;
-    }
+    EXPECT_EQ(snapshot, values) << msg;
 }
 
 TEST(LimitedQueue, PushBack)

@@ -71,13 +71,12 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
-LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot() const
+std::vector<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
 }
 
-LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot(
-    size_t nItems) const
+std::vector<MessagePtr> Channel::getMessageSnapshot(size_t nItems) const
 {
     return this->messages_.lastN(nItems);
 }
@@ -147,7 +146,7 @@ void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 
 void Channel::disableAllMessages()
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    std::vector<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.size();
     for (int i = 0; i < snapshotLength; i++)
     {
