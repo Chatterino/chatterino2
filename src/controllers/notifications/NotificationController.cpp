@@ -16,6 +16,8 @@
 
 #include <QUrl>
 
+#include <ranges>
+
 namespace ranges = std::ranges;
 
 namespace chatterino {

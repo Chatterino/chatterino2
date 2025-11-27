@@ -6,6 +6,8 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Twitch.hpp"
 
+#include <ranges>
+
 namespace chatterino::commands {
 
 QString sendReply(const CommandContext &ctx)
