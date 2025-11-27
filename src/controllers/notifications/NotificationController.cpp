@@ -154,19 +154,10 @@ void NotificationController::notifyTwitchChannelLive(
 void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
-    const std::vector<MessagePtr> snapshot =
-        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200);
-
-    // Guard against empty snapshot to prevent underflow and invalid access
-    if (snapshot.size() == 0)
+    for (const auto &s :
+         getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200) |
+             std::views::reverse)
     {
-        return;
-    }
-
-    for (size_t i = snapshot.size() - 1; i >= 0; --i)
-    {
-        const auto &s = snapshot[i];
-
         if (s->id == id)
         {
             s->flags.set(MessageFlag::Disabled);

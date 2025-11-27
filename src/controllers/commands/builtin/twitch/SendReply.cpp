@@ -31,10 +31,9 @@ QString sendReply(const CommandContext &ctx)
     QString username = ctx.words[1];
     stripChannelName(username);
 
-    auto snapshot = ctx.twitchChannel->getMessageSnapshot();
-    for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
+    for (const auto &msg :
+         ctx.twitchChannel->getMessageSnapshot() | std::views::reverse)
     {
-        const auto &msg = *it;
         if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
         {
             // found most recent message by user
