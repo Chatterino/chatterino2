@@ -471,14 +471,14 @@ void EmotePopup::reloadEmotes()
 
     if (auto *holder = this->channel_->emotes())
     {
-        for (const auto &item : holder->items())
+        for (const auto &data : holder->providerData())
         {
-            auto provider = item.provider.lock();
+            auto provider = data.provider.lock();
             if (!provider || !provider->hasChannelEmotes())
             {
                 continue;
             }
-            addEmotes(*channelChannel, *item.emotes, provider->name());
+            addEmotes(*channelChannel, *data.emotes, provider->name());
         }
     }
 
@@ -594,14 +594,14 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
 
     if (auto *holder = this->channel_->emotes())
     {
-        for (const auto &item : holder->items())
+        for (const auto &data : holder->providerData())
         {
-            auto filtered = filterEmoteMap(searchText, item.emotes);
+            auto filtered = filterEmoteMap(searchText, data.emotes);
             if (filtered.empty())
             {
                 continue;
             }
-            auto provider = item.provider.lock();
+            auto provider = data.provider.lock();
             if (!provider || !provider->hasChannelEmotes())
             {
                 continue;

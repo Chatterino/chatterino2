@@ -30,7 +30,7 @@ class EmoteHolder
 {
 public:
     /// An entry for a single provider
-    struct Item {
+    struct ProviderData {
         std::weak_ptr<EmoteProvider> provider;
         QString id;
         EmoteMapPtr emotes;
@@ -51,19 +51,19 @@ public:
     ///                      message will always be added to the channel.
     void refresh(bool manualRefresh);
 
-    Item *itemByProvider(const std::weak_ptr<EmoteProvider> &provider);
-    std::span<const Item> items() const
+    ProviderData *dataForProvider(const std::weak_ptr<EmoteProvider> &provider);
+    std::span<const ProviderData> providerData() const
     {
-        return this->items_;
+        return this->providerData_;
     }
 
 private:
-    static void refreshItem(const Item &item, Channel *channel,
-                            bool manualRefresh);
+    static void refreshProvider(const ProviderData &data, Channel *channel,
+                                bool manualRefresh);
 
     void sort();
 
-    std::vector<Item> items_;
+    std::vector<ProviderData> providerData_;
 
     Channel *channel;
     pajlada::Signals::SignalHolder signalHolder;

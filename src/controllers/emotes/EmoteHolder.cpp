@@ -27,14 +27,14 @@ void EmoteHolder::initialize(const EmoteController &controller)
             continue;
         }
 
-        this->items_.emplace_back(Item{
+        this->providerData_.emplace_back(ProviderData{
             .provider = provider,
             .id = provider->id(),
             .emotes = EMPTY_EMOTE_MAP,
         });
         this->signalHolder.addConnection(provider->channelEmotesEnabled.connect(
             [this, provider](bool enabled) {
-                auto *item = this->itemByProvider(provider);
+                auto *item = this->dataForProvider(provider);
                 if (!item)
                 {
                     return;
@@ -46,7 +46,7 @@ void EmoteHolder::initialize(const EmoteController &controller)
                     return;
                 }
 
-                EmoteHolder::refreshItem(*item, this->channel, false);
+                EmoteHolder::refreshProvider(*item, this->channel, false);
             }));
     }
     this->sort();
@@ -54,11 +54,11 @@ void EmoteHolder::initialize(const EmoteController &controller)
 
 EmotePtr EmoteHolder::resolve(const EmoteName &query) const
 {
-    for (const auto &item : this->items_)
+    for (const auto &data : this->providerData_)
     {
-        assert(item.emotes);
-        auto it = item.emotes->find(query);
-        if (it != item.emotes->end())
+        assert(data.emotes);
+        auto it = data.emotes->find(query);
+        if (it != data.emotes->end())
         {
             return it->second;
         }
@@ -68,16 +68,16 @@ EmotePtr EmoteHolder::resolve(const EmoteName &query) const
 
 void EmoteHolder::refresh(bool manualRefresh)
 {
-    for (const auto &item : this->items_)
+    for (const auto &item : this->providerData_)
     {
-        EmoteHolder::refreshItem(item, this->channel, manualRefresh);
+        EmoteHolder::refreshProvider(item, this->channel, manualRefresh);
     }
 }
 
-EmoteHolder::Item *EmoteHolder::itemByProvider(
+EmoteHolder::ProviderData *EmoteHolder::dataForProvider(
     const std::weak_ptr<EmoteProvider> &provider)
 {
-    for (auto &item : this->items_)
+    for (auto &item : this->providerData_)
     {
         if (weakOwnerEquals(item.provider, provider))
         {
@@ -87,10 +87,10 @@ EmoteHolder::Item *EmoteHolder::itemByProvider(
     return nullptr;
 }
 
-void EmoteHolder::refreshItem(const Item &item, Channel *channel,
-                              bool manualRefresh)
+void EmoteHolder::refreshProvider(const ProviderData &data, Channel *channel,
+                                  bool manualRefresh)
 {
-    auto provider = item.provider.lock();
+    auto provider = data.provider.lock();
     if (!provider || !channel)
     {
         return;
@@ -105,7 +105,7 @@ void EmoteHolder::refreshItem(const Item &item, Channel *channel,
     provider->loadChannelEmotes(
         channelSP,
         weakGuarded(
-            [provider = item.provider, manualRefresh, hasPreemptive = false](
+            [provider = data.provider, manualRefresh, hasPreemptive = false](
                 const std::shared_ptr<Channel> &chan,
                 ExpectedStr<EmoteLoadResult> result) mutable {
                 auto *emotes = chan->emotes();
@@ -114,7 +114,7 @@ void EmoteHolder::refreshItem(const Item &item, Channel *channel,
                     return;
                 }
 
-                auto *item = emotes->itemByProvider(provider);
+                auto *item = emotes->dataForProvider(provider);
                 if (!item)
                 {
                     return;
@@ -175,7 +175,7 @@ void EmoteHolder::refreshItem(const Item &item, Channel *channel,
 
 void EmoteHolder::sort()
 {
-    std::ranges::sort(this->items_, {}, [](const auto &item) {
+    std::ranges::sort(this->providerData_, {}, [](const auto &item) {
         auto provider = item.provider.lock();
         if (!provider)
         {

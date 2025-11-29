@@ -111,14 +111,14 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
 
             if (const auto *holder = tc->emotes())
             {
-                for (const auto &item : holder->items())
+                for (const auto &data : holder->providerData())
                 {
-                    auto provider = item.provider.lock();
+                    auto provider = data.provider.lock();
                     if (!provider)
                     {
                         continue;
                     }
-                    addEmotes(emotes, *item.emotes,
+                    addEmotes(emotes, *data.emotes,
                               u"Channel " % provider->name());
                 }
             }
