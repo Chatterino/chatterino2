@@ -17,8 +17,6 @@ QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize)
 
     const QRect bounds = screen->availableGeometry();
 
-    // If the hover frame would go off the bottom of the screen it should be moved above the cursor
-
     if (point.x() < bounds.left())
     {
         point.setX(bounds.left());
