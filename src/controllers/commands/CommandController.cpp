@@ -484,6 +484,9 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/shoutout", &commands::sendShoutout);
 
     this->registerCommand("/poll", &commands::createPoll);
+    this->registerCommand("/cancelpoll", &commands::cancelPoll);
+    this->registerCommand("/endpoll", &commands::endPoll);
+
     this->registerCommand("/prediction", &commands::createPrediction);
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
