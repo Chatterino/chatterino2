@@ -71,15 +71,15 @@ QString endPoll(const CommandContext &ctx)
 {
     if (ctx.twitchChannel == nullptr)
     {
-        const QString err =
-            "The /endpoll command only works in Twitch channels";
+        const auto err = QStringLiteral(
+            "The /endpoll command only works in Twitch channels");
         if (ctx.channel != nullptr)
         {
             ctx.channel->addSystemMessage(err);
         }
         else
         {
-            qCWarning(chatterinoCommands) << "Error parsing command:" << err;
+            qCWarning(chatterinoCommands) << "Invalid command context:" << err;
         }
         return "";
     }
@@ -114,19 +114,43 @@ QString endPoll(const CommandContext &ctx)
                     // find most popular choice
                     HelixPollChoice winner = data.choices.front();
                     int totalVotes = 0;
+                    int winnerCount = 0;
                     for (const auto &choice : data.choices)
                     {
                         totalVotes += choice.votes;
                         if (choice.votes > winner.votes)
                         {
                             winner = choice;
+                            winnerCount = 1;
+                        }
+                        else if (choice.votes == winner.votes)
+                        {
+                            winnerCount++;
                         }
                     }
+
+                    if (totalVotes == 0)
+                    {
+                        channel->addSystemMessage(
+                            QString("Poll ended with zero votes: '%1'")
+                                .arg(data.title));
+                        return;
+                    }
+
+                    if (winnerCount > 1)
+                    {
+                        channel->addSystemMessage(
+                            QString("Poll ended in a draw: '%1'")
+                                .arg(data.title));
+                        return;
+                    }
+
                     const double percent =
                         100.0 * winner.votes / std::max(totalVotes, 1);
 
                     channel->addSystemMessage(
-                        QString("Ended poll: '%1' - '%2' had %3 votes (%4%)")
+                        QString(
+                            "Ended poll: '%1' - '%2' won with %3 votes (%4%)")
                             .arg(data.title, winner.title,
                                  QString::number(winner.votes),
                                  QString::number(percent, 'f', 1)));
@@ -147,15 +171,15 @@ QString cancelPoll(const CommandContext &ctx)
 {
     if (ctx.twitchChannel == nullptr)
     {
-        const QString err =
-            "The /cancelpoll command only works in Twitch channels";
+        const auto err = QStringLiteral(
+            "The /cancelpoll command only works in Twitch channels");
         if (ctx.channel != nullptr)
         {
             ctx.channel->addSystemMessage(err);
         }
         else
         {
-            qCWarning(chatterinoCommands) << "Error parsing command:" << err;
+            qCWarning(chatterinoCommands) << "Invalid command context:" << err;
         }
         return "";
     }
