@@ -54,6 +54,7 @@
 - Dev: Added method to get the last N messages of a channel. (#6602, #6604)
 - Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
+- Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 
 ## 2.5.4
 
