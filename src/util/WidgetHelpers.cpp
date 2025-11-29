@@ -8,7 +8,7 @@
 
 namespace {
 
-QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize, int height)
+QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize)
 {
     if (screen == nullptr)
     {
@@ -17,8 +17,12 @@ QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize, int height)
 
     const QRect bounds = screen->availableGeometry();
 
-    bool stickRight = false;
-    bool stickBottom = false;
+    // If the hover frame would go off the bottom of the screen it should be moved above the cursor
+    if (point.y() + frameSize.height() > bounds.bottom())
+    {
+        const QPoint globalCursorPos = QCursor::pos();
+        point.setY(globalCursorPos.y() - frameSize.height() - 16);
+    }
 
     if (point.x() < bounds.left())
     {
@@ -30,19 +34,11 @@ QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize, int height)
     }
     if (point.x() + frameSize.width() > bounds.right())
     {
-        stickRight = true;
         point.setX(bounds.right() - frameSize.width());
     }
     if (point.y() + frameSize.height() > bounds.bottom())
     {
-        stickBottom = true;
         point.setY(bounds.bottom() - frameSize.height());
-    }
-
-    if (stickRight && stickBottom)
-    {
-        const QPoint globalCursorPos = QCursor::pos();
-        point.setY(globalCursorPos.y() - height - 16);
     }
 
     return point;
@@ -51,8 +47,7 @@ QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize, int height)
 /// Move the `window` into the `screen` geometry if it's not already in there.
 void moveWithinScreen(QWidget *window, QScreen *screen, QPoint point)
 {
-    auto checked =
-        applyBounds(screen, point, window->frameSize(), window->height());
+    auto checked = applyBounds(screen, point, window->frameSize());
     window->move(checked);
 }
 
@@ -72,8 +67,7 @@ QRect checkInitialBounds(QRect initialBounds, BoundsChecking mode)
         case BoundsChecking::CursorPosition: {
             return QRect{
                 applyBounds(QGuiApplication::screenAt(QCursor::pos()),
-                            initialBounds.topLeft(), initialBounds.size(),
-                            initialBounds.height()),
+                            initialBounds.topLeft(), initialBounds.size()),
                 initialBounds.size(),
             };
         }
@@ -82,8 +76,7 @@ QRect checkInitialBounds(QRect initialBounds, BoundsChecking mode)
         case BoundsChecking::DesiredPosition: {
             return QRect{
                 applyBounds(QGuiApplication::screenAt(initialBounds.topLeft()),
-                            initialBounds.topLeft(), initialBounds.size(),
-                            initialBounds.height()),
+                            initialBounds.topLeft(), initialBounds.size()),
                 initialBounds.size(),
             };
         }
