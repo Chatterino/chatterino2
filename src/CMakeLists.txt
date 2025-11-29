@@ -99,6 +99,10 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/GetVIPs.cpp
         controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/Poll.cpp
+        controllers/commands/builtin/twitch/Poll.hpp
+        controllers/commands/builtin/twitch/Prediction.cpp
+        controllers/commands/builtin/twitch/Prediction.hpp
         controllers/commands/builtin/twitch/Raid.cpp
         controllers/commands/builtin/twitch/Raid.hpp
         controllers/commands/builtin/twitch/RemoveModerator.cpp
@@ -256,6 +260,12 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/JSON.cpp
+        controllers/plugins/api/JSON.hpp
+        controllers/plugins/api/JSONParse.cpp
+        controllers/plugins/api/JSONParse.hpp
+        controllers/plugins/api/JSONStringify.cpp
+        controllers/plugins/api/JSONStringify.hpp
         controllers/plugins/api/Message.cpp
         controllers/plugins/api/Message.hpp
         controllers/plugins/api/WebSocket.cpp

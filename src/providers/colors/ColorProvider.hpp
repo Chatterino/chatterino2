@@ -13,6 +13,7 @@ enum class ColorType {
     Subscription,
     Whisper,
     RedeemedHighlight,
+    WatchStreak,
     FirstMessageHighlight,
     ElevatedMessageHighlight,
     ThreadMessageHighlight,

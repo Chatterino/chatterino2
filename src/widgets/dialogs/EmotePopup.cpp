@@ -508,7 +508,7 @@ void EmotePopup::reloadEmotes()
         addEmotes(*globalChannel, *provider->globalEmotes(), provider->name());
     }
 
-    if (subChannel->getMessageSnapshot().size() == 0)
+    if (!subChannel->hasMessages())
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
