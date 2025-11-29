@@ -56,6 +56,7 @@
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 - Dev: Added options to close multiple visible tabs. (#6515)
+- Bugfix: Fix tooltip vertical positioning on Wayland. (#6611)
 
 ## 2.5.4
 
