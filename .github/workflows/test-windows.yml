@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$Env:GITHUB_ENV"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -56,7 +56,7 @@ jobs:
 
       - name: Setup sccache
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.19
+        uses: hendrikmuhs/ccache-action@v1.2.20
         with:
           variant: sccache
           # only save on the default (master) branch
