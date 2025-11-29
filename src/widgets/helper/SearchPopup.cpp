@@ -248,7 +248,7 @@ std::vector<MessagePtr> SearchPopup::buildSnapshot()
         ChannelView &sharedView = channel.get();
 
         const FilterSetPtr filterSet = sharedView.getFilterSet();
-        const std::vector<MessagePtr> &snapshot =
+        std::vector<MessagePtr> snapshot =
             sharedView.channel()->getMessageSnapshot();
 
         for (const auto &message : snapshot)

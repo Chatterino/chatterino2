@@ -6,6 +6,8 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Twitch.hpp"
 
+#include <ranges>
+
 namespace chatterino::commands {
 
 QString sendReply(const CommandContext &ctx)
@@ -32,9 +34,8 @@ QString sendReply(const CommandContext &ctx)
     stripChannelName(username);
 
     auto snapshot = ctx.twitchChannel->getMessageSnapshot();
-    for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
+    for (const auto &msg : snapshot | std::views::reverse)
     {
-        const auto &msg = *it;
         if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
         {
             // found most recent message by user
