@@ -52,6 +52,10 @@
 - Dev: Set settings directory to temporary one used in tests. (#6584)
 - Dev: Check Lua unwinding and version in tests. (#6586)
 - Dev: Added method to get the last N messages of a channel. (#6602, #6604)
+- Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
+- Dev: Simplified uses of `getMessageSnapshot`. (#6607)
+- Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
+- Dev: Added options to close multiple visible tabs. (#6515)
 
 ## 2.5.4
 

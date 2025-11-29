@@ -7,7 +7,6 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -480,15 +479,14 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 
     for (const auto &chan : activeChannels)
     {
-        LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
+        MessagePtr last = chan->getLastMessage();
 
         bool replaceMessage =
-            snapshot.size() > 0 && snapshot[snapshot.size() - 1]->flags.has(
-                                       MessageFlag::DisconnectedMessage);
+            last && last->flags.has(MessageFlag::DisconnectedMessage);
 
         if (replaceMessage)
         {
-            chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
+            chan->replaceMessage(last, reconnected);
         }
         else
         {

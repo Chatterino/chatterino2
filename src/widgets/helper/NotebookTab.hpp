@@ -162,6 +162,9 @@ private:
     int growWidth_ = 0;
 
     QMenu menu_;
+    QMenu *closeMultipleTabsMenu_{};
+    QAction *closeTabsToLeftAction_{};
+    QAction *closeTabsToRightAction_{};
 
     pajlada::Signals::SignalHolder managedConnections_;
 };

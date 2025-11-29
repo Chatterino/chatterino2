@@ -13,7 +13,6 @@
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -693,7 +692,7 @@ void ChannelView::performLayout(bool causedByScrollbar, bool causedByShow)
 }
 
 void ChannelView::layoutVisibleMessages(
-    const LimitedQueueSnapshot<MessageLayoutPtr> &messages)
+    const std::vector<MessageLayoutPtr> &messages)
 {
     const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
     const auto layoutWidth = this->getLayoutWidth();
@@ -731,9 +730,8 @@ void ChannelView::layoutVisibleMessages(
     }
 }
 
-void ChannelView::updateScrollbar(
-    const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-    bool causedByScrollbar, bool causedByShow)
+void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
+                                  bool causedByScrollbar, bool causedByShow)
 {
     if (messages.size() == 0)
     {
@@ -820,7 +818,7 @@ QString ChannelView::getSelectedText()
 {
     QString result = "";
 
-    LimitedQueueSnapshot<MessageLayoutPtr> &messagesSnapshot =
+    std::vector<MessageLayoutPtr> &messagesSnapshot =
         this->getMessagesSnapshot();
 
     Selection selection = this->selection_;
@@ -897,7 +895,7 @@ const std::optional<MessageElementFlags> &ChannelView::getOverrideFlags() const
     return this->overrideFlags_;
 }
 
-LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
+std::vector<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
 {
     this->snapshotGuard_.guard();
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
