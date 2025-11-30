@@ -13,7 +13,7 @@
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Minor: Added a setting to show the stream title in live messages. (#6572)
-- Minor: Added broadcaster-only `/poll` command to start a poll. (#6583)
+- Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction` command to start a prediction. (#6583)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Bugfix: Fixed some commands and filters not working as expected in seach popups. (#6539)
@@ -53,6 +53,9 @@
 - Dev: Check Lua unwinding and version in tests. (#6586)
 - Dev: Added method to get the last N messages of a channel. (#6602, #6604)
 - Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
+- Dev: Simplified uses of `getMessageSnapshot`. (#6607)
+- Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
+- Dev: Added options to close multiple visible tabs. (#6515)
 
 ## 2.5.4
 

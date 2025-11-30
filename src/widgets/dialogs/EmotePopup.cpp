@@ -483,7 +483,7 @@ void EmotePopup::reloadEmotes()
                   "7TV");
     }
 
-    if (subChannel->getMessageSnapshot().size() == 0)
+    if (!subChannel->hasMessages())
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
