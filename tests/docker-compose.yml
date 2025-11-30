@@ -1,0 +1,14 @@
+services:
+  http-server:
+    restart: always
+    image: ghcr.io/kevinastone/httpbox:master
+    command: "--port 9051"
+    ports:
+      - "9051:9051"
+  pubsub-server:
+    restart: always
+    image: ghcr.io/chatterino/twitch-pubsub-server-test:latest
+    command: "./server 0.0.0.0:9050 0.0.0.0:9052"
+    ports:
+      - "9050:9050"
+      - "9052:9052"

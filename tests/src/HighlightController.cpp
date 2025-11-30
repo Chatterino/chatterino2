@@ -2,6 +2,7 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
