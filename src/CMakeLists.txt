@@ -204,6 +204,8 @@ set(SOURCE_FILES
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
+        controllers/highlights/HighlightResult.cpp
+        controllers/highlights/HighlightResult.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
