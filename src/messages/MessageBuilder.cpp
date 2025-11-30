@@ -6,6 +6,8 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
+#include "controllers/emotes/EmoteHolder.hpp"
+#include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -420,12 +422,23 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
 EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
+    //  - Channel emotes
     //  - FrankerFaceZ Channel
     //  - BetterTTV Channel
     //  - 7TV Channel
+    //  - Global emotes
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
     //  - 7TV Global
+
+    if (auto *holder = twitchChannel->emotes())
+    {
+        auto channel = holder->resolve(name);
+        if (channel)
+        {
+            return channel;
+        }
+    }
 
     const auto *globalFfzEmotes = getApp()->getFfzEmotes();
     const auto *globalBttvEmotes = getApp()->getBttvEmotes();
@@ -457,6 +470,11 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     }
 
     // Check for global emotes
+    auto global = getApp()->getEmotes()->resolveGlobal(name);
+    if (global)
+    {
+        return global;
+    }
 
     emote = globalFfzEmotes->emote(name);
     if (emote)
