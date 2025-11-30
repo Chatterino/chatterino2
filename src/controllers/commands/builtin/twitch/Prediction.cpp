@@ -66,4 +66,147 @@ QString createPrediction(const CommandContext &ctx)
     return "";
 }
 
+QString endPrediction(const CommandContext &ctx)
+{
+    if (ctx.twitchChannel == nullptr)
+    {
+        const auto err = QStringLiteral(
+            "The /endprediction command only works in Twitch channels");
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addSystemMessage(err);
+        }
+        else
+        {
+            qCWarning(chatterinoCommands) << "Invalid command context:" << err;
+        }
+        return "";
+    }
+
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addSystemMessage(
+            "You must be logged in to end a prediction!");
+        return "";
+    }
+
+    const auto roomId = ctx.twitchChannel->roomId();
+    getHelix()->getPredictions(
+        roomId, {}, 1, {},
+        [channel = ctx.channel, roomId](const auto &result) {
+            if (result.predictions.empty())
+            {
+                channel->addSystemMessage("Failed to find any predictions");
+                return;
+            }
+
+            auto prediction = result.predictions.front();
+            if (prediction.status != "ACTIVE")
+            {
+                channel->addSystemMessage(
+                    "Could not find an active prediction");
+                return;
+            }
+
+            getHelix()->endPrediction(
+                roomId, prediction.id, false, {},
+                [channel](const HelixPrediction &data) {
+                    int points = 0;
+                    int users = 0;
+                    for (const auto &outcome : data.outcomes)
+                    {
+                        points += outcome.channelPoints;
+                        users += outcome.users;
+                    }
+
+                    channel->addSystemMessage(
+                        QString("Locked prediction with %1 points wagered by "
+                                "%2 users: '%3'")
+                            .arg(QString::number(points),
+                                 QString::number(users), data.title));
+                },
+                [channel](const auto &error) {
+                    channel->addSystemMessage("Failed to lock prediction - " +
+                                              error);
+                });
+        },
+        [channel = ctx.channel](const auto &error) {
+            channel->addSystemMessage("Failed to query predictions - " + error);
+        });
+
+    return "";
+}
+
+QString cancelPrediction(const CommandContext &ctx)
+{
+    if (ctx.twitchChannel == nullptr)
+    {
+        const auto err = QStringLiteral(
+            "The /cancelprediction command only works in Twitch channels");
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addSystemMessage(err);
+        }
+        else
+        {
+            qCWarning(chatterinoCommands) << "Invalid command context:" << err;
+        }
+        return "";
+    }
+
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addSystemMessage(
+            "You must be logged in to cancel a prediction!");
+        return "";
+    }
+
+    const auto roomId = ctx.twitchChannel->roomId();
+    getHelix()->getPredictions(
+        roomId, {}, 1, {},
+        [channel = ctx.channel, roomId](const auto &result) {
+            if (result.predictions.empty())
+            {
+                channel->addSystemMessage("Failed to find any predictions");
+                return;
+            }
+
+            auto prediction = result.predictions.front();
+            if (prediction.status != "ACTIVE" && prediction.status != "LOCKED")
+            {
+                channel->addSystemMessage("Could not find an open prediction");
+                return;
+            }
+
+            getHelix()->endPrediction(
+                roomId, prediction.id, true, {},
+                [channel](const HelixPrediction &data) {
+                    int points = 0;
+                    int users = 0;
+                    for (const auto &outcome : data.outcomes)
+                    {
+                        points += outcome.channelPoints;
+                        users += outcome.users;
+                    }
+
+                    channel->addSystemMessage(
+                        QString("Refunded %1 points to %2 users for "
+                                "prediction: '%3'")
+                            .arg(QString::number(points),
+                                 QString::number(users), data.title));
+                },
+                [channel](const auto &error) {
+                    channel->addSystemMessage("Failed to cancel prediction - " +
+                                              error);
+                });
+        },
+        [channel = ctx.channel](const auto &error) {
+            channel->addSystemMessage("Failed to query predictions - " + error);
+        });
+
+    return "";
+}
+
 }  // namespace chatterino::commands
