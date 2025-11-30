@@ -8,6 +8,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "util/Helpers.hpp"
 
 #include <chrono>
 
@@ -123,8 +124,8 @@ QString lockPrediction(const CommandContext &ctx)
                     channel->addSystemMessage(
                         QString("Locked prediction with %1 points wagered by "
                                 "%2 users: '%3'")
-                            .arg(QString::number(points),
-                                 QString::number(users), data.title));
+                            .arg(localizeNumbers(points),
+                                 localizeNumbers(users), data.title));
                 },
                 [channel](const auto &error) {
                     channel->addSystemMessage("Failed to lock prediction - " +
@@ -194,8 +195,8 @@ QString cancelPrediction(const CommandContext &ctx)
                     channel->addSystemMessage(
                         QString("Refunded %1 points to %2 users for "
                                 "prediction: '%3'")
-                            .arg(QString::number(points),
-                                 QString::number(users), data.title));
+                            .arg(localizeNumbers(points),
+                                 localizeNumbers(users), data.title));
                 },
                 [channel](const auto &error) {
                     channel->addSystemMessage("Failed to cancel prediction - " +
