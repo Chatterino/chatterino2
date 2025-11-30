@@ -1,7 +1,8 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/MessageFlag.hpp"
+#include "controllers/highlights/HighlightCheck.hpp"
 #include "singletons/Settings.hpp"
 
 #include <boost/signals2/connection.hpp>
@@ -10,6 +11,7 @@
 #include <QColor>
 #include <QUrl>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -20,6 +22,8 @@ namespace chatterino {
 class Badge;
 struct MessageParseArgs;
 class AccountController;
+enum class MessageFlag : std::int64_t;
+using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct HighlightResult {
     HighlightResult(bool _alert, bool _playSound,
@@ -73,14 +77,6 @@ struct HighlightResult {
 
     friend std::ostream &operator<<(std::ostream &os,
                                     const HighlightResult &result);
-};
-
-struct HighlightCheck {
-    using Checker = std::function<std::optional<HighlightResult>(
-        const MessageParseArgs &args, const std::vector<Badge> &badges,
-        const QString &senderName, const QString &originalMessage,
-        const MessageFlags &messageFlags, bool self)>;
-    Checker cb;
 };
 
 class HighlightController final
