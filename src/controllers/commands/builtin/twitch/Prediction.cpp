@@ -66,12 +66,12 @@ QString createPrediction(const CommandContext &ctx)
     return "";
 }
 
-QString endPrediction(const CommandContext &ctx)
+QString lockPrediction(const CommandContext &ctx)
 {
     if (ctx.twitchChannel == nullptr)
     {
         const auto err = QStringLiteral(
-            "The /endprediction command only works in Twitch channels");
+            "The /lockprediction command only works in Twitch channels");
         if (ctx.channel != nullptr)
         {
             ctx.channel->addSystemMessage(err);
@@ -87,7 +87,7 @@ QString endPrediction(const CommandContext &ctx)
     if (currentUser->isAnon())
     {
         ctx.channel->addSystemMessage(
-            "You must be logged in to end a prediction!");
+            "You must be logged in to lock a prediction!");
         return "";
     }
 

@@ -13,8 +13,8 @@ namespace chatterino::commands {
 /// /prediction
 QString createPrediction(const CommandContext &ctx);
 
-/// /endprediction
-QString endPrediction(const CommandContext &ctx);
+/// /lockprediction
+QString lockPrediction(const CommandContext &ctx);
 
 /// /cancelprediction
 QString cancelPrediction(const CommandContext &ctx);

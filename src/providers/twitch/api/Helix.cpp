@@ -3478,6 +3478,7 @@ void Helix::getPredictions(const QString broadcasterID, QStringList ids,
         .execute();
 }
 
+// End prediction can lock, cancel, or resolve an outstanding prediction.
 void Helix::endPrediction(const QString broadcasterID, const QString id,
                           const bool refundPoints,
                           const QString winningOutcomeID,
