@@ -346,7 +346,7 @@ void Toasts::ensureInitialized()
     {
         return;
     }
-    auto result = notify_init("chatterino2");
+    auto result = notify_init("Chatterino");
 
     if (result == 0)
     {
