@@ -32,8 +32,7 @@ class WindowManager;
 class ILogging;
 class Logging;
 class Paths;
-class Emotes;
-class IEmotes;
+class EmoteController;
 class Settings;
 class Fonts;
 class Toasts;
@@ -78,7 +77,7 @@ public:
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
-    virtual IEmotes *getEmotes() = 0;
+    virtual EmoteController *getEmotes() = 0;
     virtual AccountController *getAccounts() = 0;
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
@@ -151,7 +150,7 @@ private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Logging> logging;
-    std::unique_ptr<Emotes> emotes;
+    std::unique_ptr<EmoteController> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -197,7 +196,7 @@ public:
     }
     Theme *getThemes() override;
     Fonts *getFonts() override;
-    IEmotes *getEmotes() override;
+    EmoteController *getEmotes() override;
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;

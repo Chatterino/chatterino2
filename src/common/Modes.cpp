@@ -9,7 +9,10 @@ namespace chatterino {
 Modes::Modes()
 {
     QFile file(combinePath(QCoreApplication::applicationDirPath(), "modes"));
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
 
     while (!file.atEnd())
     {

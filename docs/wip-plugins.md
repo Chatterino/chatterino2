@@ -113,7 +113,7 @@ runtime.
 ## LuaLS type definitions
 
 Type definitions for LuaLS are available in
-[the `/plugin-meta.lua` file](./plugin-meta.lua). These are generated from [the C++
+[the `/lua-meta` directory](./lua-meta). These are generated from [the C++
 headers](../src/controllers/plugins/LuaAPI.hpp) of Chatterino using [a
 script](../scripts/make_luals_meta.py).
 
@@ -521,6 +521,58 @@ request:execute()
 -- ConnectionRefusedError
 ```
 
+#### `WebSocket`
+
+This API allows you to connect to WebSocket servers. For example, you can do the following:
+
+```lua
+local ws = c2.WebSocket.new("wss://echo.websocket.org",
+  -- this object is optional
+  {
+    on_open = function()
+      print("Connection established")
+    end,
+    on_close = function()
+      print("Connection closed")
+    end
+  }
+)
+-- handlers can be passed in the constructor or set here
+ws.on_text = function(data)
+  print("Got text: " .. data)
+end
+
+ws:send_text("Hello, World!")
+```
+
+##### `WebSocket.new(url[, options])`
+
+Create and connect to a WebSocket server specified by `url`.
+
+`options`, if specified, has to be a table with the following members (all optional):
+
+| Key         | Type                    | Description                                                                                                                             |
+| ----------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers`   | `table<string, string>` | Additional headers to set when connecting to the server. Any headers specified here will overwrite the ones Chatterino sets by default. |
+| `on_open`   | `fun()`                 | Called when the WebSocket handshake completed.                                                                                          |
+| `on_text`   | `fun(data: string)`     | Handler for text messages.                                                                                                              |
+| `on_binary` | `fun(data: string)`     | Handler for binary messages. Here, the data might not be valid UTF-8.                                                                   |
+| `on_close`  | `fun()`                 | Handler for a close event. This handler is also called if the connection failed.                                                        |
+
+The returned object has writable properties for the `on_close`, `on_text`, `on_binary`, and `on_open` handlers.
+
+##### `WebSocket:send_text(data)`
+
+Sends a text messsage to the server. If the socket is not yet connected, this message is queued and sent once a connection is established.
+
+##### `WebSocket:send_binary(data)`
+
+Sends a binary message to the server. If the socket is not yet connected, this message is queued and sent once a connection is established.
+
+##### `WebSocket:close()`
+
+Closes the WebSocket connection.
+
 #### `Message`
 
 Allows creation of rich chat messages. This is currently limited but is expected to be expanded soon.
@@ -555,7 +607,21 @@ c2.register_command("/testing", function(ctx)
 end)
 ```
 
-The full range of options can be found in the typing files ([LuaLS](./plugin-meta.lua), [TypeScript](./chatterino.d.ts)).
+The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
+
+#### `LinkType` enum
+
+This table describes links available to plugins.
+
+| `LinkType`        | `c2.Link.value` content            | Action on click                                                                      | Example                               |
+| ----------------- | ---------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------- |
+| `Url`             | Any URI that makes sense to open   | Open Link in browser                                                                 | `https://example.org`                 |
+| `UserInfo`        | A Twitch username or `id:TwitchID` | Open a usercard                                                                      | `mm2pl`, `id:117691339`               |
+| `UserAction`      | Command to run or message to send  | Send command/message                                                                 | `/timeout mm2pl 1s test`, `!spoilers` |
+| `JumpToChannel`   | [Channel name](#channelget_name)   | Go to already open split with given channel                                          | `#pajlada`                            |
+| `CopyToClipboard` | Any Unicode text                   | Copy value to clipboard                                                              | n/a                                   |
+| `JumpToMessage`   | ID of the message                  | Highlight the message with given ID in current split, do nothing if it was not found | n/a                                   |
+| `InsertText`      | Any text, command or emote         | Insert text into split input                                                         | n/a                                   |
 
 ### Input/Output API
 
@@ -704,3 +770,80 @@ require("data.file") -- tried to load Plugins/name/data/file.lua and errors beca
 #### `print(Args...)`
 
 The `print` global function is equivalent to calling `c2.log(c2.LogLevel.Debug, Args...)`
+
+### JSON API
+
+Chatterino includes the `chatterino.json` module for parsing and serializing JSON:
+
+```lua
+local json = require('chatterino.json')
+
+local parsed = json.parse('{"foo": 1}')
+-- { foo = 1 }
+
+local str = json.stringify({ foo = 1 })
+-- '{"foo":1}'
+```
+
+#### `parse(string[, options])`
+
+Parse a string as JSON. Errors if the input was invalid JSON. Use [`pcall`](https://www.lua.org/pil/8.4.html) when parsing untrusted/user input.
+
+```lua
+local json = require('chatterino.json')
+
+local parsed = json.parse('{"foo": 1}')
+-- { foo = 1 }
+
+local ok, result = pcall(json.parse, 'invalid input')
+-- ok = false, result = "Failed to parse JSON: syntax error..."
+
+local ok, result = pcall(json.parse, '{"foo": 1 /* foo */ }', { allow_comments = true })
+-- ok = true, result = { foo = 1 }
+```
+
+`options` can be an optional table with the following optional keys:
+
+- `allow_comments` (boolean): Allow C++ style comments (`/* foo */` and `// foo`)
+- `allow_trailing_commas` (boolean): Allow trailing comments in objects and arrays (`[1, 2,]`)
+
+#### `stringify(value[, options])`
+
+Stringify a Lua value as JSON. Only tables and scalars (strings/numbers/booleans) are supported.
+Empty tables are stringified as objects. To get an empty array, use the following: `{ [0] = json.null }` (will produce `[]`).
+Tables with `nil` values like `{ foo = nil }` will be stringified as `{}` (they are identical to the empty table).
+To get `null` there, use `json.null`.
+
+```lua
+local json = require('chatterino.json')
+
+local str = json.stringify({ foo = 1, bar = nil, baz = json.null })
+-- '{"foo":1,"baz":null}'
+
+local str = json.stringify({ foo = 1 }, { pretty = true })
+-- {
+--     "foo": 1
+-- }
+```
+
+`options` can be an optional table with the following optional keys:
+
+- `pretty` (boolean): Use newlines and indentation when stringifying
+- `indent_char` (string, default: space): Character to use when indenting object/array items
+- `indent_size` (number, default: 4): Amount of times `indent_char` is repeated per nesting-level
+
+#### `null`
+
+A sentinel to indicate a `null` value.
+This is useful if `nil` would hide the value (such as in tables):
+
+```lua
+local json = require('chatterino.json')
+
+local str = json.stringify({ foo = 1, bar = nil, baz = json.null })
+-- '{"foo":1,"baz":null}'
+
+local obj = json.parse(str)
+assert(obj.baz == json.null)
+assert(obj.baz ~= nil)
+```

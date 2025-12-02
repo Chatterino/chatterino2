@@ -3,7 +3,6 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageFlag.hpp"
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
@@ -178,7 +177,7 @@ public:
     /// Checks if this view has a #sourceChannel
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
+    std::vector<MessageLayoutPtr> &getMessagesSnapshot();
 
     void queueLayout();
     void invalidateBuffers();
@@ -286,9 +285,8 @@ private:
 
     void performLayout(bool causedByScrollbar = false,
                        bool causedByShow = false);
-    void layoutVisibleMessages(
-        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+    void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
+    void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool causedByShow);
 
     void drawMessages(QPainter &painter, const QRect &area);
@@ -354,7 +352,7 @@ private:
     MessageLayoutPtr lastReadMessage_;
 
     ThreadGuard snapshotGuard_;
-    LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
+    std::vector<MessageLayoutPtr> snapshot_;
 
     /// @brief The backing (internal) channel
     ///

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "messages/LimitedQueueSnapshot.hpp"
-
 #include <boost/circular_buffer.hpp>
 
 #include <cassert>
@@ -318,10 +316,28 @@ public:
         return false;
     }
 
-    [[nodiscard]] LimitedQueueSnapshot<T> getSnapshot() const
+    [[nodiscard]] std::vector<T> getSnapshot() const
     {
         std::shared_lock lock(this->mutex_);
-        return LimitedQueueSnapshot<T>(this->buffer_);
+        return {this->buffer_.begin(), this->buffer_.end()};
+    }
+
+    [[nodiscard]] std::vector<T> lastN(size_t nItems) const
+    {
+        std::shared_lock lock(this->mutex_);
+        return {
+            this->buffer_.end() - std::min(nItems, this->buffer_.size()),
+            this->buffer_.end(),
+        };
+    }
+
+    [[nodiscard]] std::vector<T> firstN(size_t nItems) const
+    {
+        std::shared_lock lock(this->mutex_);
+        return {
+            this->buffer_.begin(),
+            this->buffer_.begin() + std::min(nItems, this->buffer_.size()),
+        };
     }
 
     // Actions

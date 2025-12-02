@@ -95,6 +95,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Signals",
                        "https://github.com/pajlada/signals",
                        ":/licenses/pajlada_signals.txt");
+            addLicense(form.getElement(), "Pajlada/Serialize",
+                       "https://github.com/pajlada/serialize",
+                       ":/licenses/pajlada_serialize.txt");
             addLicense(form.getElement(), "Websocketpp",
                        "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
@@ -130,11 +133,17 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "expected-lite",
                        "https://github.com/martinmoene/expected-lite",
                        ":/licenses/expected-lite.txt");
+            addLicense(form.getElement(), "certify",
+                       "https://github.com/djarek/certify",
+                       ":/licenses/certify.txt");
             addLicense(form.getElement(), "Howard Hinnant's date.h",
                        "https://github.com/HowardHinnant/date",
                        ":/licenses/howard-hinnant-date.txt");
             addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
                        ":/licenses/fmtlib.txt");
+            addLicense(form.getElement(), "Unicode",
+                       "https://www.unicode.org/copyright.html",
+                       ":/licenses/unicode.txt");
 #ifdef CHATTERINO_WITH_SPELLCHECK
             addLicense(form.getElement(), "Hunsppell",
                        "https://hunspell.github.io", ":/licenses/hunspell.txt");
@@ -162,7 +171,11 @@ AboutPage::AboutPage()
             auto l = contributors.emplace<FlowLayout>();
 
             QFile contributorsFile(":/contributors.txt");
-            contributorsFile.open(QFile::ReadOnly);
+            if (!contributorsFile.open(QFile::ReadOnly))
+            {
+                assert(false && "Resources not loaded");
+                qCWarning(chatterinoWidget) << "Resources not loaded";
+            }
 
             QTextStream stream(&contributorsFile);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -269,7 +282,12 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
             auto *edit = new QTextEdit;
 
             QFile file(licenseLink);
-            file.open(QIODevice::ReadOnly);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                assert(false && "License not found");
+                qCWarning(chatterinoWidget)
+                    << "License not found" << licenseLink;
+            }
             edit->setText(file.readAll());
             edit->setReadOnly(true);
 

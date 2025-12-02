@@ -155,6 +155,8 @@ public:
      */
     QString to_string();
 
+    bool operator==(const ChannelRef &other) const noexcept;
+
     /**
      * Static functions
      */

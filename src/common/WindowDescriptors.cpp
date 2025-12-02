@@ -14,7 +14,10 @@ namespace {
 QJsonArray loadWindowArray(const QString &settingsPath)
 {
     QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return {};
+    }
     QByteArray data = file.readAll();
     QJsonDocument document = QJsonDocument::fromJson(data);
     QJsonArray windows_arr = document.object().value("windows").toArray();

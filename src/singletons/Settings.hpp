@@ -320,6 +320,13 @@ public:
         true,
     };
 
+    /// The maximum length the contents of a deleted message can be
+    /// before we truncate it in the chat
+    IntSetting deletedMessageLengthLimit = {
+        "/behaviour/deletedMessageLengthLimit",
+        50,
+    };
+
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {
         "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
@@ -521,6 +528,11 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
+    BoolSetting enableWatchStreakHighlight = {
+        "/highlighting/watchStreak/enabled", true};
+    QStringSetting watchStreakHighlightColor = {
+        "/highlighting/watchStreak/color", ""};
+
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
         true,
@@ -686,6 +698,10 @@ public:
                                                true};
     BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
     BoolSetting showPronouns = {"/misc/showPronouns", false};
+    BoolSetting showTitleInLiveMessage = {
+        "/extraChannels/live/showTitle",
+        false,
+    };
 
     /// UI
 

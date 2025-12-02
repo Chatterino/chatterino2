@@ -25,6 +25,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/sound/MiniaudioBackend.hpp"
 #include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
@@ -44,7 +45,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/CrashHandler.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Logging.hpp"
@@ -164,7 +164,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , logging(new Logging(_settings))
-    , emotes(new Emotes)
+    , emotes(new EmoteController)
     , accounts(new AccountController)
     , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
@@ -235,6 +235,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
+    this->emotes->initialize();
 
     this->accounts->load();
 
@@ -345,7 +346,7 @@ Fonts *Application::getFonts()
     return this->fonts.get();
 }
 
-IEmotes *Application::getEmotes()
+EmoteController *Application::getEmotes()
 {
     assertInGuiThread();
     assert(this->emotes);

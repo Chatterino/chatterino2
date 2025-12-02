@@ -226,13 +226,10 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.managedConnect(
-        app->getFonts()->fontChanged, [=, this]() {
-            this->ui_.textEdit->setFont(
-                app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
-            this->ui_.replyLabel->setFont(app->getFonts()->getFont(
-                FontStyle::ChatMediumBold, this->scale()));
-        });
+    this->managedConnections_.managedConnect(app->getFonts()->fontChanged,
+                                             [this] {
+                                                 this->updateFonts();
+                                             });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &Button::leftClicked, [this] {
@@ -274,7 +271,6 @@ void SplitInput::triggerSelfMessageReceived()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -288,18 +284,7 @@ void SplitInput::scaleChangedEvent(float scale)
             this->ui_.vbox->setSpacing(this->marginForTheme());
         }
     }
-    // TODO: This font does _not_ get updated when you change your chat font
-    this->ui_.textEdit->setFont(
-        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
-
-    // TODO: This font does _not_ get updated when you change your chat font
-    // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
-    // meaning numbers get equal width & don't bounce around while the user is typing.
-    this->ui_.textEditLength->setFont(
-        app->getFonts()->getFont(FontStyle::TimestampMedium, scale));
-    // TODO: This font does _not_ get updated when you change your chat font
-    this->ui_.replyLabel->setFont(
-        app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
+    this->updateFonts();
 }
 
 void SplitInput::themeChangedEvent()
@@ -1417,6 +1402,20 @@ void SplitInput::checkSpellingChanged()
     {
         this->spellcheckHighlighter->setDocument(target);
     }
+}
+
+void SplitInput::updateFonts()
+{
+    auto *app = getApp();
+    this->ui_.textEdit->setFont(
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+
+    // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
+    // meaning numbers get equal width & don't bounce around while the user is typing.
+    this->ui_.textEditLength->setFont(
+        app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
+    this->ui_.replyLabel->setFont(
+        app->getFonts()->getFont(FontStyle::ChatMediumBold, this->scale()));
 }
 
 }  // namespace chatterino

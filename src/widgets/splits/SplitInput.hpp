@@ -195,6 +195,8 @@ protected:
 
     SpellCheckHighlighter *spellcheckHighlighter = nullptr;
 
+    void updateFonts();
+
 private Q_SLOTS:
     void editTextChanged();
 
