@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Image.hpp"
@@ -24,9 +23,9 @@
 #include <QLoggingCategory>
 #include <QString>
 
-namespace chatterino::commands {
+using namespace Qt::StringLiterals;
 
-using namespace literals;
+namespace chatterino::commands {
 
 QString setLoggingRules(const CommandContext &ctx)
 {
