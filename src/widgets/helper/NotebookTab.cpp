@@ -125,9 +125,53 @@ NotebookTab::NotebookTab(Notebook *notebook)
                           });
 
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
-    this->menu_.addMenu(closeMultipleTabsMenu_);
 
-    closeMultipleTabsMenu_->addAction("Close All Visible Tabs", [this]() {
+    const auto tabDirection = getSettings()->tabDirection.getEnum();
+    recreateCloseMultipleTabsMenu(tabDirection);
+    this->menu_.addMenu(closeMultipleTabsMenu_);
+    getSettings()->tabDirection.connect(
+        [this](int val) {
+            this->recreateCloseMultipleTabsMenu(
+                static_cast<NotebookTabLocation>(val));
+        },
+        this->signalHolder_);
+
+    this->menu_.addAction(
+        "Popup Tab",
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                   "popup", {{"window"}}),
+        [this]() {
+            if (auto *container = dynamic_cast<SplitContainer *>(this->page))
+            {
+                container->popup();
+            }
+        });
+
+    this->menu_.addAction("Duplicate Tab", [this]() {
+        this->notebook_->duplicatePage(this->page);
+    });
+
+    highlightNewMessagesAction_ =
+        new QAction("Mark Tab as Unread on New Messages", &this->menu_);
+    highlightNewMessagesAction_->setCheckable(true);
+    highlightNewMessagesAction_->setChecked(highlightEnabled_);
+    QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
+                     [this](bool checked) {
+                         this->highlightEnabled_ = checked;
+                     });
+    this->menu_.addAction(highlightNewMessagesAction_);
+
+    this->menu_.addSeparator();
+
+    this->notebook_->addNotebookActionsToMenu(&this->menu_);
+}
+
+void NotebookTab::recreateCloseMultipleTabsMenu(
+    const NotebookTabLocation tabDirection)
+{
+    this->closeMultipleTabsMenu_->clear();
+
+    this->closeMultipleTabsMenu_->addAction("Close All Visible Tabs", [this]() {
         auto reply = QMessageBox::question(
             this, "Close All Visible Tabs",
             "Are you sure you want to close all visible tabs?",
@@ -158,10 +202,9 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
-    // TODO(jupjohn): hook up to settings signal & rebuild menu
     QString beforeSelectedName;
     QString afterSelectedName;
-    switch (getSettings()->tabDirection.getEnum())
+    switch (tabDirection)
     {
         case Top:
         case Bottom:
@@ -180,7 +223,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
         [this, beforeSelectedName]() {
             auto reply = QMessageBox::question(
                 this, "Close Visible Tabs to " + beforeSelectedName,
-                "Are you sure you want to close all visible tabs to the " + beforeSelectedName.toLower() + "?",
+                "Are you sure you want to close all visible tabs to the " +
+                    beforeSelectedName.toLower() + "?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
             if (reply != QMessageBox::Yes)
@@ -219,11 +263,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
         });
 
     this->closeTabsAfterSelectedAction_ = this->closeMultipleTabsMenu_->addAction(
-        "Close Visible Tabs to " + afterSelectedName, [this, afterSelectedName]()
-        {
+        "Close Visible Tabs to " + afterSelectedName,
+        [this, afterSelectedName]() {
             auto reply = QMessageBox::question(
                 this, "Close Visible Tabs to " + afterSelectedName,
-                "Are you sure you want to close all visible tabs to the " + afterSelectedName + "?",
+                "Are you sure you want to close all visible tabs to the " +
+                    afterSelectedName + "?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
             if (reply != QMessageBox::Yes)
@@ -255,70 +300,40 @@ NotebookTab::NotebookTab(Notebook *notebook)
             }
         });
 
-    this->closeMultipleTabsMenu_->addAction(
-        "Close Other Visible Tabs", [this]() {
-            auto reply = QMessageBox::question(
-                this, "Close Other Visible Tabs",
-                "Are you sure you want to close all other visible tabs?",
-                QMessageBox::Yes | QMessageBox::Cancel);
+    this->closeMultipleTabsMenu_->addAction("Close Other Visible Tabs", [this]() {
+        auto reply = QMessageBox::question(
+            this, "Close Other Visible Tabs",
+            "Are you sure you want to close all other visible tabs?",
+            QMessageBox::Yes | QMessageBox::Cancel);
 
-            if (reply != QMessageBox::Yes)
+        if (reply != QMessageBox::Yes)
+        {
+            return;
+        }
+
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+        {
+            auto *p = this->notebook_->getPageAt(i);
+            if (p == this->page)
             {
-                return;
+                continue;
             }
 
-            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            auto *container = dynamic_cast<SplitContainer *>(p);
+            if (!container)
             {
-                auto *p = this->notebook_->getPageAt(i);
-                if (p == this->page)
-                {
-                    continue;
-                }
-
-                auto *container = dynamic_cast<SplitContainer *>(p);
-                if (!container)
-                {
-                    continue;
-                }
-
-                auto *tab = container->getTab();
-                if (!tab || !tab->isVisible())
-                {
-                    continue;
-                }
-
-                this->notebook_->removePage(p);
+                continue;
             }
-        });
 
-    this->menu_.addAction(
-        "Popup Tab",
-        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                   "popup", {{"window"}}),
-        [this]() {
-            if (auto *container = dynamic_cast<SplitContainer *>(this->page))
+            auto *tab = container->getTab();
+            if (!tab || !tab->isVisible())
             {
-                container->popup();
+                continue;
             }
-        });
 
-    this->menu_.addAction("Duplicate Tab", [this]() {
-        this->notebook_->duplicatePage(this->page);
+            this->notebook_->removePage(p);
+        }
     });
-
-    highlightNewMessagesAction_ =
-        new QAction("Mark Tab as Unread on New Messages", &this->menu_);
-    highlightNewMessagesAction_->setCheckable(true);
-    highlightNewMessagesAction_->setChecked(highlightEnabled_);
-    QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
-                     [this](bool checked) {
-                         this->highlightEnabled_ = checked;
-                     });
-    this->menu_.addAction(highlightNewMessagesAction_);
-
-    this->menu_.addSeparator();
-
-    this->notebook_->addNotebookActionsToMenu(&this->menu_);
 }
 
 void NotebookTab::showRenameDialog()
