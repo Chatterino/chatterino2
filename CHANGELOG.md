@@ -47,6 +47,7 @@
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: Use CMake's `FetchContent` for RapidJSON, PajladaSignals, PajladaSerialize, and PajladaSettings. (#6560, #6567, #6569)
 - Dev: The LuaLS meta files moved from `docs/plugin-meta.lua` to `docs/lua-meta/globals.lua`. (#6530)
+- Dev: Be more hesitant about setting saves. (#6620)
 - Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
