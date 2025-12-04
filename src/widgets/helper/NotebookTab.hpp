@@ -163,8 +163,8 @@ private:
 
     QMenu menu_;
     QMenu *closeMultipleTabsMenu_{};
-    QAction *closeTabsToLeftAction_{};
-    QAction *closeTabsToRightAction_{};
+    QAction *closeTabsBeforeSelectedAction_{};
+    QAction *closeTabsAfterSelectedAction_{};
 
     pajlada::Signals::SignalHolder managedConnections_;
 };

@@ -158,7 +158,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
-    this->closeTabsToLeftAction_ = this->closeMultipleTabsMenu_->addAction(
+    this->closeTabsBeforeSelectedAction_ = this->closeMultipleTabsMenu_->addAction(
         "Close Visible Tabs to Left", [this]() {
             auto reply = QMessageBox::question(
                 this, "Close Visible Tabs to Left",
@@ -200,7 +200,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
             }
         });
 
-    this->closeTabsToRightAction_ = this->closeMultipleTabsMenu_->addAction(
+    this->closeTabsAfterSelectedAction_ = this->closeMultipleTabsMenu_->addAction(
         "Close Visible Tabs to Right", [this]() {
             auto reply = QMessageBox::question(
                 this, "Close Visible Tabs to Right",
@@ -1065,8 +1065,8 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
 
                 this->closeMultipleTabsMenu_->setEnabled(visibleTabCount > 1);
 
-                this->closeTabsToLeftAction_->setEnabled(selectedTabIndex > 0);
-                this->closeTabsToRightAction_->setEnabled(
+                this->closeTabsBeforeSelectedAction_->setEnabled(selectedTabIndex > 0);
+                this->closeTabsAfterSelectedAction_->setEnabled(
                     selectedTabIndex != -1 &&
                     selectedTabIndex < (visibleTabCount - 1));
             }
