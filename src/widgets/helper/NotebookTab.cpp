@@ -158,11 +158,29 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
+    // TODO(jupjohn): hook up to settings signal & rebuild menu
+    QString beforeSelectedName;
+    QString afterSelectedName;
+    switch (getSettings()->tabDirection.getEnum())
+    {
+        case Top:
+        case Bottom:
+            beforeSelectedName = "Left";
+            afterSelectedName = "Right";
+            break;
+        case Left:
+        case Right:
+            beforeSelectedName = "Top";
+            afterSelectedName = "Bottom";
+            break;
+    }
+
     this->closeTabsBeforeSelectedAction_ = this->closeMultipleTabsMenu_->addAction(
-        "Close Visible Tabs to Left", [this]() {
+        "Close Visible Tabs to " + beforeSelectedName,
+        [this, beforeSelectedName]() {
             auto reply = QMessageBox::question(
-                this, "Close Visible Tabs to Left",
-                "Are you sure you want to close all visible tabs to the left?",
+                this, "Close Visible Tabs to " + beforeSelectedName,
+                "Are you sure you want to close all visible tabs to the " + beforeSelectedName.toLower() + "?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
             if (reply != QMessageBox::Yes)
@@ -201,10 +219,11 @@ NotebookTab::NotebookTab(Notebook *notebook)
         });
 
     this->closeTabsAfterSelectedAction_ = this->closeMultipleTabsMenu_->addAction(
-        "Close Visible Tabs to Right", [this]() {
+        "Close Visible Tabs to " + afterSelectedName, [this, afterSelectedName]()
+        {
             auto reply = QMessageBox::question(
-                this, "Close Visible Tabs to Right",
-                "Are you sure you want to close all visible tabs to the right?",
+                this, "Close Visible Tabs to " + afterSelectedName,
+                "Are you sure you want to close all visible tabs to the " + afterSelectedName + "?",
                 QMessageBox::Yes | QMessageBox::Cancel);
 
             if (reply != QMessageBox::Yes)
