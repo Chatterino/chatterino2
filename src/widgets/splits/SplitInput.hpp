@@ -156,6 +156,9 @@ protected:
         QLabel *textEditLength;
         LabelButton *sendButton;
         SvgButton *emoteButton;
+        QWidget *backwardsWrap;
+        QLineEdit *backwardsInput;
+        QLabel *backwardsLabel;
     } ui_;
 
     MessagePtr replyTarget_ = nullptr;
@@ -189,6 +192,34 @@ protected:
     QPropertyAnimation backgroundColorAnimation;
 
     void updateFonts();
+
+    bool inBackwardsSearch = false;
+
+    void startBackwardsSearch();
+    void stopBackwardsSearchIfNecessary();
+
+    /// Search through all previous messages for `backwardsQuery`
+    void refreshBackwardsSearch();
+
+    /// Cycle to the previous match or wrap around
+    void cycleBackwardsSearch();
+
+    /// Show the currently selected message in the input box
+    void updateSelectedBackwardsMatch();
+
+    QString basePlaceholder;
+    QString backwardsQuery;
+
+    struct BackwardsResult {
+        /// Index of the message in `prevMsg_`
+        qsizetype messageIdx = 0;
+        QString message;
+    };
+    std::vector<BackwardsResult> backwardsResults;
+
+    /// Index into `backwardsResults`
+    size_t backwardsResultIndex = 0;
+    bool backwardsSearchFailed = true;
 
 private Q_SLOTS:
     void editTextChanged();
