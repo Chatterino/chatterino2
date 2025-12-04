@@ -1102,7 +1102,8 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
 
                 this->closeMultipleTabsMenu_->setEnabled(visibleTabCount > 1);
 
-                this->closeTabsBeforeSelectedAction_->setEnabled(selectedTabIndex > 0);
+                this->closeTabsBeforeSelectedAction_->setEnabled(
+                    selectedTabIndex > 0);
                 this->closeTabsAfterSelectedAction_->setEnabled(
                     selectedTabIndex != -1 &&
                     selectedTabIndex < (visibleTabCount - 1));
