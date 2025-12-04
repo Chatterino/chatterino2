@@ -13,6 +13,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
@@ -201,6 +202,23 @@ QString debugTest(const CommandContext &ctx)
     {
         getApp()->getUpdates().checkForUpdates();
         ctx.channel->addSystemMessage(QString("checking for updates"));
+    }
+    else if (command == "save-settings")
+    {
+        ctx.channel->addSystemMessage(u"requesting settings save"_s);
+        auto res = getSettings()->requestSave();
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                ctx.channel->addSystemMessage(u"setting save failed"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                ctx.channel->addSystemMessage(u"setting save success"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                ctx.channel->addSystemMessage(u"setting save skipped"_s);
+                break;
+        }
     }
     else
     {

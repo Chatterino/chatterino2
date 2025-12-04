@@ -198,14 +198,14 @@ Settings::~Settings()
     Settings::instance_ = this->prevInstance_;
 }
 
-void Settings::requestSave() const
+pajlada::Settings::SettingManager::SaveResult Settings::requestSave() const
 {
     if (this->disableSaving)
     {
-        return;
+        return pajlada::Settings::SettingManager::SaveResult::Skipped;
     }
 
-    pajlada::Settings::SettingManager::gSave();
+    return pajlada::Settings::SettingManager::gSave();
 }
 
 void Settings::saveSnapshot()
