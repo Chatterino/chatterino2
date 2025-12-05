@@ -219,6 +219,51 @@ c2.register_callback(
 )
 ```
 
+#### `current_account()`
+
+Returns a `TwitchAccount` representing the current account. 
+
+#### `TwitchAccount`
+
+Represents a Twitch account. There can only be one selected at a time but
+unselected accounts stay valid. An account can become invalid if removed by the
+user in the settings. Using an invalid account produces an error.
+
+```lua
+local acc = c2.current_account()
+
+print(acc:is_valid()) -- true unless user removed account
+```
+
+##### `TwitchAccount:login()`
+
+Returns the login name of the account. This string may only contain lowercase ASCII.
+
+```lua
+print(acc:login()) -- "mm2pl"
+```
+
+##### `TwitchAccount:id()`
+
+Returns the Twitch user ID of the account. This uniquely and persistently identifies the account.
+
+```lua
+print(acc:id()) -- "117691339"
+```
+
+##### `TwitchAccount:color()`
+
+Returns the color in chat of this account. If the user has not sent any
+messages this will be `nil`.
+
+```lua
+print(acc:color()) -- "#ffdaa520"
+```
+
+##### `TwitchAccount:is_anon()`
+
+Returns `true` if this account is an anonymous account (no associated Twitch user).
+
 #### `ChannelType` enum
 
 This table describes channel types Chatterino supports. The values behind the
