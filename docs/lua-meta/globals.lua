@@ -60,6 +60,12 @@ c2.ChannelType = {
 ---@class c2.TwitchAccount
 c2.TwitchAccount = {}
 
+--- Returns true if the account this object points to is valid.
+--- If the object expired, returns false
+---
+---@return boolean success
+function c2.TwitchAccount:is_valid() end
+
 ---@return string user_login The (login) name of the account
 function c2.TwitchAccount:login() end
 
