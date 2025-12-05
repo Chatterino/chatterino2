@@ -66,7 +66,7 @@ function c2.TwitchAccount:user_login() end
 ---@return string user_id The Twitch user ID of the account
 function c2.TwitchAccount:user_id() end
 
----@return string color Color in chat of this account
+---@return string? color Color in chat of this account. `nil` if not yet known
 function c2.TwitchAccount:color() end
 
 ---@return boolean is_anon `true` if this account is an anonymous account (no associated Twitch user)

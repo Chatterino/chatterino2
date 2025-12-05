@@ -8,6 +8,8 @@
 
 #include <sol/sol.hpp>
 
+#include <optional>
+
 namespace {
 
 using namespace chatterino;
@@ -30,9 +32,14 @@ public:
         return this->shared()->getUserId();
     }
 
-    QString color() const
+    std::optional<QString> color() const
     {
-        return this->shared()->color().name(QColor::HexArgb);
+        auto c = this->shared()->color();
+        if (c.isValid())
+        {
+            return c.name(QColor::HexArgb);
+        }
+        return std::nullopt;
     }
 
     bool isAnon() const
