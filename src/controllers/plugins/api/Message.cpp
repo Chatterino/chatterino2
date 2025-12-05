@@ -326,7 +326,7 @@ struct ElementRef {
 
     MessageElement &ref() const
     {
-        auto *el = element();
+        auto *el = this->element();
         if (!el)
         {
             throw std::runtime_error("Element does not exist or expired");
@@ -336,7 +336,7 @@ struct ElementRef {
 
     const MessageElement &cref() const
     {
-        const auto *el = constElement();
+        const auto *el = this->constElement();
         if (!el)
         {
             throw std::runtime_error("Element does not exist or expired");
@@ -350,7 +350,7 @@ struct ElementRef {
     sol::optional<T &> as() const
     {
         // using ref() to error if the reference is invalid
-        auto *el = dynamic_cast<T *>(&ref());
+        auto *el = dynamic_cast<T *>(&this->ref());
         if (!el)
         {
             return sol::nullopt;
@@ -364,7 +364,7 @@ struct ElementRef {
     sol::optional<const T &> asConst() const
     {
         // using cref() to error if the reference is invalid
-        const auto *el = dynamic_cast<const T *>(&cref());
+        const auto *el = dynamic_cast<const T *>(&this->cref());
         if (!el)
         {
             return sol::nullopt;
@@ -375,7 +375,7 @@ struct ElementRef {
     template <typename T>
     bool is() const
     {
-        return dynamic_cast<const T *>(&cref()) != nullptr;
+        return dynamic_cast<const T *>(&this->cref()) != nullptr;
     }
 
     /// Visit this element by dynamic casting
@@ -389,7 +389,7 @@ struct ElementRef {
         using T0 = std::tuple_element_t<0, std::tuple<T...>>;
         using TReturn = std::invoke_result_t<Cb0, T0 &>;
 
-        return visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
+        return this->visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
     }
 
     bool operator==(const ElementRef &rhs) const
@@ -424,7 +424,8 @@ private:
         -> std::conditional_t<std::is_void_v<TReturn>, void,
                               sol::optional<TReturn>>
     {
-        auto *el = dynamic_cast<T *>(maybeConstElement<std::is_const_v<T>>());
+        auto *el =
+            dynamic_cast<T *>(this->maybeConstElement<std::is_const_v<T>>());
         if (!el)
         {
             if constexpr (sizeof...(rest) == 0)
@@ -571,20 +572,20 @@ struct MessageElements {
 
     ElementIterator begin() const
     {
-        return {msg, 0};
+        return {this->msg, 0};
     }
     ElementIterator end() const
     {
-        return {msg, msg->elements.size()};
+        return {this->msg, this->msg->elements.size()};
     }
 
     size_type size() const
     {
-        if (!msg)
+        if (!this->msg)
         {
             return 0;
         }
-        return msg->elements.size();
+        return this->msg->elements.size();
     }
 
     // NOLINTNEXTLINE
@@ -595,11 +596,11 @@ struct MessageElements {
 
     bool empty() const
     {
-        if (!msg)
+        if (!this->msg)
         {
             return true;
         }
-        return msg->elements.empty();
+        return this->msg->elements.empty();
     }
 
     // NOLINTNEXTLINE
@@ -669,9 +670,7 @@ void createUserType(sol::table &c2)
             }),
         "padding", sol::property([](const ElementRef &el) {
             return el.asConst<CircularImageElement>().map(
-                [](const CircularImageElement &el) {
-                    return el.padding();
-                });
+                &CircularImageElement::padding);
         }),
         "background", sol::property([](const ElementRef &el) {
             return el.as<CircularImageElement>().map(
@@ -681,12 +680,7 @@ void createUserType(sol::table &c2)
         }),
         "words", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
-                [](const TextElement &el) {
-                    return el.words();
-                },
-                [](const SingleLineTextElement &el) {
-                    return el.words();
-                });
+                &TextElement::words, &SingleLineTextElement::words);
         }),
         "color", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
@@ -699,22 +693,13 @@ void createUserType(sol::table &c2)
         }),
         "style", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
-                [](const TextElement &el) {
-                    return el.fontStyle();
-                },
-                [](const SingleLineTextElement &el) {
-                    return el.fontStyle();
-                });
+                &TextElement::fontStyle, &SingleLineTextElement::fontStyle);
         }),
         "lowercase", sol::property([](const ElementRef &el) {
-            return el.asConst<LinkElement>().map([](const LinkElement &el) {
-                return el.lowercase();
-            });
+            return el.asConst<LinkElement>().map(&LinkElement::lowercase);
         }),
         "original", sol::property([](const ElementRef &el) {
-            return el.asConst<LinkElement>().map([](const LinkElement &el) {
-                return el.original();
-            });
+            return el.asConst<LinkElement>().map(&LinkElement::original);
         }),
         "fallback_color", sol::property([](const ElementRef &el) {
             return el.asConst<MentionElement>().map(
@@ -730,9 +715,7 @@ void createUserType(sol::table &c2)
         }),
         "user_login_name", sol::property([](const ElementRef &el) {
             return el.asConst<MentionElement>().map(
-                [](const MentionElement &el) {
-                    return el.userLoginName();
-                });
+                &MentionElement::userLoginName);
         }),
         "time", sol::property([](const ElementRef &el) {
             return el.asConst<TimestampElement>().map(
@@ -818,10 +801,6 @@ void createUserType(sol::table &c2)
         }),
         "elements",
         [](const std::shared_ptr<Message> &msg) {
-            if (!msg)
-            {
-                throw std::runtime_error("No message instance");
-            }
             return MessageElements(msg);
         },
         "append_element",
