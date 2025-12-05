@@ -108,7 +108,7 @@ bool checkMessageUserName(const QString &userName, MessagePtr message)
 
 ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
+    std::vector<MessagePtr> snapshot = channel->getMessageSnapshot();
 
     ChannelPtr channelPtr;
     if (channel->isTwitchChannel())
@@ -121,10 +121,8 @@ ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
             std::make_shared<Channel>(channel->getName(), Channel::Type::None);
     }
 
-    for (size_t i = 0; i < snapshot.size(); i++)
+    for (const auto &message : snapshot)
     {
-        MessagePtr message = snapshot[i];
-
         if (checkMessageUserName(userName, message))
         {
             channelPtr->addMessage(message, MessageContext::Repost);

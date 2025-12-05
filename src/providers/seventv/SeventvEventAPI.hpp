@@ -1,39 +1,36 @@
 #pragma once
 
-#include "providers/liveupdates/BasicPubSubClient.hpp"
-#include "providers/liveupdates/BasicPubSubManager.hpp"
-#include "providers/seventv/eventapi/Subscription.hpp"
-#include "util/QStringHash.hpp"
-
 #include <pajlada/signals/signal.hpp>
+#include <QString>
+
+#include <memory>
 
 namespace chatterino {
 
+namespace liveupdates {
+struct Diag;
+}  // namespace liveupdates
+
 namespace seventv::eventapi {
-struct Dispatch;
 struct EmoteAddDispatch;
 struct EmoteUpdateDispatch;
 struct EmoteRemoveDispatch;
 struct UserConnectionUpdateDispatch;
-struct CosmeticCreateDispatch;
-struct EntitlementCreateDeleteDispatch;
 }  // namespace seventv::eventapi
 
 class SeventvBadges;
 
+class SeventvEventAPIPrivate;
 class SeventvEventAPI
-    : public BasicPubSubManager<seventv::eventapi::Subscription>
 {
     template <typename T>
-    using Signal =
-        pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
+    using Signal = pajlada::Signals::Signal<T>;
 
 public:
     SeventvEventAPI(QString host,
                     std::chrono::milliseconds defaultHeartbeatInterval =
                         std::chrono::milliseconds(25000));
-
-    ~SeventvEventAPI() override;
+    ~SeventvEventAPI();
 
     struct {
         Signal<seventv::eventapi::EmoteAddDispatch> emoteAdded;
@@ -65,34 +62,19 @@ public:
     /** Unsubscribes from cosmetics and entitlements in a Twitch channel */
     void unsubscribeTwitchChannel(const QString &id);
 
-protected:
-    std::shared_ptr<BasicPubSubClient<seventv::eventapi::Subscription>>
-        createClient(liveupdates::WebsocketClient &client,
-                     websocketpp::connection_hdl hdl) override;
-    void onMessage(
-        websocketpp::connection_hdl hdl,
-        BasicPubSubManager<seventv::eventapi::Subscription>::WebsocketMessagePtr
-            msg) override;
+    /// Stop the manager
+    ///
+    /// Used in tests to check that connections are closed (through #diag()).
+    /// Otherwise, calling the destructor is sufficient.
+    void stop();
+
+    /// Statistics about the opened/closed connections and received messages
+    ///
+    /// Used in tests.
+    const liveupdates::Diag &diag() const;
 
 private:
-    void handleDispatch(const seventv::eventapi::Dispatch &dispatch);
-
-    void onEmoteSetUpdate(const seventv::eventapi::Dispatch &dispatch);
-    void onUserUpdate(const seventv::eventapi::Dispatch &dispatch);
-    void onCosmeticCreate(
-        const seventv::eventapi::CosmeticCreateDispatch &cosmetic);
-    void onEntitlementCreate(
-        const seventv::eventapi::EntitlementCreateDeleteDispatch &entitlement);
-    void onEntitlementDelete(
-        const seventv::eventapi::EntitlementCreateDeleteDispatch &entitlement);
-
-    /** emote-set ids */
-    std::unordered_set<QString> subscribedEmoteSets_;
-    /** user ids */
-    std::unordered_set<QString> subscribedUsers_;
-    /** Twitch channel ids */
-    std::unordered_set<QString> subscribedTwitchChannels_;
-    std::chrono::milliseconds heartbeatInterval_;
+    std::unique_ptr<SeventvEventAPIPrivate> private_;
 };
 
 }  // namespace chatterino

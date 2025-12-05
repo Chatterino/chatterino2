@@ -99,6 +99,10 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/GetVIPs.cpp
         controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/Poll.cpp
+        controllers/commands/builtin/twitch/Poll.hpp
+        controllers/commands/builtin/twitch/Prediction.cpp
+        controllers/commands/builtin/twitch/Prediction.hpp
         controllers/commands/builtin/twitch/Raid.cpp
         controllers/commands/builtin/twitch/Raid.hpp
         controllers/commands/builtin/twitch/RemoveModerator.cpp
@@ -193,12 +197,15 @@ set(SOURCE_FILES
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
+        controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
+        controllers/highlights/HighlightResult.cpp
+        controllers/highlights/HighlightResult.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
@@ -254,6 +261,12 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/JSON.cpp
+        controllers/plugins/api/JSON.hpp
+        controllers/plugins/api/JSONParse.cpp
+        controllers/plugins/api/JSONParse.hpp
+        controllers/plugins/api/JSONStringify.cpp
+        controllers/plugins/api/JSONStringify.hpp
         controllers/plugins/api/Message.cpp
         controllers/plugins/api/Message.hpp
         controllers/plugins/api/WebSocket.cpp
@@ -345,6 +358,8 @@ set(SOURCE_FILES
         providers/bttv/BttvLiveUpdates.cpp
         providers/bttv/BttvLiveUpdates.hpp
 
+        providers/bttv/liveupdates/BttvLiveUpdateClient.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateClient.hpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
         providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
@@ -376,8 +391,8 @@ set(SOURCE_FILES
         providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubListener.hpp
         providers/liveupdates/BasicPubSubManager.hpp
-        providers/liveupdates/BasicPubSubWebsocket.hpp
 
         providers/pronouns/Pronouns.cpp
         providers/pronouns/Pronouns.hpp
@@ -648,6 +663,22 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+
+        widgets/dialogs/font/FontDialog.cpp
+        widgets/dialogs/font/FontDialog.hpp
+        widgets/dialogs/font/FontFamilyWidget.cpp
+        widgets/dialogs/font/FontFamilyWidget.hpp
+        widgets/dialogs/font/FontSettingDialog.cpp
+        widgets/dialogs/font/FontSettingDialog.hpp
+        widgets/dialogs/font/FontSizeWidget.cpp
+        widgets/dialogs/font/FontSizeWidget.hpp
+        widgets/dialogs/font/FontWeightWidget.cpp
+        widgets/dialogs/font/FontWeightWidget.hpp
+        widgets/dialogs/font/IntItem.cpp
+        widgets/dialogs/font/IntItem.hpp
+        widgets/dialogs/font/PreviewWidget.cpp
+        widgets/dialogs/font/PreviewWidget.hpp
+
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
@@ -702,6 +733,8 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
@@ -857,6 +890,17 @@ if (CHATTERINO_GENERATE_COVERAGE)
         )
 endif ()
 
+if(TARGET rapidjson)
+    message(DEBUG "Linking to rapidjson target")
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(DEBUG "RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
+else()
+    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
@@ -872,7 +916,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Signals
         websocketpp::websocketpp
         Threads::Threads
-        RapidJSON::RapidJSON
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
@@ -1078,6 +1121,10 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
+    # Disable min/max macros from Windows.h
+    $<$<BOOL:${WIN32}>:NOMINMAX>
+    # Exclude some headers when including Windows.h
+    $<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>
     )
 
 set(_c2_qt_defs
@@ -1174,8 +1221,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         OpenSSL::Crypto
         )
 
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
-
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
@@ -1243,9 +1288,6 @@ if (MSVC)
             -Wno-missing-designated-field-initializers
         )
     endif()
-
-    # Disable min/max macros from Windows.h
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall

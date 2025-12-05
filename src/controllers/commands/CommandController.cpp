@@ -15,6 +15,8 @@
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
 #include "controllers/commands/builtin/twitch/GetModerators.hpp"
 #include "controllers/commands/builtin/twitch/GetVIPs.hpp"
+#include "controllers/commands/builtin/twitch/Poll.hpp"
+#include "controllers/commands/builtin/twitch/Prediction.hpp"
 #include "controllers/commands/builtin/twitch/Raid.hpp"
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
@@ -480,6 +482,12 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
     this->registerCommand("/shoutout", &commands::sendShoutout);
+
+    this->registerCommand("/poll", &commands::createPoll);
+    this->registerCommand("/cancelpoll", &commands::cancelPoll);
+    this->registerCommand("/endpoll", &commands::endPoll);
+
+    this->registerCommand("/prediction", &commands::createPrediction);
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
     this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);

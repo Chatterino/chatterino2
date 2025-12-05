@@ -3,6 +3,7 @@
 #include "buttons/SvgButton.hpp"
 
 #include <QMouseEvent>
+#include <QWindow>
 
 #include <chrono>
 
@@ -10,31 +11,23 @@ namespace chatterino {
 
 namespace {
 
+constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS{
 #ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> popupFlags{
     BaseWindow::Dialog,
+#endif
     BaseWindow::EnableCustomFrame,
 };
-FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-    BaseWindow::Dialog,
-    BaseWindow::EnableCustomFrame,
-};
-#else
-FlagsEnum<BaseWindow::Flags> popupFlags{
-    BaseWindow::EnableCustomFrame,
-};
-FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
+constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS_CLOSE_AUTOMATICALLY{
     BaseWindow::EnableCustomFrame,
     BaseWindow::Frameless,
     BaseWindow::FramelessDraggable,
 };
-#endif
 
 }  // namespace
 
 DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
     : BaseWindow(
-          (closeAutomatically ? popupFlagsCloseAutomatically : popupFlags) |
+          (closeAutomatically ? POPUP_FLAGS_CLOSE_AUTOMATICALLY : POPUP_FLAGS) |
               BaseWindow::DisableLayoutSave |
               BaseWindow::ClearBuffersOnDpiChange,
           parent)
@@ -72,7 +65,8 @@ DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
 
 void DraggablePopup::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::MouseButton::LeftButton)
+    if (event->button() == Qt::MouseButton::LeftButton &&
+        !this->windowHandle()->startSystemMove())
     {
         this->dragTimer_.start(std::chrono::milliseconds(17));
         this->startPosDrag_ = event->pos();

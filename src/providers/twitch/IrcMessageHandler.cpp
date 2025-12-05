@@ -720,7 +720,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         if (!content.isEmpty())
         {
             addMessage(message, sink, channel, content, *getApp()->getTwitch(),
-                       true, false);
+                       true, false, msgType);
         }
     }
 
@@ -784,6 +784,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 calculateMessageTime(message).time(), channel);
 
             msg->flags.set(MessageFlag::Subscription);
+
             if (mirrored)
             {
                 msg->flags.set(MessageFlag::SharedMessage);
@@ -852,7 +853,15 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             parseTagString(messageText), login, displayName, userColor,
             calculateMessageTime(message).time());
 
-        msg->flags.set(MessageFlag::Subscription);
+        if (msgType == "viewermilestone")
+        {
+            msg->flags.set(MessageFlag::WatchStreak);
+        }
+        else
+        {
+            msg->flags.set(MessageFlag::Subscription);
+        }
+
         if (mirrored)
         {
             msg->flags.set(MessageFlag::SharedMessage);
@@ -1014,7 +1023,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
                                    ITwitchIrcServer &twitch, bool isSub,
-                                   bool isAction)
+                                   bool isAction, const QString &msgType)
 {
     assert(chan);
 
@@ -1138,7 +1147,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     {
         if (isSub)
         {
-            msg->flags.set(MessageFlag::Subscription);
+            if (msgType == "viewermilestone")
+            {
+                msg->flags.set(MessageFlag::WatchStreak);
+            }
+            else
+            {
+                msg->flags.set(MessageFlag::Subscription);
+            }
 
             if (tags.value("msg-id") != "announcement")
             {

@@ -71,9 +71,24 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
-LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
+std::vector<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
+}
+
+std::vector<MessagePtr> Channel::getMessageSnapshot(size_t nItems) const
+{
+    return this->messages_.lastN(nItems);
+}
+
+MessagePtr Channel::getLastMessage() const
+{
+    auto last = this->messages_.last();
+    if (last)
+    {
+        return *std::move(last);
+    }
+    return nullptr;
 }
 
 void Channel::addMessage(MessagePtr message, MessageContext context,
@@ -117,7 +132,7 @@ void Channel::addSystemMessage(const QString &contents)
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(), std::move(message), now,
+        this->getMessageSnapshot(20), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -130,7 +145,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelClear(
-        this->getMessageSnapshot(), std::move(message), now,
+        this->getMessageSnapshot(20), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -141,19 +156,15 @@ void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 
 void Channel::disableAllMessages()
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
-    for (int i = 0; i < snapshotLength; i++)
+    for (const auto &message : this->getMessageSnapshot())
     {
-        const auto &message = snapshot[i];
         if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout,
                                    MessageFlag::Whisper}))
         {
             continue;
         }
 
-        // FOURTF: disabled for now
-        const_cast<Message *>(message.get())->flags.set(MessageFlag::Disabled);
+        message->flags.set(MessageFlag::Disabled);
     }
 }
 

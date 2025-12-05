@@ -23,6 +23,7 @@
 #include <QKeySequence>
 #include <QMessageBox>
 #include <QSizeGrip>
+#include <QWindow>
 
 #ifdef Q_OS_WIN
 #    include <Windows.h>
@@ -232,6 +233,10 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
     switch (event->type())
     {
         case QEvent::MouseButtonPress: {
+            if (this->windowHandle()->startSystemMove())
+            {
+                return true;
+            }
             auto *evt = dynamic_cast<QMouseEvent *>(event);
             this->moving_ = true;
             this->moveOrigin_ = evt->globalPosition().toPoint();

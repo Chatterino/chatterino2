@@ -72,14 +72,18 @@ private:
               const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    static void openLibrariesFor(Plugin *plugin);
+    void openLibrariesFor(Plugin *plugin);
 
-    static void initSol(sol::state_view &lua, Plugin *plugin);
+    void initSol(sol::state_view &lua, Plugin *plugin);
 
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
     WebSocketPool webSocketPool_;
+
+    std::vector<
+        std::pair<std::string, std::function<sol::object(sol::state_view)>>>
+        loaders_;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;
