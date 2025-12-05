@@ -1150,9 +1150,9 @@ TEST_F(PluginTest, testAccounts)
 
     auto res = lua->script(R"lua(
         local current = c2.current_account()
-        assert(current:user_login() == "testaccount_420")
-        assert(current:user_id() == "117166826")
-        assert(current:color() == "#ff000000") -- unset
+        assert(current:login() == "testaccount_420")
+        assert(current:id() == "117166826")
+        assert(current:color() == nil) -- unset
         assert(not current:is_anon())
     )lua");
     ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
