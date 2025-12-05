@@ -1530,6 +1530,28 @@ TEST_P(PluginJsonTest, Run)
 INSTANTIATE_TEST_SUITE_P(PluginJson, PluginJsonTest,
                          testing::ValuesIn(discoverLuaTests("json")));
 
+class PluginMessageTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginMessageTest, Run)
+{
+    configure();
+
+    auto pfr = lua->safe_script_file(luaTestPath("message", GetParam()));
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug() << "Test" << GetParam() << "failed:";
+        sol::error err = pfr;
+        qDebug() << err.what();
+        return;
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
+                         testing::ValuesIn(discoverLuaTests("message")));
+
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
 {
