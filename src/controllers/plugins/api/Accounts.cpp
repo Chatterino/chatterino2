@@ -22,12 +22,12 @@ public:
     {
     }
 
-    QString userName() const
+    QString login() const
     {
         return this->shared()->getUserName();
     }
 
-    QString userID() const
+    QString id() const
     {
         return this->shared()->getUserId();
     }
@@ -72,14 +72,15 @@ namespace chatterino::lua::api {
 
 void createAccounts(sol::table &c2)
 {
-    c2.new_usertype<WeakTwitchAccount>(
+    c2.new_usertype<WeakTwitchAccount>(        //
         "TwitchAccount", sol::no_constructor,  //
         sol::meta_function::to_string,
-        &WeakTwitchAccount::userName,                //
-        "user_login", &WeakTwitchAccount::userName,  //
-        "user_id", &WeakTwitchAccount::userID,       //
-        "color", &WeakTwitchAccount::color,          //
-        "is_anon", &WeakTwitchAccount::isAnon        //
+        &WeakTwitchAccount::login,  //
+        "login",
+        &WeakTwitchAccount::login,             //
+        "id", &WeakTwitchAccount::id,          //
+        "color", &WeakTwitchAccount::color,    //
+        "is_anon", &WeakTwitchAccount::isAnon  //
     );
 
     c2.set_function("current_account", [] {

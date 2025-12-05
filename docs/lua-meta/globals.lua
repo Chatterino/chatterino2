@@ -61,10 +61,10 @@ c2.ChannelType = {
 c2.TwitchAccount = {}
 
 ---@return string user_login The (login) name of the account
-function c2.TwitchAccount:user_login() end
+function c2.TwitchAccount:login() end
 
 ---@return string user_id The Twitch user ID of the account
-function c2.TwitchAccount:user_id() end
+function c2.TwitchAccount:id() end
 
 ---@return string? color Color in chat of this account. `nil` if not yet known
 function c2.TwitchAccount:color() end
