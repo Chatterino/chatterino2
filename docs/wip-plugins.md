@@ -221,7 +221,7 @@ c2.register_callback(
 
 #### `current_account()`
 
-Returns a `TwitchAccount` representing the current account. 
+Returns a `TwitchAccount` representing the current account.
 
 #### `TwitchAccount`
 
