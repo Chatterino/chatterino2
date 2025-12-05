@@ -1,7 +1,5 @@
 #pragma once
 
-#include "messages/LimitedQueueSnapshot.hpp"
-
 #include <IrcMessage>
 
 #include <optional>
@@ -66,7 +64,7 @@ public:
 
 private:
     static float similarity(const MessagePtr &msg,
-                            const LimitedQueueSnapshot<MessagePtr> &messages);
+                            const std::vector<MessagePtr> &messages);
     static void setSimilarityFlags(const MessagePtr &message,
                                    const ChannelPtr &channel);
 };

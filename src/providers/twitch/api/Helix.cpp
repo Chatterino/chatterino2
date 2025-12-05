@@ -3218,6 +3218,214 @@ void Helix::getFollowedChannel(
         .execute();
 }
 
+void Helix::createPoll(QString broadcasterID, QString title,
+                       QStringList choices, const std::chrono::seconds duration,
+                       const int pointsPerVote,
+                       ResultCallback<> successCallback,
+                       FailureCallback<QString> failureCallback)
+{
+    // Prepare request body
+    QJsonArray choiceArray;
+    for (auto choice : choices)
+    {
+        choiceArray.append(QJsonObject{{{"title", choice}}});
+    }
+
+    QJsonObject json{{{"broadcaster_id", broadcasterID},
+                      {"title", title},
+                      {"duration", static_cast<int>(duration.count())},
+                      {"choices", choiceArray}}};
+
+    if (pointsPerVote > 0)
+    {
+        json["channel_points_voting_enabled"] = true;
+        json["channel_points_per_vote"] = static_cast<qint64>(pointsPerVote);
+    }
+
+    // Execute API call
+    this->makePost("polls", {})
+        .json(json)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for creating a poll was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+void Helix::getPolls(const QString broadcasterID, QStringList ids,
+                     const int first, const QString after,
+                     ResultCallback<HelixPolls> successCallback,
+                     FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("first", QString::number(first));
+
+    if (!after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+
+    for (const auto &id : ids)
+    {
+        urlQuery.addQueryItem("id", id);
+    }
+
+    this->makeGet("polls", urlQuery)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting polls was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            successCallback(HelixPolls(response));
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+void Helix::endPoll(const QString broadcasterID, const QString id,
+                    const bool immediatelyHide,
+                    ResultCallback<HelixPoll> successCallback,
+                    FailureCallback<QString> failureCallback)
+{
+    QJsonObject payload;
+    payload.insert("broadcaster_id", broadcasterID);
+    payload.insert("id", id);
+    payload.insert("status", immediatelyHide ? "ARCHIVED" : "TERMINATED");
+
+    this->makePatch("polls", {})
+        .json(payload)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for ending a poll was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            const auto data = HelixPolls(response);
+            successCallback(data.polls.front());
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+void Helix::createPrediction(const QString broadcasterID, const QString title,
+                             QStringList outcomes,
+                             const std::chrono::seconds duration,
+                             ResultCallback<> successCallback,
+                             FailureCallback<QString> failureCallback)
+{
+    // Prepare request body
+    QJsonArray outcomeArray;
+    for (auto outcome : outcomes)
+    {
+        outcomeArray.append(QJsonObject{{{"title", outcome}}});
+    }
+
+    QJsonObject payload;
+    payload.insert("broadcaster_id", broadcasterID);
+    payload.insert("title", title);
+    payload.insert("prediction_window", static_cast<int>(duration.count()));
+    payload.insert("outcomes", outcomeArray);
+
+    // Execute API call
+    this->makePost("predictions", {})
+        .json(payload)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for creating a prediction was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 void Helix::createEventSubSubscription(
     const eventsub::SubscriptionRequest &request, const QString &sessionID,
     ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,

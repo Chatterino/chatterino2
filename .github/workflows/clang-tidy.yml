@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -41,7 +41,7 @@ jobs:
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.21.0
+        uses: ZedThree/clang-tidy-review@v0.22.2
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
@@ -64,4 +64,4 @@ jobs:
             libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.21.0
+        uses: ZedThree/clang-tidy-review/upload@v0.22.2

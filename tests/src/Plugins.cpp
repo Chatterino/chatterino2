@@ -1,7 +1,9 @@
+#include "mocks/Helix.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "common/Channel.hpp"
 #    include "common/network/NetworkCommon.hpp"
+#    include "controllers/accounts/AccountController.hpp"
 #    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
@@ -44,6 +46,15 @@ const QString TEST_SETTINGS = R"(
         "enabledPlugins": [
             "test"
         ]
+    },
+    "accounts": {
+        "uid117166826": {
+            "username": "testaccount_420",
+            "userID": "117166826",
+            "clientID": "abc",
+            "oauthToken": "def"
+        },
+        "current": "testaccount_420"
     }
 }
 )";
@@ -108,11 +119,18 @@ public:
         return &this->logging;
     }
 
+    AccountController *getAccounts() override
+    {
+        return &this->accounts;
+    }
+
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
     mock::EmoteController emotes;
     MockTwitch twitch;
+    AccountController accounts;
+    mock::Helix helix;
 };
 
 QDir luaTestBaseDir(const QString &category)
@@ -201,6 +219,8 @@ protected:
 
         this->channel = app->twitch.mm2pl;
         this->rawpl->dataDirectory().mkpath(".");
+        initializeHelix(&this->app->helix);
+        this->app->accounts.load();
     }
 
     void TearDown() override
@@ -1556,6 +1576,20 @@ INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
 TEST(PluginMessageConstructionTest, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST_F(PluginTest, testAccounts)
+{
+    configure();
+
+    auto res = lua->script(R"lua(
+        local current = c2.current_account()
+        assert(current:login() == "testaccount_420")
+        assert(current:id() == "117166826")
+        assert(current:color() == nil) -- unset
+        assert(not current:is_anon())
+    )lua");
+    ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
 }
 
 #endif
