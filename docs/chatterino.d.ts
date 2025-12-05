@@ -376,6 +376,16 @@ declare namespace c2 {
         Original,
         Repost,
     }
+
+    class TwitchAccount implements IWeakResource {
+        is_valid(): boolean;
+        user_login(): string;
+        user_id(): string;
+        color(): string;
+        is_anon(): boolean;
+    }
+
+    function current_account(): TwitchAccount;
 }
 
 declare module "chatterino.json" {
