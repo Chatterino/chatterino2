@@ -377,7 +377,8 @@ declare namespace c2 {
         Repost,
     }
 
-    class TwitchAccount {
+    class TwitchAccount implements IWeakResource {
+        is_valid(): boolean;
         user_login(): string;
         user_id(): string;
         color(): string;

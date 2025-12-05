@@ -47,6 +47,11 @@ public:
         return this->shared()->isAnon();
     }
 
+    bool isValid() const
+    {
+        return !this->weak.expired();
+    }
+
     bool operator==(const WeakTwitchAccount &other) const
     {
         return weakOwnerEquals(this->weak, other.weak);
@@ -72,15 +77,16 @@ namespace chatterino::lua::api {
 
 void createAccounts(sol::table &c2)
 {
-    c2.new_usertype<WeakTwitchAccount>(        //
-        "TwitchAccount", sol::no_constructor,  //
-        sol::meta_function::to_string,
-        &WeakTwitchAccount::login,  //
-        "login",
-        &WeakTwitchAccount::login,             //
-        "id", &WeakTwitchAccount::id,          //
-        "color", &WeakTwitchAccount::color,    //
-        "is_anon", &WeakTwitchAccount::isAnon  //
+    c2.new_usertype<WeakTwitchAccount>(
+        // clang-format off
+        "TwitchAccount", sol::no_constructor,
+        sol::meta_function::to_string, &WeakTwitchAccount::login,
+        "is_valid", &WeakTwitchAccount::isValid,
+        "login", &WeakTwitchAccount::login,
+        "id", &WeakTwitchAccount::id,
+        "color", &WeakTwitchAccount::color,
+        "is_anon", &WeakTwitchAccount::isAnon
+        // clang-format on
     );
 
     c2.set_function("current_account", [] {
