@@ -353,6 +353,8 @@ set(SOURCE_FILES
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
+        providers/bttv/BttvBadges.cpp
+        providers/bttv/BttvBadges.hpp
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
         providers/bttv/BttvLiveUpdates.cpp
@@ -525,6 +527,8 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/BadgeRegistry.cpp
+        util/BadgeRegistry.hpp
         util/CancellationToken.hpp
         util/ChannelHelpers.hpp
         util/Clipboard.cpp

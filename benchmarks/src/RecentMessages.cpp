@@ -9,6 +9,7 @@
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -71,6 +72,11 @@ public:
         return &this->ffzBadges;
     }
 
+    BttvBadges *getBttvBadges() override
+    {
+        return &this->bttvBadges;
+    }
+
     SeventvBadges *getSeventvBadges() override
     {
         return &this->seventvBadges;
@@ -124,6 +130,7 @@ public:
     mock::EmptyLinkResolver linkResolver;
     ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
+    BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
     TwitchBadges twitchBadges;

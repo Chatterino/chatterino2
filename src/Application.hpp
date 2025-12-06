@@ -39,6 +39,7 @@ class Toasts;
 class IChatterinoBadges;
 class ChatterinoBadges;
 class FfzBadges;
+class BttvBadges;
 class SeventvBadges;
 class ImageUploader;
 class SeventvAPI;
@@ -90,6 +91,7 @@ public:
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual BttvBadges *getBttvBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ISoundController *getSound() = 0;
@@ -162,6 +164,7 @@ private:
     std::unique_ptr<HighlightController> highlights;
     std::unique_ptr<TwitchIrcServer> twitch;
     std::unique_ptr<FfzBadges> ffzBadges;
+    std::unique_ptr<BttvBadges> bttvBadges;
     std::unique_ptr<SeventvBadges> seventvBadges;
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;
@@ -206,6 +209,7 @@ public:
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
+    BttvBadges *getBttvBadges() override;
     SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;

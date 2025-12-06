@@ -61,6 +61,11 @@ public:
         this->ws_.close();
     }
 
+    void sendText(const QByteArray &data)
+    {
+        this->ws_.sendText(data);
+    }
+
 protected:
     /**
      * @return true if this client subscribed to this subscription

@@ -931,6 +931,7 @@ TEST_F(PluginTest, MessageElementFlag)
     )lua");
 
     const char *VALUES = "AlwaysShow=0x2000000,"
+                         "BadgeBttv=0x40,"
                          "BadgeChannelAuthority=0x8000,"
                          "BadgeChatterino=0x40000,"
                          "BadgeFfz=0x80000,"

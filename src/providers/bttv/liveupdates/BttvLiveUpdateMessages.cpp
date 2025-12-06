@@ -2,6 +2,8 @@
 
 namespace {
 
+using namespace Qt::Literals;
+
 bool tryParseChannelId(QString &channelId)
 {
     if (!channelId.startsWith("twitch:"))
@@ -47,6 +49,23 @@ bool BttvLiveUpdateEmoteRemoveMessage::validate() const
 {
     return !this->badChannelID_ && !this->emoteID.isEmpty() &&
            !this->channelID.isEmpty();
+}
+
+BttvLiveUpdateUserUpdateMessage::BttvLiveUpdateUserUpdateMessage(
+    const QJsonObject &json)
+    : userID(json["providerId"_L1].toString())
+    , badgeObject(json["badge"_L1].toObject())
+{
+}
+
+bool BttvLiveUpdateUserUpdateMessage::validate() const
+{
+    return !this->userID.isEmpty();
+}
+
+bool BttvLiveUpdateUserUpdateMessage::hasBadge() const
+{
+    return !this->badgeObject.isEmpty();
 }
 
 }  // namespace chatterino

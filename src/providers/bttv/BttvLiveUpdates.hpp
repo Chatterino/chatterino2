@@ -39,6 +39,8 @@ public:
      */
     void joinChannel(const QString &channelID, const QString &userID);
 
+    void broadcastMe(const QString &channelID, const QString &userID);
+
     /**
      * Parts a twitch channel by its id (without any prefix like 'twitch:')
      * if it's joined.

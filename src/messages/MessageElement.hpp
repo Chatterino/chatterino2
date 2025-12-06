@@ -44,7 +44,6 @@ enum class MessageElementFlag : int64_t {
     EmoteText = (1LL << 5),
     Emote = EmoteImage | EmoteText,
 
-    // unused: (1LL << 6),
     // unused: (1LL << 7),
 
     ChannelPointReward = (1LL << 8),
@@ -105,6 +104,8 @@ enum class MessageElementFlag : int64_t {
     // - 7TV Contributor
     BadgeSevenTV = (1LL << 36),
 
+    BadgeBttv = (1LL << 6),
+
     // Slot 7: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
@@ -113,7 +114,7 @@ enum class MessageElementFlag : int64_t {
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
              BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSevenTV |
-             BadgeFfz | BadgeSharedChannel,
+             BadgeFfz | BadgeSharedChannel | BadgeBttv,
 
     ChannelName = (1LL << 20),
 

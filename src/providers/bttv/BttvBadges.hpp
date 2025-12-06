@@ -11,10 +11,10 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class SeventvBadges : public BadgeRegistry
+class BttvBadges : public BadgeRegistry
 {
 public:
-    SeventvBadges() = default;
+    BttvBadges() = default;
 
 protected:
     QString idForBadge(const QJsonObject &badgeJson) const override;

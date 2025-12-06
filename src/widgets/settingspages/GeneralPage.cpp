@@ -659,6 +659,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.enableBTTVLiveUpdates)
         ->addKeywords({"bttv"})
         ->addTo(layout);
+    SettingWidget::checkbox("Send activity to BetterTTV", s.sendBTTVActivity)
+        ->setTooltip(
+            "When enabled, Chatterino will signal an activity to BetterTTV "
+            "when you send a chat message. This is used for badges, "
+            " and personal emotes. When disabled, no activity "
+            "is sent and others won't see your cosmetics.")
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
 
     SettingWidget::checkbox("Show FrankerFaceZ global emotes",
                             s.enableFFZGlobalEmotes)
@@ -1114,6 +1122,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Use custom FrankerFaceZ VIP badges",
                             s.useCustomFfzVipBadges)
         ->addKeywords({"ffz"})
+        ->addTo(layout);
+    SettingWidget::checkbox("BetterTTV", s.showBadgesBttv)
+        ->addKeywords({"bttv"})
         ->addTo(layout);
 
     layout.addSubtitle("Overlay");

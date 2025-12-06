@@ -35,4 +35,14 @@ private:
     bool badChannelID_;
 };
 
+struct BttvLiveUpdateUserUpdateMessage {
+    BttvLiveUpdateUserUpdateMessage(const QJsonObject &json);
+
+    QString userID;
+    QJsonObject badgeObject;
+
+    bool validate() const;
+    bool hasBadge() const;
+};
+
 }  // namespace chatterino
