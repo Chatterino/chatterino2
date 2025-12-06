@@ -195,17 +195,19 @@ protected:
 
     bool inHistorySearch = false;
 
-    void startHistorySearch();
+    void startHistorySearch(bool backwards, bool loop);
     void stopHistorySearchIfNecessary();
 
     /// Search through all previous messages for `historySearchQuery`
-    void refreshHistorySearch();
+    void refreshHistorySearch(bool backwards, bool loop);
 
-    /// Cycle to the previous match or wrap around
-    void cycleHistorySearch();
+    void cycleHistorySearch(bool backwards, bool loop);
+    void loopHistorySearchIfNeeded(bool backwards);
 
     /// Show the currently selected message in the input box
     void updateSelectedHistorySearchMatch();
+
+    void updateHistorySearchStatus(bool failed, const QString &message);
 
     QString historySearchQuery;
 
@@ -217,8 +219,19 @@ protected:
     std::vector<HistorySearchResult> historySearchResults;
 
     /// Index into `historySearchResults`
-    size_t historySearchResultIndex = 0;
-    bool historySearchFailed = true;
+    /// This might be out of bounds if there's no match.
+    qsizetype historySearchResultIndex = -1;
+
+    bool historySearchFailed = false;
+
+    bool lastHistorySearchBackwards = false;
+    bool lastHistorySearchLoop = false;
+
+    /// `prevIndex_` value before a history search was started.
+    ///
+    /// The history search modifies `prevIndex_`, but we need this anchor when
+    /// the user updates the query.
+    int prevIndexBeforeSearch = 0;
 
 private Q_SLOTS:
     void editTextChanged();

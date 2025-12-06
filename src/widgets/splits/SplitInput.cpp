@@ -15,6 +15,7 @@
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -30,6 +31,7 @@
 #include <QCompleter>
 #include <QPainter>
 #include <QSignalBlocker>
+#include <qwindow.h>
 
 #include <algorithm>
 #include <functional>
@@ -163,12 +165,14 @@ void SplitInput::initLayout()
         input->setFrame(false);
         input->setPlaceholderText("Search input history...");
         input->setFocusPolicy(Qt::ClickFocus);
-        QObject::connect(input.getElement(), &QLineEdit::textChanged,
+        QObject::connect(input.getElement(), &QLineEdit::textChanged, this,
                          [this](const QString &text) {
                              if (this->inHistorySearch)
                              {
                                  this->historySearchQuery = text;
-                                 this->refreshHistorySearch();
+                                 this->refreshHistorySearch(
+                                     this->lastHistorySearchBackwards,
+                                     this->lastHistorySearchLoop);
                              }
                          });
         QObject::connect(input.getElement(),
@@ -786,8 +790,15 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"incremental-search-history",
-         [this](const auto & /*args*/) -> QString {
-             this->startHistorySearch();
+         [this](const auto &args) -> QString {
+             bool backwards = false;
+             bool loop = false;
+             if (args.size() >= 2)
+             {
+                 backwards = args[0] == u"backward"_s;
+                 loop = args[1] == u"loop"_s;
+             }
+             this->startHistorySearch(backwards, loop);
              return {};
          }},
     };
@@ -1475,7 +1486,7 @@ void SplitInput::updateFonts()
 
 void SplitInput::stopHistorySearchIfNecessary()
 {
-    if (!this->inHistorySearch)
+    if (!this->inHistorySearch || isAppAboutToQuit())
     {
         return;
     }
@@ -1487,11 +1498,13 @@ void SplitInput::stopHistorySearchIfNecessary()
     this->editTextChanged();
 }
 
-void SplitInput::startHistorySearch()
+void SplitInput::startHistorySearch(bool backwards, bool loop)
 {
+    this->lastHistorySearchBackwards = backwards;
+    this->lastHistorySearchLoop = loop;
     if (this->inHistorySearch)
     {
-        this->cycleHistorySearch();
+        this->cycleHistorySearch(backwards, loop);
         return;
     }
     this->ui_.historySearchInput->clear();
@@ -1500,10 +1513,11 @@ void SplitInput::startHistorySearch()
     this->ui_.historySearchInput->setFocus(Qt::MouseFocusReason);
     this->historySearchQuery = {};
     this->inHistorySearch = true;
-    this->refreshHistorySearch();
+    this->prevIndexBeforeSearch = this->prevIndex_;
+    this->refreshHistorySearch(backwards, loop);
 }
 
-void SplitInput::refreshHistorySearch()
+void SplitInput::refreshHistorySearch(bool backwards, bool loop)
 {
     if (!this->inHistorySearch)
     {
@@ -1516,7 +1530,11 @@ void SplitInput::refreshHistorySearch()
         this->editTextChanged();
         return;
     }
+    // `prevIndex_` might've changed because the user cycled through the results.
+    // However, the initial position should be used as the anchor.
+    this->prevIndex_ = this->prevIndexBeforeSearch;
 
+    qsizetype closestMatch = -1;  // initial result
     for (qsizetype i = 0; i < this->prevMsg_.size(); i++)
     {
         auto message = this->prevMsg_[i];
@@ -1527,77 +1545,119 @@ void SplitInput::refreshHistorySearch()
             this->historySearchResults.emplace_back(
                 HistorySearchResult{.messageIdx = i, .message = message});
         }
+
+        if (i == this->prevIndex_)
+        {
+            closestMatch =
+                static_cast<qsizetype>(this->historySearchResults.size()) - 1;
+        }
+    }
+    if (this->prevIndex_ >= this->prevMsg_.size())
+    {
+        closestMatch =
+            static_cast<qsizetype>(this->historySearchResults.size()) - 1;
     }
 
-    if (this->historySearchResults.empty())
+    // `closestMatch` points at the last message that's before or at `prevIndex_`.
+    // For forwards search, we want it to be the first message not before `prevIndex_`.
+    if (!backwards && closestMatch >= 0 &&
+        static_cast<size_t>(closestMatch) < this->historySearchResults.size() &&
+        this->historySearchResults[closestMatch].messageIdx != this->prevIndex_)
     {
-        // search failed
-        this->historySearchFailed = true;
+        closestMatch++;
+    }
 
-        this->ui_.historySearchWrap->setForegroundRole(QPalette::Highlight);
+    this->historySearchResultIndex = closestMatch;
 
+    if (loop)
+    {
+        this->loopHistorySearchIfNeeded(backwards);
+    }
+
+    this->updateSelectedHistorySearchMatch();
+}
+
+void SplitInput::cycleHistorySearch(bool backwards, bool loop)
+{
+    if (backwards)
+    {
+        this->historySearchResultIndex--;
+    }
+    else
+    {
+        this->historySearchResultIndex++;
+    }
+
+    if (loop)
+    {
+        this->loopHistorySearchIfNeeded(backwards);
+    }
+
+    this->historySearchResultIndex =
+        std::clamp(this->historySearchResultIndex, -1LL,
+                   static_cast<qsizetype>(this->historySearchResults.size()));
+
+    this->updateSelectedHistorySearchMatch();
+}
+
+void SplitInput::loopHistorySearchIfNeeded(bool backwards)
+{
+    if (backwards && this->historySearchResultIndex < 0)
+    {
+        this->historySearchResultIndex =
+            static_cast<qsizetype>(this->historySearchResults.size()) - 1;
+    }
+    else if (!backwards &&
+             this->historySearchResultIndex >=
+                 static_cast<qsizetype>(this->historySearchResults.size()))
+    {
+        this->historySearchResultIndex = 0;
+    }
+}
+
+void SplitInput::updateSelectedHistorySearchMatch()
+{
+    if (this->historySearchResultIndex < 0 ||
+        this->historySearchResultIndex >=
+            static_cast<qsizetype>(this->historySearchResults.size()))
+    {
+        this->updateHistorySearchStatus(true, "no match");
+        return;
+    }
+
+    const auto &current = this->historySearchResults[static_cast<size_t>(
+        this->historySearchResultIndex)];
+
+    this->prevIndex_ = static_cast<int>(current.messageIdx);
+    this->ui_.textEdit->setText(current.message);
+
+    this->updateHistorySearchStatus(
+        false, QString::number(this->historySearchResults.size() -
+                               this->historySearchResultIndex) %
+                   '/' % QString::number(this->historySearchResults.size()));
+
+    this->editTextChanged();
+}
+
+void SplitInput::updateHistorySearchStatus(bool failed, const QString &message)
+{
+    if (failed && !this->historySearchFailed)
+    {
         QPalette palette = this->ui_.historySearchWrap->palette();
         palette.setColor(QPalette::Text, Qt::red);
         palette.setColor(QPalette::WindowText, Qt::red);
         this->ui_.historySearchWrap->setPalette(palette);
-
-        this->ui_.historySearchLabel->setText("no match");
-
-        this->editTextChanged();
-        return;
     }
-
-    if (this->historySearchFailed)
+    else if (!failed && this->historySearchFailed)
     {
-        // previous search failed, so restore color
-        this->historySearchFailed = false;
         QPalette palette = this->ui_.historySearchWrap->palette();
         palette.setColor(QPalette::Text, getTheme()->splits.input.text);
         palette.setColor(QPalette::WindowText, getTheme()->splits.input.text);
         this->ui_.historySearchWrap->setPalette(palette);
     }
+    this->historySearchFailed = failed;
 
-    assert(!this->historySearchResults.empty());
-    this->historySearchResultIndex = this->historySearchResults.size() - 1;
-    this->updateSelectedHistorySearchMatch();
-}
-
-void SplitInput::cycleHistorySearch()
-{
-    if (this->historySearchResults.empty())
-    {
-        return;
-    }
-
-    if (this->historySearchResultIndex == 0)
-    {
-        this->historySearchResultIndex = this->historySearchResults.size();
-    }
-    this->historySearchResultIndex--;
-
-    this->updateSelectedHistorySearchMatch();
-}
-
-void SplitInput::updateSelectedHistorySearchMatch()
-{
-    if (this->historySearchResults.empty())
-    {
-        this->ui_.historySearchLabel->clear();
-        return;
-    }
-
-    const auto &current =
-        this->historySearchResults[this->historySearchResultIndex];
-
-    this->prevIndex_ = static_cast<int>(current.messageIdx);
-    this->ui_.textEdit->setText(current.message);
-
-    this->ui_.historySearchLabel->setText(
-        QString::number(this->historySearchResults.size() -
-                        this->historySearchResultIndex) %
-        '/' % QString::number(this->historySearchResults.size()));
-
-    this->editTextChanged();
+    this->ui_.historySearchLabel->setText(message);
 }
 
 }  // namespace chatterino

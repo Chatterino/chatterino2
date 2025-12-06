@@ -276,10 +276,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .maxCountArguments = 2,
               .possibleArguments =
                   {
-                      {"Backward (looping)", {"backward loop"}},
-                      {"Backward (no looping)", {"backward noloop"}},
-                      {"Forward (looping)", {"forward loop"}},
-                      {"Forward (no looping)", {"forward noloop"}},
+                      {"Backward (looping)", {"backward", "loop"}},
+                      {"Backward (no looping)", {"backward", "noloop"}},
+                      {"Forward (looping)", {"forward", "loop"}},
+                      {"Forward (no looping)", {"forward", "noloop"}},
                   },
               .argumentsPrompt = "Direction:",
           }},
