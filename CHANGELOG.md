@@ -60,6 +60,7 @@
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 - Dev: Added Clazy linting in CI. (#6623)
+- Dev: Added custom clang-tidy module linting in CI. (#6626)
 
 ## 2.5.4
 
