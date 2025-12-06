@@ -12,6 +12,8 @@
 - Minor: Consolidate font picking into one dialog. (#6531)
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
+- Minor: Added an API to get the current Twitch account in plugins. (#6554)
+- Minor: Added options to close multiple visible tabs. (#6515, #6619)
 - Minor: Added a setting to show the stream title in live messages. (#6572)
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction` command to start a prediction. (#6583)
@@ -58,6 +60,7 @@
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 - Dev: Added options to close multiple visible tabs. (#6515)
 - Dev: Started work on spell checking. (#6446)
+- Dev: Added Clazy linting in CI. (#6623)
 
 ## 2.5.4
 
