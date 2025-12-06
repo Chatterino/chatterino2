@@ -127,7 +127,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
 
     const auto tabDirection = getSettings()->tabDirection.getEnum();
-    recreateCloseMultipleTabsMenu(tabDirection);
+    this->recreateCloseMultipleTabsMenu(tabDirection);
     this->menu_.addMenu(closeMultipleTabsMenu_);
     getSettings()->tabDirection.connect(
         [this](int val) {
