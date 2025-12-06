@@ -13,6 +13,7 @@
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
 - Minor: Added an API to get the current Twitch account in plugins. (#6554)
+- Minor: Added options to close multiple visible tabs. (#6515, #6619)
 - Minor: Added a setting to show the stream title in live messages. (#6572)
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction` command to start a prediction. (#6583)
@@ -27,7 +28,6 @@
 - Bugfix: Fixed popups and the overlay not being draggable on Wayland. (#6573)
 - Bugfix: Fixed middle-clicking usernames in a local channel opening an invalid viewercard. (#6577)
 - Bugfix: Added `desktop-entry` hint to Linux notifications. (#6615)
-- Bugfix: Corrected "Close tabs to Left/Right" wording when using vertical tabs. (#6619)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
@@ -58,7 +58,6 @@
 - Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
-- Dev: Added options to close multiple visible tabs. (#6515)
 
 ## 2.5.4
 
