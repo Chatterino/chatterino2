@@ -144,6 +144,10 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Unicode",
                        "https://www.unicode.org/copyright.html",
                        ":/licenses/unicode.txt");
+#ifdef CHATTERINO_WITH_SPELLCHECK
+            addLicense(form.getElement(), "Hunspell",
+                       "https://hunspell.github.io", ":/licenses/hunspell.txt");
+#endif
         }
 
         // Attributions

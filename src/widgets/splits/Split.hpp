@@ -62,6 +62,9 @@ public:
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
+
     void insertTextToInput(const QString &text);
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,

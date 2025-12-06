@@ -13,6 +13,7 @@
     "boost-json",
     "boost-signals2",
     "boost-variant",
+    "hunspell",
     {
       "name": "qtbase",
       "default-features": false,

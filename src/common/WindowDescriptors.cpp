@@ -111,6 +111,12 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
         descriptor.channelName_ = data.value("name").toString();
     }
     descriptor.filters_ = loadFilters(root.value("filters"));
+
+    auto spellOverride = root["checkSpelling"];
+    if (spellOverride.isBool())
+    {
+        descriptor.spellCheckOverride = spellOverride.toBool();
+    }
 }
 
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)

@@ -39,6 +39,9 @@ public:
     // Custom themes live here. <appDataDirectory>/Themes
     QString themesDirectory;
 
+    // Spell checking dictionaries <appDataDirectory>/Dictionaries
+    QString dictionariesDirectory;
+
     // Directory for shared memory files.
     // <appDataDirectory>/IPC   on Windows
     // /tmp                     elsewhere
