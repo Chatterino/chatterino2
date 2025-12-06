@@ -236,7 +236,8 @@ void HotkeyController::loadHotkeys()
     auto numCombinedDefaults = set.size();
 
     pajlada::Settings::Setting<std::vector<QString>>::set(
-        "/hotkeys/addedDefaults", std::vector<QString>(set.begin(), set.end()));
+        "/hotkeys/addedDefaults", std::vector<QString>(set.begin(), set.end()),
+        pajlada::Settings::SettingOption::CompareBeforeSet);
 
     qCDebug(chatterinoHotkeys) << "Loading hotkeys...";
     for (const auto &key : keys)

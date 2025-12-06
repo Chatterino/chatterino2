@@ -157,8 +157,12 @@ Settings::Settings(const Args &args, const QString &settingsDirectory)
 
     settingsInstance->setBackupEnabled(true);
     settingsInstance->setBackupSlots(9);
-    settingsInstance->saveMethod =
-        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
+    settingsInstance->saveMethod = static_cast<
+        pajlada::Settings::SettingManager::SaveMethod>(
+        static_cast<uint64_t>(
+            pajlada::Settings::SettingManager::SaveMethod::SaveManually) |
+        static_cast<uint64_t>(
+            pajlada::Settings::SettingManager::SaveMethod::OnlySaveIfChanged));
 
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);
@@ -198,14 +202,14 @@ Settings::~Settings()
     Settings::instance_ = this->prevInstance_;
 }
 
-void Settings::requestSave() const
+pajlada::Settings::SettingManager::SaveResult Settings::requestSave() const
 {
     if (this->disableSaving)
     {
-        return;
+        return pajlada::Settings::SettingManager::SaveResult::Skipped;
     }
 
-    pajlada::Settings::SettingManager::gSave();
+    return pajlada::Settings::SettingManager::gSave();
 }
 
 void Settings::saveSnapshot()
