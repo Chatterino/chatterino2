@@ -2,6 +2,10 @@
 
 set -ev;
 
+CLANG_TIDY_VERSION=21
+CLAZY_VERSION=v1.16
+CLAZY_CLANG_TIDY_HASH=6ef467f518304955ef031fb74e74fa16349361919172c7f0fb622dcf4b4b7030
+
 # aqt installs into .qtinstall/Qt/<version>/gcc_64
 # This is doing the same as jurplel/install-qt-action
 # See https://github.com/jurplel/install-qt-action/blob/74ca8cd6681420fc8894aed264644c7a76d7c8cb/action/src/main.ts#L52-L74
@@ -21,6 +25,11 @@ cmake -S. -Bbuild-clang-tidy \
     -DCHATTERINO_PLUGINS=On \
     -DBUILD_TESTS=On \
     -DBUILD_BENCHMARKS=On
+
+curl -sSLo build-clang-tidy/clazy.zip \
+    https://github.com/Nerixyz/clazy-ubuntu-builds/releases/download/ci/clazy-$CLAZY_VERSION-clang$CLANG_TIDY_VERSION.zip
+echo "$CLAZY_CLANG_TIDY_HASH build-clang-tidy/clazy.zip" | sha256sum --check --status
+unzip build-clang-tidy/clazy.zip -d /usr/lib
 
 # Run MOC and UIC
 # This will compile the dependencies

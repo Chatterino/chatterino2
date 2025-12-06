@@ -135,6 +135,8 @@ private:
     void removeHighlightSource(const ChannelView::ChannelViewID &source);
     void updateHighlightStateDueSourcesChange();
 
+    void recreateCloseMultipleTabsMenu(NotebookTabLocation tabLocation);
+
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
 
@@ -163,8 +165,8 @@ private:
 
     QMenu menu_;
     QMenu *closeMultipleTabsMenu_{};
-    QAction *closeTabsToLeftAction_{};
-    QAction *closeTabsToRightAction_{};
+    QAction *closeTabsBeforeSelectedAction_{};
+    QAction *closeTabsAfterSelectedAction_{};
 
     pajlada::Signals::SignalHolder managedConnections_;
 };
