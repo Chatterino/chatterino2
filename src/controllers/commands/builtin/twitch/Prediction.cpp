@@ -103,6 +103,14 @@ QString lockPrediction(const CommandContext &ctx)
             }
 
             auto prediction = result.predictions.front();
+            if (prediction.status == "LOCKED")
+            {
+                channel->addSystemMessage(
+                    "The current prediction is already locked: " +
+                    prediction.title);
+                return;
+            }
+
             if (prediction.status != "ACTIVE")
             {
                 channel->addSystemMessage(
