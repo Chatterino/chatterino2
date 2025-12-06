@@ -47,7 +47,7 @@ jobs:
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "lib/*,tools/crash-handler/*,mocks/*"
-          extra_arguments: "-load=/usr/lib/ClazyClangTidy21.so --load=/usr/lib/chatterino-clang-tidy-module-21.so"
+          extra_arguments: --load=/usr/lib/ClazyClangTidy21.so --load=/usr/lib/chatterino-clang-tidy-module-21.so
           clang_tidy_version: 21
           cmake_command: >-
             ./.CI/setup-clang-tidy.sh
