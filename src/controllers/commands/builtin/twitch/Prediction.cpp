@@ -113,19 +113,19 @@ QString lockPrediction(const CommandContext &ctx)
             getHelix()->endPrediction(
                 roomId, prediction.id, false, {},
                 [channel](const HelixPrediction &data) {
-                    int points = 0;
-                    int users = 0;
+                    int totalPoints = 0;
+                    int numUsers = 0;
                     for (const auto &outcome : data.outcomes)
                     {
-                        points += outcome.channelPoints;
-                        users += outcome.users;
+                        totalPoints += outcome.channelPoints;
+                        numUsers += outcome.users;
                     }
 
                     channel->addSystemMessage(
                         QString("Locked prediction with %1 points wagered by "
                                 "%2 users: '%3'")
-                            .arg(localizeNumbers(points),
-                                 localizeNumbers(users), data.title));
+                            .arg(localizeNumbers(totalPoints),
+                                 localizeNumbers(numUsers), data.title));
                 },
                 [channel](const auto &error) {
                     channel->addSystemMessage("Failed to lock prediction - " +
@@ -184,19 +184,19 @@ QString cancelPrediction(const CommandContext &ctx)
             getHelix()->endPrediction(
                 roomId, prediction.id, true, {},
                 [channel](const HelixPrediction &data) {
-                    int points = 0;
-                    int users = 0;
+                    int totalPoints = 0;
+                    int numUsers = 0;
                     for (const auto &outcome : data.outcomes)
                     {
-                        points += outcome.channelPoints;
-                        users += outcome.users;
+                        totalPoints += outcome.channelPoints;
+                        numUsers += outcome.users;
                     }
 
                     channel->addSystemMessage(
                         QString("Refunded %1 points to %2 users for "
                                 "prediction: '%3'")
-                            .arg(localizeNumbers(points),
-                                 localizeNumbers(users), data.title));
+                            .arg(localizeNumbers(totalPoints),
+                                 localizeNumbers(numUsers), data.title));
                 },
                 [channel](const auto &error) {
                     channel->addSystemMessage("Failed to cancel prediction - " +
