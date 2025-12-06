@@ -156,9 +156,9 @@ protected:
         QLabel *textEditLength;
         LabelButton *sendButton;
         SvgButton *emoteButton;
-        QWidget *backwardsWrap;
-        QLineEdit *backwardsInput;
-        QLabel *backwardsLabel;
+        QWidget *historySearchWrap;
+        QLineEdit *historySearchInput;
+        QLabel *historySearchLabel;
     } ui_;
 
     MessagePtr replyTarget_ = nullptr;
@@ -193,33 +193,32 @@ protected:
 
     void updateFonts();
 
-    bool inBackwardsSearch = false;
+    bool inHistorySearch = false;
 
-    void startBackwardsSearch();
-    void stopBackwardsSearchIfNecessary();
+    void startHistorySearch();
+    void stopHistorySearchIfNecessary();
 
-    /// Search through all previous messages for `backwardsQuery`
-    void refreshBackwardsSearch();
+    /// Search through all previous messages for `historySearchQuery`
+    void refreshHistorySearch();
 
     /// Cycle to the previous match or wrap around
-    void cycleBackwardsSearch();
+    void cycleHistorySearch();
 
     /// Show the currently selected message in the input box
-    void updateSelectedBackwardsMatch();
+    void updateSelectedHistorySearchMatch();
 
-    QString basePlaceholder;
-    QString backwardsQuery;
+    QString historySearchQuery;
 
-    struct BackwardsResult {
+    struct HistorySearchResult {
         /// Index of the message in `prevMsg_`
         qsizetype messageIdx = 0;
         QString message;
     };
-    std::vector<BackwardsResult> backwardsResults;
+    std::vector<HistorySearchResult> historySearchResults;
 
-    /// Index into `backwardsResults`
-    size_t backwardsResultIndex = 0;
-    bool backwardsSearchFailed = true;
+    /// Index into `historySearchResults`
+    size_t historySearchResultIndex = 0;
+    bool historySearchFailed = true;
 
 private Q_SLOTS:
     void editTextChanged();
