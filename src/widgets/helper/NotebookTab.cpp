@@ -167,7 +167,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 }
 
 void NotebookTab::recreateCloseMultipleTabsMenu(
-    const NotebookTabLocation tabDirection)
+    const NotebookTabLocation tabLocation)
 {
     this->closeMultipleTabsMenu_->clear();
 
@@ -204,7 +204,7 @@ void NotebookTab::recreateCloseMultipleTabsMenu(
 
     QString beforeSelectedName;
     QString afterSelectedName;
-    switch (tabDirection)
+    switch (tabLocation)
     {
         case Top:
         case Bottom:

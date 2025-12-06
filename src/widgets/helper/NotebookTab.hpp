@@ -135,7 +135,7 @@ private:
     void removeHighlightSource(const ChannelView::ChannelViewID &source);
     void updateHighlightStateDueSourcesChange();
 
-    void recreateCloseMultipleTabsMenu(NotebookTabLocation tabDirection);
+    void recreateCloseMultipleTabsMenu(NotebookTabLocation tabLocation);
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
