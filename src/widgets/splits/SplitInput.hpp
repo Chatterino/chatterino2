@@ -20,6 +20,7 @@ namespace chatterino {
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
+class InputHighlighter;
 class MessageView;
 class LabelButton;
 class ResizingTextEdit;
@@ -193,7 +194,7 @@ protected:
     bool shouldCheckSpelling() const;
     void checkSpellingChanged();
 
-    SpellCheckHighlighter *spellcheckHighlighter = nullptr;
+    InputHighlighter *inputHighlighter = nullptr;
 
     void updateFonts();
 

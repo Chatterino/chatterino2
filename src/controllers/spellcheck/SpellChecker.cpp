@@ -2,12 +2,6 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "messages/Emote.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "util/FilesystemHelpers.hpp"
 
@@ -16,47 +10,6 @@
 #ifdef CHATTERINO_WITH_SPELLCHECK
 #    include <hunspell/hunspell.hxx>
 #endif
-
-namespace {
-
-using namespace chatterino;
-
-bool shouldIgnore(TwitchChannel *twitch, const QString &word)
-{
-    EmoteName name{word};
-    if (twitch)
-    {
-        if (twitch->bttvEmote(name) || twitch->ffzEmote(name) ||
-            twitch->seventvEmote(name))
-        {
-            return true;
-        }
-        auto locals = twitch->localTwitchEmotes();
-        if (locals->contains(name))
-        {
-            return true;
-        }
-
-        if (twitch->accessChatters()->contains(word))
-        {
-            return true;
-        }
-    }
-    if (getApp()->getBttvEmotes()->emote(name) ||
-        getApp()->getFfzEmotes()->emote(name) ||
-        getApp()->getSeventvEmotes()->globalEmote(name))
-    {
-        return true;
-    }
-
-    return getApp()
-        ->getAccounts()
-        ->twitch.getCurrent()
-        ->twitchEmote(name)
-        .has_value();
-}
-
-}  // namespace
 
 namespace chatterino {
 
@@ -171,49 +124,6 @@ std::vector<std::string> SpellChecker::suggestions(const QString &word)
     (void)word;
     return {};
 #endif
-}
-
-SpellCheckHighlighter::SpellCheckHighlighter(QObject *parent)
-    : QSyntaxHighlighter(parent)
-    , wordRegex(R"(\p{L}+)",
-                QRegularExpression::PatternOption::UseUnicodePropertiesOption)
-{
-    this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-    this->spellFmt.setUnderlineColor(Qt::red);
-}
-
-void SpellCheckHighlighter::setChannel(const std::shared_ptr<Channel> &channel)
-{
-    auto twitch = std::dynamic_pointer_cast<TwitchChannel>(channel);
-    this->channel = twitch;
-    this->rehighlight();
-}
-
-void SpellCheckHighlighter::highlightBlock(const QString &text)
-{
-    auto *spellChecker = getApp()->getSpellChecker();
-    if (!spellChecker->isLoaded())
-    {
-        return;
-    }
-    auto *channel = this->channel.lock().get();
-
-    QStringView textView = text;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto it = this->wordRegex.globalMatchView(textView);
-#else
-    auto it = this->wordRegex.globalMatch(textView);
-#endif
-    while (it.hasNext())
-    {
-        auto match = it.next();
-        auto text = match.captured();
-        if (!shouldIgnore(channel, text) && !spellChecker->check(text))
-        {
-            this->setFormat(static_cast<int>(match.capturedStart()),
-                            static_cast<int>(text.size()), this->spellFmt);
-        }
-    }
 }
 
 }  // namespace chatterino

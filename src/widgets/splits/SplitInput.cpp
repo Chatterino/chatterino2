@@ -25,6 +25,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
+#include "widgets/splits/InputHighlighter.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -74,15 +75,15 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->ui_.textEdit->setCompleter(completer);
 
     // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-    this->spellcheckHighlighter = new SpellCheckHighlighter(this);
-    this->spellcheckHighlighter->setChannel(this->split_->getChannel());
+    auto *spellChecker = getApp()->getSpellChecker();
+    this->inputHighlighter = new InputHighlighter(*spellChecker, this);
+    this->inputHighlighter->setChannel(this->split_->getChannel());
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
         auto channel = this->split_->getChannel();
         auto *completer = new QCompleter(channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
-        this->spellcheckHighlighter->setChannel(this->split_->getChannel());
-        this->spellcheckHighlighter->setChannel(this->split_->getChannel());
+        this->inputHighlighter->setChannel(this->split_->getChannel());
     });
 
     getSettings()->enableSpellChecking.connect(
@@ -1398,9 +1399,9 @@ void SplitInput::checkSpellingChanged()
         target = this->ui_.textEdit->document();
     }
 
-    if (this->spellcheckHighlighter->document() != target)
+    if (this->inputHighlighter->document() != target)
     {
-        this->spellcheckHighlighter->setDocument(target);
+        this->inputHighlighter->setDocument(target);
     }
 }
 
