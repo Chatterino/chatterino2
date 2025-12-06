@@ -723,7 +723,7 @@ QString CommandController::execCustomCommand(
 
 QStringList CommandController::getDefaultChatterinoCommandList()
 {
-    return this->defaultChatterinoCommandAutoCompletions_;
+    return defaultChatterinoCommandAutoCompletions_;
 }
 
 }  // namespace chatterino
