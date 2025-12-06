@@ -1,7 +1,10 @@
 #pragma once
 
 #include <QRegularExpression>
+#include <QString>
 #include <QSyntaxHighlighter>
+
+#include <memory>
 
 class QTextDocument;
 
