@@ -9,6 +9,7 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/EmoteProvider.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -191,21 +192,28 @@ private:
         addEmote(*bttvEmotes, "B-)");
         addEmote(*bttvEmotes, "Clap");
         addEmote(*bttvEmotes, ":tf:");
-        this->mockApplication->bttvEmotes.setEmotes(std::move(bttvEmotes));
+        auto bttv =
+            std::make_shared<mock::EmoteProvider>("BetterTTV", "betterttv", 1);
+        bttv->setGlobalEmotes(std::move(bttvEmotes));
+        mockApplication->emotes.addProvider(std::move(bttv));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
         addEmote(*ffzEmotes, "ManChicken");
         addEmote(*ffzEmotes, "CatBag");
-        this->mockApplication->ffzEmotes.setEmotes(std::move(ffzEmotes));
+        auto ffz = std::make_shared<mock::EmoteProvider>("FrankerFaceZ",
+                                                         "frankerfacez", 2);
+        ffz->setGlobalEmotes(std::move(ffzEmotes));
+        mockApplication->emotes.addProvider(std::move(ffz));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
         addEmote(*seventvEmotes, "Clap2");
         addEmote(*seventvEmotes, "pajaW");
         addEmote(*seventvEmotes, "PAJAW");
-        this->mockApplication->seventvEmotes.setGlobalEmotes(
-            std::move(seventvEmotes));
+        auto stv = std::make_shared<mock::EmoteProvider>("7TV", "seventv", 3);
+        stv->setGlobalEmotes(std::move(seventvEmotes));
+        mockApplication->emotes.addProvider(std::move(stv));
     }
 
 protected:
