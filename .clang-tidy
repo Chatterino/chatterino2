@@ -1,6 +1,7 @@
 Checks: "-*,
   clang-diagnostic-*,
   llvm-*,
+  chatterino-*,
   misc-*,
   -misc-unused-parameters,
   readability-identifier-naming,
