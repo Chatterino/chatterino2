@@ -10,6 +10,9 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include <QTextCharFormat>
+#include <QTextDocument>
+
 namespace {
 
 using namespace chatterino;

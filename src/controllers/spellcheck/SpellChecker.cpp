@@ -5,8 +5,6 @@
 #include "singletons/Paths.hpp"
 #include "util/FilesystemHelpers.hpp"
 
-#include <QTextCharFormat>
-
 #ifdef CHATTERINO_WITH_SPELLCHECK
 #    include <hunspell/hunspell.hxx>
 #endif

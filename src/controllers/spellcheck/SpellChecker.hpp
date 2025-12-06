@@ -1,13 +1,8 @@
 #pragma once
 
-#include <QRegularExpression>
-#include <QSyntaxHighlighter>
-
 #include <memory>
 #include <string>
 #include <vector>
-
-class QTextDocument;
 
 namespace chatterino {
 
