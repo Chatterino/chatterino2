@@ -1,8 +1,12 @@
 #pragma once
 
+#include "util/Expected.hpp"
+
 #include <nonstd/expected.hpp>
 #include <QString>
+#include <QStringList>
 
+#include <chrono>
 #include <ostream>
 #include <tuple>
 #include <vector>
@@ -47,6 +51,14 @@ struct PerformChannelAction {
     }
 };
 
+struct StartUserParticipationAction {
+    QString broadcasterID;
+    QString title;
+    QStringList choices;
+    std::chrono::seconds duration;
+    int pointsPerVote = 0;
+};
+
 std::ostream &operator<<(std::ostream &os, const IncompleteHelixUser &u);
 // gtest printer
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -55,5 +67,9 @@ void PrintTo(const PerformChannelAction &a, std::ostream *os);
 nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     bool withDuration, bool withReason);
+
+ExpectedStr<StartUserParticipationAction> parseUserParticipationAction(
+    const CommandContext &ctx, const QString &command, const QString &usage,
+    std::chrono::seconds minDuration, std::chrono::seconds maxDuration);
 
 }  // namespace chatterino::commands

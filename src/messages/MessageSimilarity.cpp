@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"  // IWYU pragma: keep
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Settings.hpp"
 
@@ -115,7 +114,5 @@ void setSimilarityFlags(const MessagePtr &message, const T &messages)
 
 template void setSimilarityFlags<std::vector<MessagePtr>>(
     const MessagePtr &msg, const std::vector<MessagePtr> &messages);
-template void setSimilarityFlags<LimitedQueueSnapshot<MessagePtr>>(
-    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages);
 
 }  // namespace chatterino
