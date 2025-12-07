@@ -536,6 +536,7 @@ c2.MessageElementFlag = {
     BadgeVanity = 0,
     BadgeChatterino = 0,
     BadgeSevenTV = 0,
+    BadgeBttv = 0,
     BadgeFfz = 0,
     Badges = 0,
     ChannelName = 0,
@@ -603,6 +604,7 @@ c2.MessageFlag = {
     EventSub = 0,
     ModerationAction = 0,
     InvalidReplyTarget = 0,
+    WatchStreak = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
