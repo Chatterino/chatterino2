@@ -11,6 +11,7 @@
 #include "util/Helpers.hpp"
 
 #include <QCommandLineParser>
+#include <QProcess>
 
 #include <chrono>
 
