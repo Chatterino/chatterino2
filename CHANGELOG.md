@@ -24,6 +24,7 @@
 - Bugfix: Fixed settings occasionally not opening when clicking on "Manage Accounts" in the account switcher. (#6543)
 - Bugfix: Fixed font change not resulting in forced layout update. (#6536)
 - Bugfix: Fixed scrollbar rect computation potentially resulting in overflows. (#6547)
+- Bugfix: Fixed websocket connections failing if the DNS resolving gave bad hosts. (#6631)
 - Bugfix: Forward query params to websocket URLs. (#6141)
 - Bugfix: Fixed Lua errors from handlers of HTTP requests not being logged. (#6452)
 - Bugfix: Fixed restore button not showing on Windows. (#6565)
