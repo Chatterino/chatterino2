@@ -104,9 +104,11 @@ enum class MessageElementFlag : int64_t {
     // - 7TV Contributor
     BadgeSevenTV = (1LL << 36),
 
+    // Slot 8: BetterTTV
+    // - BetterTTV Pro
     BadgeBttv = (1LL << 6),
 
-    // Slot 7: FrankerFaceZ
+    // Slot 9: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
