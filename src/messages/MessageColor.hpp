@@ -17,6 +17,10 @@ struct MessageColor {
 
     QString toString() const;
 
+    QString toLua() const;
+    static MessageColor fromLua(const QString &spec,
+                                Type fallback = Type::Text);
+
     bool operator==(const MessageColor &other) const noexcept
     {
         return this->type_ == other.type_ &&
