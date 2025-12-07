@@ -15,6 +15,8 @@ public:
 
     void onMessage(const QByteArray &msg) /* override */;
 
+    void broadcastMe(const QString &channelID, const QString &userID);
+
 private:
     BttvLiveUpdates &manager;
 };

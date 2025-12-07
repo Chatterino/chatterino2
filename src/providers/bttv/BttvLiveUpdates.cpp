@@ -24,6 +24,7 @@ public:
     BttvLiveUpdatesPrivate &operator=(const BttvLiveUpdatesPrivate &&) = delete;
 
     std::shared_ptr<BttvLiveUpdateClient> makeClient();
+    std::shared_ptr<BttvLiveUpdateClient> anyClient();
 
     // Contains all joined Twitch channel-ids
     std::unordered_set<QString> joinedChannels;
@@ -50,6 +51,15 @@ std::shared_ptr<BttvLiveUpdateClient> BttvLiveUpdatesPrivate::makeClient()
     return std::make_shared<BttvLiveUpdateClient>(this->parent);
 }
 
+std::shared_ptr<BttvLiveUpdateClient> BttvLiveUpdatesPrivate::anyClient()
+{
+    if (this->clients().empty())
+    {
+        return nullptr;
+    }
+    return this->clients().begin()->second;
+}
+
 BttvLiveUpdates::BttvLiveUpdates(QString host)
     : private_(std::make_unique<BttvLiveUpdatesPrivate>(*this, std::move(host)))
 {
@@ -74,6 +84,16 @@ void BttvLiveUpdates::partChannel(const QString &id)
     if (this->private_->joinedChannels.erase(id) > 0)
     {
         this->private_->unsubscribe({BttvLiveUpdateSubscriptionChannel{id}});
+    }
+}
+
+void BttvLiveUpdates::broadcastMe(const QString &channelID,
+                                  const QString &userID)
+{
+    auto client = this->private_->anyClient();
+    if (client)
+    {
+        client->broadcastMe(channelID, userID);
     }
 }
 

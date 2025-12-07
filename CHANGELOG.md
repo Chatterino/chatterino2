@@ -18,6 +18,7 @@
 - Minor: Add categories to the emoji viewer. (#6598)
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, and `/lockprediction` commands. (#6583, #6612)
+- Minor: Added support for BetterTTV Pro subscriber badges. (#6625)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Bugfix: Fixed some commands and filters not working as expected in seach popups. (#6539)
 - Bugfix: Fixed settings occasionally not opening when clicking on "Manage Accounts" in the account switcher. (#6543)
