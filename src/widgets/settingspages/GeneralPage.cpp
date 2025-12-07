@@ -1114,6 +1114,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"seventv"})
         ->setTooltip("Badges for 7TV admins, developers, and supporters")
         ->addTo(layout);
+    SettingWidget::checkbox("BetterTTV", s.showBadgesBttv)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
     layout.addSeparator();
     SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
                             s.useCustomFfzModeratorBadges)
@@ -1122,9 +1125,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Use custom FrankerFaceZ VIP badges",
                             s.useCustomFfzVipBadges)
         ->addKeywords({"ffz"})
-        ->addTo(layout);
-    SettingWidget::checkbox("BetterTTV", s.showBadgesBttv)
-        ->addKeywords({"bttv"})
         ->addTo(layout);
 
     layout.addSubtitle("Overlay");
