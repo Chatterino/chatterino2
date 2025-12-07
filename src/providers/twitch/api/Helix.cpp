@@ -3426,6 +3426,117 @@ void Helix::createPrediction(const QString broadcasterID, const QString title,
         .execute();
 }
 
+void Helix::getPredictions(const QString broadcasterID, QStringList ids,
+                           const int first, const QString after,
+                           ResultCallback<HelixPredictions> successCallback,
+                           FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("first", QString::number(first));
+
+    if (!after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+
+    for (const auto &id : ids)
+    {
+        urlQuery.addQueryItem("id", id);
+    }
+
+    this->makeGet("predictions", urlQuery)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting predictions was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            successCallback(HelixPredictions(response));
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+// End prediction can lock, cancel, or resolve an outstanding prediction.
+void Helix::endPrediction(const QString broadcasterID, const QString id,
+                          const bool refundPoints,
+                          const QString winningOutcomeID,
+                          ResultCallback<HelixPrediction> successCallback,
+                          FailureCallback<QString> failureCallback)
+{
+    QJsonObject payload;
+    payload.insert("broadcaster_id", broadcasterID);
+    payload.insert("id", id);
+    if (refundPoints)
+    {
+        payload.insert("status", "CANCELED");
+    }
+    else if (winningOutcomeID.isEmpty())
+    {
+        payload.insert("status", "LOCKED");
+    }
+    else
+    {
+        payload.insert("status", "RESOLVED");
+        payload.insert("winning_outcome_id", winningOutcomeID);
+    }
+
+    this->makePatch("predictions", {})
+        .json(payload)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for ending a prediction was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            const auto data = HelixPredictions(response);
+            successCallback(data.predictions.front());
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            const auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 void Helix::createEventSubSubscription(
     const eventsub::SubscriptionRequest &request, const QString &sessionID,
     ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
