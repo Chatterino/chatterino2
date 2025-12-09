@@ -433,12 +433,9 @@ set(SOURCE_FILES
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
-        providers/twitch/PubSubClientOptions.hpp
-        providers/twitch/PubSubHelpers.hpp
         providers/twitch/PubSubManager.cpp
         providers/twitch/PubSubManager.hpp
         providers/twitch/PubSubMessages.hpp
-        providers/twitch/PubSubWebsocket.hpp
         providers/twitch/TwitchAccount.cpp
         providers/twitch/TwitchAccount.hpp
         providers/twitch/TwitchAccountManager.cpp

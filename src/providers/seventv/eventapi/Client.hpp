@@ -18,7 +18,7 @@ struct Dispatch;
 struct CosmeticCreateDispatch;
 struct EntitlementCreateDeleteDispatch;
 
-class Client : public BasicPubSubClient<Subscription>,
+class Client : public BasicPubSubClient<Subscription, Client>,
                std::enable_shared_from_this<Client>
 {
 public:

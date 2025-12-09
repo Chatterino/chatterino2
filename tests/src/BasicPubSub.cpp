@@ -73,7 +73,7 @@ struct hash<DummySubscription> {
 namespace {
 
 class MyManager;
-class MyClient : public BasicPubSubClient<DummySubscription>
+class MyClient : public BasicPubSubClient<DummySubscription, MyClient>
 {
 public:
     MyClient(MyManager &manager)
