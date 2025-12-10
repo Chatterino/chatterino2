@@ -14,7 +14,10 @@ namespace chatterino {
 struct TopicData {
     QString topic;
 
-    auto operator<=>(const TopicData &other) const = default;
+    bool operator==(const TopicData &other) const
+    {
+        return this->topic == other.topic;
+    }
 
     friend QDebug operator<<(QDebug debug, const TopicData &data);
 };
