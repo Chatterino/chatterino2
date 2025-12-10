@@ -237,7 +237,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
         pubSub.listenToChannelPointRewards(QString("2%1").arg(i));
     }
 
-    QTest::qWait(50);
+    QTest::qWait(200);
 
     ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
     ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
