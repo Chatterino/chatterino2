@@ -1075,6 +1075,15 @@ void UserInfoPopup::updateUserData()
                         this->ui_.subageLabel->setText(
                             "Subscription status hidden");
                     }
+                    else if (!subageInfo.gifterName.isEmpty())
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Tier %1 - Subscribed for %2 months "
+                                    "- Gifted by %3")
+                                .arg(subageInfo.subTier)
+                                .arg(subageInfo.totalSubMonths)
+                                .arg(subageInfo.gifterName));
+                    }
                     else if (subageInfo.isSubbed)
                     {
                         this->ui_.subageLabel->setText(
