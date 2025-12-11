@@ -394,7 +394,8 @@ void IrcMessageHandler::parsePrivMessageInto(
         if (badgesTag.isValid())
         {
             auto parsedBadges = parseBadges(badgesTag.toString());
-            channel->setMod(parsedBadges.contains("moderator"));
+            channel->setMod(parsedBadges.contains("moderator") ||
+                            parsedBadges.contains("lead_moderator"));
             channel->setVIP(parsedBadges.contains("vip"));
             channel->setStaff(parsedBadges.contains("staff"));
         }
@@ -582,27 +583,32 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    // Checking if currentUser is a VIP or staff member
-    QVariant badgesTag = message->tag("badges");
-    if (badgesTag.isValid())
+    auto *tc = dynamic_cast<TwitchChannel *>(c.get());
+    if (tc != nullptr)
     {
-        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+        bool hasModBadge{};
+
+        // Checking if currentUser is a VIP, staff member or has moderator badges
+        QVariant badgesTag = message->tag("badges");
+        if (badgesTag.isValid())
         {
             auto parsedBadges = parseBadges(badgesTag.toString());
             tc->setVIP(parsedBadges.contains("vip"));
             tc->setStaff(parsedBadges.contains("staff"));
-        }
-    }
 
-    // Checking if currentUser is a moderator
-    QVariant modTag = message->tag("mod");
-    if (modTag.isValid())
-    {
-        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+            hasModBadge = parsedBadges.contains("moderator") ||
+                          parsedBadges.contains("lead_moderator");
+        }
+
+        // Also checking if the mod tag is present, since badges sometimes disappear in IRC
+        QVariant modTag = message->tag("mod");
+        if (modTag.isValid())
         {
-            tc->setMod(modTag == "1");
+            tc->setMod(modTag == "1" || hasModBadge);
+        }
+        else
+        {
+            tc->setMod(hasModBadge);
         }
     }
 }
