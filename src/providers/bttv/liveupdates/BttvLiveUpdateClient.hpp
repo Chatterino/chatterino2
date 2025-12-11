@@ -8,7 +8,7 @@ namespace chatterino {
 class BttvLiveUpdates;
 
 class BttvLiveUpdateClient
-    : public BasicPubSubClient<BttvLiveUpdateSubscription>
+    : public BasicPubSubClient<BttvLiveUpdateSubscription, BttvLiveUpdateClient>
 {
 public:
     BttvLiveUpdateClient(BttvLiveUpdates &manager);

@@ -18,8 +18,8 @@ struct Dispatch;
 struct CosmeticCreateDispatch;
 struct EntitlementCreateDeleteDispatch;
 
-class Client : public BasicPubSubClient<Subscription>,
-               std::enable_shared_from_this<Client>
+class Client : public BasicPubSubClient<Subscription, Client>,
+               public std::enable_shared_from_this<Client>
 {
 public:
     Client(SeventvEventAPI &manager,

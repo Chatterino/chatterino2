@@ -1,7 +1,7 @@
 #pragma once
 
-#include "providers/twitch/PubSubClientOptions.hpp"
-#include "providers/twitch/PubSubWebsocket.hpp"
+#include "providers/liveupdates/BasicPubSubClient.hpp"
+#include "providers/twitch/pubsubmessages/Message.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QString>
@@ -11,67 +11,71 @@
 
 namespace chatterino {
 
-struct PubSubMessage;
-struct PubSubListenMessage;
-
 struct TopicData {
     QString topic;
-    bool authed{false};
-    bool persistent{false};
+
+    bool operator==(const TopicData &other) const
+    {
+        return this->topic == other.topic;
+    }
+
+    friend QDebug operator<<(QDebug debug, const TopicData &data);
 };
 
-struct Listener : TopicData {
-    bool confirmed{false};
+}  // namespace chatterino
+
+template <>
+struct std::hash<chatterino::TopicData> {
+    std::size_t operator()(const chatterino::TopicData &data) const noexcept
+    {
+        return std::hash<QString>{}(data.topic);
+    }
 };
 
-class PubSubClient : public std::enable_shared_from_this<PubSubClient>
+namespace chatterino {
+
+struct PubSubMessage;
+class PubSub;
+struct PubSubListenMessage;
+
+class PubSubClient : public BasicPubSubClient<TopicData, PubSubClient>
 {
 public:
+    // The max amount of topics we may listen to with a single connection
+    static constexpr size_t MAX_LISTENS = 50;
+
     struct UnlistenPrefixResponse {
         std::vector<QString> topics;
         QString nonce;
     };
 
-    // The max amount of topics we may listen to with a single connection
-    static constexpr std::vector<QString>::size_type MAX_LISTENS = 50;
+    PubSubClient(PubSub &manager, std::chrono::milliseconds heartbeatInterval);
 
-    PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle,
-                 const PubSubClientOptions &clientOptions);
+    void onOpen() /* override */;
+    void onMessage(const QByteArray &msg) /* override */;
 
-    void start();
-    void stop();
+    void checkHeartbeat();
 
-    void close(const std::string &reason,
-               websocketpp::close::status::value code =
-                   websocketpp::close::status::normal);
-
-    bool listen(const PubSubListenMessage &msg);
-    UnlistenPrefixResponse unlistenPrefix(const QString &prefix);
-
-    void handleListenResponse(const PubSubMessage &message);
-    void handleUnlistenResponse(const PubSubMessage &message);
-
-    void handlePong();
-
-    bool isListeningToTopic(const QString &topic);
-
-    std::vector<Listener> getListeners() const;
+    QByteArray encodeSubscription(
+        const Subscription &subscription) /* override */;
+    QByteArray encodeUnsubscription(
+        const Subscription &subscription) /* override */;
 
 private:
-    void ping();
-    bool send(const char *payload);
+    struct NonceInfo {
+        bool isListen;
+    };
 
-    WebsocketClient &websocketClient_;
-    WebsocketHandle handle_;
-    uint16_t numListens_ = 0;
+    void handleResponse(const PubSubMessage &message);
+    void handleMessageResponse(const PubSubMessageMessage &message);
 
-    std::vector<Listener> listeners_;
+    std::unordered_map<QString, NonceInfo> nonces_;
 
-    std::atomic<bool> awaitingPong_{false};
-    std::atomic<bool> started_{false};
-
-    std::shared_ptr<boost::asio::steady_timer> heartbeatTimer_;
-    const PubSubClientOptions &clientOptions_;
+    std::atomic<std::chrono::time_point<std::chrono::steady_clock>>
+        lastHeartbeat_;
+    std::chrono::milliseconds heartbeatInterval_;
+    bool isOpen_ = false;
+    PubSub &manager_;
 };
 
 }  // namespace chatterino

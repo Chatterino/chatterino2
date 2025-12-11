@@ -291,7 +291,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         this->initNm(paths);
     }
-    this->twitchPubSub->initialize();
 
     this->twitch->initEventAPIs(this->bttvLiveUpdates.get(),
                                 this->seventvEventAPI.get());

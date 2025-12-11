@@ -45,7 +45,7 @@ std::optional<InnerClass> PubSubMessage::toInner()
     return InnerClass{this->nonce, data};
 }
 
-std::optional<PubSubMessage> parsePubSubBaseMessage(const QString &blob);
+std::optional<PubSubMessage> parsePubSubBaseMessage(const QByteArray &blob);
 
 }  // namespace chatterino
 
