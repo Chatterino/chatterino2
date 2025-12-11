@@ -459,6 +459,22 @@ public:
                  FailureCallback<QString> failureCallback),
                 (override));
 
+    // get predictions
+    MOCK_METHOD(void, getPredictions,
+                (QString broadcasterID, QStringList ids, int first,
+                 QString after,
+                 ResultCallback<HelixPredictions> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // end prediction
+    MOCK_METHOD(void, endPrediction,
+                (QString broadcasterID, QString id, bool refundPoints,
+                 QString winningOutcomeID,
+                 ResultCallback<HelixPrediction> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
     MOCK_METHOD(void, createEventSubSubscription,
                 (const eventsub::SubscriptionRequest &request,
                  const QString &sessionID,
