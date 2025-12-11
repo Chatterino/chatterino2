@@ -600,15 +600,18 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
                           parsedBadges.contains("lead_moderator");
         }
 
-        // Also checking if the mod tag is present, since badges sometimes disappear in IRC
-        QVariant modTag = message->tag("mod");
-        if (modTag.isValid())
+        if (hasModBadge)
         {
-            tc->setMod(modTag == "1" || hasModBadge);
+            tc->setMod(true);
         }
         else
         {
-            tc->setMod(hasModBadge);
+            QVariant modTag = message->tag("mod");
+            if (modTag.isValid())
+            {
+                // Also checking if the mod tag is present, since badges sometimes disappear in IRC
+                tc->setMod(modTag == "1");
+            }
         }
     }
 }
