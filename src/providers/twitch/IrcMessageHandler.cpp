@@ -586,7 +586,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     auto *tc = dynamic_cast<TwitchChannel *>(c.get());
     if (tc != nullptr)
     {
-        bool hasModBadge{};
+        bool hasModBadge = false;
 
         // Checking if currentUser is a VIP, staff member or has moderator badges
         QVariant badgesTag = message->tag("badges");
