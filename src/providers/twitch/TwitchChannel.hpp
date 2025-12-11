@@ -341,6 +341,11 @@ public:
     const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
 
+    /**
+     * Returns the localized name of the user
+     **/
+    const QString &getLocalizedName() const override;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -402,11 +407,6 @@ private:
     void setLocalizedName(const QString &name);
 
     void onLiveStatusChanged(bool isLive, bool isInitialUpdate);
-
-    /**
-     * Returns the localized name of the user
-     **/
-    const QString &getLocalizedName() const override;
 
     QString prepareMessage(const QString &message) const;
 

@@ -7,6 +7,8 @@
 
 #include <QDateTime>
 #include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QLocale>
 #include <QLoggingCategory>
