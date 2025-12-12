@@ -29,7 +29,7 @@ struct IvrSubage {
         , totalSubMonths(
               root.value("cumulative").toObject().value("months").toInt())
         , followingSince(root.value("followedAt").toString())
-        , isGifted(isSubbed &&
+        , isGifted(this->isSubbed &&
                    !root.value("meta").toObject().value("giftMeta").isNull())
         , gifterName(root.value("meta")
                          .toObject()

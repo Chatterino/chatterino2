@@ -85,6 +85,7 @@ private:
         Label *userIDLabel = nullptr;
         Label *followageLabel = nullptr;
         Label *subageLabel = nullptr;
+        Label *gifterLabel = nullptr;
 
         LiveIndicator *liveIndicator = nullptr;
 
