@@ -1084,6 +1084,14 @@ void UserInfoPopup::updateUserData()
                                 .arg(subageInfo.totalSubMonths)
                                 .arg(subageInfo.gifterName));
                     }
+                    else if (subageInfo.isGifted)
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Tier %1 - Subscribed for %2 months "
+                                    "- Gifted anonymously")
+                                .arg(subageInfo.subTier)
+                                .arg(subageInfo.totalSubMonths));
+                    }
                     else if (subageInfo.isSubbed)
                     {
                         this->ui_.subageLabel->setText(
