@@ -1557,9 +1557,9 @@ class PluginMessageTest : public PluginTest,
 };
 TEST_P(PluginMessageTest, Run)
 {
-    configure();
+    this->configure();
 
-    auto pfr = lua->safe_script_file(luaTestPath("message", GetParam()));
+    auto pfr = this->lua->safe_script_file(luaTestPath("message", GetParam()));
     EXPECT_TRUE(pfr.valid());
     if (!pfr.valid())
     {
