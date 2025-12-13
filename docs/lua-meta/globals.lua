@@ -190,9 +190,9 @@ function c2.Channel:replace_message(message, replacement, hint) end
 
 --- Replace a message at an index with a different one.
 ---
----@param hint number A zero-based index (from the start) of the message to replace.
+---@param index number A zero-based index (from the start) of the message to replace.
 ---@param replacement c2.Message The replacement.
-function c2.Channel:replace_message_at(hint, replacement) end
+function c2.Channel:replace_message_at(index, replacement) end
 
 --- Disable a message with an ID (set the `Disabled` flag).
 --- Note that this requires a re-layout to be visible. This functionality is not yet exposed to plugins.

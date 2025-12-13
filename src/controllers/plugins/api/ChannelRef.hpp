@@ -142,7 +142,7 @@ public:
     /**
      * Replace a message at an index with a different one.
      * 
-     * @lua@param hint number A zero-based index (from the start) of the message to replace.
+     * @lua@param index number A zero-based index (from the start) of the message to replace.
      * @lua@param replacement c2.Message The replacement.
      * @exposed c2.Channel:replace_message_at
      */
