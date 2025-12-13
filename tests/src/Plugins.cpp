@@ -1573,6 +1573,28 @@ TEST_P(PluginMessageTest, Run)
 INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
                          testing::ValuesIn(discoverLuaTests("message")));
 
+class PluginChannelTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginChannelTest, Run)
+{
+    configure();
+
+    auto pfr = lua->safe_script_file(luaTestPath("channel", GetParam()));
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug() << "Test" << GetParam() << "failed:";
+        sol::error err = pfr;
+        qDebug() << err.what();
+        return;
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginChannelTest,
+                         testing::ValuesIn(discoverLuaTests("channel")));
+
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
 {
