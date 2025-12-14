@@ -32,13 +32,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
-            qt-version: 6.7.2
-            force-lto: false
-            skip-artifact: false
-            skip-crashpad: false
-            build-deb: true
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.2
@@ -171,7 +164,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -333,12 +326,6 @@ jobs:
           path: release-artifacts/
 
       # Linux
-      - uses: actions/download-artifact@v6
-        name: Ubuntu 20.04 deb
-        with:
-          name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
       - uses: actions/download-artifact@v6
         name: Ubuntu 22.04 deb
         with:

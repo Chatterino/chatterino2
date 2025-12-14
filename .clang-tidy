@@ -1,6 +1,7 @@
 Checks: "-*,
   clang-diagnostic-*,
   llvm-*,
+  chatterino-*,
   misc-*,
   -misc-unused-parameters,
   readability-identifier-naming,
@@ -12,6 +13,8 @@ Checks: "-*,
   misc-*,
   bugprone-*,
   cert-*,
+  clazy-*,
+  -clazy-qstring-allocations,
   cppcoreguidelines-*,
   -cppcoreguidelines-pro-type-cstyle-cast,
   -cppcoreguidelines-pro-type-vararg,
@@ -33,7 +36,8 @@ Checks: "-*,
   -bugprone-easily-swappable-parameters,
   -cert-err58-cpp,
   -modernize-avoid-c-arrays,
-  -misc-include-cleaner
+  -misc-include-cleaner,
+  -llvm-prefer-static-over-anonymous-namespace
   "
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
