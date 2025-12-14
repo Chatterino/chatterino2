@@ -84,6 +84,25 @@
                 },
                 {
                     "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+                        },
+                        "name": "",
+                        "tooltip": "Moderator"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Moderator",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
                         "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
