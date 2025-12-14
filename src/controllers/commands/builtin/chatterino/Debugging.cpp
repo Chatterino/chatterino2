@@ -219,21 +219,6 @@ QString debugTest(const CommandContext &ctx)
                 break;
         }
     }
-    else if (command == "shared-chat-badge-messages")
-    {
-        const auto nowMillis = QDateTime::currentDateTime().toSecsSinceEpoch();
-        const std::vector messages =  {
-            QString("@tmi-sent-ts=%1;id=3e0750f7-541e-4f7c-8fec-4f943bfd84a3;room-id=11148817;user-id=123706702;display-name=fastTV;badges=bits/100;badge-info=;color=#00FF7F;flags=5-8:P.3;user-type=;emotes=;source-only=0;source-badge-info=subscriber/52;source-id=0dd9957e-6140-498f-a6e8-e62d1b43dfe7;source-room-id=22484632;source-badges=moderator/1,subscriber/48 :fasttv!fasttv@fasttv.tmi.twitch.tv PRIVMSG #pajlada :I'm a mod in a shared chat").arg(nowMillis),
-            QString("@tmi-sent-ts=%1;mod=1;id=d37d2177-2df0-4da2-bdac-34f6b4272818;room-id=11148817;user-id=50931717;display-name=BlackipinoGambino;badges=moderator/1,twitch-recap-2025/1;badge-info=;color=#1E90FF;flags=;user-type=mod;emotes=;source-only=0;source-room-id=22484632;source-id=b11aa5aa-b50c-4205-9e91-799ca4c4b587;source-badge-info=subscriber/76;source-badges=moderator/1,subscriber/72,twitch-recap-2025/1 :blackipinogambino!blackipinogambino@blackipinogambino.tmi.twitch.tv PRIVMSG #pajlada :I'm a mod in both chats").arg(nowMillis),
-            QString("@tmi-sent-ts=%1;id=5956b5b5-9f40-4c98-a10b-610141aed8f3;room-id=11148817;user-id=232174108;client-nonce=61df60966afb055c98085e728fba667c;display-name=fire_val;badges=partner/1;badge-info=;color=#FF0000;flags=;user-type=;emotes=;source-room-id=22484632;source-badge-info=subscriber/9;source-badges=vip/1,subscriber/9,partner/1;source-id=8fb99f1e-c302-49ea-8cc6-626a4632b937;source-only=0 :fire_val!fire_val@fire_val.tmi.twitch.tv PRIVMSG #pajlada :I'm a VIP in a shared chat").arg(nowMillis),
-            QString("@tmi-sent-ts=%1;vip=1;id=936263ef-8588-4435-9bb7-7a0836046d72;room-id=11148817;user-id=112423840;client-nonce=e516e4e906d9ab239230a00bd1f22e20;display-name=TrulyTenzin;badges=vip/1,partner/1;badge-info=;color=#FF5656;flags=;user-type=;emotes=;source-id=9ff662e2-4bbc-42b5-a616-007b25078afa;source-badge-info=subscriber/52;source-room-id=22484632;source-badges=vip/1,subscriber/48,partner/1;source-only=0 :trulytenzin!trulytenzin@trulytenzin.tmi.twitch.tv PRIVMSG #pajlada :I'm a VIP in both chats").arg(nowMillis)
-        };
-
-        for (const auto &msg : messages)
-        {
-            getApp()->getTwitch()->addFakeMessage(msg);
-        }
-    }
     else
     {
         ctx.channel->addSystemMessage(
