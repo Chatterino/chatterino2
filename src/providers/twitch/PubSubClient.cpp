@@ -99,14 +99,18 @@ void PubSubClient::checkHeartbeat()
 QByteArray PubSubClient::encodeSubscription(const Subscription &subscription)
 {
     PubSubListenMessage listen({subscription.topic});
-    this->nonces_[listen.nonce] = NonceInfo{.isListen = true};
+    this->nonces_[listen.nonce] = NonceInfo{
+        .isListen = true,
+    };
     return listen.toJson();
 }
 
 QByteArray PubSubClient::encodeUnsubscription(const Subscription &subscription)
 {
     PubSubUnlistenMessage unlisten({subscription.topic});
-    this->nonces_[unlisten.nonce] = NonceInfo{.isListen = true};
+    this->nonces_[unlisten.nonce] = NonceInfo{
+        .isListen = true,
+    };
     return unlisten.toJson();
 }
 
