@@ -33,6 +33,7 @@ QList<DisplayBadge> availableBadges = {
     {"Admin", "admin"},
     {"Staff", "staff"},
     {"Moderator", "moderator"},
+    {"Lead Moderator", "lead_moderator"},
     {"Verified", "partner"},
     {"VIP", "vip"},
     {"Founder", "founder"},

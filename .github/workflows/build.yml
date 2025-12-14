@@ -164,7 +164,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
