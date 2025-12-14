@@ -20,13 +20,14 @@ class EmoteController;
 
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+class TwitchChannel;
 
 /// Emote manager for one channel.
 ///
 /// Conceptually, this is a managed list of "instantiated" providers for a
 /// channel. It stores the emotes for each provider and takes care of
 /// initializing and reloading them. Providers are sorted by their priority.
-class EmoteHolder
+class ChannelEmotes
 {
 public:
     /// An entry for a single provider
@@ -36,7 +37,12 @@ public:
         EmoteMapPtr emotes;
     };
 
-    EmoteHolder(Channel *channel);
+    ChannelEmotes(TwitchChannel *channel);
+    ChannelEmotes(const ChannelEmotes &) = delete;
+    ChannelEmotes(ChannelEmotes &&) = delete;
+    ChannelEmotes &operator=(const ChannelEmotes &) = delete;
+    ChannelEmotes &operator=(ChannelEmotes &&) = delete;
+    ~ChannelEmotes() = default;
 
     void initialize(const EmoteController &controller);
 
@@ -58,14 +64,14 @@ public:
     }
 
 private:
-    static void refreshProvider(const ProviderData &data, Channel *channel,
-                                bool manualRefresh);
+    static void refreshProvider(const ProviderData &data,
+                                TwitchChannel *channel, bool manualRefresh);
 
     void sort();
 
     std::vector<ProviderData> providerData_;
 
-    Channel *channel;
+    TwitchChannel *channel;
     pajlada::Signals::SignalHolder signalHolder;
 };
 

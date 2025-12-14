@@ -163,8 +163,8 @@ set(SOURCE_FILES
 
         controllers/emotes/EmoteController.cpp
         controllers/emotes/EmoteController.hpp
-        controllers/emotes/EmoteHolder.cpp
-        controllers/emotes/EmoteHolder.hpp
+        controllers/emotes/ChannelEmotes.cpp
+        controllers/emotes/ChannelEmotes.hpp
         controllers/emotes/EmoteProvider.cpp
         controllers/emotes/EmoteProvider.hpp
 

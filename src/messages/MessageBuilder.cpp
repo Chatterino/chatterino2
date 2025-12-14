@@ -5,8 +5,8 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "controllers/emotes/EmoteController.hpp"
-#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -61,6 +61,7 @@
 #include <algorithm>
 #include <chrono>
 #include <unordered_set>
+
 
 using namespace chatterino::literals;
 
@@ -431,15 +432,6 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     //  - BetterTTV Global
     //  - 7TV Global
 
-    if (auto *holder = twitchChannel->emotes())
-    {
-        auto channel = holder->resolve(name);
-        if (channel)
-        {
-            return channel;
-        }
-    }
-
     const auto *globalFfzEmotes = getApp()->getFfzEmotes();
     const auto *globalBttvEmotes = getApp()->getBttvEmotes();
     const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
@@ -449,6 +441,11 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     if (twitchChannel != nullptr)
     {
         // Check for channel emotes
+        auto channelEmote = twitchChannel->channelEmotes().resolve(name);
+        if (channelEmote)
+        {
+            return channelEmote;
+        }
 
         emote = twitchChannel->ffzEmote(name);
         if (emote)

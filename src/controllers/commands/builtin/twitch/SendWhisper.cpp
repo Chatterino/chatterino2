@@ -122,6 +122,14 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             }
         }  // Twitch emote
 
+        {  // third party emotes
+            emote = emoteController->resolveGlobal(EmoteName{words[i]});
+            if (emote)
+            {
+                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
+                continue;
+            }
+        }  // third party emotes
         {  // bttv/ffz emote
             emote = bttvemotes->emote({words[i]});
             if (!emote)
@@ -135,14 +143,6 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                 continue;
             }
         }  // bttv/ffz emote
-        {  // third party emotes
-            emote = emoteController->resolveGlobal(EmoteName{words[i]});
-            if (emote)
-            {
-                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
-                continue;
-            }
-        }  // third party emotes
         {  // emoji/text
             for (auto &variant : emoteController->getEmojis()->parse(words[i]))
             {

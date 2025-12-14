@@ -1,6 +1,6 @@
 #include "controllers/emotes/EmoteProvider.hpp"
 
-#include "controllers/emotes/EmoteHolder.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 
 namespace chatterino {
 
@@ -27,11 +27,6 @@ EmotePtr EmoteProvider::globalEmote(const EmoteName &name) const
         return nullptr;
     }
     return it->second;
-}
-
-bool EmoteProvider::hasChannelEmotes() const
-{
-    return true;
 }
 
 EmotePtr EmoteProvider::createEmote(Emote &&emote)

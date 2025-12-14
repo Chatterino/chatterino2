@@ -3,8 +3,8 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "controllers/emotes/EmoteController.hpp"
-#include "controllers/emotes/EmoteHolder.hpp"
 #include "controllers/emotes/EmoteProvider.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
@@ -34,6 +34,7 @@
 #include <QTabWidget>
 
 #include <utility>
+
 
 namespace {
 
@@ -467,11 +468,9 @@ void EmotePopup::reloadEmotes()
             addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
                       "7TV");
         }
-    }
 
-    if (auto *holder = this->channel_->emotes())
-    {
-        for (const auto &data : holder->providerData())
+        for (const auto &data :
+             this->twitchChannel_->channelEmotes().providerData())
         {
             auto provider = data.provider.lock();
             if (!provider || !provider->hasChannelEmotes())
@@ -592,28 +591,26 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                   provider->name() % u" (Global)");
     }
 
-    if (auto *holder = this->channel_->emotes())
-    {
-        for (const auto &data : holder->providerData())
-        {
-            auto filtered = filterEmoteMap(searchText, data.emotes);
-            if (filtered.empty())
-            {
-                continue;
-            }
-            auto provider = data.provider.lock();
-            if (!provider || !provider->hasChannelEmotes())
-            {
-                continue;
-            }
-            addEmotes(*searchChannel, std::move(filtered),
-                      provider->name() % u" (Channel)");
-        }
-    }
-
     if (this->twitchChannel_ == nullptr)
     {
         return;
+    }
+
+    for (const auto &data :
+         this->twitchChannel_->channelEmotes().providerData())
+    {
+        auto filtered = filterEmoteMap(searchText, data.emotes);
+        if (filtered.empty())
+        {
+            continue;
+        }
+        auto provider = data.provider.lock();
+        if (!provider || !provider->hasChannelEmotes())
+        {
+            continue;
+        }
+        addEmotes(*searchChannel, std::move(filtered),
+                  provider->name() % u" (Channel)");
     }
 
     auto bttvChannelEmotes =

@@ -25,9 +25,6 @@ public:
 
     virtual void initialize();
 
-    EmoteProviderPtr findProviderByName(QStringView name) const;
-    EmoteProviderPtr findProviderByID(QStringView id) const;
-
     EmotePtr resolveGlobal(const EmoteName &query) const;
 
     std::span<const EmoteProviderPtr> getProviders() const;

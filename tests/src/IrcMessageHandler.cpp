@@ -2,7 +2,7 @@
 
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/emotes/EmoteHolder.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/sound/NullBackend.hpp"
@@ -342,7 +342,7 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
     const QString &name, const testlib::Snapshot &snapshot)
 {
     auto chan = std::make_shared<TwitchChannel>(name);
-    chan->emotes()->refresh(false);
+    chan->channelEmotes().refresh(false);
 
     QJsonObject defaultImage{
         {u"url_1x"_s, u"https://chatterino.com/reward1x.png"_s},
@@ -522,7 +522,7 @@ public:
 
         this->twitchdevChannel = std::make_shared<TwitchChannel>("twitchdev");
         this->twitchdevChannel->setRoomId("141981764");
-        this->twitchdevChannel->emotes()->refresh(false);
+        this->twitchdevChannel->channelEmotes().refresh(false);
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);

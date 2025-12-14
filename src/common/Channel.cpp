@@ -1,7 +1,6 @@
 #include "common/Channel.hpp"
 
 #include "Application.hpp"
-#include "controllers/emotes/EmoteHolder.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageSimilarity.hpp"
@@ -434,16 +433,6 @@ void Channel::onConnected()
 
 void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
-}
-
-EmoteHolder *Channel::emotes()
-{
-    return this->emotes_.get();
-}
-
-const EmoteHolder *Channel::emotes() const
-{
-    return this->emotes_.get();
 }
 
 //

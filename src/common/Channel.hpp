@@ -20,8 +20,6 @@ namespace chatterino {
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-class EmoteHolder;
-
 class Channel : public std::enable_shared_from_this<Channel>, public MessageSink
 {
 public:
@@ -124,9 +122,6 @@ public:
 
     MessageSinkTraits sinkTraits() const final;
 
-    EmoteHolder *emotes();
-    const EmoteHolder *emotes() const;
-
     // CHANNEL INFO
     virtual bool canSendMessage() const;
     virtual bool isWritable() const;  // whether split input will be usable
@@ -151,8 +146,6 @@ protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
     QString platform_;
-
-    std::unique_ptr<EmoteHolder> emotes_;
 
 private:
     const QString name_;

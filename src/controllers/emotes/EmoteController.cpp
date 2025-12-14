@@ -28,30 +28,6 @@ void EmoteController::initialize()
     }
 }
 
-EmoteProviderPtr EmoteController::findProviderByName(QStringView name) const
-{
-    auto it = std::ranges::find_if(this->providers_, [&](const auto &provider) {
-        return provider->name() == name;
-    });
-    if (it == this->providers_.end())
-    {
-        return nullptr;
-    }
-    return *it;
-}
-
-EmoteProviderPtr EmoteController::findProviderByID(QStringView id) const
-{
-    auto it = std::ranges::find_if(this->providers_, [&](const auto &provider) {
-        return provider->id() == id;
-    });
-    if (it == this->providers_.end())
-    {
-        return nullptr;
-    }
-    return *it;
-}
-
 EmotePtr EmoteController::resolveGlobal(const EmoteName &query) const
 {
     for (const auto &provider : this->providers_)
