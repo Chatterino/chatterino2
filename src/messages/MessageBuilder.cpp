@@ -348,6 +348,39 @@ void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
     builder->message().badgeInfos = badgeInfos;
 }
 
+std::vector<Badge> appendSharedChatBadges(MessageBuilder *builder,
+                            const std::vector<Badge> &sharedBadges,
+                            const QString &sharedChannelName,
+                            const TwitchChannel *twitchChannel)
+{
+    auto appendedBadges = std::vector<Badge>{};
+    for (const auto &badge : sharedBadges)
+    {
+        if (badge.key_ != "moderator" && badge.key_ != "vip")
+        {
+            continue;
+        }
+
+        auto badgeEmote = getTwitchBadge(badge, twitchChannel);
+        if (!badgeEmote)
+        {
+            continue;
+        }
+
+        auto tooltip = (*badgeEmote)->tooltip.string;
+        if (sharedChannelName != "")
+        {
+            tooltip = QString("%1 (%2)").arg(tooltip, sharedChannelName);
+        }
+
+        builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
+            ->setTooltip(tooltip);
+        appendedBadges.push_back(badge);
+    }
+
+    return appendedBadges;
+}
+
 bool doesWordContainATwitchEmote(
     int cursor, const QString &word,
     const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
@@ -2379,6 +2412,8 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         return;
     }
 
+    auto badges = parseBadgeTag(tags);
+
     if (this->message().flags.has(MessageFlag::SharedMessage))
     {
         const QString sourceId = tags["source-room-id"].toString();
@@ -2410,10 +2445,24 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         this->emplace<BadgeElement>(
             makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
             MessageElementFlag::BadgeSharedChannel);
+
+        const auto sourceBadges = parseBadgeTag(tags, "source-badges");
+        const auto appendedBadges = appendSharedChatBadges(this, sourceBadges,
+                                                           sourceName,
+                                                           twitchChannel);
+
+        // Dedup mod/vip badges if user is mod/vip in both chats,
+        // preferring source channel's badges for the tooltips
+        for (const auto &appendedBadge : appendedBadges)
+        {
+            if (auto b = std::ranges::find(badges, appendedBadge); b != badges.end())
+            {
+                badges.erase(b);
+            }
+        }
     }
 
     auto badgeInfos = parseBadgeInfoTag(tags);
-    auto badges = parseBadgeTag(tags);
     appendBadges(this, badges, badgeInfos, twitchChannel);
 }
 
