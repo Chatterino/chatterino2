@@ -224,7 +224,7 @@ QString cancelPrediction(const CommandContext &ctx)
 QString completePrediction(const CommandContext &ctx)
 {
     const auto usage = QStringLiteral(
-        R"(Usage: /completeprediction --choice "<choice>" --index <index> - Selects a winner for an outstanding prediction. The choice title must exactly match the wording in the prediction. Alternatively, you may specify the one-based index of the winning outcome, but you may not specify both the choice name and index.)");
+        R"(Usage: /completeprediction --choice "<choice>" or /completeprediction --index <index> - Selects a winner for an outstanding prediction. The choice title must exactly match the wording in the prediction. Alternatively, you may specify the one-based index of the winning outcome.)");
 
     if (ctx.twitchChannel == nullptr)
     {
