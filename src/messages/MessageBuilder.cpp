@@ -64,7 +64,6 @@
 #include <chrono>
 #include <unordered_set>
 
-
 using namespace chatterino::literals;
 
 namespace {

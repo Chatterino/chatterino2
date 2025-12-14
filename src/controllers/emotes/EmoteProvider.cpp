@@ -31,7 +31,7 @@ EmotePtr EmoteProvider::globalEmote(const EmoteName &name) const
 
 EmotePtr EmoteProvider::createEmote(Emote &&emote)
 {
-    auto &slot = cache[emote.id];
+    auto &slot = this->cache[emote.id];
     auto shared = slot.lock();
     if (shared && *shared == emote)
     {

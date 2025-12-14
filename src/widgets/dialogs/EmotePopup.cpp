@@ -36,7 +36,6 @@
 
 #include <utility>
 
-
 namespace {
 
 using namespace chatterino;

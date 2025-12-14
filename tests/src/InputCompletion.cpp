@@ -195,7 +195,7 @@ private:
         auto bttv =
             std::make_shared<mock::EmoteProvider>("BetterTTV", "betterttv", 1);
         bttv->setGlobalEmotes(std::move(bttvEmotes));
-        mockApplication->emotes.addProvider(std::move(bttv));
+        this->mockApplication->emotes.addProvider(std::move(bttv));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
@@ -204,7 +204,7 @@ private:
         auto ffz = std::make_shared<mock::EmoteProvider>("FrankerFaceZ",
                                                          "frankerfacez", 2);
         ffz->setGlobalEmotes(std::move(ffzEmotes));
-        mockApplication->emotes.addProvider(std::move(ffz));
+        this->mockApplication->emotes.addProvider(std::move(ffz));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
@@ -213,7 +213,7 @@ private:
         addEmote(*seventvEmotes, "PAJAW");
         auto stv = std::make_shared<mock::EmoteProvider>("7TV", "seventv", 3);
         stv->setGlobalEmotes(std::move(seventvEmotes));
-        mockApplication->emotes.addProvider(std::move(stv));
+        this->mockApplication->emotes.addProvider(std::move(stv));
     }
 
 protected:

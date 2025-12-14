@@ -20,7 +20,7 @@ void ChannelEmotes::initialize(const EmoteController &controller)
 {
     for (const auto &provider : controller.getProviders())
     {
-        if (!provider->supportsChannel(channel))
+        if (!provider->supportsChannel(this->channel))
         {
             continue;
         }
