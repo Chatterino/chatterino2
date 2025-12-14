@@ -15,17 +15,17 @@ public:
     {
     }
 
-    void setGlobalEmotes(EmoteMapPtr map)
+    void setGlobalEmotes(std::shared_ptr<const EmoteMap> map)
     {
         this->globalEmotes_ = std::move(map);
     }
 
-    void setChannel(const QString &name, EmoteMapPtr map)
+    void setChannel(const QString &name, std::shared_ptr<const EmoteMap> map)
     {
         this->channels[name] = std::move(map);
     }
 
-    void setChannelFallback(EmoteMapPtr map)
+    void setChannelFallback(std::shared_ptr<const EmoteMap> map)
     {
         this->channelFallback = std::move(map);
     }
@@ -78,8 +78,8 @@ public:
         return true;
     }
 
-    std::unordered_map<QString, EmoteMapPtr> channels;
-    EmoteMapPtr channelFallback;
+    std::unordered_map<QString, std::shared_ptr<const EmoteMap>> channels;
+    std::shared_ptr<const EmoteMap> channelFallback;
 };
 
 }  // namespace chatterino::mock

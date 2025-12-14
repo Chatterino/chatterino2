@@ -15,7 +15,6 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteProvider;
 class EmoteMap;
-using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
 class EmoteController;
 
 class Channel;
@@ -34,7 +33,7 @@ public:
     struct ProviderData {
         std::weak_ptr<EmoteProvider> provider;
         QString id;
-        EmoteMapPtr emotes;
+        std::shared_ptr<const EmoteMap> emotes;
     };
 
     ChannelEmotes(TwitchChannel *channel);

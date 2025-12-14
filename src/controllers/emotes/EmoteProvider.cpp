@@ -14,7 +14,7 @@ EmoteProvider::EmoteProvider(QString name, QString id, uint32_t priority)
 
 EmoteProvider::~EmoteProvider() = default;
 
-EmoteMapPtr EmoteProvider::globalEmotes() const
+std::shared_ptr<const EmoteMap> EmoteProvider::globalEmotes() const
 {
     return this->globalEmotes_;
 }

@@ -13,7 +13,7 @@ namespace chatterino {
 class Channel;
 
 struct EmoteLoadResult {
-    EmoteMapPtr emotes;
+    std::shared_ptr<const EmoteMap> emotes;
     bool isPreemptiveCached = false;
 };
 
@@ -38,7 +38,7 @@ public:
 
     virtual bool supportsChannel(Channel *channel) = 0;
 
-    EmoteMapPtr globalEmotes() const;
+    std::shared_ptr<const EmoteMap> globalEmotes() const;
     EmotePtr globalEmote(
         const EmoteName &name) const;  // XXX: should take a view
 
@@ -64,7 +64,7 @@ public:
 protected:
     EmotePtr createEmote(Emote &&emote);
 
-    EmoteMapPtr globalEmotes_;
+    std::shared_ptr<const EmoteMap> globalEmotes_;
 
 private:
     std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
