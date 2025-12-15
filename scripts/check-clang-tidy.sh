@@ -2,7 +2,7 @@
 
 # example usage: FAST=1 ./scripts/check-clang-tidy.sh --checks '-*,modernize-return-braced-init-list' --fix
 
-set -eu
+set -e
 
 clang-tidy --version
 
