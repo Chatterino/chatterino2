@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2025 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-License-Identifier: CC0-1.0
+---
+name: REUSE license check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reuse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: REUSE license check
+        uses: fsfe/reuse-action@v6
+        # I don't want to scare contributors yet, but I want to see progress in actions.
+        continue-on-error: true
