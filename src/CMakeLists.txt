@@ -883,7 +883,6 @@ if (CHATTERINO_GENERATE_COVERAGE)
         EXCLUDE "lib/settings/*"
         EXCLUDE "lib/signals/*"
         EXCLUDE "lib/sol2/*"
-        EXCLUDE "lib/websocketpp/*"
         EXCLUDE "lib/WinToast/*"
 
         EXCLUDE "*/ui_*.h"
@@ -915,7 +914,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
-        websocketpp::websocketpp
         Threads::Threads
         LRUCache
         MagicEnum
