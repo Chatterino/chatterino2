@@ -13,8 +13,8 @@ const QStringList &getSampleEmoteTestMessages();
 
 /// Channel point reward tests
 
-const QString &getSampleChannelRewardMessage();
-const QString &getSampleChannelRewardMessage2();
+QByteArray getSampleChannelRewardMessage();
+QByteArray getSampleChannelRewardMessage2();
 const QString &getSampleChannelRewardIRCMessage();
 
 /// Links
