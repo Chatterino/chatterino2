@@ -7,13 +7,18 @@
 
 #include <QApplication>
 #include <QComboBox>
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLocale>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QString>
 #include <QStringBuilder>
 #include <QVBoxLayout>
+
+#include <chrono>
+#include <filesystem>
 
 using namespace Qt::Literals;
 
@@ -79,7 +84,8 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
                             this, "Failed to restore file",
                             u"Failed to copy '%1' to '%2': %3"_s.arg(
                                 stdPathToQString(data->path),
-                                stdPathToQString(data->dstPath), ec.message()),
+                                stdPathToQString(data->dstPath),
+                                QString::fromStdString(ec.message())),
                             QMessageBox::Retry | QMessageBox::Ok) ==
                         QMessageBox::Retry;
             }
