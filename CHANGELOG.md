@@ -67,6 +67,7 @@
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 - Dev: Added Clazy linting in CI. (#6623)
 - Dev: Added custom clang-tidy module linting in CI. (#6626)
+- Dev: Moved Twitch PubSub to liveupdates. (#6638)
 
 ## 2.5.4
 
