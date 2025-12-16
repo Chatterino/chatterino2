@@ -11,6 +11,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "debug/Benchmark.hpp"
 #include "pajlada/settings/signalargs.hpp"
+#include "util/Backup.hpp"
 #include "util/WindowsHelper.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -18,6 +19,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace Qt::Literals;
 
 template <typename T>
 void initializeSignalVector(pajlada::Signals::SignalHolder &signalHolder,
@@ -144,7 +146,8 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 
 Settings *Settings::instance_ = nullptr;
 
-Settings::Settings(const Args &args, const QString &settingsDirectory)
+Settings::Settings(const Args &args, const QString &settingsDirectory,
+                   bool isTest)
     : prevInstance_(Settings::instance_)
     , disableSaving(args.dontSaveSettings)
 {
@@ -153,7 +156,42 @@ Settings::Settings(const Args &args, const QString &settingsDirectory)
     // get global instance of the settings library
     auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
 
-    settingsInstance->load(qPrintable(settingsPath));
+    if (isTest)
+    {
+        settingsInstance->load(qPrintable(settingsPath));
+    }
+    else
+    {
+        backup::loadSettingFileWithBackups(
+            backup::FileData{
+                .fileName = u"settings.json"_s,
+                .directory = settingsDirectory,
+                .fileKind = u"Settings"_s,
+                .fileDescription =
+                    u"This file contains the main application settings such as accounts and hotkeys."_s},
+            [&]() -> ExpectedStr<void> {
+                using LoadError = pajlada::Settings::SettingManager::LoadError;
+                auto err = settingsInstance->load(qPrintable(settingsPath));
+                switch (err)
+                {
+                    case LoadError::NoError:
+                        return {};  // ok
+                    case LoadError::CannotOpenFile:
+                        return makeUnexpected(u"Failed to open '" %
+                                              settingsPath % '\'');
+                    case LoadError::FileHandleError:
+                        return makeUnexpected("File handle error");
+                    case LoadError::FileReadError:
+                        return makeUnexpected("Failed to read file");
+                    case LoadError::FileSeekError:
+                        return makeUnexpected("Failed to seek in file");
+                    case LoadError::JSONParseError:
+                        return makeUnexpected("File contained malformed JSON");
+                }
+                assert(false);
+                return makeUnexpected("Unknown error");
+            });
+    }
 
     settingsInstance->setBackupEnabled(true);
     settingsInstance->setBackupSlots(9);
