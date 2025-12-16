@@ -313,26 +313,26 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       # Windows
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Windows Qt6.7.1
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Windows Qt6.7.1 symbols
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Ubuntu 22.04 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Ubuntu 24.04 deb
         with:
           name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
