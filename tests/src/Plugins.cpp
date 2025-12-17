@@ -1592,7 +1592,7 @@ TEST_P(PluginChannelTest, Run)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginChannelTest,
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
                          testing::ValuesIn(discoverLuaTests("channel")));
 
 // verify that all snapshots are included
