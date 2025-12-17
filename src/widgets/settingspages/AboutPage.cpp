@@ -98,9 +98,6 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Serialize",
                        "https://github.com/pajlada/serialize",
                        ":/licenses/pajlada_serialize.txt");
-            addLicense(form.getElement(), "Websocketpp",
-                       "https://www.zaphoyd.com/websocketpp/",
-                       ":/licenses/websocketpp.txt");
 #ifndef NO_QTKEYCHAIN
             addLicense(form.getElement(), "QtKeychain",
                        "https://github.com/frankosterfeld/qtkeychain",

@@ -1,224 +1,196 @@
 #include "providers/twitch/PubSubClient.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/twitch/PubSubHelpers.hpp"
+#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
-#include "util/DebugCount.hpp"
 
 namespace chatterino {
 
-static const char *PING_PAYLOAD = R"({"type":"PING"})";
+using namespace Qt::Literals;
 
-PubSubClient::PubSubClient(WebsocketClient &websocketClient,
-                           WebsocketHandle handle,
-                           const PubSubClientOptions &clientOptions)
-    : websocketClient_(websocketClient)
-    , handle_(handle)
-    , heartbeatTimer_(std::make_shared<boost::asio::steady_timer>(
-          this->websocketClient_.get_io_service()))
-    , clientOptions_(clientOptions)
+QDebug operator<<(QDebug debug, const TopicData &data)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "TopicData(" << data.topic << ')';
+
+    return debug;
+}
+
+PubSubClient::PubSubClient(PubSub &manager,
+                           std::chrono::milliseconds heartbeatInterval)
+    : BasicPubSubClient(MAX_LISTENS)
+    , heartbeatInterval_(heartbeatInterval)
+    , manager_(manager)
 {
 }
 
-void PubSubClient::start()
+void PubSubClient::onOpen()
 {
-    assert(!this->started_);
-
-    this->started_ = true;
-
-    this->ping();
+    BasicPubSubClient::onOpen();
+    this->isOpen_ = true;
+    this->lastHeartbeat_ = std::chrono::steady_clock::now();
 }
 
-void PubSubClient::stop()
+void PubSubClient::onMessage(const QByteArray &msg)
 {
-    assert(this->started_);
+    this->manager_.diag.messagesReceived++;
 
-    this->started_ = false;
-    this->heartbeatTimer_->cancel();
-}
+    auto optMessage = parsePubSubBaseMessage(msg);
+    if (!optMessage)
+    {
+        qCDebug(chatterinoPubSub)
+            << "Unable to parse incoming pubsub message" << msg;
+        this->manager_.diag.messagesFailedToParse += 1;
+        return;
+    }
 
-void PubSubClient::close(const std::string &reason,
-                         websocketpp::close::status::value code)
-{
-    boost::asio::post(
-        this->websocketClient_.get_io_service().get_executor(),
-        [this, reason, code] {
-            // We need to post this request to the io service executor
-            // to ensure the weak pointer used in get_con_from_hdl is used in a safe way
-            WebsocketErrorCode ec;
+    auto message = *optMessage;
 
-            auto conn =
-                this->websocketClient_.get_con_from_hdl(this->handle_, ec);
-            if (ec)
+    switch (message.type)
+    {
+        case PubSubMessage::Type::Pong: {
+            this->lastHeartbeat_.store(std::chrono::steady_clock::now());
+        }
+        break;
+
+        case PubSubMessage::Type::Response: {
+            this->handleResponse(message);
+        }
+        break;
+
+        case PubSubMessage::Type::Message: {
+            auto oMessageMessage = message.toInner<PubSubMessageMessage>();
+            if (!oMessageMessage)
             {
-                qCDebug(chatterinoPubSub)
-                    << "Error getting con:" << ec.message().c_str();
+                qCDebug(chatterinoPubSub) << "Malformed MESSAGE:" << msg;
                 return;
             }
 
-            conn->close(code, reason, ec);
-            if (ec)
-            {
-                qCDebug(chatterinoPubSub)
-                    << "Error closing:" << ec.message().c_str();
-                return;
-            }
-        });
+            this->handleMessageResponse(*oMessageMessage);
+        }
+        break;
+
+        case PubSubMessage::Type::INVALID:
+        default: {
+            qCDebug(chatterinoPubSub)
+                << "Unknown message type:" << message.typeString;
+        }
+        break;
+    }
 }
 
-bool PubSubClient::listen(const PubSubListenMessage &msg)
+void PubSubClient::checkHeartbeat()
 {
-    auto numRequestedListens = msg.topics.size();
-
-    if (this->numListens_ + numRequestedListens > PubSubClient::MAX_LISTENS)
+    if (!this->isOpen_)
     {
-        // This PubSubClient is already at its peak listens
-        return false;
-    }
-    this->numListens_ += numRequestedListens;
-    DebugCount::increase("PubSub topic pending listens",
-                         static_cast<int64_t>(numRequestedListens));
-
-    for (const auto &topic : msg.topics)
-    {
-        this->listeners_.emplace_back(Listener{
-            TopicData{
-                topic,
-                false,
-                false,
-            },
-            false,
-        });
+        return;
     }
 
-    qCDebug(chatterinoPubSub)
-        << "Subscribing to" << numRequestedListens << "topics";
+    auto dur = std::chrono::steady_clock::now() - this->lastHeartbeat_.load();
+    if (dur > this->heartbeatInterval_ * 1.5)
+    {
+        qCDebug(chatterinoPubSub) << "Heartbeat timed out";
+        this->close();
+    }
 
-    this->send(msg.toJson());
-
-    return true;
+    this->sendText(R"({"type":"PING"})"_ba);
 }
 
-PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
-    const QString &prefix)
+QByteArray PubSubClient::encodeSubscription(const Subscription &subscription)
 {
-    std::vector<QString> topics;
+    PubSubListenMessage listen({subscription.topic});
+    this->nonces_[listen.nonce] = NonceInfo{
+        .isListen = true,
+    };
+    return listen.toJson();
+}
 
-    for (auto it = this->listeners_.begin(); it != this->listeners_.end();)
+QByteArray PubSubClient::encodeUnsubscription(const Subscription &subscription)
+{
+    PubSubUnlistenMessage unlisten({subscription.topic});
+    this->nonces_[unlisten.nonce] = NonceInfo{
+        .isListen = true,
+    };
+    return unlisten.toJson();
+}
+
+void PubSubClient::handleResponse(const PubSubMessage &message)
+{
+    const bool failed = !message.error.isEmpty();
+
+    if (failed)
     {
-        const auto &listener = *it;
-        if (listener.topic.startsWith(prefix))
+        qCDebug(chatterinoPubSub)
+            << "Error" << message.error << "on nonce" << message.nonce;
+    }
+
+    if (message.nonce.isEmpty())
+    {
+        // Can't do any specific handling since no nonce was specified
+        return;
+    }
+
+    auto nonceInfoIt = this->nonces_.find(message.nonce);
+    if (nonceInfoIt == this->nonces_.end())
+    {
+        qCDebug(chatterinoPubSub) << "Unknown nonce:" << message.nonce;
+        return;
+    }
+
+    if (nonceInfoIt->second.isListen)
+    {
+        if (failed)
         {
-            topics.push_back(listener.topic);
-            it = this->listeners_.erase(it);
+            this->manager_.diag.failedListenResponses++;
         }
         else
         {
-            ++it;
+            this->manager_.diag.listenResponses++;
         }
     }
-
-    if (topics.empty())
+    else
     {
-        return {{}, ""};
+        this->manager_.diag.unlistenResponses++;
     }
 
-    auto numRequestedUnlistens = topics.size();
-
-    this->numListens_ -= numRequestedUnlistens;
-    DebugCount::increase("PubSub topic pending unlistens",
-                         static_cast<int64_t>(numRequestedUnlistens));
-
-    PubSubUnlistenMessage message(topics);
-
-    this->send(message.toJson());
-
-    return {message.topics, message.nonce};
+    this->nonces_.erase(nonceInfoIt);
 }
 
-void PubSubClient::handleListenResponse(const PubSubMessage &message)
+void PubSubClient::handleMessageResponse(const PubSubMessageMessage &message)
 {
-}
-
-void PubSubClient::handleUnlistenResponse(const PubSubMessage &message)
-{
-}
-
-void PubSubClient::handlePong()
-{
-    assert(this->awaitingPong_);
-
-    this->awaitingPong_ = false;
-}
-
-bool PubSubClient::isListeningToTopic(const QString &topic)
-{
-    for (const auto &listener : this->listeners_)
-    {
-        if (listener.topic == topic)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-std::vector<Listener> PubSubClient::getListeners() const
-{
-    return this->listeners_;
-}
-
-void PubSubClient::ping()
-{
-    assert(this->started_);
-
-    if (this->awaitingPong_)
-    {
-        qCDebug(chatterinoPubSub) << "No pong response, disconnect!";
-        this->close("Didn't respond to ping");
-
-        return;
-    }
-
-    if (!this->send(PING_PAYLOAD))
+    if (!message.topic.startsWith("community-points-channel-v1."))
     {
         return;
     }
 
-    this->awaitingPong_ = true;
-
-    auto self = this->shared_from_this();
-
-    runAfter(this->heartbeatTimer_, this->clientOptions_.pingInterval_,
-             [self](auto timer) {
-                 (void)timer;
-                 if (!self->started_)
-                 {
-                     return;
-                 }
-
-                 self->ping();
-             });
-}
-
-bool PubSubClient::send(const char *payload)
-{
-    WebsocketErrorCode ec;
-    this->websocketClient_.send(this->handle_, payload,
-                                websocketpp::frame::opcode::text, ec);
-
-    if (ec)
+    auto oInnerMessage =
+        message.toInner<PubSubCommunityPointsChannelV1Message>();
+    if (!oInnerMessage)
     {
-        qCDebug(chatterinoPubSub) << "Error sending message" << payload << ":"
-                                  << ec.message().c_str();
-        // TODO(pajlada): Check which error code happened and maybe
-        // gracefully handle it
-
-        return false;
+        qCDebug(chatterinoPubSub)
+            << "Malformed community-points-channel-v1 message";
+        return;
     }
 
-    return true;
+    const auto &innerMessage = *oInnerMessage;
+
+    switch (innerMessage.type)
+    {
+        case PubSubCommunityPointsChannelV1Message::Type::
+            AutomaticRewardRedeemed:
+        case PubSubCommunityPointsChannelV1Message::Type::RewardRedeemed: {
+            auto redemption = innerMessage.data.value("redemption").toObject();
+            this->manager_.pointReward.redeemed.invoke(redemption);
+        }
+        break;
+
+        case PubSubCommunityPointsChannelV1Message::Type::INVALID:
+        default: {
+            qCDebug(chatterinoPubSub)
+                << "Invalid point event type:" << innerMessage.typeString;
+        }
+        break;
+    }
 }
 
 }  // namespace chatterino

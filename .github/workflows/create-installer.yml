@@ -52,7 +52,7 @@ jobs:
         shell: powershell
 
       - name: Upload installer
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
