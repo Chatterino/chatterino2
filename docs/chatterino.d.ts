@@ -64,9 +64,7 @@ declare namespace c2 {
         ): void;
 
         message_snapshot(n_items: number): Message[];
-        message_snapshot_as_table(n_items: number): Message[];
         last_message(): Message | null;
-        disable_all_messages(): void;
         replace_message(message: Message, replacement: Message): void;
         replace_message(
             message: Message,
@@ -74,7 +72,6 @@ declare namespace c2 {
             hint: number
         ): void;
         replace_message_at(index: number, replacement: Message): void;
-        disable_message_by_id(id: string): void;
         clear_messages(): void;
         find_message_by_id(id: string): Message | null;
         has_messages(): boolean;

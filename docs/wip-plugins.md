@@ -448,21 +448,9 @@ Get a list of messages in this channel (starting from the most recent messages).
 The snapshot is returned as a usertype that wraps a C++ object.
 `n_items` is an upper bound, the actual number of messages returned might be lower.
 
-##### `Channel:message_snapshot_as_table(n_items)`
-
-Get a list of messages in this channel (starting from the most recent messages).
-The snapshot is returned as a Lua table.
-
-`n_items` is an upper bound, the actual number of messages returned might be lower.
-
 ##### `Channel:last_message()`
 
 Get the most recent message. If this channel doesn't have any message, this returns `nil`.
-
-##### `Channel:disable_all_messages()`
-
-Set the `Disabled` flag on all messages that aren't whispers, timeouts, or system messages.
-Note that this requires a re-layout to be visible. This functionality is not yet exposed to plugins.
 
 ##### `Channel:replace_message(message, replacement[, hint])`
 
@@ -473,11 +461,6 @@ Replace a specific message with a different one.
 
 Replace a message at an index with a different one.
 `index` is a zero-based index (from the start) of the message to replace.
-
-##### `Channel:disable_message_by_id(id)`
-
-Disable a message with an ID (set the `Disabled` flag).
-Note that this requires a re-layout to be visible. This functionality is not yet exposed to plugins.
 
 ##### `Channel:clear_messages()`
 

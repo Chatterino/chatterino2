@@ -121,20 +121,9 @@ std::vector<MessagePtrMut> ChannelRef::message_snapshot(size_t n_items)
     return this->strong()->getMessageSnapshotMut(n_items);
 }
 
-sol::as_table_t<std::vector<MessagePtrMut>>
-    ChannelRef::message_snapshot_as_table(size_t n_items)
-{
-    return sol::as_table(this->strong()->getMessageSnapshotMut(n_items));
-}
-
 MessagePtrMut ChannelRef::last_message()
 {
     return std::const_pointer_cast<Message>(this->strong()->getLastMessage());
-}
-
-void ChannelRef::disable_all_messages()
-{
-    this->strong()->disableAllMessages();
 }
 
 void ChannelRef::replace_message(const MessagePtrMut &message,
@@ -169,11 +158,6 @@ void ChannelRef::replace_message_at(size_t index,
     }
 
     this->strong()->replaceMessage(index, replacement);
-}
-
-void ChannelRef::disable_message_by_id(const QString &id)
-{
-    this->strong()->disableMessage(id);
 }
 
 void ChannelRef::clear_messages()
@@ -286,13 +270,10 @@ void ChannelRef::createUserType(sol::table &c2)
         "add_system_message", &ChannelRef::add_system_message,
         "add_message", &ChannelRef::add_message,
         "message_snapshot", &ChannelRef::message_snapshot,
-        "message_snapshot_as_table", &ChannelRef::message_snapshot_as_table,
         "last_message", &ChannelRef::last_message,
-        "disable_all_messages", &ChannelRef::disable_all_messages,
         "replace_message", sol::overload(&ChannelRef::replace_message,
              &ChannelRef::replace_message_hint),
         "replace_message_at", &ChannelRef::replace_message_at,
-        "disable_message_by_id", &ChannelRef::disable_message_by_id,
         "clear_messages", &ChannelRef::clear_messages,
         "find_message_by_id", &ChannelRef::find_message_by_id,
         "has_messages", &ChannelRef::has_messages,

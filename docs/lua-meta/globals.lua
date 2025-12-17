@@ -158,22 +158,10 @@ function c2.Channel:add_message(message, context, override_flags) end
 ---@return c2.Message[]
 function c2.Channel:message_snapshot(n_items) end
 
---- Get a list of messages in this channel (starting from the most recent messages).
---- The snapshot is returned as a Lua table.
----
----@param n_items number Number of messages to retrieve. This is an upper bound, the actual number of messages returned might be lower.
----@return c2.Message[]
-function c2.Channel:message_snapshot_as_table(n_items) end
-
 --- Get the most recent message. If this channel doesn't have any message, this returns `nil`.
 ---
 ---@return c2.Message?
 function c2.Channel:last_message() end
-
---- Set the `Disabled` flag on all messages that aren't whispers, timeouts, or system messages.
---- Note that this requires a re-layout to be visible. This functionality is not yet exposed to plugins.
----
-function c2.Channel:disable_all_messages() end
 
 --- Replace a specific message with a different one.
 ---
@@ -193,12 +181,6 @@ function c2.Channel:replace_message(message, replacement, hint) end
 ---@param index number A zero-based index (from the start) of the message to replace.
 ---@param replacement c2.Message The replacement.
 function c2.Channel:replace_message_at(index, replacement) end
-
---- Disable a message with an ID (set the `Disabled` flag).
---- Note that this requires a re-layout to be visible. This functionality is not yet exposed to plugins.
----
----@param id string The ID of the message to disable.
-function c2.Channel:disable_message_by_id(id) end
 
 --- Remove all messages in this channel.
 ---
