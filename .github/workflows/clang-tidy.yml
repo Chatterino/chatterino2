@@ -67,4 +67,4 @@ jobs:
             curl, unzip
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.22.2
+        uses: ZedThree/clang-tidy-review/upload@v0.22.3
