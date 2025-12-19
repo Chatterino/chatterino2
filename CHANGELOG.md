@@ -21,6 +21,7 @@
 - Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632)
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
+- Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
 - Bugfix: Fixed some commands and filters not working as expected in seach popups. (#6539)
 - Bugfix: Fixed settings occasionally not opening when clicking on "Manage Accounts" in the account switcher. (#6543)
