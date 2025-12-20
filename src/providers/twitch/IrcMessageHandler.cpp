@@ -396,6 +396,7 @@ void IrcMessageHandler::parsePrivMessageInto(
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
+            channel->setLeadModerator(parsedBadges.contains("lead_moderator"));
             channel->setVIP(parsedBadges.contains("vip"));
             channel->setStaff(parsedBadges.contains("staff"));
         }
@@ -595,6 +596,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             auto parsedBadges = parseBadges(badgesTag.toString());
             tc->setVIP(parsedBadges.contains("vip"));
             tc->setStaff(parsedBadges.contains("staff"));
+            tc->setLeadModerator(parsedBadges.contains("lead_moderator"));
 
             hasModBadge = parsedBadges.contains("moderator") ||
                           parsedBadges.contains("lead_moderator");
