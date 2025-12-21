@@ -478,7 +478,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),
                 this->split_,
                 [twitchChannel] {
-                    twitchChannel->createClip();
+                    twitchChannel->createClip({}, {});
                 })
             ->setVisible(twitchChannel->isLive());
 
