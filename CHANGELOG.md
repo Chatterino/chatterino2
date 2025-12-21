@@ -49,6 +49,7 @@
 - Dev: Refactored `Emotes` into `EmoteController`. (#6516)
 - Dev: Fix Arch Linux partial upgrade error in CI. (#6553)
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
+- Dev: Added REUSE license checking. (#6659)
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308)
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
