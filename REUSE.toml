@@ -9,3 +9,18 @@ SPDX-PackageDownloadLocation = "https://chatterino.com/"
 # License files we embed for display to users
 # XXX: How do we license these?
 # path = "resources/licenses/*.txt"
+
+# [[annotations]]
+# # These files are part of code generation for the Twitch EventSub WebSocket library.
+# path = "lib/twitch-eventsub-ws/include/twitch-eventsub-ws/payloads/*.inc"
+# SPDX-FileCopyrightText = "Contributors to Chatterino <https://chatterino.com>"
+# SPDX-License-Identifier = "MIT"
+#
+# [[annotations]]
+# # Snapshot tests
+# path = [
+#     "tests/snapshots/**",
+#     "lib/twitch-eventsub-ws/tests/resources/**.json",
+# ]
+# SPDX-FileCopyrightText = "Contributors to Chatterino <https://chatterino.com>"
+# SPDX-License-Identifier = "CC0-1.0"
