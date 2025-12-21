@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2023 Mm2PL <mm2pl+gh@kotmisia.pl>
+# SPDX-FileContributor: Nerixyz <nerixdev@outlook.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 """
 This script generates docs/plugin-meta.lua. It accepts no arguments
 
