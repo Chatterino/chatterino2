@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2018 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-FileContributor: Leon Richardt <git@leon.dev>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 read -p "Are you sure you want to run clang-format on all source files? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
