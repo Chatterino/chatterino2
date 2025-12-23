@@ -16,8 +16,6 @@ class Paths;
 
 namespace chatterino::backup {
 
-bool anyBackupsOf(const QString &directory, const QString &filename);
-
 enum class BackupState : uint8_t {
     /// The backup contains valid JSON
     Ok,
@@ -31,12 +29,9 @@ struct BackupFile {
     std::filesystem::path path;
     std::filesystem::path dstPath;
     QDateTime lastModified;
-    qint64 fileSize;
-    BackupState state;
+    qint64 fileSize = 0;
+    BackupState state = BackupState::Ok;
 };
-
-std::vector<BackupFile> findBackupsFor(const QString &directory,
-                                       const QString &filename);
 
 struct FileData {
     /// "settings.json", "window-layout.json"
@@ -48,8 +43,11 @@ struct FileData {
     QString fileDescription;
 };
 
-void loadSettingFileWithBackups(const FileData &fileData,
-                                const std::function<ExpectedStr<void>()> &load);
+std::vector<BackupFile> findBackupsFor(const QString &directory,
+                                       const QString &filename);
+
+void loadWithBackups(const FileData &fileData,
+                     const std::function<ExpectedStr<void>()> &load);
 
 }  // namespace chatterino::backup
 

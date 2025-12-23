@@ -25,7 +25,8 @@ using namespace Qt::Literals;
 namespace chatterino {
 
 RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
-                                           QString prevError, QWidget *parent)
+                                           const QString &prevError,
+                                           QWidget *parent)
     : QDialog(parent, Qt::Dialog)
     , fileData(std::move(fileData))
     , backupCombo(new QComboBox)
@@ -60,7 +61,7 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     layout->addWidget(buttons);
 
-    QObject::connect(buttons, &QDialogButtonBox::accepted, [this] {
+    QObject::connect(buttons, &QDialogButtonBox::accepted, this, [this] {
         auto selected = this->backupCombo.currentData();
         auto *data = get_if<backup::BackupFile>(&selected);
         if (!data)
@@ -96,7 +97,7 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
     QObject::connect(buttons, &QDialogButtonBox::rejected, this,
                      &QDialog::reject);
 
-    QObject::connect(&this->showButton, &QPushButton::clicked, [this] {
+    QObject::connect(&this->showButton, &QPushButton::clicked, this, [this] {
         auto selected = this->backupCombo.currentData();
         auto *data = get_if<backup::BackupFile>(&selected);
         if (!data)

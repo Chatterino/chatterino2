@@ -16,7 +16,7 @@ class Paths;
 class RestoreBackupsDialog : public QDialog
 {
 public:
-    RestoreBackupsDialog(backup::FileData fileData, QString prevError,
+    RestoreBackupsDialog(backup::FileData fileData, const QString &prevError,
                          QWidget *parent = nullptr);
 
 private:

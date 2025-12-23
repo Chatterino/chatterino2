@@ -162,7 +162,7 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
     }
     else
     {
-        backup::loadSettingFileWithBackups(
+        backup::loadWithBackups(
             backup::FileData{
                 .fileName = u"settings.json"_s,
                 .directory = settingsDirectory,
