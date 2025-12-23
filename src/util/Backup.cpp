@@ -7,13 +7,13 @@
 
 #include <QDir>
 #include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QRegularExpression>
 #include <QStringBuilder>
+#include <rapidjson/reader.h>
+#include <rapidjson/stream.h>
 
 #include <algorithm>
+
 
 namespace {
 
@@ -68,7 +68,7 @@ public:
         {
             return '\0';
         }
-        return *cur++;
+        return *this->cur++;
     }
 
     /// Get the current read cursor.
