@@ -32,7 +32,7 @@ void MarkdownLabel::setText(const QString &text)
     }
 }
 
-void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
+void MarkdownLabel::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 

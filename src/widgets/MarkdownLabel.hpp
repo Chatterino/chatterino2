@@ -21,7 +21,7 @@ public:
     void setText(const QString &text);
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 

@@ -61,7 +61,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            QChar newLine(0x2029);  // QTextEdit uses this sequence for newlines
+            QChar newLine(0x2029);
 
             if (selectedText.back() == newLine)
             {
@@ -95,7 +95,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            QChar newLine(0x2029);  // QTextEdit uses this sequence for newlines
+            QChar newLine(0x2029);
 
             if (selectedText.back() == newLine)
             {
@@ -151,7 +151,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             auto selectedText = cursor.selectedText();
-            QChar newLine(0x2029);  // QTextEdit uses this sequence for newlines
+            QChar newLine(0x2029);
 
             if (selectedText.back() == newLine)
             {
