@@ -1,7 +1,7 @@
 #include "CmdDeleteKeyFilter.hpp"
 
-#include <QTextCursor>
 #include <QKeyEvent>
+#include <QTextCursor>
 #include <QTextEdit>
 
 CmdDeleteKeyFilter::CmdDeleteKeyFilter(QObject *parent)
