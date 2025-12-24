@@ -34,7 +34,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                   .light = ":/buttons/heading-lightMode.svg",
                               })
                               .getElement();
-    QObject::connect(headingButton, &Button::leftClicked, [this] {
+    QObject::connect(headingButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
@@ -56,7 +56,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                .light = ":/buttons/bold-lightMode.svg",
                            })
                            .getElement();
-    QObject::connect(boldButton, &Button::leftClicked, [this] {
+    QObject::connect(boldButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
@@ -90,7 +90,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                  .light = ":/buttons/italic-lightMode.svg",
                              })
                              .getElement();
-    QObject::connect(italicButton, &Button::leftClicked, [this] {
+    QObject::connect(italicButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
@@ -124,7 +124,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                 .light = ":/buttons/quote-lightMode.svg",
                             })
                             .getElement();
-    QObject::connect(quoteButton, &Button::leftClicked, [this] {
+    QObject::connect(quoteButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
@@ -146,7 +146,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                .light = ":/buttons/link-lightMode.svg",
                            })
                            .getElement();
-    QObject::connect(linkButton, &Button::leftClicked, [this] {
+    QObject::connect(linkButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
@@ -180,7 +180,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                                .light = ":/buttons/bullet-list-lightMode.svg",
                            })
                            .getElement();
-    QObject::connect(listButton, &Button::leftClicked, [this] {
+    QObject::connect(listButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
