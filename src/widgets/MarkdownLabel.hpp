@@ -29,7 +29,7 @@ private:
     void updateSize() override;
     void initializeMarkdownDocument();
 
-    mutable std::unique_ptr<QTextDocument> markdownDocument_;
+    std::unique_ptr<QTextDocument> markdownDocument_;
 };
 
 }  // namespace chatterino
