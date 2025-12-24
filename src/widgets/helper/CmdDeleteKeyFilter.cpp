@@ -16,7 +16,7 @@ bool CmdDeleteKeyFilter::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if (auto *textEdit = qobject_cast<QTextEdit *>(obj))
         {
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
             if (keyEvent->modifiers() == Qt::ControlModifier &&
                 keyEvent->key() == Qt::Key_Backspace)
             {
