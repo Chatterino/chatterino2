@@ -497,9 +497,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         });
     }
 
-    auto notesPreview =
-        layout.emplace<MarkdownLabel>(this, QString())
-            .assign(&ui_.notesPreview);
+    auto notesPreview = layout.emplace<MarkdownLabel>(this, QString())
+                            .assign(&ui_.notesPreview);
     notesPreview->setVisible(false);
     notesPreview->setShouldElide(true);
 
