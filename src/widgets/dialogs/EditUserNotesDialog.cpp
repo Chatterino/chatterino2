@@ -28,10 +28,6 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
     auto headerLayout = layout.emplace<QHBoxLayout>();
 
-    auto previewCheckBox =
-        headerLayout.emplace<QCheckBox>("Show Markdown Preview")
-            .assign(&this->previewCheckBox_);
-
     auto *headingButton = headerLayout
                               .emplace<SvgButton>(SvgButton::Src{
                                   .dark = ":/buttons/heading-darkMode.svg",
@@ -199,6 +195,10 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         this->textEdit_->setFocus();
     });
     listButton->setToolTip("Insert a bullet list item");
+
+    auto previewCheckBox =
+        headerLayout.emplace<QCheckBox>("Show Markdown Preview")
+            .assign(&this->previewCheckBox_);
 
     auto splitter =
         layout.emplace<QSplitter>(Qt::Horizontal).assign(&this->splitter_);
