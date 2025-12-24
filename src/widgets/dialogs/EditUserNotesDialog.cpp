@@ -2,6 +2,7 @@
 
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 
 #include <QDialogButtonBox>
 #include <QTextEdit>
@@ -23,6 +24,9 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                       .setLayoutType<QVBoxLayout>();
 
     auto edit = layout.emplace<QTextEdit>().assign(&this->textEdit_);
+
+    auto *shortcutFilter = new CmdDeleteKeyFilter(edit.getElement());
+    edit->installEventFilter(shortcutFilter);
 
     layout
         .emplace<QDialogButtonBox>(QDialogButtonBox::Ok |
