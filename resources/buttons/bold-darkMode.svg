@@ -1,6 +1,1 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg fill="#ffffff" width="800px" height="800px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
-    <g id="bgCarrier" stroke-width="0"/>
-    <g id="tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-    <g id="iconCarrier"> <path d="M177.0752,114.45508A47.97683,47.97683,0,0,0,140.001,36l-76.00586-.00488h-.001a12.0006,12.0006,0,0,0-12,12v152a11.99987,11.99987,0,0,0,11.99951,12L152,212a51.99383,51.99383,0,0,0,25.0752-97.54492ZM75.99414,59.99609,140,60a24,24,0,0,1,0,48H75.99414ZM152.00049,188l-76.00635-.00391V132H152a28,28,0,0,1,.00049,56Z"/> </g>
-</svg>
+<svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.935 4.44A1.5 1.5 0 0 1 7.996 4h4.383C15.017 4 17 6.182 17 8.625a4.63 4.63 0 0 1-.865 2.682c1.077.827 1.866 2.12 1.866 3.813C18 18.232 15.3 20 13.12 20H8a1.5 1.5 0 0 1-1.5-1.5l-.004-13c0-.397.158-.779.44-1.06ZM9.5 10.25h2.88c.903 0 1.62-.76 1.62-1.625S13.281 7 12.38 7H9.498l.002 3.25Zm0 3V17h3.62c.874 0 1.88-.754 1.88-1.88 0-1.13-.974-1.87-1.88-1.87H9.5Z" fill="#fff"/></svg>
