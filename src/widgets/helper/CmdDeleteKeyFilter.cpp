@@ -13,8 +13,9 @@ bool CmdDeleteKeyFilter::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (auto *textEdit = qobject_cast<QTextEdit *>(obj))
+        auto *textEdit = qobject_cast<QTextEdit *>(obj);
+        QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        if (textEdit && keyEvent) // types are verified
         {
 #ifdef Q_OS_MACOS
             if (keyEvent->modifiers() == Qt::ControlModifier &&
