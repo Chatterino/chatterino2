@@ -6,55 +6,12 @@
 
 using namespace chatterino;
 
-namespace chatterino {
-
 template <typename T>
-std::ostream &operator<<(std::ostream &os,
-                         const LimitedQueueSnapshot<T> &snapshot)
-{
-    os << "[ ";
-    for (size_t i = 0; i < snapshot.size(); ++i)
-    {
-        os << snapshot[i] << ' ';
-    }
-    os << "]";
-
-    return os;
-}
-
-}  // namespace chatterino
-
-namespace std {
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const vector<T> &vec)
-{
-    os << "[ ";
-    for (const auto &item : vec)
-    {
-        os << item << ' ';
-    }
-    os << "]";
-
-    return os;
-}
-}  // namespace std
-
-template <typename T>
-inline void SNAPSHOT_EQUALS(const LimitedQueueSnapshot<T> &snapshot,
+inline void SNAPSHOT_EQUALS(const std::vector<T> &snapshot,
                             const std::vector<T> &values,
                             const std::string &msg)
 {
-    SCOPED_TRACE(msg);
-    ASSERT_EQ(snapshot.size(), values.size())
-        << "snapshot = " << snapshot << " values = " << values;
-
-    if (snapshot.size() != values.size())
-        return;
-
-    for (size_t i = 0; i < snapshot.size(); ++i)
-    {
-        EXPECT_EQ(snapshot[i], values[i]) << "i = " << i;
-    }
+    EXPECT_EQ(snapshot, values) << msg;
 }
 
 TEST(LimitedQueue, PushBack)
@@ -263,4 +220,52 @@ TEST(LimitedQueue, Find)
                                return i <= 0;
                            })
                      .has_value());
+}
+
+TEST(LimitedQueue, LastN)
+{
+    LimitedQueue<int> queue(10);
+    queue.pushBack(1);
+    queue.pushBack(2);
+    queue.pushBack(3);
+    queue.pushBack(4);
+    queue.pushBack(5);
+    queue.pushBack(6);
+
+    SNAPSHOT_EQUALS(queue.lastN(0), {}, "no item");
+    SNAPSHOT_EQUALS(queue.lastN(1), {6}, "one item");
+    SNAPSHOT_EQUALS(queue.lastN(2), {5, 6}, "two items");
+    SNAPSHOT_EQUALS(queue.lastN(6), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.lastN(7), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.lastN(12), {1, 2, 3, 4, 5, 6}, "all items");
+
+    LimitedQueue<int> empty(10);
+    SNAPSHOT_EQUALS(empty.lastN(0), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(1), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(2), {}, "empty");
+    SNAPSHOT_EQUALS(empty.lastN(6), {}, "empty");
+}
+
+TEST(LimitedQueue, FirstN)
+{
+    LimitedQueue<int> queue(10);
+    queue.pushBack(1);
+    queue.pushBack(2);
+    queue.pushBack(3);
+    queue.pushBack(4);
+    queue.pushBack(5);
+    queue.pushBack(6);
+
+    SNAPSHOT_EQUALS(queue.firstN(0), {}, "no item");
+    SNAPSHOT_EQUALS(queue.firstN(1), {1}, "one item");
+    SNAPSHOT_EQUALS(queue.firstN(2), {1, 2}, "two items");
+    SNAPSHOT_EQUALS(queue.firstN(6), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.firstN(7), {1, 2, 3, 4, 5, 6}, "all items");
+    SNAPSHOT_EQUALS(queue.firstN(12), {1, 2, 3, 4, 5, 6}, "all items");
+
+    LimitedQueue<int> empty(10);
+    SNAPSHOT_EQUALS(empty.firstN(0), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(1), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(2), {}, "empty");
+    SNAPSHOT_EQUALS(empty.firstN(6), {}, "empty");
 }

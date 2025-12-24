@@ -5,7 +5,9 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
@@ -15,9 +17,11 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -33,7 +37,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "providers/twitch/UserColor.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -416,8 +419,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
-    TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
 {
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -440,19 +442,19 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
         emote = twitchChannel->ffzEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::FfzEmote};
+            return *emote;
         }
 
         emote = twitchChannel->bttvEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::BttvEmote};
+            return *emote;
         }
 
         emote = twitchChannel->seventvEmote(name);
         if (emote)
         {
-            return {emote, MessageElementFlag::SevenTVEmote};
+            return *emote;
         }
     }
 
@@ -461,22 +463,22 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags> parseEmote(
     emote = globalFfzEmotes->emote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::FfzEmote};
+        return *emote;
     }
 
     emote = globalBttvEmotes->emote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::BttvEmote};
+        return *emote;
     }
 
     emote = globalSeventvEmotes->globalEmote(name);
     if (emote)
     {
-        return {emote, MessageElementFlag::SevenTVEmote};
+        return *emote;
     }
 
-    return {{}, {}};
+    return {};
 }
 
 }  // namespace
@@ -1153,6 +1155,7 @@ MessagePtr MessageBuilder::makeChannelPointRewardMessage(
 
 MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
                                            const QString &channelID,
+                                           const QString &title,
                                            MessageFlags extraFlags)
 {
     MessageBuilder builder;
@@ -1162,9 +1165,23 @@ MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
         .emplace<TextElement>(channelName, MessageElementFlag::Username,
                               MessageColor::Text, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, channelName});
-    builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
-                                 MessageColor::Text);
-    auto text = QString("%1 is live!").arg(channelName);
+
+    QString text;
+    if (getSettings()->showTitleInLiveMessage)
+    {
+        text = QString("%1 is live: %2").arg(channelName, title);
+        builder.emplace<TextElement>("is live:", MessageElementFlag::Text,
+                                     MessageColor::Text);
+        builder.emplace<TextElement>(title, MessageElementFlag::Text,
+                                     MessageColor::Text);
+    }
+    else
+    {
+        text = QString("%1 is live!").arg(channelName);
+        builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                     MessageColor::Text);
+    }
+
     builder.message().messageText = text;
     builder.message().searchText = text;
     builder.message().id = channelID;
@@ -1620,6 +1637,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     builder.appendChatterinoBadges(userID);
     builder.appendFfzBadges(twitchChannel, userID);
+    builder.appendBttvBadges(userID);
     builder.appendSeventvBadges(userID);
 
     builder.appendUsername(tags, args);
@@ -2211,14 +2229,14 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto [emote, flags] = parseEmote(twitchChannel, name);
+    auto emote = parseEmote(twitchChannel, name);
 
     if (!emote)
     {
         return Failure;
     }
 
-    if ((*emote)->zeroWidth && getSettings()->enableZeroWidthEmotes &&
+    if (emote->zeroWidth && getSettings()->enableZeroWidthEmotes &&
         !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
@@ -2231,9 +2249,12 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
             auto baseEmoteElement = this->releaseBack();
 
             std::vector<LayeredEmoteElement::Emote> layers = {
-                {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
+                {baseEmote, baseEmoteElement->getFlags()},
+                {emote, MessageElementFlag::Emote},
+            };
             this->emplace<LayeredEmoteElement>(
-                std::move(layers), baseEmoteElement->getFlags() | flags,
+                std::move(layers),
+                baseEmoteElement->getFlags() | MessageElementFlag::Emote,
                 this->textColor_);
             return Success;
         }
@@ -2241,15 +2262,16 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
         auto *asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
         if (asLayered)
         {
-            asLayered->addEmoteLayer({*emote, flags});
-            asLayered->addFlags(flags);
+            asLayered->addEmoteLayer({emote, MessageElementFlag::Emote});
+            asLayered->addFlags(MessageElementFlag::Emote);
             return Success;
         }
 
         // No emote to merge with, just show as regular emote
     }
 
-    this->emplace<EmoteElement>(*emote, flags, this->textColor_);
+    this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+                                this->textColor_);
     return Success;
 }
 
@@ -2278,7 +2300,7 @@ void MessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote,
+                                            MessageElementFlag::Emote,
                                             this->textColor_);
 
                 auto len = currentTwitchEmote.name.string.length();
@@ -2422,6 +2444,14 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+    }
+}
+
+void MessageBuilder::appendBttvBadges(const QString &userID)
+{
+    if (auto badge = getApp()->getBttvBadges()->getBadge({userID}))
+    {
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeBttv);
     }
 }
 

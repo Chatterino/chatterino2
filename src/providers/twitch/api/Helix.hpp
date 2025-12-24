@@ -16,6 +16,7 @@
 #include <QUrl>
 #include <QUrlQuery>
 
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <unordered_set>
@@ -461,6 +462,112 @@ struct HelixSendMessageArgs {
     QString message;
     /// Optional
     QString replyParentMessageID;
+};
+
+struct HelixPollChoice {
+    QString id;
+    QString title;
+    int votes;
+
+    explicit HelixPollChoice(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , title(jsonObject.value("title").toString())
+        , votes(jsonObject.value("votes").toInt())
+    {
+    }
+};
+
+struct HelixPoll {
+    QString id;
+    QString title;
+    std::vector<HelixPollChoice> choices;
+    QString status;
+
+    explicit HelixPoll(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , title(jsonObject.value("title").toString())
+        , status(jsonObject.value("status").toString())
+    {
+        const auto &data = jsonObject.value("choices").toArray();
+        this->choices.reserve(data.size());
+        for (const auto &c : data)
+        {
+            HelixPollChoice choice(c.toObject());
+            this->choices.push_back(choice);
+        }
+    }
+};
+
+struct HelixPolls {
+    std::vector<HelixPoll> polls;
+
+    HelixPolls() = default;
+
+    explicit HelixPolls(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        this->polls.reserve(data.size());
+        for (const auto &p : data)
+        {
+            HelixPoll poll(p.toObject());
+            this->polls.push_back(poll);
+        }
+    }
+};
+
+struct HelixPredictionOutcome {
+    QString id;
+    QString title;
+    int users;
+    int channelPoints;
+
+    explicit HelixPredictionOutcome(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , title(jsonObject.value("title").toString())
+        , users(jsonObject.value("users").toInt())
+        , channelPoints(jsonObject.value("channel_points").toInt())
+    {
+    }
+};
+
+struct HelixPrediction {
+    QString id;
+    QString title;
+    QString winningOutcomeID;
+    QString status;
+    std::vector<HelixPredictionOutcome> outcomes;
+
+    explicit HelixPrediction(const QJsonObject &jsonObject)
+        : id(jsonObject.value("id").toString())
+        , title(jsonObject.value("title").toString())
+        , winningOutcomeID(jsonObject.value("winning_outcome_id").toString())
+        , status(jsonObject.value("status").toString())
+    {
+        const auto &data = jsonObject.value("outcomes").toArray();
+        this->outcomes.reserve(data.size());
+        for (const auto &o : data)
+        {
+            HelixPredictionOutcome outcome(o.toObject());
+            this->outcomes.push_back(outcome);
+        }
+    }
+};
+
+struct HelixPredictions {
+    std::vector<HelixPrediction> predictions;
+
+    HelixPredictions() = default;
+
+    explicit HelixPredictions(const QJsonObject &jsonObject)
+    {
+        const auto &data = jsonObject.value("data").toArray();
+        this->predictions.reserve(data.size());
+        for (const auto &p : data)
+        {
+            HelixPrediction prediction(p.toObject());
+            this->predictions.push_back(prediction);
+        }
+    }
 };
 
 enum class HelixAnnouncementColor {
@@ -1211,6 +1318,43 @@ public:
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference#create-poll
+    virtual void createPoll(QString broadcasterID, QString title,
+                            QStringList choices, std::chrono::seconds duration,
+                            int pointsPerVote, ResultCallback<> successCallback,
+                            FailureCallback<QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference#get-polls
+    virtual void getPolls(QString broadcasterID, QStringList ids, int first,
+                          QString after,
+                          ResultCallback<HelixPolls> successCallback,
+                          FailureCallback<QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference#end-poll
+    virtual void endPoll(QString broadcasterID, QString id,
+                         bool immediatelyHide,
+                         ResultCallback<HelixPoll> successCallback,
+                         FailureCallback<QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference#create-prediction
+    virtual void createPrediction(QString broadcasterID, QString title,
+                                  QStringList choices,
+                                  std::chrono::seconds duration,
+                                  ResultCallback<> successCallback,
+                                  FailureCallback<QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference#get-predictions
+    virtual void getPredictions(
+        QString broadcasterID, QStringList ids, int first, QString after,
+        ResultCallback<HelixPredictions> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference#end-prediction
+    virtual void endPrediction(QString broadcasterID, QString id,
+                               bool refundPoints, QString winningOutcomeID,
+                               ResultCallback<HelixPrediction> successCallback,
+                               FailureCallback<QString> failureCallback) = 0;
+
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     virtual void createEventSubSubscription(
         const eventsub::SubscriptionRequest &request, const QString &sessionID,
@@ -1565,6 +1709,40 @@ public:
         QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#create-poll
+    void createPoll(QString broadcasterID, QString title, QStringList choices,
+                    std::chrono::seconds duration, int pointsPerVote,
+                    ResultCallback<> successCallback,
+                    FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#get-polls
+    void getPolls(QString broadcasterID, QStringList ids, int first,
+                  QString after, ResultCallback<HelixPolls> successCallback,
+                  FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#end-poll
+    void endPoll(QString broadcasterID, QString id, bool immediatelyHide,
+                 ResultCallback<HelixPoll> successCallback,
+                 FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#create-prediction
+    void createPrediction(QString broadcasterID, QString title,
+                          QStringList outcomes, std::chrono::seconds duration,
+                          ResultCallback<> successCallback,
+                          FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#get-predictions
+    void getPredictions(QString broadcasterID, QStringList ids, int first,
+                        QString after,
+                        ResultCallback<HelixPredictions> successCallback,
+                        FailureCallback<QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference#end-prediction
+    void endPrediction(QString broadcasterID, QString id, bool refundPoints,
+                       QString winningOutcomeID,
+                       ResultCallback<HelixPrediction> successCallback,
+                       FailureCallback<QString> failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     void createEventSubSubscription(

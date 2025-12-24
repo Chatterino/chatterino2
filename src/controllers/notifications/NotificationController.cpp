@@ -16,6 +16,8 @@
 
 #include <QUrl>
 
+#include <ranges>
+
 namespace ranges = std::ranges;
 
 namespace chatterino {
@@ -138,7 +140,8 @@ void NotificationController::notifyTwitchChannelLive(
 
     // Message in /live channel
     getApp()->getTwitch()->getLiveChannel()->addMessage(
-        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId),
+        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId,
+                                        payload.title),
         MessageContext::Original);
 
     // Notify on all channels with a ping sound
@@ -153,16 +156,10 @@ void NotificationController::notifyTwitchChannelLive(
 void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
-    LimitedQueueSnapshot<MessagePtr> snapshot =
-        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
-    int snapshotLength = static_cast<int>(snapshot.size());
-
-    int end = std::max(0, snapshotLength - 200);
-
-    for (int i = snapshotLength - 1; i >= end; --i)
+    auto snapshot =
+        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200);
+    for (const auto &s : snapshot | std::views::reverse)
     {
-        const auto &s = snapshot[i];
-
         if (s->id == id)
         {
             s->flags.set(MessageFlag::Disabled);

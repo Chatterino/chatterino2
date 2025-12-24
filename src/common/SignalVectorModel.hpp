@@ -18,9 +18,10 @@ template <typename T>
 struct SignalVectorItemEvent;
 
 template <typename TVectorItem>
-class SignalVectorModel : public QAbstractTableModel,
-                          pajlada::Signals::SignalHolder
+class SignalVectorModel : public QAbstractTableModel
 {
+    pajlada::Signals::SignalHolder signalHolder;
+
 public:
     SignalVectorModel(int columnCount, QObject *parent = nullptr)
         : QAbstractTableModel(parent)
@@ -66,9 +67,9 @@ public:
             insert(args);
         }
 
-        this->managedConnect(vec->itemInserted, insert);
+        this->signalHolder.managedConnect(vec->itemInserted, insert);
 
-        this->managedConnect(vec->itemRemoved, [this](auto args) {
+        this->signalHolder.managedConnect(vec->itemRemoved, [this](auto args) {
             if (args.caller == this)
             {
                 return;

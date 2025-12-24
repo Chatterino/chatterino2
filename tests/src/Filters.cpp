@@ -7,11 +7,12 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
@@ -34,7 +35,7 @@ public:
     {
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -64,6 +65,11 @@ public:
         return &this->ffzBadges;
     }
 
+    BttvBadges *getBttvBadges() override
+    {
+        return &this->bttvBadges;
+    }
+
     SeventvBadges *getSeventvBadges() override
     {
         return &this->seventvBadges;
@@ -81,11 +87,12 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
+    BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
 };

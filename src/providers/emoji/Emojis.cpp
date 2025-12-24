@@ -62,6 +62,8 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
     rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
     rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
 
+    rj::getSafe(unparsedEmoji, "category", emojiData->category);
+
     if (capabilities.apple)
     {
         emojiData->capabilities.set(EmojiData::Capability::Apple);
@@ -172,7 +174,12 @@ void Emojis::loadEmojis()
 {
     // Current version: https://github.com/iamcal/emoji-data/blob/v15.1.1/emoji.json (Emoji version 15.1 (2023))
     QFile file(":/emoji.json");
-    file.open(QFile::ReadOnly);
+    if (!file.open(QFile::ReadOnly))
+    {
+        assert(false && "Resources not available");
+        qCWarning(chatterinoEmoji) << "Resources not available";
+        return;
+    }
     QTextStream s1(&file);
     QString data = s1.readAll();
     rapidjson::Document root;
@@ -213,6 +220,10 @@ void Emojis::loadEmojis()
 
                 parseEmoji(variationEmojiData, variation,
                            emojiData->shortCodes[0] + "_" + toneName);
+
+                // NOTE: Emoji variations do not have a category.
+                // We have to manually inherit it from the original emojiData.
+                variationEmojiData->category = emojiData->category;
 
                 this->emojiShortCodeToEmoji_.insert(
                     variationEmojiData->shortCodes[0], variationEmojiData);
@@ -292,9 +303,11 @@ void Emojis::loadEmojiSet()
             }
             QString url = urlPrefix + code + ".png";
             emoji->emote = std::make_shared<Emote>(Emote{
-                EmoteName{emoji->value},
-                ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
-                Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
+                .name = EmoteName{emoji->value},
+                .images = ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
+                .tooltip = Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"},
+                .homePage = Url{},
+            });
         }
     });
 }

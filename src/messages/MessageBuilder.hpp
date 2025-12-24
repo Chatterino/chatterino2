@@ -175,6 +175,7 @@ public:
     /// Make a "CHANNEL_NAME has gone live!" message
     static MessagePtr makeLiveMessage(const QString &channelName,
                                       const QString &channelID,
+                                      const QString &title,
                                       MessageFlags extraFlags = {});
 
     // Messages in normal chat for channel stuff
@@ -314,6 +315,7 @@ private:
                             TwitchChannel *twitchChannel);
     void appendChatterinoBadges(const QString &userID);
     void appendFfzBadges(TwitchChannel *twitchChannel, const QString &userID);
+    void appendBttvBadges(const QString &userID);
     void appendSeventvBadges(const QString &userID);
 
     [[nodiscard]] static bool isIgnored(const QString &originalMessage,

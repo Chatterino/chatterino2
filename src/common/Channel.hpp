@@ -79,7 +79,13 @@ public:
     virtual const QString &getLocalizedName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
-    LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
+
+    std::vector<MessagePtr> getMessageSnapshot() const;
+    std::vector<MessagePtr> getMessageSnapshot(size_t nItems) const;
+
+    /// Returns the last message (the one at the bottom). If the channel has no
+    /// messages, this will return an empty shared pointer.
+    MessagePtr getLastMessage() const;
 
     // MESSAGES
     // overridingFlags can be filled in with flags that should be used instead

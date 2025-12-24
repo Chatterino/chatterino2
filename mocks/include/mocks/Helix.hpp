@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <chrono>
 #include <functional>
 #include <vector>
 
@@ -427,6 +428,52 @@ public:
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));
+
+    // create poll
+    MOCK_METHOD(void, createPoll,
+                (QString broadcasterID, QString title, QStringList choices,
+                 std::chrono::seconds duration, int pointsPerVote,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // get polls
+    MOCK_METHOD(void, getPolls,
+                (QString broadcasterID, QStringList ids, int first,
+                 QString after, ResultCallback<HelixPolls> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // end poll
+    MOCK_METHOD(void, endPoll,
+                (QString broadcasterID, QString id, bool immediatelyHide,
+                 ResultCallback<HelixPoll> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // create prediction
+    MOCK_METHOD(void, createPrediction,
+                (QString broadcasterID, QString title, QStringList outcomes,
+                 std::chrono::seconds duration,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // get predictions
+    MOCK_METHOD(void, getPredictions,
+                (QString broadcasterID, QStringList ids, int first,
+                 QString after,
+                 ResultCallback<HelixPredictions> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // end prediction
+    MOCK_METHOD(void, endPrediction,
+                (QString broadcasterID, QString id, bool refundPoints,
+                 QString winningOutcomeID,
+                 ResultCallback<HelixPrediction> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
 
     MOCK_METHOD(void, createEventSubSubscription,
                 (const eventsub::SubscriptionRequest &request,

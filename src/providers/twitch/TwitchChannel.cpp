@@ -8,6 +8,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "messages/Emote.hpp"
@@ -20,6 +21,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/recentmessages/Api.hpp"
@@ -36,7 +38,6 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
@@ -640,6 +641,7 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         this->addMessage(
             MessageBuilder::makeLiveMessage(
                 this->getDisplayName(), this->roomId(),
+                this->accessStreamStatus()->title,
                 {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
             MessageContext::Original);
     }
@@ -829,6 +831,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
     bool messageSent = false;
     this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
+    this->updateBttvActivity();
     this->updateSevenTVActivity();
 
     if (messageSent)
@@ -2252,6 +2255,31 @@ std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string) const
         }
     }
     return std::nullopt;
+}
+
+void TwitchChannel::updateBttvActivity()
+{
+    if (!getApp()->getBttvLiveUpdates())
+    {
+        return;
+    }
+
+    auto now = QDateTime::currentDateTimeUtc();
+    if (this->nextBttvActivity_.isValid() && now < this->nextBttvActivity_)
+    {
+        return;
+    }
+    this->nextBttvActivity_ = now.addSecs(60);
+
+    qCDebug(chatterinoBttv) << "Sending activity in" << this->getName();
+
+    auto acc = getApp()->getAccounts()->twitch.getCurrent();
+    if (acc->isAnon())
+    {
+        return;
+    }
+    getApp()->getBttvLiveUpdates()->broadcastMe(this->roomId(),
+                                                acc->getUserId());
 }
 
 void TwitchChannel::updateSevenTVActivity()

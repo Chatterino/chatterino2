@@ -12,6 +12,8 @@ After you've built Chatterino, you can now run the tests with `ctest` or by manu
   We expect this to be listening to port 9050, you can launch it like this:
   `twitch-pubsub-server-test 127.0.0.1:9050`
 
+Alternatively, you can run the docker-compose defined in this file: `docker compose up` before you run the tests.
+
 # Modifying message building
 
 If you make a change that has to do with message building, there's a big chance that some of the snapshot tests will fail.

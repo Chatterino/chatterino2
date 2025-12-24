@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QString>
 #include <QUrl>
 
 #include <memory>
@@ -74,7 +75,7 @@ struct WebSocketOptions {
 class WebSocketPool
 {
 public:
-    WebSocketPool();
+    WebSocketPool(QString shortName = {});
     ~WebSocketPool();
 
     [[nodiscard]] WebSocketHandle createSocket(
@@ -82,6 +83,7 @@ public:
 
 private:
     std::unique_ptr<ws::detail::WebSocketPoolImpl> impl;
+    QString shortName;
 };
 
 }  // namespace chatterino

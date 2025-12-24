@@ -31,6 +31,8 @@ struct EmojiData {
     // i.e. thinking
     std::vector<QString> shortCodes;
 
+    QString category;
+
     using Capability = EmojiStyle;
     using Capabilities = FlagsEnum<Capability>;
 
@@ -58,7 +60,6 @@ public:
 class Emojis : public IEmojis
 {
 public:
-    void initialize();
     void load();
     std::vector<boost::variant<EmotePtr, QString>> parse(
         const QString &text) const override;

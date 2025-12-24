@@ -123,11 +123,11 @@ void SplitInput::initLayout()
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
 
-    auto messageVbox = layoutCreator.setLayoutType<QVBoxLayout>();
+    auto *messageVbox = new QVBoxLayout;
     this->ui_.replyMessage = new MessageView();
     messageVbox->addWidget(this->ui_.replyMessage, 0, Qt::AlignLeft);
     messageVbox->setContentsMargins(10, 0, 0, 0);
-    replyVbox->addLayout(messageVbox->layout(), 0);
+    replyVbox->addLayout(messageVbox, 0);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -258,7 +258,6 @@ void SplitInput::triggerSelfMessageReceived()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();

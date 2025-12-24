@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
+set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
+include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -137,6 +139,10 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Svg
     Concurrent
     )
+if(CHATTERINO_ALLOW_PRIVATE_QT_API)
+    # Only exists since 6.10 and prints a warning regarding private headers
+    find_package(Qt${MAJOR_QT_VERSION} COMPONENTS GuiPrivate)
+endif()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
@@ -191,10 +197,6 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(RapidJSON REQUIRED)
-
-find_package(Websocketpp REQUIRED)
-
 if (BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
@@ -220,22 +222,37 @@ if (BUILD_BENCHMARKS)
     find_package(benchmark REQUIRED)
 endif ()
 
-find_package(PajladaSerialize REQUIRED)
-find_package(PajladaSignals REQUIRED)
+FetchContent_Declare(
+    RapidJSON
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/rapidjson
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS
+)
+set(RAPIDJSON_BUILD_EXAMPLES Off CACHE INTERNAL "")
+set(RAPIDJSON_BUILD_TESTS Off CACHE INTERNAL "")
+
+FetchContent_Declare(
+    PajladaSignals
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSerialize
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSettings
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
+    EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)
+
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
 find_package(Doxygen)
 find_package(BoostCertify REQUIRED)
-
-if (USE_SYSTEM_PAJLADA_SETTINGS)
-    find_package(PajladaSettings REQUIRED)
-else()
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/settings/CMakeLists.txt")
-        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/settings/CMakeLists.txt")
-    endif()
-
-    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
-endif()
 
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
