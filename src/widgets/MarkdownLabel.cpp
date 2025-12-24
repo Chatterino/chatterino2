@@ -12,11 +12,6 @@
 
 namespace chatterino {
 
-MarkdownLabel::MarkdownLabel(QString text, FontStyle style)
-    : MarkdownLabel(nullptr, std::move(text), style)
-{
-}
-
 MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
     : Label(parent, std::move(text), style)
 {
