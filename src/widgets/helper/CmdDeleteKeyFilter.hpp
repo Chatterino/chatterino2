@@ -1,8 +1,6 @@
 #pragma once
 
 #include <QObject>
-class QTextEdit;
-class QEvent;
 
 class CmdDeleteKeyFilter : public QObject
 {
