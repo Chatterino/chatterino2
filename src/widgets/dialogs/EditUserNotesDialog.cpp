@@ -196,6 +196,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     });
     listButton->setToolTip("Insert a bullet list item");
 
+    headerLayout->addSpacing(175); // group markdown toolbar buttons
+
     auto previewCheckBox =
         headerLayout.emplace<QCheckBox>("Show Markdown Preview")
             .assign(&this->previewCheckBox_);
