@@ -206,7 +206,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
     auto edit = splitter.emplace<QTextEdit>().assign(&this->textEdit_);
 
     auto preview =
-        splitter.emplace<MarkdownLabel>(this).assign(&this->previewLabel_);
+        splitter.emplace<MarkdownLabel>(this, QString()).assign(&this->previewLabel_);
     preview->setWordWrap(true);
     preview->setPadding(QMargins(10, 10, 10, 10));
 

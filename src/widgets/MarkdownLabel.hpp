@@ -15,7 +15,7 @@ namespace chatterino {
 class MarkdownLabel : public Label
 {
 public:
-    explicit MarkdownLabel(BaseWidget *parent, QString text = QString(),
+    explicit MarkdownLabel(BaseWidget *parent, QString text,
                            FontStyle style = FontStyle::UiMedium);
 
     void setText(const QString &text);
