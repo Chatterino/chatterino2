@@ -11,13 +11,13 @@ CmdDeleteKeyFilter::CmdDeleteKeyFilter(QObject *parent)
 
 bool CmdDeleteKeyFilter::eventFilter(QObject *obj, QEvent *event)
 {
+#ifdef Q_OS_MACOS
     if (event->type() == QEvent::KeyPress)
     {
         auto *textEdit = qobject_cast<QTextEdit *>(obj);
         const auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
         if (textEdit && keyEvent)  // types are verified
         {
-#ifdef Q_OS_MACOS
             if (keyEvent->modifiers() == Qt::ControlModifier &&
                 keyEvent->key() == Qt::Key_Backspace)
             {
@@ -31,8 +31,8 @@ bool CmdDeleteKeyFilter::eventFilter(QObject *obj, QEvent *event)
                 textEdit->setTextCursor(cursor);
                 return true;
             }
-#endif
         }
     }
+#endif
     return false;
 }
