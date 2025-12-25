@@ -34,5 +34,5 @@ bool CmdDeleteKeyFilter::eventFilter(QObject *obj, QEvent *event)
 #endif
         }
     }
-    return QObject::eventFilter(obj, event);
+    return false;
 }
