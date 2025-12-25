@@ -1,4 +1,4 @@
-#include "CmdDeleteKeyFilter.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 
 #include <QKeyEvent>
 #include <QTextCursor>
