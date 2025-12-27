@@ -81,6 +81,9 @@ private:
     std::chrono::seconds keepaliveTimeout{0};
     bool receivedMessage = false;
     std::unique_ptr<boost::asio::system_timer> keepaliveTimer;
+
+    boost::asio::cancellation_signal closeSignal;
+    boost::asio::steady_timer closeTimeout;
 };
 
 }  // namespace chatterino::eventsub::lib
