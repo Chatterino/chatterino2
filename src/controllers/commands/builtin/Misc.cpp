@@ -200,7 +200,41 @@ QString clip(const CommandContext &ctx)
         return "";
     }
 
-    ctx.twitchChannel->createClip();
+    QString title = "";
+    std::optional<int> duration = std::nullopt;
+    if (!ctx.words.empty())
+    {
+        QCommandLineParser parser;
+        parser.setSingleDashWordOptionMode(
+            QCommandLineParser::ParseAsLongOptions);
+        parser.setOptionsAfterPositionalArgumentsMode(
+            QCommandLineParser::ParseAsPositionalArguments);
+        parser.addPositionalArgument("title", "The title of the clip");
+
+        QCommandLineOption durationOption(
+            {"d", "duration"}, "The duration of the clip", "duration");
+        parser.addOptions({
+            durationOption,
+        });
+        parser.parse(ctx.words);
+
+        title = parser.positionalArguments().join(' ');
+
+        if (parser.isSet(durationOption))
+        {
+            bool ok = false;
+            duration = parser.value(durationOption).toInt(&ok);
+
+            if (!ok)
+            {
+                ctx.channel->addSystemMessage(
+                    "Could not parse clip duration to an integer.");
+                return "";
+            }
+        }
+    }
+
+    ctx.twitchChannel->createClip(title, duration);
 
     return "";
 }
