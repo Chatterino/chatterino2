@@ -14,6 +14,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
             include/mocks/ChatterinoBadges.hpp
             include/mocks/DisabledStreamerMode.hpp
             include/mocks/EmoteController.hpp
+            include/mocks/EmoteProvider.hpp
             include/mocks/EmptyApplication.hpp
             include/mocks/Helix.hpp
             include/mocks/LinkResolver.hpp
