@@ -164,17 +164,24 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
+            auto appended = 0;
             auto selectedText = cursor.selectedText();
             QChar newLine(QChar::ParagraphSeparator);
 
             if (selectedText.back() == newLine)
             {
                 selectedText.chop(1);
+                cursor.insertText("[" + selectedText + "](url)" + newLine);
+                appended = 2;
             }
-            cursor.insertText("[" + selectedText + "](url)" + newLine);
+            else
+            {
+                cursor.insertText("[" + selectedText + "](url)");
+                appended = 1;
+            }
 
             // select "url" for easy replacement
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
         }
         else
