@@ -35,18 +35,20 @@ struct TwitchEmoteOccurrence {
 /// @returns A map of badge-names to their values
 std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags);
 
-/// @brief Parses the `badges` tag of an IRC message
+/// @brief Parses the badges from the specified tag of an IRC message
 ///
-/// The `badges` tag contains a comma separated list of key-value elements which
-/// make up the name and version of each badge.
+/// All `badges`-type tags contain a comma separated list of key-value elements
+/// which make up the name and version of each badge.
 ///
 /// **Example**:
 /// `badges=broadcaster/1,subscriber/18` would be parsed as
 /// `[(broadcaster, 1), (subscriber, 18)]`
 ///
 /// @param tags The tags of the IRC message
+/// @param tagName The name of the tag to read badges from
 /// @returns A list of badges (name and version)
-std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
+                                 const QString &tagName = "badges");
 
 /// @brief Parses Twitch emotes in an IRC message
 ///
