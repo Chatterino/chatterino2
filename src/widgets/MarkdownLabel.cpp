@@ -14,22 +14,22 @@ namespace chatterino {
 
 MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
     : Label(parent, std::move(text), style)
-    , markdownDocument_(new QTextDocument(this))
+    , markdownDocument(new QTextDocument(this))
 {
     if (!this->text_.isEmpty())
     {
-        this->markdownDocument_->setMarkdown(this->text_);
+        this->markdownDocument->setMarkdown(this->text_);
     }
 }
 
 void MarkdownLabel::setText(const QString &text)
 {
-    assert(this->markdownDocument_ != nullptr);
+    assert(this->markdownDocument != nullptr);
 
     if (this->text_ != text)
     {
         this->text_ = text;
-        this->markdownDocument_->setMarkdown(text);
+        this->markdownDocument->setMarkdown(text);
         this->updateSize();
         this->update();
     }
@@ -37,7 +37,7 @@ void MarkdownLabel::setText(const QString &text)
 
 void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
 {
-    assert(this->markdownDocument_ != nullptr);
+    assert(this->markdownDocument != nullptr);
 
     QPainter painter(this);
 
@@ -52,10 +52,10 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
         QColor textColor =
             this->theme ? this->theme->messages.textColors.regular : Qt::black;
 
-        this->markdownDocument_->setTextWidth(textRect.width());
-        this->markdownDocument_->setDefaultFont(
+        this->markdownDocument->setTextWidth(textRect.width());
+        this->markdownDocument->setDefaultFont(
             getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
-        this->markdownDocument_->setMarkdown(this->text_);
+        this->markdownDocument->setMarkdown(this->text_);
 
         QPalette docPalette = this->palette();
         docPalette.setColor(QPalette::Text, textColor);
@@ -70,7 +70,7 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
         QAbstractTextDocumentLayout::PaintContext paintContext;
         paintContext.palette = docPalette;
         paintContext.clip = QRectF(0, 0, textRect.width(), textRect.height());
-        this->markdownDocument_->documentLayout()->draw(&painter, paintContext);
+        this->markdownDocument->documentLayout()->draw(&painter, paintContext);
 
         painter.restore();
     }
@@ -84,7 +84,7 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
 
 void MarkdownLabel::mousePressEvent(QMouseEvent *event)
 {
-    assert(this->markdownDocument_ != nullptr);
+    assert(this->markdownDocument != nullptr);
 
     if (event->button() == Qt::LeftButton)
     {
@@ -92,7 +92,7 @@ void MarkdownLabel::mousePressEvent(QMouseEvent *event)
         QPointF pos = event->pos() - textRect.topLeft();
 
         QString anchor =
-            this->markdownDocument_->documentLayout()->anchorAt(pos);
+            this->markdownDocument->documentLayout()->anchorAt(pos);
         if (!anchor.isEmpty())
         {
             QUrl url(anchor);
@@ -125,12 +125,12 @@ void MarkdownLabel::mousePressEvent(QMouseEvent *event)
 
 void MarkdownLabel::mouseMoveEvent(QMouseEvent *event)
 {
-    assert(this->markdownDocument_ != nullptr);
+    assert(this->markdownDocument != nullptr);
 
     QRectF textRect = this->textRect();
     QPointF pos = event->pos() - textRect.topLeft();
 
-    QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+    QString anchor = this->markdownDocument->documentLayout()->anchorAt(pos);
     if (!anchor.isEmpty())
     {
         this->setCursor(Qt::PointingHandCursor);
@@ -145,28 +145,28 @@ void MarkdownLabel::mouseMoveEvent(QMouseEvent *event)
 
 void MarkdownLabel::updateSize()
 {
-    assert(this->markdownDocument_ != nullptr);
+    assert(this->markdownDocument != nullptr);
 
     this->currentPadding_ = this->basePadding_.toMarginsF() * this->scale();
 
     if (!this->text_.isEmpty())
     {
-        this->markdownDocument_->setDefaultFont(
+        this->markdownDocument->setDefaultFont(
             getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
-        this->markdownDocument_->setMarkdown(this->text_);
+        this->markdownDocument->setMarkdown(this->text_);
 
         // Use word wrap width if enabled, otherwise use a reasonable default
         qreal testWidth = this->wordWrap_
                               ? 400.0 * this->scale()
-                              : this->markdownDocument_->idealWidth();
-        this->markdownDocument_->setTextWidth(testWidth);
+                              : this->markdownDocument->idealWidth();
+        this->markdownDocument->setTextWidth(testWidth);
 
         auto yPadding =
             this->currentPadding_.top() + this->currentPadding_.bottom();
 
-        auto height = this->markdownDocument_->size().height() + yPadding;
-        auto width = qMin(this->markdownDocument_->idealWidth(), testWidth) +
+        auto height = this->markdownDocument->size().height() + yPadding;
+        auto width = qMin(this->markdownDocument->idealWidth(), testWidth) +
                      this->currentPadding_.left() +
                      this->currentPadding_.right();
 

@@ -26,7 +26,7 @@ protected:
 private:
     void updateSize() override;
 
-    QTextDocument *markdownDocument_;
+    QTextDocument *markdownDocument;
 };
 
 }  // namespace chatterino
