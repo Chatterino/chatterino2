@@ -15,7 +15,11 @@ namespace chatterino {
 MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
     : Label(parent, std::move(text), style)
 {
-    this->initializeMarkdownDocument();
+    this->markdownDocument_ = std::make_unique<QTextDocument>();
+    if (!this->text_.isEmpty())
+    {
+        this->markdownDocument_->setMarkdown(this->text_);
+    }
 }
 
 void MarkdownLabel::setText(const QString &text)
@@ -172,15 +176,6 @@ void MarkdownLabel::updateSize()
     {
         // Fall back to base Label size calculation
         Label::updateSize();
-    }
-}
-
-void MarkdownLabel::initializeMarkdownDocument()
-{
-    this->markdownDocument_ = std::make_unique<QTextDocument>();
-    if (!this->text_.isEmpty())
-    {
-        this->markdownDocument_->setMarkdown(this->text_);
     }
 }
 

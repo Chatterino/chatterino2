@@ -27,7 +27,6 @@ protected:
 
 private:
     void updateSize() override;
-    void initializeMarkdownDocument();
 
     std::unique_ptr<QTextDocument> markdownDocument_;
 };
