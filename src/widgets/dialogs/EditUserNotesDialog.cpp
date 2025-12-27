@@ -184,12 +184,17 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
+            cursor.select(QTextCursor::LineUnderCursor);
             auto selectedText = cursor.selectedText();
             cursor.insertText("- " + selectedText);
+            cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor, 0);
         }
         else
         {
+            const auto pos = cursor.columnNumber();
+            cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor, 0);
             cursor.insertText("- ");
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, pos);
         }
         this->textEdit_->setTextCursor(cursor);
         this->textEdit_->setFocus();
