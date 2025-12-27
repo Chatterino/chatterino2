@@ -487,7 +487,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                                      this->userName_, Qt::CaseInsensitive) == 0;
 
                 visibilityModButtons =
-                    twitchChannel->isBroadcaster() && !isMyself;
+                    twitchChannel->canManageModerators() && !isMyself;
             }
             mod->setVisible(visibilityModButtons);
             unmod->setVisible(visibilityModButtons);
