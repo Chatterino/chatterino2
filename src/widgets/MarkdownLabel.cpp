@@ -20,6 +20,8 @@ MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
     {
         this->markdownDocument->setMarkdown(this->text_);
     }
+
+    this->setMouseTracking(true);
 }
 
 void MarkdownLabel::setText(const QString &text)
