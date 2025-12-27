@@ -41,8 +41,10 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
 
     QPainter painter(this);
 
-    painter.setFont(
-        getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
+    auto font =
+        getApp()->getFonts()->getFont(this->getFontStyle(), this->scale());
+
+    painter.setFont(font);
 
     // draw text
     QRectF textRect = this->textRect();
@@ -53,8 +55,7 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
             this->theme ? this->theme->messages.textColors.regular : Qt::black;
 
         this->markdownDocument->setTextWidth(textRect.width());
-        this->markdownDocument->setDefaultFont(
-            getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
+        this->markdownDocument->setDefaultFont(font);
         this->markdownDocument->setMarkdown(this->text_);
 
         QPalette docPalette = this->palette();
