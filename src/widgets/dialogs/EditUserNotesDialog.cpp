@@ -60,17 +60,24 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
+            auto appended = 0;
             auto selectedText = cursor.selectedText();
             QChar newLine(QChar::ParagraphSeparator);
 
             if (selectedText.back() == newLine)
             {
                 selectedText.chop(1);
+                cursor.insertText("**" + selectedText + "**" + newLine);
+                appended = 3;
             }
-            cursor.insertText("**" + selectedText + "**" + newLine);
+            else
+            {
+                cursor.insertText("**" + selectedText + "**");
+                appended = 2;
+            }
 
             // restore selection
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 3);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length()));
         }
@@ -94,17 +101,24 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         auto cursor = this->textEdit_->textCursor();
         if (cursor.hasSelection())
         {
+            auto appended = 0;
             auto selectedText = cursor.selectedText();
             QChar newLine(QChar::ParagraphSeparator);
 
             if (selectedText.back() == newLine)
             {
                 selectedText.chop(1);
+                cursor.insertText("*" + selectedText + "*" + newLine);
+                appended = 2;
             }
-            cursor.insertText("*" + selectedText + "*" + newLine);
+            else
+            {
+                cursor.insertText("*" + selectedText + "*");
+                appended = 1;
+            }
 
             // restore selection
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length()));
         }
