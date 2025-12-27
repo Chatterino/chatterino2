@@ -77,7 +77,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             }
 
             // restore selection
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor,
+                                appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length()));
         }
@@ -118,7 +119,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             }
 
             // restore selection
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor,
+                                appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length()));
         }
@@ -181,7 +183,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             }
 
             // select "url" for easy replacement
-            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, appended);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor,
+                                appended);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 3);
         }
         else
@@ -208,14 +211,17 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
             cursor.select(QTextCursor::LineUnderCursor);
             auto selectedText = cursor.selectedText();
             cursor.insertText("- " + selectedText);
-            cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor, 0);
+            cursor.movePosition(QTextCursor::StartOfLine,
+                                QTextCursor::KeepAnchor, 0);
         }
         else
         {
             const auto pos = cursor.columnNumber();
-            cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor, 0);
+            cursor.movePosition(QTextCursor::StartOfLine,
+                                QTextCursor::MoveAnchor, 0);
             cursor.insertText("- ");
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, pos);
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,
+                                pos);
         }
         this->textEdit_->setTextCursor(cursor);
         this->textEdit_->setFocus();
