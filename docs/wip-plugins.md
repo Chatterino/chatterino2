@@ -850,6 +850,31 @@ and [`file:write()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:write).
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.write)
 
+### Debug API
+
+To aid debugging, Chatterino provides Lua's `debug.traceback` function.
+Other functions from the `debug` library are not exposed.
+
+#### `traceback([thread,] [message [, level]])`
+
+Returns a stack trace of `thread` or the current thread with an optional `message` prepended.
+`level` can be used to skip some frames. By default, it's 1 (skipping the current function).
+
+This can be used as a message handler in `xpcall`:
+
+```lua
+local function main()
+  c2.ThisDoesNotExistAndWillError()
+end
+
+local ok, result = xpcall(main, debug.traceback)
+if not ok then
+  print(result)
+end
+```
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-debug.traceback)
+
 ### Changed globals
 
 #### `load(chunk [, chunkname [, mode [, env]]])`
