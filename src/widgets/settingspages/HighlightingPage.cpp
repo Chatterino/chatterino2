@@ -9,6 +9,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -25,23 +26,6 @@
 #include <QTabWidget>
 
 namespace chatterino {
-
-namespace {
-// Add additional badges for highlights here
-QList<DisplayBadge> availableBadges = {
-    {"Broadcaster", "broadcaster"},
-    {"Admin", "admin"},
-    {"Staff", "staff"},
-    {"Moderator", "moderator"},
-    {"Lead Moderator", "lead_moderator"},
-    {"Verified", "partner"},
-    {"VIP", "vip"},
-    {"Founder", "founder"},
-    {"Subscriber", "subscriber"},
-    {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
-    {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
-};
-}  // namespace
 
 HighlightingPage::HighlightingPage()
 {
@@ -191,10 +175,12 @@ HighlightingPage::HighlightingPage()
                     view->getTableView()->setColumnWidth(0, 200);
                 });
 
+                this->badges_ = getApp()->getTwitchBadges()->getDisplayBadges();
+
                 // We can safely ignore this signal connection since we own the view
                 std::ignore = view->addButtonPressed.connect([this] {
                     auto d = std::make_shared<BadgePickerDialog>(
-                        availableBadges, this);
+                        this->badges_, this);
 
                     d->setWindowTitle("Choose badge");
                     if (d->exec() == QDialog::Accepted)

@@ -19,6 +19,8 @@
 #include <QThread>
 #include <QUrlQuery>
 
+#include <algorithm>
+
 namespace {
 
 // From Twitch docs - expected size for a badge (1x)
@@ -254,6 +256,29 @@ void TwitchBadges::loadEmoteImage(const QString &name, const ImagePtr &image,
 
                           callback(name, icon);
                       });
+}
+
+QList<DisplayBadge> TwitchBadges::getDisplayBadges() const
+{
+    QList<DisplayBadge> badges;
+    auto badgeSets = this->badgeSets_.access();
+    for (const auto& [id, set] : *badgeSets) {
+        auto it = set.find("1");
+        if (it == set.end()) {
+            it = set.find("0");
+        }
+        if (it != set.end()) {
+            // For most badges, use the version 0 or 1 badge
+            badges.emplace_back(it->second->tooltip.string, id);
+        } else {
+            // For the badges without versions 0 or 1, include all badges
+            for (const auto& [version, badge] : set) {
+                badges.emplace_back(badge->tooltip.string, id + "/" + version);
+            }
+        }
+    }
+    std::sort(badges.begin(), badges.end());
+    return badges;
 }
 
 }  // namespace chatterino
