@@ -13,7 +13,7 @@
 - Minor: Consolidate font picking into one dialog. (#6531)
 - Minor: Added a menu action to sort tabs alphabetically. (#6551)
 - Minor: Fixed "edit hotkey" dialog opening like a normal window. (#6540)
-- Minor: Added an API to get the current Twitch account in plugins. (#6554)
+- Minor: Added an API to get the current Twitch account in plugins. (#6554, #6675)
 - Minor: Added options to close multiple visible tabs. (#6515, #6619)
 - Minor: Added a setting to show the stream title in live messages. (#6572)
 - Minor: Add categories to the emoji viewer. (#6598)
