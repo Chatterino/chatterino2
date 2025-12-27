@@ -279,6 +279,8 @@ void EditUserNotesDialog::themeChangedEvent()
         return;
     }
 
+    assert(this->previewLabel_ != nullptr);
+
     auto palette = this->palette();
 
     palette.setColor(QPalette::Window,
@@ -293,26 +295,23 @@ void EditUserNotesDialog::themeChangedEvent()
         this->textEdit_->setPalette(palette);
     }
 
-    if (this->previewLabel_)
-    {
-        this->previewLabel_->setPalette(palette);
-    }
+    this->previewLabel_->setPalette(palette);
 }
 
 void EditUserNotesDialog::updatePreview()
 {
-    if (this->previewLabel_ && this->textEdit_)
+    assert(this->textEdit_ != nullptr);
+    assert(this->previewLabel_ != nullptr);
+
+    QString text = this->textEdit_->toPlainText();
+    if (text.isEmpty())
     {
-        QString text = this->textEdit_->toPlainText();
-        if (text.isEmpty())
-        {
-            this->previewLabel_->setText(
-                "*Preview will appear here when you type markdown text...*");
-        }
-        else
-        {
-            this->previewLabel_->setText(text);
-        }
+        this->previewLabel_->setText(
+            "*Preview will appear here when you type markdown text...*");
+    }
+    else
+    {
+        this->previewLabel_->setText(text);
     }
 }
 
