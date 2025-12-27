@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2024 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 # example usage: FAST=1 ./scripts/check-clang-tidy.sh --checks '-*,modernize-return-braced-init-list' --fix
 
 set -e
