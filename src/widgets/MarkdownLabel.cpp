@@ -14,8 +14,8 @@ namespace chatterino {
 
 MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
     : Label(parent, std::move(text), style)
+    , markdownDocument_(new QTextDocument(this))
 {
-    this->markdownDocument_ = std::make_unique<QTextDocument>();
     if (!this->text_.isEmpty())
     {
         this->markdownDocument_->setMarkdown(this->text_);
@@ -24,13 +24,12 @@ MarkdownLabel::MarkdownLabel(BaseWidget *parent, QString text, FontStyle style)
 
 void MarkdownLabel::setText(const QString &text)
 {
+    assert(this->markdownDocument_ != nullptr);
+
     if (this->text_ != text)
     {
         this->text_ = text;
-        if (this->markdownDocument_)
-        {
-            this->markdownDocument_->setMarkdown(text);
-        }
+        this->markdownDocument_->setMarkdown(text);
         this->updateSize();
         this->update();
     }
@@ -38,6 +37,8 @@ void MarkdownLabel::setText(const QString &text)
 
 void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
 {
+    assert(this->markdownDocument_ != nullptr);
+
     QPainter painter(this);
 
     painter.setFont(
@@ -46,7 +47,7 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
     // draw text
     QRectF textRect = this->textRect();
 
-    if (this->markdownDocument_ && !this->text_.isEmpty())
+    if (!this->text_.isEmpty())
     {
         QColor textColor =
             this->theme ? this->theme->messages.textColors.regular : Qt::black;
@@ -83,7 +84,9 @@ void MarkdownLabel::paintEvent(QPaintEvent * /*event*/)
 
 void MarkdownLabel::mousePressEvent(QMouseEvent *event)
 {
-    if (this->markdownDocument_ && event->button() == Qt::LeftButton)
+    assert(this->markdownDocument_ != nullptr);
+
+    if (event->button() == Qt::LeftButton)
     {
         QRectF textRect = this->textRect();
         QPointF pos = event->pos() - textRect.topLeft();
@@ -122,21 +125,19 @@ void MarkdownLabel::mousePressEvent(QMouseEvent *event)
 
 void MarkdownLabel::mouseMoveEvent(QMouseEvent *event)
 {
-    if (this->markdownDocument_)
-    {
-        QRectF textRect = this->textRect();
-        QPointF pos = event->pos() - textRect.topLeft();
+    assert(this->markdownDocument_ != nullptr);
 
-        QString anchor =
-            this->markdownDocument_->documentLayout()->anchorAt(pos);
-        if (!anchor.isEmpty())
-        {
-            this->setCursor(Qt::PointingHandCursor);
-        }
-        else
-        {
-            this->setCursor(Qt::ArrowCursor);
-        }
+    QRectF textRect = this->textRect();
+    QPointF pos = event->pos() - textRect.topLeft();
+
+    QString anchor = this->markdownDocument_->documentLayout()->anchorAt(pos);
+    if (!anchor.isEmpty())
+    {
+        this->setCursor(Qt::PointingHandCursor);
+    }
+    else
+    {
+        this->setCursor(Qt::ArrowCursor);
     }
 
     Label::mouseMoveEvent(event);
@@ -144,9 +145,11 @@ void MarkdownLabel::mouseMoveEvent(QMouseEvent *event)
 
 void MarkdownLabel::updateSize()
 {
+    assert(this->markdownDocument_ != nullptr);
+
     this->currentPadding_ = this->basePadding_.toMarginsF() * this->scale();
 
-    if (this->markdownDocument_ && !this->text_.isEmpty())
+    if (!this->text_.isEmpty())
     {
         this->markdownDocument_->setDefaultFont(
             getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));

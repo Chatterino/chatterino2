@@ -2,8 +2,6 @@
 
 #include "widgets/Label.hpp"
 
-#include <memory>
-
 class QTextDocument;
 
 namespace chatterino {
@@ -28,7 +26,7 @@ protected:
 private:
     void updateSize() override;
 
-    std::unique_ptr<QTextDocument> markdownDocument_;
+    QTextDocument *markdownDocument_;
 };
 
 }  // namespace chatterino
