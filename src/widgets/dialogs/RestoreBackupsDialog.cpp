@@ -35,14 +35,15 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
           u"Some backups are damaged or otherwise unreadable."_s)
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
-    this->setWindowTitle(u"Restore backup of " %
-                         this->fileData.fileKind.toLower() % '?');
+    this->setWindowTitle(u"Chatterino - Restore Backup of " %
+                         this->fileData.fileKind % '?');
 
     auto *layout = new QVBoxLayout(this);
 
     auto *description =
-        new QLabel(this->fileData.fileKind % u" failed to load: " % prevError %
-                   u"<p>" % this->fileData.fileDescription %
+        new QLabel(u"Chatterino " % this->fileData.fileKind.toLower() %
+                   u" failed to load: " % prevError % u"<p>" %
+                   this->fileData.fileDescription %
                    u"<p>There are backups of this file.<br>Do you want to "
                    u"restore the selected backup?");
     layout->addWidget(description);
@@ -57,9 +58,10 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
 
     layout->addSpacing(10);
 
-    auto *buttons =
-        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    auto *buttons = new QDialogButtonBox;
     layout->addWidget(buttons);
+    buttons->addButton(QDialogButtonBox::Ok)->setText(u"Restore Backup"_s);
+    buttons->addButton(QDialogButtonBox::Cancel)->setText(u"Discard"_s);
 
     QObject::connect(buttons, &QDialogButtonBox::accepted, this, [this] {
         auto selected = this->backupCombo.currentData();
@@ -94,8 +96,16 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
 
         this->accept();
     });
-    QObject::connect(buttons, &QDialogButtonBox::rejected, this,
-                     &QDialog::reject);
+    QObject::connect(buttons, &QDialogButtonBox::rejected, this, [this] {
+        auto res = QMessageBox::question(
+            this, u"Chatterino - Discard Backup?"_s,
+            u"Are you sure you want to discard the backup? Doing so will "_s
+            "overwrite and discard any previous settings.");
+        if (res == QMessageBox::Yes)
+        {
+            this->reject();
+        }
+    });
 
     QObject::connect(&this->showButton, &QPushButton::clicked, this, [this] {
         auto selected = this->backupCombo.currentData();
@@ -109,6 +119,12 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
     });
 
     this->refreshBackups();
+
+#ifdef Q_OS_LINUX
+    // Needed for Sway to make the dialog floating. See
+    // https://github.com/swaywm/sway/issues/3095
+    this->setFixedSize(this->minimumSize());
+#endif
 }
 
 void RestoreBackupsDialog::refreshBackups()
