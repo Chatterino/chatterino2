@@ -7,7 +7,9 @@
 
 #include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QRegularExpression>
 #include <QSplitter>
+#include <QTextBlock>
 #include <QTextEdit>
 
 namespace chatterino {
@@ -36,10 +38,27 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                               .getElement();
     QObject::connect(headingButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
-        if (cursor.hasSelection())
+        const auto line = cursor.block().text();
+        const auto pos = EditUserNotesDialog::currentWordPosition(cursor);
+        const auto selectedText = cursor.selectedText();
+
+        if (!selectedText.isEmpty() && EditUserNotesDialog::isHeading(line, pos))
         {
-            auto selectedText = cursor.selectedText();
+            cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 4);
+            cursor.removeSelectedText();
+
+            // restore selection
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length()));
+        }
+        else if (cursor.hasSelection())
+        {
             cursor.insertText("### " + selectedText);
+
+            // restore selection
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length()));
         }
         else
         {
@@ -58,10 +77,25 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                            .getElement();
     QObject::connect(boldButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
-        if (cursor.hasSelection())
+        const auto line = cursor.block().text();
+        const auto pos = cursor.columnNumber();
+        auto selectedText = cursor.selectedText();
+
+        if (!selectedText.isEmpty() && EditUserNotesDialog::isBold(line, pos))
+        {
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);  // un-select
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 2);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length() + 4));
+            cursor.insertText(selectedText);
+
+            // restore selection
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length()));
+        }
+        else if (cursor.hasSelection())
         {
             auto appended = 0;
-            auto selectedText = cursor.selectedText();
             QChar newLine(QChar::ParagraphSeparator);
 
             if (selectedText.back() == newLine)
@@ -100,10 +134,25 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
                              .getElement();
     QObject::connect(italicButton, &Button::leftClicked, this, [&] {
         auto cursor = this->textEdit_->textCursor();
-        if (cursor.hasSelection())
+        const auto line = cursor.block().text();
+        const auto pos = cursor.columnNumber();
+        auto selectedText = cursor.selectedText();
+
+        if (!selectedText.isEmpty() && EditUserNotesDialog::isItalic(line, pos))
+        {
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);  // un-select
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length() + 2));
+            cursor.insertText(selectedText);
+
+            // restore selection
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
+                                static_cast<int>(selectedText.length()));
+        }
+        else if (cursor.hasSelection())
         {
             auto appended = 0;
-            auto selectedText = cursor.selectedText();
             QChar newLine(QChar::ParagraphSeparator);
 
             if (selectedText.back() == newLine)
@@ -209,7 +258,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         if (cursor.hasSelection())
         {
             cursor.select(QTextCursor::LineUnderCursor);
-            auto selectedText = cursor.selectedText();
+            const auto selectedText = cursor.selectedText();
             cursor.insertText("- " + selectedText);
             cursor.movePosition(QTextCursor::StartOfLine,
                                 QTextCursor::KeepAnchor, 0);
@@ -345,6 +394,70 @@ void EditUserNotesDialog::updatePreview()
     {
         this->previewLabel_->setText(text);
     }
+}
+
+int EditUserNotesDialog::currentWordPosition(const QTextCursor &cursor)
+{
+    QTextCursor temp = cursor;
+    temp.movePosition(QTextCursor::StartOfWord, QTextCursor::MoveAnchor);
+
+    return temp.columnNumber();
+}
+
+bool EditUserNotesDialog::isBold(const QString &line, const int pos)
+{
+    QRegularExpression pattern(R"((\*{2,})(.*?)(\1))");
+
+    QRegularExpressionMatchIterator iter = pattern.globalMatch(line);
+
+    while (iter.hasNext())
+    {
+        QRegularExpressionMatch match = iter.next();
+        const auto startIndex = match.capturedStart(2);
+        const auto endIndex = match.capturedEnd(2);
+
+        if (pos == startIndex || pos == endIndex)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool EditUserNotesDialog::isItalic(const QString &line, const int pos)
+{
+    QRegularExpression pattern(R"(\*(.*?)\*)");
+
+    QRegularExpressionMatchIterator iter = pattern.globalMatch(line);
+
+    while (iter.hasNext())
+    {
+        QRegularExpressionMatch match = iter.next();
+        const auto startIndex = match.capturedStart(1);
+        const auto endIndex = match.capturedEnd(1);
+
+        if (pos == startIndex || pos == endIndex)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool EditUserNotesDialog::isHeading(const QString &line, const int pos)
+{
+    QRegularExpression pattern(R"(###\s)");
+
+    QRegularExpressionMatch match = pattern.match(line, pos - 4);
+
+    if (match.hasMatch() && pos == match.capturedEnd())
+    {
+        return true;
+    }
+
+    return false;
 }
 
 }  // namespace chatterino
