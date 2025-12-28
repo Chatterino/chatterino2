@@ -30,10 +30,10 @@ protected:
 
 private:
     void updatePreview();
-    int currentWordPosition(const QTextCursor &cursor);
-    bool isBold(const QString &line, const int pos);
-    bool isItalic(const QString &line, const int pos);
-    bool isHeading(const QString &line, const int pos);
+    static int currentWordPosition(const QTextCursor &cursor);
+    static bool isBold(const QString &line, const int pos);
+    static bool isItalic(const QString &line, const int pos);
+    static bool isHeading(const QString &line, const int pos);
 
     QTextEdit *textEdit_{};
     QCheckBox *previewCheckBox_{};

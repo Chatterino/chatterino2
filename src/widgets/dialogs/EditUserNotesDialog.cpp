@@ -409,7 +409,7 @@ int EditUserNotesDialog::currentWordPosition(const QTextCursor &cursor)
 
 bool EditUserNotesDialog::isBold(const QString &line, const int pos)
 {
-    QRegularExpression pattern(R"((\*{2,})(.*?)(\1))");
+    static QRegularExpression pattern(R"((\*{2,})(.*?)(\1))");
 
     QRegularExpressionMatchIterator iter = pattern.globalMatch(line);
 
@@ -430,7 +430,7 @@ bool EditUserNotesDialog::isBold(const QString &line, const int pos)
 
 bool EditUserNotesDialog::isItalic(const QString &line, const int pos)
 {
-    QRegularExpression pattern(R"(\*(.*?)\*)");
+    static QRegularExpression pattern(R"(\*(.*?)\*)");
 
     QRegularExpressionMatchIterator iter = pattern.globalMatch(line);
 
@@ -451,16 +451,11 @@ bool EditUserNotesDialog::isItalic(const QString &line, const int pos)
 
 bool EditUserNotesDialog::isHeading(const QString &line, const int pos)
 {
-    QRegularExpression pattern(R"(###\s)");
+    static QRegularExpression pattern(R"(###\s)");
 
     QRegularExpressionMatch match = pattern.match(line, pos - 4);
 
-    if (match.hasMatch() && pos == match.capturedEnd())
-    {
-        return true;
-    }
-
-    return false;
+    return match.hasMatch() && pos == match.capturedEnd();
 }
 
 }  // namespace chatterino
