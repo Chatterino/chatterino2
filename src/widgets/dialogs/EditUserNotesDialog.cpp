@@ -2,8 +2,8 @@
 
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 #include "widgets/buttons/SvgButton.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 #include "widgets/MarkdownLabel.hpp"
 
 #include <QCheckBox>
