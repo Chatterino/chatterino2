@@ -3,6 +3,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/buttons/SvgButton.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 #include "widgets/MarkdownLabel.hpp"
 
 #include <QCheckBox>
@@ -298,6 +299,9 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
     this->splitter_->setSizes({350, 350});
     this->previewLabel_->setVisible(false);
+
+    auto *shortcutFilter = new CmdDeleteKeyFilter(edit.getElement());
+    edit->installEventFilter(shortcutFilter);
 
     layout
         .emplace<QDialogButtonBox>(QDialogButtonBox::Ok |
