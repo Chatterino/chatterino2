@@ -66,7 +66,7 @@ jobs:
             sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
           path: ~/.conan2/

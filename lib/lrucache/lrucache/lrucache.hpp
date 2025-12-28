@@ -3,6 +3,9 @@
  * Original Author: Alexander Ponomarev
  *
  * Created on June 20, 2013, 5:09 PM
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2014, lamerman
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #ifndef _LRUCACHE_HPP_INCLUDED_

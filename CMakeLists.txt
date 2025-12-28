@@ -197,8 +197,6 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(Websocketpp REQUIRED)
-
 if (BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings

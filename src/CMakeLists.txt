@@ -435,12 +435,9 @@ set(SOURCE_FILES
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
-        providers/twitch/PubSubClientOptions.hpp
-        providers/twitch/PubSubHelpers.hpp
         providers/twitch/PubSubManager.cpp
         providers/twitch/PubSubManager.hpp
         providers/twitch/PubSubMessages.hpp
-        providers/twitch/PubSubWebsocket.hpp
         providers/twitch/TwitchAccount.cpp
         providers/twitch/TwitchAccount.hpp
         providers/twitch/TwitchAccountManager.cpp
@@ -621,6 +618,8 @@ set(SOURCE_FILES
         widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
         widgets/Label.hpp
+        widgets/MarkdownLabel.cpp
+        widgets/MarkdownLabel.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
@@ -888,7 +887,6 @@ if (CHATTERINO_GENERATE_COVERAGE)
         EXCLUDE "lib/settings/*"
         EXCLUDE "lib/signals/*"
         EXCLUDE "lib/sol2/*"
-        EXCLUDE "lib/websocketpp/*"
         EXCLUDE "lib/WinToast/*"
 
         EXCLUDE "*/ui_*.h"
@@ -920,7 +918,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
-        websocketpp::websocketpp
         Threads::Threads
         LRUCache
         MagicEnum
