@@ -3,9 +3,14 @@
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BasePopup.hpp"
 
+class QCheckBox;
+class QSplitter;
+class QTextCursor;
 class QTextEdit;
 
 namespace chatterino {
+
+class MarkdownLabel;
 
 class EditUserNotesDialog : public BasePopup
 {
@@ -24,7 +29,16 @@ protected:
     void themeChangedEvent() override;
 
 private:
+    void updatePreview();
+    int currentWordPosition(const QTextCursor &cursor);
+    bool isBold(const QString &line, const int pos);
+    bool isItalic(const QString &line, const int pos);
+    bool isHeading(const QString &line, const int pos);
+
     QTextEdit *textEdit_{};
+    QCheckBox *previewCheckBox_{};
+    QSplitter *splitter_{};
+    MarkdownLabel *previewLabel_{};
 };
 
 }  // namespace chatterino
