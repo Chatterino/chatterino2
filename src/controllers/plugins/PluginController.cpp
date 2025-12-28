@@ -210,10 +210,10 @@ void PluginController::openLibrariesFor(Plugin *plugin)
     }
     // set up debug lib
     {
-        auto c2debug = lua.create_table();
-        g["debug"] = c2debug;
+        auto debuglib = lua.create_table();
+        g["debug"] = debuglib;
 
-        c2debug.set_function("traceback", lua::api::debugTraceback);
+        debuglib.set_function("traceback", lua::api::debugTraceback);
     }
     PluginController::initSol(lua, plugin);
 }
