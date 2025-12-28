@@ -42,7 +42,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         const auto pos = EditUserNotesDialog::currentWordPosition(cursor);
         const auto selectedText = cursor.selectedText();
 
-        if (!selectedText.isEmpty() && EditUserNotesDialog::isHeading(line, pos))
+        if (!selectedText.isEmpty() &&
+            EditUserNotesDialog::isHeading(line, pos))
         {
             cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 4);
@@ -83,7 +84,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
         if (!selectedText.isEmpty() && EditUserNotesDialog::isBold(line, pos))
         {
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);  // un-select
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,
+                                1);  // un-select
             cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 2);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length() + 4));
@@ -140,7 +142,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
         if (!selectedText.isEmpty() && EditUserNotesDialog::isItalic(line, pos))
         {
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);  // un-select
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,
+                                1);  // un-select
             cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor,
                                 static_cast<int>(selectedText.length() + 2));
