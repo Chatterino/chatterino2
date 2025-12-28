@@ -20,6 +20,7 @@
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632)
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625)
+- Minor: Added `debug.traceback` for plugins. (#6652)
 - Minor: Added title and duration options for `/clip` command. (#6669)
 - Minor: Added Markdown support to user notes. (#6490)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
