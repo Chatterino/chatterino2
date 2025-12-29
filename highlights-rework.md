@@ -32,3 +32,6 @@ Could we take it further to allow the user to customize an entire message from a
 UNRELATED: Can commands access "the right-clicked element" context? i.e. if I right-click an emote, could it access the emote name? emote copytext?
 UNRELATED: Can we make a command that appends a given string to the user's input box?
 UNRELATED: Copy emote name from context menu?
+
+Issues to keep in mind:
+ - https://github.com/Chatterino/chatterino2/discussions/6686
