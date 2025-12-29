@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <set>
+#include <span>
 
 namespace chatterino {
 

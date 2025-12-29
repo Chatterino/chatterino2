@@ -1,13 +1,15 @@
 #include "controllers/plugins/api/WindowManager.hpp"
 
-#include "controllers/plugins/api/ChannelRef.hpp"
-#include "controllers/plugins/LuaUtilities.hpp"
-#include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
-#include "singletons/WindowManager.hpp"
-#include "util/WeakPtrHelpers.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/Window.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "singletons/WindowManager.hpp"
+#    include "util/WeakPtrHelpers.hpp"
+#    include "widgets/Notebook.hpp"
+#    include "widgets/splits/Split.hpp"
+#    include "widgets/Window.hpp"
 
 namespace {
 
@@ -169,3 +171,5 @@ void createUserTypes(sol::table &c2)
 }
 
 }  // namespace chatterino::lua::api::windowmanager
+
+#endif

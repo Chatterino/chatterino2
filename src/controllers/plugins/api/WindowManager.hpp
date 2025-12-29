@@ -1,6 +1,8 @@
 #pragma once
 
-#include <sol/forward.hpp>
+#ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include <sol/forward.hpp>
 
 /**
  * @includefile widgets/splits/SplitContainer.hpp
@@ -71,3 +73,5 @@ namespace chatterino::lua::api::windowmanager {
 void createUserTypes(sol::table &c2);
 
 }  // namespace chatterino::lua::api::windowmanager
+
+#endif
