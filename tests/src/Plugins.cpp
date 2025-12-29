@@ -33,7 +33,6 @@
 #    include <optional>
 #    include <utility>
 
-
 using namespace chatterino;
 using chatterino::mock::MockChannel;
 
