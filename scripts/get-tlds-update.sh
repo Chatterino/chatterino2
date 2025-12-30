@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# SPDX-FileCopyrightText: 2018 LajamerrMittesdine <danieljmerritt4394@gmail.com>
-#
-# SPDX-License-Identifier: CC0-1.0
-
 #Download the official list of active TLDs from IANA
 #Remove the first line that contains data not needed.
 #Put everything that can be into lowercase.
