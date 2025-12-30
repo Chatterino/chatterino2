@@ -6,6 +6,7 @@
 #    include "util/TypeName.hpp"
 
 #    include <QObject>
+#    include <QPointer>
 #    include <QString>
 #    include <QStringBuilder>
 #    include <QStringList>
@@ -197,5 +198,29 @@ SOL_STACK_FUNCTIONS(QStringList)
 SOL_STACK_FUNCTIONS(QByteArray)
 
 #    undef SOL_STACK_FUNCTIONS
+
+namespace sol {
+
+// NOLINTBEGIN(readability-identifier-naming)
+template <typename T>
+struct unique_usertype_traits<QPointer<T>> {
+    using type = T;
+    using actual_type = QPointer<T>;
+
+    static const bool value = true;
+
+    static bool is_null(const actual_type &ptr)
+    {
+        return ptr.isNull();
+    }
+
+    static type *get(const actual_type &ptr)
+    {
+        return ptr.get();
+    }
+};
+// NOLINTEND(readability-identifier-naming)
+
+}  // namespace sol
 
 #endif

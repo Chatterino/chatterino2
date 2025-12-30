@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <set>
+#include <span>
 
 namespace chatterino {
 
@@ -138,6 +139,8 @@ public:
     void toggleAllOverlayInertia();
 
     std::set<QString> getVisibleChannelNames() const;
+
+    std::span<Window *const> windows() const;
 
     /// Signals
     pajlada::Signals::NoArgSignal gifRepaintRequested;

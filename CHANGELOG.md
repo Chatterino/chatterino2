@@ -23,6 +23,7 @@
 - Minor: Added `debug.traceback` for plugins. (#6652)
 - Minor: Added title and duration options for `/clip` command. (#6669)
 - Minor: Added Markdown support to user notes. (#6490)
+- Minor: Added read-only access to windows for plugins. (#6687)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
