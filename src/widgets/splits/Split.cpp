@@ -109,7 +109,7 @@ Split::Split(QWidget *parent)
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
         }));
-    this->signalHolder_.managedConnect(channelChanged, [this] {
+    this->signalHolder_.managedConnect(this->channelChanged, [this] {
         this->updateInputPlaceholder();
     });
     this->updateInputPlaceholder();

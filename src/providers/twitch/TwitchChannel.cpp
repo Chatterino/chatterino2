@@ -1196,7 +1196,7 @@ void TwitchChannel::updateSeventvUser(
         return;
     }
 
-    updateSeventvData(this->seventvUserID_, dispatch.emoteSetID);
+    this->updateSeventvData(this->seventvUserID_, dispatch.emoteSetID);
     SeventvEmotes::getEmoteSet(
         dispatch.emoteSetID,
         [this, weak = weakOf<Channel>(this), dispatch](auto &&emotes,

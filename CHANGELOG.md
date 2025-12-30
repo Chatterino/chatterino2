@@ -75,6 +75,9 @@
 - Dev: Started work on spell checking. (#6446)
 - Dev: Added Clazy linting in CI. (#6623)
 - Dev: Added custom clang-tidy module linting in CI. (#6626)
+- Dev: CMake option `USE_ALTERNATE_LINKER` now errors if the given linker can't be found. (#6692)
+- Dev: Enable C++ 23. (#6693)
+- Dev: Prefer `std::expected` over `nonstd::expected_lite`. (#6693)
 - Dev: Moved Twitch PubSub to liveupdates. (#6638)
 
 ## 2.5.4

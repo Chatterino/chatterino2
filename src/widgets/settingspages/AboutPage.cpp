@@ -3,10 +3,10 @@
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "util/Expected.hpp"  // IWYU pragma: keep - this is being used to see if we're using the expected_lite library
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/buttons/SignalLabel.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QFile>
@@ -17,6 +17,7 @@
 #include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
+#include <twitch-eventsub-ws/chrono.hpp>  // IWYU pragma: keep - this is being used to see if we're using Howard Hinnant's date library
 
 namespace chatterino {
 
@@ -127,15 +128,19 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Fluent icons",
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
+#ifdef CHATTERINO_USING_NONSTD_EXPECTED
             addLicense(form.getElement(), "expected-lite",
                        "https://github.com/martinmoene/expected-lite",
                        ":/licenses/expected-lite.txt");
+#endif
             addLicense(form.getElement(), "certify",
                        "https://github.com/djarek/certify",
                        ":/licenses/certify.txt");
+#ifdef CHATTERINO_USING_HOWARD_HINNANTS_DATE
             addLicense(form.getElement(), "Howard Hinnant's date.h",
                        "https://github.com/HowardHinnant/date",
                        ":/licenses/howard-hinnant-date.txt");
+#endif
             addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
                        ":/licenses/fmtlib.txt");
             addLicense(form.getElement(), "Unicode",

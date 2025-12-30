@@ -138,7 +138,7 @@ public:
             return QVariant();
         }
 
-        return rows_[row].items[column]->data(role);
+        return this->rows_[row].items[column]->data(role);
     }
 
     bool setData(const QModelIndex &index, const QVariant &value,

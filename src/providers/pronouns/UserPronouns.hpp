@@ -12,7 +12,7 @@ public:
 
     QString format() const
     {
-        if (isUnspecified())
+        if (this->isUnspecified())
         {
             return "unspecified";
         }

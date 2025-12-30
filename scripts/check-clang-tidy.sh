@@ -20,13 +20,17 @@ if [ "$FAST" = "1" ]; then
         -regex '\./src/.*\.\(hpp\|cpp\)' -o \
         -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
         -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
-        -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
+        -regex '\./mocks/include/.*\.\(hpp\|cpp\)' -o \
+        -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
+        -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' \
         \) | parallel --jobs "$NUM_TIDY_JOBS" --verbose clang-tidy --quiet "$@"
 else
     find . \( \
         -regex '\./src/.*\.\(hpp\|cpp\)' -o \
         -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
         -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
-        -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
+        -regex '\./mocks/include/.*\.\(hpp\|cpp\)' -o \
+        -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
+        -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' \
         \) -exec clang-tidy --quiet "$@" {} \;
 fi

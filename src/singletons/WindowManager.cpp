@@ -812,7 +812,7 @@ void WindowManager::closeAll()
     qCDebug(chatterinoWindowmanager) << "Shutting down (closing windows)";
     this->shuttingDown_ = true;
 
-    for (Window *window : windows_)
+    for (Window *window : this->windows_)
     {
         closeWindowsRecursive(window);
     }

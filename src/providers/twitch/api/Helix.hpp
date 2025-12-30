@@ -393,7 +393,7 @@ struct HelixBadgeSet {
         const auto jsonVersions = json.value("versions").toArray();
         for (const auto &version : jsonVersions)
         {
-            versions.emplace_back(version.toObject());
+            this->versions.emplace_back(version.toObject());
         }
     }
 };
