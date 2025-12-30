@@ -17,6 +17,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             -regex '\./src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
             \) | parallel --verbose --jobs "$NUM_FORMAT_JOBS" clang-format -i
     else
@@ -24,6 +26,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             -regex '\./src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
             \) -exec clang-format -i {} \;
     fi

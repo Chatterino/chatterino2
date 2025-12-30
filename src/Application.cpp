@@ -12,6 +12,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -100,7 +101,8 @@ ISoundController *makeSoundController(Settings &settings)
 BttvLiveUpdates *makeBttvLiveUpdates(Settings &settings)
 {
     bool enabled =
-        settings.enableBTTVLiveUpdates && settings.enableBTTVChannelEmotes;
+        settings.enableBTTVLiveUpdates &&
+        (settings.enableBTTVChannelEmotes || settings.showBadgesBttv);
 
     if (enabled)
     {
@@ -180,6 +182,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , highlights(new HighlightController(_settings, this->accounts.get()))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
+    , bttvBadges(new BttvBadges)
     , seventvBadges(new SeventvBadges)
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
@@ -290,7 +293,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         this->initNm(paths);
     }
-    this->twitchPubSub->initialize();
 
     this->twitch->initEventAPIs(this->bttvLiveUpdates.get(),
                                 this->seventvEventAPI.get());
@@ -424,6 +426,14 @@ FfzBadges *Application::getFfzBadges()
     assert(this->ffzBadges);
 
     return this->ffzBadges.get();
+}
+
+BttvBadges *Application::getBttvBadges()
+{
+    // BttvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->bttvBadges);
+
+    return this->bttvBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()

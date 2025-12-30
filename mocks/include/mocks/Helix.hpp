@@ -79,7 +79,8 @@ public:
                 (override));
 
     MOCK_METHOD(void, createClip,
-                (QString channelId, ResultCallback<HelixClip> successCallback,
+                (QString channelId, QString title, std::optional<int> duration,
+                 ResultCallback<HelixClip> successCallback,
                  std::function<void(HelixClipError, QString)> failureCallback,
                  std::function<void()> finallyCallback),
                 (override));
@@ -456,6 +457,22 @@ public:
                 (QString broadcasterID, QString title, QStringList outcomes,
                  std::chrono::seconds duration,
                  ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // get predictions
+    MOCK_METHOD(void, getPredictions,
+                (QString broadcasterID, QStringList ids, int first,
+                 QString after,
+                 ResultCallback<HelixPredictions> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));
+
+    // end prediction
+    MOCK_METHOD(void, endPrediction,
+                (QString broadcasterID, QString id, bool refundPoints,
+                 QString winningOutcomeID,
+                 ResultCallback<HelixPrediction> successCallback,
                  FailureCallback<QString> failureCallback),
                 (override));
 

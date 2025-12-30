@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-14]
-        qt-version: [6.4.3, 6.7.1]
+        qt-version: [6.7.1, 6.10.1]
       fail-fast: false
     env:
       QT_MODULES: qtimageformats

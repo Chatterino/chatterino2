@@ -10,12 +10,6 @@ env
 BUILD_TESTS="On"
 BUILD_BENCHMARKS="ON"
 
-ubuntu_version="$(lsb_release -sr)"
-if [ "$ubuntu_version" = "20.04" ]; then
-    BUILD_TESTS="Off"
-    BUILD_BENCHMARKS="Off"
-fi
-
 rm -rf build
 mkdir build
 cmake \

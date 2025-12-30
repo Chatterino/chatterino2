@@ -1,10 +1,10 @@
 #include "mocks/BaseApplication.hpp"
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "Test.hpp"
 
 #include <QString>
+#include <QtCore/qtestsupport_core.h>
 
 #include <chrono>
 #include <mutex>
@@ -107,38 +107,40 @@ TEST(TwitchPubSubClient, ServerRespondsToPings)
     MockApplication a("", 1s);
     auto &pubSub = a.pubSub;
 
-    pubSub.start();
+    QTest::qWait(50);
 
-    std::this_thread::sleep_for(50ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
     pubSub.listenToChannelPointRewards("123456");
 
-    std::this_thread::sleep_for(150ms);
+    QTest::qWait(150);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 1);  // LISTEN
     ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    std::this_thread::sleep_for(2s);
+    QTest::qWait(2 * 1000);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 4);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 3);  // LISTEN + 2 * PONG
 
     pubSub.stop();
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 4);
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 3);
     ASSERT_EQ(pubSub.diag.listenResponses, 1);
 }
 
@@ -147,28 +149,31 @@ TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
     MockApplication a("/dont-respond-to-ping", 1s);
     auto &pubSub = a.pubSub;
 
-    pubSub.start();
     pubSub.listenToChannelPointRewards("123456");
 
-    std::this_thread::sleep_for(750ms);
+    QTest::qWait(750);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 1);
 
-    std::this_thread::sleep_for(500ms);
+    QTest::qWait(1500);  // we need to wait for two rounds of pings
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 2);
 
     pubSub.stop();
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 2);
 }
 
@@ -177,33 +182,31 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     MockApplication a("/disconnect-client-after-1s", 10s);
     auto &pubSub = a.pubSub;
 
-    pubSub.start();
+    QTest::qWait(50);
 
-    std::this_thread::sleep_for(50ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
     ASSERT_EQ(pubSub.diag.listenResponses, 0);
 
     pubSub.listenToChannelPointRewards("123456");
 
-    std::this_thread::sleep_for(500ms);
+    QTest::qWait(500);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 2);  // Listen RESPONSE & Pong
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 1);  // Listen RESPONSE
     ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    std::this_thread::sleep_for(950ms);
+    QTest::qWait(950);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.listenResponses, 2);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 4);  // new listen & new pong
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);  // new listen
 
     pubSub.stop();
 }
@@ -213,11 +216,9 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
     MockApplication a("", 1s);
     auto &pubSub = a.pubSub;
 
-    pubSub.start();
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
     for (size_t i = 0; i < PubSubClient::MAX_LISTENS; ++i)
@@ -225,58 +226,32 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
         pubSub.listenToChannelPointRewards(QString("1%1").arg(i));
     }
 
-    std::this_thread::sleep_for(50ms);
+    QTest::qWait(100);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 1);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
 
     for (size_t i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
         pubSub.listenToChannelPointRewards(QString("2%1").arg(i));
     }
 
-    std::this_thread::sleep_for(50ms);
+    QTest::qWait(200);
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-
-    pubSub.stop();
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-}
-
-TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
-{
-    MockApplication a("", 1s);
-    auto &pubSub = a.pubSub;
-
-    pubSub.start();
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 0);
-
-    for (size_t i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
-    {
-        pubSub.listenToChannelPointRewards("123456");
-    }
-
-    std::this_thread::sleep_for(150ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 0);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
 
     pubSub.stop();
 
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    // after exactly one event loop iteration, we should see updated counters
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    ASSERT_EQ(pubSub.wsDiag().connectionsOpened, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsClosed, 2);
+    ASSERT_EQ(pubSub.wsDiag().connectionsFailed, 0);
 }
 
 }  // namespace chatterino
