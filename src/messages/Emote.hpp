@@ -30,7 +30,7 @@ struct Emote {
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const
     {
-        return name.string;
+        return this->name.string;
     }
 
     QJsonObject toJson() const;

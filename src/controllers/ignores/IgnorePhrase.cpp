@@ -17,12 +17,12 @@ IgnorePhrase::IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock,
 {
     if (this->isCaseSensitive_)
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::UseUnicodePropertiesOption);
     }
     else
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::CaseInsensitiveOption |
             QRegularExpression::UseUnicodePropertiesOption);
     }

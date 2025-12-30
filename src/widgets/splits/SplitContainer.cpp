@@ -340,7 +340,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     split->setParent(nullptr);
     Position position = node->releaseSplit();
     this->layout();
-    if (splits_.empty())
+    if (this->splits_.empty())
     {
         this->setSelected(nullptr);
         this->setCursor(Qt::PointingHandCursor);
@@ -366,7 +366,7 @@ SplitContainer::Position SplitContainer::deleteSplit(Split *split)
     assert(split != nullptr);
 
     split->deleteLater();
-    return releaseSplit(split);
+    return this->releaseSplit(split);
 }
 
 void SplitContainer::selectNextSplit(SplitDirection direction)
@@ -468,13 +468,13 @@ Split *SplitContainer::getTopRightSplit(Node &node)
         case Node::Type::VerticalContainer:
             if (!node.getChildren().empty())
             {
-                return getTopRightSplit(*node.getChildren().front());
+                return this->getTopRightSplit(*node.getChildren().front());
             }
             break;
         case Node::Type::HorizontalContainer:
             if (!node.getChildren().empty())
             {
-                return getTopRightSplit(*node.getChildren().back());
+                return this->getTopRightSplit(*node.getChildren().back());
             }
             break;
         default:;
@@ -635,7 +635,7 @@ void SplitContainer::paintSplitBorder(Node *node, QPainter *painter)
         case Node::Type::HorizontalContainer: {
             for (const auto &child : node->children_)
             {
-                paintSplitBorder(child.get(), painter);
+                this->paintSplitBorder(child.get(), painter);
             }
         }
         break;
@@ -650,7 +650,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 
     if (this->splits_.empty())
     {
-        painter.fillRect(rect(), this->theme->splits.background);
+        painter.fillRect(this->rect(), this->theme->splits.background);
 
         painter.setPen(this->theme->splits.header.text);
 
@@ -670,7 +670,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
             }
         }
 
-        painter.drawText(rect(), text, QTextOption(Qt::AlignCenter));
+        painter.drawText(this->rect(), text, QTextOption(Qt::AlignCenter));
     }
     else
     {
@@ -725,7 +725,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
                             ? this->theme->tabs.selected.backgrounds.regular
                             : this->theme->tabs.selected.backgrounds.unfocused);
 
-    painter.fillRect(0, 0, width(), 1, accentColor);
+    painter.fillRect(0, 0, this->width(), 1, accentColor);
 }
 
 void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
@@ -1152,7 +1152,7 @@ void SplitContainer::Node::insertSplitRelative(Split *_split,
     }
 
     // parent != nullptr
-    if (parent_->type_ == toContainerType(_direction))
+    if (this->parent_->type_ == toContainerType(_direction))
     {
         // hell yeah we'll just insert it next to outselves
         this->insertNextToThis(_split, _direction);
@@ -1238,7 +1238,7 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
 {
     assert(this->type_ == Type::Split);
 
-    if (parent_ == nullptr)
+    if (this->parent_ == nullptr)
     {
         this->type_ = Type::EmptyRoot;
         this->split_ = nullptr;
@@ -1667,7 +1667,7 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     assert(node != nullptr);
     assert(node->parent_ != nullptr);
 
-    const auto &siblings = node->parent_->getChildren();
+    const auto &siblings = this->node->parent_->getChildren();
     auto it = std::ranges::find_if(siblings, [this](const auto &n) {
         return n.get() == this->node;
     });

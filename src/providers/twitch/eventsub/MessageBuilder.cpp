@@ -161,9 +161,9 @@ void EventSubMessageBuilder::appendUser(const lib::String &userName,
                                         QString &text, bool trailingSpace)
 {
     auto login = userLogin.qt();
-    auto *el = this->emplace<MentionElement>(userName.qt(), login,
-                                             MessageColor::System,
-                                             channel->getUserColor(login));
+    auto *el = this->emplace<MentionElement>(
+        userName.qt(), login, MessageColor::System,
+        this->channel->getUserColor(login));
     text.append(login);
 
     if (trailingSpace)
