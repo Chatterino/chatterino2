@@ -132,7 +132,7 @@ void Channel::addSystemMessage(const QString &contents)
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(20), std::move(message), now,
+        this->getMessageSnapshot(), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },

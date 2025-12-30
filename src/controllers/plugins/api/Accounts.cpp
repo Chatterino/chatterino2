@@ -1,14 +1,16 @@
 #include "controllers/plugins/api/Accounts.hpp"
 
-#include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
-#include "providers/twitch/TwitchAccount.hpp"
-#include "util/WeakPtrHelpers.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
 
-#include <sol/sol.hpp>
+#    include "Application.hpp"
+#    include "controllers/accounts/AccountController.hpp"
+#    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "providers/twitch/TwitchAccount.hpp"
+#    include "util/WeakPtrHelpers.hpp"
 
-#include <optional>
+#    include <sol/sol.hpp>
+
+#    include <optional>
 
 namespace {
 
@@ -95,3 +97,5 @@ void createAccounts(sol::table &c2)
 }
 
 }  // namespace chatterino::lua::api
+
+#endif
