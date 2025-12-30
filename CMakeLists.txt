@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
+# CMake upgrade notes:
+#  - In CMake >= 3.29, we should deprecate USE_ALTERNATE_LINKER in favour of CMake's CMAKE_LINKER_TYPE
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
@@ -37,7 +39,7 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
 
-set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default")
+set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
 if(CHATTERINO_SANITIZER_SUPPORT)
     list(APPEND CMAKE_MODULE_PATH
