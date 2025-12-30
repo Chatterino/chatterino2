@@ -90,7 +90,7 @@ ExternalToolsPage::ExternalToolsPage()
     y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*view);
+    this->initLayout(*this->view);
 }
 
 bool ExternalToolsPage::filterElements(const QString &query)

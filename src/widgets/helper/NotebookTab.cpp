@@ -127,7 +127,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
 
     const auto tabDirection = getSettings()->tabDirection.getEnum();
-    this->menu_.addMenu(closeMultipleTabsMenu_);
+    this->menu_.addMenu(this->closeMultipleTabsMenu_);
     getSettings()->tabDirection.connect(
         [this](int val) {
             this->recreateCloseMultipleTabsMenu(
@@ -150,15 +150,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->notebook_->duplicatePage(this->page);
     });
 
-    highlightNewMessagesAction_ =
+    this->highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
-    highlightNewMessagesAction_->setCheckable(true);
-    highlightNewMessagesAction_->setChecked(highlightEnabled_);
-    QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
+    this->highlightNewMessagesAction_->setCheckable(true);
+    this->highlightNewMessagesAction_->setChecked(this->highlightEnabled_);
+    QObject::connect(this->highlightNewMessagesAction_, &QAction::triggered,
                      [this](bool checked) {
                          this->highlightEnabled_ = checked;
                      });
-    this->menu_.addAction(highlightNewMessagesAction_);
+    this->menu_.addAction(this->highlightNewMessagesAction_);
 
     this->menu_.addSeparator();
 
@@ -824,7 +824,7 @@ bool NotebookTab::hasHighlightsEnabled() const
 
 QRect NotebookTab::getDesiredRect() const
 {
-    return QRect(this->positionAnimationDesiredPoint_, size());
+    return QRect(this->positionAnimationDesiredPoint_, this->size());
 }
 
 void NotebookTab::tabSizeChanged()
@@ -1081,7 +1081,7 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         this->mouseDown_ = true;
         this->mouseDownX_ = this->getXRect().contains(event->pos());
 
-        this->notebook_->select(page);
+        this->notebook_->select(this->page);
     }
 
     this->update();

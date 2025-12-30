@@ -229,7 +229,7 @@ void Window::addCustomTitlebarButtons()
             this->userLabel_->mapToGlobal(
                 this->userLabel_->rect().bottomLeft()));
     });
-    this->userLabel_->setMinimumWidth(20 * scale());
+    this->userLabel_->setMinimumWidth(20 * this->scale());
 
     // streamer mode
     this->streamerModeTitlebarIcon_ =

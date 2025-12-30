@@ -374,7 +374,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     if (!c->isTwitchChannel() || this->replyTarget_ == nullptr)
     {
         // standard message send behavior
-        QString message = ui_.textEdit->toPlainText();
+        QString message = this->ui_.textEdit->toPlainText();
 
         message = message.replace('\n', ' ');
         QString sendMessage =
@@ -544,7 +544,7 @@ void SplitInput::addShortcuts()
 
              if (this->prevIndex_ == (this->prevMsg_.size()))
              {
-                 this->currMsg_ = ui_.textEdit->toPlainText();
+                 this->currMsg_ = this->ui_.textEdit->toPlainText();
              }
 
              this->prevIndex_--;
@@ -568,7 +568,7 @@ void SplitInput::addShortcuts()
                  return "";
              }
              bool cursorToEnd = true;
-             QString message = ui_.textEdit->toPlainText();
+             QString message = this->ui_.textEdit->toPlainText();
 
              if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                  this->prevIndex_ != this->prevMsg_.size())

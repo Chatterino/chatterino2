@@ -36,7 +36,7 @@ void SettingsDialogTab::setSelected(bool _selected)
     //    height: <checkbox-size>px;
 
     this->selected_ = _selected;
-    selectedChanged(selected_);
+    this->selectedChanged(this->selected_);
 }
 
 SettingsPage *SettingsDialogTab::page()
@@ -69,10 +69,10 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     pad = (3 * pad) + iconSize;
 
-    this->style()->drawItemText(&painter,
-                                QRect(pad, 0, width() - pad, height()),
-                                Qt::AlignLeft | Qt::AlignVCenter,
-                                this->palette(), false, this->ui_.labelText);
+    this->style()->drawItemText(
+        &painter, QRect(pad, 0, this->width() - pad, this->height()),
+        Qt::AlignLeft | Qt::AlignVCenter, this->palette(), false,
+        this->ui_.labelText);
 }
 
 void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
@@ -89,12 +89,12 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
 
 const QString &SettingsDialogTab::name() const
 {
-    return name_;
+    return this->name_;
 }
 
 SettingsTabId SettingsDialogTab::id() const
 {
-    return id_;
+    return this->id_;
 }
 
 }  // namespace chatterino

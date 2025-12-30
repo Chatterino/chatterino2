@@ -104,12 +104,12 @@ void Updates::deleteOldFiles()
 
 const QString &Updates::getCurrentVersion() const
 {
-    return currentVersion_;
+    return this->currentVersion_;
 }
 
 const QString &Updates::getOnlineVersion() const
 {
-    return onlineVersion_;
+    return this->onlineVersion_;
 }
 
 void Updates::installUpdates()

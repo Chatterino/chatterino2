@@ -19,7 +19,7 @@ RawSubscriptionHandle::~RawSubscriptionHandle()
         // We're shutting down, assume the unsubscription has been taken care of
         return;
     }
-    app->getEventSub()->removeRef(request);
+    app->getEventSub()->removeRef(this->request);
 }
 
 }  // namespace chatterino::eventsub
