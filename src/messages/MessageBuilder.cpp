@@ -2423,6 +2423,7 @@ void MessageBuilder::appendChatterinoBadges(const QString &userID)
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
+        this->message().badges.emplace_back((*badge)->tooltip.string, /*value=*/"");
     }
 }
 
@@ -2433,6 +2434,7 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+        this->message().badges.emplace_back(badge.emote->tooltip.string, /*value=*/"");
     }
 
     if (twitchChannel == nullptr)
@@ -2444,6 +2446,7 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+        this->message().badges.emplace_back(badge.emote->tooltip.string, /*value=*/"");
     }
 }
 
@@ -2452,6 +2455,7 @@ void MessageBuilder::appendBttvBadges(const QString &userID)
     if (auto badge = getApp()->getBttvBadges()->getBadge({userID}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeBttv);
+        this->message().badges.emplace_back((*badge)->tooltip.string, /*value=*/"");
     }
 }
 
@@ -2460,6 +2464,7 @@ void MessageBuilder::appendSeventvBadges(const QString &userID)
     if (auto badge = getApp()->getSeventvBadges()->getBadge({userID}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
+        this->message().badges.emplace_back((*badge)->tooltip.string, /*value=*/"");
     }
 }
 
