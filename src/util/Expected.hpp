@@ -5,6 +5,7 @@
 #if __cpp_lib_expected >= 202202L
 #    include <expected>
 #else
+#    define CHATTERINO_USING_NONSTD_EXPECTED
 #    include <nonstd/expected.hpp>
 #endif
 
