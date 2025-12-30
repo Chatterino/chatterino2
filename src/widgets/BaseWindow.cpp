@@ -751,7 +751,7 @@ bool BaseWindow::applyLastBoundsCheck()
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
-    if (!flags_.has(DisableLayoutSave))
+    if (!this->flags_.has(DisableLayoutSave))
     {
         getApp()->getWindows()->queueSave();
     }
@@ -766,7 +766,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    if (!flags_.has(DisableLayoutSave))
+    if (!this->flags_.has(DisableLayoutSave))
     {
         getApp()->getWindows()->queueSave();
     }

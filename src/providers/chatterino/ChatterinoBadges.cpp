@@ -21,10 +21,10 @@ std::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
 {
     std::shared_lock lock(this->mutex_);
 
-    auto it = badgeMap.find(id.string);
-    if (it != badgeMap.end())
+    auto it = this->badgeMap.find(id.string);
+    if (it != this->badgeMap.end())
     {
-        return emotes[it->second];
+        return this->emotes[it->second];
     }
     return std::nullopt;
 }
@@ -66,12 +66,12 @@ void ChatterinoBadges::loadChatterinoBadges()
                     .homePage = Url{},
                 };
 
-                emotes.push_back(
+                this->emotes.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
 
                 for (const auto &user : jsonBadge.value("users").toArray())
                 {
-                    badgeMap[user.toString()] = index;
+                    this->badgeMap[user.toString()] = index;
                 }
                 ++index;
             }

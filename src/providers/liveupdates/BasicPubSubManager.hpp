@@ -143,7 +143,7 @@ private:
 
         this->connectBackoff_.reset();
 
-        auto *client = resolve(id);
+        auto *client = this->resolve(id);
         client->onOpen();
         auto pendingSubsToTake = std::min(this->pendingSubscriptions_.size(),
                                           client->maxSubscriptions);

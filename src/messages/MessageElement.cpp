@@ -428,7 +428,7 @@ std::vector<LayeredEmoteElement::Emote> LayeredEmoteElement::getUniqueEmotes()
     struct NotDuplicate {
         bool operator()(const Emote &element)
         {
-            return seen.insert(element.ptr).second;
+            return this->seen.insert(element.ptr).second;
         }
 
     private:
