@@ -97,8 +97,8 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
 
 void DraggablePopup::togglePinned()
 {
-    this->isPinned_ = !isPinned_;
-    if (isPinned_)
+    this->isPinned_ = !this->isPinned_;
+    if (this->isPinned_)
     {
         this->windowDeactivateAction = WindowDeactivateAction::Nothing;
         this->pinButton_->setSource(this->pinEnabledSource_);
@@ -111,7 +111,7 @@ void DraggablePopup::togglePinned()
 }
 Button *DraggablePopup::createPinButton()
 {
-    this->pinButton_ = new SvgButton(pinDisabledSource_, this, {3, 3});
+    this->pinButton_ = new SvgButton(this->pinDisabledSource_, this, {3, 3});
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 

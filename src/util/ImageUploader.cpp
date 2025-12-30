@@ -158,7 +158,7 @@ ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText)
 {
     if (clipboardText.isEmpty())
     {
-        return nonstd::make_unexpected("Clipboard must not be empty");
+        return makeUnexpected("Clipboard must not be empty");
     }
 
     QJsonParseError parseError;
@@ -167,25 +167,24 @@ ExpectedStr<QJsonObject> validateImportJson(const QString &clipboardText)
 
     if (parseError.error != QJsonParseError::NoError)
     {
-        return nonstd::make_unexpected("Clipboard did not contain valid JSON");
+        return makeUnexpected("Clipboard did not contain valid JSON");
     }
 
     if (!doc.isObject())
     {
-        return nonstd::make_unexpected("JSON must be an object");
+        return makeUnexpected("JSON must be an object");
     }
 
     auto settingsObj = doc.object();
 
     if (!settingsObj.contains("Version"))
     {
-        return nonstd::make_unexpected("JSON must contain the 'Version' key");
+        return makeUnexpected("JSON must contain the 'Version' key");
     }
 
     if (!settingsObj.contains("RequestURL"))
     {
-        return nonstd::make_unexpected(
-            "JSON must contain the 'RequestURL' key");
+        return makeUnexpected("JSON must contain the 'RequestURL' key");
     }
 
     return settingsObj;

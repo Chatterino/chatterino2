@@ -93,9 +93,10 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
 
 namespace chatterino::nm::detail {
 
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json)
+Expected<void, WriteManifestError> writeManifestTo(QString directory,
+                                                   const QString &nmDirectory,
+                                                   const QString &filename,
+                                                   const QJsonDocument &json)
 {
     if (directory.startsWith('~'))
     {

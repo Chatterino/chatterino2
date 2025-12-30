@@ -118,7 +118,7 @@ void TwitchLiveController::request(std::optional<QStringList> optChannelIDs)
                     for (const auto &result : results)
                     {
                         auto it = this->channels.find(result.first);
-                        if (it != channels.end())
+                        if (it != this->channels.end())
                         {
                             if (auto channel = it->second.ptr.lock(); channel)
                             {

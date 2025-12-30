@@ -461,7 +461,7 @@ Scrollbar *ChannelView::scrollbar()
 
 bool ChannelView::pausable() const
 {
-    return pausable_;
+    return this->pausable_;
 }
 
 void ChannelView::setPausable(bool value)
@@ -867,7 +867,7 @@ bool ChannelView::hasSelection()
 void ChannelView::clearSelection()
 {
     this->selection_ = Selection();
-    queueLayout();
+    this->queueLayout();
 }
 
 void ChannelView::copySelectedText()
@@ -1543,7 +1543,7 @@ void ChannelView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->messageColors_.channelBackground);
+    painter.fillRect(this->rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter, event->rect());
@@ -1961,7 +1961,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     int messageIndex;
 
     // no message under cursor
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         this->setCursor(Qt::ArrowCursor);
         this->tooltipWidget_->hide();
@@ -2164,9 +2164,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
         auto &messagesSnapshot = this->getMessagesSnapshot();
         if (messagesSnapshot.size() == 0)
         {
@@ -2271,7 +2271,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     int messageIndex;
 
     bool foundElement =
-        tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+        this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
@@ -2915,7 +2915,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         return;
     }

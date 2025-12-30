@@ -1,10 +1,10 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "util/Expected.hpp"
 #    include "util/FunctionRef.hpp"
 #    include "util/QMagicEnum.hpp"
 #    include "util/TypeName.hpp"
 
-#    include <nonstd/expected.hpp>
 #    include <QObject>
 #    include <QString>
 #    include <QStringBuilder>
@@ -71,8 +71,7 @@ QString errorResultToString(const sol::protected_function_result &result);
 /// `std::optional<T>` means nil|LuaEquiv<T> (or zero returns)
 /// A return type that doesn't match returns an error
 template <typename T, typename... Args>
-inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
-                                                           Args &&...args)
+inline Expected<T, QString> tryCall(const auto &function, Args &&...args)
     requires(std::same_as<std::remove_cvref_t<decltype(function)>,
                           sol::protected_function> ||
              std::same_as<std::remove_cvref_t<decltype(function)>,
@@ -82,8 +81,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         function(std::forward<Args>(args)...);
     if (!result.valid())
     {
-        return nonstd::expected_lite::make_unexpected(
-            errorResultToString(result));
+        return makeUnexpected(errorResultToString(result));
     }
 
     if constexpr (std::is_same_v<T, void>)
@@ -101,10 +99,9 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         }
         if (result.return_count() > 1)
         {
-            return nonstd::expected_lite::make_unexpected(
-                u"Expected one value to be returned but " %
-                QString::number(result.return_count()) %
-                u" values were returned");
+            return makeUnexpected(u"Expected one value to be returned but " %
+                                  QString::number(result.return_count()) %
+                                  u" values were returned");
         }
 
         try
@@ -122,7 +119,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
                 if (!ret)
                 {
                     auto t = type_name<T>();
-                    return nonstd::expected_lite::make_unexpected(
+                    return makeUnexpected(
                         u"Expected " % QLatin1String(t.data(), t.size()) %
                         u" to be returned but " %
                         qmagicenum::enumName(result.get_type()) %
@@ -137,7 +134,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
                 if (!ret)
                 {
                     auto t = type_name<T>();
-                    return nonstd::expected_lite::make_unexpected(
+                    return makeUnexpected(
                         u"Expected " % QLatin1String(t.data(), t.size()) %
                         u" to be returned but " %
                         qmagicenum::enumName(result.get_type()) %
@@ -148,8 +145,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
         }
         catch (std::runtime_error &e)
         {
-            return nonstd::expected_lite::make_unexpected(
-                QString::fromUtf8(e.what()));
+            return makeUnexpected(QString::fromUtf8(e.what()));
         }
         // non other exceptions we let it explode
     }
@@ -158,7 +154,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
 void logError(Plugin *plugin, QStringView context, const QString &msg);
 
 template <typename T>
-bool hasValueOrLog(const nonstd::expected<T, QString> &res, QStringView context,
+bool hasValueOrLog(const Expected<T, QString> &res, QStringView context,
                    Plugin *plugin)
 {
     if (!res.has_value())
