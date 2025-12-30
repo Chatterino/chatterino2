@@ -58,14 +58,14 @@ void PrintTo(const PerformChannelAction &a, std::ostream *os)
         << ", duration:" << std::to_string(a.duration) << '}';
 }
 
-nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
+Expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     bool withDuration, bool withReason)
 {
     if (ctx.channel == nullptr)
     {
         // A ban action must be performed with a channel as a context
-        return nonstd::make_unexpected(
+        return makeUnexpected(
             "A " % command %
             " action must be performed with a channel as a context");
     }
@@ -93,7 +93,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     auto positionalArguments = parser.positionalArguments();
     if (positionalArguments.isEmpty())
     {
-        return nonstd::make_unexpected("Missing target - " % usage);
+        return makeUnexpected("Missing target - " % usage);
     }
 
     auto [targetUserName, targetUserID] =
@@ -121,7 +121,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
             base.duration = (int)parseDurationToSeconds(durationStr);
             if (base.duration <= 0)
             {
-                return nonstd::make_unexpected("Invalid duration - " % usage);
+                return makeUnexpected("Invalid duration - " % usage);
             }
             if (withReason)
             {
@@ -144,8 +144,8 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     {
         if (ctx.twitchChannel == nullptr)
         {
-            return nonstd::make_unexpected(
-                "The " % command % " command only works in Twitch channels");
+            return makeUnexpected("The " % command %
+                                  " command only works in Twitch channels");
         }
 
         actions.push_back(PerformChannelAction{
