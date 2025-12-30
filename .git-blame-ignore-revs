@@ -15,3 +15,6 @@ b06eb9df835c25154899fbcf43e9b37addcea1b1
 #
 # 2025 - Unindented inner namespaces https://github.com/Chatterino/chatterino2/pull/6235
 8acca1c241db169a682c4712154145f5fc92e0d4
+#
+# 2025 - Mass-added missing explicit `this->` https://github.com/Chatterino/chatterino2/pull/6696
+5d0fd0594bcfb91578d2743c3b1fc138194a4532
