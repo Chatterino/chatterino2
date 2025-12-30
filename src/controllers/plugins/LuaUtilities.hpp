@@ -76,7 +76,7 @@ public:
 
     ~StackGuard()
     {
-        if (expected < 0)
+        if (this->expected < 0)
         {
             return;
         }

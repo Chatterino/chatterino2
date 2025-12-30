@@ -144,7 +144,7 @@ void DrawnButton::paintContent(QPainter &painter)
 
             QRect centerBox;
             centerBox.setSize({thickness, thickness});
-            centerBox.moveCenter(rect().center());
+            centerBox.moveCenter(this->rect().center());
 
             painter.fillRect(centerBox, fg);
 

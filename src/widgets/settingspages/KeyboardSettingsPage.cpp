@@ -77,7 +77,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
     });
 
-    QObject::connect(view_->getTableView(), &QTableView::doubleClicked,
+    QObject::connect(this->view_->getTableView(), &QTableView::doubleClicked,
                      [view, model](const QModelIndex &clicked) {
                          tableCellClicked(clicked, view, model);
                      });

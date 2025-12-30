@@ -152,7 +152,7 @@ protected:
 
     const QList<Item> items()
     {
-        return items_;
+        return this->items_;
     }
 
     /**

@@ -254,6 +254,8 @@ set(SOURCE_FILES
         controllers/plugins/api/Accounts.hpp
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
+        controllers/plugins/api/DebugLibrary.cpp
+        controllers/plugins/api/DebugLibrary.hpp
         controllers/plugins/api/EventType.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
@@ -616,6 +618,8 @@ set(SOURCE_FILES
         widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
         widgets/Label.hpp
+        widgets/MarkdownLabel.cpp
+        widgets/MarkdownLabel.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
@@ -728,6 +732,8 @@ set(SOURCE_FILES
 
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
+        widgets/helper/CmdDeleteKeyFilter.cpp
+        widgets/helper/CmdDeleteKeyFilter.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
         widgets/helper/ComboBoxItemDelegate.hpp
         widgets/helper/DebugPopup.cpp

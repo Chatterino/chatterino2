@@ -19,6 +19,7 @@
 #include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 #include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
@@ -163,6 +164,9 @@ void SplitInput::initLayout()
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
     textEdit->setFrameStyle(QFrame::NoFrame);
+
+    auto *shortcutFilter = new CmdDeleteKeyFilter(this);
+    textEdit->installEventFilter(shortcutFilter);
 
     hboxLayout.emplace<LabelButton>("SEND").assign(&this->ui_.sendButton);
     this->ui_.sendButton->hide();
@@ -370,7 +374,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     if (!c->isTwitchChannel() || this->replyTarget_ == nullptr)
     {
         // standard message send behavior
-        QString message = ui_.textEdit->toPlainText();
+        QString message = this->ui_.textEdit->toPlainText();
 
         message = message.replace('\n', ' ');
         QString sendMessage =
@@ -540,7 +544,7 @@ void SplitInput::addShortcuts()
 
              if (this->prevIndex_ == (this->prevMsg_.size()))
              {
-                 this->currMsg_ = ui_.textEdit->toPlainText();
+                 this->currMsg_ = this->ui_.textEdit->toPlainText();
              }
 
              this->prevIndex_--;
@@ -564,7 +568,7 @@ void SplitInput::addShortcuts()
                  return "";
              }
              bool cursorToEnd = true;
-             QString message = ui_.textEdit->toPlainText();
+             QString message = this->ui_.textEdit->toPlainText();
 
              if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                  this->prevIndex_ != this->prevMsg_.size())
