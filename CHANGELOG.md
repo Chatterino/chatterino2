@@ -34,6 +34,7 @@
 - Bugfix: Forward query params to websocket URLs. (#6141)
 - Bugfix: Fixed Lua errors from handlers of HTTP requests not being logged. (#6452)
 - Bugfix: Fixed restore button not showing on Windows. (#6565)
+- Bugfix: Fixed a crash that could occur when network requests were loading/saving cache as Chatterino was being shut down. (#6698)
 - Bugfix: Fixed popups and the overlay not being draggable on Wayland. (#6573)
 - Bugfix: Fixed middle-clicking usernames in a local channel opening an invalid viewercard. (#6577)
 - Bugfix: Added `desktop-entry` hint to Linux notifications. (#6615)
