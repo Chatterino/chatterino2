@@ -64,7 +64,7 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p) const
 {
-    return ranges::any_of(channelMap.at(p).raw(), [&](const auto &name) {
+    return ranges::any_of(this->channelMap.at(p).raw(), [&](const auto &name) {
         return name.compare(channelName, Qt::CaseInsensitive) == 0;
     });
 }
@@ -72,19 +72,19 @@ bool NotificationController::isChannelNotified(const QString &channelName,
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap[p].append(channelName);
+    this->channelMap[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
-         i++)
+    for (std::vector<int>::size_type i = 0;
+         i != this->channelMap[p].raw().size(); i++)
     {
-        if (channelMap[p].raw()[i].compare(channelName, Qt::CaseInsensitive) ==
-            0)
+        if (this->channelMap[p].raw()[i].compare(channelName,
+                                                 Qt::CaseInsensitive) == 0)
         {
-            channelMap[p].removeAt(static_cast<int>(i));
+            this->channelMap[p].removeAt(static_cast<int>(i));
             i--;
         }
     }
@@ -173,9 +173,9 @@ void NotificationController::fetchFakeChannels()
     qCDebug(chatterinoNotification) << "fetching fake channels";
 
     QStringList channels;
-    for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
+    for (size_t i = 0; i < this->channelMap[Platform::Twitch].raw().size(); i++)
     {
-        const auto &name = channelMap[Platform::Twitch].raw()[i];
+        const auto &name = this->channelMap[Platform::Twitch].raw()[i];
         auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {

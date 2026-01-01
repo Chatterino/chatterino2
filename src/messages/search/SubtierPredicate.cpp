@@ -24,7 +24,7 @@ bool SubtierPredicate::appliesToImpl(const Message &message)
             const auto &subTier =
                 badge.value_.length() > 3 ? badge.value_.at(0) : '1';
 
-            return subtiers_.contains(subTier);
+            return this->subtiers_.contains(subTier);
         }
     }
 

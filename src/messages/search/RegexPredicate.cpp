@@ -12,12 +12,12 @@ RegexPredicate::RegexPredicate(const QString &regex, bool negate)
 
 bool RegexPredicate::appliesToImpl(const Message &message)
 {
-    if (!regex_.isValid())
+    if (!this->regex_.isValid())
     {
         return false;
     }
 
-    QRegularExpressionMatch match = regex_.match(message.messageText);
+    QRegularExpressionMatch match = this->regex_.match(message.messageText);
 
     return match.hasMatch();
 }

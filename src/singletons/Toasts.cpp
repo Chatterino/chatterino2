@@ -462,7 +462,7 @@ AvatarDownloader::AvatarDownloader(const QString &avatarURL,
         {
             this->file_.close();
         }
-        downloadComplete();
+        this->downloadComplete();
         this->deleteLater();
     });
 }

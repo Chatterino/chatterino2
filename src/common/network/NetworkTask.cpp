@@ -141,7 +141,24 @@ void NetworkTask::logReply()
 void NetworkTask::writeToCache(const QByteArray &bytes) const
 {
     std::ignore = QtConcurrent::run([data = this->data_, bytes] {
-        QFile cachedFile(getApp()->getPaths().cacheDirectory() + "/" +
+        if (isAppAboutToQuit())
+        {
+            qCDebug(chatterinoHTTP)
+                << "Skipping cache write for" << data->request.url()
+                << "because app is about to quit";
+            return;
+        }
+
+        auto *app = tryGetApp();
+        if (!app)
+        {
+            qCDebug(chatterinoHTTP)
+                << "Skipping cache write for" << data->request.url()
+                << "because app is null";
+            return;
+        }
+
+        QFile cachedFile(app->getPaths().cacheDirectory() + "/" +
                          data->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly))

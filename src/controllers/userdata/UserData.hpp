@@ -21,7 +21,7 @@ struct UserData {
 
     bool isEmpty() const
     {
-        return !color.has_value() && notes.isEmpty();
+        return !this->color.has_value() && this->notes.isEmpty();
     }
 };
 

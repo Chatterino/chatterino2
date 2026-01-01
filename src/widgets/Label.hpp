@@ -43,8 +43,7 @@ protected:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-private:
-    void updateSize();
+    virtual void updateSize();
     QRectF textRect() const;
 
     /// Returns the current font style's font metric based on the current scale.

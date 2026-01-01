@@ -16,9 +16,10 @@ enum class WriteManifestError : std::uint8_t {
     FailedToCreateFile,
 };
 
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json);
+Expected<void, WriteManifestError> writeManifestTo(QString directory,
+                                                   const QString &nmDirectory,
+                                                   const QString &filename,
+                                                   const QJsonDocument &json);
 
 }  // namespace chatterino::nm::detail
 

@@ -20,7 +20,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     , model_(model)
 {
     this->model_->setParent(this);
-    this->tableView_->setModel(model_);
+    this->tableView_->setModel(this->model_);
     // disabling word-wrap somehow prevent '/'-prefixed commands from being elided
     this->tableView_->setWordWrap(false);
     this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -66,7 +66,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
         for (auto &&row : rows)
         {
-            model_->removeRow(row);
+            this->model_->removeRow(row);
         }
     });
 
@@ -171,8 +171,8 @@ bool EditableModelView::filterSearchResults(const QString &query,
 
         for (int j : columnSelect)
         {
-            QModelIndex idx = model_->index(i, j);
-            QVariant a = model_->data(idx);
+            QModelIndex idx = this->model_->index(i, j);
+            QVariant a = this->model_->data(idx);
             if (a.toString().contains(query, Qt::CaseInsensitive))
             {
                 foundMatch = true;
@@ -181,7 +181,7 @@ bool EditableModelView::filterSearchResults(const QString &query,
             }
         }
 
-        tableView_->setRowHidden(i, !foundMatch);
+        this->tableView_->setRowHidden(i, !foundMatch);
     }
 
     return searchFoundSomething;
@@ -194,19 +194,19 @@ void EditableModelView::filterSearchResultsHotkey(
 
     for (int i = 0; i < rowAmount; i++)
     {
-        QModelIndex idx = model_->index(i, 1);
-        QVariant a = model_->data(idx);
+        QModelIndex idx = this->model_->index(i, 1);
+        QVariant a = this->model_->data(idx);
         auto seq = qvariant_cast<QKeySequence>(a);
 
         // todo: Make this fuzzy match, right now only exact matches happen
         // so ctrl+f won't match ctrl+shift+f shortcuts
         if (keySequenceQuery.matches(seq) != QKeySequence::NoMatch)
         {
-            tableView_->showRow(i);
+            this->tableView_->showRow(i);
         }
         else
         {
-            tableView_->hideRow(i);
+            this->tableView_->hideRow(i);
         }
     }
 }
@@ -224,8 +224,8 @@ void EditableModelView::moveRow(int dir)
         return;
     }
 
-    model_->moveRows(model_->index(row, 0), row, selected.size(),
-                     model_->index(row + dir, 0), row + dir);
+    this->model_->moveRows(this->model_->index(row, 0), row, selected.size(),
+                           this->model_->index(row + dir, 0), row + dir);
     this->tableView_->selectRow(row + dir);
 }
 

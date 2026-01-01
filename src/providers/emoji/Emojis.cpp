@@ -62,6 +62,8 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
     rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
     rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
 
+    rj::getSafe(unparsedEmoji, "category", emojiData->category);
+
     if (capabilities.apple)
     {
         emojiData->capabilities.set(EmojiData::Capability::Apple);
@@ -218,6 +220,10 @@ void Emojis::loadEmojis()
 
                 parseEmoji(variationEmojiData, variation,
                            emojiData->shortCodes[0] + "_" + toneName);
+
+                // NOTE: Emoji variations do not have a category.
+                // We have to manually inherit it from the original emojiData.
+                variationEmojiData->category = emojiData->category;
 
                 this->emojiShortCodeToEmoji_.insert(
                     variationEmojiData->shortCodes[0], variationEmojiData);

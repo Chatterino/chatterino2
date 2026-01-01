@@ -20,6 +20,7 @@
 #include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/CmdDeleteKeyFilter.hpp"
 #include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
@@ -200,11 +201,11 @@ void SplitInput::initLayout()
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
 
-    auto messageVbox = layoutCreator.setLayoutType<QVBoxLayout>();
+    auto *messageVbox = new QVBoxLayout;
     this->ui_.replyMessage = new MessageView();
     messageVbox->addWidget(this->ui_.replyMessage, 0, Qt::AlignLeft);
     messageVbox->setContentsMargins(10, 0, 0, 0);
-    replyVbox->addLayout(messageVbox->layout(), 0);
+    replyVbox->addLayout(messageVbox, 0);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -240,6 +241,9 @@ void SplitInput::initLayout()
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
     textEdit->setFrameStyle(QFrame::NoFrame);
+
+    auto *shortcutFilter = new CmdDeleteKeyFilter(this);
+    textEdit->installEventFilter(shortcutFilter);
 
     hboxLayout.emplace<LabelButton>("SEND").assign(&this->ui_.sendButton);
     this->ui_.sendButton->hide();
@@ -459,7 +463,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     if (!c->isTwitchChannel() || this->replyTarget_ == nullptr)
     {
         // standard message send behavior
-        QString message = ui_.textEdit->toPlainText();
+        QString message = this->ui_.textEdit->toPlainText();
 
         message = message.replace('\n', ' ');
         QString sendMessage =
@@ -636,7 +640,7 @@ void SplitInput::addShortcuts()
 
              if (this->prevIndex_ == (this->prevMsg_.size()))
              {
-                 this->currMsg_ = ui_.textEdit->toPlainText();
+                 this->currMsg_ = this->ui_.textEdit->toPlainText();
              }
 
              this->prevIndex_--;
@@ -661,7 +665,7 @@ void SplitInput::addShortcuts()
                  return "";
              }
              bool cursorToEnd = true;
-             QString message = ui_.textEdit->toPlainText();
+             QString message = this->ui_.textEdit->toPlainText();
 
              if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                  this->prevIndex_ != this->prevMsg_.size())

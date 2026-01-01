@@ -1,5 +1,8 @@
 #pragma once
 
+#include <type_traits>  // IWYU: pragma keep - included before QFlags to fix a bug on macOS Qt 6.7
+// Keep this type_traits include above the QFlags include
+
 #include <QFlags>
 #include <QLabel>
 #include <QMouseEvent>

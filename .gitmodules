@@ -20,10 +20,6 @@
 [submodule "lib/qtkeychain"]
 	path = lib/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain
-[submodule "lib/websocketpp"]
-	path = lib/websocketpp
-	url = https://github.com/Chatterino/websocketpp
-	branch = chatterino
 [submodule "cmake/sanitizers-cmake"]
 	path = cmake/sanitizers-cmake
 	url = https://github.com/arsenm/sanitizers-cmake

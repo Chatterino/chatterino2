@@ -37,7 +37,7 @@ struct ActionDefinition {
     uint8_t minCountArguments = 0;
 
     // maxCountArguments is the maximum amount of arguments the action accepts
-    uint8_t maxCountArguments = minCountArguments;
+    uint8_t maxCountArguments = this->minCountArguments;
 
     // possibleArguments is empty or contains all possible argument values,
     // it is an ordered mapping from option name (what the user sees) to

@@ -14,6 +14,7 @@
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "lib/Snapshot.hpp"
 #    include "messages/Message.hpp"
+#    include "messages/MessageElement.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/EmoteController.hpp"
@@ -154,6 +155,24 @@ QStringList discoverLuaTests(const QString &category)
 std::string luaTestPath(const QString &category, const QString &entry)
 {
     return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
+}
+
+bool runLuaTest(const QString &category, const QString &entry,
+                sol::state_view lua)
+{
+    auto loadResult = lua.load_file(luaTestPath(category, entry));
+    auto pfn = loadResult.get<sol::protected_function>();
+    pfn.set_error_handler(lua["debug"]["traceback"]);
+    auto pfr = pfn.call();
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug().noquote() << "Test" << entry << "failed:";
+        sol::error err = pfr;
+        qDebug().noquote() << err.what();
+        return false;
+    }
+    return true;
 }
 
 }  // namespace
@@ -931,6 +950,7 @@ TEST_F(PluginTest, MessageElementFlag)
     )lua");
 
     const char *VALUES = "AlwaysShow=0x2000000,"
+                         "BadgeBttv=0x40,"
                          "BadgeChannelAuthority=0x8000,"
                          "BadgeChatterino=0x40000,"
                          "BadgeFfz=0x80000,"
@@ -1015,6 +1035,417 @@ TEST_F(PluginTest, ChannelAddMessage)
     ASSERT_EQ(added[0].first, logged[0]);
     ASSERT_EQ(added[2].first, logged[1]);
     ASSERT_EQ(added[5].first, logged[2]);
+}
+
+TEST_F(PluginTest, MessageFrozenFlag)
+{
+    configure();
+    sol::protected_function isFrozenFn = lua->script(R"lua(
+        return function(msg)
+            return msg.frozen
+        end
+    )lua");
+    sol::protected_function setFrozenFn = lua->script(R"lua(
+        return function(msg, val)
+            msg.frozen = val
+        end
+    )lua");
+
+    auto liquid = std::make_shared<Message>();
+    auto res = isFrozenFn(liquid);
+    ASSERT_TRUE(res.valid());
+    ASSERT_FALSE(res.get<bool>());
+
+    auto frozen = std::make_shared<Message>();
+    frozen->freeze();
+    res = isFrozenFn(frozen);
+    ASSERT_TRUE(res.valid());
+    ASSERT_TRUE(res.get<bool>());
+
+    // we shouldn't be able to modify the flag
+    ASSERT_FALSE(setFrozenFn(liquid, true).valid());
+    ASSERT_FALSE(setFrozenFn(liquid, false).valid());
+    ASSERT_FALSE(setFrozenFn(frozen, true).valid());
+    ASSERT_FALSE(setFrozenFn(frozen, false).valid());
+}
+
+TEST_F(PluginTest, MessageFlagModification)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            assert(msg.flags == c2.MessageFlag.Debug)
+            msg.flags = c2.MessageFlag.System
+            assert(msg.flags == c2.MessageFlag.System)
+        end
+    )lua");
+    sol::protected_function isFrozenFn = lua->script(R"lua(
+        return function(msg)
+            return msg.frozen
+        end
+    )lua");
+
+    auto liquid = std::make_shared<Message>();
+    liquid->flags = MessageFlag::Debug;
+    auto res = pfn(liquid);
+    ASSERT_TRUE(res.valid());
+
+    // for the flags, it shouldn't matter if the message is frozen
+    auto frozen = std::make_shared<Message>();
+    frozen->flags = MessageFlag::Debug;
+    frozen->freeze();
+    res = pfn(frozen);
+    ASSERT_TRUE(res.valid());
+}
+
+TEST_F(PluginTest, MessageModification)
+{
+    configure();
+
+    // Test that we can modify properties and that Lua sees the modification
+    sol::table tests = lua->script(R"lua(
+        return {
+            function(msg)
+                msg.parse_time = 1234567
+            end,
+            function(msg)
+                assert(msg.id == "abc")
+                msg.id = "1234"
+                assert(msg.id == "1234")
+            end,
+            function(msg)
+                assert(msg.search_text == "search")
+                msg.search_text = "query"
+                assert(msg.search_text == "query")
+            end,
+            function(msg)
+                assert(msg.message_text == "msg")
+                msg.message_text = "text"
+                assert(msg.message_text == "text")
+            end,
+            function(msg)
+                assert(msg.login_name == "login")
+                msg.login_name = "name"
+                assert(msg.login_name == "name")
+            end,
+            function(msg)
+                assert(msg.display_name == "display")
+                msg.display_name = "name"
+                assert(msg.display_name == "name")
+            end,
+            function(msg)
+                assert(msg.localized_name == "localized")
+                msg.localized_name = "name"
+                assert(msg.localized_name == "name")
+            end,
+            function(msg)
+                assert(msg.user_id == "id")
+                msg.user_id = "id"
+                assert(msg.user_id == "id")
+            end,
+            function(msg)
+                assert(msg.channel_name == "channel")
+                msg.channel_name = "name"
+                assert(msg.channel_name == "name")
+            end,
+            function(msg)
+                assert(msg.username_color == "#ffaabbcc")
+                msg.username_color = "#ccbbaaff"
+                assert(msg.username_color == "#ccbbaaff")
+            end,
+            function(msg)
+                assert(msg.server_received_time == 1230000)
+                msg.server_received_time = 1240000
+                assert(msg.server_received_time == 1240000)
+            end,
+            function(msg)
+                print(msg.highlight_color)
+                assert(msg.highlight_color == "#ff223344")
+                msg.highlight_color = "#44332211"
+                assert(msg.highlight_color == "#44332211")
+            end,
+            function(msg)
+                assert(#msg:elements() == 2)
+                msg:append_element({ type = "linebreak" })
+                assert(#msg:elements() == 3)
+                assert(msg:elements()[3].type == "linebreak")
+            end,
+        }
+    )lua");
+
+    auto makeMsg = [] {
+        auto msg = std::make_shared<Message>();
+        msg->flags = MessageFlag::Debug;
+        msg->id = "abc";
+        msg->searchText = "search";
+        msg->messageText = "msg";
+        msg->loginName = "login";
+        msg->displayName = "display";
+        msg->localizedName = "localized";
+        msg->userID = "id";
+        msg->channelName = "channel";
+        msg->usernameColor = QColor(0xaabbcc);
+        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->highlightColor = std::make_shared<QColor>(0x223344);
+        msg->elements.push_back(
+            std::make_unique<TextElement>("lol", MessageElementFlag::Text));
+        msg->elements.push_back(
+            std::make_unique<TextElement>("wow", MessageElementFlag::Text));
+        return msg;
+    };
+
+    auto liquid = makeMsg();
+    ASSERT_TRUE(tests.valid());
+    for (const auto &[_key, cb] : tests)
+    {
+        sol::protected_function pf = cb;
+        auto res = pf(liquid);
+        if (!res.valid())
+        {
+            sol::error err = res;
+            ASSERT_TRUE(false) << err.what();
+        }
+    }
+
+    // If the message is frozen, all modifications should fail with an error
+    auto frozen = makeMsg();
+    frozen->freeze();
+    for (const auto &[key, cb] : tests)
+    {
+        sol::protected_function pf = cb;
+        auto res = pf(frozen);
+        ASSERT_FALSE(res.valid());
+        sol::error err = res;
+        ASSERT_EQ(std::string_view(err.what()), "Message is frozen");
+    }
+}
+
+TEST_F(PluginTest, MessageConstness)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            assert(msg.login_name == "hello")
+            msg.login_name = "alien"
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->loginName = "hello";
+    MessagePtr cmsg = msg;
+
+    auto res = pfn(cmsg);
+    ASSERT_TRUE(res.valid());
+    cmsg->freeze();
+    res = pfn(cmsg);
+    ASSERT_FALSE(res.valid());
+}
+
+// Test that we can access properties of message elements
+TEST_F(PluginTest, MessageElementAccess)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg, idx, prop)
+            return msg:elements()[idx][prop]
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->elements.emplace_back(
+        std::make_unique<TextElement>("my text", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<SingleLineTextElement>(
+        "single line", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<CircularImageElement>(
+        ImagePtr{}, 2, QColor(0xabcdef), MessageElementFlag::ReplyButton));
+    msg->elements.emplace_back(std::make_unique<MentionElement>(
+        "display", "login", MessageColor::Text, MessageColor::System));
+
+    msg->elements[1]->setTooltip("tooltip");
+    msg->elements[2]->setTrailingSpace(false);
+    msg->freeze();
+
+    auto getAll = [&](std::string_view key) {
+        return std::array{
+            pfn(msg, 1, key).get<sol::object>(),
+            pfn(msg, 2, key).get<sol::object>(),
+            pfn(msg, 3, key).get<sol::object>(),
+            pfn(msg, 4, key).get<sol::object>(),
+        };
+    };
+
+    auto types = getAll("type");
+    ASSERT_EQ(types[0].as<std::string>(), "text");
+    ASSERT_EQ(types[1].as<std::string>(), "single-line-text");
+    ASSERT_EQ(types[2].as<std::string>(), "circular-image");
+    ASSERT_EQ(types[3].as<std::string>(), "mention");
+
+    auto flags = getAll("flags");
+    ASSERT_EQ(flags[0].as<MessageElementFlag>(), MessageElementFlag::Text);
+    ASSERT_EQ(flags[1].as<MessageElementFlag>(), MessageElementFlag::Text);
+    ASSERT_EQ(flags[2].as<MessageElementFlag>(),
+              MessageElementFlag::ReplyButton);
+    ASSERT_EQ(flags[3].as<MessageElementFlag>(),
+              (MessageElementFlags(MessageElementFlag::Text,
+                                   MessageElementFlag::Mention)));
+
+    auto tooltips = getAll("tooltip");
+    ASSERT_EQ(tooltips[0].as<std::string>(), "");
+    ASSERT_EQ(tooltips[1].as<std::string>(), "tooltip");
+    ASSERT_EQ(tooltips[2].as<std::string>(), "");
+    ASSERT_EQ(tooltips[3].as<std::string>(), "");
+
+    auto spaces = getAll("trailing_space");
+    ASSERT_TRUE(spaces[0].as<bool>());
+    ASSERT_TRUE(spaces[1].as<bool>());
+    ASSERT_FALSE(spaces[2].as<bool>());
+    ASSERT_TRUE(spaces[3].as<bool>());
+
+    // Properties only found on _some_ elements should not error
+    // (like non existent properties)
+    auto paddings = getAll("padding");
+    ASSERT_TRUE(paddings[0].is<std::nullptr_t>());
+    ASSERT_TRUE(paddings[1].is<std::nullptr_t>());
+    ASSERT_EQ(paddings[2].as<int>(), 2);
+    ASSERT_TRUE(paddings[3].is<std::nullptr_t>());
+
+    auto words = getAll("words");
+    ASSERT_EQ(words[0].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"my", "text"}));
+    ASSERT_EQ(words[1].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"single", "line"}));
+    ASSERT_TRUE(words[2].is<std::nullptr_t>());
+    // mention elements are also text elements
+    ASSERT_EQ(words[3].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"display"}));
+
+    auto userLogins = getAll("user_login_name");
+    ASSERT_TRUE(userLogins[0].is<std::nullptr_t>());
+    ASSERT_TRUE(userLogins[1].is<std::nullptr_t>());
+    ASSERT_TRUE(userLogins[2].is<std::nullptr_t>());
+    ASSERT_EQ(userLogins[3].as<std::string>(), "login");
+
+    auto times = getAll("time");
+    ASSERT_TRUE(times[0].is<std::nullptr_t>());
+    ASSERT_TRUE(times[1].is<std::nullptr_t>());
+    ASSERT_TRUE(times[2].is<std::nullptr_t>());
+    ASSERT_TRUE(times[3].is<std::nullptr_t>());
+
+    auto nonExistent = getAll("non_existent");
+    ASSERT_TRUE(nonExistent[0].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[1].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[2].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[3].is<std::nullptr_t>());
+
+    auto links = getAll("link");
+    ASSERT_TRUE(links[0].is<Link>());
+    ASSERT_TRUE(links[1].is<Link>());
+    ASSERT_TRUE(links[2].is<Link>());
+    ASSERT_TRUE(links[3].is<Link>());
+
+    // test that accessing anything outside the elements vector causes an error
+    auto res = pfn(msg, 0, "flags");
+    ASSERT_FALSE(res.valid());
+    res = pfn(msg, 42, "flags");
+    ASSERT_FALSE(res.valid());
+}
+
+// Test that we can modify properties of message elements
+TEST_F(PluginTest, MessageElementModification)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg, idx, prop, val)
+            msg:elements()[idx][prop] = val
+        end
+    )lua");
+
+    // same as MessageElementAccess...
+    auto msg = std::make_shared<Message>();
+    msg->elements.emplace_back(
+        std::make_unique<TextElement>("my text", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<SingleLineTextElement>(
+        "single line", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<CircularImageElement>(
+        ImagePtr{}, 2, QColor(0xabcdef), MessageElementFlag::ReplyButton));
+    msg->elements.emplace_back(std::make_unique<MentionElement>(
+        "display", "login", MessageColor::Text, MessageColor::System));
+
+    msg->elements[1]->setTooltip("tooltip");
+    msg->elements[2]->setTrailingSpace(false);
+    // ...but we don't freeze the message here
+
+    auto setAll = [&](std::string_view key, auto value) {
+        for (size_t i = 1; i <= 4; i++)
+        {
+            EXPECT_TRUE(pfn(msg, i, key, value).valid());
+        }
+    };
+    setAll("tooltip", "tool");
+    ASSERT_EQ(msg->elements[0]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[1]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[2]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[3]->getTooltip(), "tool");
+
+    setAll("trailing_space", false);
+    ASSERT_FALSE(msg->elements[0]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[1]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[2]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[3]->hasTrailingSpace());
+
+    pfn(msg, 1, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 2, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 3, "link", Link{Link::CopyToClipboard, "foo"});
+    // can't modify links of mention elements
+    ASSERT_FALSE(
+        pfn(msg, 4, "link", Link{Link::CopyToClipboard, "foo"}).valid());
+
+    ASSERT_EQ(msg->elements[0]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[0]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[0]->getTooltip(), "<b>Copy to clipboard</b>");
+    ASSERT_EQ(msg->elements[1]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[1]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[2]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[2]->getLink().value, "foo");
+
+    auto expectErr = [&](std::string_view key, auto value) {
+        for (size_t i = 1; i <= 4; i++)
+        {
+            auto result = pfn(msg, i, key, value);
+            EXPECT_FALSE(result.valid()) << key;
+        }
+    };
+    expectErr("type", "something");
+    expectErr("trailing_space", "something");
+
+    // can't set these types
+    expectErr("link", Link{Link::ViewThread, "foo"});
+    expectErr("link", Link{Link::AutoModAllow, "foo"});
+
+    // We can't modify these yet
+    expectErr("padding", 1);
+    expectErr("background", 0xabcdef12);
+    expectErr("words", QStringList{"a", "b"});
+    expectErr("color", 0x1234);
+    expectErr("style", FontStyle::ChatMedium);
+    expectErr("lowercase", "abc");
+    expectErr("original", "or");
+    expectErr("fallback_color", "system");
+    expectErr("user_color", "system");
+    expectErr("user_login_name", "system");
+    expectErr("time", 42);
+
+    // test that accessing anything outside the elements vector causes an error
+    auto res = pfn(msg, 0, "trailing_space", true);
+    ASSERT_FALSE(res.valid());
+    res = pfn(msg, 42, "trailing_space", true);
+    ASSERT_FALSE(res.valid());
+
+    // we can't modify anything on frozen messages
+    msg->freeze();
+    expectErr("tooltip", "tool");
+    expectErr("trailing_space", false);
+    expectErr("padding", 1);
 }
 
 /// Test that both C++ exceptions and luaL_error properly unwind the stack.
@@ -1115,28 +1546,33 @@ TEST_P(PluginJsonTest, Run)
     auto reg = lua->registry().size();
     auto globals = lua->globals().size();
 
-    auto pfr = lua->safe_script_file(luaTestPath("json", GetParam()));
-    EXPECT_TRUE(pfr.valid());
-    if (!pfr.valid())
-    {
-        qDebug() << "Test" << GetParam() << "failed:";
-        sol::error err = pfr;
-        qDebug() << err.what();
-        return;
-    }
+    runLuaTest("json", GetParam(), *this->lua);
 
     for (size_t i = 0; i < 5; i++)
     {
         lua->collect_garbage();
     }
     // make sure we don't leak anything to globals or the registry
-    // but give the registry some room of 1 slot
-    EXPECT_LE(lua->registry().size(), reg + 1);
+    // but give the registry some room of 3 slots (two from getting the debug library)
+    EXPECT_LE(lua->registry().size(), reg + 3);
     EXPECT_EQ(lua->globals().size(), globals);
 }
 
 INSTANTIATE_TEST_SUITE_P(PluginJson, PluginJsonTest,
                          testing::ValuesIn(discoverLuaTests("json")));
+
+class PluginMessageTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginMessageTest, Run)
+{
+    this->configure();
+    runLuaTest("message", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
+                         testing::ValuesIn(discoverLuaTests("message")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
@@ -1156,6 +1592,65 @@ TEST_F(PluginTest, testAccounts)
         assert(not current:is_anon())
     )lua");
     ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
+}
+
+TEST_F(PluginTest, debugTraceback)
+{
+    configure();
+
+    QString traceback = lua->script(R"lua(
+        local function other()
+            error("oh no")
+        end
+        local function main()
+            local function inner()
+                other()
+            end
+            inner()
+        end
+
+        local ok, res = xpcall(main, debug.traceback)
+        return res
+    )lua")
+                            .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'error'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:3: in upvalue 'other'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:7: in local 'inner'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:9: in function <[string \"...\"]:5>"));
+    ASSERT_TRUE(traceback.contains("[C]: in function 'xpcall'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:12: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback()
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback("my message")
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("my message"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        local coro = coroutine.create(function ()
+            coroutine.yield()
+        end)
+        coroutine.resume(coro)
+        return debug.traceback(coro)
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'coroutine.yield'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:3: in function <[string \"...\"]:2>"));
+
+    auto msg = lua->script(R"lua(
+        return debug.traceback(c2.Message.new({id = "who would do this"}))
+    )lua")
+                   .get<std::shared_ptr<Message>>();
+    ASSERT_EQ(msg->id, "who would do this");
 }
 
 #endif

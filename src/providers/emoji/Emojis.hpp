@@ -31,6 +31,8 @@ struct EmojiData {
     // i.e. thinking
     std::vector<QString> shortCodes;
 
+    QString category;
+
     using Capability = EmojiStyle;
     using Capabilities = FlagsEnum<Capability>;
 

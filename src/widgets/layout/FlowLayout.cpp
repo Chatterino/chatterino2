@@ -155,7 +155,7 @@ QSize FlowLayout::minimumSize() const
         size = size.expandedTo(item->minimumSize());
     }
 
-    const QMargins margins = contentsMargins();
+    const QMargins margins = this->contentsMargins();
     size += QSize(margins.left() + margins.right(),
                   margins.top() + margins.bottom());
     return size;
