@@ -18,7 +18,7 @@
 - Minor: Added a setting to show the stream title in live messages. (#6572)
 - Minor: Add categories to the emoji viewer. (#6598)
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
-- Minor: Added reverse search of previously sent messages. (#6622)
+- Minor: Added reverse search of previously sent messages (add new hotkey "Incrementally search through the input history" under "Split input box"). (#6622)
 - Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632)
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625)
 - Minor: Added `debug.traceback` for plugins. (#6652)
