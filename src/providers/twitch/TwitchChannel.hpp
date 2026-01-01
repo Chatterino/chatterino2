@@ -182,7 +182,7 @@ public:
     bool canReconnect() const override;
     void reconnect() override;
     QString getCurrentStreamID() const override;
-    void createClip();
+    void createClip(const QString &title, std::optional<int> duration);
 
     /// Delete the message with the specified ID as a moderator.
     ///

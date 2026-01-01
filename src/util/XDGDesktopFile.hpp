@@ -26,7 +26,7 @@ public:
     /// isValid returns true if the file exists and is readable
     bool isValid() const
     {
-        return valid;
+        return this->valid;
     }
 
     /// Find the first desktop file based on the given desktop file ID

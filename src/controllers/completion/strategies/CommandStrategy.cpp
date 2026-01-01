@@ -23,7 +23,7 @@ void CommandStrategy::apply(const std::vector<CommandItem> &items,
 {
     QString normalizedQuery = normalizeQuery(query);
 
-    if (startsWithOnly_)
+    if (this->startsWithOnly_)
     {
         std::copy_if(items.begin(), items.end(),
                      std::back_insert_iterator(output),

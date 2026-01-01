@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
+# CMake upgrade notes:
+#  - In CMake >= 3.29, we should deprecate USE_ALTERNATE_LINKER in favour of CMake's CMAKE_LINKER_TYPE
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
@@ -36,6 +38,8 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
 if(CHATTERINO_SANITIZER_SUPPORT)
     list(APPEND CMAKE_MODULE_PATH
@@ -90,25 +94,14 @@ elseif (CCACHE_PROGRAM)
     set(_compiler_launcher ${CCACHE_PROGRAM})
 endif ()
 
-
-# Alternate linker code taken from heavyai/heavydb
-# https://github.com/heavyai/heavydb/blob/0517d99b467806f6af7b4c969e351368a667497d/CMakeLists.txt#L87-L103
-macro(set_alternate_linker linker)
-  find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
-  if(LINKER_EXECUTABLE)
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
-      add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+if(USE_ALTERNATE_LINKER)
+    find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+    if(LINKER_EXECUTABLE)
+        message(STATUS "Using alternate linker '${USE_ALTERNATE_LINKER}'")
+        add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
     else()
-      add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        message(FATAL_ERROR "Alternate linker ${USE_ALTERNATE_LINKER} could not be found under ld.${USE_ALTERNATIVE_LINKER} or ${USE_ALTERNATE_LINKER}")
     endif()
-  else()
-    set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
-  endif()
-endmacro()
-
-set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
-if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
-  set_alternate_linker(${USE_ALTERNATE_LINKER})
 endif()
 
 if (_compiler_launcher)
@@ -197,8 +190,6 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(Websocketpp REQUIRED)
-
 if (BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
@@ -279,7 +270,7 @@ else ()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
 endif ()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Generate resource files

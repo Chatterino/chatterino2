@@ -356,7 +356,7 @@ void Notebook::select(QWidget *page, bool focusPage)
         // Hide the previously selected page
         this->selectedPage_->hide();
 
-        auto *item = this->findItem(selectedPage_);
+        auto *item = this->findItem(this->selectedPage_);
         if (!item)
         {
             return;
@@ -830,7 +830,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
             auto isLast = &item == &ctx.items.back();
 
             auto fitsInLine = ((isLast ? ctx.addButtonWidth : 0) + x +
-                               item.tab->width()) <= width();
+                               item.tab->width()) <= this->width();
 
             if (!isFirst && !fitsInLine)
             {
@@ -884,7 +884,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, 0);
-            this->selectedPage_->resize(width(), tabsStart);
+            this->selectedPage_->resize(this->width(), tabsStart);
             this->selectedPage_->raise();
         }
     }
@@ -905,7 +905,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, y);
-            this->selectedPage_->resize(width(), height() - y);
+            this->selectedPage_->resize(this->width(), this->height() - y);
             this->selectedPage_->raise();
         }
     }
@@ -1010,7 +1010,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
             {
                 if (isRight)
                 {
-                    int distanceFromRight = width() - x;
+                    int distanceFromRight = this->width() - x;
                     largestWidth = std::max(
                         largestWidth, consumedButtonWidths - distanceFromRight);
                 }
@@ -1069,7 +1069,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, 0);
-            this->selectedPage_->resize(tabsStart, height());
+            this->selectedPage_->resize(tabsStart, this->height());
             this->selectedPage_->raise();
         }
     }
@@ -1087,7 +1087,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(x, 0);
-            this->selectedPage_->resize(width() - x, height());
+            this->selectedPage_->resize(this->width() - x, this->height());
             this->selectedPage_->raise();
         }
     }
@@ -1158,8 +1158,8 @@ void Notebook::paintEvent(QPaintEvent *event)
             {
                 painter.fillRect(this->lineOffset_,
                                  int(NOTEBOOK_TAB_HEIGHT * scale),
-                                 width() - this->lineOffset_, int(2 * scale),
-                                 this->theme->tabs.dividerLine);
+                                 this->width() - this->lineOffset_,
+                                 int(2 * scale), this->theme->tabs.dividerLine);
             }
         }
 

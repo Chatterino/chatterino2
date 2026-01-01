@@ -18,7 +18,7 @@ bool UserPronouns::isUnspecified() const
 
 UserPronouns::operator bool() const
 {
-    return !isUnspecified();
+    return !this->isUnspecified();
 }
 
 }  // namespace chatterino::pronouns

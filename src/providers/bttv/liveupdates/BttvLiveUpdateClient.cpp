@@ -13,7 +13,7 @@
 namespace chatterino {
 
 BttvLiveUpdateClient::BttvLiveUpdateClient(BttvLiveUpdates &manager)
-    : BasicPubSubClient<BttvLiveUpdateSubscription>(100)
+    : BasicPubSubClient(100)
     , manager(manager)
 {
 }

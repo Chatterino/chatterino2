@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2018 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-FileContributor: Leon Richardt <git@leon.dev>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 read -p "Are you sure you want to run clang-format on all source files? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -17,6 +22,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             -regex '\./src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
             \) | parallel --verbose --jobs "$NUM_FORMAT_JOBS" clang-format -i
     else
@@ -24,6 +31,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             -regex '\./src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./tests/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./benchmarks/src/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/include/.*\.\(hpp\|cpp\)' -o \
+            -regex '\./lib/twitch-eventsub-ws/src/.*\.\(hpp\|cpp\)' -o \
             -regex '\./mocks/include/.*\.\(hpp\|cpp\)' \
             \) -exec clang-format -i {} \;
     fi

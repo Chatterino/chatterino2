@@ -36,37 +36,37 @@ struct QByteArrayBuffer {
 
         [[nodiscard]] constexpr reference operator*() const noexcept
         {
-            return *ptr;
+            return *this->ptr;
         }
 
         [[nodiscard]] constexpr pointer operator->() const noexcept
         {
-            return ptr;
+            return this->ptr;
         }
 
         constexpr ConstIterator &operator++() noexcept
         {
-            ++ptr;
+            ++this->ptr;
             return *this;
         }
 
         constexpr ConstIterator operator++(int) noexcept
         {
             ConstIterator tmp = *this;
-            ++ptr;
+            ++this->ptr;
             return tmp;
         }
 
         constexpr ConstIterator &operator--() noexcept
         {
-            --ptr;
+            --this->ptr;
             return *this;
         }
 
         constexpr ConstIterator operator--(int) noexcept
         {
             ConstIterator tmp = *this;
-            --ptr;
+            --this->ptr;
             return tmp;
         }
 
