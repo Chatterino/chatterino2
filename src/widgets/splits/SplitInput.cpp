@@ -36,6 +36,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <utility>
 
 using namespace Qt::Literals;
 
@@ -1541,7 +1542,7 @@ void SplitInput::refreshHistorySearch(bool backwards, bool loop)
     qsizetype closestMatch = -1;  // initial result
     for (qsizetype i = 0; i < this->prevMsg_.size(); i++)
     {
-        auto message = this->prevMsg_[i];
+        auto message = this->prevMsg_.at(i);
         auto matchIdx =
             message.indexOf(this->historySearchQuery, 0, Qt::CaseInsensitive);
         if (matchIdx >= 0)
@@ -1612,8 +1613,8 @@ void SplitInput::loopHistorySearchIfNeeded(bool backwards)
             static_cast<qsizetype>(this->historySearchResults.size()) - 1;
     }
     else if (!backwards &&
-             this->historySearchResultIndex >=
-                 static_cast<qsizetype>(this->historySearchResults.size()))
+             std::cmp_greater_equal(this->historySearchResultIndex,
+                                    this->historySearchResults.size()))
     {
         this->historySearchResultIndex = 0;
     }
@@ -1622,8 +1623,8 @@ void SplitInput::loopHistorySearchIfNeeded(bool backwards)
 void SplitInput::updateSelectedHistorySearchMatch()
 {
     if (this->historySearchResultIndex < 0 ||
-        this->historySearchResultIndex >=
-            static_cast<qsizetype>(this->historySearchResults.size()))
+        std::cmp_greater_equal(this->historySearchResultIndex,
+                               this->historySearchResults.size()))
     {
         this->updateHistorySearchStatus(true, "no match");
         return;
