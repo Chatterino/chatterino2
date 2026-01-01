@@ -393,7 +393,7 @@ struct HelixBadgeSet {
         const auto jsonVersions = json.value("versions").toArray();
         for (const auto &version : jsonVersions)
         {
-            versions.emplace_back(version.toObject());
+            this->versions.emplace_back(version.toObject());
         }
     }
 };
@@ -1036,7 +1036,8 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#create-clip
     virtual void createClip(
-        QString channelId, ResultCallback<HelixClip> successCallback,
+        QString channelId, QString title, std::optional<int> duration,
+        ResultCallback<HelixClip> successCallback,
         std::function<void(HelixClipError, QString)> failureCallback,
         std::function<void()> finallyCallback) = 0;
 
@@ -1428,7 +1429,8 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#create-clip
     void createClip(
-        QString channelId, ResultCallback<HelixClip> successCallback,
+        QString channelId, QString title, std::optional<int> duration,
+        ResultCallback<HelixClip> successCallback,
         std::function<void(HelixClipError, QString)> failureCallback,
         std::function<void()> finallyCallback) final;
 

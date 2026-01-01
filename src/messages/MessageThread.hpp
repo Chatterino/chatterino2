@@ -51,17 +51,17 @@ public:
 
     const QString &rootId() const
     {
-        return rootMessageId_;
+        return this->rootMessageId_;
     }
 
     const std::shared_ptr<const Message> &root() const
     {
-        return rootMessage_;
+        return this->rootMessage_;
     }
 
     const std::vector<std::weak_ptr<const Message>> &replies() const
     {
-        return replies_;
+        return this->replies_;
     }
 
     QJsonObject toJson() const;

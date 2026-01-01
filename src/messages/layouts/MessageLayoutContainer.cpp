@@ -165,14 +165,14 @@ void MessageLayoutContainer::breakLine()
     {
         const int marginOffset = int(MARGIN.left() * this->scale_) +
                                  int(MARGIN.right() * this->scale_);
-        xOffset = (width_ - marginOffset -
+        xOffset = (this->width_ - marginOffset -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
                        .right()) /
                   2;
     }
 
-    for (size_t i = lineStart_; i < this->elements_.size(); i++)
+    for (size_t i = this->lineStart_; i < this->elements_.size(); i++)
     {
         MessageLayoutElement *element = this->elements_.at(i).get();
 
@@ -199,11 +199,11 @@ void MessageLayoutContainer::breakLine()
         this->lines_.back().endCharIndex = this->charIndex_;
     }
     this->lines_.push_back({
-        .startIndex = lineStart_,
+        .startIndex = this->lineStart_,
         .endIndex = 0,
         .startCharIndex = this->charIndex_,
         .endCharIndex = 0,
-        .rect = QRectF(-100000, this->currentY_, 200000, lineHeight_),
+        .rect = QRectF(-100000, this->currentY_, 200000, this->lineHeight_),
     });
 
     for (auto i = this->lineStart_; i < this->elements_.size(); i++)

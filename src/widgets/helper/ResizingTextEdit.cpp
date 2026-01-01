@@ -66,7 +66,8 @@ int ResizingTextEdit::heightForWidth(int) const
 {
     auto margins = this->contentsMargins();
 
-    return margins.top() + document()->size().height() + margins.bottom() + 5;
+    return margins.top() + this->document()->size().height() +
+           margins.bottom() + 5;
 }
 
 QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
@@ -131,22 +132,6 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 }
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
-#ifdef Q_OS_MACOS
-    if ((event->modifiers() == Qt::ControlModifier) &&
-        (event->key() == Qt::Key_Backspace))
-    {
-        QTextCursor cursor = this->textCursor();
-        if (!cursor.hasSelection())
-        {
-            cursor.movePosition(QTextCursor::StartOfLine,
-                                QTextCursor::KeepAnchor);
-        }
-        cursor.removeSelectedText();
-        this->setTextCursor(cursor);
-        return;
-    }
-#endif
-
     event->ignore();
 
     this->keyPressed.invoke(event);
@@ -272,7 +257,7 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
 
-    QObject::connect(completer_,
+    QObject::connect(this->completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(
                          &QCompleter::highlighted),
                      this, &ResizingTextEdit::insertCompletion);
