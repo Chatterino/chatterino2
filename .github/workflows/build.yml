@@ -220,6 +220,7 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DFORCE_JSON_GENERATION=On `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -273,8 +274,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          # brew install openssl rapidjson p7zip create-dmg cmake tree boost
-          brew install openssl rapidjson p7zip create-dmg tree boost
+          # brew install openssl rapidjson p7zip create-dmg cmake tree boost hunspell
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
         shell: bash
 
       - name: Build (MacOS)
@@ -289,6 +290,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash

@@ -5,6 +5,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QMenu>
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QObject>
@@ -335,6 +336,13 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     }
 
     insertPlainText(source->text());
+}
+
+void ResizingTextEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    QObjectPtr<QMenu> menu{this->createStandardContextMenu(event->pos())};
+    this->contextMenuRequested.invoke(menu.get(), event->pos());
+    menu->exec(event->globalPos());
 }
 
 }  // namespace chatterino
