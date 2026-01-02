@@ -15,7 +15,7 @@ class TwitchChannel;
 class SpellChecker;
 
 /// This highlights the text in the split input.
-/// Currently, it only does syntax highlighting.
+/// Currently, it only does spell checking.
 class InputHighlighter : public QSyntaxHighlighter
 {
 public:

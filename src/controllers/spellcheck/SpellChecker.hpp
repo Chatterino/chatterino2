@@ -19,7 +19,6 @@ public:
     ~SpellChecker();
 
     bool isLoaded() const;
-    void reload();
 
     bool check(const QString &word);
     std::vector<std::string> suggestions(const QString &word);

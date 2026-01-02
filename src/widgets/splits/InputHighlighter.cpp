@@ -17,7 +17,7 @@ namespace {
 
 using namespace chatterino;
 
-bool isEmote(TwitchChannel *twitch, const QString &word)
+bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 {
     EmoteName name{word};
     if (twitch)
@@ -59,7 +59,8 @@ namespace chatterino {
 InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
-    , wordRegex(R"(\p{L}+)",
+    // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
+    , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
                 QRegularExpression::PatternOption::UseUnicodePropertiesOption)
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
@@ -92,7 +93,7 @@ void InputHighlighter::highlightBlock(const QString &text)
     {
         auto match = it.next();
         auto text = match.captured();
-        if (!isEmote(channel, text) && !this->spellChecker.check(text))
+        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
         {
             this->setFormat(static_cast<int>(match.capturedStart()),
                             static_cast<int>(text.size()), this->spellFmt);

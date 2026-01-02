@@ -79,13 +79,6 @@ bool SpellChecker::isLoaded() const
     return this->private_ != nullptr;
 }
 
-void SpellChecker::reload()
-{
-#ifdef CHATTERINO_WITH_SPELLCHECK
-    this->private_ = SpellCheckerPrivate::tryLoad();
-#endif
-}
-
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 bool SpellChecker::check(const QString &word)
 {

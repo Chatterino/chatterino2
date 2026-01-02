@@ -71,7 +71,6 @@
 - Dev: Unwrapped `LimitedQueueSnapshot` to `std::vector`. (#6606)
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
-- Dev: Added options to close multiple visible tabs. (#6515)
 - Dev: Started work on spell checking. (#6446)
 - Dev: Added Clazy linting in CI. (#6623)
 - Dev: Added custom clang-tidy module linting in CI. (#6626)
