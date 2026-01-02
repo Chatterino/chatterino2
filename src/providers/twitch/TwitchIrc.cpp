@@ -107,7 +107,7 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
 }
 
 std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
-                                 const QString& tagName)
+                                 const QString &tagName)
 {
     std::vector<Badge> b;
 

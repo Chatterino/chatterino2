@@ -18,8 +18,7 @@ public:
             .displayName = "forsen",
             .profilePictureUrl =
                 "https://static-cdn.jtvnw.net/jtv_user_pictures/"
-                "forsen-profile_image-48b43e1e4f54b5c8-300x300.png"
-        };
+                "forsen-profile_image-48b43e1e4f54b5c8-300x300.png"};
         return std::make_shared<TwitchUser>(u);
     }
 };

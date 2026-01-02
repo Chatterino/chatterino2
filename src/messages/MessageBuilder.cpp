@@ -348,10 +348,9 @@ void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
     builder->message().badgeInfos = badgeInfos;
 }
 
-std::vector<Badge> appendSharedChatBadges(MessageBuilder *builder,
-                            const std::vector<Badge> &sharedBadges,
-                            const QString &sharedChannelName,
-                            const TwitchChannel *twitchChannel)
+std::vector<Badge> appendSharedChatBadges(
+    MessageBuilder *builder, const std::vector<Badge> &sharedBadges,
+    const QString &sharedChannelName, const TwitchChannel *twitchChannel)
 {
     auto appendedBadges = std::vector<Badge>{};
     for (const auto &badge : sharedBadges)
@@ -2447,15 +2446,15 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
             MessageElementFlag::BadgeSharedChannel);
 
         const auto sourceBadges = parseBadgeTag(tags, "source-badges");
-        const auto appendedBadges = appendSharedChatBadges(this, sourceBadges,
-                                                           sourceName,
-                                                           twitchChannel);
+        const auto appendedBadges = appendSharedChatBadges(
+            this, sourceBadges, sourceName, twitchChannel);
 
         // Dedup mod/vip badges if user is mod/vip in both chats,
         // preferring source channel's badges for the tooltips
         for (const auto &appendedBadge : appendedBadges)
         {
-            if (auto b = std::ranges::find(badges, appendedBadge); b != badges.end())
+            if (auto b = std::ranges::find(badges, appendedBadge);
+                b != badges.end())
             {
                 badges.erase(b);
             }
