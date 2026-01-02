@@ -1,16 +1,15 @@
 {
-    "input": "@badge-info=;flags=;room-id=11148817;color=;client-nonce=0d1632f37b6baee51576859d5dbaf325;emotes=;subscriber=0;tmi-sent-ts=1727395701680;id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;turbo=1;badges=staff/1,turbo/1;source-badges=staff/1,moderator/1,bits-leader/1;source-badge-info=;display-name=creativewind;source-room-id=1025594235;source-id=b97eea45-f9dc-4f0c-8744-f8256c3ed950;user-type=staff;user-id=106940612;mod=0 :creativewind!creativewind@creativewind.tmi.twitch.tv PRIVMSG #pajlada :Guys",
+    "input": "@vip=1;badges=vip/1;tmi-sent-ts=1729627237027;id=3e0750f7-541e-4f7c-8fec-4f943bfd84a3;room-id=11148817;user-id=100229878;display-name=nuuls;badges=bits/100;badge-info=;color=#00FF7F;flags=5-8:P.3;user-type=;emotes=;source-only=0;source-badge-info=subscriber/52;source-id=0dd9957e-6140-498f-a6e8-e62d1b43dfe7;source-room-id=22484632;source-badges=vip/1,subscriber/48 :nuuls!nuuls@nuuls.tmi.twitch.tv PRIVMSG #pajlada :I'm a vip in the current & shared channel",
     "output": [
         {
             "badgeInfos": {
             },
             "badges": [
-                "staff",
-                "turbo"
+                "bits"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "creativewind",
+            "displayName": "nuuls",
             "elements": [
                 {
                     "color": "System",
@@ -40,7 +39,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "0:08"
+                            "20:00"
                         ]
                     },
                     "flags": "Timestamp",
@@ -49,7 +48,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "00:08:21",
+                    "time": "20:00:37",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -86,75 +85,57 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://help.twitch.tv/customer/en/portal/articles/659115-twitch-chat-badges-guide",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/3"
                         },
                         "name": "",
-                        "tooltip": "Moderator"
+                        "tooltip": "VIP"
                     },
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Moderator (forsen)",
+                    "tooltip": "VIP (forsen)",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
                     "emote": {
-                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
+                        "homePage": "https://bits.twitch.tv",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/3"
                         },
                         "name": "",
-                        "tooltip": "Staff"
-                    },
-                    "flags": "BadgeGlobalAuthority",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Staff",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/3"
-                        },
-                        "name": "",
-                        "tooltip": "Turbo"
+                        "tooltip": "cheer 100"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Turbo",
+                    "tooltip": "Twitch cheer 100",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ff00ff00",
+                    "color": "#ff00ff7f",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "creativewind"
+                        "value": "nuuls"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "creativewind:"
+                        "nuuls:"
                     ]
                 },
                 {
@@ -169,7 +150,15 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Guys"
+                        "I'm",
+                        "a",
+                        "vip",
+                        "in",
+                        "the",
+                        "current",
+                        "&",
+                        "shared",
+                        "channel"
                     ]
                 },
                 {
@@ -177,7 +166,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a"
+                        "value": "3e0750f7-541e-4f7c-8fec-4f943bfd84a3"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -188,15 +177,15 @@
             ],
             "flags": "Collapsed|SharedMessage",
             "frozen": false,
-            "id": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a",
+            "id": "3e0750f7-541e-4f7c-8fec-4f943bfd84a3",
             "localizedName": "",
-            "loginName": "creativewind",
-            "messageText": "Guys",
-            "searchText": "creativewind  creativewind: Guys ",
-            "serverReceivedTime": "2024-09-27T00:08:21Z",
+            "loginName": "nuuls",
+            "messageText": "I'm a vip in the current & shared channel",
+            "searchText": "nuuls  nuuls: I'm a vip in the current & shared channel ",
+            "serverReceivedTime": "2024-10-22T20:00:37Z",
             "timeoutUser": "",
-            "userID": "106940612",
-            "usernameColor": "#ff00ff00"
+            "userID": "100229878",
+            "usernameColor": "#ff00ff7f"
         }
     ]
 }
