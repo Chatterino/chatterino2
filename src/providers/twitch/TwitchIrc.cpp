@@ -106,11 +106,12 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
     return infoMap;
 }
 
-std::vector<Badge> parseBadgeTag(const QVariantMap &tags)
+std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
+                                 const QString &tagName)
 {
     std::vector<Badge> b;
 
-    auto badgesIt = tags.constFind("badges");
+    auto badgesIt = tags.constFind(tagName);
     if (badgesIt == tags.end())
     {
         return b;

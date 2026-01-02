@@ -66,19 +66,40 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "homePage": "https://www.twitch.tv/forsen",
                         "images": {
-                            "1x": ""
+                            "1x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-28x28.png",
+                            "2x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png",
+                            "3x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-150x150.png"
                         },
                         "name": "",
-                        "tooltip": "Shared Message"
+                        "tooltip": "Shared Message from forsen"
                     },
                     "flags": "BadgeSharedChannel",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Shared Message",
+                    "tooltip": "Shared Message from forsen",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+                        },
+                        "name": "",
+                        "tooltip": "Moderator"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Moderator (forsen)",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },

@@ -67,6 +67,7 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<BOOL:${MSVC}>:BOOST_JSON_NO_LIB>
     $<$<BOOL:${MSVC}>:BOOST_CONTAINER_NO_LIB>
+    QT_NO_KEYWORDS
 )
 
 if (MSVC)
