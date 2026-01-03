@@ -21,14 +21,16 @@ public:
         , value(value_)
         , prevValue(qEnvironmentVariable(this->key))
     {
-        qInfo() << "XXX: Setting" << qPrintable(key) << "from"
-                << this->prevValue << "to" << this->value;
         if (this->value.isNull())
         {
+            qDebug() << "Setting" << qPrintable(key) << "from"
+                     << this->prevValue << "to" << this->value;
             qunsetenv(this->key);
         }
         else
         {
+            qDebug() << "Unsetting" << qPrintable(key) << "- old value was"
+                     << this->prevValue;
             qputenv(this->key, this->value.toLocal8Bit());
         }
     }
@@ -42,14 +44,14 @@ public:
     {
         if (!prevValue.isNull())
         {
-            qInfo() << "Reverting" << qPrintable(key) << "to"
-                    << this->prevValue;
+            qDebug() << "Reverting" << qPrintable(key) << "to"
+                     << this->prevValue;
             qputenv(this->key, this->prevValue.toLocal8Bit());
         }
         else
         {
-            qInfo() << "Unsetting" << qPrintable(key) << "to"
-                    << this->prevValue;
+            qDebug() << "Unsetting" << qPrintable(key) << "to"
+                     << this->prevValue;
             qunsetenv(this->key);
         }
     }
