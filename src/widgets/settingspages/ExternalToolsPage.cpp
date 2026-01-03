@@ -251,6 +251,23 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             ->setTooltip("Check the spelling of words in the input box of all "
                          "splits by default.")
             ->addTo(layout);
+
+        auto toItem =
+            [](const DictionaryInfo &dict) -> std::pair<QString, QVariant> {
+            return {
+                dict.name,
+                dict.path,
+            };
+        };
+        std::vector<std::pair<QString, QVariant>> dictList{{"None", ""}};
+        std::ranges::copy(
+            std::views::transform(
+                getApp()->getSpellChecker()->getSystemDictionaries(), toItem),
+            std::back_inserter(dictList));
+        SettingWidget::dropdown(
+            "Fallback spellchecking dictionary (requires restart)",
+            s.spellCheckingFallback, dictList)
+            ->addTo(layout);
     }
 #endif
 
