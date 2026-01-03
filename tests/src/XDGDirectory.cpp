@@ -89,7 +89,6 @@ TEST(XDGDirectory, ConfigDefault)
 
 TEST(XDGDirectory, ConfigCustom)
 {
-    QTemporaryDir tmp;
     auto lock = environmentLock();
 
     TempEnv dataHome("XDG_CONFIG_HOME", "/tmp/home-data");
