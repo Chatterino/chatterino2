@@ -1,5 +1,7 @@
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 
+#include "controllers/spellcheck/SpellChecker.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
@@ -226,6 +228,31 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
         buttonLayout->addStretch();
         layout.addLayout(buttonLayout);
     }
+
+#ifdef CHATTERINO_WITH_SPELLCHECK
+    {
+        // auto *form = new QFormLayout;
+        layout.addTitle("Spell checker (experimental)");
+
+        layout.addDescription(
+            u"Check the spelling of words in the input box of splits."
+            " Chatterino does not include dictionaries - they have to "
+            "be downloaded or created manually. Chatterino expects "
+            "Hunspell "
+            "dictionaries in " %
+            formatRichNamedLink(getApp()->getPaths().dictionariesDirectory,
+                                getApp()->getPaths().dictionariesDirectory) %
+            u". The file index.aff has to contain the affixes and "
+            u"index.dic "
+            u"must contain the dictionary (subject to change).");
+
+        SettingWidget::checkbox("Check spelling by default",
+                                s.enableSpellChecking)
+            ->setTooltip("Check the spelling of words in the input box of all "
+                         "splits by default.")
+            ->addTo(layout);
+    }
+#endif
 
     layout.addStretch();
 }
