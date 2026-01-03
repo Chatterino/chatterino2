@@ -40,3 +40,10 @@ void PrintTo(const QString &str, std::ostream *os)
 {
     ::testing::internal::UniversalPrint(str.toStdU16String(), os);
 }
+
+std::unique_lock<std::mutex> environmentLock()
+{
+    static std::mutex m;
+
+    return std::unique_lock(m);
+}

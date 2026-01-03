@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>  // IWYU pragma: export
 #include <gtest/gtest.h>  // IWYU pragma: export
 
+#include <mutex>
 #include <ostream>
 
 class QString;
@@ -20,3 +21,7 @@ void PrintTo(const QByteArray &bytes, std::ostream *os);
 void PrintTo(QStringView str, std::ostream *os);
 void PrintTo(const QString &str, std::ostream *os);
 // NOLINTEND(readability-identifier-naming)
+
+/// Use this lock when your test relies on certain environment variables being set.
+/// It essentially helps ensure tests that rely on the same process environment variables cannot run in parallel
+std::unique_lock<std::mutex> environmentLock();
