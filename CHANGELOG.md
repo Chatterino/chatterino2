@@ -75,6 +75,7 @@
 - Dev: Simplified uses of `getMessageSnapshot`. (#6607)
 - Dev: Disabled `llvm-prefer-static-over-anonymous-namespace` in clang-tidy. (#6610)
 - Dev: Started work on spell checking. (#6446)
+- Dev: Enabled linux-only system dictionary spell checking fallback. (#6703)
 - Dev: Added Clazy linting in CI. (#6623)
 - Dev: Added custom clang-tidy module linting in CI. (#6626)
 - Dev: CMake option `USE_ALTERNATE_LINKER` now errors if the given linker can't be found. (#6692)
