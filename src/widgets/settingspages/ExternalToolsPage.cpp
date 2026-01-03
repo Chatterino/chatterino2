@@ -18,6 +18,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+#include <algorithm>
+
 namespace chatterino {
 
 namespace {
@@ -260,10 +262,11 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             };
         };
         std::vector<std::pair<QString, QVariant>> dictList{{"None", ""}};
-        std::ranges::copy(
-            std::views::transform(
-                getApp()->getSpellChecker()->getSystemDictionaries(), toItem),
-            std::back_inserter(dictList));
+
+        std::ranges::transform(
+            getApp()->getSpellChecker()->getSystemDictionaries(),
+            std::back_inserter(dictList), toItem);
+
         if (dictList.size() > 1)
         {
             SettingWidget::dropdown(
