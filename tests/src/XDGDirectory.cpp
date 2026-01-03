@@ -79,12 +79,12 @@ TEST(XDGDirectory, ConfigDefault)
     TempEnv dataHome("XDG_CONFIG_HOME", {});
     TempEnv dataDirs("XDG_CONFIG_DIRS", {});
 
-    auto config = getXDGDirectories(XDGDirectoryType::Config);
+    auto actual = getXDGDirectories(XDGDirectoryType::Config);
 
-    ASSERT_EQ(config.at(0), combinePath(home.getValue(), ".config/"));
-    ASSERT_EQ(config.at(1), "/etc/xdg");
+    ASSERT_EQ(actual.at(0), combinePath(home.getValue(), ".config/"));
+    ASSERT_EQ(actual.at(1), "/etc/xdg");
 
-    ASSERT_EQ(config.length(), 2);
+    ASSERT_EQ(actual.length(), 2);
 }
 
 TEST(XDGDirectory, ConfigCustom)
@@ -94,13 +94,13 @@ TEST(XDGDirectory, ConfigCustom)
     TempEnv dataHome("XDG_CONFIG_HOME", "/tmp/home-data");
     TempEnv dataDirs("XDG_CONFIG_DIRS", "/tmp/sys-data-1:/tmp/sys-data-2");
 
-    auto config = getXDGDirectories(XDGDirectoryType::Config);
+    auto actual = getXDGDirectories(XDGDirectoryType::Config);
 
-    ASSERT_EQ(config.at(0), "/tmp/home-data");
-    ASSERT_EQ(config.at(1), "/tmp/sys-data-1");
-    ASSERT_EQ(config.at(2), "/tmp/sys-data-2");
+    ASSERT_EQ(actual.at(0), "/tmp/home-data");
+    ASSERT_EQ(actual.at(1), "/tmp/sys-data-1");
+    ASSERT_EQ(actual.at(2), "/tmp/sys-data-2");
 
-    ASSERT_EQ(config.length(), 3);
+    ASSERT_EQ(actual.length(), 3);
 }
 
 /// Test the returned directories from XDGDirectoryType::Data when no extra environment variables are set
@@ -113,13 +113,13 @@ TEST(XDGDirectory, DataDefault)
     TempEnv dataHome("XDG_DATA_HOME", {});
     TempEnv dataDirs("XDG_DATA_DIRS", {});
 
-    auto config = getXDGDirectories(XDGDirectoryType::Data);
+    auto actual = getXDGDirectories(XDGDirectoryType::Data);
 
-    ASSERT_EQ(config.at(0), combinePath(home.getValue(), ".local/share/"));
-    ASSERT_EQ(config.at(1), "/usr/local/share/");
-    ASSERT_EQ(config.at(2), "/usr/share/");
+    ASSERT_EQ(actual.at(0), combinePath(home.getValue(), ".local/share/"));
+    ASSERT_EQ(actual.at(1), "/usr/local/share/");
+    ASSERT_EQ(actual.at(2), "/usr/share/");
 
-    ASSERT_EQ(config.length(), 3);
+    ASSERT_EQ(actual.length(), 3);
 }
 
 /// Test the returned directories from XDGDirectoryType::Data when user custom-configured environment variables are set
@@ -131,14 +131,14 @@ TEST(XDGDirectory, DataCustom)
     TempEnv dataDirs("XDG_DATA_DIRS",
                      "/tmp/sys-share-1:/tmp/sys-share-2:/tmp/sys-share-3");
 
-    auto config = getXDGDirectories(XDGDirectoryType::Data);
+    auto actual = getXDGDirectories(XDGDirectoryType::Data);
 
-    ASSERT_EQ(config.at(0), "/tmp/home-share");
-    ASSERT_EQ(config.at(1), "/tmp/sys-share-1");
-    ASSERT_EQ(config.at(2), "/tmp/sys-share-2");
-    ASSERT_EQ(config.at(3), "/tmp/sys-share-3");
+    ASSERT_EQ(actual.at(0), "/tmp/home-share");
+    ASSERT_EQ(actual.at(1), "/tmp/sys-share-1");
+    ASSERT_EQ(actual.at(2), "/tmp/sys-share-2");
+    ASSERT_EQ(actual.at(3), "/tmp/sys-share-3");
 
-    ASSERT_EQ(config.length(), 4);
+    ASSERT_EQ(actual.length(), 4);
 }
 
 #endif
