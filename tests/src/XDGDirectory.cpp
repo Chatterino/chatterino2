@@ -42,7 +42,7 @@ public:
 
     ~TempEnv()
     {
-        if (!prevValue.isNull())
+        if (!this->prevValue.isNull())
         {
             qDebug() << "Reverting" << qPrintable(this->key) << "to"
                      << this->prevValue;
