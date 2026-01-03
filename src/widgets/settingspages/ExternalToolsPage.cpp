@@ -264,10 +264,13 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             std::views::transform(
                 getApp()->getSpellChecker()->getSystemDictionaries(), toItem),
             std::back_inserter(dictList));
-        SettingWidget::dropdown(
-            "Fallback spellchecking dictionary (requires restart)",
-            s.spellCheckingFallback, dictList)
-            ->addTo(layout);
+        if (dictList.size() > 1)
+        {
+            SettingWidget::dropdown(
+                "Fallback spellchecking dictionary (requires restart)",
+                s.spellCheckingFallback, dictList)
+                ->addTo(layout);
+        }
     }
 #endif
 
