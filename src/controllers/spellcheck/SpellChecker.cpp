@@ -217,7 +217,26 @@ std::vector<DictionaryInfo> SpellChecker::getSystemDictionaries() const
             {
                 // NOTE: We currently filter out symbolic links from system-loaded dictionaries.
                 // Without this, the list of dictionaries we "support" would be too high on Linux distros.
-                // Installing en_US dictionary symlinks en_GH/en_HK/en_IE/en_IN/en_JM/en_NA/en-NG/en_NZ etc to that installed dictionary.
+                // As an example, this is the symlinks the installation of `hunspell-en-gb` creates on Arch Linux:
+                // - en_AG.aff -> en_GB-large.aff
+                // - en_BS.aff -> en_GB-large.aff
+                // - en_BW.aff -> en_GB-large.aff
+                // - en_BZ.aff -> en_GB-large.aff
+                // - en_DK.aff -> en_GB-large.aff
+                // - en_GB.aff -> en_GB-large.aff
+                // - en_GB-large.aff
+                // - en_GH.aff -> en_GB-large.aff
+                // - en_HK.aff -> en_GB-large.aff
+                // - en_IE.aff -> en_GB-large.aff
+                // - en_IN.aff -> en_GB-large.aff
+                // - en_JM.aff -> en_GB-large.aff
+                // - en_NA.aff -> en_GB-large.aff
+                // - en_NG.aff -> en_GB-large.aff
+                // - en_NZ.aff -> en_GB-large.aff
+                // - en_SG.aff -> en_GB-large.aff
+                // - en_TT.aff -> en_GB-large.aff
+                // - en_ZA.aff -> en_GB-large.aff
+                // - en_ZW.aff -> en_GB-large.aff
                 continue;
             }
 
