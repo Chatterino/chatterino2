@@ -21,17 +21,17 @@ public:
         , value(value_)
         , prevValue(qEnvironmentVariable(this->key))
     {
-        if (this->value.isNull())
+        if (!this->value.isNull())
         {
             qDebug() << "Setting" << qPrintable(this->key) << "from"
                      << this->prevValue << "to" << this->value;
-            qunsetenv(this->key);
+            qputenv(this->key, this->value.toLocal8Bit());
         }
         else
         {
             qDebug() << "Unsetting" << qPrintable(this->key)
                      << "- old value was" << this->prevValue;
-            qputenv(this->key, this->value.toLocal8Bit());
+            qunsetenv(this->key);
         }
     }
 
