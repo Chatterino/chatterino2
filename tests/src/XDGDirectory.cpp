@@ -23,14 +23,14 @@ public:
     {
         if (this->value.isNull())
         {
-            qDebug() << "Setting" << qPrintable(key) << "from"
+            qDebug() << "Setting" << qPrintable(this->key) << "from"
                      << this->prevValue << "to" << this->value;
             qunsetenv(this->key);
         }
         else
         {
-            qDebug() << "Unsetting" << qPrintable(key) << "- old value was"
-                     << this->prevValue;
+            qDebug() << "Unsetting" << qPrintable(this->key)
+                     << "- old value was" << this->prevValue;
             qputenv(this->key, this->value.toLocal8Bit());
         }
     }
@@ -44,13 +44,13 @@ public:
     {
         if (!prevValue.isNull())
         {
-            qDebug() << "Reverting" << qPrintable(key) << "to"
+            qDebug() << "Reverting" << qPrintable(this->key) << "to"
                      << this->prevValue;
             qputenv(this->key, this->prevValue.toLocal8Bit());
         }
         else
         {
-            qDebug() << "Unsetting" << qPrintable(key) << "to"
+            qDebug() << "Unsetting" << qPrintable(this->key) << "to"
                      << this->prevValue;
             qunsetenv(this->key);
         }
