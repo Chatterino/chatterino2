@@ -2,12 +2,6 @@
     "input": "@badge-info=;badges=staff/1,raging-wolf-helm/1;color=#DAA520;display-name=lahoooo;emotes=;flags=;id=01cd601f-bc3f-49d5-ab4b-136fa9d6ec22;login=lahoooo;mod=0;msg-id=sharedchatnotice;msg-param-color=PRIMARY;room-id=11148817;source-badge-info=;source-badges=staff/1,moderator/1,bits-leader/1;source-id=4083dadc-9f20-40f9-ba92-949ebf6bc294;source-msg-id=announcement;source-room-id=1025594235;subscriber=0;system-msg=;tmi-sent-ts=1726118378465;user-id=612865661;user-type=staff;vip=0 :tmi.twitch.tv USERNOTICE #pajlada :hi this is an announcement from 1",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-                "staff",
-                "raging-wolf-helm"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "lahoooo",
@@ -202,14 +196,16 @@
             "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
             "serverReceivedTime": "2024-09-12T05:19:38Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "staff",
+                "raging-wolf-helm"
+            ],
             "userID": "612865661",
             "usernameColor": "#ffdaa520"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -266,6 +262,10 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

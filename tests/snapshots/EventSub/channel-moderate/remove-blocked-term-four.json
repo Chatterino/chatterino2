@@ -44,10 +44,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -203,6 +199,10 @@
             "searchText": "nerixyz removed \"my phrase\", \"term\", \"wow\", and \"🥲\" as blocked terms on AutoMod. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

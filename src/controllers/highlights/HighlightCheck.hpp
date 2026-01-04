@@ -13,16 +13,17 @@ namespace chatterino {
 
 struct HighlightResult;
 struct MessageParseArgs;
-class Badge;
+class TwitchBadge;
 
 enum class MessageFlag : std::int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct HighlightCheck {
     using Checker = std::function<std::optional<HighlightResult>(
-        const MessageParseArgs &args, const std::vector<Badge> &badges,
-        const QString &senderName, const QString &originalMessage,
-        const MessageFlags &messageFlags, bool self)>;
+        const MessageParseArgs &args,
+        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
+        const QString &originalMessage, const MessageFlags &messageFlags,
+        bool self)>;
     Checker cb;
 };
 

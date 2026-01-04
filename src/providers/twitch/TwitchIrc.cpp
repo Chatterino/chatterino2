@@ -106,10 +106,10 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
     return infoMap;
 }
 
-std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
-                                 const QString &tagName)
+std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
+                                       const QString &tagName)
 {
-    std::vector<Badge> b;
+    std::vector<TwitchBadge> b;
 
     auto badgesIt = tags.constFind(tagName);
     if (badgesIt == tags.end())
@@ -127,7 +127,7 @@ std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
         }
 
         auto pair = slashKeyValue(badge);
-        b.emplace_back(Badge{pair.first, pair.second});
+        b.emplace_back(TwitchBadge{pair.first, pair.second});
     }
 
     return b;
