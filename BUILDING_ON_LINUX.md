@@ -55,9 +55,7 @@ nix-shell -p openssl boost qt6.full pkg-config cmake libnotify hunspell
    ```
 1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
    ```sh
-   cmake -DBUILD_WITH_QTKEYCHAIN=OFF \
-         -DCHATTERINO_SPELLCHECK=On
-   ..
+   cmake -DBUILD_WITH_QTKEYCHAIN=OFF -DCHATTERINO_SPELLCHECK=On ..
    ```
 1. Build the project
    ```sh
