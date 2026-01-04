@@ -50,13 +50,13 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel = getApp()->getTwitch()->getWatchingChannel().get();
 
-    /* 
-     * Looking to add a new identifier to filters? Here's what to do: 
-     *  1. Update validIdentifiersMap in Tokenizer.cpp
+    /*
+     * Looking to add a new identifier to filters? Here's what to do:
+     *  1. Update VALID_IDENTIFIERS_MAP in Tokenizer.cpp
      *  2. Add the identifier to the list below
-     *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT in Filter.hpp
+     *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT at the top of this file
      *  4. Add the value for the identifier to the ContextMap returned by this function
-     * 
+     *
      * List of identifiers:
      *
      * author.badges
