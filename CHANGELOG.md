@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6704)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
