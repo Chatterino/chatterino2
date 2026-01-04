@@ -119,17 +119,19 @@ QJsonObject Message::toJson() const
     };
 
     QJsonArray badges;
-    for (const auto &badge : this->badges)
+    for (const auto &badge : this->twitchBadges)
     {
         badges.append(badge.key_);
     }
+    // TODO: rename to twitchBadges
     msg["badges"_L1] = badges;
 
     QJsonObject badgeInfos;
-    for (const auto &[key, value] : this->badgeInfos)
+    for (const auto &[key, value] : this->twitchBadgeInfos)
     {
         badgeInfos.insert(key, value);
     }
+    // TODO: rename to twitchBadgeInfos
     msg["badgeInfos"_L1] = badgeInfos;
 
     if (this->highlightColor)

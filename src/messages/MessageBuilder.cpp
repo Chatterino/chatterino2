@@ -236,7 +236,7 @@ QString stylizeUsername(const QString &username, const Message &message)
     return usernameText;
 }
 
-std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
+std::optional<EmotePtr> getTwitchBadge(const TwitchBadge &badge,
                                        const TwitchChannel *twitchChannel)
 {
     if (auto channelBadge =
@@ -254,7 +254,8 @@ std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
     return std::nullopt;
 }
 
-void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
+void appendBadges(MessageBuilder *builder,
+                  const std::vector<TwitchBadge> &badges,
                   const std::unordered_map<QString, QString> &badgeInfos,
                   const TwitchChannel *twitchChannel)
 {
@@ -344,15 +345,15 @@ void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
             ->setTooltip(tooltip);
     }
 
-    builder->message().badges = badges;
-    builder->message().badgeInfos = badgeInfos;
+    builder->message().twitchBadges = badges;
+    builder->message().twitchBadgeInfos = badgeInfos;
 }
 
-std::vector<Badge> appendSharedChatBadges(
-    MessageBuilder *builder, const std::vector<Badge> &sharedBadges,
+std::vector<TwitchBadge> appendSharedChatBadges(
+    MessageBuilder *builder, const std::vector<TwitchBadge> &sharedBadges,
     const QString &sharedChannelName, const TwitchChannel *twitchChannel)
 {
-    auto appendedBadges = std::vector<Badge>{};
+    auto appendedBadges = std::vector<TwitchBadge>{};
     for (const auto &badge : sharedBadges)
     {
         if (badge.key_ != "moderator" && badge.key_ != "vip")

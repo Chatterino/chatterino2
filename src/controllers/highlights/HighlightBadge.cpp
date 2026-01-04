@@ -73,7 +73,7 @@ bool HighlightBadge::hasSound() const
     return this->hasSound_;
 }
 
-bool HighlightBadge::isMatch(const Badge &badge) const
+bool HighlightBadge::isMatch(const TwitchBadge &badge) const
 {
     if (this->isMulti_)
     {
@@ -92,7 +92,7 @@ bool HighlightBadge::isMatch(const Badge &badge) const
     }
 }
 
-bool HighlightBadge::compare(const QString &id, const Badge &badge) const
+bool HighlightBadge::compare(const QString &id, const TwitchBadge &badge) const
 {
     if (this->hasVersions_)
     {

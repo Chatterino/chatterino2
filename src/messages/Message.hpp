@@ -17,7 +17,7 @@ class QJsonObject;
 namespace chatterino {
 class MessageElement;
 class MessageThread;
-class Badge;
+class TwitchBadge;
 class ScrollbarHighlight;
 
 struct Message;
@@ -54,8 +54,13 @@ struct Message {
     QString channelName;
     QColor usernameColor;
     QDateTime serverReceivedTime;
-    std::vector<Badge> badges;
-    std::unordered_map<QString, QString> badgeInfos;
+
+    /// List of Twitch badges associated with this message
+    std::vector<TwitchBadge> twitchBadges;
+
+    /// Map of extra data associated with each Twitch badge
+    std::unordered_map<QString, QString> twitchBadgeInfos;
+
     std::shared_ptr<QColor> highlightColor;
     // Each reply holds a reference to the thread. When every reply is dropped,
     // the reply thread will be cleaned up by the TwitchChannel.
