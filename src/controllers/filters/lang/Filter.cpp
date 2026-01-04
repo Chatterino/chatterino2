@@ -95,8 +95,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
     using MessageFlag = chatterino::MessageFlag;
 
     QStringList badges;
-    badges.reserve(m->badges.size());
-    for (const auto &e : m->badges)
+    badges.reserve(m->twitchBadges.size());
+    for (const auto &e : m->twitchBadges)
     {
         badges << e.key_;
     }
@@ -114,9 +114,9 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
             continue;
         }
         subscribed = true;
-        if (m->badgeInfos.find(subBadge) != m->badgeInfos.end())
+        if (m->twitchBadgeInfos.find(subBadge) != m->twitchBadgeInfos.end())
         {
-            subLength = m->badgeInfos.at(subBadge).toInt();
+            subLength = m->twitchBadgeInfos.at(subBadge).toInt();
         }
     }
     ContextMap vars = {

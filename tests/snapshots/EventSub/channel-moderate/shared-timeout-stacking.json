@@ -123,10 +123,6 @@
     ],
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "testaccount_420",
             "count": 2,
             "displayName": "",
@@ -263,14 +259,14 @@
             "searchText": "nerixyz timed out twitchdev for 10m in testaccount_420. (2 times) ",
             "serverReceivedTime": "2025-02-22T17:54:05Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -403,6 +399,10 @@
             "searchText": "nerixyz timed out twitchdev for 10m. ",
             "serverReceivedTime": "2025-02-22T17:54:06Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

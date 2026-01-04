@@ -33,7 +33,7 @@ BadgePredicate::BadgePredicate(const QString &badges, bool negate)
 
 bool BadgePredicate::appliesToImpl(const Message &message)
 {
-    for (const Badge &badge : message.badges)
+    for (const TwitchBadge &badge : message.twitchBadges)
     {
         if (this->badges_.contains(badge.key_, Qt::CaseInsensitive))
         {

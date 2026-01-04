@@ -34,10 +34,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -145,14 +141,14 @@
             "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -252,6 +248,10 @@
             "searchText": "nerixyz: ass",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

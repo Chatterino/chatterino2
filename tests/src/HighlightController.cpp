@@ -166,7 +166,7 @@ struct TestCase {
     // TODO: create one of these from a raw irc message? hmm xD
     struct {
         MessageParseArgs args;
-        std::vector<Badge> badges;
+        std::vector<TwitchBadge> badges;
         QString senderName;
         QString originalMessage;
         MessageFlags flags;

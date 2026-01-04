@@ -47,8 +47,8 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags);
 /// @param tags The tags of the IRC message
 /// @param tagName The name of the tag to read badges from
 /// @returns A list of badges (name and version)
-std::vector<Badge> parseBadgeTag(const QVariantMap &tags,
-                                 const QString &tagName = "badges");
+std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
+                                       const QString &tagName = "badges");
 
 /// @brief Parses Twitch emotes in an IRC message
 ///

@@ -2,10 +2,6 @@
     "input": "@tmi-sent-ts=1726764056444 :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -119,6 +115,10 @@
             "searchText": "jammehcow  jammehcow: Kappa ",
             "serverReceivedTime": "2024-09-19T16:40:56Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

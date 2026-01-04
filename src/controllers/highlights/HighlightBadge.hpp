@@ -12,7 +12,7 @@
 
 namespace chatterino {
 
-class Badge;
+class TwitchBadge;
 
 class HighlightBadge
 {
@@ -32,7 +32,7 @@ public:
     bool showInMentions() const;
     bool hasAlert() const;
     bool hasSound() const;
-    bool isMatch(const Badge &badge) const;
+    bool isMatch(const TwitchBadge &badge) const;
 
     /**
      * @brief Check if this highlight phrase has a custom sound set.
@@ -55,7 +55,7 @@ public:
     static QColor FALLBACK_HIGHLIGHT_COLOR;
 
 private:
-    bool compare(const QString &id, const Badge &badge) const;
+    bool compare(const QString &id, const TwitchBadge &badge) const;
 
     QString badgeName_;
     QString displayName_;
