@@ -481,21 +481,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "yours is successfully sent in the matching channel.")
         ->addTo(layout);
 
-#ifdef CHATTERINO_WITH_SPELLCHECK
-    SettingWidget::checkbox("Check spelling by default (experimental)",
-                            s.enableSpellChecking)
-        ->setTooltip(
-            u"Check the spelling of words in the input box of all splits by "
-            "default. This can be overwritten per split in the context menu."
-            " Chatterino does not include dictionaries - they have to "
-            "be downloaded or created manually. Chatterino expects Hunspell "
-            "dictionaries in '" %
-            getApp()->getPaths().dictionariesDirectory %
-            u"'. The file index.aff has to contain the affixes and index.dic "
-            u"must contain the dictionary (subject to change).")
-        ->addTo(layout);
-#endif
-
     layout.addTitle("Messages");
 
     SettingWidget::checkbox("Separate with lines", s.separateMessages)
