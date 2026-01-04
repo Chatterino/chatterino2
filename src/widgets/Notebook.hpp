@@ -115,7 +115,7 @@ public:
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
-    void setLockNotebookLayout(bool value);
+    virtual void setLockNotebookLayout(bool value);
 
     virtual void addNotebookActionsToMenu(QMenu *menu);
 
@@ -275,6 +275,8 @@ private:
     // Main window on Windows has basically a duplicate of this in Window
     PixmapButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    void setLockNotebookLayout(bool value) override;
 };
 
 }  // namespace chatterino
