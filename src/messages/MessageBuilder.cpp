@@ -2472,6 +2472,10 @@ void MessageBuilder::appendChatterinoBadges(const QString &userID)
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
+
+        /// e.g. "chatterino:Chatterino Top donator"
+        this->message().externalBadges.emplace_back(u"chatterino:" %
+                                                    (*badge)->tooltip.string);
     }
 }
 
@@ -2482,6 +2486,10 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+
+        /// e.g. "frankerfacez:subwoofer"
+        this->message().externalBadges.emplace_back(u"frankerfacez:" %
+                                                    badge.name);
     }
 
     if (twitchChannel == nullptr)
@@ -2493,6 +2501,10 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+
+        /// e.g. "frankerfacez:subwoofer"
+        this->message().externalBadges.emplace_back(u"frankerfacez:" %
+                                                    badge.name);
     }
 }
 
@@ -2501,6 +2513,10 @@ void MessageBuilder::appendBttvBadges(const QString &userID)
     if (auto badge = getApp()->getBttvBadges()->getBadge({userID}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeBttv);
+
+        /// e.g. "betterttv:Pro Subscriber"
+        this->message().externalBadges.emplace_back(u"betterttv:" %
+                                                    (*badge)->tooltip.string);
     }
 }
 
@@ -2509,6 +2525,10 @@ void MessageBuilder::appendSeventvBadges(const QString &userID)
     if (auto badge = getApp()->getSeventvBadges()->getBadge({userID}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
+
+        /// e.g. "7tv:Pro Subscriber"
+        this->message().externalBadges.emplace_back(u"7tv:" %
+                                                    (*badge)->tooltip.string);
     }
 }
 

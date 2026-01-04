@@ -82,13 +82,12 @@ void FfzBadges::load()
                     .homePage = Url{},
                 };
 
-                Badge badge;
-
                 int badgeID = jsonBadge.value("id").toInt();
 
                 this->badges[badgeID] = Badge{
-                    std::make_shared<const Emote>(std::move(emote)),
-                    QColor(jsonBadge.value("color").toString()),
+                    .emote = std::make_shared<const Emote>(std::move(emote)),
+                    .color = QColor(jsonBadge.value("color").toString()),
+                    .name = jsonBadge.value("name").toString(),
                 };
 
                 // Find users with this badge
