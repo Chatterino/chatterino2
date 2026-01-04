@@ -32,7 +32,8 @@ public:
         this->condition_.notify_one();
     }
 
-    void waitForRequest()
+    void waitForRequest(
+        std::chrono::milliseconds interval = std::chrono::milliseconds(10))
     {
         using namespace std::chrono_literals;
         auto start = std::chrono::system_clock::now();
@@ -41,7 +42,7 @@ public:
         {
             {
                 std::unique_lock lck(this->mutex_);
-                bool done = this->condition_.wait_for(lck, 10ms, [this] {
+                bool done = this->condition_.wait_for(lck, interval, [this] {
                     return this->requestDone_;
                 });
                 if (done)
