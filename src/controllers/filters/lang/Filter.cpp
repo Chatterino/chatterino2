@@ -12,6 +12,7 @@ namespace chatterino::filters {
 
 const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
     {"author.badges", Type::StringList},
+    {"author.external_badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
     {"author.user_id", Type::String},
@@ -59,6 +60,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * List of identifiers:
      *
      * author.badges
+     * author.external_badges
      * author.color
      * author.name
      * author.user_id
@@ -121,6 +123,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
     }
     ContextMap vars = {
         {"author.badges", std::move(badges)},
+        {"author.external_badges", m->externalBadges},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
         {"author.user_id", m->userID},
