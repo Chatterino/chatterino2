@@ -118,21 +118,19 @@ QJsonObject Message::toJson() const
         {"frozen"_L1, this->frozen},
     };
 
-    QJsonArray badges;
+    QJsonArray twitchBadges;
     for (const auto &badge : this->twitchBadges)
     {
-        badges.append(badge.key_);
+        twitchBadges.append(badge.key_);
     }
-    // TODO: rename to twitchBadges
-    msg["badges"_L1] = badges;
+    msg["twitchBadges"_L1] = twitchBadges;
 
-    QJsonObject badgeInfos;
+    QJsonObject twitchBadgeInfos;
     for (const auto &[key, value] : this->twitchBadgeInfos)
     {
-        badgeInfos.insert(key, value);
+        twitchBadgeInfos.insert(key, value);
     }
-    // TODO: rename to twitchBadgeInfos
-    msg["badgeInfos"_L1] = badgeInfos;
+    msg["twitchBadgeInfos"_L1] = twitchBadgeInfos;
 
     if (this->highlightColor)
     {

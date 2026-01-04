@@ -39,10 +39,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "testaccount_420",
             "count": 1,
             "displayName": "",
@@ -183,6 +179,10 @@
             "searchText": "nerixyz banned twitchdev in testaccount_420. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

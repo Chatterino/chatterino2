@@ -2,11 +2,6 @@
     "input": "@tmi-sent-ts=1726764056444;subscriber=1;id=546c42a6-21d0-4f3d-a6a0-c77f78d7b131;room-id=11148817;user-id=123456;display-name=badgy;badges=subscriber24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :badgy!badgy@badgy.tmi.twitch.tv PRIVMSG #pajlada :badge",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "badgy",
@@ -223,6 +218,11 @@
             "searchText": "badgy  badgy: badge ",
             "serverReceivedTime": "2024-09-19T16:40:56Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+            ],
             "userID": "123456",
             "usernameColor": "#ffff0000"
         }
