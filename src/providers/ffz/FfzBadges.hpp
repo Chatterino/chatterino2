@@ -26,9 +26,6 @@ public:
     struct Badge {
         EmotePtr emote;
         QColor color;
-
-        /// The name of the badge from the FrankerFaceZ API, e.g. "subwoofer" or "developer"
-        QString name;
     };
 
     std::vector<Badge> getUserBadges(const UserId &id);

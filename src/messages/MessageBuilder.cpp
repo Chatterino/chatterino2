@@ -2474,8 +2474,7 @@ void MessageBuilder::appendChatterinoBadges(const QString &userID)
                                     MessageElementFlag::BadgeChatterino);
 
         /// e.g. "chatterino:Chatterino Top donator"
-        this->message().externalBadges.emplace_back(u"chatterino:" %
-                                                    (*badge)->tooltip.string);
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 
@@ -2488,8 +2487,7 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
 
         /// e.g. "frankerfacez:subwoofer"
-        this->message().externalBadges.emplace_back(u"frankerfacez:" %
-                                                    badge.name);
+        this->message().externalBadges.emplace_back(badge.emote->name.string);
     }
 
     if (twitchChannel == nullptr)
@@ -2503,8 +2501,7 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
 
         /// e.g. "frankerfacez:subwoofer"
-        this->message().externalBadges.emplace_back(u"frankerfacez:" %
-                                                    badge.name);
+        this->message().externalBadges.emplace_back(badge.emote->name.string);
     }
 }
 
@@ -2515,8 +2512,7 @@ void MessageBuilder::appendBttvBadges(const QString &userID)
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeBttv);
 
         /// e.g. "betterttv:Pro Subscriber"
-        this->message().externalBadges.emplace_back(u"betterttv:" %
-                                                    (*badge)->tooltip.string);
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 
@@ -2526,9 +2522,8 @@ void MessageBuilder::appendSeventvBadges(const QString &userID)
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
 
-        /// e.g. "7tv:Pro Subscriber"
-        this->message().externalBadges.emplace_back(u"7tv:" %
-                                                    (*badge)->tooltip.string);
+        /// e.g. "7tv:NNYS 2024"
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 

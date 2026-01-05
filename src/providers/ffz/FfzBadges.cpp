@@ -66,7 +66,11 @@ void FfzBadges::load()
                                jsonBadge["height"].toInt(18));
 
                 auto emote = Emote{
-                    .name = EmoteName{},
+                    .name =
+                        EmoteName{
+                            u"frankerfacez:" %
+                                jsonBadge.value("name").toString(),
+                        },
                     .images =
                         ImageSet{
                             Image::fromUrl(
@@ -87,7 +91,6 @@ void FfzBadges::load()
                 this->badges[badgeID] = Badge{
                     .emote = std::make_shared<const Emote>(std::move(emote)),
                     .color = QColor(jsonBadge.value("color").toString()),
-                    .name = jsonBadge.value("name").toString(),
                 };
 
                 // Find users with this badge

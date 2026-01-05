@@ -63,7 +63,7 @@
                         "images": {
                             "1x": "https://chatterino.com/Chatterino.png"
                         },
-                        "name": "",
+                        "name": "chatterino:Chatterino",
                         "tooltip": "Chatterino badge"
                     },
                     "flags": "BadgeChatterino",
@@ -81,7 +81,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ1.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ1",
                         "tooltip": "FFZ1 badge"
                     },
                     "flags": "BadgeFfz",
@@ -99,7 +99,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -117,7 +117,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -135,7 +135,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -153,7 +153,7 @@
                         "images": {
                             "1x": "https://chatterino.com/7tv//1x"
                         },
-                        "name": "",
+                        "name": "7tv:7TV badge name",
                         "tooltip": "7TV badge"
                     },
                     "flags": "BadgeSevenTV",
@@ -210,12 +210,12 @@
                 }
             ],
             "externalBadges": [
-                "chatterino:Chatterino badge",
-                "frankerfacez:",
-                "frankerfacez:",
-                "frankerfacez:",
-                "frankerfacez:",
-                "7tv:7TV badge"
+                "chatterino:Chatterino",
+                "frankerfacez:FFZ1",
+                "frankerfacez:FFZ2",
+                "frankerfacez:FFZ2",
+                "frankerfacez:FFZ2",
+                "7tv:7TV badge name"
             ],
             "flags": "Collapsed",
             "frozen": false,
