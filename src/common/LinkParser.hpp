@@ -75,7 +75,9 @@ struct Parsed {
     QStringView link;
 
     /// Checks if the parsed link contains a prefix
-    bool hasPrefix(const QString &source) const noexcept
+    ///
+    /// @param source The exact source string passed to parse()
+    bool hasPrefix(QStringView source) const noexcept
     {
         return this->link.begin() != source.begin();
     }
@@ -89,13 +91,17 @@ struct Parsed {
     /// https://www.forsen.tv/commands
     /// (empty)
     /// ```
-    QStringView prefix(const QString &source) const noexcept
+    ///
+    /// @param source The exact source string passed to parse()
+    QStringView prefix(QStringView source) const noexcept
     {
         return {source.data(), this->link.begin()};
     }
 
     /// Checks if the parsed link contains a suffix
-    bool hasSuffix(const QString &source) const noexcept
+    ///
+    /// @param source The exact source string passed to parse()
+    bool hasSuffix(QStringView source) const noexcept
     {
         return this->link.end() != source.end();
     }
@@ -109,7 +115,9 @@ struct Parsed {
     /// https://www.forsen.tv/commands
     /// (empty)
     /// ```
-    QStringView suffix(const QString &source) const noexcept
+    ///
+    /// @param source The exact source string passed to parse()
+    QStringView suffix(QStringView source) const noexcept
     {
         return {
             this->link.begin() + this->link.size(),
@@ -125,6 +133,6 @@ struct Parsed {
 /// views into @a source.
 ///
 /// For the accepted links, see Parsed.
-std::optional<Parsed> parse(const QString &source) noexcept;
+std::optional<Parsed> parse(QStringView source) noexcept;
 
 }  // namespace chatterino::linkparser

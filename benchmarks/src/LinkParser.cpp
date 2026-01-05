@@ -23,7 +23,7 @@ static void BM_LinkParsing(benchmark::State &state)
 
     // Make sure the TLDs are loaded
     {
-        benchmark::DoNotOptimize(linkparser::parse("xd.com"));
+        benchmark::DoNotOptimize(linkparser::parse(u"xd.com"));
     }
 
     for (auto _ : state)

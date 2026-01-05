@@ -1009,7 +1009,7 @@ void MessageBuilder::append(std::unique_ptr<MessageElement> element)
 }
 
 void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
-                             const QString &source)
+                             QStringView source)
 {
     QString lowercaseLinkString;
     QString origLink = parsedLink.link.toString();
