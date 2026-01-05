@@ -179,6 +179,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,
             "id": "",

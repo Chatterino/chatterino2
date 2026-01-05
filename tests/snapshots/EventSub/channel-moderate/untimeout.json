@@ -136,6 +136,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Untimeout|EventSub|ModerationAction",
             "frozen": true,
             "id": "",

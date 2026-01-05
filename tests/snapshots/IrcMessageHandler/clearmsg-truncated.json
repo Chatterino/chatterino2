@@ -106,6 +106,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",

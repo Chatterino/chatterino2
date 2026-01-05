@@ -211,7 +211,9 @@ TEST(Filters, Evaluation)
         {"author.subbed", QVariant(false)},
         {"message.content", QVariant("hey there :) 2038-01-19 123 456")},
         {"channel.name", QVariant("forsen")},
-        {"author.badges", QVariant(QStringList({"moderator", "staff"}))}};
+        {"author.badges", QVariant(QStringList({"moderator", "staff"}))},
+        {"author.external_badges", QStringList{"frankerfacez:bot"}},
+    };
 
     // clang-format off
     std::vector<TestCase> tests
@@ -252,6 +254,7 @@ TEST(Filters, Evaluation)
         {R".(!author.subbed).", QVariant(true)},
         {R".(author.color == "#ff0000").", QVariant(true)},
         {R".(channel.name == "forsen" && author.badges contains "moderator").", QVariant(true)},
+        {R".(author.external_badges contains "frankerfacez:bot").", QVariant(true)},
         {R".(message.content match {r"(\d\d\d\d)\-(\d\d)\-(\d\d)", 3}).", QVariant("19")},
         {R".(message.content match r"HEY THERE").", QVariant(false)},
         {R".(message.content match ri"HEY THERE").", QVariant(true)},

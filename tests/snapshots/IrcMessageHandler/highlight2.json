@@ -104,6 +104,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Highlighted|Collapsed|ShowInMentions",
             "frozen": false,
             "highlightColor": "#7f7f3f49",

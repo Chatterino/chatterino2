@@ -4,6 +4,7 @@
 #include "util/ThreadGuard.hpp"
 
 #include <QColor>
+#include <QString>
 
 #include <memory>
 #include <optional>

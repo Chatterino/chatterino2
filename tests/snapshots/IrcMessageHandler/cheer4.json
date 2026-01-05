@@ -122,6 +122,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|CheerMessage",
             "frozen": false,
             "id": "60d8835b-23fa-418c-96ca-5874e5d5e8ba",

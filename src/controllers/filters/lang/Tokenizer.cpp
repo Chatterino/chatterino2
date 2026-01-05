@@ -18,6 +18,7 @@ namespace chatterino::filters {
 
 const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"author.badges", "author badges"},
+    {"author.external_badges", "author external badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},
     {"author.user_id", "author user id"},

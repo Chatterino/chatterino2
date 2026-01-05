@@ -103,6 +103,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Highlighted|Collapsed",
             "frozen": false,
             "highlightColor": "#48ae812f",

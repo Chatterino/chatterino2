@@ -1,7 +1,7 @@
 #include "providers/seventv/SeventvBadges.hpp"
 
 #include "messages/Emote.hpp"
-#include "messages/Image.hpp"
+#include "messages/Image.hpp"  // IWYU pragma: keep
 #include "providers/seventv/SeventvEmotes.hpp"
 
 namespace chatterino {
@@ -15,7 +15,9 @@ EmotePtr SeventvBadges::createBadge(const QString &id,
                                     const QJsonObject &badgeJson) const
 {
     auto emote = Emote{
-        .name = EmoteName{},
+        // We utilize the "emote" "name" for filtering badges, and expect
+        // the format to be "7tv:badge name" (e.g. "7tv:NNYS 2024")
+        .name = EmoteName{u"7tv:" % badgeJson["name"].toString()},
         .images = SeventvEmotes::createImageSet(badgeJson, true),
         .tooltip = Tooltip{badgeJson["tooltip"].toString()},
         .homePage = Url{},

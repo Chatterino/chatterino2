@@ -22,6 +22,7 @@
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625)
 - Minor: Added `debug.traceback` for plugins. (#6652)
 - Minor: Added title and duration options for `/clip` command. (#6669)
+- Minor: Added the ability to filter on messages by the author's external badges (example: `author.external_badges contains "chatterino:Top Donator"` or `author.external_badges contains "frankerfacez:bot"`). (#6709)
 - Minor: Added Markdown support to user notes. (#6490)
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)

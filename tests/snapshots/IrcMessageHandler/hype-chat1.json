@@ -148,6 +148,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ElevatedMessage",
             "frozen": false,
             "id": "e6681ba0-cdc6-4482-93a3-515b74361e8b",
@@ -221,6 +223,8 @@
                         "NOK14.00"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
             "frozen": false,

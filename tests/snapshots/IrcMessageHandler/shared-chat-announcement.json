@@ -186,6 +186,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|Subscription|SharedMessage",
             "frozen": false,
             "highlightColor": "#64c466ff",
@@ -252,6 +254,8 @@
                         "Announcement"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|DoNotTriggerNotification|Subscription|SharedMessage",
             "frozen": false,

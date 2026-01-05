@@ -53,6 +53,8 @@
                 "type": "ReplyCurveElement"
             }
         ],
+        "externalBadges": [
+        ],
         "flags": "",
         "frozen": false,
         "id": "",

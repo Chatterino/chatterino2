@@ -214,6 +214,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -328,6 +330,8 @@
                         "."
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,

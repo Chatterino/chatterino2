@@ -55,6 +55,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification",
             "frozen": false,
             "id": "",

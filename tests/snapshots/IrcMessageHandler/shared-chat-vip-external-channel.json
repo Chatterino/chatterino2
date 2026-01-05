@@ -168,6 +168,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|SharedMessage",
             "frozen": false,
             "id": "3e0750f7-541e-4f7c-8fec-4f943bfd84a3",
