@@ -143,11 +143,8 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         b.emplace<EmoteElement>(emote,
                                                 MessageElementFlag::EmojiAll);
                     }
-                    void operator()(QStringView stringView,
-                                    MessageBuilder &b) const
+                    void operator()(QStringView string, MessageBuilder &b) const
                     {
-                        QString string =
-                            stringView.toString();  // FIXME: use string view
                         auto link = linkparser::parse(string);
                         if (link)
                         {
@@ -155,7 +152,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                         else
                         {
-                            b.emplace<TextElement>(string,
+                            b.emplace<TextElement>(string.toString(),
                                                    MessageElementFlag::Text);
                         }
                     }

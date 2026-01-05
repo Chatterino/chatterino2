@@ -170,7 +170,7 @@ Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
 
 namespace chatterino::linkparser {
 
-std::optional<Parsed> parse(const QString &source) noexcept
+std::optional<Parsed> parse(QStringView source) noexcept
 {
     using SizeType = QString::size_type;
 
