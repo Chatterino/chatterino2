@@ -122,8 +122,6 @@ public:
     // Update layout and tab visibility
     void refresh();
 
-    void sortTabsAlphabetically();
-
 protected:
     bool getShowTabs() const;
     void setShowTabs(bool value);
@@ -170,6 +168,8 @@ protected:
     bool shouldShowTab(const NotebookTab *tab) const;
 
     void performLayout(bool animate = false);
+
+    void sortTabsAlphabetically();
 
 private:
     struct LayoutContext {

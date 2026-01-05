@@ -1640,7 +1640,7 @@ void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
 
 void SplitNotebook::setLockNotebookLayout(bool value)
 {
-    this->Notebook::setLockNotebookLayout(value);
+    Notebook::setLockNotebookLayout(value);
     this->sortTabsAlphabeticallyAction_->setEnabled(!value);
 }
 
