@@ -83,6 +83,7 @@
 - Dev: Prefer `std::expected` over `nonstd::expected_lite`. (#6693)
 - Dev: Moved Twitch PubSub to liveupdates. (#6638)
 - Dev: Refactored types used for emoji parsing. (#6714)
+- Dev: `LinkParser` now parses `QStringView`s. (#6715)
 
 ## 2.5.4
 
