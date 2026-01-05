@@ -143,9 +143,11 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         b.emplace<EmoteElement>(emote,
                                                 MessageElementFlag::EmojiAll);
                     }
-                    void operator()(const QString &string,
+                    void operator()(QStringView stringView,
                                     MessageBuilder &b) const
                     {
+                        QString string =
+                            stringView.toString();  // FIXME: use string view
                         auto link = linkparser::parse(string);
                         if (link)
                         {
@@ -158,7 +160,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                     }
                 } visitor;
-                boost::apply_visitor(
+                std::visit(
                     [&b](auto &&arg) {
                         visitor(arg, b);
                     },

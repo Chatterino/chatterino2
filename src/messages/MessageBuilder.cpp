@@ -2363,16 +2363,15 @@ void MessageBuilder::addWords(
             for (auto variant :
                  getApp()->getEmotes()->getEmojis()->parse(preText))
             {
-                boost::apply_visitor(variant::Overloaded{
-                                         [&](const EmotePtr &emote) {
-                                             this->addEmoji(emote);
-                                         },
-                                         [&](QString text) {
-                                             this->addTextOrEmote(
-                                                 state, std::move(text));
-                                         },
-                                     },
-                                     variant);
+                std::visit(variant::Overloaded{
+                               [&](const EmotePtr &emote) {
+                                   this->addEmoji(emote);
+                               },
+                               [&](QStringView text) {
+                                   this->addTextOrEmote(state, text.toString());
+                               },
+                           },
+                           variant);
             }
 
             cursor += preText.size();
@@ -2388,16 +2387,15 @@ void MessageBuilder::addWords(
         // split words
         for (auto variant : getApp()->getEmotes()->getEmojis()->parse(word))
         {
-            boost::apply_visitor(variant::Overloaded{
-                                     [&](const EmotePtr &emote) {
-                                         this->addEmoji(emote);
-                                     },
-                                     [&](QString text) {
-                                         this->addTextOrEmote(state,
-                                                              std::move(text));
-                                     },
-                                 },
-                                 variant);
+            std::visit(variant::Overloaded{
+                           [&](const EmotePtr &emote) {
+                               this->addEmoji(emote);
+                           },
+                           [&](QStringView text) {
+                               this->addTextOrEmote(state, text.toString());
+                           },
+                       },
+                       variant);
         }
 
         cursor += word.size() + 1;

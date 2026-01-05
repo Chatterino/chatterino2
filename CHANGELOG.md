@@ -82,6 +82,7 @@
 - Dev: Enable C++ 23. (#6693)
 - Dev: Prefer `std::expected` over `nonstd::expected_lite`. (#6693)
 - Dev: Moved Twitch PubSub to liveupdates. (#6638)
+- Dev: Refactored types used for emoji parsing. (#6714)
 
 ## 2.5.4
 

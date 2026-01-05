@@ -929,9 +929,9 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             for (const auto &parsedWord :
                  app->getEmotes()->getEmojis()->parse(word))
             {
-                if (parsedWord.type() == typeid(QString))
+                if (std::holds_alternative<QStringView>(parsedWord))
                 {
-                    currentText += boost::get<QString>(parsedWord);
+                    currentText += std::get<QStringView>(parsedWord);
                     QString prev =
                         currentText;  // only increments the ref-count
                     currentText =
@@ -943,9 +943,9 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                         break;
                     }
                 }
-                else if (parsedWord.type() == typeid(EmotePtr))
+                else if (std::holds_alternative<EmotePtr>(parsedWord))
                 {
-                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    auto emote = std::get<EmotePtr>(parsedWord);
                     auto image =
                         emote->images.getImageOrLoaded(container.getScale());
                     if (!image->isEmpty())
