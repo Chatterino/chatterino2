@@ -64,7 +64,7 @@ static void BM_EmojiParsing(benchmark::State &state)
 
     struct TestCase {
         QString input;
-        std::vector<boost::variant<EmotePtr, QString>> expectedOutput;
+        std::vector<std::variant<EmotePtr, QStringView>> expectedOutput;
     };
 
     const auto &emojiMap = emojis.getEmojis();
@@ -89,9 +89,9 @@ static void BM_EmojiParsing(benchmark::State &state)
             "foo 🐧 bar",
             // expected output
             {
-                "foo ",
+                u"foo ",
                 penguinEmoji,
-                " bar",
+                u" bar",
             },
         },
         {
@@ -99,7 +99,7 @@ static void BM_EmojiParsing(benchmark::State &state)
             "foo bar",
             // expected output
             {
-                "foo bar",
+                u"foo bar",
             },
         },
         {
@@ -107,9 +107,9 @@ static void BM_EmojiParsing(benchmark::State &state)
             "foo 🐧 bar 🐧🐧🐧🐧🐧",
             // expected output
             {
-                "foo ",
+                u"foo ",
                 penguinEmoji,
-                " bar ",
+                u" bar ",
                 penguinEmoji,
                 penguinEmoji,
                 penguinEmoji,
@@ -133,9 +133,9 @@ static void BM_EmojiParsing(benchmark::State &state)
                 qDebug() << "BAD BENCH";
                 for (const auto &v : output)
                 {
-                    if (v.type() == typeid(QString))
+                    if (std::holds_alternative<QStringView>(v))
                     {
-                        qDebug() << "output:" << boost::get<QString>(v);
+                        qDebug() << "output:" << std::get<QStringView>(v);
                     }
                 }
             }
@@ -158,7 +158,7 @@ static void BM_EmojiParsing2(benchmark::State &state, const QString &input,
         int actualNumEmojis = 0;
         for (const auto &part : output)
         {
-            if (part.type() == typeid(EmotePtr))
+            if (std::holds_alternative<EmotePtr>(part))
             {
                 ++actualNumEmojis;
             }

@@ -65,7 +65,7 @@ TEST(Emojis, Parse)
 
     struct TestCase {
         QString input;
-        std::vector<boost::variant<EmotePtr, QString>> expectedOutput;
+        std::vector<std::variant<EmotePtr, QStringView>> expectedOutput;
     };
 
     auto getEmoji = [&](auto code) {
@@ -96,23 +96,23 @@ TEST(Emojis, Parse)
     const std::vector<TestCase> tests{
         {
             "abc",
-            {"abc"},
+            {u"abc"},
         },
         {
             "abc def",
-            {"abc def"},
+            {u"abc def"},
         },
         {
             "abc🐧def",
-            {"abc", penguin, "def"},
+            {u"abc", penguin, u"def"},
         },
         {
             "abc 🐧def",
-            {"abc ", penguin, "def"},
+            {u"abc ", penguin, u"def"},
         },
         {
             " abc🐧 def ",
-            {" abc", penguin, " def "},
+            {u" abc", penguin, u" def "},
         },
         {
             "🐧",
