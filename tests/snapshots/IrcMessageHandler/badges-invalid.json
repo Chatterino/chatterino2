@@ -149,6 +149,24 @@
                 },
                 {
                     "emote": {
+                        "id": "https://chatterino.com/betterttv/test.png",
+                        "images": {
+                            "1x": "https://chatterino.com/betterttv/test.png"
+                        },
+                        "name": "betterttv:pro",
+                        "tooltip": "BTTV Pro"
+                    },
+                    "flags": "BadgeBttv",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "BTTV Pro",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7tv//1x"
@@ -215,6 +233,7 @@
                 "frankerfacez:FFZ2",
                 "frankerfacez:FFZ2",
                 "frankerfacez:FFZ2",
+                "betterttv:pro",
                 "7tv:7TV badge name"
             ],
             "flags": "Collapsed",

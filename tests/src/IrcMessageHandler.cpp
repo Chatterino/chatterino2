@@ -536,6 +536,14 @@ public:
         this->mockApplication->getSeventvBadges()->assignBadgeToUser(
             u"1"_s, {u"123456"_s});
 
+        // BetterTTV
+        this->mockApplication->getBttvBadges()->registerBadge({
+            {u"startedAt"_s, u"2017-01-11T09:54:10.000Z"_s},
+            {u"url"_s, u"https://chatterino.com/betterttv/test.png"_s},
+        });
+        this->mockApplication->getBttvBadges()->assignBadgeToUser(
+            u"https://chatterino.com/betterttv/test.png"_s, {u"123456"_s});
+
         // Twitch
         this->mockApplication->getTwitchBadges()->loadLocalBadges();
 
