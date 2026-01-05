@@ -57,6 +57,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
             "frozen": false,
             "id": "",

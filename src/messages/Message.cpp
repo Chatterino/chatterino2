@@ -132,6 +132,8 @@ QJsonObject Message::toJson() const
     }
     msg["twitchBadgeInfos"_L1] = twitchBadgeInfos;
 
+    msg["externalBadges"_L1] = QJsonArray::fromStringList(this->externalBadges);
+
     if (this->highlightColor)
     {
         msg["highlightColor"_L1] = this->highlightColor->name(QColor::HexArgb);

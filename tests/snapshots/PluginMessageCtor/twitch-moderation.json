@@ -53,6 +53,8 @@
                 "type": "TwitchModerationElement"
             }
         ],
+        "externalBadges": [
+        ],
         "flags": "",
         "frozen": false,
         "id": "",

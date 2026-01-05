@@ -172,6 +172,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Disabled|PubSub|AutoMod|AutoModOffendingMessageHeader|EventSub|ModerationAction",
             "frozen": true,
             "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
@@ -278,6 +280,8 @@
                         "ass"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessage|EventSub|ModerationAction",
             "frozen": true,

@@ -69,6 +69,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -186,6 +188,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "aa1baade-c9c7-4932-b518-07c6b0226914",
@@ -271,6 +275,8 @@
                         "times)"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,

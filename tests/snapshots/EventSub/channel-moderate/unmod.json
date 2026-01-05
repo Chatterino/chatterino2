@@ -136,6 +136,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|EventSub",
             "frozen": true,
             "id": "",

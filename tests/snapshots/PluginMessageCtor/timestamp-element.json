@@ -121,6 +121,8 @@
                 "type": "TimestampElement"
             }
         ],
+        "externalBadges": [
+        ],
         "flags": "",
         "frozen": false,
         "id": "",

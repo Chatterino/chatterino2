@@ -86,6 +86,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "LowTrustUsers|RestrictedMessage|EventSub",
             "frozen": true,
             "id": "",
@@ -192,6 +194,8 @@
                         "FeelsDankMan"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "PubSub|LowTrustUsers|RestrictedMessage|EventSub",
             "frozen": true,

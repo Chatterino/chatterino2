@@ -103,6 +103,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|RedeemedChannelPointReward",
             "frozen": false,
             "id": "4d409401-f692-4dd1-9295-f21350f86860",

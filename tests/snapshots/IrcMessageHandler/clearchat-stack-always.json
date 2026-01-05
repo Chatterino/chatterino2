@@ -57,6 +57,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
             "frozen": false,
             "id": "",
@@ -221,6 +223,8 @@
                     "type": "CircularImageElement",
                     "url": ""
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "Collapsed",
             "frozen": false,

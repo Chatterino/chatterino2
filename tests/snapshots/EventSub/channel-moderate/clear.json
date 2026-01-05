@@ -101,6 +101,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|PubSub|ClearChat|ModerationAction",
             "frozen": true,
             "id": "",

@@ -141,6 +141,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ElevatedMessage",
             "frozen": false,
             "id": "8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6",
@@ -209,6 +211,8 @@
                         "USD5.00"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
             "frozen": false,
