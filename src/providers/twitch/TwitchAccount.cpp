@@ -336,7 +336,7 @@ void TwitchAccount::loadSeventvUserID()
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)
-                << "Failed to load 7TV user-id:" << result.formatError();
+                << "Failed to load your 7TV user-id:" << result.formatError();
         });
 }
 
