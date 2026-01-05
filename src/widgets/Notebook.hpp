@@ -115,14 +115,12 @@ public:
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
-    void setLockNotebookLayout(bool value);
+    virtual void setLockNotebookLayout(bool value);
 
     virtual void addNotebookActionsToMenu(QMenu *menu);
 
     // Update layout and tab visibility
     void refresh();
-
-    void sortTabsAlphabetically();
 
 protected:
     bool getShowTabs() const;
@@ -170,6 +168,8 @@ protected:
     bool shouldShowTab(const NotebookTab *tab) const;
 
     void performLayout(bool animate = false);
+
+    void sortTabsAlphabetically();
 
 private:
     struct LayoutContext {
@@ -275,6 +275,8 @@ private:
     // Main window on Windows has basically a duplicate of this in Window
     PixmapButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    void setLockNotebookLayout(bool value) override;
 };
 
 }  // namespace chatterino

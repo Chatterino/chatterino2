@@ -1247,6 +1247,8 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
 
 void Notebook::sortTabsAlphabetically()
 {
+    assert(!this->isNotebookLayoutLocked() &&
+           "sortTabsAlphabetically called while notebook layout is locked");
     std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
         const QString &lhs = a.tab->getTitle();
         const QString &rhs = b.tab->getTitle();
@@ -1320,6 +1322,10 @@ SplitNotebook::SplitNotebook(Window *parent)
 
     this->sortTabsAlphabeticallyAction_ =
         new QAction("Sort Tabs Alphabetically", this);
+    if (this->isNotebookLayoutLocked())
+    {
+        this->sortTabsAlphabeticallyAction_->setEnabled(false);
+    }
     QObject::connect(this->sortTabsAlphabeticallyAction_, &QAction::triggered,
                      [this] {
                          this->sortTabsAlphabetically();
@@ -1630,6 +1636,12 @@ void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
             cb(split);
         }
     }
+}
+
+void SplitNotebook::setLockNotebookLayout(bool value)
+{
+    Notebook::setLockNotebookLayout(value);
+    this->sortTabsAlphabeticallyAction_->setEnabled(!value);
 }
 
 }  // namespace chatterino
