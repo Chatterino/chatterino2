@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 

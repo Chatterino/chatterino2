@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/InputHighlighter.hpp"
 
 #include "Application.hpp"
