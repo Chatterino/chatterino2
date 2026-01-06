@@ -41,7 +41,7 @@ jobs:
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.22.3
+        uses: ZedThree/clang-tidy-review@v0.23.0
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
@@ -67,4 +67,4 @@ jobs:
             curl, unzip
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.22.3
+        uses: ZedThree/clang-tidy-review/upload@v0.23.0
