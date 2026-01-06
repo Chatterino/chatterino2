@@ -22,7 +22,7 @@ sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev
 
 ### OpenSuse
 ```sh
-sudo zypper install cmake qt6-tools-devel qt6-multimedia-devel libboost_filesystem-devel boost-devel libopenssl-devel libboost_headers-devel qt6-svg-devel git libnotify-devel qt6-concurrent-devel qt6-qt5compat-devel libsecret-devel qt6-dbus-devel hunspell
+sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-file-utils libappstream-glib8 hunspell ninja doxygen qt6-tools-devel
 ```
 
 ### gentoo
