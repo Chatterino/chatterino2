@@ -27,7 +27,7 @@ sudo zypper install cmake qt6-tools-devel qt6-multimedia-devel libboost_filesyst
 
 ### gentoo
 ```sh
-doas emerge dev-libs/openssl ev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
+doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
 ```
 
 ### Arch Linux
