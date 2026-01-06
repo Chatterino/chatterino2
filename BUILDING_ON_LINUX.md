@@ -20,8 +20,17 @@ The built binary should be exportable from the final image & able to run on your
 sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git hunspell
 ```
 
-### Arch Linux
+### OpenSuse
+```sh
+sudo zypper install cmake qt6-tools-devel qt6-multimedia-devel libboost_filesystem-devel boost-devel libopenssl-devel libboost_headers-devel qt6-svg-devel git libnotify-devel qt6-concurrent-devel qt6-qt5compat-devel libsecret-devel qt6-dbus-devel hunspell
+```
 
+### gentoo
+```sh
+doas emerge dev-libs/openssl ev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
+```
+
+### Arch Linux
 ```sh
 sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-svg boost libnotify rapidjson pkgconf cmake hunspell
 ```
