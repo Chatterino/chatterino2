@@ -46,6 +46,7 @@ jobs:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
+          error_action: abort
           exclude: "lib/*,tools/crash-handler/*,mocks/*"
           extra_arguments: "--load=/usr/lib/ClazyClangTidy21.so --load=/usr/lib/chatterino-clang-tidy-module-21.so"
           clang_tidy_version: 21
