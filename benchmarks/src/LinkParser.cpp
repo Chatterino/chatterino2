@@ -6,6 +6,7 @@
 
 #include <benchmark/benchmark.h>
 #include <QDebug>
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
 
@@ -41,3 +42,20 @@ static void BM_LinkParsing(benchmark::State &state)
 }
 
 BENCHMARK(BM_LinkParsing);
+
+const QRegularExpression LINK_HEURISTIC(R"(^(https?://)?[^\.]+.[^\.]{2,})");
+
+static void BM_IsolatedRegex(benchmark::State &state)
+{
+    QStringList words = INPUT.split(' ');
+
+    for (auto _ : state)
+    {
+        for (const auto &word : words)
+        {
+            auto ismatch = LINK_HEURISTIC.matchView(word);
+            benchmark::DoNotOptimize(ismatch);
+        }
+    }
+}
+BENCHMARK(BM_IsolatedRegex);
