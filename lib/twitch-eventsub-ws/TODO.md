@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+
+SPDX-License-Identifier: MIT
+-->
+
 ## TODO
 
 - Default of `json_transform` should be `snake_case` since it will be used most

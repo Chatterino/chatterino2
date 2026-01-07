@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+
+SPDX-License-Identifier: MIT
+-->
+
 ## Available scripts
 
 - `get-builtin-include-dirs.py`

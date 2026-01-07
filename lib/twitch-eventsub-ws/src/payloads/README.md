@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+
+SPDX-License-Identifier: MIT
+-->
+
 # Adding a new subscription type
 
 The example will use `channel.update` on version `1`.
