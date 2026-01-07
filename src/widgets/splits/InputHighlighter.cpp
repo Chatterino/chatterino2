@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/Aliases.hpp"
+#include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Emote.hpp"
@@ -49,11 +50,17 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
-    return getApp()
-        ->getAccounts()
-        ->twitch.getCurrent()
-        ->twitchEmote(name)
-        .has_value();
+    if (getApp()
+            ->getAccounts()
+            ->twitch.getCurrent()
+            ->twitchEmote(name)
+            .has_value())
+    {
+        return true;
+    }
+
+    auto link = linkparser::parse(word);
+    return link.has_value();
 }
 
 }  // namespace
