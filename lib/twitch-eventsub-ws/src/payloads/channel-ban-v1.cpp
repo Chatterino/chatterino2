@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
 
 namespace chatterino::eventsub::lib::payload::channel_ban::v1 {

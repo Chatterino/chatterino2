@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/session.hpp"
 

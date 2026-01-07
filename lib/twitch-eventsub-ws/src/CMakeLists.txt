@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 generate_json_impls(
     OUTPUT_SOURCES eventsub_generated_sources
     BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.."

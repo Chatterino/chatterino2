@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
