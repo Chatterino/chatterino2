@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 from lib.build import build_structs
 from lib.helpers import init_clang_cindex
 from lib.membertype import MemberType

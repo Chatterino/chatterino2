@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 import os
 
 from jinja2 import Environment, FileSystemLoader

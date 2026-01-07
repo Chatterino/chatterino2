@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 import logging
 import os
 import re

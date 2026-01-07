@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: MIT
+
 from .generate import generate
 from .helpers import get_clang_builtin_include_dirs, init_clang_cindex, temporary_file
 from .logging import init_logging
