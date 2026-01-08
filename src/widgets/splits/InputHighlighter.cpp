@@ -59,6 +59,7 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
+    // TODO: Replace this with a link parser variant that doesn't return the parsed data
     auto link = linkparser::parse(word);
     return link.has_value();
 }
