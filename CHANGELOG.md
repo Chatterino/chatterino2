@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Num pad enter key on Mac now sends message instead of making new line. (#6726)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
