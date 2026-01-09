@@ -133,7 +133,8 @@ private:
      **/
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyCategory category,
                        QKeySequence keySequence, QString action,
-                       std::vector<QString> args, QString name);
+                       std::vector<QString> args, QString name,
+                       QKeySequence *keySequenceAlt = nullptr);
 
     /**
      * @brief try to remove a default hotkey if it hasn't already been modified by the user
