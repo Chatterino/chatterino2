@@ -8,6 +8,7 @@
 #include "common/Aliases.hpp"
 #include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Emote.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -101,15 +102,21 @@ void InputHighlighter::highlightBlock(const QString &text)
 #else
     auto it = this->wordRegex.globalMatch(textView);
 #endif
+    bool isFirst = true;
+    bool ignoreFirst = getApp()->getCommands()->isCommand(
+        text.section(' ', 0, 0, QString::SectionSkipEmpty));
+
     while (it.hasNext())
     {
         auto match = it.next();
         auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
+        if (!isIgnoredWord(channel, text) && !(isFirst && ignoreFirst) &&
+            !this->spellChecker.check(text))
         {
             this->setFormat(static_cast<int>(match.capturedStart()),
                             static_cast<int>(text.size()), this->spellFmt);
         }
+        isFirst = false;
     }
 }
 

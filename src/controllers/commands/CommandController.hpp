@@ -54,6 +54,7 @@ public:
         return this->pluginCommands_;
     }
 #endif
+    bool isCommand(const QString &word);
 
 private:
     void load(Paths &paths);

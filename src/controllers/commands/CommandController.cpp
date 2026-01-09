@@ -733,4 +733,19 @@ QStringList CommandController::getDefaultChatterinoCommandList()
     return this->defaultChatterinoCommandAutoCompletions_;
 }
 
+bool CommandController::isCommand(const QString &word)
+{
+    if (this->commands_.contains(word) || this->userCommands_.contains(word))
+    {
+        return true;
+    }
+#ifdef CHATTERINO_HAVE_PLUGINS
+    if (this->pluginCommands_.contains(word))
+    {
+        return true;
+    }
+#endif
+    return false;
+}
+
 }  // namespace chatterino
