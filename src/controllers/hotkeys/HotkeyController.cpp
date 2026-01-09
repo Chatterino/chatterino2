@@ -138,11 +138,11 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
         };
         auto qs = QKeySequence(hotkey->keySequence());
 
-        auto stringified = qs.toString(QKeySequence::NativeText);
+        auto stringified = qs.toString(QKeySequence::PortableText);
         if (stringified.contains("Return"))
         {
             stringified.replace("Return", "Enter");
-            auto copy = QKeySequence(stringified, QKeySequence::NativeText);
+            auto copy = QKeySequence(stringified, QKeySequence::PortableText);
             createShortcutFromKeySeq(copy);
         }
         createShortcutFromKeySeq(qs);
