@@ -25,7 +25,6 @@ kornes | https://github.com/kornes |
 
 @header Contributors
 
-Nevicar | https://github.com/Nevicar |
 Cranken | https://github.com/Cranken |
 hemirt | https://github.com/hemirt |
 LajamerrMittesdine | https://github.com/LajamerrMittesdine |
@@ -96,6 +95,7 @@ Supa | https://github.com/0Supa | :/avatars/supa.jpg
 devPoland | https://github.com/devPoland | :/avatars/devpoland.png
 Solomoncyj | https://github.com/solomoncyj |
 Juliapixel | https://github.com/Juliapixel | :/avatars/juliapixel.png
+Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
 
 # If you are a contributor add yourself above this line
 
