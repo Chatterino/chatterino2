@@ -25,6 +25,7 @@ kornes | https://github.com/kornes |
 
 @header Contributors
 
+Nevicar | https://github.com/Nevicar |
 Cranken | https://github.com/Cranken |
 hemirt | https://github.com/hemirt |
 LajamerrMittesdine | https://github.com/LajamerrMittesdine |
