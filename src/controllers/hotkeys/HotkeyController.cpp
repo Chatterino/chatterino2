@@ -11,6 +11,7 @@
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
 #include <pajlada/settings.hpp>
+#include <QKeyCombination>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QWidget>
@@ -138,14 +139,27 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
         };
         auto qs = QKeySequence(hotkey->keySequence());
 
-        auto stringified = qs.toString(QKeySequence::NativeText);
-        if (stringified.contains("Return"))
-        {
-            stringified.replace("Return", "Enter");
-            auto copy = QKeySequence(stringified, QKeySequence::NativeText);
-            createShortcutFromKeySeq(copy);
-        }
+        // Create shortcut for the original key sequence
         createShortcutFromKeySeq(qs);
+
+        // Qt treats Key_Return (main keyboard) and Key_Enter (numpad) as different keys, but they are expect to behave identically.
+        // Create a duplicate shortcut with the alternate key.
+        for (int i = 0; i < qs.count(); i++)
+        {
+            auto combo = qs[i];
+            if (combo.key() == Qt::Key_Return)
+            {
+                QKeyCombination enterCombo(combo.keyboardModifiers(),
+                                           Qt::Key_Enter);
+                createShortcutFromKeySeq(QKeySequence(enterCombo));
+            }
+            else if (combo.key() == Qt::Key_Enter)
+            {
+                QKeyCombination returnCombo(combo.keyboardModifiers(),
+                                            Qt::Key_Return);
+                createShortcutFromKeySeq(QKeySequence(returnCombo));
+            }
+        }
     }
     return output;
 }
