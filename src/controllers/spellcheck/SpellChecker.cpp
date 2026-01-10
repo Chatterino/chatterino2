@@ -24,7 +24,7 @@ namespace {
 
 /// Returns a list of available dictionaries in the given directory
 std::vector<DictionaryInfo> loadDictionariesFromDirectory(
-    const QDir &searchDirectory)
+    const QDir &searchDirectory, bool isSystem)
 {
     std::vector<DictionaryInfo> dictionaries;
 
@@ -47,14 +47,32 @@ std::vector<DictionaryInfo> loadDictionariesFromDirectory(
         auto isSymbolicLink =
             affInfo.isSymbolicLink() || dicInfo.isSymbolicLink();
 
+        QString path = [&] {
+            if (isSystem)
+            {
+                return searchDirectory.absoluteFilePath(dictName);
+            }
+            return dictName;
+        }();
+
         dictionaries.push_back(DictionaryInfo{
             .name = dictName,
-            .path = searchDirectory.absoluteFilePath(dictName),
+            .path = path,
             .isSymbolicLink = isSymbolicLink,
+            .isSystem = isSystem,
         });
     }
 
     return dictionaries;
+}
+
+QString resolveDictionaryPath(const QString &path)
+{
+    if (QDir::isAbsolutePath(path))
+    {
+        return path;
+    }
+    return combinePath(getApp()->getPaths().dictionariesDirectory, path);
 }
 
 }  // namespace
@@ -75,25 +93,20 @@ private:
 std::unique_ptr<SpellCheckerPrivate> SpellCheckerPrivate::tryLoad(
     const QString &path)
 {
-    std::filesystem::path aff;
-    std::filesystem::path dic;
-    if (path.isNull())
+    if (path.isEmpty())
     {
-        auto stdPath =
-            qStringToStdPath(getApp()->getPaths().dictionariesDirectory);
-        aff = stdPath / "index.aff";
-        dic = stdPath / "index.dic";
+        qCDebug(chatterinoSpellcheck) << "No path specified";
+        return nullptr;
     }
-    else
-    {
-        aff = qStringToStdPath(path % ".aff");
-        dic = qStringToStdPath(path % ".dic");
-    }
+
+    auto resolvedPath = resolveDictionaryPath(path);
+    auto aff = qStringToStdPath(resolvedPath % ".aff");
+    auto dic = qStringToStdPath(resolvedPath % ".dic");
 
     if (!std::filesystem::exists(aff) || !std::filesystem::exists(dic))
     {
-        qCInfo(chatterinoSpellcheck)
-            << "Failed to find index.aff or index.dic in 'Dictionaries'";
+        qCInfo(chatterinoSpellcheck).nospace().noquote()
+            << "Failed to find " << resolvedPath << ".{aff,dic}";
         return nullptr;
     }
     std::error_code ec;
@@ -124,20 +137,9 @@ SpellCheckerPrivate::SpellCheckerPrivate(const char *affpath, const char *dpath)
 }
 
 SpellChecker::SpellChecker()
-    : private_(SpellCheckerPrivate::tryLoad())
+    : private_(SpellCheckerPrivate::tryLoad(
+          getSettings()->spellCheckingDefaultDictionary))
 {
-    // The method we load dictionaries by is bound to change, so it's OK for this to be a bit ugly as we test things.
-
-    if (!this->private_)
-    {
-        // The default dictionary was not found, try the fallback if it's set
-        auto fallbackDictionary =
-            getSettings()->spellCheckingFallback.getValue();
-        if (!fallbackDictionary.isEmpty())
-        {
-            this->private_ = SpellCheckerPrivate::tryLoad(fallbackDictionary);
-        }
-    }
 }
 #else
 class SpellCheckerPrivate
@@ -192,70 +194,72 @@ std::vector<std::string> SpellChecker::suggestions(const QString &word)
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-std::vector<DictionaryInfo> SpellChecker::getSystemDictionaries() const
+std::vector<DictionaryInfo> SpellChecker::getAvailableDictionaries() const
 {
 #ifdef CHATTERINO_WITH_SPELLCHECK
+    std::vector<std::pair<QString, bool>> searchDirectories{
+        {getApp()->getPaths().dictionariesDirectory, false},
+    };
+
 #    if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
     // For each XDG data directory, search in hunspell, myspell, and myspell/dicts.
     // This somewhat matches where dictionaries are stored on Ubuntu & Fedora
     // if we want to support defaulting to your LC_ALL language.
 
-    QStringList searchDirectories;
     auto dataDirs = getXDGBaseDirectories(XDGDirectoryType::Data);
     for (const auto &dataDir : dataDirs)
     {
-        searchDirectories.push_back(combinePath(dataDir, "hunspell"));
-        searchDirectories.push_back(combinePath(dataDir, "myspell"));
-        searchDirectories.push_back(combinePath(dataDir, "myspell/dicts"));
+        searchDirectories.emplace_back(combinePath(dataDir, "hunspell"), true);
+        searchDirectories.emplace_back(combinePath(dataDir, "myspell"), true);
+        searchDirectories.emplace_back(combinePath(dataDir, "myspell/dicts"),
+                                       true);
     }
+#    endif
 
     std::vector<DictionaryInfo> dictionaries;
 
-    for (const auto &searchDirectory : searchDirectories)
+    for (const auto &[searchDirectory, isSystem] : searchDirectories)
     {
         qCDebug(chatterinoSpellcheck)
-            << "Looking for system dictionaries in" << searchDirectory;
-        for (const auto &dict : loadDictionariesFromDirectory(searchDirectory))
+            << "Looking for dictionaries in" << searchDirectory
+            << "isSystem:" << isSystem;
+        for (const auto &dict :
+             loadDictionariesFromDirectory(searchDirectory, isSystem))
         {
-            if (dict.isSymbolicLink)
+            if (dict.isSymbolicLink && dict.isSystem)
             {
                 // NOTE: We currently filter out symbolic links from system-loaded dictionaries.
                 // Without this, the list of dictionaries we "support" would be too high on Linux distros.
                 // As an example, this is the symlinks the installation of `hunspell-en-gb` creates on Arch Linux:
                 // - en_AG.aff -> en_GB-large.aff
-                // - en_BS.aff -> en_GB-large.aff
-                // - en_BW.aff -> en_GB-large.aff
-                // - en_BZ.aff -> en_GB-large.aff
-                // - en_DK.aff -> en_GB-large.aff
-                // - en_GB.aff -> en_GB-large.aff
+                // -  ...
                 // - en_GB-large.aff
-                // - en_GH.aff -> en_GB-large.aff
-                // - en_HK.aff -> en_GB-large.aff
-                // - en_IE.aff -> en_GB-large.aff
-                // - en_IN.aff -> en_GB-large.aff
-                // - en_JM.aff -> en_GB-large.aff
-                // - en_NA.aff -> en_GB-large.aff
-                // - en_NG.aff -> en_GB-large.aff
-                // - en_NZ.aff -> en_GB-large.aff
-                // - en_SG.aff -> en_GB-large.aff
-                // - en_TT.aff -> en_GB-large.aff
-                // - en_ZA.aff -> en_GB-large.aff
-                // - en_ZW.aff -> en_GB-large.aff
                 continue;
             }
+            auto name = [&] -> QString {
+                if (dict.isSystem)
+                {
+                    return dict.name % " (System)";
+                }
+                return dict.name;
+            }();
 
             dictionaries.push_back(DictionaryInfo{
-                .name = dict.name % " (System)",
+                .name = name,
                 .path = dict.path,
-                .isSymbolicLink = false,
+                .isSymbolicLink = dict.isSymbolicLink,
+                .isSystem = dict.isSystem,
             });
         }
     }
 
+    std::ranges::sort(dictionaries,
+                      [](const DictionaryInfo &lhs, const DictionaryInfo &rhs) {
+                          return std::tie(lhs.isSystem, lhs.name, lhs.path) <
+                                 std::tie(rhs.isSystem, rhs.name, rhs.path);
+                      });
+
     return dictionaries;
-#    else
-    return {};
-#    endif
 #else
     return {};
 #endif
