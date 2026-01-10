@@ -8,6 +8,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
@@ -19,6 +20,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QTableView>
+#include <QSignalBlocker>
 
 #include <array>
 
@@ -93,10 +95,19 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 #endif
     auto *searchText = new QLabel("Search keybind:", this);
 
-    QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
-                     [view](const QKeySequence &keySequence) {
-                         view->filterSearchResultsHotkey(keySequence);
-                     });
+    QObject::connect(
+            keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
+            this,
+            [view, keySequenceInput](const QKeySequence &keySequence) {
+                // Normalize Key_Enter (numpad) to Key_Return for consistent search
+                auto normalized = normalizeKeySequence(keySequence);
+                if (normalized != keySequence)
+                {
+                    QSignalBlocker blocker(keySequenceInput);
+                    keySequenceInput->setKeySequence(normalized);
+                }
+                view->filterSearchResultsHotkey(normalized);
+            });
     view->addCustomButton(searchText);
     view->addCustomButton(keySequenceInput);
 
