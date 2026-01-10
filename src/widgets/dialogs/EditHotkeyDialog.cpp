@@ -11,6 +11,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
+
 #include <QSignalBlocker>
 
 namespace chatterino {
@@ -24,8 +25,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     this->ui_->setupUi(this);
     // normalize Key_Enter (numpad) to Key_Return so both Enter keys display and behave identically
     QObject::connect(
-        this->ui_->keyComboEdit, &QKeySequenceEdit::keySequenceChanged,
-        this,
+        this->ui_->keyComboEdit, &QKeySequenceEdit::keySequenceChanged, this,
         [this](const QKeySequence &keySequence) {
             auto normalized = normalizeKeySequence(keySequence);
             if (normalized != keySequence)

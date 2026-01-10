@@ -87,8 +87,8 @@ QKeySequence normalizeKeySequence(const QKeySequence &seq)
         auto combo = seq[i];
         if (combo.key() == Qt::Key_Enter)
         {
-            combos.at(i) = QKeyCombination(combo.keyboardModifiers(),
-                                           Qt::Key_Return);
+            combos.at(i) =
+                QKeyCombination(combo.keyboardModifiers(), Qt::Key_Return);
         }
         else
         {

@@ -11,10 +11,10 @@
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
 #include <pajlada/settings.hpp>
+#include <QKeyCombination>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QWidget>
-#include <QKeyCombination>
 
 namespace {
 
