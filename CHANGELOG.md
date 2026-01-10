@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Minor: Numpad enter key on Mac now interpreted as Qt::Key_Return instead of Qt::Key_Enter. Now can be used to send messages and will also correct to Qt::Key_Return when used in Hotkeys. (#6726)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
@@ -44,6 +43,7 @@
 - Bugfix: Fixed <kbd>CMD</kbd> + <kbd>DELETE</kbd> behavior in the user notes editing dialog for macOS. (#6676)
 - Bugfix: Fixed a potential crash when closing Chatterino with a slow network connection. (#6645)
 - Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6710)
+- Bugfix: Fixed Return and Enter being treated as different keys on Mac OS. (#6726)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
