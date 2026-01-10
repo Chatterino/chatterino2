@@ -102,21 +102,22 @@ void InputHighlighter::highlightBlock(const QString &text)
 #else
     auto it = this->wordRegex.globalMatch(textView);
 #endif
-    bool isFirst = true;
-    bool ignoreFirst = getApp()->getCommands()->isCommand(
-        text.section(' ', 0, 0, QString::SectionSkipEmpty));
+    auto firstWord = text.section(' ', 0, 0, QString::SectionSkipEmpty);
+    if (it.hasNext() && getApp()->getCommands()->isCommand(firstWord) &&
+        this->wordRegex.match(firstWord).hasMatch())
+    {
+        it.next();
+    }
 
     while (it.hasNext())
     {
         auto match = it.next();
         auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !(isFirst && ignoreFirst) &&
-            !this->spellChecker.check(text))
+        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
         {
             this->setFormat(static_cast<int>(match.capturedStart()),
                             static_cast<int>(text.size()), this->spellFmt);
         }
-        isFirst = false;
     }
 }
 
