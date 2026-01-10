@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Numpad enter key on Mac now interpreted as Qt::Key_Return instead of Qt::Key_Enter. Now can be used to send messages and will also correct to Qt::Key_Return when used in Hotkeys. (#6726)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
