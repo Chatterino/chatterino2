@@ -20,6 +20,7 @@
 #include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -37,8 +38,11 @@
 #include <QCompleter>
 #include <QPainter>
 #include <QSignalBlocker>
+#include <qwindow.h>
 
+#include <algorithm>
 #include <functional>
+#include <utility>
 
 using namespace Qt::Literals;
 
@@ -55,6 +59,39 @@ qreal highlightEasingFunction(qreal progress)
     }
     return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
 }
+
+class BackwardsSearchLineEdit : public QLineEdit
+{
+    Q_OBJECT
+
+public:
+    BackwardsSearchLineEdit(QWidget *parent = nullptr)
+        : QLineEdit(parent)
+    {
+    }
+
+Q_SIGNALS:
+    void onFocusOut();
+
+protected:
+    void focusOutEvent(QFocusEvent * /* event */) override
+    {
+        this->onFocusOut();
+    }
+
+    void keyPressEvent(QKeyEvent *event) override
+    {
+        auto key = event->key();
+        bool isEndKey = key == Qt::Key_Escape || key == Qt::Key_Enter ||
+                        key == Qt::Key_Tab || key == Qt::Key_Backtab;
+        if (!event->modifiers().testFlag(Qt::ControlModifier) && isEndKey)
+        {
+            this->clearFocus();
+            return;
+        }
+        QLineEdit::keyPressEvent(event);
+    }
+};
 
 }  // namespace
 
@@ -128,6 +165,47 @@ void SplitInput::initLayout()
             &this->ui_.vbox);
     layout->setSpacing(0);
     this->applyOuterMargin();
+
+    // backwards ui
+    {
+        auto wrap =
+            layout.emplace<QWidget>().assign(&this->ui_.historySearchWrap);
+        wrap->setVisible(false);
+        wrap->setAutoFillBackground(true);
+        auto palette = wrap->palette();
+        palette.setColor(QPalette::Base, Qt::transparent);
+        palette.setColor(QPalette::Window, getTheme()->splits.input.background);
+        wrap->setPalette(palette);
+
+        auto backLayout = wrap.setLayoutType<QHBoxLayout>().withoutMargin();
+
+        backLayout->addSpacing(5);
+        auto input = backLayout.emplace<BackwardsSearchLineEdit>().assign(
+            &this->ui_.historySearchInput);
+        input->setFrame(false);
+        input->setPlaceholderText("Search input history...");
+        input->setFocusPolicy(Qt::ClickFocus);
+        QObject::connect(input.getElement(), &QLineEdit::textChanged, this,
+                         [this](const QString &text) {
+                             if (this->inHistorySearch)
+                             {
+                                 this->historySearchQuery = text;
+                                 this->refreshHistorySearch(
+                                     this->lastHistorySearchBackwards,
+                                     this->lastHistorySearchLoop);
+                             }
+                         });
+        QObject::connect(input.getElement(),
+                         &BackwardsSearchLineEdit::onFocusOut, this,
+                         &SplitInput::stopHistorySearchIfNecessary);
+        backLayout->setStretch(0, 1);
+        backLayout->addSpacing(5);
+
+        auto label =
+            backLayout.emplace<QLabel>().assign(&this->ui_.historySearchLabel);
+        label->setFrameStyle(QFrame::NoFrame);
+        backLayout->addSpacing(5);
+    }
 
     // reply label stuff
     auto replyWrapper =
@@ -298,11 +376,23 @@ void SplitInput::scaleChangedEvent(float scale)
 
 void SplitInput::themeChangedEvent()
 {
-    QPalette palette;
+    {
+        QPalette palette;
+        palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+        this->ui_.textEditLength->setPalette(palette);
+    }
 
-    palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
-
-    this->ui_.textEditLength->setPalette(palette);
+    {
+        QPalette palette = this->ui_.historySearchWrap->palette();
+        palette.setColor(QPalette::Window, getTheme()->splits.input.background);
+        if (!this->historySearchFailed)
+        {
+            palette.setColor(QPalette::Text, getTheme()->splits.input.text);
+            palette.setColor(QPalette::WindowText,
+                             getTheme()->splits.input.text);
+        }
+        this->ui_.historySearchWrap->setPalette(palette);
+    }
 
     // Theme changed, reset current background color
     this->setBackgroundColor(this->theme->splits.input.background);
@@ -472,6 +562,8 @@ void SplitInput::addShortcuts()
     HotkeyController::HotkeyMap actions{
         {"cursorToStart",
          [this](const std::vector<QString> &arguments) -> QString {
+             this->stopHistorySearchIfNecessary();
+
              if (arguments.size() != 1)
              {
                  qCWarning(chatterinoHotkeys)
@@ -507,6 +599,8 @@ void SplitInput::addShortcuts()
          }},
         {"cursorToEnd",
          [this](const std::vector<QString> &arguments) -> QString {
+             this->stopHistorySearchIfNecessary();
+
              if (arguments.size() != 1)
              {
                  qCWarning(chatterinoHotkeys)
@@ -549,11 +643,14 @@ void SplitInput::addShortcuts()
          }},
         {"sendMessage",
          [this](const std::vector<QString> &arguments) -> QString {
+             this->stopHistorySearchIfNecessary();
              return this->handleSendMessage(arguments);
          }},
         {"previousMessage",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
+
+             this->stopHistorySearchIfNecessary();
 
              if (this->prevMsg_.isEmpty() || this->prevIndex_ == 0)
              {
@@ -579,6 +676,7 @@ void SplitInput::addShortcuts()
         {"nextMessage",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
+             this->stopHistorySearchIfNecessary();
 
              // If user did not write anything before then just do nothing.
              if (this->prevMsg_.isEmpty())
@@ -630,6 +728,7 @@ void SplitInput::addShortcuts()
         {"undo",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
+             this->stopHistorySearchIfNecessary();
 
              this->ui_.textEdit->undo();
              return "";
@@ -637,6 +736,7 @@ void SplitInput::addShortcuts()
         {"redo",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
+             this->stopHistorySearchIfNecessary();
 
              this->ui_.textEdit->redo();
              return "";
@@ -684,6 +784,7 @@ void SplitInput::addShortcuts()
         {"paste",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
+             this->stopHistorySearchIfNecessary();
 
              this->ui_.textEdit->paste();
              return "";
@@ -710,6 +811,18 @@ void SplitInput::addShortcuts()
              cursor.select(QTextCursor::WordUnderCursor);
              this->ui_.textEdit->setTextCursor(cursor);
              return "";
+         }},
+        {"incremental-search-history",
+         [this](const auto &args) -> QString {
+             bool backwards = false;
+             bool loop = false;
+             if (args.size() >= 2)
+             {
+                 backwards = args[0] == u"backward"_s;
+                 loop = args[1] == u"loop"_s;
+             }
+             this->startHistorySearch(backwards, loop);
+             return {};
          }},
     };
 
@@ -1061,12 +1174,12 @@ void SplitInput::editTextChanged()
                                                true);
     }
 
+    QList<QTextEdit::ExtraSelection> selections;
     if (text.length() > 0 &&
         getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
         QTextCursor cursor = this->ui_.textEdit->textCursor();
         QTextCharFormat format;
-        QList<QTextEdit::ExtraSelection> selections;
 
         cursor.setPosition(qMin(text.length(), TWITCH_MESSAGE_LIMIT),
                            QTextCursor::MoveAnchor);
@@ -1080,11 +1193,40 @@ void SplitInput::editTextChanged()
             format.setForeground(Qt::red);
             selections.append({cursor, format});
         }
-        // block reemit of QTextEdit::textChanged()
+    }
+
+    if (!text.isEmpty() && this->inHistorySearch &&
+        !this->historySearchFailed && !this->historySearchQuery.isEmpty())
+    {
+        auto matchIdx =
+            text.indexOf(this->historySearchQuery, 0, Qt::CaseInsensitive);
+        if (matchIdx >= 0)
         {
-            const QSignalBlocker b(this->ui_.textEdit);
-            this->ui_.textEdit->setExtraSelections(selections);
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            QTextCharFormat format;
+            if (getTheme()->isLightTheme())
+            {
+                format.setBackground(QColor(20, 20, 255, 80));
+            }
+            else
+            {
+                format.setBackground(QColor(110, 110, 255, 80));
+            }
+            format.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+            cursor.setPosition(static_cast<int>(matchIdx),
+                               QTextCursor::MoveAnchor);
+            cursor.setPosition(
+                static_cast<int>(matchIdx + this->historySearchQuery.size()),
+                QTextCursor::KeepAnchor);
+            selections.append({.cursor = cursor, .format = format});
         }
+    }
+
+    // block reemit of QTextEdit::textChanged()
+    {
+        const QSignalBlocker b(this->ui_.textEdit);
+        this->ui_.textEdit->setExtraSelections(selections);
     }
 
     QString labelText;
@@ -1279,6 +1421,7 @@ void SplitInput::setPlaceholderText(const QString &text)
 void SplitInput::clearInput()
 {
     this->currMsg_ = "";
+    this->stopHistorySearchIfNecessary();
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
     if (this->enableInlineReplying_)
@@ -1425,6 +1568,187 @@ void SplitInput::updateFonts()
         app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, this->scale()));
+
+    this->ui_.historySearchWrap->setFont(getApp()->getFonts()->getFont(
+        FontStyle::ChatMediumSmall, this->scale()));
+}
+
+void SplitInput::stopHistorySearchIfNecessary()
+{
+    if (!this->inHistorySearch || isAppAboutToQuit())
+    {
+        return;
+    }
+    this->inHistorySearch = false;
+    this->ui_.historySearchWrap->hide();
+    this->split_->setFocusProxy(this->ui_.textEdit);
+    this->ui_.textEdit->setFocus();
+    this->ui_.textEdit->moveCursor(QTextCursor::End);
+    this->editTextChanged();
+}
+
+void SplitInput::startHistorySearch(bool backwards, bool loop)
+{
+    this->lastHistorySearchBackwards = backwards;
+    this->lastHistorySearchLoop = loop;
+    if (this->inHistorySearch)
+    {
+        this->cycleHistorySearch(backwards, loop);
+        return;
+    }
+    this->ui_.historySearchInput->clear();
+    this->ui_.historySearchWrap->setVisible(true);
+    this->split_->setFocusProxy(this->ui_.historySearchInput);
+    this->ui_.historySearchInput->setFocus(Qt::MouseFocusReason);
+    this->historySearchQuery = {};
+    this->inHistorySearch = true;
+    this->prevIndexBeforeSearch = this->prevIndex_;
+    this->refreshHistorySearch(backwards, loop);
+}
+
+void SplitInput::refreshHistorySearch(bool backwards, bool loop)
+{
+    if (!this->inHistorySearch)
+    {
+        return;
+    }
+    this->historySearchResults.clear();
+    if (this->historySearchQuery.isEmpty())
+    {
+        this->ui_.historySearchLabel->clear();
+        this->editTextChanged();
+        return;
+    }
+    // `prevIndex_` might've changed because the user cycled through the results.
+    // However, the initial position should be used as the anchor.
+    this->prevIndex_ = this->prevIndexBeforeSearch;
+
+    qsizetype closestMatch = -1;  // initial result
+    for (qsizetype i = 0; i < this->prevMsg_.size(); i++)
+    {
+        auto message = this->prevMsg_.at(i);
+        auto matchIdx =
+            message.indexOf(this->historySearchQuery, 0, Qt::CaseInsensitive);
+        if (matchIdx >= 0)
+        {
+            this->historySearchResults.emplace_back(
+                HistorySearchResult{.messageIdx = i, .message = message});
+        }
+
+        if (i == this->prevIndex_)
+        {
+            closestMatch =
+                static_cast<qsizetype>(this->historySearchResults.size()) - 1;
+        }
+    }
+    if (this->prevIndex_ >= this->prevMsg_.size())
+    {
+        closestMatch =
+            static_cast<qsizetype>(this->historySearchResults.size()) - 1;
+    }
+
+    // `closestMatch` points at the last message that's before or at `prevIndex_`.
+    // For forwards search, we want it to be the first message not before `prevIndex_`.
+    if (!backwards && closestMatch >= 0 &&
+        static_cast<size_t>(closestMatch) < this->historySearchResults.size() &&
+        this->historySearchResults[closestMatch].messageIdx != this->prevIndex_)
+    {
+        closestMatch++;
+    }
+
+    this->historySearchResultIndex = closestMatch;
+
+    if (loop)
+    {
+        this->loopHistorySearchIfNeeded(backwards);
+    }
+
+    this->updateSelectedHistorySearchMatch();
+}
+
+void SplitInput::cycleHistorySearch(bool backwards, bool loop)
+{
+    if (backwards)
+    {
+        this->historySearchResultIndex--;
+    }
+    else
+    {
+        this->historySearchResultIndex++;
+    }
+
+    if (loop)
+    {
+        this->loopHistorySearchIfNeeded(backwards);
+    }
+
+    this->historySearchResultIndex =
+        std::clamp(this->historySearchResultIndex, -1LL,
+                   static_cast<qsizetype>(this->historySearchResults.size()));
+
+    this->updateSelectedHistorySearchMatch();
+}
+
+void SplitInput::loopHistorySearchIfNeeded(bool backwards)
+{
+    if (backwards && this->historySearchResultIndex < 0)
+    {
+        this->historySearchResultIndex =
+            static_cast<qsizetype>(this->historySearchResults.size()) - 1;
+    }
+    else if (!backwards &&
+             std::cmp_greater_equal(this->historySearchResultIndex,
+                                    this->historySearchResults.size()))
+    {
+        this->historySearchResultIndex = 0;
+    }
+}
+
+void SplitInput::updateSelectedHistorySearchMatch()
+{
+    if (this->historySearchResultIndex < 0 ||
+        std::cmp_greater_equal(this->historySearchResultIndex,
+                               this->historySearchResults.size()))
+    {
+        this->updateHistorySearchStatus(true, "no match");
+        return;
+    }
+
+    const auto &current = this->historySearchResults[static_cast<size_t>(
+        this->historySearchResultIndex)];
+
+    this->prevIndex_ = static_cast<int>(current.messageIdx);
+    this->ui_.textEdit->setText(current.message);
+
+    this->updateHistorySearchStatus(
+        false, QString::number(this->historySearchResults.size() -
+                               this->historySearchResultIndex) %
+                   '/' % QString::number(this->historySearchResults.size()));
+
+    this->editTextChanged();
+}
+
+void SplitInput::updateHistorySearchStatus(bool failed, const QString &message)
+{
+    if (failed && !this->historySearchFailed)
+    {
+        QPalette palette = this->ui_.historySearchWrap->palette();
+        palette.setColor(QPalette::Text, Qt::red);
+        palette.setColor(QPalette::WindowText, Qt::red);
+        this->ui_.historySearchWrap->setPalette(palette);
+    }
+    else if (!failed && this->historySearchFailed)
+    {
+        QPalette palette = this->ui_.historySearchWrap->palette();
+        palette.setColor(QPalette::Text, getTheme()->splits.input.text);
+        palette.setColor(QPalette::WindowText, getTheme()->splits.input.text);
+        this->ui_.historySearchWrap->setPalette(palette);
+    }
+    this->historySearchFailed = failed;
+
+    this->ui_.historySearchLabel->setText(message);
 }
 
 }  // namespace chatterino
+
+#include "SplitInput.moc"
