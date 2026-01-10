@@ -361,8 +361,8 @@ public:
         "/behaviour/spellChecking/enabled",
         false,
     };
-    QStringSetting spellCheckingFallback = {
-        "/behaviour/spellChecking/systemFallback",
+    QStringSetting spellCheckingDefaultDictionary = {
+        "/behaviour/spellChecking/defaultDictionary",
         "",
     };
 
