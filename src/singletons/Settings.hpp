@@ -33,10 +33,13 @@
 
 #include <optional>
 #include <string_view>
+#include <vector>
 
 using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
+
+struct SharedHighlight;
 
 class Args;
 
@@ -542,6 +545,7 @@ public:
         "/highlighting/subHighlight/enableTaskbarFlashing", false};
     QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
                                            ""};
+
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
     BoolSetting enableWatchStreakHighlight = {
@@ -784,6 +788,8 @@ private:
         "/highlighting/users"};
     ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
         "/highlighting/badges"};
+    ChatterinoSetting<std::vector<SharedHighlight>> sharedHighlightsSetting = {
+        "/highlighting/sharedHighlights"};
     ChatterinoSetting<std::vector<HighlightBlacklistUser>>
         blacklistedUsersSetting = {"/highlighting/blacklist"};
     ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
@@ -799,10 +805,24 @@ private:
         "/logging/channels"};
     SignalVector<QString> mutedChannels;
 
+    IntSetting version = {
+        "/version",
+        0,
+    };
+
+    void migrate();
+
+    /// Migration 01
+    ///
+    /// This migration takes all of our custom highlight values & turns them into real highlight rows
+    /// It also merges messages, user, and badge highlights into a single vector.
+    void migrateHighlights();
+
 public:
     SignalVector<HighlightPhrase> highlightedMessages;
     SignalVector<HighlightPhrase> highlightedUsers;
     SignalVector<HighlightBadge> highlightedBadges;
+    SignalVector<SharedHighlight> sharedHighlights;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
     SignalVector<FilterRecordPtr> filterRecords;

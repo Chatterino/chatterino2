@@ -11,6 +11,7 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/SharedHighlight.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -363,6 +364,22 @@ void rebuildBadgeHighlights(Settings &settings,
     }
 }
 
+void rebuildSharedHighlights(Settings &settings,
+                             std::vector<HighlightCheck> &checks)
+{
+    auto highlights = settings.sharedHighlights.readOnly();
+
+    for (const auto &highlight : *highlights)
+    {
+        if (!highlight.enabled)
+        {
+            continue;
+        }
+
+        checks.emplace_back(highlight.buildCheck());
+    }
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -441,6 +458,13 @@ HighlightController::HighlightController(Settings &settings,
             this->rebuildChecks(settings);
         }));
 
+    this->signalHolder_.managedConnect(
+        getSettings()->sharedHighlights.delayedItemsChanged, [this, &settings] {
+            qCInfo(chatterinoHighlights)
+                << "XXX: Rebuild checks because shared highlights changed";
+            this->rebuildChecks(settings);
+        });
+
     this->rebuildChecks(settings);
 }
 
@@ -464,6 +488,8 @@ void HighlightController::rebuildChecks(Settings &settings)
     rebuildReplyThreadHighlight(settings, *checks);
 
     rebuildBadgeHighlights(settings, *checks);
+
+    rebuildSharedHighlights(settings, *checks);
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
