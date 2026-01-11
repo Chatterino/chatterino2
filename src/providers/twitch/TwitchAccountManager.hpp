@@ -70,6 +70,7 @@ public:
 
     boost::signals2::signal<void()> currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
+    pajlada::Signals::NoArgSignal currentUserNameChanged;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 
