@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 ## Unversioned
 
@@ -45,6 +45,7 @@
 - Bugfix: Fixed a potential crash when closing Chatterino with a slow network connection. (#6645)
 - Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6710)
 - Bugfix: Fixed Return and Enter being treated as different keys on Mac OS. (#6726)
+- Bugfix: Fix highlight mentions not updating when username changes. (#6723)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
@@ -491,7 +492,10 @@
 - Minor: Added an option to always include the broadcaster in user completions. This is enabled by default. (#5193, #5244)
 - Minor: Added a warning message if you have multiple commands with the same trigger. (#4322)
 - Minor: Chatters from message history are now added to autocompletion. (#5116)
-- Minor: Added support for the `{input.text}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
+- Minor: Added support for the `
+{
+    input.text
+}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
 - Minor: Added `--activate <channel>` (or `-a`) command line option to focus or add a certain Twitch channel on startup. (#5111)
 - Minor: Added the `--incognito/--no-incognito` options to the `/openurl` command, allowing you to override the "Open links in incognito/private mode" setting. (#5149, #5197)
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
@@ -1040,7 +1044,13 @@
 - Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
-- Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
+- Minor: Add `{
+    channel.name}`, `{
+    channel.id}`, `{
+    stream.game}`, `{
+    stream.title}`, `{
+    my.id}`, `{
+    my.name}` placeholders for commands (#3155)
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
 - Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)

@@ -194,6 +194,16 @@ void TwitchAccount::blockUserLocally(const QString &userID,
     this->ignoresUserLogins_.insert(blockedUser.name);
 }
 
+bool TwitchAccount::setUserName(const QString &newUserName)
+{
+    if (this->userName_.compare(newUserName, Qt::CaseInsensitive) == 0)
+    {
+        return false;
+    }
+    this->userName_ = newUserName;
+    return true;
+}
+
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
     assertInGuiThread();
