@@ -18,8 +18,7 @@ AccountController::AccountController()
     // will always be destroyed before the AccountController
     std::ignore =
         this->twitch.accounts.itemInserted.connect([this](const auto &args) {
-            this->accounts_.insert(
-                std::dynamic_pointer_cast<Account>(args.item));
+            this->accounts_.insert(args.item);
         });
 
     std::ignore =
