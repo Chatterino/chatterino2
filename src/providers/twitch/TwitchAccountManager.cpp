@@ -71,7 +71,7 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
                 login.compare(account->getUserName(), Qt::CaseInsensitive) != 0)
             {
                 account->setUserName(login);
-                getApp()->getAccounts()->twitch.currentUserChanged();
+                getApp()->getAccounts()->twitch.currentUserNameChanged.invoke();
             }
 
             auto missing = missingScopes(json["scopes"_L1].toArray());
