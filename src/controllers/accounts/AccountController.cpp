@@ -18,19 +18,18 @@ AccountController::AccountController()
     // will always be destroyed before the AccountController
     std::ignore =
         this->twitch.accounts.itemInserted.connect([this](const auto &args) {
-            this->accounts_.insert(
-                std::dynamic_pointer_cast<Account>(args.item));
+            this->accounts_.insert(args.item);
         });
 
     std::ignore =
         this->twitch.accounts.itemRemoved.connect([this](const auto &args) {
             if (args.caller != this)
             {
-                const auto &accs = this->twitch.accounts.raw();
-                auto it = std::find(accs.begin(), accs.end(), args.item);
-                assert(it != accs.end());
-
-                this->accounts_.removeAt(it - accs.begin(), this);
+                this->accounts_.removeFirstMatching(
+                    [&](const auto &item) {
+                        return item == args.item;
+                    },
+                    this);
             }
         });
 
@@ -40,10 +39,11 @@ AccountController::AccountController()
             case ProviderId::Twitch: {
                 if (args.caller != this)
                 {
-                    auto &&accs = this->twitch.accounts;
-                    auto it = std::find(accs.begin(), accs.end(), args.item);
-                    assert(it != accs.end());
-                    this->twitch.accounts.removeAt(it - accs.begin(), this);
+                    this->twitch.accounts.removeFirstMatching(
+                        [&](const auto &item) {
+                            return item == args.item;
+                        },
+                        this);
                 }
             }
             break;
