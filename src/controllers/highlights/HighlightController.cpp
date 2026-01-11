@@ -441,6 +441,12 @@ HighlightController::HighlightController(Settings &settings,
             this->rebuildChecks(settings);
         }));
 
+    this->signalHolder_.managedConnect(
+        accounts->twitch.currentUserNameChanged, [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because user name changed";
+            this->rebuildChecks(settings);
+        });
     this->rebuildChecks(settings);
 }
 
