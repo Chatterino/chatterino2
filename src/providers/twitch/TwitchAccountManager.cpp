@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "providers/twitch/TwitchAccountManager.hpp"
+#include "controllers/accounts/AccountController.hpp"
 
 #include "Application.hpp"
 #include "common/Args.hpp"
@@ -69,7 +70,8 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
             if (!login.isEmpty() &&
                 login.compare(account->getUserName(), Qt::CaseInsensitive) != 0)
             {
-                account->setUserName(login);
+                account->setUserName(login);                
+                getApp()->getAccounts()->twitch.currentUserChanged();
             }
 
             auto missing = missingScopes(json["scopes"_L1].toArray());
