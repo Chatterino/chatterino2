@@ -55,6 +55,13 @@ public:
     }
 #endif
 
+    /// Returns the length of the command trigger in `text`, including leading
+    /// spaces. If `text` does not start with a command trigger, 0 is returned.
+    /// Examples:
+    ///  - " /ban forsen" returns 5
+    ///  - "/non-existing-command" returns 0
+    qsizetype commandTriggerLen(QStringView text);
+
 private:
     void load(Paths &paths);
 

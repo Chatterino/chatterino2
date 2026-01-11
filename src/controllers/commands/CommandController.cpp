@@ -733,4 +733,36 @@ QStringList CommandController::getDefaultChatterinoCommandList()
     return this->defaultChatterinoCommandAutoCompletions_;
 }
 
+qsizetype CommandController::commandTriggerLen(QStringView text)
+{
+    auto words = text.split(' ');
+
+    qsizetype triggerLen = 0;
+    qsizetype spaces = 0;
+    QString commandName{};
+
+    for (qsizetype i = 0; i < words.length() && spaces <= this->maxSpaces_; ++i)
+    {
+        commandName += words[i];
+        triggerLen += words[i].length();
+
+        if (this->commands_.contains(commandName) ||
+            this->userCommands_.contains(commandName))
+        {
+            return triggerLen;
+        }
+
+        // ignore consecutive spaces
+        if (!words[i].isEmpty())
+        {
+            commandName += ' ';
+            ++spaces;
+        }
+        // account for the space between the current and next word
+        ++triggerLen;
+    }
+
+    return 0;
+}
+
 }  // namespace chatterino
