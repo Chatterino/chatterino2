@@ -97,17 +97,16 @@ void InputHighlighter::highlightBlock(const QString &text)
     auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
+
+    // skip leading command trigger
+    auto cmdTriggerLen = getApp()->getCommands()->commandTriggerLen(textView);
+    textView = textView.sliced(cmdTriggerLen);
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto it = this->wordRegex.globalMatchView(textView);
 #else
     auto it = this->wordRegex.globalMatch(textView);
 #endif
-    auto firstWord = text.section(' ', 0, 0, QString::SectionSkipEmpty);
-    if (it.hasNext() && getApp()->getCommands()->isCommand(firstWord) &&
-        this->wordRegex.match(firstWord).hasMatch())
-    {
-        it.next();
-    }
 
     while (it.hasNext())
     {
@@ -115,8 +114,9 @@ void InputHighlighter::highlightBlock(const QString &text)
         auto text = match.captured();
         if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
         {
-            this->setFormat(static_cast<int>(match.capturedStart()),
-                            static_cast<int>(text.size()), this->spellFmt);
+            this->setFormat(
+                static_cast<int>(match.capturedStart() + cmdTriggerLen),
+                static_cast<int>(text.size()), this->spellFmt);
         }
     }
 }

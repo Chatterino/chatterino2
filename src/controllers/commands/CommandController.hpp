@@ -54,7 +54,11 @@ public:
         return this->pluginCommands_;
     }
 #endif
-    bool isCommand(const QString &word);
+
+    /// Returns the length of the command trigger in `text`, including leading
+    /// spaces. If `text` does not start with a command trigger, 0 is returned.
+    /// Example: " /ban forsen" returns 5
+    qsizetype commandTriggerLen(QStringView text);
 
 private:
     void load(Paths &paths);
