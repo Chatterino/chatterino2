@@ -132,8 +132,7 @@ public:
         this->itemsChanged_();
     }
 
-    bool removeFirstMatching(std::function<bool(const T &)> matcher,
-                             void *caller = nullptr)
+    bool removeFirstMatching(auto &&matcher, void *caller = nullptr)
     {
         assertInGuiThread();
 
