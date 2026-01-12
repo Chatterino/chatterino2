@@ -901,6 +901,11 @@ bool TwitchChannel::isStaff() const
     return this->staff_;
 }
 
+bool TwitchChannel::isLeadModerator() const
+{
+    return this->leadModerator_;
+}
+
 void TwitchChannel::setMod(bool value)
 {
     if (this->mod_ != value)
@@ -931,12 +936,27 @@ void TwitchChannel::setStaff(bool value)
     }
 }
 
+void TwitchChannel::setLeadModerator(bool value)
+{
+    if (this->leadModerator_ != value)
+    {
+        this->leadModerator_ = value;
+
+        this->userStateChanged.invoke();
+    }
+}
+
 bool TwitchChannel::isBroadcaster() const
 {
     auto *app = getApp();
 
     return this->getName() ==
            app->getAccounts()->twitch.getCurrent()->getUserName();
+}
+
+bool TwitchChannel::canManageModerators() const
+{
+    return this->isBroadcaster() || this->isLeadModerator();
 }
 
 bool TwitchChannel::hasHighRateLimit() const

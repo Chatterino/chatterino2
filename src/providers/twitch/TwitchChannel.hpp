@@ -181,7 +181,9 @@ public:
     bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
+    bool isLeadModerator() const;
     bool isBroadcaster() const override;
+    bool canManageModerators() const;
     bool hasHighRateLimit() const override;
     bool canReconnect() const override;
     void reconnect() override;
@@ -400,6 +402,7 @@ private:
     void setMod(bool value);
     void setVIP(bool value);
     void setStaff(bool value);
+    void setLeadModerator(bool value);
     void setRoomId(const QString &id);
     void setRoomModes(const RoomModes &newRoomModes);
     void setDisplayName(const QString &name);
@@ -488,6 +491,7 @@ private:
     bool mod_ = false;
     bool vip_ = false;
     bool staff_ = false;
+    bool leadModerator_ = false;
     UniqueAccess<QString> roomID_;
 
     // --

@@ -294,8 +294,8 @@ ChatterListWidget::ChatterListWidget(const TwitchChannel *twitchChannel,
     QObject::connect(searchBar, &QLineEdit::textEdited, this,
                      performListSearch);
 
-    // Only broadcaster can get vips, mods can get chatters
-    if (twitchChannel->isBroadcaster())
+    // Only broadcaster and lead moderator can get vips, mods can get chatters
+    if (twitchChannel->canManageModerators())
     {
         // Add moderators
         getHelix()->getModerators(
