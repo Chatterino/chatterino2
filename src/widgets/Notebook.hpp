@@ -257,7 +257,8 @@ public:
     void toggleTabVisibility();
 
     QAction *showAllTabsAction;
-    QAction *onlyShowLiveTabsAction;
+    QAction *showLiveTabsAction;
+    QAction *showUnreadTabsAction;
     QAction *hideAllTabsAction;
 
 protected:

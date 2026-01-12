@@ -224,6 +224,8 @@ void SplitContainer::addSplit(Split *split)
                              {
                                  if (this->tab_->updateHighlightState(state, split->getChannelView()))
                                  {
+                                     // Force a refresh for the notebook when highlight state actually changed
+                                     // to recalculate tab visibilities
                                      if (auto *notebook = dynamic_cast<Notebook *>(this->parentWidget()))
                                      {
                                          notebook->refresh();

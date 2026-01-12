@@ -1,19 +1,21 @@
 #pragma once
+#include "common/FlagsEnum.hpp"
 
 namespace chatterino {
 
 enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
 
 // Controls the visibility of tabs in this notebook
-enum NotebookTabVisibility : int {
+enum NotebookTabVisibilityFlag : uint8_t {
     // Show all tabs
-    AllTabs = (1U << 0),
+    AllTabs = 1 << 0,
 
     // Only show tabs containing splits that are live
-    LiveOnly = (1U << 1),
+    Live = 1 << 1,
 
     // Only show tabs containing splits that have unread messages
-    UnreadOnly = (1U << 2),
+    Unread = 1 << 2,
 };
+using NotebookTabVisibilityFlags = FlagsEnum<NotebookTabVisibilityFlag>;
 
 }  // namespace chatterino

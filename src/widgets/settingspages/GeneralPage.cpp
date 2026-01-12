@@ -237,18 +237,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
-    layout.addDropdown<std::underlying_type_t<NotebookTabVisibility>>(
+    layout.addDropdown<std::underlying_type_t<NotebookTabVisibilityFlag>>(
         "Tab visibility", {"All tabs", "Only live tabs", "Only unread tabs", "Live + unread tabs"}, s.tabVisibility,
         [](auto val) {
             switch (val)
             {
-                case NotebookTabVisibility::LiveOnly:
+                case NotebookTabVisibilityFlag::Live:
                     return "Only live tabs";
-                case NotebookTabVisibility::UnreadOnly:
+                case NotebookTabVisibilityFlag::Unread:
                     return "Only unread tabs";
-                case NotebookTabVisibility::LiveOnly | NotebookTabVisibility::UnreadOnly:
+                case NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Unread:
                     return "Live + unread tabs";
-                case NotebookTabVisibility::AllTabs:
+                case NotebookTabVisibilityFlag::AllTabs:
                 default:
                     return "All tabs";
             }
@@ -256,19 +256,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             if (args.value == "Only live tabs")
             {
-                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::LiveOnly);
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live);
             }
             else if (args.value == "Only unread tabs")
             {
-                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::UnreadOnly);
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Unread);
             }
             else if (args.value == "Live + unread tabs")
             {
-                return NotebookTabVisibility::LiveOnly | NotebookTabVisibility::UnreadOnly;
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Unread);
             }
             else
             {
-                return static_cast<std::underlying_type_t<NotebookTabVisibility>>(NotebookTabVisibility::AllTabs);
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::AllTabs);
             }
         },
         false, "Choose which tabs are visible in the notebook");

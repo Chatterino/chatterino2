@@ -355,7 +355,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{
               .displayName = "Set tab visibility",
               .argumentDescription =
-                  "[on, off, toggle, or liveOnly. default: toggle]",
+                  "[on, off, toggle, liveOnly, or unreadOnly. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{
@@ -363,10 +363,11 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   {"Show all tabs", {"on"}},
                   {"Hide all tabs", {"off"}},
                   {"Only show live tabs", {"liveOnly"}},
+                  {"Only show unread tabs", {"unreadOnly"}},
               },
               .argumentsPrompt = "New value:",
               .argumentsPromptHover = "Should the tabs be enabled, disabled, "
-                                      "toggled, or live-only.",
+                                      "toggled, live-only, or unread-only.",
           }},
      }},
 };

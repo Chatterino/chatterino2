@@ -685,7 +685,7 @@ void Window::addShortcuts()
              }
              else if (arg == "liveOnly")
              {
-                 this->notebook_->onlyShowLiveTabsAction->trigger();
+                 this->notebook_->showLiveTabsAction->trigger();
              }
              else if (arg == "toggleLiveOnly")
              {
