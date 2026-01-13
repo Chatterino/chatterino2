@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1728311235904;subscriber=1;id=5b6f9721-80fd-4036-951e-1ced9c591b32;room-id=11148817;user-id=129546453;display-name=nerixyz;source-badge-info=;source-room-id=141981764;source-id=d7be8e12-187c-4f96-9d96-d87a17aa9ce9;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:0-4 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :Kappa BTTVEmote BTTVGlobal 7TVEmote 7TVGlobal FFZEmote FFZGlobal BTTVTwitchDev 7TVTwitchDev FFZTwitchDev",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -66,9 +60,11 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "homePage": "https://www.twitch.tv/forsen",
                         "images": {
-                            "1x": ""
+                            "1x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-28x28.png",
+                            "2x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png",
+                            "3x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-150x150.png"
                         },
                         "name": "",
                         "tooltip": "Shared Message from twitchdev"
@@ -107,7 +103,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -141,7 +137,7 @@
                         "name": "BTTVGlobal",
                         "tooltip": "BTTVGlobal Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -176,7 +172,7 @@
                         "name": "7TVGlobal",
                         "tooltip": "7TVGlobal Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -210,7 +206,7 @@
                         "name": "FFZGlobal",
                         "tooltip": "FFZGlobal Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -229,7 +225,7 @@
                         "name": "BTTVTwitchDev",
                         "tooltip": "BTTVTwitchDev Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -249,7 +245,7 @@
                         "name": "7TVTwitchDev",
                         "tooltip": "7TVTwitchDev Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -268,7 +264,7 @@
                         "name": "FFZTwitchDev",
                         "tooltip": "FFZTwitchDev Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -291,6 +287,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "DoNotTriggerNotification|Collapsed|SharedMessage",
             "frozen": false,
             "id": "5b6f9721-80fd-4036-951e-1ced9c591b32",
@@ -300,6 +298,12 @@
             "searchText": "nerixyz  nerixyz: Kappa BTTVEmote BTTVGlobal 7TVEmote 7TVGlobal FFZEmote FFZGlobal BTTVTwitchDev 7TVTwitchDev FFZTwitchDev ",
             "serverReceivedTime": "2024-10-07T14:27:15Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

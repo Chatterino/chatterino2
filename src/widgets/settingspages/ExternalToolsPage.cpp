@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 
+#include "controllers/spellcheck/SpellChecker.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
@@ -15,6 +21,8 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+
+#include <algorithm>
 
 namespace chatterino {
 
@@ -90,7 +98,7 @@ ExternalToolsPage::ExternalToolsPage()
     y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*view);
+    this->initLayout(*this->view);
 }
 
 bool ExternalToolsPage::filterElements(const QString &query)
@@ -226,6 +234,50 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
         buttonLayout->addStretch();
         layout.addLayout(buttonLayout);
     }
+
+#ifdef CHATTERINO_WITH_SPELLCHECK
+    {
+        // auto *form = new QFormLayout;
+        layout.addTitle("Spell checker (experimental)");
+
+        layout.addDescription(
+            u"Check the spelling of words in the input box of splits."
+            " Chatterino does not include dictionaries - they have to "
+            "be downloaded or created manually. Chatterino expects "
+            "Hunspell "
+            "dictionaries in " %
+            formatRichNamedLink(getApp()->getPaths().dictionariesDirectory,
+                                getApp()->getPaths().dictionariesDirectory) %
+            u". Dictionaries are pairs of .aff (affixes) and .dic (dictionary) "
+            u"files.");
+
+        SettingWidget::checkbox("Check spelling by default",
+                                s.enableSpellChecking)
+            ->setTooltip("Check the spelling of words in the input box of all "
+                         "splits by default.")
+            ->addTo(layout);
+
+        auto toItem =
+            [](const DictionaryInfo &dict) -> std::pair<QString, QVariant> {
+            return {
+                dict.name,
+                dict.path,
+            };
+        };
+        std::vector<std::pair<QString, QVariant>> dictList{{"None", ""}};
+
+        std::ranges::transform(
+            getApp()->getSpellChecker()->getAvailableDictionaries(),
+            std::back_inserter(dictList), toItem);
+
+        if (dictList.size() > 1)
+        {
+            SettingWidget::dropdown("Default dictionary (requires restart)",
+                                    s.spellCheckingDefaultDictionary, dictList)
+                ->addTo(layout);
+        }
+    }
+#endif
 
     layout.addStretch();
 }

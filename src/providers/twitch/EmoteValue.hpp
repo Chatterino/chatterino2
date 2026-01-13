@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QString>
@@ -8,17 +12,17 @@ struct EmoteValue {
 public:
     int getSet()
     {
-        return set_;
+        return this->set_;
     }
 
     int getId()
     {
-        return id_;
+        return this->id_;
     }
 
     const QString &getChannelName()
     {
-        return channelName_;
+        return this->channelName_;
     }
 
 private:

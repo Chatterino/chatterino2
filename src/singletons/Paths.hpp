@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QString>
@@ -38,6 +42,9 @@ public:
 
     // Custom themes live here. <appDataDirectory>/Themes
     QString themesDirectory;
+
+    // Spell checking dictionaries <appDataDirectory>/Dictionaries
+    QString dictionariesDirectory;
 
     // Directory for shared memory files.
     // <appDataDirectory>/IPC   on Windows

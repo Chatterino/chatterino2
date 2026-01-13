@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <QColor>
+#include <QString>
 
 #include <memory>
 #include <optional>

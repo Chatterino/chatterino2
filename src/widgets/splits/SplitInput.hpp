@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Message.hpp"
@@ -20,11 +24,13 @@ namespace chatterino {
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
+class InputHighlighter;
 class MessageView;
 class LabelButton;
 class ResizingTextEdit;
 class ChannelView;
 class SvgButton;
+class SpellCheckHighlighter;
 enum class CompletionKind;
 
 class SplitInput : public BaseWidget
@@ -78,6 +84,9 @@ public:
 
     void triggerSelfMessageReceived();
 
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
+
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
 
@@ -102,10 +111,7 @@ protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
-#ifdef DEBUG
-    bool keyPressedEventInstalled{};
-#endif
-    void installKeyPressedEvent();
+    void installTextEditEvents();
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
@@ -187,6 +193,14 @@ protected:
     void setBackgroundColor(QColor newColor);
 
     QPropertyAnimation backgroundColorAnimation;
+
+    std::optional<bool> checkSpellingOverride_;
+    bool shouldCheckSpelling() const;
+    void checkSpellingChanged();
+
+    InputHighlighter *inputHighlighter = nullptr;
+
+    void updateFonts();
 
 private Q_SLOTS:
     void editTextChanged();

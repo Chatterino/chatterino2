@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QString>
@@ -9,13 +13,9 @@ public:
     enum Type {
         None,
         Url,
-        CloseCurrentSplit,
         UserInfo,
-        UserTimeout,
-        UserBan,
         UserWhisper,
         InsertText,
-        ShowMessage,
         UserAction,
         AutoModAllow,
         AutoModDeny,

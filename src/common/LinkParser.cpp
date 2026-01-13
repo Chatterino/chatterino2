@@ -1,6 +1,11 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
+#include "common/QLogging.hpp"
 #include "util/QCompareTransparent.hpp"
 
 #include <QFile>
@@ -20,7 +25,12 @@ TldSet &tlds()
 {
     static TldSet tlds = [] {
         QFile file(QStringLiteral(":/tlds.txt"));
-        file.open(QFile::ReadOnly);
+        bool ok = file.open(QFile::ReadOnly);
+        if (!ok)
+        {
+            assert(false && "Resources not available");
+            qCWarning(chatterinoApp) << "Resources not available";
+        }
         QTextStream stream(&file);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -164,7 +174,7 @@ Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
 
 namespace chatterino::linkparser {
 
-std::optional<Parsed> parse(const QString &source) noexcept
+std::optional<Parsed> parse(QStringView source) noexcept
 {
     using SizeType = QString::size_type;
 

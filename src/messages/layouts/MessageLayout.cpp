@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
@@ -395,6 +399,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         backgroundColor = blendColors(
             backgroundColor,
             *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
+    }
+    else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
+             ctx.preferences.enableWatchStreakHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor, *ctx.colorProvider.color(ColorType::WatchStreak));
     }
     else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&

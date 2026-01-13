@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/buttons/TitlebarButton.hpp"
 
 #include "singletons/Theme.hpp"
@@ -56,9 +60,9 @@ void TitleBarButton::paintContent(QPainter &painter)
             int xD2 = xD * 1 / 5;
             int xD3 = xD * 4 / 5;
 
+            painter.setPen(color);
             painter.drawRect(centerX - xD / 2 + xD2, xD, xD3, xD3);
-            painter.fillRect(centerX - xD / 2, xD + xD2, xD3, xD3,
-                             this->theme->window.background);
+            painter.setBrush(this->theme->window.background);
             painter.drawRect(centerX - xD / 2, xD + xD2, xD3, xD3);
             break;
         }

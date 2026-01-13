@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/ModerationPage.hpp"
 
 #include "Application.hpp"
@@ -83,9 +87,15 @@ ModerationPage::ModerationPage()
 
         auto logsPathLabel = logs.emplace<QLabel>();
 
+        QString logExplanation =
+            "<span style=\"color:#bbb\"> They are saved as plain "
+            "text files per channel, containing the messages with "
+            "timestamps.</span>";
+
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect(
-            [logsPathLabel](const QString &logPath, auto) mutable {
+            [logsPathLabel, logExplanation](const QString &logPath,
+                                            auto) mutable {
                 QString pathOriginal =
                     logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
                                       : logPath;
@@ -93,10 +103,11 @@ ModerationPage::ModerationPage()
                 QString pathShortened =
                     "Logs are saved at <a href=\"file:///" + pathOriginal +
                     R"("><span style="color: white;">)" +
-                    shortenString(pathOriginal, 50) + "</span></a>";
+                    shortenString(pathOriginal, 50) + ".</span></a>";
 
-                logsPathLabel->setText(pathShortened);
+                logsPathLabel->setText(pathShortened + logExplanation);
                 logsPathLabel->setToolTip(pathOriginal);
+                logsPathLabel->setWordWrap(true);
             });
 
         logsPathLabel->setTextFormat(Qt::RichText);

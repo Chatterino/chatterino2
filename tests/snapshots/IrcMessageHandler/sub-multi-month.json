@@ -2,10 +2,6 @@
     "input": "@badge-info=subscriber/1;badges=subscriber/0;emotes=;msg-param-sub-plan=1000;msg-param-months=0;mod=0;login=foly__;room-id=11148817;flags=;user-id=441166175;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;system-msg=foly__\\ssubscribed\\sat\\sTier\\s1.;msg-id=sub;display-name=foly__;msg-param-sub-plan-name=Channel\\sSubscription\\s(k4sen);user-type=;id=327249bb-81bc-4f87-8b43-c05720a2dd64;msg-param-was-gifted=false;tmi-sent-ts=1728710962985;msg-param-cumulative-months=1;vip=0;color=;subscriber=1;msg-param-multimonth-duration=6 :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -79,6 +75,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -88,6 +86,10 @@
             "searchText": "foly__ subscribed at Tier 1 for 6 months in advance!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

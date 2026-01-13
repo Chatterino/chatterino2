@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "Application.hpp"
 
 #include "common/Args.hpp"
@@ -11,6 +15,8 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "controllers/spellcheck/SpellChecker.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -24,6 +30,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/sound/MiniaudioBackend.hpp"
 #include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
@@ -43,7 +50,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/CrashHandler.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Logging.hpp"
@@ -99,7 +105,8 @@ ISoundController *makeSoundController(Settings &settings)
 BttvLiveUpdates *makeBttvLiveUpdates(Settings &settings)
 {
     bool enabled =
-        settings.enableBTTVLiveUpdates && settings.enableBTTVChannelEmotes;
+        settings.enableBTTVLiveUpdates &&
+        (settings.enableBTTVChannelEmotes || settings.showBadgesBttv);
 
     if (enabled)
     {
@@ -163,7 +170,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , logging(new Logging(_settings))
-    , emotes(new Emotes)
+    , emotes(new EmoteController)
     , accounts(new AccountController)
     , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
@@ -179,6 +186,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , highlights(new HighlightController(_settings, this->accounts.get()))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
+    , bttvBadges(new BttvBadges)
     , seventvBadges(new SeventvBadges)
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
@@ -195,6 +203,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
+    , spellChecker(new SpellChecker)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -233,6 +242,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
+    this->emotes->initialize();
 
     this->accounts->load();
 
@@ -287,7 +297,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         this->initNm(paths);
     }
-    this->twitchPubSub->initialize();
 
     this->twitch->initEventAPIs(this->bttvLiveUpdates.get(),
                                 this->seventvEventAPI.get());
@@ -343,7 +352,7 @@ Fonts *Application::getFonts()
     return this->fonts.get();
 }
 
-IEmotes *Application::getEmotes()
+EmoteController *Application::getEmotes()
 {
     assertInGuiThread();
     assert(this->emotes);
@@ -421,6 +430,14 @@ FfzBadges *Application::getFfzBadges()
     assert(this->ffzBadges);
 
     return this->ffzBadges.get();
+}
+
+BttvBadges *Application::getBttvBadges()
+{
+    // BttvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->bttvBadges);
+
+    return this->bttvBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()
@@ -597,6 +614,14 @@ eventsub::IController *Application::getEventSub()
     return this->eventSub.get();
 }
 
+SpellChecker *Application::getSpellChecker()
+{
+    assertInGuiThread();
+    assert(this->spellChecker);
+
+    return this->spellChecker.get();
+}
+
 void Application::aboutToQuit()
 {
     ABOUT_TO_QUIT.store(true);
@@ -649,6 +674,7 @@ void Application::stop()
     this->logging.reset();
     this->fonts.reset();
     this->themes.reset();
+    this->spellChecker.reset();
 
     STOPPED.store(true);
 }

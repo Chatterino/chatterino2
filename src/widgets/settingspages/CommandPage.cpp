@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/CommandPage.hpp"
 
 #include "Application.hpp"
@@ -12,6 +16,7 @@
 #include <QColor>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTableView>
@@ -105,9 +110,15 @@ CommandPage::CommandPage()
         auto *button = new QPushButton("Import commands from Chatterino 1");
         this->view->addCustomButton(button);
 
-        QObject::connect(button, &QPushButton::clicked, this, [] {
+        QObject::connect(button, &QPushButton::clicked, this, [this] {
             QFile c1settings(c1settingsPath());
-            c1settings.open(QIODevice::ReadOnly);
+            if (!c1settings.open(QIODevice::ReadOnly))
+            {
+                QMessageBox::warning(
+                    this, "Chatterino 1 Importer",
+                    "Failed to read settings: " + c1settings.errorString());
+                return;
+            }
             for (const auto &line :
                  QString(c1settings.readAll())
                      .split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts))

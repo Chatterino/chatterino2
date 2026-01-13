@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/WebSocketPool.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -61,7 +65,7 @@ TEST(WebSocketPool, tcpEcho)
 
     auto handle = pool.createSocket(
         {
-            .url = QUrl("ws://127.0.0.1:9052/echo"),
+            .url = QUrl("ws://127.0.0.1:9052/echo?query=123&xd=wow"),
             .headers =
                 {
                     {"My-Header", "my-header-VALUE"},
@@ -85,11 +89,12 @@ TEST(WebSocketPool, tcpEcho)
     handle.sendText("/HEADER another-header");
     handle.sendText("/HEADER cookie");
     handle.sendText("/HEADER user-agent");
+    handle.sendText("/URL");
     handle.sendText("/CLOSE");
 
     ASSERT_TRUE(closeFlag.waitFor(1s));
 
-    ASSERT_EQ(messages.size(), 10);
+    ASSERT_EQ(messages.size(), 11);
     ASSERT_EQ(messages[0].first, false);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, false);
@@ -110,6 +115,8 @@ TEST(WebSocketPool, tcpEcho)
     ASSERT_EQ(messages[8].second, "xd");
     ASSERT_EQ(messages[9].first, true);
     ASSERT_EQ(messages[9].second, "MyUserAgent");
+    ASSERT_EQ(messages[10].first, true);
+    ASSERT_EQ(messages[10].second, "/echo?query=123&xd=wow");
 }
 
 TEST(WebSocketPool, tlsEcho)
@@ -146,11 +153,12 @@ TEST(WebSocketPool, tlsEcho)
     handle.sendText("/HEADER another-header");
     handle.sendText("/HEADER cookie");
     handle.sendText("/HEADER user-agent");
+    handle.sendText("/URL");
     handle.sendText("/CLOSE");
 
     ASSERT_TRUE(closeFlag.waitFor(1s));
 
-    ASSERT_EQ(messages.size(), 10);
+    ASSERT_EQ(messages.size(), 11);
     ASSERT_EQ(messages[0].first, false);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, false);
@@ -171,4 +179,6 @@ TEST(WebSocketPool, tlsEcho)
     ASSERT_EQ(messages[8].second, "xd");
     ASSERT_EQ(messages[9].first, true);
     ASSERT_TRUE(messages[9].second.startsWith("Chatterino"));
+    ASSERT_EQ(messages[10].first, true);
+    ASSERT_EQ(messages[10].second, "/echo");
 }

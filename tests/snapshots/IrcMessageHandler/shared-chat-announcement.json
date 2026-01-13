@@ -2,12 +2,6 @@
     "input": "@badge-info=;badges=staff/1,raging-wolf-helm/1;color=#DAA520;display-name=lahoooo;emotes=;flags=;id=01cd601f-bc3f-49d5-ab4b-136fa9d6ec22;login=lahoooo;mod=0;msg-id=sharedchatnotice;msg-param-color=PRIMARY;room-id=11148817;source-badge-info=;source-badges=staff/1,moderator/1,bits-leader/1;source-id=4083dadc-9f20-40f9-ba92-949ebf6bc294;source-msg-id=announcement;source-room-id=1025594235;subscriber=0;system-msg=;tmi-sent-ts=1726118378465;user-id=612865661;user-type=staff;vip=0 :tmi.twitch.tv USERNOTICE #pajlada :hi this is an announcement from 1",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-                "staff",
-                "raging-wolf-helm"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "lahoooo",
@@ -66,19 +60,40 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "homePage": "https://www.twitch.tv/forsen",
                         "images": {
-                            "1x": ""
+                            "1x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-28x28.png",
+                            "2x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png",
+                            "3x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-150x150.png"
                         },
                         "name": "",
-                        "tooltip": "Shared Message"
+                        "tooltip": "Shared Message from forsen"
                     },
                     "flags": "BadgeSharedChannel",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Shared Message",
+                    "tooltip": "Shared Message from forsen",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+                        },
+                        "name": "",
+                        "tooltip": "Moderator"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Moderator (forsen)",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
@@ -171,6 +186,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|Subscription|SharedMessage",
             "frozen": false,
             "highlightColor": "#64c466ff",
@@ -181,14 +198,16 @@
             "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
             "serverReceivedTime": "2024-09-12T05:19:38Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "staff",
+                "raging-wolf-helm"
+            ],
             "userID": "612865661",
             "usernameColor": "#ffdaa520"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -236,6 +255,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription|SharedMessage",
             "frozen": false,
             "id": "",
@@ -245,6 +266,10 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

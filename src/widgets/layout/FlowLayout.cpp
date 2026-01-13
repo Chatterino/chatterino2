@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QSizePolicy>
@@ -155,7 +159,7 @@ QSize FlowLayout::minimumSize() const
         size = size.expandedTo(item->minimumSize());
     }
 
-    const QMargins margins = contentsMargins();
+    const QMargins margins = this->contentsMargins();
     size += QSize(margins.left() + margins.right(),
                   margins.top() + margins.bottom());
     return size;

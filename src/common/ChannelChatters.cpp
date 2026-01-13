@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/ChannelChatters.hpp"
 
 #include "common/Channel.hpp"
@@ -33,6 +37,8 @@ void ChannelChatters::addJoinedUser(const QString &user, bool isMod,
     assertInGuiThread();
 
     if (isIgnoredMessage(IgnoredMessageParameters{
+            .message = {},
+            .twitchUserID = {},
             .twitchUserLogin = user,
             .isMod = isMod,
             .isBroadcaster = isBroadcaster,
@@ -69,6 +75,8 @@ void ChannelChatters::addPartedUser(const QString &user, bool isMod,
     assertInGuiThread();
 
     if (isIgnoredMessage(IgnoredMessageParameters{
+            .message = {},
+            .twitchUserID = {},
             .twitchUserLogin = user,
             .isMod = isMod,
             .isBroadcaster = isBroadcaster,

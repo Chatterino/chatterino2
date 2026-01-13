@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 #include "Application.hpp"
@@ -7,11 +11,11 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"  // IWYU pragma: keep
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"  // IWYU pragma: keep
@@ -479,15 +483,14 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 
     for (const auto &chan : activeChannels)
     {
-        LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
+        MessagePtr last = chan->getLastMessage();
 
         bool replaceMessage =
-            snapshot.size() > 0 && snapshot[snapshot.size() - 1]->flags.has(
-                                       MessageFlag::DisconnectedMessage);
+            last && last->flags.has(MessageFlag::DisconnectedMessage);
 
         if (replaceMessage)
         {
-            chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
+            chan->replaceMessage(last, reconnected);
         }
         else
         {
@@ -880,8 +883,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                     },
                     this);
             });
-
-        bttvLiveUpdates->start();
     }
     else
     {
@@ -932,8 +933,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                                              chan.updateSeventvUser(data);
                                          });
             });
-
-        seventvEventAPI->start();
     }
     else
     {

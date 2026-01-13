@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/AccountSwitchPopup.hpp"
 
 #include "common/Literals.hpp"
@@ -40,7 +44,8 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
     vbox->addLayout(hbox);
 
     connect(manageAccountsButton, &QPushButton::clicked, [this]() {
-        SettingsDialog::showDialog(this, SettingsDialogPreference::Accounts);
+        SettingsDialog::showDialog(this->parentWidget(),
+                                   SettingsDialogPreference::Accounts);
     });
 
     this->getLayoutContainer()->setLayout(vbox);

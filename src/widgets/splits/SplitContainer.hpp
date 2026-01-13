@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/WindowDescriptors.hpp"
@@ -78,7 +82,10 @@ private:
     };
 
 public:
-    struct Node final {
+    struct Node final : public std::enable_shared_from_this<Node> {
+        Node();
+        Node(Split *_split, Node *_parent);
+
         enum class Type {
             EmptyRoot,
             Split,
@@ -91,12 +98,9 @@ public:
         Node *getParent() const;
         qreal getHorizontalFlex() const;
         qreal getVerticalFlex() const;
-        const std::vector<std::unique_ptr<Node>> &getChildren();
+        const std::vector<std::shared_ptr<Node>> &getChildren();
 
     private:
-        Node();
-        Node(Split *_split, Node *_parent);
-
         bool isOrContainsNode(Node *_node);
         Node *findNodeContainingSplit(Split *_split);
         void insertSplitRelative(Split *_split, SplitDirection _direction);
@@ -123,7 +127,7 @@ public:
         QRectF geometry_;
         qreal flexH_ = 1;
         qreal flexV_ = 1;
-        std::vector<std::unique_ptr<Node>> children_;
+        std::vector<std::shared_ptr<Node>> children_;
 
         friend class SplitContainer;
     };
@@ -260,7 +264,7 @@ private:
     std::vector<std::unique_ptr<ResizeHandle>> resizeHandles_;
     QPoint mouseOverPoint_;
 
-    Node baseNode_;
+    std::shared_ptr<Node> baseNode_;
     Split *selected_{};
     Split *topRight_{};
     bool disableLayouting_{};

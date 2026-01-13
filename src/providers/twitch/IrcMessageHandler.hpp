@@ -1,6 +1,8 @@
-#pragma once
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
 
-#include "messages/LimitedQueueSnapshot.hpp"
+#pragma once
 
 #include <IrcMessage>
 
@@ -61,11 +63,12 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *chan, const QString &originalContent,
-                           ITwitchIrcServer &twitch, bool isSub, bool isAction);
+                           ITwitchIrcServer &twitch, bool isSub, bool isAction,
+                           const QString &msgType = "");
 
 private:
     static float similarity(const MessagePtr &msg,
-                            const LimitedQueueSnapshot<MessagePtr> &messages);
+                            const std::vector<MessagePtr> &messages);
     static void setSimilarityFlags(const MessagePtr &message,
                                    const ChannelPtr &channel);
 };

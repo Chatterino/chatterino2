@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include "common/QLogging.hpp"
@@ -35,7 +39,7 @@ SettingWidget::SettingWidget(const QString &mainKeyword)
     this->vLayout->setContentsMargins(0, 0, 0, 0);
 
     this->hLayout->setContentsMargins(0, 0, 0, 0);
-    this->vLayout->addLayout(hLayout);
+    this->vLayout->addLayout(this->hLayout);
 
     this->keywords.append(mainKeyword);
 }
@@ -371,8 +375,7 @@ SettingWidget *SettingWidget::dropdown(
         widget->managedConnections);
 
     QObject::connect(combo, &QComboBox::currentTextChanged,
-                     [label, combo, &setting](const auto &newText) {
-                         bool ok = true;
+                     [label, combo, &setting](const auto & /*newText*/) {
                          auto stringValue = combo->currentData().toString();
 
                          setting.setValue(stringValue);

@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/settingspages/SettingsPage.hpp"
-
-#include <QPushButton>
 
 namespace chatterino {
 
@@ -12,11 +14,6 @@ class AccountsPage : public SettingsPage
 {
 public:
     AccountsPage();
-
-private:
-    QPushButton *addButton_{};
-    QPushButton *removeButton_{};
-    AccountSwitchWidget *accountSwitchWidget_{};
 };
 
 }  // namespace chatterino

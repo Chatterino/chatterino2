@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <cassert>
@@ -32,14 +36,14 @@ class WindowManager;
 class ILogging;
 class Logging;
 class Paths;
-class Emotes;
-class IEmotes;
+class EmoteController;
 class Settings;
 class Fonts;
 class Toasts;
 class IChatterinoBadges;
 class ChatterinoBadges;
 class FfzBadges;
+class BttvBadges;
 class SeventvBadges;
 class ImageUploader;
 class SeventvAPI;
@@ -59,6 +63,7 @@ class Pronouns;
 namespace eventsub {
 class IController;
 }  // namespace eventsub
+class SpellChecker;
 
 class IApplication
 {
@@ -77,7 +82,7 @@ public:
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
-    virtual IEmotes *getEmotes() = 0;
+    virtual EmoteController *getEmotes() = 0;
     virtual AccountController *getAccounts() = 0;
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
@@ -91,6 +96,7 @@ public:
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
+    virtual BttvBadges *getBttvBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ISoundController *getSound() = 0;
@@ -112,6 +118,7 @@ public:
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
     virtual eventsub::IController *getEventSub() = 0;
+    virtual SpellChecker *getSpellChecker() = 0;
 };
 
 class Application : public IApplication
@@ -149,7 +156,7 @@ private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Logging> logging;
-    std::unique_ptr<Emotes> emotes;
+    std::unique_ptr<EmoteController> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -163,6 +170,7 @@ private:
     std::unique_ptr<HighlightController> highlights;
     std::unique_ptr<TwitchIrcServer> twitch;
     std::unique_ptr<FfzBadges> ffzBadges;
+    std::unique_ptr<BttvBadges> bttvBadges;
     std::unique_ptr<SeventvBadges> seventvBadges;
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;
@@ -179,6 +187,7 @@ private:
     std::unique_ptr<IStreamerMode> streamerMode;
     std::unique_ptr<ITwitchUsers> twitchUsers;
     std::unique_ptr<pronouns::Pronouns> pronouns;
+    std::unique_ptr<SpellChecker> spellChecker;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif
@@ -194,7 +203,7 @@ public:
     }
     Theme *getThemes() override;
     Fonts *getFonts() override;
-    IEmotes *getEmotes() override;
+    EmoteController *getEmotes() override;
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
@@ -207,6 +216,7 @@ public:
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
+    BttvBadges *getBttvBadges() override;
     SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;
@@ -231,6 +241,7 @@ public:
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
     ITwitchUsers *getTwitchUsers() override;
+    SpellChecker *getSpellChecker() override;
 
 private:
     void initNm(const Paths &paths);

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -76,7 +80,7 @@ public:
 
     ~StackGuard()
     {
-        if (expected < 0)
+        if (this->expected < 0)
         {
             return;
         }
@@ -124,6 +128,17 @@ sol::table createEnumTable(sol::state_view &lua)
     (out.raw_set(magic_enum::enum_name<Additional>(), Additional), ...);
 
     return out;
+}
+
+/// luaL_error but with [[noreturn]]
+[[noreturn]]
+void fail(lua_State *L, const char *fmt, auto &&...args)
+{
+    luaL_error(L, fmt, std::forward<decltype(args)>(args)...);
+    // luaL_error is not annotated with [[noreturn]] for backwards
+    // compatibility, but it will never return. If we ever get here, something
+    // is seriously wrong, so abort.
+    std::terminate();
 }
 
 }  // namespace chatterino::lua

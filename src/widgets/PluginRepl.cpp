@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/PluginRepl.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -148,7 +152,7 @@ std::optional<QString> HistoricTextEdit::nextHistoryItem(qsizetype diff)
     bool wasUnfinishedInput = this->historyIdx >= this->history.size();
 
     auto nextIdx =
-        std::clamp(this->historyIdx + diff, 0LL, this->history.size());
+        std::clamp<qsizetype>(this->historyIdx + diff, 0, this->history.size());
     if (nextIdx == this->historyIdx)
     {
         return {};  // nothing changed

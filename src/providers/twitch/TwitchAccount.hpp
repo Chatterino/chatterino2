@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -60,6 +64,10 @@ public:
     // Attempts to update the users OAuth Token
     // Returns true if the value has changed, otherwise false
     bool setOAuthToken(const QString &newOAuthToken);
+
+    // Attempts to update the users username
+    // Returns true if the value has changed, otherwise false
+    bool setUserName(const QString &newUserName);
 
     bool isAnon() const;
 

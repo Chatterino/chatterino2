@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -82,6 +86,7 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev);
 
 /**
  * @includefile common/Channel.hpp
+ * @includefile controllers/plugins/api/Accounts.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
  * @includefile controllers/plugins/api/HTTPResponse.hpp
  * @includefile controllers/plugins/api/HTTPRequest.hpp

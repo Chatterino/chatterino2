@@ -1,18 +1,23 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/SendWhisper.hpp"
 
 #include "Application.hpp"
 #include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -108,7 +113,6 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     const auto &accemotes = *acc->accessEmotes();
     const auto *bttvemotes = app->getBttvEmotes();
     const auto *ffzemotes = app->getFfzEmotes();
-    auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
@@ -116,25 +120,21 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             auto it = accemotes->find({words[i]});
             if (it != accemotes->end())
             {
-                b.emplace<EmoteElement>(it->second,
-                                        MessageElementFlag::TwitchEmote);
+                b.emplace<EmoteElement>(it->second, MessageElementFlag::Emote);
                 continue;
             }
         }  // Twitch emote
 
         {  // bttv/ffz emote
-            if ((emote = bttvemotes->emote({words[i]})))
+            emote = bttvemotes->emote({words[i]});
+            if (!emote)
             {
-                flags = MessageElementFlag::BttvEmote;
-            }
-            else if ((emote = ffzemotes->emote({words[i]})))
-            {
-                flags = MessageElementFlag::FfzEmote;
+                emote = ffzemotes->emote({words[i]});
             }
             // TODO: Load 7tv global emotes
             if (emote)
             {
-                b.emplace<EmoteElement>(*emote, flags);
+                b.emplace<EmoteElement>(*emote, MessageElementFlag::Emote);
                 continue;
             }
         }  // bttv/ffz emote
@@ -147,8 +147,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         b.emplace<EmoteElement>(emote,
                                                 MessageElementFlag::EmojiAll);
                     }
-                    void operator()(const QString &string,
-                                    MessageBuilder &b) const
+                    void operator()(QStringView string, MessageBuilder &b) const
                     {
                         auto link = linkparser::parse(string);
                         if (link)
@@ -157,12 +156,12 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                         else
                         {
-                            b.emplace<TextElement>(string,
+                            b.emplace<TextElement>(string.toString(),
                                                    MessageElementFlag::Text);
                         }
                     }
                 } visitor;
-                boost::apply_visitor(
+                std::visit(
                     [&b](auto &&arg) {
                         visitor(arg, b);
                     },

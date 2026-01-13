@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
@@ -17,6 +21,7 @@
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
@@ -153,34 +158,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     }
 
-    layout.addDropdown<QString>(
-        "Font", {"Segoe UI", "Arial", "Choose..."}, s.chatFontFamily,
-        [](auto val) {
-            return val;
-        },
-        [this](auto args) {
-            return this->getFont(args);
-        },
-        true, "", true);
-    layout.addDropdown<int>(
-        "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        s.chatFontSize,
-        [](auto val) {
-            return QString::number(val) + "pt";
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 10);
-        });
-    layout.addDropdown<int>(
-        "Font weight",
-        {"100", "200", "300", "400", "500", "600", "700", "800", "900"},
-        s.chatFontWeight,
-        [](auto val) {
-            return QString::number(val);
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 400);
-        });
     layout.addDropdown<float>(
         "Zoom", ZOOM_LEVELS, s.uiScale,
         [](auto val) {
@@ -274,6 +251,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+
+    layout.addWidget(new FontSettingWidget(s.chatFontFamily, s.chatFontSize,
+                                           s.chatFontWeight),
+                     {"font", "weight", "size"});
 
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
@@ -568,6 +549,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+    layout.addDropdown<int>(
+        "Limit length of deleted messages",
+        {"No limit", "50 characters", "100 characters", "200 characters",
+         "300 characters", "400 characters"},
+        s.deletedMessageLengthLimit,
+        [](auto val) {
+            return val ? QString::number(val) + " characters"
+                       : QString("No limit");
+        },
+        [](const auto &args) {
+            return fuzzyToInt(args.value, 0);
+        },
+        true,
+        {"Limits the amount of characters displayed in deleted messages "
+         "when announced via system message."});
+
     layout.addSeparator();
 
     SettingWidget::checkbox("Draw a line below the most recent message before "
@@ -676,6 +673,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox(
         "Enable BetterTTV live emote updates (requires restart)",
         s.enableBTTVLiveUpdates)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Send activity to BetterTTV", s.sendBTTVActivity)
+        ->setTooltip(
+            "When enabled, Chatterino will signal an activity to BetterTTV "
+            "when you send a chat message. This is used for badges, "
+            " and personal emotes. When disabled, no activity "
+            "is sent and others won't see your cosmetics.")
         ->addKeywords({"bttv"})
         ->addTo(layout);
 
@@ -885,10 +890,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
-#ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
-    layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with Chatterino.");
+#ifdef Q_OS_WIN
+    layout.addDescription(
+        "The browser extension replaces the default "
+        "Twitch.tv chat with Chatterino, and updates the /watching split on "
+        "Chatterino when Twitch.tv is open.");
+#else
+    layout.addDescription("The browser extension updates the /watching "
+                          "split on Chatterino when Twitch.tv is open.");
+#endif
 
     {
         if (auto err = nmIpcError().get())
@@ -906,6 +917,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDescription(
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 
+#ifdef Q_OS_WIN
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
@@ -914,6 +926,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "Attempt to force the Chatterino Browser Extension to work in "
             "certain browsers that do not work automatically.\ne.g. Librewolf")
         ->addTo(layout);
+#endif
 
     {
         auto *note = layout.addDescription(
@@ -934,7 +947,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                 "Extension;IDs;separated;by;semicolons")
             ->addTo(layout, form);
     }
-#endif
 
     layout.addTitle("AppData & Cache");
 
@@ -1118,6 +1130,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"seventv"})
         ->setTooltip("Badges for 7TV admins, developers, and supporters")
         ->addTo(layout);
+    SettingWidget::checkbox("BetterTTV", s.showBadgesBttv)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
     layout.addSeparator();
     SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
                             s.useCustomFfzModeratorBadges)
@@ -1295,6 +1310,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Show user's pronouns in user card", s.showPronouns)
         ->setDescription(
             R"(Pronouns are retrieved from <a href="https://pr.alejo.io">pr.alejo.io</a> when a user card is opened.)")
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show stream title in live message",
+                            s.showTitleInLiveMessage)
+        ->setTooltip("The title in the message will be the title the streamer "
+                     "set when they went live, and will not update as the "
+                     "streamer updates their title.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Bold @usernames", s.boldUsernames)
@@ -1528,27 +1550,6 @@ void GeneralPage::initExtra()
                 cachePath->setToolTip(newPath);
             });
     }
-}
-
-QString GeneralPage::getFont(const DropdownArgs &args) const
-{
-    if (args.combobox->currentIndex() == args.combobox->count() - 1)
-    {
-        args.combobox->setEditText("Choosing...");
-
-        auto ok = bool();
-        auto previousFont =
-            getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.);
-        auto font = QFontDialog::getFont(&ok, previousFont, this->window());
-
-        if (ok)
-        {
-            return font.family();
-        }
-
-        return previousFont.family();
-    }
-    return args.value;
 }
 
 }  // namespace chatterino

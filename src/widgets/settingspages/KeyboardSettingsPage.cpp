@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
@@ -14,6 +19,7 @@
 #include <QKeySequenceEdit>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSignalBlocker>
 #include <QTableView>
 
 #include <array>
@@ -31,7 +37,7 @@ void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
     {
         return;  // clicked on header or invalid hotkey
     }
-    EditHotkeyDialog dialog(hotkey);
+    EditHotkeyDialog dialog(hotkey, view);
     bool wasAccepted = dialog.exec() == 1;
 
     if (wasAccepted)
@@ -65,8 +71,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         1, QHeaderView::Stretch);
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
-        EditHotkeyDialog dialog(nullptr);
+    std::ignore = view->addButtonPressed.connect([view] {
+        EditHotkeyDialog dialog(nullptr, view);
         bool wasAccepted = dialog.exec() == 1;
 
         if (wasAccepted)
@@ -77,7 +83,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
     });
 
-    QObject::connect(view_->getTableView(), &QTableView::doubleClicked,
+    QObject::connect(this->view_->getTableView(), &QTableView::doubleClicked,
                      [view, model](const QModelIndex &clicked) {
                          tableCellClicked(clicked, view, model);
                      });
@@ -90,8 +96,16 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto *searchText = new QLabel("Search keybind:", this);
 
     QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
-                     [view](const QKeySequence &keySequence) {
-                         view->filterSearchResultsHotkey(keySequence);
+                     this,
+                     [view, keySequenceInput](const QKeySequence &keySequence) {
+                         // Normalize Key_Enter (numpad) to Key_Return for consistent search
+                         auto normalized = normalizeKeySequence(keySequence);
+                         if (normalized != keySequence)
+                         {
+                             QSignalBlocker blocker(keySequenceInput);
+                             keySequenceInput->setKeySequence(normalized);
+                         }
+                         view->filterSearchResultsHotkey(normalized);
                      });
     view->addCustomButton(searchText);
     view->addCustomButton(keySequenceInput);

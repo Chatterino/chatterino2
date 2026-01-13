@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/WindowManager.hpp"
 
 #include "Application.hpp"
@@ -135,6 +139,7 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->updateWordTypeMaskListener.add(settings.showBadgesVanity);
     this->updateWordTypeMaskListener.add(settings.showBadgesChatterino);
     this->updateWordTypeMaskListener.add(settings.showBadgesFfz);
+    this->updateWordTypeMaskListener.add(settings.showBadgesBttv);
     this->updateWordTypeMaskListener.add(settings.showBadgesSevenTV);
     this->updateWordTypeMaskListener.add(settings.enableEmoteImages);
     this->updateWordTypeMaskListener.add(settings.lowercaseDomains);
@@ -163,9 +168,9 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.streamerModeHideModActions);
     this->forceLayoutChannelViewsListener.add(
         settings.streamerModeHideRestrictedUsers);
+    this->forceLayoutChannelViewsListener.add(fonts.fontChanged);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
-    this->layoutChannelViewsListener.add(fonts.fontChanged);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
     this->invalidateChannelViewBuffersListener.add(settings.separateMessages);
@@ -209,7 +214,7 @@ void WindowManager::updateWordTypeMask()
     // emotes
     if (settings->enableEmoteImages)
     {
-        flags.set(MEF::EmoteImages);
+        flags.set(MEF::EmoteImage);
     }
     flags.set(MEF::EmoteText);
     flags.set(MEF::EmojiText);
@@ -232,6 +237,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
     flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
+    flags.set(settings->showBadgesBttv ? MEF::BadgeBttv : MEF::None);
     flags.set(settings->showBadgesSevenTV ? MEF::BadgeSevenTV : MEF::None);
 
     // username
@@ -314,6 +320,9 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     assertInGuiThread();
 
     auto *const realParent = [this, type, parent]() -> QWidget * {
+        (void)this;
+        (void)type;
+
         if (parent)
         {
             // If a parent is explicitly specified, we use that immediately.
@@ -677,6 +686,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             WindowManager::encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
+
+            auto spellOverride = node->getSplit()->checkSpellingOverride();
+            if (spellOverride)
+            {
+                obj["checkSpelling"] = *spellOverride;
+            }
         }
         break;
         case SplitNode::Type::HorizontalContainer:
@@ -687,7 +702,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
                            : "vertical");
 
             QJsonArray itemsArr;
-            for (const std::unique_ptr<SplitNode> &n : node->getChildren())
+            for (const auto &n : node->getChildren())
             {
                 QJsonObject subObj;
                 WindowManager::encodeNodeRecursively(n.get(), subObj);
@@ -696,6 +711,9 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("items", itemsArr);
         }
         break;
+
+        default:
+            break;
     }
 
     obj.insert("flexh", node->getHorizontalFlex());
@@ -737,6 +755,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "misc");
             obj.insert("name", channel.get()->getName());
         }
+        break;
+
+        default:
+            break;
     }
 }
 
@@ -795,7 +817,7 @@ void WindowManager::closeAll()
     qCDebug(chatterinoWindowmanager) << "Shutting down (closing windows)";
     this->shuttingDown_ = true;
 
-    for (Window *window : windows_)
+    for (Window *window : this->windows_)
     {
         closeWindowsRecursive(window);
     }
@@ -923,6 +945,9 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 window.setWindowState(Qt::WindowMaximized);
             }
             break;
+
+            case WindowDescriptor::State::None:
+                break;
         }
     }
 }

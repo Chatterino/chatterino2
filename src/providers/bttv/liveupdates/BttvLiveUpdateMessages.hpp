@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QJsonObject>
@@ -33,6 +37,16 @@ private:
     // true if the channel id is malformed
     // (e.g. doesn't start with "twitch:")
     bool badChannelID_;
+};
+
+struct BttvLiveUpdateUserUpdateMessage {
+    BttvLiveUpdateUserUpdateMessage(const QJsonObject &json);
+
+    QString userID;
+    QJsonObject badgeObject;
+
+    bool validate() const;
+    bool hasBadge() const;
 };
 
 }  // namespace chatterino

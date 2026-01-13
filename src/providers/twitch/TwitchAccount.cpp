@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchAccount.hpp"
 
 #include "Application.hpp"
@@ -5,6 +9,7 @@
 #include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Emote.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -12,7 +17,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
-#include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"  // IWYU pragma: keep
 
@@ -190,6 +194,16 @@ void TwitchAccount::blockUserLocally(const QString &userID,
     this->ignoresUserLogins_.insert(blockedUser.name);
 }
 
+bool TwitchAccount::setUserName(const QString &newUserName)
+{
+    if (this->userName_.compare(newUserName, Qt::CaseInsensitive) == 0)
+    {
+        return false;
+    }
+    this->userName_ = newUserName;
+    return true;
+}
+
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
     assertInGuiThread();
@@ -336,7 +350,7 @@ void TwitchAccount::loadSeventvUserID()
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)
-                << "Failed to load 7TV user-id:" << result.formatError();
+                << "Failed to load your 7TV user-id:" << result.formatError();
         });
 }
 

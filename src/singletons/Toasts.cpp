@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Toasts.hpp"
 
 #include "Application.hpp"
@@ -346,7 +350,7 @@ void Toasts::ensureInitialized()
     {
         return;
     }
-    auto result = notify_init("chatterino2");
+    auto result = notify_init("Chatterino");
 
     if (result == 0)
     {
@@ -366,6 +370,10 @@ void Toasts::sendLibnotify(const QString &channelName,
 
     NotifyNotification *notif = notify_notification_new(
         str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
+
+    notify_notification_set_hint(
+        notif, "desktop-entry",
+        g_variant_new_string("com.chatterino.chatterino"));
 
     // this will be freed in onNotificationDestroyed
     auto *channelNameHeap = new QString(channelName);
@@ -458,7 +466,7 @@ AvatarDownloader::AvatarDownloader(const QString &avatarURL,
         {
             this->file_.close();
         }
-        downloadComplete();
+        this->downloadComplete();
         this->deleteLater();
     });
 }

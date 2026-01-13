@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/LuaAPI.hpp"
 
@@ -13,7 +17,6 @@
 #    include <QFileInfo>
 #    include <QList>
 #    include <QLoggingCategory>
-#    include <QTextCodec>
 #    include <QUrl>
 #    include <sol/forward.hpp>
 #    include <sol/protected_function_result.hpp>

@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
+# CMake upgrade notes:
+#  - In CMake >= 3.29, we should deprecate USE_ALTERNATE_LINKER in favour of CMake's CMAKE_LINKER_TYPE
+set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
-if (POLICY CMP0167)
-    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
-endif ()
 include(FeatureSummary)
+include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
-    "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
 option(BUILD_APP "Build Chatterino" ON)
@@ -31,9 +31,23 @@ option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
+option(CHATTERINO_SPELLCHECK "Enable spellchecking in Chatterino (requires Hunspell)" OFF)
+
+option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
+mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
+add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPORT "")
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    list(APPEND CMAKE_MODULE_PATH
+        "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
+    )
+    find_package(Sanitizers REQUIRED)
+endif()
 
 if(BUILD_TESTS)
     list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -81,25 +95,14 @@ elseif (CCACHE_PROGRAM)
     set(_compiler_launcher ${CCACHE_PROGRAM})
 endif ()
 
-
-# Alternate linker code taken from heavyai/heavydb
-# https://github.com/heavyai/heavydb/blob/0517d99b467806f6af7b4c969e351368a667497d/CMakeLists.txt#L87-L103
-macro(set_alternate_linker linker)
-  find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
-  if(LINKER_EXECUTABLE)
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
-      add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+if(USE_ALTERNATE_LINKER)
+    find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+    if(LINKER_EXECUTABLE)
+        message(STATUS "Using alternate linker '${USE_ALTERNATE_LINKER}'")
+        add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
     else()
-      add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        message(FATAL_ERROR "Alternate linker ${USE_ALTERNATE_LINKER} could not be found under ld.${USE_ALTERNATIVE_LINKER} or ${USE_ALTERNATE_LINKER}")
     endif()
-  else()
-    set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
-  endif()
-endmacro()
-
-set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
-if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
-  set_alternate_linker(${USE_ALTERNATE_LINKER})
 endif()
 
 if (_compiler_launcher)
@@ -130,6 +133,10 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Svg
     Concurrent
     )
+if(CHATTERINO_ALLOW_PRIVATE_QT_API)
+    # Only exists since 6.10 and prints a warning regarding private headers
+    find_package(Qt${MAJOR_QT_VERSION} COMPONENTS GuiPrivate)
+endif()
 
 message(STATUS "Qt version: ${Qt${MAJOR_QT_VERSION}_VERSION}")
 
@@ -137,15 +144,23 @@ if (WIN32)
     add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
 endif ()
 
-find_package(Sanitizers QUIET)
-
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
 
 find_package(Threads REQUIRED)
+
+if(CHATTERINO_SPELLCHECK)
+    # Find from package manager
+    find_package(hunspell QUIET CONFIG)
+    if(NOT hunspell_FOUND)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(hunspell REQUIRED IMPORTED_TARGET hunspell)
+        add_library(hunspell::hunspell ALIAS PkgConfig::hunspell)
+    endif()
+endif()
 
 find_library(LIBRT rt)
 
@@ -186,10 +201,6 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(RapidJSON REQUIRED)
-
-find_package(Websocketpp REQUIRED)
-
 if (BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
@@ -215,22 +226,37 @@ if (BUILD_BENCHMARKS)
     find_package(benchmark REQUIRED)
 endif ()
 
-find_package(PajladaSerialize REQUIRED)
-find_package(PajladaSignals REQUIRED)
+FetchContent_Declare(
+    RapidJSON
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/rapidjson
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS
+)
+set(RAPIDJSON_BUILD_EXAMPLES Off CACHE INTERNAL "")
+set(RAPIDJSON_BUILD_TESTS Off CACHE INTERNAL "")
+
+FetchContent_Declare(
+    PajladaSignals
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSerialize
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
+    EXCLUDE_FROM_ALL
+)
+FetchContent_Declare(
+    PajladaSettings
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
+    EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)
+
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
 find_package(Doxygen)
 find_package(BoostCertify REQUIRED)
-
-if (USE_SYSTEM_PAJLADA_SETTINGS)
-    find_package(PajladaSettings REQUIRED)
-else()
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/settings/CMakeLists.txt")
-        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/settings/CMakeLists.txt")
-    endif()
-
-    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
-endif()
 
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
@@ -255,7 +281,7 @@ else ()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
 endif ()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Generate resource files

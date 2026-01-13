@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/MessageElement.hpp"
@@ -50,6 +54,7 @@ struct MessagePreferences {
     bool enableElevatedMessageHighlight{};
     bool enableFirstMessageHighlight{};
     bool enableSubHighlight{};
+    bool enableWatchStreakHighlight{};
     bool enableAutomodHighlight{};
 
     bool alternateMessages{};

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QColor>
@@ -13,6 +17,7 @@ enum class ColorType {
     Subscription,
     Whisper,
     RedeemedHighlight,
+    WatchStreak,
     FirstMessageHighlight,
     ElevatedMessageHighlight,
     ThreadMessageHighlight,

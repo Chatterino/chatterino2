@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
 
 #include "Application.hpp"
@@ -8,15 +12,29 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
 
+#include <QSignalBlocker>
+
 namespace chatterino {
 
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
-                                   bool isAdd, QWidget *parent)
+                                   QWidget *parent)
     : QDialog(parent, Qt::WindowStaysOnTopHint)
     , ui_(new Ui::EditHotkeyDialog)
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
+    // normalize Key_Enter (numpad) to Key_Return so both Enter keys display and behave identically
+    QObject::connect(
+        this->ui_->keyComboEdit, &QKeySequenceEdit::keySequenceChanged, this,
+        [this](const QKeySequence &keySequence) {
+            auto normalized = normalizeKeySequence(keySequence);
+            if (normalized != keySequence)
+            {
+                // Block signals to prevent infinite loop
+                QSignalBlocker blocker(this->ui_->keyComboEdit);
+                this->ui_->keyComboEdit->setKeySequence(normalized);
+            }
+        });
     this->setStyleSheet(R"(QToolTip {
     padding: 2px;
     background-color: #333333;

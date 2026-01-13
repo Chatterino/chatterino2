@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 #include "controllers/filters/lang/Filter.hpp"
@@ -7,11 +11,12 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
@@ -34,7 +39,7 @@ public:
     {
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -64,6 +69,11 @@ public:
         return &this->ffzBadges;
     }
 
+    BttvBadges *getBttvBadges() override
+    {
+        return &this->bttvBadges;
+    }
+
     SeventvBadges *getSeventvBadges() override
     {
         return &this->seventvBadges;
@@ -81,11 +91,12 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
+    BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
 };
@@ -204,7 +215,9 @@ TEST(Filters, Evaluation)
         {"author.subbed", QVariant(false)},
         {"message.content", QVariant("hey there :) 2038-01-19 123 456")},
         {"channel.name", QVariant("forsen")},
-        {"author.badges", QVariant(QStringList({"moderator", "staff"}))}};
+        {"author.badges", QVariant(QStringList({"moderator", "staff"}))},
+        {"author.external_badges", QStringList{"frankerfacez:bot"}},
+    };
 
     // clang-format off
     std::vector<TestCase> tests
@@ -245,6 +258,7 @@ TEST(Filters, Evaluation)
         {R".(!author.subbed).", QVariant(true)},
         {R".(author.color == "#ff0000").", QVariant(true)},
         {R".(channel.name == "forsen" && author.badges contains "moderator").", QVariant(true)},
+        {R".(author.external_badges contains "frankerfacez:bot").", QVariant(true)},
         {R".(message.content match {r"(\d\d\d\d)\-(\d\d)\-(\d\d)", 3}).", QVariant("19")},
         {R".(message.content match r"HEY THERE").", QVariant(false)},
         {R".(message.content match ri"HEY THERE").", QVariant(true)},

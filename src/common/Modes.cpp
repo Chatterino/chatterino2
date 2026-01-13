@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Modes.hpp"
 
 #include "util/CombinePath.hpp"
@@ -9,7 +13,10 @@ namespace chatterino {
 Modes::Modes()
 {
     QFile file(combinePath(QCoreApplication::applicationDirPath(), "modes"));
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
 
     while (!file.atEnd())
     {

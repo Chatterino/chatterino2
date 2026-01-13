@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # TODO: Investigate if the -fno-sized-deallocation flag is still necessary
-# TODO: Test appimage/deb creation
+# TODO: Test deb creation
 
 set -e
 
@@ -9,12 +9,6 @@ env
 
 BUILD_TESTS="On"
 BUILD_BENCHMARKS="ON"
-
-ubuntu_version="$(lsb_release -sr)"
-if [ "$ubuntu_version" = "20.04" ]; then
-    BUILD_TESTS="Off"
-    BUILD_BENCHMARKS="Off"
-fi
 
 rm -rf build
 mkdir build
@@ -33,5 +27,4 @@ cmake \
     .
 cmake --build build
 
-# sh ./../.CI/CreateAppImage.sh
 # sh ./../.CI/CreateUbuntuDeb.sh

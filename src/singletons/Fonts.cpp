@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Fonts.hpp"
 
 #include "Application.hpp"
@@ -251,6 +255,9 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 #endif
         }
         break;
+
+        default:
+            break;
     }
 
     return font;
