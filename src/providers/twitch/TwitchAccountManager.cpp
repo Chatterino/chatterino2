@@ -71,6 +71,10 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
                 login.compare(account->getUserName(), Qt::CaseInsensitive) != 0)
             {
                 account->setUserName(login);
+                const std::string basePath =
+                    "/accounts/uid" + account->getUserId().toStdString();
+                pajlada::Settings::Setting<QString>::set(basePath + "/username",
+                                                         login);
                 app->getAccounts()->twitch.currentUserNameChanged.invoke();
             }
 
