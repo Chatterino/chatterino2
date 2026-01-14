@@ -17,6 +17,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "singletons/Settings.hpp"
 #include "util/QCompareTransparent.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
@@ -75,6 +76,17 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
                     "/accounts/uid" + account->getUserId().toStdString();
                 pajlada::Settings::Setting<QString>::set(basePath + "/username",
                                                          login);
+                auto currentUsername =
+                    app->getAccounts()->twitch.getCurrent()->getUserName();
+                auto storedCurrent = pajlada::Settings::Setting<QString>::get(
+                    "/accounts/current");
+                if (currentUsername.compare(storedCurrent,
+                                            Qt::CaseInsensitive) != 0)
+                {
+                    pajlada::Settings::Setting<QString>::set(
+                        "/accounts/current", currentUsername);
+                    getSettings()->requestSave();
+                }
                 app->getAccounts()->twitch.currentUserNameChanged.invoke();
             }
 
