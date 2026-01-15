@@ -1289,6 +1289,21 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.autoCloseThreadPopup)
         ->addTo(layout);
 
+    layout.addDropdown<QString>(
+        "Search Engine",
+        {"Google", "Bing", "DuckDuckGo", "Qwant", "Startpage", "Yahoo",
+         "Yandex", "Ecosia", "Baidu", "Ask", "Aol"},
+        s.searchEngine,
+        [](auto val) {
+            return val;
+        },
+        [](auto args) {
+            return args.value;
+        },
+        false,
+        "Select the search engine to use when searching selected text from the "
+        "context menu.");
+
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
                             s.lowercaseDomains)
         ->setTooltip(

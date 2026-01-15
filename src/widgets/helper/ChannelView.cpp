@@ -286,6 +286,34 @@ float getTooltipScale(EmoteTooltipScale emoteTooltipScale)
     }
 }
 
+QString getSearchEngineURL(QString searchEngine)
+{
+    if (searchEngine == "Google")
+        return "https://www.google.com/search?q=";
+    else if (searchEngine == "Bing")
+        return "https://www.bing.com/search?q=";
+    else if (searchEngine == "DuckDuckGo")
+        return "https://duckduckgo.com/?q=";
+    else if (searchEngine == "Qwant")
+        return "https://www.qwant.com/?q=";
+    else if (searchEngine == "Startpage")
+        return "https://www.startpage.com/do/search?query=";
+    else if (searchEngine == "Yahoo")
+        return "https://search.yahoo.com/search?p=";
+    else if (searchEngine == "Yandex")
+        return "https://yandex.com/search/?text=";
+    else if (searchEngine == "Ecosia")
+        return "https://www.ecosia.org/search?q=";
+    else if (searchEngine == "Baidu")
+        return "https://www.baidu.com/s?wd=";
+    else if (searchEngine == "Ask")
+        return "https://www.ask.com/web?q=";
+    else if (searchEngine == "Aol")
+        return "https://search.aol.com/aol/search?q=";
+    // Return Google as fallback
+    return "https://www.google.com/search?q=";
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -2618,6 +2646,13 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     {
         menu->addAction("&Copy selection", [this] {
             crossPlatformCopy(this->getSelectedText());
+        });
+
+        // Add search action when text is selected
+        QString searchEngine = getSettings()->searchEngine.getValue();
+        menu->addAction("&Search in " + searchEngine, [=] {
+            QDesktopServices::openUrl(QUrl(getSearchEngineURL(searchEngine) +
+                                           this->getSelectedText().trimmed()));
         });
     }
 
