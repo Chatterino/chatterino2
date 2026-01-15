@@ -266,6 +266,7 @@ public:
     QAction *showAllTabsAction;
     QAction *showLiveTabsAction;
     QAction *showUnreadTabsAction;
+    QAction *showOtherTabsAction;
     QAction *hideAllTabsAction;
 
 protected:

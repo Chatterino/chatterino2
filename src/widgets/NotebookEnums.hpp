@@ -11,13 +11,13 @@ enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
 
 // Controls the visibility of tabs in this notebook
 enum NotebookTabVisibilityFlag : uint8_t {
-    // Show all tabs
-    AllTabs = 1 << 0,
+    // All tabs not in the following categories
+    Other = 1 << 0,
 
-    // Only show tabs containing splits that are live
+    // Tabs containing splits that are live
     Live = 1 << 1,
 
-    // Only show tabs containing splits that have unread messages
+    // Tabs containing splits that are marked unread
     Unread = 1 << 2,
 };
 using NotebookTabVisibilityFlags = FlagsEnum<NotebookTabVisibilityFlag>;
