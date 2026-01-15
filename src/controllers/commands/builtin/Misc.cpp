@@ -763,4 +763,27 @@ QString openUsercard(const CommandContext &ctx)
     return "";
 }
 
+QString pinned(const CommandContext &ctx)
+{
+    if (!ctx.twitchChannel)
+    {
+        ctx.channel->addSystemMessage("This command only works in Twitch channels.");
+        return "";
+    }
+
+    auto &pinnedMsgs = ctx.twitchChannel->pinnedMessages();
+    if (pinnedMsgs.empty())
+    {
+        ctx.channel->addSystemMessage("No pinned messages found.");
+        return "";
+    }
+
+    ctx.channel->addSystemMessage("Recent pinned messages:");
+    for (size_t i = 0; i < pinnedMsgs.size(); ++i)
+    {
+        ctx.channel->addSystemMessage(QString("%1: %2").arg(i + 1).arg(pinnedMsgs[i]->messageText));
+    }
+    return "";
+}
+
 }  // namespace chatterino::commands

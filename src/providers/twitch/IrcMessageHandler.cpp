@@ -26,6 +26,7 @@
 #include "providers/twitch/UserColor.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
@@ -881,6 +882,27 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
 
         sink.addMessage(msg, MessageContext::Original);
+
+        if (msgType == "pinned-chat-message")
+        {
+            channel->pinnedMessages_.push_back(msg);
+            if (channel->pinnedMessages_.size() > 10)
+            {
+                channel->pinnedMessages_.erase(channel->pinnedMessages_.begin());
+            }
+
+            // Show toast notification for pinned message
+            if (Toasts::isEnabled())
+            {
+                QString truncatedContent = content;
+                if (truncatedContent.length() > 100)
+                {
+                    truncatedContent = truncatedContent.left(97) + "...";
+                }
+                getApp()->getToasts()->sendChannelNotification(
+                    channel->getName(), "Pinned: " + truncatedContent);
+            }
+        }
     }
 }
 
