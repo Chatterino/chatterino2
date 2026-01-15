@@ -498,6 +498,8 @@ CommandController::CommandController(const Paths &paths)
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
     this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
+
+    this->registerCommand("/pinned", &commands::pinned);
 }
 
 void CommandController::save()

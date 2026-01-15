@@ -215,6 +215,9 @@ public:
      */
     void markConnected();
 
+    // Pinned messages
+    const std::vector<MessagePtr> &pinnedMessages() const;
+
     // Emotes
     std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -461,6 +464,7 @@ private:
         lastConnectedAt_{};
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
+    std::vector<MessagePtr> pinnedMessages_;
 
 protected:
     void messageRemovedFromStart(const MessagePtr &msg) override;

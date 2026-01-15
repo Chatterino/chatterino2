@@ -2341,4 +2341,9 @@ void TwitchChannel::listenSevenTVCosmetics() const
     }
 }
 
+const std::vector<MessagePtr> &TwitchChannel::pinnedMessages() const
+{
+    return this->pinnedMessages_;
+}
+
 }  // namespace chatterino
