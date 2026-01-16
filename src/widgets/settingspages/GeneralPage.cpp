@@ -22,6 +22,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/FontSettingWidget.hpp"
+#include "widgets/dialogs/CustomSearchEnginesDialog.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
@@ -1289,20 +1290,76 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.autoCloseThreadPopup)
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
-        "Search Engine",
-        {"Google", "Bing", "DuckDuckGo", "Qwant", "Startpage", "Yahoo",
-         "Yandex", "Ecosia", "Baidu", "Ask", "Aol"},
-        s.searchEngine,
-        [](auto val) {
-            return val;
-        },
-        [](auto args) {
-            return args.value;
-        },
-        false,
-        "Select the search engine to use when searching selected text from the "
-        "context menu.");
+    {
+        auto buildSearchEngineList = [&s]() {
+            QStringList list = {"DuckDuckGo", "Bing", "Google"};
+            auto customEngines = s.customSearchEngines.readOnly();
+            for (const auto &engine : *customEngines)
+            {
+                QString displayName = engine.displayName();
+                if (!displayName.isEmpty() && !list.contains(displayName))
+                {
+                    list.append(displayName);
+                }
+            }
+            return list;
+        };
+
+        SettingWidget::checkbox("Enable search in context menu",
+                                s.searchEngineEnabled)
+            ->setTooltip("Allow searching selected text using a search engine from "
+                         "the right-click context menu.")
+            ->addTo(layout);
+
+        auto *searchEngineCombo = layout.addDropdown<QString>(
+            "Search Engine", buildSearchEngineList(), s.searchEngine,
+            [](auto val) {
+                return val;
+            },
+            [](auto args) {
+                return args.value;
+            },
+            true,
+            "Select the search engine to use when searching selected text from the "
+            "context menu.");
+        searchEngineCombo->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([searchEngineCombo](const bool &value) {
+            searchEngineCombo->setEnabled(value);
+        });
+
+        auto *manageEnginesButton = layout.addButton(
+            "Manage Custom Search Engines", [this] {
+                CustomSearchEnginesDialog dialog(this);
+                dialog.exec();
+            });
+        manageEnginesButton->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([manageEnginesButton](const bool &value) {
+            manageEnginesButton->setEnabled(value);
+        });
+
+        // Update dropdown when custom engines change
+        auto updateDropdown = [searchEngineCombo, buildSearchEngineList, &s]() {
+            QString currentValue = s.searchEngine.getValue();
+            QStringList newList = buildSearchEngineList();
+            searchEngineCombo->clear();
+            searchEngineCombo->addItems(newList);
+
+            // Restore previous selection if it still exists
+            int index = newList.indexOf(currentValue);
+            if (index >= 0)
+            {
+                searchEngineCombo->setCurrentIndex(index);
+            }
+            else if (!currentValue.isEmpty())
+            {
+                searchEngineCombo->setEditText(currentValue);
+            }
+        };
+
+        s.customSearchEngines.delayedItemsChanged.connect([updateDropdown] {
+            updateDropdown();
+        });
+    }
 
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
                             s.lowercaseDomains)

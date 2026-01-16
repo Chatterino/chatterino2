@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
+#include "common/CustomSearchEngine.hpp"
 #include "common/enums/MessageOverflow.hpp"
 #include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
@@ -309,7 +310,8 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
-    QStringSetting searchEngine = {"/behaviour/searchEngine", "Google"};
+    BoolSetting searchEngineEnabled = {"/behaviour/searchEngineEnabled", false};
+    QStringSetting searchEngine = {"/behaviour/searchEngine", ""};
 
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
@@ -798,6 +800,8 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
+    ChatterinoSetting<std::vector<CustomSearchEngine>> customSearchEnginesSetting =
+        {"/behaviour/customSearchEngines"};
     SignalVector<QString> mutedChannels;
 
 public:
@@ -810,6 +814,7 @@ public:
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
     SignalVector<ChannelLog> loggedChannels;
+    SignalVector<CustomSearchEngine> customSearchEngines;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
