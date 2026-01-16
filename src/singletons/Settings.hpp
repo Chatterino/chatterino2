@@ -800,8 +800,8 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
-    ChatterinoSetting<std::vector<CustomSearchEngine>> customSearchEnginesSetting =
-        {"/behaviour/customSearchEngines"};
+    ChatterinoSetting<std::vector<CustomSearchEngine>>
+        customSearchEnginesSetting = {"/behaviour/customSearchEngines"};
     SignalVector<QString> mutedChannels;
 
 public:

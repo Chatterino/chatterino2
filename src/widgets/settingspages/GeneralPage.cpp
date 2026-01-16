@@ -21,8 +21,8 @@
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/dialogs/CustomSearchEnginesDialog.hpp"
+#include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
@@ -1307,8 +1307,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
         SettingWidget::checkbox("Enable search in context menu",
                                 s.searchEngineEnabled)
-            ->setTooltip("Allow searching selected text using a search engine from "
-                         "the right-click context menu.")
+            ->setTooltip(
+                "Allow searching selected text using a search engine from "
+                "the right-click context menu.")
             ->addTo(layout);
 
         auto *searchEngineCombo = layout.addDropdown<QString>(
@@ -1320,15 +1321,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 return args.value;
             },
             true,
-            "Select the search engine to use when searching selected text from the "
-            "context menu.");
+            "Select which search engine to use for searching selected text "
+            "from the context menu.");
         searchEngineCombo->setEnabled(s.searchEngineEnabled.getValue());
         s.searchEngineEnabled.connect([searchEngineCombo](const bool &value) {
             searchEngineCombo->setEnabled(value);
         });
 
-        auto *manageEnginesButton = layout.addButton(
-            "Manage Custom Search Engines", [this] {
+        auto *manageEnginesButton =
+            layout.addButton("Manage Custom Search Engines", [this] {
                 CustomSearchEnginesDialog dialog(this);
                 dialog.exec();
             });

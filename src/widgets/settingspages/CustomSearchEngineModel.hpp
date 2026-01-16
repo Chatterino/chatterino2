@@ -24,8 +24,9 @@ public:
 
 protected:
     // turn a vector item into a model row
-    CustomSearchEngine getItemFromRow(std::vector<QStandardItem *> &row,
-                                      const CustomSearchEngine &original) override;
+    CustomSearchEngine getItemFromRow(
+        std::vector<QStandardItem *> &row,
+        const CustomSearchEngine &original) override;
 
     // turns a row in the model into a vector item
     void getRowFromItem(const CustomSearchEngine &item,

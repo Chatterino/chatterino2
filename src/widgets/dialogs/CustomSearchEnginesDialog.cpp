@@ -26,13 +26,12 @@ CustomSearchEnginesDialog::CustomSearchEnginesDialog(QWidget *parent)
     LayoutCreator<CustomSearchEnginesDialog> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    auto *view =
-        layout
-            .emplace<EditableModelView>(
-                (new CustomSearchEngineModel(nullptr))
-                    ->initialized(&getSettings()->customSearchEngines),
-                false)
-            .getElement();
+    auto *view = layout
+                     .emplace<EditableModelView>(
+                         (new CustomSearchEngineModel(nullptr))
+                             ->initialized(&getSettings()->customSearchEngines),
+                         false)
+                     .getElement();
 
     view->setTitles({"Name", "URL"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(

@@ -2648,24 +2648,27 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         {
             QString searchEngine = getSettings()->searchEngine.getValue();
             QString searchURL = getSearchEngineURL(searchEngine);
-            
+
             if (!searchEngine.isEmpty() && !searchURL.isEmpty())
             {
                 QString displayName = searchEngine;
-                auto customEngines = getSettings()->customSearchEngines.readOnly();
+                auto customEngines =
+                    getSettings()->customSearchEngines.readOnly();
                 for (const auto &engine : *customEngines)
                 {
-                    if (engine.name == searchEngine || engine.displayName() == searchEngine)
+                    if (engine.name == searchEngine ||
+                        engine.displayName() == searchEngine)
                     {
                         displayName = engine.displayName();
                         break;
                     }
                 }
-                
-                menu->addAction("&Search with " + displayName, [this, searchURL] {
-                    QDesktopServices::openUrl(QUrl(searchURL +
-                                                   this->getSelectedText().trimmed()));
-                });
+
+                menu->addAction(
+                    "&Search with " + displayName, [this, searchURL] {
+                        QDesktopServices::openUrl(QUrl(
+                            searchURL + this->getSelectedText().trimmed()));
+                    });
             }
         }
     }

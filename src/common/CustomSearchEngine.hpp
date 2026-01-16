@@ -13,7 +13,8 @@ namespace chatterino {
 
 struct CustomSearchEngine {
     QString name;  // Optional display name (can be empty)
-    QString url;   // Required URL template (e.g., "https://search.yahoo.com/search?p=")
+    QString
+        url;  // Required URL template (e.g., "https://search.yahoo.com/search?p=")
 
     CustomSearchEngine() = default;
     CustomSearchEngine(const QString &name, const QString &url)
