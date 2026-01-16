@@ -81,8 +81,7 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
                 if (currentUsername.compare(manager.currentUsername.getValue(),
                                             Qt::CaseInsensitive) != 0)
                 {
-                    pajlada::Settings::Setting<QString>::set(
-                        "/accounts/current", currentUsername);
+                    manager.currentUsername = currentUsername;
                 }
                 getSettings()->requestSave();
                 app->getAccounts()->twitch.currentUserNameChanged.invoke();
