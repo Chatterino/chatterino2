@@ -76,17 +76,15 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
                     "/accounts/uid" + account->getUserId().toStdString();
                 pajlada::Settings::Setting<QString>::set(basePath + "/username",
                                                          login);
-                auto currentUsername =
-                    app->getAccounts()->twitch.getCurrent()->getUserName();
-                auto storedCurrent = pajlada::Settings::Setting<QString>::get(
-                    "/accounts/current");
-                if (currentUsername.compare(storedCurrent,
+                auto &manager = app->getAccounts()->twitch;
+                auto currentUsername = manager.getCurrent()->getUserName();
+                if (currentUsername.compare(manager.currentUsername.getValue(),
                                             Qt::CaseInsensitive) != 0)
                 {
                     pajlada::Settings::Setting<QString>::set(
                         "/accounts/current", currentUsername);
-                    getSettings()->requestSave();
                 }
+                getSettings()->requestSave();
                 app->getAccounts()->twitch.currentUserNameChanged.invoke();
             }
 

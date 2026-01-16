@@ -46,7 +46,7 @@
 - Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6710)
 - Bugfix: Fix highlight mentions not updating when username changes. (#6723)
 - Bugfix: Fixed Return and Enter being treated as different keys on Mac OS. (#6726)
-- Bugfix: Update account entry when username changes. (#6739)
+- Bugfix: Defensively update current Twitch account username in checkMissingScopes. (#6734)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
