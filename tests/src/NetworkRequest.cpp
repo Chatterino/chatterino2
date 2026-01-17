@@ -326,7 +326,6 @@ TEST(NetworkRequest, HttpBody)
     for (auto ty : std::array{
              NetworkRequestType::Post,
              NetworkRequestType::Put,
-             NetworkRequestType::Delete,
              NetworkRequestType::Patch,
          })
     {
@@ -357,7 +356,6 @@ TEST(NetworkRequest, HttpBodyMultipart)
     for (auto ty : std::array{
              NetworkRequestType::Post,
              NetworkRequestType::Put,
-             NetworkRequestType::Delete,
              NetworkRequestType::Patch,
          })
     {

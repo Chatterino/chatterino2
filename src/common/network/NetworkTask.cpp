@@ -84,40 +84,61 @@ QNetworkReply *NetworkTask::createReply()
     const auto &data = this->data_;
     const auto &request = this->data_->request;
     auto *accessManager = NetworkManager::accessManager;
-
-    // GET has some special handling
-    if (this->data_->requestType == NetworkRequestType::Get)
+    switch (this->data_->requestType)
     {
-        return accessManager->get(request);
+        case NetworkRequestType::Get:
+            return accessManager->get(request);
+
+        case NetworkRequestType::Delete:
+            return accessManager->deleteResource(data->request);
+
+        case NetworkRequestType::Put:
+            if (data->multiPartPayload)
+            {
+                assert(data->payload.isNull());
+
+                return accessManager->put(request,
+                                          data->multiPartPayload.get());
+            }
+            else
+            {
+                assert(data->multiPartPayload == nullptr);
+
+                return accessManager->put(request, data->payload);
+            }
+
+        case NetworkRequestType::Post:
+            if (data->multiPartPayload)
+            {
+                assert(data->payload.isNull());
+
+                return accessManager->post(request,
+                                           data->multiPartPayload.get());
+            }
+            else
+            {
+                assert(data->multiPartPayload == nullptr);
+
+                return accessManager->post(request, data->payload);
+            }
+
+        case NetworkRequestType::Patch:
+            if (data->multiPartPayload)
+            {
+                assert(data->payload.isNull());
+
+                return accessManager->sendCustomRequest(
+                    request, "PATCH", data->multiPartPayload.get());
+            }
+            else
+            {
+                assert(data->multiPartPayload == nullptr);
+
+                return NetworkManager::accessManager->sendCustomRequest(
+                    request, "PATCH", data->payload);
+            }
     }
-
-    QByteArray verb = [&] {
-        switch (this->data_->requestType)
-        {
-            case NetworkRequestType::Get:
-                break;
-            case NetworkRequestType::Post:
-                return "POST"_ba;
-            case NetworkRequestType::Put:
-                return "PUT"_ba;
-            case NetworkRequestType::Delete:
-                return "DELETE"_ba;
-            case NetworkRequestType::Patch:
-                return "PATCH"_ba;
-        }
-        assert(false && "Invalid request type");
-        return QByteArray{};
-    }();
-
-    if (data->multiPartPayload)
-    {
-        assert(data->payload.isNull());
-        return accessManager->sendCustomRequest(request, verb,
-                                                data->multiPartPayload.get());
-    }
-    assert(data->multiPartPayload == nullptr);
-
-    return accessManager->sendCustomRequest(request, verb, data->payload);
+    return nullptr;
 }
 
 void NetworkTask::logReply()
