@@ -2628,7 +2628,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
 
             if (!searchURL.isEmpty())
             {
-                QString displayName = searchName.isEmpty() ? "Search" : searchName;
+                QString displayName =
+                    searchName.isEmpty() ? "Search" : searchName;
 
                 menu->addAction(
                     "&Search with " + displayName, [this, searchURL] {

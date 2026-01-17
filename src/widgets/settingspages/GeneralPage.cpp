@@ -1226,12 +1226,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addDescription(
             "Search engine which appears when you select text and "
             "right-click a message. Select a search engine preset from the "
-            "dropdown below, or fill in your custom search engine URL and name.");
+            "dropdown below, or fill in your custom search engine URL and "
+            "name.");
 
         // Preset dropdown
         QStringList presetList = {"DuckDuckGo", "Bing", "Google", "Custom"};
-        auto *presetCombo = layout.addDropdown("Search Engine Preset", presetList,
-                                               "Select a search engine preset");
+        auto *presetCombo =
+            layout.addDropdown("Search Engine Preset", presetList,
+                               "Select a search engine preset");
         presetCombo->setEnabled(s.searchEngineEnabled.getValue());
         s.searchEngineEnabled.connect([presetCombo](bool value) {
             presetCombo->setEnabled(value);
@@ -1263,8 +1265,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
         // Connect preset dropdown to update URL and name settings
         QObject::connect(
-            presetCombo,
-            QOverload<int>::of(&QComboBox::currentIndexChanged),
+            presetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             [&s, presetCombo](int index) {
                 if (index < 0)
                     return;
@@ -1289,7 +1290,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             });
 
         // URL and Name text inputs
-        auto *urlWidget = SettingWidget::lineEdit("Search Engine URL", s.searchEngineUrl);
+        auto *urlWidget =
+            SettingWidget::lineEdit("Search Engine URL", s.searchEngineUrl);
         urlWidget->setEnabled(s.searchEngineEnabled.getValue());
         s.searchEngineEnabled.connect([urlWidget](bool value) {
             urlWidget->setEnabled(value);
