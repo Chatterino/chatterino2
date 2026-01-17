@@ -17,7 +17,6 @@ struct CustomSearchEngine {
         url;  // Required URL template (e.g., "https://search.yahoo.com/search?p=")
 
     CustomSearchEngine() = default;
-    CustomSearchEngine(const QString &name, QString url)
     CustomSearchEngine(QString name, const QString &url)
         : name(std::move(name))
         , url(url)
