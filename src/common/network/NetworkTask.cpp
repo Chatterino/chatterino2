@@ -17,8 +17,6 @@
 #include <QNetworkReply>
 #include <QtConcurrent>
 
-using namespace Qt::Literals;
-
 namespace chatterino::network::detail {
 
 NetworkTask::NetworkTask(std::shared_ptr<NetworkData> &&data)
