@@ -286,11 +286,14 @@ float getTooltipScale(EmoteTooltipScale emoteTooltipScale)
     }
 }
 
-QString getSearchEngineURL(QString searchEngine)
+QString getSearchEngineURL(const QString &searchEngine)
 {
-    if (searchEngine == "DuckDuckGo")
+    if (searchEngine == "DuckDuckGo") {
         return "https://duckduckgo.com/?q=";
     else if (searchEngine == "Bing")
+        return "https://www.bing.com/search?q=";
+    else if (searchEngine == "Google")
+    if (searchEngine == "Bing")
         return "https://www.bing.com/search?q=";
     else if (searchEngine == "Google")
         return "https://www.google.com/search?q=";

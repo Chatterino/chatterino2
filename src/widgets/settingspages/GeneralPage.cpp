@@ -1317,14 +1317,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             [](auto val) {
                 return val;
             },
-            [](auto args) {
+            [](const auto& args) {
                 return args.value;
             },
             true,
             "Select which search engine to use for searching selected text "
             "from the context menu.");
         searchEngineCombo->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([searchEngineCombo](const bool &value) {
+        s.searchEngineEnabled.connect([searchEngineCombo](bool value) {
             searchEngineCombo->setEnabled(value);
         });
 
@@ -1334,7 +1334,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 dialog.exec();
             });
         manageEnginesButton->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([manageEnginesButton](const bool &value) {
+        s.searchEngineEnabled.connect([manageEnginesButton](bool value) {
             manageEnginesButton->setEnabled(value);
         });
 
