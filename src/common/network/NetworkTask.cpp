@@ -17,6 +17,8 @@
 #include <QNetworkReply>
 #include <QtConcurrent>
 
+using namespace Qt::Literals;
+
 namespace chatterino::network::detail {
 
 NetworkTask::NetworkTask(std::shared_ptr<NetworkData> &&data)
@@ -82,44 +84,33 @@ QNetworkReply *NetworkTask::createReply()
     const auto &data = this->data_;
     const auto &request = this->data_->request;
     auto *accessManager = NetworkManager::accessManager;
-    switch (this->data_->requestType)
+    QByteArray verb = [&] {
+        switch (this->data_->requestType)
+        {
+            case NetworkRequestType::Get:
+                return "GET"_ba;
+            case NetworkRequestType::Post:
+                return "POST"_ba;
+            case NetworkRequestType::Put:
+                return "PUT"_ba;
+            case NetworkRequestType::Delete:
+                return "DELETE"_ba;
+            case NetworkRequestType::Patch:
+                return "PATCH"_ba;
+        }
+        assert(false && "Invalid request type");
+        return QByteArray{};
+    }();
+
+    if (data->multiPartPayload)
     {
-        case NetworkRequestType::Get:
-            return accessManager->get(request);
-
-        case NetworkRequestType::Put:
-            return accessManager->put(request, data->payload);
-
-        case NetworkRequestType::Delete:
-            return accessManager->deleteResource(data->request);
-
-        case NetworkRequestType::Post:
-            if (data->multiPartPayload)
-            {
-                assert(data->payload.isNull());
-
-                return accessManager->post(request,
-                                           data->multiPartPayload.get());
-            }
-            else
-            {
-                return accessManager->post(request, data->payload);
-            }
-        case NetworkRequestType::Patch:
-            if (data->multiPartPayload)
-            {
-                assert(data->payload.isNull());
-
-                return accessManager->sendCustomRequest(
-                    request, "PATCH", data->multiPartPayload.get());
-            }
-            else
-            {
-                return NetworkManager::accessManager->sendCustomRequest(
-                    request, "PATCH", data->payload);
-            }
+        assert(data->payload.isNull());
+        return accessManager->sendCustomRequest(request, verb,
+                                                data->multiPartPayload.get());
     }
-    return nullptr;
+    assert(data->multiPartPayload == nullptr);
+
+    return accessManager->sendCustomRequest(request, verb, data->payload);
 }
 
 void NetworkTask::logReply()
