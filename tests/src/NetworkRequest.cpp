@@ -335,6 +335,7 @@ TEST(NetworkRequest, HttpBody)
         NetworkRequest(getHttpbinUrl(path), ty)
             .timeout(1000)
             .payload("foobar")
+            .header("Content-Type", "text/plain")
             .onSuccess([&](const NetworkResult &result) {
                 EXPECT_EQ(result.getData(), "foobar") << path;
                 success = true;
