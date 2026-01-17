@@ -84,11 +84,18 @@ QNetworkReply *NetworkTask::createReply()
     const auto &data = this->data_;
     const auto &request = this->data_->request;
     auto *accessManager = NetworkManager::accessManager;
+
+    // GET has some special handling
+    if (this->data_->requestType == NetworkRequestType::Get)
+    {
+        return accessManager->get(request);
+    }
+
     QByteArray verb = [&] {
         switch (this->data_->requestType)
         {
             case NetworkRequestType::Get:
-                return "GET"_ba;
+                break;
             case NetworkRequestType::Post:
                 return "POST"_ba;
             case NetworkRequestType::Put:
