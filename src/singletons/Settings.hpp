@@ -312,6 +312,8 @@ public:
                                         false};
     BoolSetting searchEngineEnabled = {"/behaviour/searchEngineEnabled", false};
     QStringSetting searchEngine = {"/behaviour/searchEngine", ""};
+    QStringSetting searchEngineUrl = {"/behaviour/searchEngine/url", ""};
+    QStringSetting searchEngineName = {"/behaviour/searchEngine/name", ""};
 
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",

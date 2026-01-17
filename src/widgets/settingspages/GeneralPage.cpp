@@ -21,7 +21,6 @@
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/dialogs/CustomSearchEnginesDialog.hpp"
 #include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
@@ -1215,6 +1214,96 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "the top and a positive to the bottom.")
         ->addTo(layout);
 
+    {
+        layout.addSubtitle("Search Engine");
+        SettingWidget::checkbox("Enable search in right-click context menu",
+                                s.searchEngineEnabled)
+            ->setTooltip(
+                "Allow searching selected text using a search engine from "
+                "the right-click context menu.")
+            ->addTo(layout);
+
+        layout.addDescription(
+            "Search engine which appears when you select text and "
+            "right-click a message. Select a search engine preset from the "
+            "dropdown below, or fill in your custom search engine URL and name.");
+
+        // Preset dropdown
+        QStringList presetList = {"DuckDuckGo", "Bing", "Google", "Custom"};
+        auto *presetCombo = layout.addDropdown("Search Engine Preset", presetList,
+                                               "Select a search engine preset");
+        presetCombo->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([presetCombo](bool value) {
+            presetCombo->setEnabled(value);
+        });
+
+        // Initialize dropdown based on current settings
+        QString currentUrl = s.searchEngineUrl.getValue();
+        int presetIndex = -1;
+        if (currentUrl == "https://duckduckgo.com/?q=")
+        {
+            presetIndex = presetList.indexOf("DuckDuckGo");
+        }
+        else if (currentUrl == "https://www.bing.com/search?q=")
+        {
+            presetIndex = presetList.indexOf("Bing");
+        }
+        else if (currentUrl == "https://www.google.com/search?q=")
+        {
+            presetIndex = presetList.indexOf("Google");
+        }
+        else
+        {
+            presetIndex = presetList.indexOf("Custom");
+        }
+        if (presetIndex >= 0)
+        {
+            presetCombo->setCurrentIndex(presetIndex);
+        }
+
+        // Connect preset dropdown to update URL and name settings
+        QObject::connect(
+            presetCombo,
+            QOverload<int>::of(&QComboBox::currentIndexChanged),
+            [&s, presetCombo](int index) {
+                if (index < 0)
+                    return;
+
+                QString preset = presetCombo->itemText(index);
+                if (preset == "DuckDuckGo")
+                {
+                    s.searchEngineUrl = "https://duckduckgo.com/?q=";
+                    s.searchEngineName = "DuckDuckGo";
+                }
+                else if (preset == "Bing")
+                {
+                    s.searchEngineUrl = "https://www.bing.com/search?q=";
+                    s.searchEngineName = "Bing";
+                }
+                else if (preset == "Google")
+                {
+                    s.searchEngineUrl = "https://www.google.com/search?q=";
+                    s.searchEngineName = "Google";
+                }
+                // "Custom" does nothing - user can edit the URL/name fields directly
+            });
+
+        // URL and Name text inputs
+        auto *urlWidget = SettingWidget::lineEdit("Search Engine URL", s.searchEngineUrl);
+        urlWidget->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([urlWidget](bool value) {
+            urlWidget->setEnabled(value);
+        });
+        urlWidget->addTo(layout);
+
+        auto *nameWidget =
+            SettingWidget::lineEdit("Search Engine Name", s.searchEngineName);
+        nameWidget->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([nameWidget](bool value) {
+            nameWidget->setEnabled(value);
+        });
+        nameWidget->addTo(layout);
+    }
     layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
@@ -1289,78 +1378,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup)
         ->addTo(layout);
-
-    {
-        auto buildSearchEngineList = [&s]() {
-            QStringList list = {"DuckDuckGo", "Bing", "Google"};
-            auto customEngines = s.customSearchEngines.readOnly();
-            for (const auto &engine : *customEngines)
-            {
-                QString displayName = engine.displayName();
-                if (!displayName.isEmpty() && !list.contains(displayName))
-                {
-                    list.append(displayName);
-                }
-            }
-            return list;
-        };
-
-        SettingWidget::checkbox("Enable search in context menu",
-                                s.searchEngineEnabled)
-            ->setTooltip(
-                "Allow searching selected text using a search engine from "
-                "the right-click context menu.")
-            ->addTo(layout);
-
-        auto *searchEngineCombo = layout.addDropdown<QString>(
-            "Search Engine", buildSearchEngineList(), s.searchEngine,
-            [](auto val) {
-                return val;
-            },
-            [](const auto& args) {
-                return args.value;
-            },
-            true,
-            "Select which search engine to use for searching selected text "
-            "from the context menu.");
-        searchEngineCombo->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([searchEngineCombo](bool value) {
-            searchEngineCombo->setEnabled(value);
-        });
-
-        auto *manageEnginesButton =
-            layout.addButton("Manage Custom Search Engines", [this] {
-                CustomSearchEnginesDialog dialog(this);
-                dialog.exec();
-            });
-        manageEnginesButton->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([manageEnginesButton](bool value) {
-            manageEnginesButton->setEnabled(value);
-        });
-
-        // Update dropdown when custom engines change
-        auto updateDropdown = [searchEngineCombo, buildSearchEngineList, &s]() {
-            QString currentValue = s.searchEngine.getValue();
-            QStringList newList = buildSearchEngineList();
-            searchEngineCombo->clear();
-            searchEngineCombo->addItems(newList);
-
-            // Restore previous selection if it still exists
-            int index = newList.indexOf(currentValue);
-            if (index >= 0)
-            {
-                searchEngineCombo->setCurrentIndex(index);
-            }
-            else if (!currentValue.isEmpty())
-            {
-                searchEngineCombo->setEditText(currentValue);
-            }
-        };
-
-        s.customSearchEngines.delayedItemsChanged.connect([updateDropdown] {
-            updateDropdown();
-        });
-    }
 
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
                             s.lowercaseDomains)

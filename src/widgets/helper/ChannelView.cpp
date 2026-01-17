@@ -286,39 +286,6 @@ float getTooltipScale(EmoteTooltipScale emoteTooltipScale)
     }
 }
 
-QString getSearchEngineURL(const QString &searchEngine)
-{
-    if (searchEngine == "DuckDuckGo") 
-    {
-        return "https://duckduckgo.com/?q=";
-    } 
-    else if (searchEngine == "Brave") 
-    {
-        return "https://search.brave.com/search?q=";
-    }
-    else if (searchEngine == "Bing") 
-    {
-        return "https://www.bing.com/search?q=";
-    } 
-    else if (searchEngine == "Google") 
-    {
-        return "https://www.google.com/search?q=";
-    }
-
-    // Check custom search engines
-    auto customEngines = getSettings()->customSearchEngines.readOnly();
-    for (const auto &engine : *customEngines)
-    {
-        if (engine.name == searchEngine || engine.displayName() == searchEngine)
-        {
-            return engine.url;
-        }
-    }
-
-    // Return empty string if engine not found
-    return "";
-}
-
 }  // namespace
 
 namespace chatterino {
@@ -2656,23 +2623,12 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         // Add search action when text is selected and search feature is enabled
         if (getSettings()->searchEngineEnabled.getValue())
         {
-            QString searchEngine = getSettings()->searchEngine.getValue();
-            QString searchURL = getSearchEngineURL(searchEngine);
+            QString searchURL = getSettings()->searchEngineUrl.getValue();
+            QString searchName = getSettings()->searchEngineName.getValue();
 
-            if (!searchEngine.isEmpty() && !searchURL.isEmpty())
+            if (!searchURL.isEmpty())
             {
-                QString displayName = searchEngine;
-                auto customEngines =
-                    getSettings()->customSearchEngines.readOnly();
-                for (const auto &engine : *customEngines)
-                {
-                    if (engine.name == searchEngine ||
-                        engine.displayName() == searchEngine)
-                    {
-                        displayName = engine.displayName();
-                        break;
-                    }
-                }
+                QString displayName = searchName.isEmpty() ? "Search" : searchName;
 
                 menu->addAction(
                     "&Search with " + displayName, [this, searchURL] {
