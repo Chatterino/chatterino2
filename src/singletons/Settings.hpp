@@ -5,7 +5,6 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
-#include "common/CustomSearchEngine.hpp"
 #include "common/enums/MessageOverflow.hpp"
 #include "common/LastMessageLineStyle.hpp"
 #include "common/Modes.hpp"
@@ -802,8 +801,6 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
-    ChatterinoSetting<std::vector<CustomSearchEngine>>
-        customSearchEnginesSetting = {"/behaviour/customSearchEngines"};
     SignalVector<QString> mutedChannels;
 
 public:
@@ -816,7 +813,6 @@ public:
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
     SignalVector<ChannelLog> loggedChannels;
-    SignalVector<CustomSearchEngine> customSearchEngines;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);

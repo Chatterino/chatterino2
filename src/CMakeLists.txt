@@ -28,7 +28,6 @@ set(SOURCE_FILES
         common/ChatterSet.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/CustomSearchEngine.hpp
         common/Env.cpp
         common/Env.hpp
         common/LastMessageLineStyle.hpp
@@ -666,8 +665,6 @@ set(SOURCE_FILES
         widgets/dialogs/ChannelFilterEditorDialog.hpp
         widgets/dialogs/ColorPickerDialog.cpp
         widgets/dialogs/ColorPickerDialog.hpp
-        widgets/dialogs/CustomSearchEnginesDialog.cpp
-        widgets/dialogs/CustomSearchEnginesDialog.hpp
         widgets/dialogs/EditHotkeyDialog.cpp
         widgets/dialogs/EditHotkeyDialog.hpp
         widgets/dialogs/EditUserNotesDialog.cpp
@@ -795,8 +792,6 @@ set(SOURCE_FILES
         widgets/settingspages/AccountsPage.hpp
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
-        widgets/settingspages/CustomSearchEngineModel.cpp
-        widgets/settingspages/CustomSearchEngineModel.hpp
         widgets/settingspages/CustomWidgets.hpp
         widgets/settingspages/ExternalToolsPage.cpp
         widgets/settingspages/ExternalToolsPage.hpp
