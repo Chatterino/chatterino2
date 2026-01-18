@@ -101,12 +101,13 @@ void removeSuspiciousTreatment(const CommandContext &ctx,
         return;
     }
 
+    auto roomId = ctx.twitchChannel->roomId();
     auto modId = currentUser->getUserId();
     getHelix()->getUserByName(
         ctx.words.at(1),
-        [chan = ctx.twitchChannel, modId, command](const auto &user) {
+        [chan{ctx.channel}, roomId, modId, command](const auto &user) {
             getHelix()->removeSuspiciousUser(
-                chan->roomId(), modId, user.id,
+                roomId, modId, user.id,
                 [] {
                     // treatment notification is handled by eventsub
                 },
