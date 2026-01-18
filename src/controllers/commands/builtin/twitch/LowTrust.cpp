@@ -32,6 +32,7 @@ void addSuspiciousTreatment(const CommandContext &ctx, const QString &command,
         {
             qCWarning(chatterinoCommands) << "Error parsing command:" << error;
         }
+        return;
     }
 
     if (ctx.words.size() < 2)
@@ -83,6 +84,7 @@ void removeSuspiciousTreatment(const CommandContext &ctx,
         {
             qCWarning(chatterinoCommands) << "Error parsing command:" << error;
         }
+        return;
     }
 
     if (ctx.words.size() < 2)
