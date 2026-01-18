@@ -22,7 +22,7 @@ void addSuspiciousTreatment(const CommandContext &ctx, const QString &command,
     if (ctx.twitchChannel == nullptr)
     {
         // This action must be performed with a twitch channel as a context
-        const auto error =
+        const QString error =
             "The " % command % " command only works in Twitch channels";
         if (ctx.channel != nullptr)
         {
@@ -73,7 +73,7 @@ void removeSuspiciousTreatment(const CommandContext &ctx,
     if (ctx.twitchChannel == nullptr)
     {
         // This action must be performed with a twitch channel as a context
-        const auto error =
+        const QString error =
             "The " % command % " command only works in Twitch channels";
         if (ctx.channel != nullptr)
         {
