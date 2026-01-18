@@ -1216,6 +1216,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     {
         layout.addSubtitle("Search Engine");
+        layout.addDescription(
+            "Search engine which appears when you select text and "
+            "right-click a message. Select a search engine preset from the "
+            "dropdown below, or fill in your custom search engine URL and "
+            "name.");
         SettingWidget::checkbox("Enable search in right-click context menu",
                                 s.searchEngineEnabled)
             ->setTooltip(
@@ -1223,45 +1228,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 "the right-click context menu.")
             ->addTo(layout);
 
-        layout.addDescription(
-            "Search engine which appears when you select text and "
-            "right-click a message. Select a search engine preset from the "
-            "dropdown below, or fill in your custom search engine URL and "
-            "name.");
-
         // Preset dropdown
-        QStringList presetList = {"DuckDuckGo", "Bing", "Google", "Custom"};
+        QStringList presetList = {"DuckDuckGo", "Bing", "Google"};
         auto *presetCombo =
             layout.addDropdown("Search Engine Preset", presetList,
                                "Select a search engine preset");
+        presetCombo->setEditable(true);
+        presetCombo->lineEdit()->setPlaceholderText("Select...");
+        presetCombo->lineEdit()->setReadOnly(true);
+        presetCombo->setCurrentIndex(-1);
         presetCombo->setEnabled(s.searchEngineEnabled.getValue());
         s.searchEngineEnabled.connect([presetCombo](bool value) {
             presetCombo->setEnabled(value);
         });
-
-        // Initialize dropdown based on current settings
-        QString currentUrl = s.searchEngineUrl.getValue();
-        int presetIndex = -1;
-        if (currentUrl == "https://duckduckgo.com/?q=")
-        {
-            presetIndex = presetList.indexOf("DuckDuckGo");
-        }
-        else if (currentUrl == "https://www.bing.com/search?q=")
-        {
-            presetIndex = presetList.indexOf("Bing");
-        }
-        else if (currentUrl == "https://www.google.com/search?q=")
-        {
-            presetIndex = presetList.indexOf("Google");
-        }
-        else
-        {
-            presetIndex = presetList.indexOf("Custom");
-        }
-        if (presetIndex >= 0)
-        {
-            presetCombo->setCurrentIndex(presetIndex);
-        }
 
         // Connect preset dropdown to update URL and name settings
         QObject::connect(
@@ -1286,7 +1265,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                     s.searchEngineUrl = "https://www.google.com/search?q=";
                     s.searchEngineName = "Google";
                 }
-                // "Custom" does nothing - user can edit the URL/name fields directly
+                // Reset to -1 after selection
+                presetCombo->blockSignals(true);
+                presetCombo->setCurrentIndex(-1);
+                presetCombo->lineEdit()->clear();
+                presetCombo->blockSignals(false);
             });
 
         // URL and Name text inputs

@@ -2628,14 +2628,14 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
 
             if (!searchURL.isEmpty())
             {
-                QString displayName =
-                    searchName.isEmpty() ? "Search" : searchName;
+                QString actionText = searchName.isEmpty()
+                                         ? "&Search"
+                                         : "&Search with " + searchName;
 
-                menu->addAction(
-                    "&Search with " + displayName, [this, searchURL] {
-                        QDesktopServices::openUrl(QUrl(
-                            searchURL + this->getSelectedText().trimmed()));
-                    });
+                menu->addAction(actionText, [this, searchURL] {
+                    QDesktopServices::openUrl(QUrl(
+                        searchURL + this->getSelectedText().trimmed()));
+                });
             }
         }
     }
