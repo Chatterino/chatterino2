@@ -2633,8 +2633,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                                          : "&Search with " + searchName;
 
                 menu->addAction(actionText, [this, searchURL] {
-                    QDesktopServices::openUrl(QUrl(
-                        searchURL + this->getSelectedText().trimmed()));
+                    QDesktopServices::openUrl(
+                        QUrl(searchURL + this->getSelectedText().trimmed()));
                 });
             }
         }

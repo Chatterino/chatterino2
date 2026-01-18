@@ -309,7 +309,8 @@ public:
     BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
-    BoolSetting searchEngineEnabled = {"/behaviour/searchEngine/enabled", false};
+    BoolSetting searchEngineEnabled = {"/behaviour/searchEngine/enabled",
+                                       false};
     QStringSetting searchEngineUrl = {"/behaviour/searchEngine/url", ""};
     QStringSetting searchEngineName = {"/behaviour/searchEngine/name", ""};
 
