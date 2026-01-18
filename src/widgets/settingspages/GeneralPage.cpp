@@ -31,6 +31,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 namespace {
 
@@ -1266,10 +1267,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                     s.searchEngineName = "Google";
                 }
                 // Reset to -1 after selection
-                presetCombo->blockSignals(true);
-                presetCombo->setCurrentIndex(-1);
-                presetCombo->lineEdit()->clear();
-                presetCombo->blockSignals(false);
+                {
+                    QSignalBlocker blocker(presetCombo);
+                    presetCombo->setCurrentIndex(-1);
+                    presetCombo->lineEdit()->clear();
+                }
             });
 
         // URL and Name text inputs
