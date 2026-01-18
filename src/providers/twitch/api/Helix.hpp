@@ -1238,6 +1238,13 @@ public:
         QString reason, ResultCallback<> successCallback,
         FailureCallback<HelixWarnUserError, QString> failureCallback) = 0;
 
+    // Monitor or restrict a user
+    // https://dev.twitch.tv/docs/api/reference/#add-suspicious-status-to-chat-user
+    virtual void addSuspiciousUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        bool restricted, ResultCallback<> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
     // Send a whisper
     // https://dev.twitch.tv/docs/api/reference#send-whisper
     virtual void sendWhisper(
@@ -1631,6 +1638,13 @@ public:
         QString broadcasterID, QString moderatorID, QString userID,
         QString reason, ResultCallback<> successCallback,
         FailureCallback<HelixWarnUserError, QString> failureCallback) final;
+
+    // Monitor or restrict a user
+    // https://dev.twitch.tv/docs/api/reference/#add-suspicious-status-to-chat-user
+    void addSuspiciousUser(QString broadcasterID, QString moderatorID,
+                           QString userID, bool restricted,
+                           ResultCallback<> successCallback,
+                           FailureCallback<QString> failureCallback) final;
 
     // Send a whisper
     // https://dev.twitch.tv/docs/api/reference#send-whisper

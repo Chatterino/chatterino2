@@ -339,6 +339,13 @@ public:
          (FailureCallback<HelixWarnUserError, QString> failureCallback)),
         (override));  // /warn
 
+    // /monitor and /restrict
+    MOCK_METHOD(void, addSuspiciousUser,
+                (QString broadcasterID, QString moderatorID, QString userID,
+                 bool restricted, ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));  // /monitor and /restrict
+
     // /w
     // The extra parenthesis around the failure callback is because its type
     // contains a comma
