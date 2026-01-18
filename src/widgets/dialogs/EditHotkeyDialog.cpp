@@ -171,7 +171,7 @@ void EditHotkeyDialog::afterEdit()
     auto arguments =
         parseHotkeyArguments(this->ui_->argumentsEdit->toPlainText());
 
-    auto category = getApp()->getHotkeys()->hotkeyCategoryFromName(
+    auto category = hotkeyCategoryFromName(
         this->ui_->categoryPicker->currentData().toString());
     if (!category)
     {
@@ -285,7 +285,7 @@ void EditHotkeyDialog::afterEdit()
 void EditHotkeyDialog::updatePossibleActions()
 {
     const auto &hotkeys = getApp()->getHotkeys();
-    auto category = hotkeys->hotkeyCategoryFromName(
+    auto category = hotkeyCategoryFromName(
         this->ui_->categoryPicker->currentData().toString());
     if (!category)
     {
@@ -337,7 +337,7 @@ void EditHotkeyDialog::updateArgumentsInput()
         return;
     }
     const auto &hotkeys = getApp()->getHotkeys();
-    auto category = hotkeys->hotkeyCategoryFromName(
+    auto category = hotkeyCategoryFromName(
         this->ui_->categoryPicker->currentData().toString());
     if (!category)
     {

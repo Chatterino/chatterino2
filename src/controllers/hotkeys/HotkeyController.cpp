@@ -64,6 +64,20 @@ QString hotkeyCategoryDisplayName(HotkeyCategory category)
     return categoryData.displayName;
 }
 
+std::optional<HotkeyCategory> hotkeyCategoryFromName(
+    const QString &categoryName)
+{
+    for (const auto &[category, data] : HOTKEY_CATEGORIES)
+    {
+        if (data.name == categoryName)
+        {
+            return category;
+        }
+    }
+    qCDebug(chatterinoHotkeys) << "Unknown category: " << categoryName;
+    return {};
+}
+
 static bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
                                const std::shared_ptr<Hotkey> &b)
 {
@@ -197,20 +211,6 @@ int HotkeyController::replaceHotkey(QString oldName,
     return this->hotkeys_.append(newHotkey);
 }
 
-std::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
-    QString categoryName)
-{
-    for (const auto &[category, data] : HOTKEY_CATEGORIES)
-    {
-        if (data.name == categoryName)
-        {
-            return category;
-        }
-    }
-    qCDebug(chatterinoHotkeys) << "Unknown category: " << categoryName;
-    return {};
-}
-
 bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
                                    QString ignoreNamed)
 {
@@ -281,7 +281,7 @@ void HotkeyController::loadHotkeys()
         {
             continue;
         }
-        auto category = this->hotkeyCategoryFromName(categoryName);
+        auto category = hotkeyCategoryFromName(categoryName);
         if (!category)
         {
             continue;

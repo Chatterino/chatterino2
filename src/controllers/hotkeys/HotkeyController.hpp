@@ -41,6 +41,9 @@ class HotkeyModel;
  **/
 [[nodiscard]] QString hotkeyCategoryDisplayName(HotkeyCategory category);
 
+[[nodiscard]] std::optional<HotkeyCategory> hotkeyCategoryFromName(
+    const QString &categoryName);
+
 class HotkeyController final
 {
 public:
@@ -74,7 +77,6 @@ public:
      * @returns the new index in the SignalVector
      **/
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
-    std::optional<HotkeyCategory> hotkeyCategoryFromName(QString categoryName);
 
     /**
      * @brief checks if the hotkey is duplicate
