@@ -89,6 +89,7 @@
 - Dev: Refactored types used for emoji parsing. (#6714)
 - Dev: `LinkParser` now parses `QStringView`s. (#6715)
 - Dev: Cleaned up `AccountController` connections. (#6735)
+- Dev: Removed unused variables. (#6748)
 
 ## 2.5.4
 
