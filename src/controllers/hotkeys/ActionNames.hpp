@@ -272,6 +272,21 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPrompt = "Behavior:",
           }},
          {"undo", ActionDefinition{"Undo"}},
+         {"incremental-search-history",
+          ActionDefinition{
+              .displayName = "Incrementally search through the input history",
+              .argumentDescription = "[forward/backward] [loop/noloop]",
+              .minCountArguments = 2,
+              .maxCountArguments = 2,
+              .possibleArguments =
+                  {
+                      {"Backward (looping)", {"backward", "loop"}},
+                      {"Backward (no looping)", {"backward", "noloop"}},
+                      {"Forward (looping)", {"forward", "loop"}},
+                      {"Forward (no looping)", {"forward", "noloop"}},
+                  },
+              .argumentsPrompt = "Direction:",
+          }},
 
      }},
     {HotkeyCategory::Window,
