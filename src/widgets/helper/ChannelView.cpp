@@ -66,6 +66,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QStringBuilder>
+#include <QUrl>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -2633,8 +2634,9 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                                          : "&Search with " + searchName;
 
                 menu->addAction(actionText, [this, searchURL] {
-                    QDesktopServices::openUrl(
-                        QUrl(searchURL + this->getSelectedText().trimmed()));
+                    QString query = this->getSelectedText().trimmed();
+                    QString encodedQuery = QUrl::toPercentEncoding(query);
+                    QDesktopServices::openUrl(QUrl(searchURL + encodedQuery));
                 });
             }
         }
