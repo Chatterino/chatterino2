@@ -10,6 +10,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -1266,6 +1267,7 @@ void Split::reloadChannelAndSubscriberEmotes()
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
+        twitchChannel->channelEmotes().refresh(true);
         twitchChannel->refreshTwitchChannelEmotes(true);
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);

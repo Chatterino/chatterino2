@@ -12,6 +12,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "controllers/emotes/EmoteController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/twitch/LiveController.hpp"
@@ -123,6 +124,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
+    , channelEmotes_(this)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -212,6 +214,8 @@ TwitchChannel::TwitchChannel(const QString &name)
             }
         });
 
+    this->channelEmotes_.initialize(*getApp()->getEmotes());
+
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -246,6 +250,17 @@ void TwitchChannel::initialize()
 {
     this->refreshChatters();
     this->refreshBadges();
+}
+
+std::shared_ptr<const TwitchChannel> TwitchChannel::sharedTwitchChannel() const
+{
+    return std::static_pointer_cast<const TwitchChannel>(
+        this->shared_from_this());
+}
+
+std::shared_ptr<TwitchChannel> TwitchChannel::sharedTwitchChannel()
+{
+    return std::static_pointer_cast<TwitchChannel>(this->shared_from_this());
 }
 
 bool TwitchChannel::isEmpty() const
@@ -750,6 +765,7 @@ void TwitchChannel::roomIdChanged()
     this->refreshFFZChannelEmotes(false);
     this->refreshBTTVChannelEmotes(false);
     this->refreshSevenTVChannelEmotes(false);
+    this->channelEmotes_.refresh(false);
     this->joinBttvChannel();
     this->listenSevenTVCosmetics();
     getApp()->getTwitchLiveController()->add(
@@ -1013,6 +1029,16 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
+}
+
+ChannelEmotes &TwitchChannel::channelEmotes()
+{
+    return this->channelEmotes_;
+}
+
+const ChannelEmotes &TwitchChannel::channelEmotes() const
+{
+    return this->channelEmotes_;
 }
 
 std::optional<EmotePtr> TwitchChannel::twitchEmote(const EmoteName &name) const
