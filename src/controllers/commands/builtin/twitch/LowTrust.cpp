@@ -12,8 +12,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
-#include <chrono>
-
 namespace {
 
 using namespace chatterino;
@@ -69,6 +67,57 @@ void addSuspiciousTreatment(const CommandContext &ctx, const QString &command,
         });
 }
 
+void removeSuspiciousTreatment(const CommandContext &ctx,
+                               const QString &command, const QString &usage)
+{
+    if (ctx.twitchChannel == nullptr)
+    {
+        // This action must be performed with a twitch channel as a context
+        const auto error =
+            "The " % command % " command only works in Twitch channels";
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addSystemMessage(error);
+        }
+        else
+        {
+            qCWarning(chatterinoCommands) << "Error parsing command:" << error;
+        }
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addSystemMessage(usage);
+        return;
+    }
+
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        ctx.channel->addSystemMessage("You must be logged in to " % command %
+                                      " someone!");
+        return;
+    }
+
+    auto modId = currentUser->getUserId();
+    getHelix()->getUserByName(
+        ctx.words.at(1),
+        [chan = ctx.twitchChannel, modId, command](const auto &user) {
+            getHelix()->removeSuspiciousUser(
+                chan->roomId(), modId, user.id,
+                [] {
+                    // treatment notification is handled by eventsub
+                },
+                [chan, command](const auto &err) {
+                    chan->addSystemMessage("Failed to " % command % " user - " %
+                                           err);
+                });
+        },
+        [chan = ctx.channel, command] {
+            chan->addSystemMessage("Failed to query user to " % command);
+        });
+}
+
 }  // namespace
 
 namespace chatterino::commands {
@@ -91,6 +140,28 @@ QString restrictUser(const CommandContext &ctx)
         R"(Usage: "/restrict <username>" - Mark a user as restricted.)");
 
     addSuspiciousTreatment(ctx, command, usage, true);
+
+    return "";
+}
+
+QString unmonitorUser(const CommandContext &ctx)
+{
+    const auto command = QStringLiteral("/unmonitor");
+    const auto usage = QStringLiteral(
+        R"(Usage: "/unmonitor <username>" - Remove a user from suspicious treatment.)");
+
+    removeSuspiciousTreatment(ctx, command, usage);
+
+    return "";
+}
+
+QString unrestrictUser(const CommandContext &ctx)
+{
+    const auto command = QStringLiteral("/unrestrict");
+    const auto usage = QStringLiteral(
+        R"(Usage: "/unrestrict <username>" - Remove a user from suspicious treatment.)");
+
+    removeSuspiciousTreatment(ctx, command, usage);
 
     return "";
 }

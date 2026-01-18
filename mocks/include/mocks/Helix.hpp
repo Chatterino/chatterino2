@@ -346,6 +346,13 @@ public:
                  FailureCallback<QString> failureCallback),
                 (override));  // /monitor and /restrict
 
+    // /unmonitor and /unrestrict
+    MOCK_METHOD(void, removeSuspiciousUser,
+                (QString broadcasterID, QString moderatorID, QString userID,
+                 ResultCallback<> successCallback,
+                 FailureCallback<QString> failureCallback),
+                (override));  // /unmonitor and /unrestrict
+
     // /w
     // The extra parenthesis around the failure callback is because its type
     // contains a comma

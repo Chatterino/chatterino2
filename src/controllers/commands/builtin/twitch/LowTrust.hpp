@@ -20,4 +20,10 @@ QString monitorUser(const CommandContext &ctx);
 /// /restrict
 QString restrictUser(const CommandContext &ctx);
 
+/// /unmonitor
+QString unmonitorUser(const CommandContext &ctx);
+
+/// /unrestrict
+QString unrestrictUser(const CommandContext &ctx);
+
 }  // namespace chatterino::commands

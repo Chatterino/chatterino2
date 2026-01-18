@@ -454,6 +454,8 @@ CommandController::CommandController(const Paths &paths)
 
     this->registerCommand("/monitor", &commands::monitorUser);
     this->registerCommand("/restrict", &commands::restrictUser);
+    this->registerCommand("/unmonitor", &commands::unmonitorUser);
+    this->registerCommand("/unrestrict", &commands::unrestrictUser);
 
     for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
     {
