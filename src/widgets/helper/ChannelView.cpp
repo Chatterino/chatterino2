@@ -66,6 +66,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QStringBuilder>
+#include <QUrl>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -2619,6 +2620,26 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         menu->addAction("&Copy selection", [this] {
             crossPlatformCopy(this->getSelectedText());
         });
+
+        // Add search action when text is selected and search feature is enabled
+        if (getSettings()->searchEngineEnabled.getValue())
+        {
+            QString searchURL = getSettings()->searchEngineUrl.getValue();
+            QString searchName = getSettings()->searchEngineName.getValue();
+
+            if (!searchURL.isEmpty())
+            {
+                QString actionText = searchName.isEmpty()
+                                         ? "&Search"
+                                         : "&Search with " + searchName;
+
+                menu->addAction(actionText, [this, searchURL] {
+                    QString query = this->getSelectedText().trimmed();
+                    QString encodedQuery = QUrl::toPercentEncoding(query);
+                    QDesktopServices::openUrl(QUrl(searchURL + encodedQuery));
+                });
+            }
+        }
     }
 
     menu->addAction("Copy &message", [layout] {

@@ -31,6 +31,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 namespace {
 
@@ -1214,6 +1215,82 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "the top and a positive to the bottom.")
         ->addTo(layout);
 
+    {
+        layout.addSubtitle("Search Engine");
+        layout.addDescription(
+            "Search engine which appears when you select text and "
+            "right-click a message. Select a search engine preset from the "
+            "dropdown below, or fill in your custom search engine URL and "
+            "name.");
+        SettingWidget::checkbox("Enable search in right-click context menu",
+                                s.searchEngineEnabled)
+            ->setTooltip(
+                "Allow searching selected text using a search engine from "
+                "the right-click context menu.")
+            ->addTo(layout);
+
+        // Preset dropdown
+        QStringList presetList = {"DuckDuckGo", "Bing", "Google"};
+        auto *presetCombo =
+            layout.addDropdown("Search Engine Preset", presetList,
+                               "Select a search engine preset");
+        presetCombo->setEditable(true);
+        presetCombo->lineEdit()->setPlaceholderText("Select...");
+        presetCombo->lineEdit()->setReadOnly(true);
+        presetCombo->setCurrentIndex(-1);
+        presetCombo->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([presetCombo](bool value) {
+            presetCombo->setEnabled(value);
+        });
+
+        // Connect preset dropdown to update URL and name settings
+        QObject::connect(
+            presetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            [&s, presetCombo](int index) {
+                if (index < 0)
+                    return;
+
+                QString preset = presetCombo->itemText(index);
+                if (preset == "DuckDuckGo")
+                {
+                    s.searchEngineUrl = "https://duckduckgo.com/?q=";
+                    s.searchEngineName = "DuckDuckGo";
+                }
+                else if (preset == "Bing")
+                {
+                    s.searchEngineUrl = "https://www.bing.com/search?q=";
+                    s.searchEngineName = "Bing";
+                }
+                else if (preset == "Google")
+                {
+                    s.searchEngineUrl = "https://www.google.com/search?q=";
+                    s.searchEngineName = "Google";
+                }
+                // Reset to -1 after selection
+                {
+                    QSignalBlocker blocker(presetCombo);
+                    presetCombo->setCurrentIndex(-1);
+                    presetCombo->lineEdit()->clear();
+                }
+            });
+
+        // URL and Name text inputs
+        auto *urlWidget =
+            SettingWidget::lineEdit("Search Engine URL", s.searchEngineUrl);
+        urlWidget->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([urlWidget](bool value) {
+            urlWidget->setEnabled(value);
+        });
+        urlWidget->addTo(layout);
+
+        auto *nameWidget =
+            SettingWidget::lineEdit("Search Engine Name", s.searchEngineName);
+        nameWidget->setEnabled(s.searchEngineEnabled.getValue());
+        s.searchEngineEnabled.connect([nameWidget](bool value) {
+            nameWidget->setEnabled(value);
+        });
+        nameWidget->addTo(layout);
+    }
     layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
