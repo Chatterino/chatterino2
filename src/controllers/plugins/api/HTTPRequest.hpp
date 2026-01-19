@@ -40,7 +40,7 @@ public:
     HTTPRequest &operator=(HTTPRequest &&) = default;
     HTTPRequest &operator=(HTTPRequest &) = delete;
     HTTPRequest(const HTTPRequest &other) = delete;
-    ~HTTPRequest();
+    ~HTTPRequest() = default;
 
 private:
     NetworkRequest req_;

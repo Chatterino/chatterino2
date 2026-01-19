@@ -184,12 +184,6 @@ HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
 {
 }
 
-HTTPRequest::~HTTPRequest()
-{
-    // We might leak a Lua function or two here if the request isn't executed
-    // but that's better than accessing a possibly invalid lua_State pointer.
-}
-
 QString HTTPRequest::to_string()
 {
     return "<HTTPRequest>";
