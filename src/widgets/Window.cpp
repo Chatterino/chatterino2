@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
@@ -229,7 +233,7 @@ void Window::addCustomTitlebarButtons()
             this->userLabel_->mapToGlobal(
                 this->userLabel_->rect().bottomLeft()));
     });
-    this->userLabel_->setMinimumWidth(20 * scale());
+    this->userLabel_->setMinimumWidth(20 * this->scale());
 
     // streamer mode
     this->streamerModeTitlebarIcon_ =

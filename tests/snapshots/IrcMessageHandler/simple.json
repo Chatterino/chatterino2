@@ -2,13 +2,6 @@
     "input": "@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "17"
-            },
-            "badges": [
-                "subscriber",
-                "no_audio"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "jammehcow",
@@ -132,6 +125,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b",
@@ -141,6 +136,13 @@
             "searchText": "jammehcow  jammehcow: Kappa ",
             "serverReceivedTime": "2022-09-03T10:31:33Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "17"
+            },
+            "twitchBadges": [
+                "subscriber",
+                "no_audio"
+            ],
             "userID": "82674227",
             "usernameColor": "#ffeba2c0"
         }

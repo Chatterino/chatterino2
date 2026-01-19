@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -182,7 +186,7 @@ public:
     bool canReconnect() const override;
     void reconnect() override;
     QString getCurrentStreamID() const override;
-    void createClip();
+    void createClip(const QString &title, std::optional<int> duration);
 
     /// Delete the message with the specified ID as a moderator.
     ///

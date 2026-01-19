@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -76,7 +80,7 @@ public:
 
     ~StackGuard()
     {
-        if (expected < 0)
+        if (this->expected < 0)
         {
             return;
         }

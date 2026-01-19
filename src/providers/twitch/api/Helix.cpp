@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/api/Helix.hpp"
 
 #include "Application.hpp"
@@ -354,12 +358,23 @@ void Helix::getGameById(QString gameId,
 }
 
 void Helix::createClip(
-    QString channelId, ResultCallback<HelixClip> successCallback,
+    QString channelId, QString title, std::optional<int> duration,
+    ResultCallback<HelixClip> successCallback,
     std::function<void(HelixClipError, QString)> failureCallback,
     std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    if (!title.isEmpty())
+    {
+        urlQuery.addQueryItem("title", title);
+    }
+
+    if (duration.has_value())
+    {
+        urlQuery.addQueryItem("duration", QString::number(*duration));
+    }
 
     this->makePost("clips", urlQuery)
         .header("Content-Type", "application/json")

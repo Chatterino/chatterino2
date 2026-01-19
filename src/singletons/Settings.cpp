@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Settings.hpp"
 
 #include "Application.hpp"
@@ -117,12 +121,12 @@ void Settings::mute(const QString &channelName)
 
 void Settings::unmute(const QString &channelName)
 {
-    for (std::vector<int>::size_type i = 0; i != mutedChannels.raw().size();
-         i++)
+    for (std::vector<int>::size_type i = 0;
+         i != this->mutedChannels.raw().size(); i++)
     {
-        if (mutedChannels.raw()[i].toLower() == channelName.toLower())
+        if (this->mutedChannels.raw()[i].toLower() == channelName.toLower())
         {
-            mutedChannels.removeAt(i);
+            this->mutedChannels.removeAt(i);
             i--;
         }
     }
@@ -132,7 +136,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 {
     if (this->isMutedChannel(channelName))
     {
-        unmute(channelName);
+        this->unmute(channelName);
         return false;
     }
     else

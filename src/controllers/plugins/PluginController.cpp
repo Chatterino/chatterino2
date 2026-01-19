@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 
@@ -9,6 +13,7 @@
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
@@ -206,6 +211,13 @@ void PluginController::openLibrariesFor(Plugin *plugin)
         // Don't give plugins the option to shit into our stdio
         r["_IO_input"] = sol::nil;
         r["_IO_output"] = sol::nil;
+    }
+    // set up debug lib
+    {
+        auto debuglib = lua.create_table();
+        g["debug"] = debuglib;
+
+        debuglib.set_function("traceback", lua::api::debugTraceback);
     }
     PluginController::initSol(lua, plugin);
 }
@@ -442,7 +454,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
                 qCDebug(chatterinoLua)
                     << "Got error from plugin " << pl->meta.name
                     << " while refreshing tab completion: "
-                    << errOrList.get_unexpected().error();
+                    << errOrList.error();
                 continue;
             }
 

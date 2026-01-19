@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/Tokenizer.hpp"
 
 #include "common/QLogging.hpp"
@@ -18,6 +22,7 @@ namespace chatterino::filters {
 
 const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"author.badges", "author badges"},
+    {"author.external_badges", "author external badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},
     {"author.user_id", "author user id"},

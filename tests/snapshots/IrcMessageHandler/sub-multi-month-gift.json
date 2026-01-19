@@ -2,10 +2,6 @@
     "input": "@user-id=35759863;msg-param-origin-id=2862055070165643340;display-name=Lucidfoxx;id=eeb3cdb8-337c-413a-9521-3a884ff78754;msg-param-gift-months=12;msg-param-sub-plan=1000;vip=0;emotes=;badges=broadcaster/1,subscriber/3042,partner/1;msg-param-recipient-user-name=ogprodigy;msg-param-recipient-id=53888434;badge-info=subscriber/71;room-id=35759863;msg-param-recipient-display-name=OGprodigy;msg-param-sub-plan-name=Silver\\sPackage;subscriber=1;system-msg=Lucidfoxx\\sgifted\\sa\\sTier\\s1\\ssub\\sto\\sOGprodigy!;login=lucidfoxx;msg-param-sender-count=0;user-type=;mod=0;flags=;rm-received-ts=1712803947891;color=#EB078D;msg-param-months=15;tmi-sent-ts=1712803947773;msg-id=subgift :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -112,6 +108,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -121,6 +119,10 @@
             "searchText": "Lucidfoxx gifted 12 months of a Tier 1 sub to OGprodigy!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

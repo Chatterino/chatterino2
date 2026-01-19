@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "Application.hpp"
@@ -6,12 +10,14 @@
 #include "common/Literals.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "singletons/Settings.hpp"
 #include "util/QCompareTransparent.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
@@ -46,13 +52,13 @@ QString missingScopes(const QJsonArray &scopesArray)
     return missingList;
 }
 
-void checkMissingScopes(const QString &token)
+void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
 {
     NetworkRequest(u"https://id.twitch.tv/oauth2/validate"_s,
                    NetworkRequestType::Get)
-        .header("Authorization", u"OAuth " % token)
+        .header("Authorization", u"OAuth " % account->getOAuthToken())
         .timeout(20000)
-        .onSuccess([](const auto &res) {
+        .onSuccess([account](const auto &res) {
             auto *app = tryGetApp();
             if (!app)
             {
@@ -60,6 +66,27 @@ void checkMissingScopes(const QString &token)
             }
 
             const auto json = res.parseJson();
+
+            const auto login = json["login"_L1].toString();
+            if (!login.isEmpty() &&
+                login.compare(account->getUserName(), Qt::CaseInsensitive) != 0)
+            {
+                account->setUserName(login);
+                const std::string basePath =
+                    "/accounts/uid" + account->getUserId().toStdString();
+                pajlada::Settings::Setting<QString>::set(basePath + "/username",
+                                                         login);
+                auto &manager = app->getAccounts()->twitch;
+                auto currentUsername = manager.getCurrent()->getUserName();
+                if (currentUsername.compare(manager.currentUsername.getValue(),
+                                            Qt::CaseInsensitive) != 0)
+                {
+                    manager.currentUsername = currentUsername;
+                }
+                getSettings()->requestSave();
+                app->getAccounts()->twitch.currentUserNameChanged.invoke();
+            }
+
             auto missing = missingScopes(json["scopes"_L1].toArray());
             if (missing.isEmpty())
             {
@@ -205,7 +232,7 @@ TwitchAccountManager::TwitchAccountManager()
         currentUser->loadSeventvUserID();
         if (!currentUser->isAnon())
         {
-            checkMissingScopes(currentUser->getOAuthToken());
+            checkMissingScopes(currentUser);
         }
     });
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <boost/beast/core/buffer_traits.hpp>
@@ -36,37 +40,37 @@ struct QByteArrayBuffer {
 
         [[nodiscard]] constexpr reference operator*() const noexcept
         {
-            return *ptr;
+            return *this->ptr;
         }
 
         [[nodiscard]] constexpr pointer operator->() const noexcept
         {
-            return ptr;
+            return this->ptr;
         }
 
         constexpr ConstIterator &operator++() noexcept
         {
-            ++ptr;
+            ++this->ptr;
             return *this;
         }
 
         constexpr ConstIterator operator++(int) noexcept
         {
             ConstIterator tmp = *this;
-            ++ptr;
+            ++this->ptr;
             return tmp;
         }
 
         constexpr ConstIterator &operator--() noexcept
         {
-            --ptr;
+            --this->ptr;
             return *this;
         }
 
         constexpr ConstIterator operator--(int) noexcept
         {
             ConstIterator tmp = *this;
-            --ptr;
+            --this->ptr;
             return tmp;
         }
 

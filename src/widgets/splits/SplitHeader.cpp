@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
@@ -478,7 +482,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),
                 this->split_,
                 [twitchChannel] {
-                    twitchChannel->createClip();
+                    twitchChannel->createClip({}, {});
                 })
             ->setVisible(twitchChannel->isLive());
 
@@ -979,10 +983,10 @@ void SplitHeader::paintEvent(QPaintEvent * /*event*/)
         border = this->theme->splits.header.focusedBorder;
     }
 
-    painter.fillRect(rect(), background);
+    painter.fillRect(this->rect(), background);
     painter.setPen(border);
-    painter.drawRect(0, 0, width() - 1, height() - 2);
-    painter.fillRect(0, height() - 1, width(), 1, background);
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 2);
+    painter.fillRect(0, this->height() - 1, this->width(), 1, background);
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)

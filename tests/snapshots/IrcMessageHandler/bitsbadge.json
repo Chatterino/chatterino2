@@ -2,10 +2,6 @@
     "input": "@badge-info=subscriber/2;badges=subscriber/2,bits/1000;color=#FF4500;display-name=whoopiix;emotes=;flags=;id=d2b32a02-3071-4c52-b2ce-bc3716acdc44;login=whoopiix;mod=0;msg-id=bitsbadgetier;msg-param-threshold=1000;room-id=11148817;subscriber=1;system-msg=bits\\sbadge\\stier\\snotification;tmi-sent-ts=1594520403813;user-id=104252055;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -77,6 +73,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -86,6 +84,10 @@
             "searchText": "whoopiix just earned a new 1K Bits badge!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/Expected.hpp"
@@ -64,7 +68,7 @@ std::ostream &operator<<(std::ostream &os, const IncompleteHelixUser &u);
 // NOLINTNEXTLINE(readability-identifier-naming)
 void PrintTo(const PerformChannelAction &a, std::ostream *os);
 
-nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
+Expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     const CommandContext &ctx, const QString &command, const QString &usage,
     bool withDuration, bool withReason);
 

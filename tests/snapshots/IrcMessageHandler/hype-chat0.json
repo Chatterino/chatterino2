@@ -2,13 +2,6 @@
     "input": "@badge-info=subscriber/3;badges=subscriber/0,bits-charity/1;color=#0000FF;display-name=SnoopyTheBot;emotes=;first-msg=0;flags=;id=8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6;mod=0;pinned-chat-paid-amount=500;pinned-chat-paid-canonical-amount=5;pinned-chat-paid-currency=USD;pinned-chat-paid-exponent=2;returning-chatter=0;room-id=36340781;subscriber=1;tmi-sent-ts=1664505974154;turbo=0;user-id=136881249;user-type= :snoopythebot!snoopythebot@snoopythebot.tmi.twitch.tv PRIVMSG #pajlada :-$5",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "3"
-            },
-            "badges": [
-                "subscriber",
-                "bits-charity"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "SnoopyTheBot",
@@ -148,6 +141,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ElevatedMessage",
             "frozen": false,
             "id": "8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6",
@@ -157,14 +152,17 @@
             "searchText": "snoopythebot  snoopythebot: -$5 ",
             "serverReceivedTime": "2022-09-30T02:46:14Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "3"
+            },
+            "twitchBadges": [
+                "subscriber",
+                "bits-charity"
+            ],
             "userID": "136881249",
             "usernameColor": "#ff0000ff"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -214,6 +212,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
             "frozen": false,
             "id": "",
@@ -223,6 +223,10 @@
             "searchText": "Hype Chat USD5.00",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

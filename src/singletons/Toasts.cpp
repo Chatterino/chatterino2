@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Toasts.hpp"
 
 #include "Application.hpp"
@@ -462,7 +466,7 @@ AvatarDownloader::AvatarDownloader(const QString &avatarURL,
         {
             this->file_.close();
         }
-        downloadComplete();
+        this->downloadComplete();
         this->deleteLater();
     });
 }

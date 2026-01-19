@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <pajlada/signals/signal.hpp>
@@ -21,6 +25,7 @@ public:
     pajlada::Signals::NoArgSignal focused;
     pajlada::Signals::NoArgSignal focusLost;
     pajlada::Signals::Signal<const QMimeData *> imagePasted;
+    pajlada::Signals::Signal<QMenu *, QPoint> contextMenuRequested;
 
     void setCompleter(QCompleter *c);
     /**
@@ -38,6 +43,8 @@ protected:
 
     bool canInsertFromMimeData(const QMimeData *source) const override;
     void insertFromMimeData(const QMimeData *source) override;
+
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     // hadSpace is set to true in case the "textUnderCursor" word was after a

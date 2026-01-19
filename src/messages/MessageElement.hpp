@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
@@ -72,6 +76,7 @@ enum class MessageElementFlag : int64_t {
     // Slot 3: Twitch
     // - VIP badge
     // - Moderator badge
+    // - Lead Moderator badge
     // - Broadcaster badge
     BadgeChannelAuthority = (1LL << 15),
 

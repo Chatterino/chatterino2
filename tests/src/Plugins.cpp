@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "mocks/Helix.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
@@ -34,6 +38,7 @@
 
 using namespace chatterino;
 using chatterino::mock::MockChannel;
+using namespace std::chrono_literals;
 
 namespace {
 
@@ -155,6 +160,24 @@ QStringList discoverLuaTests(const QString &category)
 std::string luaTestPath(const QString &category, const QString &entry)
 {
     return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
+}
+
+bool runLuaTest(const QString &category, const QString &entry,
+                sol::state_view lua)
+{
+    auto loadResult = lua.load_file(luaTestPath(category, entry));
+    auto pfn = loadResult.get<sol::protected_function>();
+    pfn.set_error_handler(lua["debug"]["traceback"]);
+    auto pfr = pfn.call();
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug().noquote() << "Test" << entry << "failed:";
+        sol::error err = pfr;
+        qDebug().noquote() << err.what();
+        return false;
+    }
+    return true;
 }
 
 }  // namespace
@@ -608,7 +631,7 @@ TEST_F(PluginTest, testTimerRec)
         end
         c2.later(f, 1)
     )lua");
-    waiter.waitForRequest();
+    waiter.waitForRequest(1ms);
 }
 
 TEST_F(PluginTest, tryCallTest)
@@ -1528,23 +1551,15 @@ TEST_P(PluginJsonTest, Run)
     auto reg = lua->registry().size();
     auto globals = lua->globals().size();
 
-    auto pfr = lua->safe_script_file(luaTestPath("json", GetParam()));
-    EXPECT_TRUE(pfr.valid());
-    if (!pfr.valid())
-    {
-        qDebug() << "Test" << GetParam() << "failed:";
-        sol::error err = pfr;
-        qDebug() << err.what();
-        return;
-    }
+    runLuaTest("json", GetParam(), *this->lua);
 
     for (size_t i = 0; i < 5; i++)
     {
         lua->collect_garbage();
     }
     // make sure we don't leak anything to globals or the registry
-    // but give the registry some room of 1 slot
-    EXPECT_LE(lua->registry().size(), reg + 1);
+    // but give the registry some room of 3 slots (two from getting the debug library)
+    EXPECT_LE(lua->registry().size(), reg + 3);
     EXPECT_EQ(lua->globals().size(), globals);
 }
 
@@ -1558,16 +1573,7 @@ class PluginMessageTest : public PluginTest,
 TEST_P(PluginMessageTest, Run)
 {
     this->configure();
-
-    auto pfr = this->lua->safe_script_file(luaTestPath("message", GetParam()));
-    EXPECT_TRUE(pfr.valid());
-    if (!pfr.valid())
-    {
-        qDebug() << "Test" << GetParam() << "failed:";
-        sol::error err = pfr;
-        qDebug() << err.what();
-        return;
-    }
+    runLuaTest("message", GetParam(), *this->lua);
 }
 
 INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
@@ -1579,17 +1585,8 @@ class PluginChannelTest : public PluginTest,
 };
 TEST_P(PluginChannelTest, Run)
 {
-    configure();
-
-    auto pfr = lua->safe_script_file(luaTestPath("channel", GetParam()));
-    EXPECT_TRUE(pfr.valid());
-    if (!pfr.valid())
-    {
-        qDebug() << "Test" << GetParam() << "failed:";
-        sol::error err = pfr;
-        qDebug() << err.what();
-        return;
-    }
+    this->configure();
+    runLuaTest("channel", GetParam(), *this->lua);
 }
 
 INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
@@ -1613,6 +1610,65 @@ TEST_F(PluginTest, testAccounts)
         assert(not current:is_anon())
     )lua");
     ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
+}
+
+TEST_F(PluginTest, debugTraceback)
+{
+    configure();
+
+    QString traceback = lua->script(R"lua(
+        local function other()
+            error("oh no")
+        end
+        local function main()
+            local function inner()
+                other()
+            end
+            inner()
+        end
+
+        local ok, res = xpcall(main, debug.traceback)
+        return res
+    )lua")
+                            .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'error'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:3: in upvalue 'other'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:7: in local 'inner'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:9: in function <[string \"...\"]:5>"));
+    ASSERT_TRUE(traceback.contains("[C]: in function 'xpcall'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:12: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback()
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback("my message")
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("my message"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        local coro = coroutine.create(function ()
+            coroutine.yield()
+        end)
+        coroutine.resume(coro)
+        return debug.traceback(coro)
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'coroutine.yield'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:3: in function <[string \"...\"]:2>"));
+
+    auto msg = lua->script(R"lua(
+        return debug.traceback(c2.Message.new({id = "who would do this"}))
+    )lua")
+                   .get<std::shared_ptr<Message>>();
+    ASSERT_EQ(msg->id, "who would do this");
 }
 
 #endif
