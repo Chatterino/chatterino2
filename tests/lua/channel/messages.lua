@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+--
+-- SPDX-License-Identifier: CC0-1.0
+
 local chan = c2.Channel.by_name("mm2pl")
 assert(chan)
 
