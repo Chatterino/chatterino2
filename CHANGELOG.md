@@ -94,6 +94,7 @@
 - Dev: Removed unused variables. (#6748)
 - Dev: Updated `miniaudio` to 0.11.24. (#6754)
 - Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
+- Dev: Refactored `DebugCount`. (#6753)
 
 ## 2.5.4
 
