@@ -75,6 +75,11 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
+size_t Channel::countMessages() const
+{
+    return this->messages_.size();
+}
+
 std::vector<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
@@ -83,6 +88,13 @@ std::vector<MessagePtr> Channel::getMessageSnapshot() const
 std::vector<MessagePtr> Channel::getMessageSnapshot(size_t nItems) const
 {
     return this->messages_.lastN(nItems);
+}
+
+std::vector<MessagePtrMut> Channel::getMessageSnapshotMut(size_t nItems) const
+{
+    return this->messages_.lastNBy<MessagePtrMut>(nItems, [](const auto &msg) {
+        return std::const_pointer_cast<Message>(msg);
+    });
 }
 
 MessagePtr Channel::getLastMessage() const

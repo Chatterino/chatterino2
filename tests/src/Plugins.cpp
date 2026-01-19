@@ -1579,6 +1579,19 @@ TEST_P(PluginMessageTest, Run)
 INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
                          testing::ValuesIn(discoverLuaTests("message")));
 
+class PluginChannelTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginChannelTest, Run)
+{
+    this->configure();
+    runLuaTest("channel", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
+                         testing::ValuesIn(discoverLuaTests("channel")));
+
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
 {
