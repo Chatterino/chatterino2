@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "util/DebugCount.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -34,7 +35,7 @@ struct Frame {
     int duration;
 };
 
-class Frames
+class Frames : public AutoDebugCount<DebugObject::Image>
 {
 public:
     Frames();

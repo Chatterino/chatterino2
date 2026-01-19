@@ -6,6 +6,7 @@
 
 #include "messages/MessageFlag.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "util/DebugCount.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QColor>
@@ -27,7 +28,7 @@ class ScrollbarHighlight;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 using MessagePtrMut = std::shared_ptr<Message>;
-struct Message {
+struct Message : public AutoDebugCount<DebugObject::Message> {
     Message();
     ~Message();
 

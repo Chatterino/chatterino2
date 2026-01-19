@@ -6,6 +6,7 @@
 
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
+#include "util/DebugCount.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QPen>
@@ -27,6 +28,7 @@ enum class MessageElementFlag : int64_t;
 struct MessageColors;
 
 class MessageLayoutElement
+    : public AutoDebugCount<DebugObject::MessageLayoutElement>
 {
 public:
     MessageLayoutElement(MessageElement &creator_, QSizeF size);

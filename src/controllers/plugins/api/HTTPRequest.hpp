@@ -6,6 +6,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "util/DebugCount.hpp"
 
 #    include <sol/forward.hpp>
 #    include <sol/types.hpp>
@@ -26,7 +27,8 @@ namespace chatterino::lua::api {
 /**
  * @lua@class c2.HTTPRequest
  */
-class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
+class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>,
+                    public AutoDebugCount<DebugObject::LuaHTTPRequest>
 {
     // This type is private to prevent the accidental construction of HTTPRequest without a shared pointer
     struct ConstructorAccessTag {

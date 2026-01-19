@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ForwardDecl.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QTimer>
 #include <QWidget>
@@ -17,7 +18,8 @@ class Split;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
-class AttachedWindow : public QWidget
+class AttachedWindow : public QWidget,
+                       public AutoDebugCount<DebugObject::AttachedWindow>
 {
     AttachedWindow(void *_target);
 

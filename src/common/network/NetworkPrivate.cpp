@@ -48,7 +48,7 @@ void runCallback(bool concurrent, auto &&fn)
 
 void loadUncached(std::shared_ptr<NetworkData> &&data)
 {
-    DebugCount::increase("http request started");
+    DebugCount::increase(DebugObject::HTTPRequestStarted);
 
     NetworkRequester requester;
     auto *worker = new NetworkTask(std::move(data));
@@ -102,16 +102,6 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 }  // namespace
 
 namespace chatterino {
-
-NetworkData::NetworkData()
-{
-    DebugCount::increase("NetworkData");
-}
-
-NetworkData::~NetworkData()
-{
-    DebugCount::decrease("NetworkData");
-}
 
 QString NetworkData::getHash()
 {

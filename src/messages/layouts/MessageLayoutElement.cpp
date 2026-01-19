@@ -40,12 +40,10 @@ MessageLayoutElement::MessageLayoutElement(MessageElement &creator, QSizeF size)
     : rect_(QPointF{}, size)
     , creator_(creator)
 {
-    DebugCount::increase("message layout elements");
 }
 
 MessageLayoutElement::~MessageLayoutElement()
 {
-    DebugCount::decrease("message layout elements");
 }
 
 MessageElement &MessageLayoutElement::getCreator() const

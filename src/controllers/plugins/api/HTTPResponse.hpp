@@ -5,6 +5,7 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkResult.hpp"
+#    include "util/DebugCount.hpp"
 
 #    include <lua.h>
 #    include <sol/sol.hpp>
@@ -21,7 +22,7 @@ namespace chatterino::lua::api {
 /**
  * @lua@class c2.HTTPResponse
  */
-class HTTPResponse
+class HTTPResponse : AutoDebugCount<DebugObject::LuaHTTPResponse>
 {
     NetworkResult result_;
 
@@ -31,7 +32,7 @@ public:
     HTTPResponse &operator=(HTTPResponse &&) = default;
     HTTPResponse &operator=(HTTPResponse &) = delete;
     HTTPResponse(const HTTPResponse &other) = delete;
-    ~HTTPResponse();
+    ~HTTPResponse() = default;
 
 private:
     static void createUserType(sol::table &c2);

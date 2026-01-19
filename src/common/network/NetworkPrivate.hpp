@@ -6,6 +6,7 @@
 
 #include "common/Common.hpp"
 #include "common/network/NetworkCommon.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>
@@ -29,11 +30,11 @@ Q_SIGNALS:
     void requestUrl();
 };
 
-class NetworkData
+class NetworkData : public AutoDebugCount<DebugObject::NetworkData>
 {
 public:
-    NetworkData();
-    ~NetworkData();
+    NetworkData() = default;
+    ~NetworkData() = default;
     NetworkData(const NetworkData &) = delete;
     NetworkData(NetworkData &&) = delete;
     NetworkData &operator=(const NetworkData &) = delete;

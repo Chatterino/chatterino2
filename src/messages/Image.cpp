@@ -36,7 +36,6 @@ namespace chatterino::detail {
 
 Frames::Frames()
 {
-    DebugCount::increase("images");
 }
 
 Frames::Frames(QList<Frame> &&frames)
@@ -51,15 +50,14 @@ Frames::Frames(QList<Frame> &&frames)
         return;
     }
 
-    DebugCount::increase("images");
     if (!this->empty())
     {
-        DebugCount::increase("loaded images");
+        DebugCount::increase(DebugObject::LoadedImage);
     }
 
     if (this->animated())
     {
-        DebugCount::increase("animated images");
+        DebugCount::increase(DebugObject::AnimatedImage);
 
         this->gifTimerConnection_ =
             app->getEmotes()->getGIFTimer()->signal.connect([this] {
@@ -85,25 +83,24 @@ Frames::Frames(QList<Frame> &&frames)
         this->processOffset();
     }
 
-    DebugCount::increase("image bytes", this->memoryUsage());
-    DebugCount::increase("image bytes (ever loaded)", this->memoryUsage());
+    DebugCount::increase(DebugObject::BytesImageCurrent, this->memoryUsage());
+    DebugCount::increase(DebugObject::BytesImageLoaded, this->memoryUsage());
 }
 
 Frames::~Frames()
 {
     assertInGuiThread();
-    DebugCount::decrease("images");
     if (!this->empty())
     {
-        DebugCount::decrease("loaded images");
+        DebugCount::decrease(DebugObject::LoadedImage);
     }
 
     if (this->animated())
     {
-        DebugCount::decrease("animated images");
+        DebugCount::decrease(DebugObject::AnimatedImage);
     }
-    DebugCount::decrease("image bytes", this->memoryUsage());
-    DebugCount::increase("image bytes (ever unloaded)", this->memoryUsage());
+    DebugCount::decrease(DebugObject::BytesImageCurrent, this->memoryUsage());
+    DebugCount::increase(DebugObject::BytesImageUnloaded, this->memoryUsage());
 
     this->gifTimerConnection_.disconnect();
 }
@@ -156,10 +153,10 @@ void Frames::clear()
     assertInGuiThread();
     if (!this->empty())
     {
-        DebugCount::decrease("loaded images");
+        DebugCount::decrease(DebugObject::LoadedImage);
     }
-    DebugCount::decrease("image bytes", this->memoryUsage());
-    DebugCount::increase("image bytes (ever unloaded)", this->memoryUsage());
+    DebugCount::decrease(DebugObject::BytesImageCurrent, this->memoryUsage());
+    DebugCount::increase(DebugObject::BytesImageUnloaded, this->memoryUsage());
 
     this->items_.clear();
     this->index_ = 0;
@@ -610,10 +607,11 @@ ImageExpirationPool::ImageExpirationPool()
             IMAGE_POOL_CLEANUP_INTERVAL));
 
     // configure all debug counts used by images
-    DebugCount::configure("image bytes", DebugCount::Flag::DataSize);
-    DebugCount::configure("image bytes (ever loaded)",
+    DebugCount::configure(DebugObject::BytesImageCurrent,
                           DebugCount::Flag::DataSize);
-    DebugCount::configure("image bytes (ever unloaded)",
+    DebugCount::configure(DebugObject::BytesImageLoaded,
+                          DebugCount::Flag::DataSize);
+    DebugCount::configure(DebugObject::BytesImageUnloaded,
                           DebugCount::Flag::DataSize);
 }
 
@@ -695,9 +693,9 @@ void ImageExpirationPool::freeOld()
     qCDebug(chatterinoImage) << "freed frame data for" << numExpired << "/"
                              << eligible << "eligible images";
 #    endif
-    DebugCount::set("last image gc: expired", numExpired);
-    DebugCount::set("last image gc: eligible", eligible);
-    DebugCount::set("last image gc: left after gc", this->allImages_.size());
+    DebugCount::set(DebugObject::LastImageGcExpired, numExpired);
+    DebugCount::set(DebugObject::LastImageGcEligible, eligible);
+    DebugCount::set(DebugObject::LastImageGcLeft, this->allImages_.size());
 }
 
 #endif

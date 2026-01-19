@@ -243,7 +243,7 @@ void NetworkTask::finished()
         this->writeToCache(bytes);
     }
 
-    DebugCount::increase("http request success");
+    DebugCount::increase(DebugObject::HTTPRequestSuccess);
     this->logReply();
     this->data_->emitSuccess({reply->error(), status, bytes});
     this->data_->emitFinally();

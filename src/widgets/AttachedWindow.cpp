@@ -60,8 +60,6 @@ AttachedWindow::AttachedWindow(void *_target)
     this->ui_.split = split;
     split->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout->addWidget(split);
-
-    DebugCount::increase("attached window");
 }
 
 AttachedWindow::~AttachedWindow()
@@ -74,8 +72,6 @@ AttachedWindow::~AttachedWindow()
             break;
         }
     }
-
-    DebugCount::decrease("attached window");
 }
 
 AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)

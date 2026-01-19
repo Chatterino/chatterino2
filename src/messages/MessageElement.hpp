@@ -10,6 +10,7 @@
 #include "messages/MessageColor.hpp"
 #include "providers/links/LinkInfo.hpp"
 #include "singletons/Fonts.hpp"
+#include "util/DebugCount.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -162,7 +163,7 @@ enum class MessageElementFlag : int64_t {
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-class MessageElement
+class MessageElement : public AutoDebugCount<DebugObject::MessageElement>
 {
 public:
     virtual ~MessageElement();

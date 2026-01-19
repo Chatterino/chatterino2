@@ -4,9 +4,8 @@
 
 #include "messages/MessageThread.hpp"
 
-#include "common/Literals.hpp"
+#include "common/Literals.hpp"  // IWYU pragma: keep
 #include "messages/Message.hpp"
-#include "util/DebugCount.hpp"
 #include "util/QMagicEnum.hpp"
 
 #include <QJsonArray>
@@ -23,12 +22,6 @@ MessageThread::MessageThread(std::shared_ptr<const Message> rootMessage)
     : rootMessageId_(rootMessage->id)
     , rootMessage_(std::move(rootMessage))
 {
-    DebugCount::increase("message threads");
-}
-
-MessageThread::~MessageThread()
-{
-    DebugCount::decrease("message threads");
 }
 
 void MessageThread::addToThread(const std::shared_ptr<const Message> &message)

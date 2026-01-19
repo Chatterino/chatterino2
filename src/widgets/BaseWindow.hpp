@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "util/DebugCount.hpp"
 #include "util/WidgetHelpers.hpp"
 #include "widgets/BaseWidget.hpp"
 
@@ -26,7 +27,8 @@ class TitleBarButton;
 class TitleBarButtons;
 enum class TitleBarButtonStyle : std::uint8_t;
 
-class BaseWindow : public BaseWidget
+class BaseWindow : public BaseWidget,
+                   public AutoDebugCount<DebugObject::BaseWindow>
 {
     Q_OBJECT
 
@@ -50,7 +52,6 @@ public:
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
                         QWidget *parent = nullptr);
-    ~BaseWindow() override;
 
     void setInitialBounds(QRect bounds, widgets::BoundsChecking mode);
     QRect getBounds() const;
