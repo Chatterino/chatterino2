@@ -91,6 +91,7 @@
 - Dev: Cleaned up `AccountController` connections. (#6735)
 - Dev: Send multipart body for HTTP `PUT` requests. (#6746)
 - Dev: Removed unused variables. (#6748)
+- Dev: Updated `miniaudio` to 0.11.24. (#6754)
 
 ## 2.5.4
 
