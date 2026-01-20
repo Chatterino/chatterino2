@@ -203,7 +203,6 @@ public Q_SLOTS:
     void showSearch(bool singleChannel);
     void openChatterList();
     void openSubPage();
-    void reloadChannelAndSubscriberEmotes();
     void reconnect();
 };
 
