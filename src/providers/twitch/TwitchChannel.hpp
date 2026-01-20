@@ -10,6 +10,7 @@
 #include "common/ChannelChatters.hpp"
 #include "common/Common.hpp"
 #include "common/UniqueAccess.hpp"
+#include "controllers/emotes/ChannelEmotes.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
@@ -171,6 +172,9 @@ public:
     TwitchChannel &operator=(const TwitchChannel &) = delete;
     TwitchChannel &operator=(TwitchChannel &&) = delete;
 
+    std::shared_ptr<const TwitchChannel> sharedTwitchChannel() const;
+    std::shared_ptr<TwitchChannel> sharedTwitchChannel();
+
     void initialize();
 
     // Channel methods
@@ -216,6 +220,9 @@ public:
     void markConnected();
 
     // Emotes
+    ChannelEmotes &channelEmotes();
+    const ChannelEmotes &channelEmotes() const;
+
     std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
@@ -489,6 +496,8 @@ private:
     bool vip_ = false;
     bool staff_ = false;
     UniqueAccess<QString> roomID_;
+
+    ChannelEmotes channelEmotes_;
 
     // --
     QString lastSentMessage_;

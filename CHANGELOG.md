@@ -72,6 +72,7 @@
 - Dev: Compile time definitions for `Windows.h` are now conditional based on `WIN32` instead of `MSVC`. (#6534)
 - Dev: Refactored split container nodes to use shared pointers. (#6435)
 - Dev: Mock headers are now added as a header set if supported by CMake. (#6561)
+- Dev: Refactored emotes. (#6570)
 - Dev: Set settings directory to temporary one used in tests. (#6584)
 - Dev: Check Lua unwinding and version in tests. (#6586)
 - Dev: Added method to get the last N messages of a channel. (#6602, #6604, #6683)

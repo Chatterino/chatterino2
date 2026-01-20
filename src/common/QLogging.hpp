@@ -16,6 +16,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoCommon);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCompletion);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCrashhandler);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoEmoji);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoEmotes);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoEnv);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoFfzemotes);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoHelper);
