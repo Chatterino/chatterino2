@@ -177,9 +177,10 @@ void ChannelRef::clear_messages()
     this->strong()->clearMessages();
 }
 
-MessagePtr ChannelRef::find_message_by_id(const QString &id)
+MessagePtrMut ChannelRef::find_message_by_id(const QString &id)
 {
-    return this->strong()->findMessageByID(id);
+    return std::const_pointer_cast<Message>(
+        this->strong()->findMessageByID(id));
 }
 
 bool ChannelRef::has_messages()

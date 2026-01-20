@@ -141,6 +141,13 @@ local tests = {
         local msg4_dup = c2.Message.new({ id = "4" })
         chan:add_message(msg4_dup)
         assert(chan:find_message_by_id("4") == msg4_dup)
+
+        local found = chan:find_message_by_id("4")
+        assert(found ~= nil)
+        chan:add_message(found)
+        assert(chan:find_message_by_id("4") == found)
+        assert(chan:find_message_by_id("4") == msg4_dup)
+        assert(chan:find_message_by_id("4") ~= msg4)
     end,
     has_messages = function()
         assert(not chan:has_messages())

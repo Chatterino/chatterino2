@@ -147,7 +147,7 @@ public:
      * @lua@return c2.Message?
      * @exposed c2.Channel:find_message_by_id
      */
-    MessagePtr find_message_by_id(const QString &id);
+    MessagePtrMut find_message_by_id(const QString &id);
 
     /**
      * Check if the channel has any messages.
