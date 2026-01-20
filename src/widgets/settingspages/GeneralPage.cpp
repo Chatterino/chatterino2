@@ -31,6 +31,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPalette>
 #include <QSignalBlocker>
 
 namespace {
@@ -1234,11 +1235,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         auto *presetCombo =
             layout.addDropdown("Search Engine Preset", presetList,
                                "Select a search engine preset");
-        presetCombo->setEditable(true);
-        presetCombo->lineEdit()->setPlaceholderText("Select...");
-        presetCombo->lineEdit()->setReadOnly(true);
+        presetCombo->setPlaceholderText("Select...");
         presetCombo->setCurrentIndex(-1);
-        presetCombo->setEnabled(s.searchEngineEnabled.getValue());
+        // Make placeholder text more visible
+        QPalette palette = presetCombo->palette();
+        palette.setColor(QPalette::PlaceholderText,
+                         QColor(255, 255, 255));  // white
+        presetCombo->setPalette(palette);
         s.searchEngineEnabled.connect([presetCombo](bool value) {
             presetCombo->setEnabled(value);
         });
@@ -1270,7 +1273,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 {
                     QSignalBlocker blocker(presetCombo);
                     presetCombo->setCurrentIndex(-1);
-                    presetCombo->lineEdit()->clear();
                 }
             });
 
