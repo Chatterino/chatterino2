@@ -118,7 +118,7 @@ public:
      * 
      * @lua@param message c2.Message The message to replace.
      * @lua@param replacement c2.Message The replacement.
-     * @lua@param hint number A zero-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+     * @lua@param hint number A one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
      * @exposed c2.Channel:replace_message
      */
     void replace_message_hint(const MessagePtrMut &message,
@@ -127,7 +127,7 @@ public:
     /**
      * Replace a message at an index with a different one.
      * 
-     * @lua@param index number A zero-based index (from the start) of the message to replace.
+     * @lua@param index number A one-based index (from the start) of the message to replace.
      * @lua@param replacement c2.Message The replacement.
      * @exposed c2.Channel:replace_message_at
      */

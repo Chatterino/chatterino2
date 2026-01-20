@@ -455,12 +455,12 @@ Get the most recent message. If this channel doesn't have any message, this retu
 ##### `Channel:replace_message(message, replacement[, hint])`
 
 Replace a specific message with a different one.
-`hint` is a zero-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+`hint` is a one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
 
 ##### `Channel:replace_message_at(index, replacement)`
 
 Replace a message at an index with a different one.
-`index` is a zero-based index (from the start) of the message to replace.
+`index` is a one-based index (from the start) of the message to replace.
 
 ##### `Channel:clear_messages()`
 

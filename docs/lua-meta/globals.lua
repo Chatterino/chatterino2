@@ -173,12 +173,12 @@ function c2.Channel:replace_message(message, replacement) end
 ---
 ---@param message c2.Message The message to replace.
 ---@param replacement c2.Message The replacement.
----@param hint number A zero-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+---@param hint number A one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
 function c2.Channel:replace_message(message, replacement, hint) end
 
 --- Replace a message at an index with a different one.
 ---
----@param index number A zero-based index (from the start) of the message to replace.
+---@param index number A one-based index (from the start) of the message to replace.
 ---@param replacement c2.Message The replacement.
 function c2.Channel:replace_message_at(index, replacement) end
 

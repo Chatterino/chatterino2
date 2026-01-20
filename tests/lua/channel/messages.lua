@@ -61,7 +61,7 @@ local tests = {
         local snap = chan:message_snapshot(2)
         assert(snap[1] == msg5 and snap[2] == msg4)
 
-        chan:replace_message(msg4, msg5, 3)
+        chan:replace_message(msg4, msg5, 4)
         snap = chan:message_snapshot(2)
         assert(snap[1] == msg5 and snap[2] == msg5)
 
@@ -76,7 +76,7 @@ local tests = {
         snap = chan:message_snapshot(2)
         assert(snap[1] == msg5 and snap[2] == msg5)
 
-        chan:replace_message(msg5, msg3, 3) -- hint is zero-based
+        chan:replace_message(msg5, msg3, 4) -- hint is one-based
         snap = chan:message_snapshot(2)
         assert(snap[1] == msg5 and snap[2] == msg3)
     end,
@@ -87,21 +87,21 @@ local tests = {
         local msg4 = c2.Message.new({ id = "4" })
         local msg5 = c2.Message.new({ id = "5" })
 
-        chan:replace_message_at(0, msg1)
         chan:replace_message_at(1, msg1)
         chan:replace_message_at(2, msg1)
+        chan:replace_message_at(3, msg1)
 
         add_all(msg1, msg2, msg3, msg4)
 
-        chan:replace_message_at(0, msg5)
+        chan:replace_message_at(1, msg5)
         local snap = chan:message_snapshot(4)
         assert(snap[1] == msg5 and snap[2] == msg2 and snap[3] == msg3 and snap[4] == msg4)
 
-        chan:replace_message_at(3, msg5)
+        chan:replace_message_at(4, msg5)
         snap = chan:message_snapshot(4)
         assert(snap[1] == msg5 and snap[2] == msg2 and snap[3] == msg3 and snap[4] == msg5)
 
-        chan:replace_message_at(4, msg5)
+        chan:replace_message_at(5, msg5)
         snap = chan:message_snapshot(4)
         assert(snap[1] == msg5 and snap[2] == msg2 and snap[3] == msg3 and snap[4] == msg5)
     end,

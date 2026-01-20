@@ -149,8 +149,12 @@ void ChannelRef::replace_message_hint(const MessagePtrMut &message,
     {
         throw std::runtime_error("Invalid message");
     }
+    if (hint == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
 
-    this->strong()->replaceMessage(hint, message, replacement);
+    this->strong()->replaceMessage(hint - 1, message, replacement);
 }
 
 void ChannelRef::replace_message_at(size_t index,
@@ -160,8 +164,12 @@ void ChannelRef::replace_message_at(size_t index,
     {
         throw std::runtime_error("Invalid message");
     }
+    if (index == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
 
-    this->strong()->replaceMessage(index, replacement);
+    this->strong()->replaceMessage(index - 1, replacement);
 }
 
 void ChannelRef::clear_messages()
