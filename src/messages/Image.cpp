@@ -605,14 +605,6 @@ ImageExpirationPool::ImageExpirationPool()
     this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
-
-    // configure all debug counts used by images
-    DebugCount::configure(DebugObject::BytesImageCurrent,
-                          DebugCount::Flag::DataSize);
-    DebugCount::configure(DebugObject::BytesImageLoaded,
-                          DebugCount::Flag::DataSize);
-    DebugCount::configure(DebugObject::BytesImageUnloaded,
-                          DebugCount::Flag::DataSize);
 }
 
 ImageExpirationPool &ImageExpirationPool::instance()

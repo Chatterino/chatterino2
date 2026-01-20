@@ -58,15 +58,6 @@ enum class DebugObject : size_t {
 class DebugCount
 {
 public:
-    enum class Flag : uint16_t {
-        None = 0,
-        /// The value is a data size in bytes
-        DataSize = 1 << 0,
-    };
-    using Flags = FlagsEnum<Flag>;
-
-    static void configure(DebugObject target, Flags flags);
-
     static void set(DebugObject target, const int64_t &amount);
 
     static void increase(DebugObject target, const int64_t &amount);

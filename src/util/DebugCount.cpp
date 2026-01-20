@@ -19,7 +19,6 @@ using namespace chatterino;
 
 struct Count {
     int64_t value = 0;
-    DebugCount::Flags flags = DebugCount::Flag::None;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -29,14 +28,7 @@ constexpr bool isBytes(DebugObject target)
 {
     switch (target)
     {
-        case DebugObject::HTTPRequestStarted:
-        case DebugObject::HTTPRequestSuccess:
-        case DebugObject::NetworkData:
-        case DebugObject::Image:
-        case DebugObject::LoadedImage:
-        case DebugObject::AnimatedImage:
-        case DebugObject::LuaHTTPResponse:
-        case DebugObject::LuaHTTPRequest:
+        default:
             return false;
 
         case DebugObject::BytesImageCurrent:
@@ -49,14 +41,6 @@ constexpr bool isBytes(DebugObject target)
 }  // namespace
 
 namespace chatterino {
-
-void DebugCount::configure(DebugObject target, Flags flags)
-{
-    auto counts = COUNTS.access();
-
-    auto &it = counts->at(static_cast<size_t>(target));
-    it.flags = flags;
-}
 
 void DebugCount::set(DebugObject target, const int64_t &amount)
 {
@@ -94,7 +78,7 @@ QString DebugCount::getDebugText()
         auto &count = counts->at(key);
 
         QString formatted;
-        if (count.flags.has(Flag::DataSize))
+        if (isBytes(static_cast<DebugObject>(key)))
         {
             formatted = locale.formattedDataSize(count.value);
         }
