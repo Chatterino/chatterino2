@@ -442,6 +442,42 @@ Returns `true` if the channel can be moderated by the current user.
 
 Returns `true` if the current user is a VIP in the channel.
 
+##### `Channel:message_snapshot(n_items)`
+
+Get a list of messages in this channel (starting from the most recent messages).
+The snapshot is returned as a usertype that wraps a C++ object.
+`n_items` is an upper bound, the actual number of messages returned might be lower.
+
+##### `Channel:last_message()`
+
+Get the most recent message. If this channel doesn't have any message, this returns `nil`.
+
+##### `Channel:replace_message(message, replacement[, hint])`
+
+Replace a specific message with a different one.
+`hint` is a one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+
+##### `Channel:replace_message_at(index, replacement)`
+
+Replace a message at an index with a different one.
+`index` is a one-based index (from the start) of the message to replace.
+
+##### `Channel:clear_messages()`
+
+Remove all messages in this channel.
+
+##### `Channel:find_message_by_id(id)`
+
+Find a message by its ID. If no message is found, `nil` is returned.
+
+##### `Channel:has_messages()`
+
+Check if the channel has any messages.
+
+##### `Channel:count_messages()`
+
+Count the number of messages in this channel.
+
 #### `HTTPMethod` enum
 
 This table describes HTTP methods available to Lua Plugins. The values behind
