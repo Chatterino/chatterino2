@@ -314,12 +314,6 @@ void Updates::checkForUpdates()
         return;
     }
 
-    // Disable updates if on nightly
-    if (Modes::instance().isNightly)
-    {
-        return;
-    }
-
     QString url = "https://notitia.chatterino.com/version/chatterino/" %
                   CHATTERINO_OS % "/" % currentBranch();
 
