@@ -93,6 +93,7 @@
 - Dev: Send multipart body for HTTP `PUT` requests. (#6746)
 - Dev: Removed unused variables. (#6748)
 - Dev: Updated `miniaudio` to 0.11.24. (#6754)
+- Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
 
 ## 2.5.4
 
