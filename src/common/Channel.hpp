@@ -23,6 +23,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+using MessagePtrMut = std::shared_ptr<Message>;
 
 class Channel : public std::enable_shared_from_this<Channel>, public MessageSink
 {
@@ -87,6 +88,12 @@ public:
     std::vector<MessagePtr> getMessageSnapshot() const;
     std::vector<MessagePtr> getMessageSnapshot(size_t nItems) const;
 
+    /// Essentially the same as #getMessageSnapshot(size_t), but the returned
+    /// vector holds `std::shared_ptr<Message>`. This should only be used in
+    /// plugins, because they take messages as `Message` but check that they're
+    /// frozen.
+    std::vector<MessagePtrMut> getMessageSnapshotMut(size_t nItems) const;
+
     /// Returns the last message (the one at the bottom). If the channel has no
     /// messages, this will return an empty shared pointer.
     MessagePtr getLastMessage() const;
@@ -121,6 +128,8 @@ public:
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
+
+    size_t countMessages() const;
 
     void applySimilarityFilters(const MessagePtr &message) const final;
 

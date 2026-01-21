@@ -25,6 +25,7 @@
 - Minor: Added the ability to filter on messages by the author's external badges (example: `author.external_badges contains "chatterino:Top Donator"` or `author.external_badges contains "frankerfacez:bot"`). (#6709)
 - Minor: Added Markdown support to user notes. (#6490)
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
+- Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
