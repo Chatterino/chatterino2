@@ -94,6 +94,7 @@
 - Dev: Removed unused variables. (#6748)
 - Dev: Updated `miniaudio` to 0.11.24. (#6754)
 - Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
+- Dev: Moved `PluginMeta` to its own file. (#6757)
 
 ## 2.5.4
 
