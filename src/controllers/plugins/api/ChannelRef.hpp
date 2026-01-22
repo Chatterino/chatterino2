@@ -9,8 +9,14 @@
 
 #    include <sol/forward.hpp>
 
+namespace chatterino::lua {
+class ThisPluginState;
+}  // namespace chatterino::lua
+
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
+
+struct ConnectionHandle;
 
 /**
  * @includefile providers/twitch/TwitchChannel.hpp
@@ -240,6 +246,16 @@ public:
     QString to_string();
 
     bool operator==(const ChannelRef &other) const noexcept;
+
+    /**
+     * Callback when the channel display name changes.
+     *
+     * @lua@param cb fun()
+     * @lua@return c2.ConnectionHandle hdl
+     * @exposed c2.Channel:on_display_name_changed
+     */
+    ConnectionHandle on_display_name_changed(ThisPluginState state,
+                                             sol::main_protected_function pfn);
 
     /**
      * Static functions
