@@ -16,17 +16,40 @@ struct SignalCallback {
         assert(this->pfn.valid());
     }
 
-    SignalCallback(const SignalCallback &) = default;
+    SignalCallback(const SignalCallback &other) = default;
     SignalCallback(SignalCallback &&) = default;
-    SignalCallback &operator=(const SignalCallback &) = default;
-    SignalCallback &operator=(SignalCallback &&) = default;
+
+    SignalCallback &operator=(const SignalCallback &other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        if (!this->pluginRef.isAlive())
+        {
+            // Reset the function reference before we assign a new function to
+            // it to avoid destroying it.
+            this->pfn.abandon();
+        }
+        this->pluginRef = other.pluginRef;
+        this->pfn = other.pfn;
+        return *this;
+    }
+
+    SignalCallback &operator=(SignalCallback &&other) noexcept
+    {
+        std::swap(this->pfn, other.pfn);
+        std::swap(this->pluginRef, other.pluginRef);
+        return *this;
+    }
 
     ~SignalCallback()
     {
         assertInGuiThread();
         if (!this->pluginRef.isAlive())
         {
-            pfn.abandon();  // don't destruct the function in this case
+            this->pfn.abandon();  // don't destruct the function in this case
         }
     }
 
