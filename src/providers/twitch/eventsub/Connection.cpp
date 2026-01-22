@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/Connection.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/Controller.hpp"

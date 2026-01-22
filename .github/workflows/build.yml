@@ -32,13 +32,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
-            qt-version: 6.7.2
-            force-lto: false
-            skip-artifact: false
-            skip-crashpad: false
-            build-deb: true
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.2
@@ -46,6 +39,7 @@ jobs:
             skip-artifact: false
             skip-crashpad: false
             build-deb: true
+            plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
             qt-version: 6.7.2
@@ -53,12 +47,21 @@ jobs:
             skip-artifact: false
             skip-crashpad: false
             build-deb: true
+            plugins: true
+          - os: ubuntu-24.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            qt-version: 6.7.2
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: false
+            plugins: false
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -91,6 +94,7 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
+            -DCHATTERINO_PLUGINS=${{ matrix.plugins && 'On' || 'Off' }} \
             ..
           make -j"$(nproc)"
 
@@ -108,7 +112,7 @@ jobs:
 
       - name: Upload artifact - .deb (Ubuntu)
         if: matrix.build-deb
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
@@ -138,7 +142,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -159,7 +163,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.19
+        uses: hendrikmuhs/ccache-action@v1.2.20
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -171,7 +175,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -216,6 +220,7 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DFORCE_JSON_GENERATION=On `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -248,14 +253,14 @@ jobs:
 
       - name: Upload artifact (Windows - binary)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
       - name: Upload artifact (Windows - symbols)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
           path: build/bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z
@@ -269,8 +274,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          # brew install openssl rapidjson p7zip create-dmg cmake tree boost
-          brew install openssl rapidjson p7zip create-dmg tree boost
+          # brew install openssl rapidjson p7zip create-dmg cmake tree boost hunspell
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
         shell: bash
 
       - name: Build (MacOS)
@@ -285,6 +290,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -304,7 +310,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
           path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
@@ -315,37 +321,31 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # allows for tags access
 
       # Windows
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Windows Qt6.7.1
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Windows Qt6.7.1 symbols
         with:
           name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
-      - uses: actions/download-artifact@v6
-        name: Ubuntu 20.04 deb
-        with:
-          name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Ubuntu 22.04 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         name: Ubuntu 24.04 deb
         with:
           name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb

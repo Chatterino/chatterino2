@@ -41,10 +41,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -183,6 +179,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -192,6 +190,10 @@
             "searchText": "nerixyz timed out twitchdev for 1s: test ",
             "serverReceivedTime": "2025-02-22T17:53:49Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

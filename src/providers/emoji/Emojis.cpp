@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/emoji/Emojis.hpp"
 
 #include "common/QLogging.hpp"
@@ -61,6 +65,8 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
     rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
     rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
     rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
+
+    rj::getSafe(unparsedEmoji, "category", emojiData->category);
 
     if (capabilities.apple)
     {
@@ -219,6 +225,10 @@ void Emojis::loadEmojis()
                 parseEmoji(variationEmojiData, variation,
                            emojiData->shortCodes[0] + "_" + toneName);
 
+                // NOTE: Emoji variations do not have a category.
+                // We have to manually inherit it from the original emojiData.
+                variationEmojiData->category = emojiData->category;
+
                 this->emojiShortCodeToEmoji_.insert(
                     variationEmojiData->shortCodes[0], variationEmojiData);
                 this->shortCodes.push_back(variationEmojiData->shortCodes[0]);
@@ -306,10 +316,10 @@ void Emojis::loadEmojiSet()
     });
 }
 
-std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
-    const QString &text) const
+std::vector<std::variant<EmotePtr, QStringView>> Emojis::parse(
+    QStringView text) const
 {
-    auto result = std::vector<boost::variant<EmotePtr, QString>>();
+    auto result = std::vector<std::variant<EmotePtr, QStringView>>();
     QString::size_type lastParsedEmojiEndIndex = 0;
 
     for (qsizetype i = 0; i < text.length(); ++i)
@@ -345,7 +355,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
             {
                 // look in emoji->value
                 bool match = QStringView{emoji->value}.mid(1) ==
-                             QStringView{text}.mid(i + 1, emojiExtraCharacters);
+                             text.mid(i + 1, emojiExtraCharacters);
 
                 if (match)
                 {
@@ -361,8 +371,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
                 // This checking here relies on the fact that the nonQualified string
                 // always starts with the same byte as value (the unified string)
                 bool match = QStringView{emoji->nonQualified}.mid(1) ==
-                             QStringView{text}.mid(
-                                 i + 1, emojiNonQualifiedExtraCharacters);
+                             text.mid(i + 1, emojiNonQualifiedExtraCharacters);
 
                 if (match)
                 {

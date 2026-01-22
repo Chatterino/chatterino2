@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/MessageBuilder.hpp"
 
 #include "Application.hpp"
@@ -7,6 +11,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
@@ -16,6 +21,7 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -234,7 +240,7 @@ QString stylizeUsername(const QString &username, const Message &message)
     return usernameText;
 }
 
-std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
+std::optional<EmotePtr> getTwitchBadge(const TwitchBadge &badge,
                                        const TwitchChannel *twitchChannel)
 {
     if (auto channelBadge =
@@ -252,7 +258,8 @@ std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
     return std::nullopt;
 }
 
-void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
+void appendBadges(MessageBuilder *builder,
+                  const std::vector<TwitchBadge> &badges,
                   const std::unordered_map<QString, QString> &badgeInfos,
                   const TwitchChannel *twitchChannel)
 {
@@ -342,8 +349,40 @@ void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
             ->setTooltip(tooltip);
     }
 
-    builder->message().badges = badges;
-    builder->message().badgeInfos = badgeInfos;
+    builder->message().twitchBadges = badges;
+    builder->message().twitchBadgeInfos = badgeInfos;
+}
+
+std::vector<TwitchBadge> appendSharedChatBadges(
+    MessageBuilder *builder, const std::vector<TwitchBadge> &sharedBadges,
+    const QString &sharedChannelName, const TwitchChannel *twitchChannel)
+{
+    auto appendedBadges = std::vector<TwitchBadge>{};
+    for (const auto &badge : sharedBadges)
+    {
+        if (badge.key_ != "moderator" && badge.key_ != "vip")
+        {
+            continue;
+        }
+
+        auto badgeEmote = getTwitchBadge(badge, twitchChannel);
+        if (!badgeEmote)
+        {
+            continue;
+        }
+
+        auto tooltip = (*badgeEmote)->tooltip.string;
+        if (sharedChannelName != "")
+        {
+            tooltip = QString("%1 (%2)").arg(tooltip, sharedChannelName);
+        }
+
+        builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
+            ->setTooltip(tooltip);
+        appendedBadges.push_back(badge);
+    }
+
+    return appendedBadges;
 }
 
 bool doesWordContainATwitchEmote(
@@ -974,7 +1013,7 @@ void MessageBuilder::append(std::unique_ptr<MessageElement> element)
 }
 
 void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
-                             const QString &source)
+                             QStringView source)
 {
     QString lowercaseLinkString;
     QString origLink = parsedLink.link.toString();
@@ -1635,6 +1674,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     builder.appendChatterinoBadges(userID);
     builder.appendFfzBadges(twitchChannel, userID);
+    builder.appendBttvBadges(userID);
     builder.appendSeventvBadges(userID);
 
     builder.appendUsername(tags, args);
@@ -2327,16 +2367,15 @@ void MessageBuilder::addWords(
             for (auto variant :
                  getApp()->getEmotes()->getEmojis()->parse(preText))
             {
-                boost::apply_visitor(variant::Overloaded{
-                                         [&](const EmotePtr &emote) {
-                                             this->addEmoji(emote);
-                                         },
-                                         [&](QString text) {
-                                             this->addTextOrEmote(
-                                                 state, std::move(text));
-                                         },
-                                     },
-                                     variant);
+                std::visit(variant::Overloaded{
+                               [&](const EmotePtr &emote) {
+                                   this->addEmoji(emote);
+                               },
+                               [&](QStringView text) {
+                                   this->addTextOrEmote(state, text.toString());
+                               },
+                           },
+                           variant);
             }
 
             cursor += preText.size();
@@ -2352,16 +2391,15 @@ void MessageBuilder::addWords(
         // split words
         for (auto variant : getApp()->getEmotes()->getEmojis()->parse(word))
         {
-            boost::apply_visitor(variant::Overloaded{
-                                     [&](const EmotePtr &emote) {
-                                         this->addEmoji(emote);
-                                     },
-                                     [&](QString text) {
-                                         this->addTextOrEmote(state,
-                                                              std::move(text));
-                                     },
-                                 },
-                                 variant);
+            std::visit(variant::Overloaded{
+                           [&](const EmotePtr &emote) {
+                               this->addEmoji(emote);
+                           },
+                           [&](QStringView text) {
+                               this->addTextOrEmote(state, text.toString());
+                           },
+                       },
+                       variant);
         }
 
         cursor += word.size() + 1;
@@ -2375,6 +2413,8 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
     {
         return;
     }
+
+    auto badges = parseBadgeTag(tags);
 
     if (this->message().flags.has(MessageFlag::SharedMessage))
     {
@@ -2407,10 +2447,24 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         this->emplace<BadgeElement>(
             makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
             MessageElementFlag::BadgeSharedChannel);
+
+        const auto sourceBadges = parseBadgeTag(tags, "source-badges");
+        const auto appendedBadges = appendSharedChatBadges(
+            this, sourceBadges, sourceName, twitchChannel);
+
+        // Dedup mod/vip badges if user is mod/vip in both chats,
+        // preferring source channel's badges for the tooltips
+        for (const auto &appendedBadge : appendedBadges)
+        {
+            if (auto b = std::ranges::find(badges, appendedBadge);
+                b != badges.end())
+            {
+                badges.erase(b);
+            }
+        }
     }
 
     auto badgeInfos = parseBadgeInfoTag(tags);
-    auto badges = parseBadgeTag(tags);
     appendBadges(this, badges, badgeInfos, twitchChannel);
 }
 
@@ -2420,6 +2474,9 @@ void MessageBuilder::appendChatterinoBadges(const QString &userID)
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
+
+        /// e.g. "chatterino:Chatterino Top donator"
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 
@@ -2430,6 +2487,9 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+
+        /// e.g. "frankerfacez:subwoofer"
+        this->message().externalBadges.emplace_back(badge.emote->name.string);
     }
 
     if (twitchChannel == nullptr)
@@ -2441,6 +2501,20 @@ void MessageBuilder::appendFfzBadges(TwitchChannel *twitchChannel,
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+
+        /// e.g. "frankerfacez:subwoofer"
+        this->message().externalBadges.emplace_back(badge.emote->name.string);
+    }
+}
+
+void MessageBuilder::appendBttvBadges(const QString &userID)
+{
+    if (auto badge = getApp()->getBttvBadges()->getBadge({userID}))
+    {
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeBttv);
+
+        /// e.g. "betterttv:Pro Subscriber"
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 
@@ -2449,6 +2523,9 @@ void MessageBuilder::appendSeventvBadges(const QString &userID)
     if (auto badge = getApp()->getSeventvBadges()->getBadge({userID}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
+
+        /// e.g. "7tv:NNYS 2024"
+        this->message().externalBadges.emplace_back((*badge)->name.string);
     }
 }
 

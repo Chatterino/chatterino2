@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/SearchPopup.hpp"
 
 #include "Application.hpp"
@@ -26,7 +30,7 @@
 namespace chatterino {
 
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
-                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
+                               const std::vector<MessagePtr> &snapshot)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
 
@@ -233,7 +237,7 @@ void SearchPopup::search()
                                           this->channelName_, this->snapshot_));
 }
 
-LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
+std::vector<MessagePtr> SearchPopup::buildSnapshot()
 {
     // no point in filtering/sorting if it's a single channel search
     if (this->searchChannels_.length() == 1)
@@ -248,7 +252,7 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
         ChannelView &sharedView = channel.get();
 
         const FilterSetPtr filterSet = sharedView.getFilterSet();
-        const LimitedQueueSnapshot<MessagePtr> &snapshot =
+        std::vector<MessagePtr> snapshot =
             sharedView.channel()->getMessageSnapshot();
 
         for (const auto &message : snapshot)
@@ -284,10 +288,7 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
                   return a->serverReceivedTime < b->serverReceivedTime;
               });
 
-    auto queue = LimitedQueue<MessagePtr>(combinedSnapshot.size());
-    queue.pushFront(combinedSnapshot);
-
-    return queue.getSnapshot();
+    return combinedSnapshot;
 }
 
 void SearchPopup::initLayout()

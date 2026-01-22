@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/Split.hpp"
 
 #include "Application.hpp"
@@ -109,7 +113,7 @@ Split::Split(QWidget *parent)
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
         }));
-    this->signalHolder_.managedConnect(channelChanged, [this] {
+    this->signalHolder_.managedConnect(this->channelChanged, [this] {
         this->updateInputPlaceholder();
     });
     this->updateInputPlaceholder();
@@ -483,7 +487,7 @@ void Split::addShortcuts()
              auto *twitchChannel =
                  dynamic_cast<TwitchChannel *>(this->getChannel().get());
 
-             twitchChannel->createClip();
+             twitchChannel->createClip({}, {});
              return "";
          }},
         {"reloadEmotes",
@@ -894,6 +898,16 @@ bool Split::getModerationMode() const
     return this->moderationMode_;
 }
 
+std::optional<bool> Split::checkSpellingOverride() const
+{
+    return this->input_->checkSpellingOverride();
+}
+
+void Split::setCheckSpellingOverride(std::optional<bool> override)
+{
+    this->input_->setCheckSpellingOverride(override);
+}
+
 void Split::insertTextToInput(const QString &text)
 {
     this->input_->insertText(text);
@@ -1244,19 +1258,6 @@ void Split::showSearch(bool singleChannel)
     }
 
     popup->show();
-}
-
-void Split::reloadChannelAndSubscriberEmotes()
-{
-    auto channel = this->getChannel();
-
-    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-    {
-        twitchChannel->refreshTwitchChannelEmotes(true);
-        twitchChannel->refreshBTTVChannelEmotes(true);
-        twitchChannel->refreshFFZChannelEmotes(true);
-        twitchChannel->refreshSevenTVChannelEmotes(true);
-    }
 }
 
 void Split::reconnect()

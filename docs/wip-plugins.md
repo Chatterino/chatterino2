@@ -219,6 +219,51 @@ c2.register_callback(
 )
 ```
 
+#### `current_account()`
+
+Returns a `TwitchAccount` representing the current account.
+
+#### `TwitchAccount`
+
+Represents a Twitch account. There can only be one selected at a time but
+unselected accounts stay valid. An account can become invalid if removed by the
+user in the settings. Using an invalid account produces an error.
+
+```lua
+local acc = c2.current_account()
+
+print(acc:is_valid()) -- true unless user removed account
+```
+
+##### `TwitchAccount:login()`
+
+Returns the login name of the account. This string may only contain lowercase ASCII.
+
+```lua
+print(acc:login()) -- "mm2pl"
+```
+
+##### `TwitchAccount:id()`
+
+Returns the Twitch user ID of the account. This uniquely and persistently identifies the account.
+
+```lua
+print(acc:id()) -- "117691339"
+```
+
+##### `TwitchAccount:color()`
+
+Returns the color in chat of this account. If the user has not sent any
+messages this will be `nil`.
+
+```lua
+print(acc:color()) -- "#ffdaa520"
+```
+
+##### `TwitchAccount:is_anon()`
+
+Returns `true` if this account is an anonymous account (no associated Twitch user).
+
 #### `ChannelType` enum
 
 This table describes channel types Chatterino supports. The values behind the
@@ -396,6 +441,42 @@ Returns `true` if the channel can be moderated by the current user.
 ##### `Channel:is_vip()`
 
 Returns `true` if the current user is a VIP in the channel.
+
+##### `Channel:message_snapshot(n_items)`
+
+Get a list of messages in this channel (starting from the most recent messages).
+The snapshot is returned as a usertype that wraps a C++ object.
+`n_items` is an upper bound, the actual number of messages returned might be lower.
+
+##### `Channel:last_message()`
+
+Get the most recent message. If this channel doesn't have any message, this returns `nil`.
+
+##### `Channel:replace_message(message, replacement[, hint])`
+
+Replace a specific message with a different one.
+`hint` is a one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+
+##### `Channel:replace_message_at(index, replacement)`
+
+Replace a message at an index with a different one.
+`index` is a one-based index (from the start) of the message to replace.
+
+##### `Channel:clear_messages()`
+
+Remove all messages in this channel.
+
+##### `Channel:find_message_by_id(id)`
+
+Find a message by its ID. If no message is found, `nil` is returned.
+
+##### `Channel:has_messages()`
+
+Check if the channel has any messages.
+
+##### `Channel:count_messages()`
+
+Count the number of messages in this channel.
 
 #### `HTTPMethod` enum
 
@@ -575,7 +656,26 @@ Closes the WebSocket connection.
 
 #### `Message`
 
-Allows creation of rich chat messages. This is currently limited but is expected to be expanded soon.
+Allows creation and modification of rich chat messages. A `Message` is
+Chatterino's representation of a chat message or any system message.
+The interface to Lua is currently limited but is expected to be expanded soon.
+
+Messages can be added to a [`Channel`](#channel). Once a message is added to a
+channel, it can't be modified anymore (except for its `flags`). These messages
+are termed "frozen" (immutable). You can check for this using the `frozen`
+property:
+
+```lua
+local my_msg = c2.Message.new({ id = "foobar" })
+assert(not my_msg.frozen)
+my_channel:add_message(my_msg)
+assert(my_msg.frozen)
+```
+
+A message has the same properties that it takes in its constructor (e.g.
+`msg.id` or `msg.flags`). If the message is not frozen (mutable), these
+properties can be modified. New elements can be added with
+[`append_element`](#messageappend_elementdata).
 
 ##### `Message.new(data)`
 
@@ -608,6 +708,58 @@ end)
 ```
 
 The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
+
+##### `Message:elements()`
+
+Gets a reference to the message's elements. This can be indexed or iterated
+though. Through the return value, you can also remove elements. Note that
+currently, new elements can't be added here (use `Message:append_element`).
+
+The return value can be thought of as a table of `MessageElement`s.
+
+```lua
+local my_msg = c2.Message.new({
+  id = "foo",
+  elements = {
+    { type = "text", text = "foo" },
+    { type = "text", text = "bar" },
+    { type = "text", text = "baz" },
+  }
+})
+local elements = my_msg:elements()
+assert(#elements == 3)
+assert(elements[1].words[1] == "foo")
+assert(elements[2].words[1] == "bar")
+
+elements:erase(2) -- erase "bar"
+assert(#elements == 2)
+assert(elements[1].words[1] == "foo")
+assert(elements[2].words[1] == "baz")
+```
+
+##### `Message:append_element(data)`
+
+Creates a message element from a table (`data`) and appends it to the message.
+The structure of the table matches the one taken in `Message.new`'s `elements`.
+
+```lua
+local my_msg = c2.Message.new({ id = "foo" })
+my_msg:append_element({
+  type = "text",
+  text = "My text element",
+})
+```
+
+#### `MessageElement`
+
+A reference to an element inside a `Message` (essentially an in index into the
+elements). Note that modifications to the elements of the parent `Message` might
+change the actual element this is referring to.
+
+To distinguish different types of elements, check the `type` property. This
+takes the same values as `element.type` in the `Message` constructor.
+
+The full range of properties can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
 
 #### `LinkType` enum
 
@@ -733,6 +885,31 @@ Equivalent to `io.output():write(...)`. See [`io.output()`](#outputfile_or_name)
 and [`file:write()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:write).
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.write)
+
+### Debug API
+
+To aid debugging, Chatterino provides Lua's `debug.traceback` function.
+Other functions from the `debug` library are not exposed.
+
+#### `traceback([thread,] [message [, level]])`
+
+Returns a stack trace of `thread` or the current thread with an optional `message` prepended.
+`level` can be used to skip some frames. By default, it's 1 (skipping the current function).
+
+This can be used as a message handler in `xpcall`:
+
+```lua
+local function main()
+  c2.ThisDoesNotExistAndWillError()
+end
+
+local ok, result = xpcall(main, debug.traceback)
+if not ok then
+  print(result)
+end
+```
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-debug.traceback)
 
 ### Changed globals
 

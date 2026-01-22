@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/HighlightingPage.hpp"
 
 #include "Application.hpp"
@@ -33,6 +37,7 @@ QList<DisplayBadge> availableBadges = {
     {"Admin", "admin"},
     {"Staff", "staff"},
     {"Moderator", "moderator"},
+    {"Lead Moderator", "lead_moderator"},
     {"Verified", "partner"},
     {"VIP", "vip"},
     {"Founder", "founder"},

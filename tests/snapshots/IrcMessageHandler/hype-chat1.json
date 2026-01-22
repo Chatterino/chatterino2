@@ -2,15 +2,6 @@
     "input": "@pinned-chat-paid-level=ONE;mod=0;flags=;pinned-chat-paid-amount=1400;pinned-chat-paid-exponent=2;tmi-sent-ts=1687970631828;subscriber=1;user-type=;color=#9DA364;emotes=;badges=predictions/blue-1,subscriber/60,twitchconAmsterdam2020/1;pinned-chat-paid-canonical-amount=1400;turbo=0;user-id=26753388;id=e6681ba0-cdc6-4482-93a3-515b74361e8b;room-id=36340781;first-msg=0;returning-chatter=0;pinned-chat-paid-currency=NOK;pinned-chat-paid-is-system-message=0;badge-info=predictions/Day\\s53/53\\sforsenSmug,subscriber/67;display-name=matrHS :matrhs!matrhs@matrhs.tmi.twitch.tv PRIVMSG #pajlada :Title: Beating the record. but who is recordingLOL",
     "output": [
         {
-            "badgeInfos": {
-                "predictions": "Day\\s53/53\\sforsenSmug",
-                "subscriber": "67"
-            },
-            "badges": [
-                "predictions",
-                "subscriber",
-                "twitchconAmsterdam2020"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "matrHS",
@@ -157,6 +148,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ElevatedMessage",
             "frozen": false,
             "id": "e6681ba0-cdc6-4482-93a3-515b74361e8b",
@@ -166,14 +159,19 @@
             "searchText": "matrhs  matrhs: Title: Beating the record. but who is recordingLOL ",
             "serverReceivedTime": "2023-06-28T16:43:51Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "predictions": "Day\\s53/53\\sforsenSmug",
+                "subscriber": "67"
+            },
+            "twitchBadges": [
+                "predictions",
+                "subscriber",
+                "twitchconAmsterdam2020"
+            ],
             "userID": "26753388",
             "usernameColor": "#ff9da364"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -226,6 +224,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
             "frozen": false,
             "id": "",
@@ -235,6 +235,10 @@
             "searchText": "Level 1 Hype Chat (30s) NOK14.00",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

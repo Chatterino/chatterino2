@@ -2,10 +2,6 @@
     "input": "@tmi-sent-ts=1726865239492;subscriber=1;id=1bf2d49a-8b88-4116-81dd-5098f11726eb;room-id=11148817;user-id=129546453;badges=;color=#FF0000;flags=;user-type=;emotes= :ignoreduser!ignoreduser@ignoreduser.tmi.twitch.tv PRIVMSG #pajlada :my-highlight",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -106,6 +102,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "1bf2d49a-8b88-4116-81dd-5098f11726eb",
@@ -115,6 +113,10 @@
             "searchText": "ignoreduser  ignoreduser: my-highlight ",
             "serverReceivedTime": "2024-09-20T20:47:19Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

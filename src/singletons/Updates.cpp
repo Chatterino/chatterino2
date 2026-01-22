@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Updates.hpp"
 
 #include "common/Literals.hpp"
@@ -104,12 +108,12 @@ void Updates::deleteOldFiles()
 
 const QString &Updates::getCurrentVersion() const
 {
-    return currentVersion_;
+    return this->currentVersion_;
 }
 
 const QString &Updates::getOnlineVersion() const
 {
-    return onlineVersion_;
+    return this->onlineVersion_;
 }
 
 void Updates::installUpdates()

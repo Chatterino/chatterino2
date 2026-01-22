@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/MessageColor.hpp"
 
 #include "messages/layouts/MessageLayoutContext.hpp"
@@ -48,6 +52,45 @@ QString MessageColor::toString() const
         default:
             return {};
     }
+}
+
+QString MessageColor::toLua() const
+{
+    switch (this->type_)
+    {
+        case Type::Custom:
+            return this->customColor_.name(QColor::HexArgb);
+        case Type::Text:
+            return QStringLiteral("text");
+        case Type::System:
+            return QStringLiteral("system");
+        case Type::Link:
+            return QStringLiteral("link");
+        default:
+            return {};
+    }
+}
+
+MessageColor MessageColor::fromLua(const QString &spec, Type fallback)
+{
+    if (spec.isEmpty())
+    {
+        return fallback;
+    }
+    if (spec == u"text")
+    {
+        return MessageColor::Text;
+    }
+    if (spec == u"link")
+    {
+        return MessageColor::Link;
+    }
+    if (spec == u"system")
+    {
+        return MessageColor::System;
+    }
+    // custom
+    return QColor(spec);
 }
 
 }  // namespace chatterino

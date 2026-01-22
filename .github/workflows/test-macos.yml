@@ -24,13 +24,13 @@ jobs:
     strategy:
       matrix:
         os: [macos-14]
-        qt-version: [6.4.3, 6.7.1]
+        qt-version: [6.7.1, 6.10.1]
       fail-fast: false
     env:
       QT_MODULES: qtimageformats
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -45,8 +45,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # brew install openssl rapidjson p7zip create-dmg cmake boost
-          brew install openssl rapidjson p7zip create-dmg boost
+          # brew install openssl rapidjson p7zip create-dmg cmake boost hunspell
+          brew install openssl rapidjson p7zip create-dmg boost hunspell
 
       - name: Install httpbox
         run: |
@@ -64,6 +64,7 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

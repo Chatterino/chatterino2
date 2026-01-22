@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/listview/GenericItemDelegate.hpp"
 
 #include "widgets/listview/GenericListItem.hpp"

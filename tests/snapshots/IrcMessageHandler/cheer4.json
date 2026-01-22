@@ -2,11 +2,6 @@
     "input": "@badge-info=;badges=bits/1;bits=10;color=#00FF7F;display-name=EXDE_HUN;emotes=;flags=;id=60d8835b-23fa-418c-96ca-5874e5d5e8ba;mod=0;room-id=111448817;subscriber=0;tmi-sent-ts=1566654664248;turbo=0;user-id=129793695;user-type= :exde_hun!exde_hun@exde_hun.tmi.twitch.tv PRIVMSG #pajlada :PogChamp10",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-                "bits"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "EXDE_HUN",
@@ -127,6 +122,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|CheerMessage",
             "frozen": false,
             "id": "60d8835b-23fa-418c-96ca-5874e5d5e8ba",
@@ -136,6 +133,11 @@
             "searchText": "exde_hun  exde_hun: PogChamp10 ",
             "serverReceivedTime": "2019-08-24T13:51:04Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "bits"
+            ],
             "userID": "129793695",
             "usernameColor": "#ff00ff7f"
         }

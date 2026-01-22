@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "common/Literals.hpp"
@@ -16,6 +20,7 @@
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -102,6 +107,11 @@ public:
         return &this->ffzBadges;
     }
 
+    BttvBadges *getBttvBadges() override
+    {
+        return &this->bttvBadges;
+    }
+
     SeventvBadges *getSeventvBadges() override
     {
         return &this->seventvBadges;
@@ -154,6 +164,7 @@ public:
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
+    BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
     BttvEmotes bttvEmotes;
@@ -471,12 +482,11 @@ public:
             ->twitch.getCurrent()
             ->blockUserLocally(u"12345"_s, u"blocked"_s);
 
-        auto makeBadge = [](QStringView platform) {
+        auto makeBadge = [](QStringView platform, QStringView name) {
             return std::make_shared<Emote>(Emote{
-                .name = {},
-                .images = {Url{u"https://chatterino.com/" % platform %
-                               u".png"}},
-                .tooltip = {platform % u" badge"},
+                .name = {platform.toString().toLower() % ':' % name},
+                .images = {Url{u"https://chatterino.com/" % name % u".png"}},
+                .tooltip = {name % u" badge"},
                 .homePage = {},
                 .zeroWidth = false,
                 .id = {},
@@ -487,17 +497,21 @@ public:
 
         // Chatterino
         this->mockApplication->chatterinoBadges.setBadge(
-            {u"123456"_s}, makeBadge(u"Chatterino"));
+            {u"123456"_s}, makeBadge(u"chatterino", u"Chatterino"));
 
-        // FFZ
+        // FrankerFaceZ
         this->mockApplication->ffzBadges.registerBadge(
-            1, {.emote = makeBadge(u"FFZ1"), .color = {9, 10, 11, 12}});
+            1, {.emote = makeBadge(u"frankerfacez", u"FFZ1"),
+                .color = {9, 10, 11, 12}});
         this->mockApplication->ffzBadges.registerBadge(
-            2, {.emote = makeBadge(u"FFZ2"), .color = {13, 14, 15, 16}});
+            2, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {13, 14, 15, 16}});
         this->mockApplication->ffzBadges.registerBadge(
-            3, {.emote = makeBadge(u"FFZ2"), .color = {17, 18, 19, 20}});
+            3, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {17, 18, 19, 20}});
         this->mockApplication->ffzBadges.registerBadge(
-            4, {.emote = makeBadge(u"FFZ2"), .color = {21, 22, 23, 24}});
+            4, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {21, 22, 23, 24}});
         this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
                                                                  1);
         this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
@@ -506,6 +520,7 @@ public:
         // 7TV
         this->mockApplication->getSeventvBadges()->registerBadge({
             {u"id"_s, u"1"_s},
+            {u"name"_s, u"7TV badge name"_s},
             {u"tooltip"_s, u"7TV badge"_s},
             {
                 u"host"_s,
@@ -524,6 +539,14 @@ public:
         });
         this->mockApplication->getSeventvBadges()->assignBadgeToUser(
             u"1"_s, {u"123456"_s});
+
+        // BetterTTV
+        this->mockApplication->getBttvBadges()->registerBadge({
+            {u"startedAt"_s, u"2017-01-11T09:54:10.000Z"_s},
+            {u"url"_s, u"https://chatterino.com/betterttv/test.png"_s},
+        });
+        this->mockApplication->getBttvBadges()->assignBadgeToUser(
+            u"https://chatterino.com/betterttv/test.png"_s, {u"123456"_s});
 
         // Twitch
         this->mockApplication->getTwitchBadges()->loadLocalBadges();

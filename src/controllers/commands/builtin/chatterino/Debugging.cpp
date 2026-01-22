@@ -1,11 +1,15 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -13,6 +17,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
@@ -23,9 +28,9 @@
 #include <QLoggingCategory>
 #include <QString>
 
-namespace chatterino::commands {
+using namespace Qt::StringLiterals;
 
-using namespace literals;
+namespace chatterino::commands {
 
 QString setLoggingRules(const CommandContext &ctx)
 {
@@ -201,6 +206,23 @@ QString debugTest(const CommandContext &ctx)
     {
         getApp()->getUpdates().checkForUpdates();
         ctx.channel->addSystemMessage(QString("checking for updates"));
+    }
+    else if (command == "save-settings")
+    {
+        ctx.channel->addSystemMessage(u"requesting settings save"_s);
+        auto res = getSettings()->requestSave();
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                ctx.channel->addSystemMessage(u"setting save failed"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                ctx.channel->addSystemMessage(u"setting save success"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                ctx.channel->addSystemMessage(u"setting save skipped"_s);
+                break;
+        }
     }
     else
     {

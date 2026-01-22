@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: apt-get update
         run: sudo apt-get update
@@ -28,7 +28,7 @@ jobs:
       - name: Check formatting
         uses: DoozyX/clang-format-lint-action@v0.20
         with:
-          source: "./src ./tests/src ./benchmarks/src ./mocks/include"
+          source: "./src ./tests/src ./benchmarks/src ./mocks/include ./lib/twitch-eventsub-ws/include ./lib/twitch-eventsub-ws/src"
           extensions: "hpp,cpp"
           clangFormatVersion: 19
 

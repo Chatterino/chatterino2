@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/RapidjsonHelpers.hpp"
@@ -21,7 +25,7 @@ struct UserData {
 
     bool isEmpty() const
     {
-        return !color.has_value() && notes.isEmpty();
+        return !this->color.has_value() && this->notes.isEmpty();
     }
 };
 

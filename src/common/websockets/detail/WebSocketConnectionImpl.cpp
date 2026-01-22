@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/detail/WebSocketConnectionImpl.hpp"
 
 #include "common/QLogging.hpp"
@@ -6,6 +10,8 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+
+using namespace std::literals::string_view_literals;
 
 namespace chatterino::ws::detail {
 
@@ -93,29 +99,60 @@ void WebSocketConnectionHelper<Derived, Inner>::onResolve(
         return;
     }
 
-    qCDebug(chatterinoWebsocket) << *this << "Resolved host";
+    this->resolvedEndpoints = results;
+
+    this->tryConnect(this->resolvedEndpoints.begin());
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::tryConnect(
+    boost::asio::ip::tcp::resolver::results_type::const_iterator
+        endpointIterator)
+{
+    if (endpointIterator == this->resolvedEndpoints.end())
+    {
+        this->fail("Ran out of resolved endpoints"sv, u"connect");
+        return;
+    }
+
+    const auto &endpoint = endpointIterator->endpoint();
+
+    qCDebug(chatterinoWebsocket)
+        << *this << "connect to" << endpoint.address().to_string();
 
     beast::get_lowest_layer(this->stream)
         .expires_after(std::chrono::seconds{30});
+
     beast::get_lowest_layer(this->stream)
-        .async_connect(results, beast::bind_front_handler(
-                                    &WebSocketConnectionHelper::onTcpHandshake,
-                                    this->shared_from_this()));
+        .async_connect(endpoint,
+                       beast::bind_front_handler(
+                           &WebSocketConnectionHelper::onTcpHandshake,
+                           this->shared_from_this(), endpointIterator));
 }
 
 template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onTcpHandshake(
-    boost::system::error_code ec,
-    const asio::ip::tcp::resolver::endpoint_type &ep)
+    boost::asio::ip::tcp::resolver::results_type::const_iterator
+        endpointIterator,
+    boost::system::error_code ec)
 {
+    const auto &ep = endpointIterator->endpoint();
+
     if (ec)
     {
-        this->fail(ec, u"TCP handshake");
+        qCDebug(chatterinoWebsocket)
+            << *this << "error in tcp handshake" << ep.address().to_string()
+            << ec.message();
+        this->tryConnect(++endpointIterator);
         return;
     }
 
-    qCDebug(chatterinoWebsocket) << *this << "TCP handshake done";
+    qCDebug(chatterinoWebsocket)
+        << *this << "TCP handshake done" << ep.address().to_string();
     this->options.url.setPort(ep.port());
+
+    // We are done with the endpoints, we can clear the range.
+    this->resolvedEndpoints = {};
 
     this->derived()->afterTcpHandshake();
 }
@@ -320,8 +357,15 @@ template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::fail(
     boost::system::error_code ec, QStringView op)
 {
+    this->fail(ec.message(), op);
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::fail(std::string_view ec,
+                                                     QStringView op)
+{
     qCWarning(chatterinoWebsocket)
-        << *this << "Failed:" << op << QUtf8StringView(ec.message());
+        << *this << "Failed:" << op << QUtf8StringView(ec);
     if (this->stream.is_open())
     {
         this->closeImpl();

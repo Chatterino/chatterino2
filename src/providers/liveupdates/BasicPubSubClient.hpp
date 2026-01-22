@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/QLogging.hpp"
@@ -20,7 +24,7 @@ namespace chatterino {
  *
  * @tparam Subscription see BasicPubSubManager
  */
-template <typename SubscriptionT>
+template <typename SubscriptionT, typename Derived>
 class BasicPubSubClient
 {
 public:
@@ -61,6 +65,21 @@ public:
         this->ws_.close();
     }
 
+    void sendText(const QByteArray &data)
+    {
+        this->ws_.sendText(data);
+    }
+
+    QByteArray encodeSubscription(const Subscription &subscription)
+    {
+        return subscription.encodeSubscribe();
+    }
+
+    QByteArray encodeUnsubscription(const Subscription &subscription)
+    {
+        return subscription.encodeUnsubscribe();
+    }
+
 protected:
     /**
      * @return true if this client subscribed to this subscription
@@ -88,7 +107,8 @@ protected:
         qCDebug(chatterinoLiveupdates) << "Subscribing to" << subscription;
         DebugCount::increase("LiveUpdates subscriptions");
 
-        QByteArray encoded = subscription.encodeSubscribe();
+        QByteArray encoded =
+            static_cast<Derived *>(this)->encodeSubscription(subscription);
         this->ws_.sendText(encoded);
 
         return true;
@@ -108,7 +128,8 @@ protected:
         qCDebug(chatterinoLiveupdates) << "Unsubscribing from" << subscription;
         DebugCount::decrease("LiveUpdates subscriptions");
 
-        QByteArray encoded = subscription.encodeUnsubscribe();
+        QByteArray encoded =
+            static_cast<Derived *>(this)->encodeUnsubscription(subscription);
         this->ws_.sendText(encoded);
 
         return true;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <pajlada/signals/signal.hpp>
@@ -38,6 +42,8 @@ public:
      * @param userID the Twitch user-id of the current user.
      */
     void joinChannel(const QString &channelID, const QString &userID);
+
+    void broadcastMe(const QString &channelID, const QString &userID);
 
     /**
      * Parts a twitch channel by its id (without any prefix like 'twitch:')

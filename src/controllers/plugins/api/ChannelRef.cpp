@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/ChannelRef.hpp"
 
@@ -7,6 +11,7 @@
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/SignalCallback.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
+#    include "messages/Message.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 #    include "util/WeakPtrHelpers.hpp"
@@ -117,6 +122,79 @@ void ChannelRef::add_message(std::shared_ptr<Message> &message,
     this->strong()->addMessage(message, ctx, overrideFlags);
 }
 
+std::vector<MessagePtrMut> ChannelRef::message_snapshot(size_t n_items)
+{
+    return this->strong()->getMessageSnapshotMut(n_items);
+}
+
+MessagePtrMut ChannelRef::last_message()
+{
+    return std::const_pointer_cast<Message>(this->strong()->getLastMessage());
+}
+
+void ChannelRef::replace_message(const MessagePtrMut &message,
+                                 const MessagePtrMut &replacement)
+{
+    if (!message || !replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+
+    this->strong()->replaceMessage(message, replacement);
+}
+
+void ChannelRef::replace_message_hint(const MessagePtrMut &message,
+                                      const MessagePtrMut &replacement,
+                                      size_t hint)
+{
+    if (!message || !replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+    if (hint == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
+
+    this->strong()->replaceMessage(hint - 1, message, replacement);
+}
+
+void ChannelRef::replace_message_at(size_t index,
+                                    const MessagePtrMut &replacement)
+{
+    if (!replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+    if (index == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
+
+    this->strong()->replaceMessage(index - 1, replacement);
+}
+
+void ChannelRef::clear_messages()
+{
+    this->strong()->clearMessages();
+}
+
+MessagePtrMut ChannelRef::find_message_by_id(const QString &id)
+{
+    return std::const_pointer_cast<Message>(
+        this->strong()->findMessageByID(id));
+}
+
+bool ChannelRef::has_messages()
+{
+    return this->strong()->hasMessages();
+}
+
+size_t ChannelRef::count_messages()
+{
+    return this->strong()->countMessages();
+}
+
 bool ChannelRef::is_twitch_channel()
 {
     return this->strong()->isTwitchChannel();
@@ -209,10 +287,21 @@ void ChannelRef::createUserType(sol::table &c2)
         "get_name",&ChannelRef::get_name,
         "get_type", &ChannelRef::get_type,
         "get_display_name", &ChannelRef::get_display_name,
+        "is_twitch_channel", &ChannelRef::is_twitch_channel,
+
+        // Messages
         "send_message", &ChannelRef::send_message,
         "add_system_message", &ChannelRef::add_system_message,
         "add_message", &ChannelRef::add_message,
-        "is_twitch_channel", &ChannelRef::is_twitch_channel,
+        "message_snapshot", &ChannelRef::message_snapshot,
+        "last_message", &ChannelRef::last_message,
+        "replace_message", sol::overload(&ChannelRef::replace_message,
+             &ChannelRef::replace_message_hint),
+        "replace_message_at", &ChannelRef::replace_message_at,
+        "clear_messages", &ChannelRef::clear_messages,
+        "find_message_by_id", &ChannelRef::find_message_by_id,
+        "has_messages", &ChannelRef::has_messages,
+        "count_messages", &ChannelRef::count_messages,
 
         "on_display_name_changed", &ChannelRef::on_display_name_changed,
 

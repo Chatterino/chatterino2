@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/ChannelView.hpp"
 
 #include "Application.hpp"
@@ -13,7 +17,6 @@
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -462,7 +465,7 @@ Scrollbar *ChannelView::scrollbar()
 
 bool ChannelView::pausable() const
 {
-    return pausable_;
+    return this->pausable_;
 }
 
 void ChannelView::setPausable(bool value)
@@ -693,7 +696,7 @@ void ChannelView::performLayout(bool causedByScrollbar, bool causedByShow)
 }
 
 void ChannelView::layoutVisibleMessages(
-    const LimitedQueueSnapshot<MessageLayoutPtr> &messages)
+    const std::vector<MessageLayoutPtr> &messages)
 {
     const auto start = size_t(this->scrollBar_->getRelativeCurrentValue());
     const auto layoutWidth = this->getLayoutWidth();
@@ -731,9 +734,8 @@ void ChannelView::layoutVisibleMessages(
     }
 }
 
-void ChannelView::updateScrollbar(
-    const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-    bool causedByScrollbar, bool causedByShow)
+void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
+                                  bool causedByScrollbar, bool causedByShow)
 {
     if (messages.size() == 0)
     {
@@ -820,7 +822,7 @@ QString ChannelView::getSelectedText()
 {
     QString result = "";
 
-    LimitedQueueSnapshot<MessageLayoutPtr> &messagesSnapshot =
+    std::vector<MessageLayoutPtr> &messagesSnapshot =
         this->getMessagesSnapshot();
 
     Selection selection = this->selection_;
@@ -869,7 +871,7 @@ bool ChannelView::hasSelection()
 void ChannelView::clearSelection()
 {
     this->selection_ = Selection();
-    queueLayout();
+    this->queueLayout();
 }
 
 void ChannelView::copySelectedText()
@@ -897,7 +899,7 @@ const std::optional<MessageElementFlags> &ChannelView::getOverrideFlags() const
     return this->overrideFlags_;
 }
 
-LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
+std::vector<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
 {
     this->snapshotGuard_.guard();
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
@@ -1545,7 +1547,7 @@ void ChannelView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->messageColors_.channelBackground);
+    painter.fillRect(this->rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter, event->rect());
@@ -1963,7 +1965,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     int messageIndex;
 
     // no message under cursor
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         this->setCursor(Qt::ArrowCursor);
         this->tooltipWidget_->hide();
@@ -2166,9 +2168,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
         auto &messagesSnapshot = this->getMessagesSnapshot();
         if (messagesSnapshot.size() == 0)
         {
@@ -2273,7 +2275,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     int messageIndex;
 
     bool foundElement =
-        tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+        this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
@@ -2917,7 +2919,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         return;
     }

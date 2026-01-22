@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/pubsubmessages/Base.hpp"
 
 #include "util/QMagicEnum.hpp"
@@ -18,9 +22,9 @@ PubSubMessage::PubSubMessage(QJsonObject _object)
     }
 }
 
-std::optional<PubSubMessage> parsePubSubBaseMessage(const QString &blob)
+std::optional<PubSubMessage> parsePubSubBaseMessage(const QByteArray &blob)
 {
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob));
 
     if (jsonDoc.isNull())
     {

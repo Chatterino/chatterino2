@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726764056444;subscriber=1;id=546c42a6-21d0-4f3d-a6a0-c77f78d7b131;room-id=11148817;user-id=123456;display-name=badgy;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :badgy!badgy@badgy.tmi.twitch.tv PRIVMSG #pajlada :badge",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "badgy",
@@ -69,7 +63,7 @@
                         "images": {
                             "1x": "https://chatterino.com/Chatterino.png"
                         },
-                        "name": "",
+                        "name": "chatterino:Chatterino",
                         "tooltip": "Chatterino badge"
                     },
                     "flags": "BadgeChatterino",
@@ -87,7 +81,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ1.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ1",
                         "tooltip": "FFZ1 badge"
                     },
                     "flags": "BadgeFfz",
@@ -105,7 +99,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -123,7 +117,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -141,7 +135,7 @@
                         "images": {
                             "1x": "https://chatterino.com/FFZ2.png"
                         },
-                        "name": "",
+                        "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
                     "flags": "BadgeFfz",
@@ -155,11 +149,29 @@
                 },
                 {
                     "emote": {
+                        "id": "https://chatterino.com/betterttv/test.png",
+                        "images": {
+                            "1x": "https://chatterino.com/betterttv/test.png"
+                        },
+                        "name": "betterttv:pro",
+                        "tooltip": "BTTV Pro"
+                    },
+                    "flags": "BadgeBttv",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "BTTV Pro",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
                         "id": "1",
                         "images": {
                             "1x": "https://chatterino.com/7tv//1x"
                         },
-                        "name": "",
+                        "name": "7tv:7TV badge name",
                         "tooltip": "7TV badge"
                     },
                     "flags": "BadgeSevenTV",
@@ -215,6 +227,15 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+                "chatterino:Chatterino",
+                "frankerfacez:FFZ1",
+                "frankerfacez:FFZ2",
+                "frankerfacez:FFZ2",
+                "frankerfacez:FFZ2",
+                "betterttv:pro",
+                "7tv:7TV badge name"
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131",
@@ -224,6 +245,12 @@
             "searchText": "badgy  badgy: badge ",
             "serverReceivedTime": "2024-09-19T16:40:56Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "123456",
             "usernameColor": "#ffff0000"
         }

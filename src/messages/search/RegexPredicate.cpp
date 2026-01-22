@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/search/RegexPredicate.hpp"
 
 #include "messages/Message.hpp"
@@ -12,12 +16,12 @@ RegexPredicate::RegexPredicate(const QString &regex, bool negate)
 
 bool RegexPredicate::appliesToImpl(const Message &message)
 {
-    if (!regex_.isValid())
+    if (!this->regex_.isValid())
     {
         return false;
     }
 
-    QRegularExpressionMatch match = regex_.match(message.messageText);
+    QRegularExpressionMatch match = this->regex_.match(message.messageText);
 
     return match.hasMatch();
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Label.hpp"
 
 #include "Application.hpp"
@@ -178,6 +182,7 @@ void Label::updateSize()
 
     auto yPadding =
         this->currentPadding_.top() + this->currentPadding_.bottom();
+
     auto height = metrics.height() + yPadding;
     if (this->shouldElide_)
     {
@@ -214,7 +219,7 @@ bool Label::updateElidedText(const QFontMetricsF &fontMetrics, qreal width)
 
 QRectF Label::textRect() const
 {
-    return this->rect().toRectF().marginsRemoved(this->currentPadding_);
+    return QRectF(this->rect()).marginsRemoved(this->currentPadding_);
 }
 
 }  // namespace chatterino

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -139,7 +143,7 @@ public:
     std::weak_ptr<const Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
-    void addLink(const linkparser::Parsed &parsedLink, const QString &source);
+    void addLink(const linkparser::Parsed &parsedLink, QStringView source);
 
     template <typename T, typename... Args>
     T *emplace(Args &&...args)
@@ -315,6 +319,7 @@ private:
                             TwitchChannel *twitchChannel);
     void appendChatterinoBadges(const QString &userID);
     void appendFfzBadges(TwitchChannel *twitchChannel, const QString &userID);
+    void appendBttvBadges(const QString &userID);
     void appendSeventvBadges(const QString &userID);
 
     [[nodiscard]] static bool isIgnored(const QString &originalMessage,

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/QLogging.hpp"
@@ -143,7 +147,7 @@ private:
 
         this->connectBackoff_.reset();
 
-        auto *client = resolve(id);
+        auto *client = this->resolve(id);
         client->onOpen();
         auto pendingSubsToTake = std::min(this->pendingSubscriptions_.size(),
                                           client->maxSubscriptions);

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/ChannelPointReward.hpp"
 
 #include "common/Literals.hpp"
@@ -58,13 +62,13 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     }
 
     // use bits cost when channel points were not used
-    if (cost == 0)
+    if (this->cost == 0)
     {
         this->cost = reward.value("bits_cost").toInt();
     }
 
     // workaround twitch bug where bits_cost is always 0 in practice
-    if (cost == 0)
+    if (this->cost == 0)
     {
         this->cost = reward.value("default_bits_cost").toInt();
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/FilterRecord.hpp"
 
 #include "controllers/filters/lang/Filter.hpp"

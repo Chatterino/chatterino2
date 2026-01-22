@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "mocks/BaseApplication.hpp"
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
@@ -73,7 +77,7 @@ struct hash<DummySubscription> {
 namespace {
 
 class MyManager;
-class MyClient : public BasicPubSubClient<DummySubscription>
+class MyClient : public BasicPubSubClient<DummySubscription, MyClient>
 {
 public:
     MyClient(MyManager &manager)

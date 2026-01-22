@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -182,7 +186,7 @@ public:
     bool canReconnect() const override;
     void reconnect() override;
     QString getCurrentStreamID() const override;
-    void createClip();
+    void createClip(const QString &title, std::optional<int> duration);
 
     /// Delete the message with the specified ID as a moderator.
     ///
@@ -377,6 +381,9 @@ private:
 
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
+
+    void updateBttvActivity();
+
     /**
      * Indicates an activity to 7TV in this channel for this user.
      * This is done at most once every 60s.
@@ -513,6 +520,8 @@ private:
      * Or: Up until this moment we don't need to send activity.
      */
     QDateTime nextSeventvActivity_;
+
+    QDateTime nextBttvActivity_;
 
     /** The platform of the last live emote update ("7TV", "BTTV", "FFZ"). */
     QString lastLiveUpdateEmotePlatform_;
