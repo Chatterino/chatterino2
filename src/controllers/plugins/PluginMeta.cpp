@@ -13,6 +13,7 @@
 
 namespace chatterino {
 
+// NOLINTBEGIN(clazy-reserve-candidates)
 PluginMeta::PluginMeta(const QJsonObject &obj)
 {
     auto homepageObj = obj.value("homepage");
@@ -180,6 +181,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
         }
     }
 }
+// NOLINTEND(clazy-reserve-candidates)
 
 }  // namespace chatterino
 
