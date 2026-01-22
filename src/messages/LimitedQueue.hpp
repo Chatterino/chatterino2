@@ -56,6 +56,14 @@ public:
         return this->buffer_.empty();
     }
 
+    /// Number of items in this container
+    [[nodiscard]] size_t size() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        return this->buffer_.size();
+    }
+
     /// Value Accessors
     // Copies of values are returned so that references aren't invalidated
 
@@ -333,6 +341,18 @@ public:
             this->buffer_.end() - std::min(nItems, this->buffer_.size()),
             this->buffer_.end(),
         };
+    }
+
+    template <typename U>
+    [[nodiscard]] std::vector<U> lastNBy(size_t nItems, auto &&cb) const
+    {
+        std::shared_lock lock(this->mutex_);
+        std::vector<U> vec;
+        std::transform(
+            this->buffer_.end() - std::min(nItems, this->buffer_.size()),
+            this->buffer_.end(), std::back_inserter(vec),
+            std::forward<decltype(cb)>(cb));
+        return vec;
     }
 
     [[nodiscard]] std::vector<T> firstN(size_t nItems) const

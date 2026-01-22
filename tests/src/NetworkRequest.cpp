@@ -8,6 +8,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "NetworkHelpers.hpp"
 #include "Test.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <QCoreApplication>
 
@@ -23,6 +24,24 @@ QString getStatusURL(int code)
 QString getDelayURL(int delay)
 {
     return QString("%1/delay/%2").arg(HTTPBIN_BASE_URL).arg(delay);
+}
+
+QString getHttpbinUrl(QStringView path)
+{
+    return QString("%1/%2").arg(HTTPBIN_BASE_URL, path);
+}
+
+QHttpMultiPart *makeMultipart()
+{
+    auto *multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart part;
+    part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                   QVariant("form-data; name=\"text\""));
+    part.setBody("my text");
+
+    multipart->append(part);
+    return multipart;
 }
 
 }  // namespace
@@ -280,4 +299,87 @@ TEST(NetworkRequest, BatchedTimeouts)
         EXPECT_FALSE(state->errored);
     }
 #endif
+}
+
+TEST(NetworkRequest, HttpGetHeaders)
+{
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+
+    RequestWaiter waiter;
+    NetworkRequest(getHttpbinUrl(u"headers"), NetworkRequestType::Get)
+        .timeout(1000)
+        .onSuccess([&](const NetworkResult &result) {
+            // make sure we don't attempt to send a body
+            auto body = QString::fromUtf8(result.getData());
+            EXPECT_FALSE(body.contains("content-length", Qt::CaseInsensitive));
+            waiter.requestDone();
+        })
+        .execute();
+
+    waiter.waitForRequest();
+}
+
+TEST(NetworkRequest, HttpBody)
+{
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+
+    for (auto ty : std::array{
+             NetworkRequestType::Post,
+             NetworkRequestType::Put,
+             NetworkRequestType::Patch,
+         })
+    {
+        auto path = qmagicenum::enumNameString(ty).toLower();
+        RequestWaiter waiter;
+        bool success = false;
+        NetworkRequest(getHttpbinUrl(path), ty)
+            .timeout(1000)
+            .payload("foobar")
+            .header("Content-Type", "text/plain")
+            .onSuccess([&](const NetworkResult &result) {
+                EXPECT_EQ(result.getData(), "foobar") << path;
+                success = true;
+            })
+            .finally([&] {
+                waiter.requestDone();
+            })
+            .execute();
+
+        waiter.waitForRequest();
+        ASSERT_TRUE(success) << path;
+    }
+}
+
+TEST(NetworkRequest, HttpBodyMultipart)
+{
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+
+    for (auto ty : std::array{
+             NetworkRequestType::Post,
+             NetworkRequestType::Put,
+             NetworkRequestType::Patch,
+         })
+    {
+        auto path = qmagicenum::enumNameString(ty).toLower();
+        RequestWaiter waiter;
+        bool success = false;
+        NetworkRequest(getHttpbinUrl(path), ty)
+            .timeout(1000)
+            .multiPart(makeMultipart())
+            .onSuccess([&](const NetworkResult &result) {
+                auto body = QString::fromUtf8(result.getData());
+                EXPECT_TRUE(body.contains("Content-Disposition: form-data; "
+                                          "name=\"text\"\r\n\r\nmy text",
+                                          Qt::CaseInsensitive))
+                    << "Path:" << path << "Body:" << body;
+                success = true;
+            })
+            .finally([&] {
+                waiter.requestDone();
+            })
+            .execute();
+
+        waiter.waitForRequest();
+        ASSERT_TRUE(success) << path;
+    }
 }

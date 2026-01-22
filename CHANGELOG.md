@@ -18,13 +18,14 @@
 - Minor: Added a setting to show the stream title in live messages. (#6572)
 - Minor: Add categories to the emoji viewer. (#6598)
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
-- Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632)
+- Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632, #6749)
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625, #6724)
 - Minor: Added `debug.traceback` for plugins. (#6652)
 - Minor: Added title and duration options for `/clip` command. (#6669)
 - Minor: Added the ability to filter on messages by the author's external badges (example: `author.external_badges contains "chatterino:Top Donator"` or `author.external_badges contains "frankerfacez:bot"`). (#6709)
 - Minor: Added Markdown support to user notes. (#6490)
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
+- Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
 - Minor: Add `/(un)monitor` and `/(un)restrict` commands for moderators. (#6750)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
@@ -90,7 +91,10 @@
 - Dev: Refactored types used for emoji parsing. (#6714)
 - Dev: `LinkParser` now parses `QStringView`s. (#6715)
 - Dev: Cleaned up `AccountController` connections. (#6735)
+- Dev: Send multipart body for HTTP `PUT` requests. (#6746)
 - Dev: Removed unused variables. (#6748)
+- Dev: Updated `miniaudio` to 0.11.24. (#6754)
+- Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
 
 ## 2.5.4
 

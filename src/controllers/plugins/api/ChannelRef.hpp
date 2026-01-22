@@ -85,6 +85,86 @@ public:
      */
     void add_message(std::shared_ptr<Message> &message, sol::variadic_args va);
 
+    // FIXME: create a separate type for Sol container wrappers
+    /**
+     * Get a list of messages in this channel (starting from the most recent messages).
+     * The snapshot is returned as a usertype that wraps a C++ object.
+     *
+     * @lua@param n_items number Number of messages to retrieve. This is an upper bound, the actual number of messages returned might be lower.
+     * @lua@return c2.Message[]
+     * @exposed c2.Channel:message_snapshot
+     */
+    std::vector<MessagePtrMut> message_snapshot(size_t n_items);
+
+    /**
+     * Get the most recent message. If this channel doesn't have any message, this returns `nil`.
+     * 
+     * @lua@return c2.Message?
+     * @exposed c2.Channel:last_message
+     */
+    MessagePtrMut last_message();
+
+    /**
+     * Replace a specific message with a different one.
+     * 
+     * @lua@param message c2.Message The message to replace.
+     * @lua@param replacement c2.Message The replacement.
+     * @exposed c2.Channel:replace_message
+     */
+    void replace_message(const MessagePtrMut &message,
+                         const MessagePtrMut &replacement);
+    /**
+     * Replace a specific message with a different one.
+     * 
+     * @lua@param message c2.Message The message to replace.
+     * @lua@param replacement c2.Message The replacement.
+     * @lua@param hint number A one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+     * @exposed c2.Channel:replace_message
+     */
+    void replace_message_hint(const MessagePtrMut &message,
+                              const MessagePtrMut &replacement, size_t hint);
+
+    /**
+     * Replace a message at an index with a different one.
+     * 
+     * @lua@param index number A one-based index (from the start) of the message to replace.
+     * @lua@param replacement c2.Message The replacement.
+     * @exposed c2.Channel:replace_message_at
+     */
+    void replace_message_at(size_t index, const MessagePtrMut &replacement);
+
+    /**
+     * Remove all messages in this channel.
+     *
+     * @exposed c2.Channel:clear_messages
+     */
+    void clear_messages();
+
+    /**
+     * Find a message by its ID.
+     *
+     * @lua@param id string
+     * @lua@return c2.Message?
+     * @exposed c2.Channel:find_message_by_id
+     */
+    MessagePtrMut find_message_by_id(const QString &id);
+
+    /**
+     * Check if the channel has any messages.
+     *
+     * @lua@return boolean
+     * @exposed c2.Channel:has_messages
+     */
+    bool has_messages();
+
+    /**
+     * Count the number of messages in this channel.
+     *
+     * @lua@return number
+     * @exposed c2.Channel:count_messages
+     */
+    size_t count_messages();
+
     /**
      * Returns true for twitch channels.
      * Compares the channel Type. Note that enum values aren't guaranteed, just
