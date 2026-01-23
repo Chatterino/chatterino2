@@ -26,6 +26,7 @@
 - Minor: Added Markdown support to user notes. (#6490)
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
 - Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
+- Minor: Added action to reset `/watching`. (#6759)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
 - Bugfix: Expose the "Extra extension IDs" setting on non-Windows systems too. (#6509)
