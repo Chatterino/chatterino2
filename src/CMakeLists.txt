@@ -283,6 +283,8 @@ set(SOURCE_FILES
         controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginMeta.cpp
+        controllers/plugins/PluginMeta.hpp
         controllers/plugins/PluginPermission.cpp
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/SolTypes.cpp

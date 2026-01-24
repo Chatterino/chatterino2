@@ -107,6 +107,8 @@ public:
 protected:
     void unsubscribe(const Subscription &subscription)
     {
+        assertInGuiThread();
+
         for (auto &client : this->clients_)
         {
             if (client.second->unsubscribe(subscription))
@@ -118,6 +120,8 @@ protected:
 
     void subscribe(const Subscription &subscription)
     {
+        assertInGuiThread();
+
         if (this->trySubscribe(subscription))
         {
             return;
@@ -141,6 +145,8 @@ private:
 
     void onConnectionOpen(size_t id)
     {
+        assertInGuiThread();
+
         DebugCount::increase("LiveUpdates connections");
         this->addingClient_ = false;
         this->diag.connectionsOpened.fetch_add(1, std::memory_order_acq_rel);
@@ -164,8 +170,8 @@ private:
             {
                 qCDebug(chatterinoLiveupdates)
                     << "Failed to subscribe to" << last << "on new client.";
-                // TODO: should we try to add a new client here?
-                return;
+                this->pendingSubscriptions_.emplace_back(std::move(last));
+                break;
             }
             DebugCount::decrease("LiveUpdates subscription backlog");
             pendingSubsToTake--;
@@ -173,12 +179,17 @@ private:
 
         if (!this->pendingSubscriptions_.empty())
         {
+            qCDebug(chatterinoLiveupdates)
+                << "Adding another client for "
+                << this->pendingSubscriptions_.size() << "subs";
             this->addClient();
         }
     }
 
     void onConnectionClose(size_t id)
     {
+        assertInGuiThread();
+
         this->addingClient_ = false;
 
         auto it = this->clients_.find(id);
@@ -216,10 +227,14 @@ private:
         {
             qCWarning(chatterinoLiveupdates)
                 << "Retrying after" << id << "failed";
+            auto nSubs = subs.size();
+            DebugCount::increase("LiveUpdates subscription backlog",
+                                 static_cast<int64_t>(nSubs));
             this->pendingSubscriptions_.insert(
                 this->pendingSubscriptions_.end(),
                 std::make_move_iterator(subs.begin()),
                 std::make_move_iterator(subs.end()));
+
             QTimer::singleShot(this->connectBackoff_.next(), this, [this] {
                 this->addClient();
             });
@@ -234,6 +249,8 @@ private:
 
     void addClient()
     {
+        assertInGuiThread();
+
         if (this->addingClient_ || !this->pool_)
         {
             return;

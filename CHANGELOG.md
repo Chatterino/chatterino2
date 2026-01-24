@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add search engine selection for context menu search action. (#6743)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)
 - Minor: Fixed usercard resizing improperly without recent messages. (#6496)
@@ -26,6 +27,7 @@
 - Minor: Added Markdown support to user notes. (#6490)
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
 - Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
+- Minor: Added action to reset `/watching`. (#6759)
 - Minor: Add `/(un)monitor` and `/(un)restrict` commands for moderators. (#6750)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
@@ -65,7 +67,7 @@
 - Dev: Added Qt keyword and warning flags project wide. (#6520)
 - Dev: Added REUSE license checking. (#6659)
 - Def: Fixed compilation error in tests with Clang 21. (#6519)
-- Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308)
+- Dev: The 7TV and BTTV liveupdates now use Boost.Beast's WebSockets. (#6308, #6763)
 - Dev: Fixed compilation warnings on clang-cl. (#6528)
 - Dev: Fixed compilation error in tests with Clang 21. (#6519)
 - Dev: Use CMake's `FetchContent` for RapidJSON, PajladaSignals, PajladaSerialize, and PajladaSettings. (#6560, #6567, #6569)
@@ -95,6 +97,7 @@
 - Dev: Removed unused variables. (#6748)
 - Dev: Updated `miniaudio` to 0.11.24. (#6754)
 - Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
+- Dev: Moved `PluginMeta` to its own file. (#6757)
 
 ## 2.5.4
 
