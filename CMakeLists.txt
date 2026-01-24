@@ -40,6 +40,8 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
 
+set(CHATTERINO_EXTRA_BUILD_STRING "" CACHE STRING "Provide an extra string to show in the about page under the Chatterino version. This string allows the use of Qt's HTML subset.")
+
 set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
 if(CHATTERINO_SANITIZER_SUPPORT)
