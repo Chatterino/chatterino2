@@ -1217,14 +1217,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     {
-        layout.addSubtitle("Search Engine");
+        layout.addSubtitle("Search");
         layout.addDescription(
-            "Search engine which appears when you select text and "
-            "right-click a message. Select a search engine preset from the "
-            "dropdown below, or fill in your custom search engine URL and "
-            "name.");
+            "Search engine which appears when you select text and right-click "
+            "a message. Select a search engine preset from the dropdown below, "
+            "or fill in your custom search engine URL and name.");
         SettingWidget::checkbox("Enable search in right-click context menu",
-                                s.searchEngineEnabled)
+                                s.searchEnabled)
             ->setTooltip(
                 "Allow searching selected text using a search engine from "
                 "the right-click context menu.")
@@ -1233,7 +1232,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         // Preset dropdown
         QStringList presetList = {"DuckDuckGo", "Bing", "Google"};
         auto *presetCombo =
-            layout.addDropdown("Search Engine Preset", presetList,
+            layout.addDropdown("Search engine preset", presetList,
                                "Select a search engine preset");
         presetCombo->setPlaceholderText("Select...");
         presetCombo->setCurrentIndex(-1);
@@ -1242,7 +1241,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         palette.setColor(QPalette::PlaceholderText,
                          QColor(255, 255, 255));  // white
         presetCombo->setPalette(palette);
-        s.searchEngineEnabled.connect([presetCombo](bool value) {
+        s.searchEnabled.connect([presetCombo](bool value) {
             presetCombo->setEnabled(value);
         });
 
@@ -1277,21 +1276,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             });
 
         // URL and Name text inputs
-        auto *urlWidget =
-            SettingWidget::lineEdit("Search Engine URL", s.searchEngineUrl);
-        urlWidget->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([urlWidget](bool value) {
-            urlWidget->setEnabled(value);
-        });
-        urlWidget->addTo(layout);
+        SettingWidget::lineEdit("Search engine URL", s.searchEngineUrl)
+            ->conditionallyEnabledBy(s.searchEnabled)
+            ->addTo(layout);
 
-        auto *nameWidget =
-            SettingWidget::lineEdit("Search Engine Name", s.searchEngineName);
-        nameWidget->setEnabled(s.searchEngineEnabled.getValue());
-        s.searchEngineEnabled.connect([nameWidget](bool value) {
-            nameWidget->setEnabled(value);
-        });
-        nameWidget->addTo(layout);
+        SettingWidget::lineEdit("Search engine name", s.searchEngineName)
+            ->conditionallyEnabledBy(s.searchEnabled)
+            ->addTo(layout);
     }
     layout.addSubtitle("Miscellaneous");
 

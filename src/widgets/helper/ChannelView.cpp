@@ -2712,8 +2712,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     }
 
     // Add search action when text is selected and search feature is enabled
-    if (!this->selection_.isEmpty() &&
-        getSettings()->searchEngineEnabled.getValue())
+    if (!this->selection_.isEmpty() && getSettings()->searchEnabled.getValue())
     {
         QString searchURL = getSettings()->searchEngineUrl.getValue();
         QString searchName = getSettings()->searchEngineName.getValue();
