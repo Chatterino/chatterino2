@@ -151,6 +151,57 @@ function c2.Channel:add_system_message(message) end
 ---@param override_flags? c2.MessageFlag|nil Flags to override the message's flags (some splits might filter for this)
 function c2.Channel:add_message(message, context, override_flags) end
 
+--- Get a list of messages in this channel (starting from the most recent messages).
+--- The snapshot is returned as a usertype that wraps a C++ object.
+---
+---@param n_items number Number of messages to retrieve. This is an upper bound, the actual number of messages returned might be lower.
+---@return c2.Message[]
+function c2.Channel:message_snapshot(n_items) end
+
+--- Get the most recent message. If this channel doesn't have any message, this returns `nil`.
+---
+---@return c2.Message?
+function c2.Channel:last_message() end
+
+--- Replace a specific message with a different one.
+---
+---@param message c2.Message The message to replace.
+---@param replacement c2.Message The replacement.
+function c2.Channel:replace_message(message, replacement) end
+
+--- Replace a specific message with a different one.
+---
+---@param message c2.Message The message to replace.
+---@param replacement c2.Message The replacement.
+---@param hint number A one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+function c2.Channel:replace_message(message, replacement, hint) end
+
+--- Replace a message at an index with a different one.
+---
+---@param index number A one-based index (from the start) of the message to replace.
+---@param replacement c2.Message The replacement.
+function c2.Channel:replace_message_at(index, replacement) end
+
+--- Remove all messages in this channel.
+---
+function c2.Channel:clear_messages() end
+
+--- Find a message by its ID.
+---
+---@param id string
+---@return c2.Message?
+function c2.Channel:find_message_by_id(id) end
+
+--- Check if the channel has any messages.
+---
+---@return boolean
+function c2.Channel:has_messages() end
+
+--- Count the number of messages in this channel.
+---
+---@return number
+function c2.Channel:count_messages() end
+
 --- Returns true for twitch channels.
 --- Compares the channel Type. Note that enum values aren't guaranteed, just
 --- that they are equal to the exposed enum.
