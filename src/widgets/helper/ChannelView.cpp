@@ -2722,10 +2722,24 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             QString actionText =
                 searchName.isEmpty() ? "&Search" : "&Search with " + searchName;
 
+            if (getSettings()->searchIncognito && supportsIncognitoLinks())
+            {
+                actionText += " in private mode";
+            }
+
             menu->addAction(actionText, [this, searchURL] {
                 QString query = this->getSelectedText().trimmed();
                 QString encodedQuery = QUrl::toPercentEncoding(query);
-                QDesktopServices::openUrl(QUrl(searchURL + encodedQuery));
+                QString url = searchURL + encodedQuery;
+
+                if (getSettings()->searchIncognito && supportsIncognitoLinks())
+                {
+                    openLinkIncognito(url);
+                }
+                else
+                {
+                    QDesktopServices::openUrl(QUrl(url));
+                }
             });
         }
     }
