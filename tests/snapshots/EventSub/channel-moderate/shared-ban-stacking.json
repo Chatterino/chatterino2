@@ -244,6 +244,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "frozen": true,
             "id": "",

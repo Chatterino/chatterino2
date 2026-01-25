@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "Application.hpp"
@@ -203,18 +207,6 @@ QString debugTest(const CommandContext &ctx)
         getApp()->getUpdates().checkForUpdates();
         ctx.channel->addSystemMessage(QString("checking for updates"));
     }
-    else if (command == "spellcheck-get-system-dictionaries")
-    {
-#ifdef CHATTERINO_WITH_SPELLCHECK
-        auto dicts = getApp()->getSpellChecker()->getSystemDictionaries();
-        for (const auto &dict : dicts)
-        {
-            ctx.channel->addSystemMessage(QString("system dictionary: %1 at %2")
-                                              .arg(dict.name)
-                                              .arg(dict.path));
-        }
-#endif
-    }
     else if (command == "save-settings")
     {
         ctx.channel->addSystemMessage(u"requesting settings save"_s);
@@ -230,6 +222,19 @@ QString debugTest(const CommandContext &ctx)
             case pajlada::Settings::SettingManager::SaveResult::Skipped:
                 ctx.channel->addSystemMessage(u"setting save skipped"_s);
                 break;
+        }
+    }
+    else if (command == "set-watching")
+    {
+        if (ctx.words.size() < 3)
+        {
+            ctx.channel->addSystemMessage("Missing name");
+            return {};
+        }
+        auto chan = getApp()->getTwitch()->getOrAddChannel(ctx.words.at(2));
+        if (chan != getApp()->getTwitch()->getWatchingChannel().get())
+        {
+            getApp()->getTwitch()->setWatchingChannel(chan);
         }
     }
     else

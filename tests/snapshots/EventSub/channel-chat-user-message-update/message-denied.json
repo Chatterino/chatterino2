@@ -85,6 +85,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "PubSub|AutoMod|EventSub",
             "frozen": true,
             "id": "automod_fc90dc3b-0634-41c3-8365-f40719f076ab",

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Resources.hpp"
 
 #include "debug/AssertInGuiThread.hpp"

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/Prediction.hpp"
 
 #include "Application.hpp"
@@ -276,7 +280,7 @@ QString completePrediction(const CommandContext &ctx)
         return "";
     }
 
-    int targetIndex = 0;
+    size_t targetIndex = 0;
     QString targetName;
     if (hasName)
     {
@@ -285,8 +289,8 @@ QString completePrediction(const CommandContext &ctx)
     else
     {
         bool ok = true;
-        targetIndex = parser.value(indexOption).toInt(&ok);
-        if (!ok || targetIndex <= 0)
+        targetIndex = parser.value(indexOption).toULongLong(&ok);
+        if (!ok || targetIndex == 0)
         {
             ctx.channel->addSystemMessage("Invalid index - " + usage);
             return "";

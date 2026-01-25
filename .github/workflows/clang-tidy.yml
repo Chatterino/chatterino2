@@ -41,11 +41,12 @@ jobs:
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.22.3
+        uses: ZedThree/clang-tidy-review@v0.23.0
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
+          error_action: abort
           exclude: "lib/*,tools/crash-handler/*,mocks/*"
           extra_arguments: "--load=/usr/lib/ClazyClangTidy21.so --load=/usr/lib/chatterino-clang-tidy-module-21.so"
           clang_tidy_version: 21
@@ -67,4 +68,4 @@ jobs:
             curl, unzip
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.22.3
+        uses: ZedThree/clang-tidy-review/upload@v0.23.0

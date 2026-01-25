@@ -69,6 +69,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",

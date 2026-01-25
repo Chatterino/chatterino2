@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/Split.hpp"
 
 #include "Application.hpp"
@@ -1254,19 +1258,6 @@ void Split::showSearch(bool singleChannel)
     }
 
     popup->show();
-}
-
-void Split::reloadChannelAndSubscriberEmotes()
-{
-    auto channel = this->getChannel();
-
-    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-    {
-        twitchChannel->refreshTwitchChannelEmotes(true);
-        twitchChannel->refreshBTTVChannelEmotes(true);
-        twitchChannel->refreshFFZChannelEmotes(true);
-        twitchChannel->refreshSevenTVChannelEmotes(true);
-    }
 }
 
 void Split::reconnect()

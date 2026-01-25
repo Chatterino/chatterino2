@@ -1,8 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/InputHighlighter.hpp"
 
 #include "Application.hpp"
 #include "common/Aliases.hpp"
+#include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Emote.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -45,11 +51,18 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
-    return getApp()
-        ->getAccounts()
-        ->twitch.getCurrent()
-        ->twitchEmote(name)
-        .has_value();
+    if (getApp()
+            ->getAccounts()
+            ->twitch.getCurrent()
+            ->twitchEmote(name)
+            .has_value())
+    {
+        return true;
+    }
+
+    // TODO: Replace this with a link parser variant that doesn't return the parsed data
+    auto link = linkparser::parse(word);
+    return link.has_value();
 }
 
 }  // namespace
@@ -84,19 +97,26 @@ void InputHighlighter::highlightBlock(const QString &text)
     auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
+
+    // skip leading command trigger
+    auto cmdTriggerLen = getApp()->getCommands()->commandTriggerLen(textView);
+    textView = textView.sliced(cmdTriggerLen);
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto it = this->wordRegex.globalMatchView(textView);
 #else
     auto it = this->wordRegex.globalMatch(textView);
 #endif
+
     while (it.hasNext())
     {
         auto match = it.next();
         auto text = match.captured();
         if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
         {
-            this->setFormat(static_cast<int>(match.capturedStart()),
-                            static_cast<int>(text.size()), this->spellFmt);
+            this->setFormat(
+                static_cast<int>(match.capturedStart() + cmdTriggerLen),
+                static_cast<int>(text.size()), this->spellFmt);
         }
     }
 }

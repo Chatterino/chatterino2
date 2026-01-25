@@ -158,6 +158,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ReplyMessage",
             "frozen": false,
             "id": "89c8f200-ae37-4279-909d-5ff4f9ed10a0",

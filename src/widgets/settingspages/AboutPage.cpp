@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/AboutPage.hpp"
 
 #include "common/Common.hpp"
@@ -52,10 +56,17 @@ AboutPage::AboutPage()
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto vbox = versionInfo.emplace<QVBoxLayout>();
-            auto version = Version::instance();
+            const auto &version = Version::instance();
 
-            auto label = vbox.emplace<QLabel>(version.buildString() + "<br>" +
-                                              version.runningString());
+            QString string =
+                version.buildString() % "<br>" % version.runningString();
+
+            if (!version.extraString().isEmpty())
+            {
+                string += "<br>" % version.extraString();
+            }
+
+            auto label = vbox.emplace<QLabel>(string);
             label->setWordWrap(true);
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);

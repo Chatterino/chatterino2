@@ -165,6 +165,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|Subscription",
             "frozen": false,
             "highlightColor": "#64c466ff",
@@ -254,6 +256,8 @@
                         "months!"
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,

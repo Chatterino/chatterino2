@@ -250,6 +250,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -419,6 +421,8 @@
                         "."
                     ]
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "frozen": true,

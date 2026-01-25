@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/Message.hpp"
 
 #include "Application.hpp"
@@ -131,6 +135,8 @@ QJsonObject Message::toJson() const
         twitchBadgeInfos.insert(key, value);
     }
     msg["twitchBadgeInfos"_L1] = twitchBadgeInfos;
+
+    msg["externalBadges"_L1] = QJsonArray::fromStringList(this->externalBadges);
 
     if (this->highlightColor)
     {

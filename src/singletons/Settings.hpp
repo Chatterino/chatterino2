@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -306,6 +310,22 @@ public:
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
 
+    /// Specifies whether the search functionality should be enabled
+    BoolSetting searchEnabled = {
+        "/behaviour/search/enabled",
+        false,
+    };
+    /// The URL of the search engine
+    QStringSetting searchEngineUrl = {
+        "/behaviour/search/engineUrl",
+        "",
+    };
+    /// The name of the search engine
+    QStringSetting searchEngineName = {
+        "/behaviour/search/engineName",
+        "",
+    };
+
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
         UsernameRightClickBehavior::Mention,
@@ -357,8 +377,8 @@ public:
         "/behaviour/spellChecking/enabled",
         false,
     };
-    QStringSetting spellCheckingFallback = {
-        "/behaviour/spellChecking/systemFallback",
+    QStringSetting spellCheckingDefaultDictionary = {
+        "/behaviour/spellChecking/defaultDictionary",
         "",
     };
 

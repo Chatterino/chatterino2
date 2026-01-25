@@ -142,6 +142,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|EventSub|ModerationAction",
             "frozen": true,
             "id": "",

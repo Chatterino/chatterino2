@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "controllers/accounts/AccountController.hpp"

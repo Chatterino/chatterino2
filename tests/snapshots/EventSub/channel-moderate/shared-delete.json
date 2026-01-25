@@ -188,6 +188,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|EventSub|ModerationAction",
             "frozen": true,
             "id": "",

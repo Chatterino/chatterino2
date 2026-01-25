@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/highlights/HighlightController.hpp"
 
 #include "Application.hpp"
@@ -437,6 +441,12 @@ HighlightController::HighlightController(Settings &settings,
             this->rebuildChecks(settings);
         }));
 
+    this->signalHolder_.managedConnect(
+        accounts->twitch.currentUserNameChanged, [this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because user name changed";
+            this->rebuildChecks(settings);
+        });
     this->rebuildChecks(settings);
 }
 

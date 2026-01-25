@@ -71,6 +71,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -187,6 +189,8 @@
                     "type": "CircularImageElement",
                     "url": ""
                 }
+            ],
+            "externalBadges": [
             ],
             "flags": "Collapsed",
             "frozen": false,

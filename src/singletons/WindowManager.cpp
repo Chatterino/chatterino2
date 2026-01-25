@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/WindowManager.hpp"
 
 #include "Application.hpp"
@@ -135,6 +139,7 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->updateWordTypeMaskListener.add(settings.showBadgesVanity);
     this->updateWordTypeMaskListener.add(settings.showBadgesChatterino);
     this->updateWordTypeMaskListener.add(settings.showBadgesFfz);
+    this->updateWordTypeMaskListener.add(settings.showBadgesBttv);
     this->updateWordTypeMaskListener.add(settings.showBadgesSevenTV);
     this->updateWordTypeMaskListener.add(settings.enableEmoteImages);
     this->updateWordTypeMaskListener.add(settings.lowercaseDomains);

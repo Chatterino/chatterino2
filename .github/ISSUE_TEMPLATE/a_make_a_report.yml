@@ -42,7 +42,7 @@ body:
       description: While optional, it's highly encouraged to include screenshots or videos to illustrate what you mean.
       placeholder: You can upload them using the text editor's dedicated button.
 
-  - type: input
+  - type: textarea
     id: versions
     validations:
       required: true

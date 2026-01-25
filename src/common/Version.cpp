@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Version.hpp"
 
 #include "common/Literals.hpp"
@@ -36,6 +40,7 @@ Version::Version()
 
     this->generateBuildString();
     this->generateRunningString();
+    this->generateExtraString();
 
 #ifdef Q_OS_WIN
     // keep in sync with .CI/chatterino-installer.iss
@@ -119,6 +124,11 @@ const QString &Version::runningString() const
     return this->runningString_;
 }
 
+const QString &Version::extraString() const
+{
+    return this->extraString_;
+}
+
 void Version::generateBuildString()
 {
     // e.g. Chatterino 2.3.5 or Chatterino Nightly 2.3.5
@@ -169,6 +179,19 @@ void Version::generateRunningString()
 
     this->runningString_ = s;
 }
+
+#define STRINGIFY(x) #x
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define STRINGIFY2(x) STRINGIFY(x)
+
+void Version::generateExtraString()
+{
+    this->extraString_ =
+        QStringLiteral(STRINGIFY2(CHATTERINO_EXTRA_BUILD_STRING)).trimmed();
+}
+
+#undef STRINGIFY2
+#undef STRINGIFY
 
 #ifdef Q_OS_WIN
 const std::wstring &Version::appUserModelID() const

@@ -81,6 +81,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "BrowserExtension.hpp"
 #include "common/Args.hpp"
 #include "common/Env.hpp"
