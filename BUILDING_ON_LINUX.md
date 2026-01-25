@@ -21,6 +21,7 @@ sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev
 ```
 
 ### Arch Linux
+
 ```sh
 sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-svg boost libnotify rapidjson pkgconf cmake hunspell
 ```
@@ -30,11 +31,13 @@ If you use Wayland, you will also need to ensure `qt6-wayland` is installed.
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
 ### openSUSE
+
 ```sh
 sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-file-utils libappstream-glib8 hunspell ninja doxygen qt6-tools-devel
 ```
 
 ### Gentoo Linux
+
 ```sh
 doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
 ```
