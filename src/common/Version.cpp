@@ -167,11 +167,6 @@ void Version::generateRunningString()
     auto s = QString("Running on %1, kernel: %2")
                  .arg(QSysInfo::prettyProductName(), QSysInfo::kernelVersion());
 
-    if (this->isFlatpak())
-    {
-        s += ", running from Flatpak";
-    }
-
     if (!this->isSupportedOS())
     {
         s += " (unsupported OS)";
