@@ -2725,7 +2725,16 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             menu->addAction(actionText, [this, searchURL] {
                 QString query = this->getSelectedText().trimmed();
                 QString encodedQuery = QUrl::toPercentEncoding(query);
-                QDesktopServices::openUrl(QUrl(searchURL + encodedQuery));
+                QString url = searchURL + encodedQuery;
+
+                if (getSettings()->searchIncognito && supportsIncognitoLinks())
+                {
+                    openLinkIncognito(url);
+                }
+                else
+                {
+                    QDesktopServices::openUrl(QUrl(url));
+                }
             });
         }
     }
