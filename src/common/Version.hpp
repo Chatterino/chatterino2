@@ -60,6 +60,9 @@ public:
     // Returns a string about the current running system
     const QString &runningString() const;
 
+    // Returns an extra string about this specific build
+    const QString &extraString() const;
+
 #ifdef Q_OS_WIN
     /// Chatterino's App ID on Windows
     ///
@@ -84,6 +87,10 @@ private:
     QString runningString_;
     // Generate a running string (e.g. Running on Arch Linux, kernel 5.14.3) and store it in runningString_ for future use
     void generateRunningString();
+
+    QString extraString_;
+    // Generate an extra string (e.g. "Built for Fedora 42.<br>Report bugs <a href...>here</a>")
+    void generateExtraString();
 
 #ifdef Q_OS_WIN
     std::wstring appUserModelID_;
