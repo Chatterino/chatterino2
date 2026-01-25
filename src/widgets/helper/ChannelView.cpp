@@ -2722,6 +2722,11 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             QString actionText =
                 searchName.isEmpty() ? "&Search" : "&Search with " + searchName;
 
+            if (getSettings()->searchIncognito && supportsIncognitoLinks())
+            {
+                actionText += " in private mode";
+            }
+
             menu->addAction(actionText, [this, searchURL] {
                 QString query = this->getSelectedText().trimmed();
                 QString encodedQuery = QUrl::toPercentEncoding(query);
