@@ -20,16 +20,6 @@ The built binary should be exportable from the final image & able to run on your
 sudo apt install qt6-base-dev qt6-svg-dev qt6-image-formats-plugins libboost-dev libnotify-dev libssl-dev libsecret-1-dev pkg-config cmake g++ git hunspell
 ```
 
-### OpenSuse
-```sh
-sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-file-utils libappstream-glib8 hunspell ninja doxygen qt6-tools-devel
-```
-
-### gentoo
-```sh
-doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
-```
-
 ### Arch Linux
 ```sh
 sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-svg boost libnotify rapidjson pkgconf cmake hunspell
@@ -38,6 +28,16 @@ sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats q
 If you use Wayland, you will also need to ensure `qt6-wayland` is installed.
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
+
+### openSUSE
+```sh
+sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-file-utils libappstream-glib8 hunspell ninja doxygen qt6-tools-devel
+```
+
+### Gentoo Linux
+```sh
+doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
+```
 
 ### Fedora 39 and above
 
