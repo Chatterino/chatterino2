@@ -86,6 +86,7 @@
 - Dev: Added Clazy linting in CI. (#6623)
 - Dev: Added custom clang-tidy module linting in CI. (#6626)
 - Dev: CMake option `USE_ALTERNATE_LINKER` now errors if the given linker can't be found. (#6692)
+- Dev: Added a CMake option `CHATTERINO_EXTRA_BUILD_STRING` which allows the packager to provide an optional freestanding Qt-HTML string that shows up in the About page under the Chatterino version. (#6766)
 - Dev: Enable C++ 23. (#6693)
 - Dev: Prefer `std::expected` over `nonstd::expected_lite`. (#6693)
 - Dev: Moved Twitch PubSub to liveupdates. (#6638)
