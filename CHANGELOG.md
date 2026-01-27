@@ -29,6 +29,7 @@
 - Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
 - Minor: Added action to reset `/watching`. (#6759)
 - Minor: Removed messaging about running flatpak. This is already apparent in the newer Flatpak runtimes. (#6768)
+- Minor: Add `/(un)monitor` and `/(un)restrict` commands for moderators. (#6750)
 - Bugfix: Fixed context menu hotkeys not working on macOS. (#6778)
 - Bugfix: Moderation checks now include the lead moderator badge. (#6642)
 - Bugfix: Fixed lead moderator badges not being filtered by the `Channel` badge setting. (#6665)
