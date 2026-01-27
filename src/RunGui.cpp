@@ -42,6 +42,9 @@
 #    include "corefoundation/CFBundle.h"
 #endif
 
+// Forward declaration (Qt doesn't declare this in headers)
+extern void qt_set_sequence_auto_mnemonic(bool b);
+
 namespace chatterino {
 namespace {
 void installCustomPalette()
@@ -101,6 +104,9 @@ void initQt()
     // On the Mac/Cocoa platform this attribute is enabled by default
     // We override it to ensure shortcuts show in context menus on that platform
     QApplication::setAttribute(Qt::AA_DontShowShortcutsInContextMenus, false);
+
+    // Enable mnemonics (menu hotkeys) on macOS - they are disabled by default
+    qt_set_sequence_auto_mnemonic(true);
 #endif
 
     installCustomPalette();
