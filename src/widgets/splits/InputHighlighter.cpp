@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/LinkParser.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
@@ -15,6 +16,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QTextCharFormat>
 #include <QTextDocument>
@@ -25,6 +27,7 @@ using namespace chatterino;
 
 bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 {
+    qCDebug(chatterinoSpellcheck) << "isIgnoredWord" << word;
     EmoteName name{word};
     if (twitch)
     {
@@ -39,7 +42,16 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
             return true;
         }
 
-        if (twitch->accessChatters()->contains(word))
+        QString chatter;
+        // skip '@' to allow @chatter
+        if (word.startsWith('@')) {
+            chatter = word.sliced(1);
+        } else {
+            chatter = word;
+        }
+        if (twitch->accessChatters()->contains(chatter) ||
+            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
+             chatter.toLower() == twitch->getName().toLower()))
         {
             return true;
         }
@@ -96,6 +108,10 @@ void InputHighlighter::highlightBlock(const QString &text)
     }
     auto *channel = this->channel.lock().get();
 
+    QRegularExpression outerRegex(R"(\S+)");
+    // maybe change to  R"(\p{L}+)" to allow for more/any seperators in words (would fix #6762)
+    QRegularExpression innerRegex = this->wordRegex;
+
     QStringView textView = text;
 
     // skip leading command trigger
@@ -103,20 +119,42 @@ void InputHighlighter::highlightBlock(const QString &text)
     textView = textView.sliced(cmdTriggerLen);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto it = this->wordRegex.globalMatchView(textView);
+    auto outerIt = outerRegex.globalMatchView(textView);
 #else
-    auto it = this->wordRegex.globalMatch(textView);
+    auto outerIt = outerRegex.globalMatch(textView);
 #endif
 
-    while (it.hasNext())
+    // iterate over strings of any non-whitespace characters
+    while (outerIt.hasNext())
     {
-        auto match = it.next();
-        auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
+        auto outerMatch = outerIt.next();
+        auto outerText = outerMatch.captured();
+        if (!isIgnoredWord(channel, outerText))
         {
-            this->setFormat(
-                static_cast<int>(match.capturedStart() + cmdTriggerLen),
-                static_cast<int>(text.size()), this->spellFmt);
+            {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+                auto innerIt = innerRegex.globalMatchView(outerText);
+#else
+                auto innerIt = innerRegex.globalMatch(outerText);
+#endif
+
+                // iterate over words that match the word regex
+                while (innerIt.hasNext())
+                {
+                    auto innerMatch = innerIt.next();
+                    auto innerText = innerMatch.captured();
+
+                    qCDebug(chatterinoSpellcheck) << "check" << innerText;
+                    if (!this->spellChecker.check(innerText))
+                    {
+                        this->setFormat(
+                            static_cast<int>(cmdTriggerLen +
+                                             outerMatch.capturedStart() +
+                                             innerMatch.capturedStart()),
+                            static_cast<int>(innerText.size()), this->spellFmt);
+                    }
+                }
+            }
         }
     }
 }
