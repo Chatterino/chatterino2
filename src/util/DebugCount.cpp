@@ -42,7 +42,7 @@ constexpr bool isBytes(DebugObject target)
 
 namespace chatterino {
 
-void DebugCount::set(DebugObject target, const int64_t &amount)
+void DebugCount::set(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 
@@ -50,7 +50,7 @@ void DebugCount::set(DebugObject target, const int64_t &amount)
     it.value = amount;
 }
 
-void DebugCount::increase(DebugObject target, const int64_t &amount)
+void DebugCount::increase(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 
@@ -58,7 +58,7 @@ void DebugCount::increase(DebugObject target, const int64_t &amount)
     it.value += amount;
 }
 
-void DebugCount::decrease(DebugObject target, const int64_t &amount)
+void DebugCount::decrease(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 

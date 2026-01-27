@@ -58,15 +58,15 @@ enum class DebugObject : size_t {
 class DebugCount
 {
 public:
-    static void set(DebugObject target, const int64_t &amount);
+    static void set(DebugObject target, int64_t amount);
 
-    static void increase(DebugObject target, const int64_t &amount);
+    static void increase(DebugObject target, int64_t amount);
     static void increase(DebugObject target)
     {
         DebugCount::increase(target, 1);
     }
 
-    static void decrease(DebugObject target, const int64_t &amount);
+    static void decrease(DebugObject target, int64_t amount);
     static void decrease(DebugObject target)
     {
         DebugCount::decrease(target, 1);
