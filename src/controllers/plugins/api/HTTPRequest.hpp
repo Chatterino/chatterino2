@@ -27,8 +27,7 @@ namespace chatterino::lua::api {
 /**
  * @lua@class c2.HTTPRequest
  */
-class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>,
-                    public AutoDebugCount<DebugObject::LuaHTTPRequest>
+class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 {
     // This type is private to prevent the accidental construction of HTTPRequest without a shared pointer
     struct ConstructorAccessTag {
@@ -36,11 +35,11 @@ class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>,
 
 public:
     HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req);
-    HTTPRequest(HTTPRequest &&other) = default;
+    HTTPRequest(HTTPRequest &&other) = default;  // TODO: this breaks DebugCount
     HTTPRequest &operator=(HTTPRequest &&) = default;
     HTTPRequest &operator=(HTTPRequest &) = delete;
     HTTPRequest(const HTTPRequest &other) = delete;
-    ~HTTPRequest() = default;
+    ~HTTPRequest();
 
 private:
     NetworkRequest req_;

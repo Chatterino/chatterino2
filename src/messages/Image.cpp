@@ -36,6 +36,7 @@ namespace chatterino::detail {
 
 Frames::Frames()
 {
+    DebugCount::increase(DebugObject::Image);
 }
 
 Frames::Frames(QList<Frame> &&frames)
@@ -50,6 +51,7 @@ Frames::Frames(QList<Frame> &&frames)
         return;
     }
 
+    DebugCount::increase(DebugObject::Image);
     if (!this->empty())
     {
         DebugCount::increase(DebugObject::LoadedImage);
@@ -90,6 +92,7 @@ Frames::Frames(QList<Frame> &&frames)
 Frames::~Frames()
 {
     assertInGuiThread();
+    DebugCount::decrease(DebugObject::Image);
     if (!this->empty())
     {
         DebugCount::decrease(DebugObject::LoadedImage);

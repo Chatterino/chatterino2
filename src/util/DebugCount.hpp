@@ -75,34 +75,6 @@ public:
     static QString getDebugText();
 };
 
-template <DebugObject target>
-class AutoDebugCount
-{
-public:
-    AutoDebugCount()
-    {
-        DebugCount::increase(target);
-    }
-
-    ~AutoDebugCount()
-    {
-        DebugCount::decrease(target);
-    }
-
-    AutoDebugCount(const AutoDebugCount & /*unused*/)
-    {
-        DebugCount::increase(target);
-    }
-
-    AutoDebugCount(AutoDebugCount && /*unused*/) noexcept
-    {
-        DebugCount::increase(target);
-    }
-
-    AutoDebugCount &operator=(const AutoDebugCount & /*unused*/) = default;
-    AutoDebugCount &operator=(AutoDebugCount &&) = default;
-};
-
 }  // namespace chatterino
 template <>
 constexpr magic_enum::customize::customize_t

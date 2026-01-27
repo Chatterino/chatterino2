@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "util/DebugCount.hpp"
-
 #include <boost/signals2.hpp>
 #include <QString>
 
@@ -17,7 +15,7 @@ class QJsonObject;
 namespace chatterino {
 struct Message;
 
-class MessageThread : public AutoDebugCount<DebugObject::MessageThread>
+class MessageThread
 {
 public:
     enum class Subscription : uint8_t {
@@ -27,6 +25,7 @@ public:
     };
 
     MessageThread(std::shared_ptr<const Message> rootMessage);
+    ~MessageThread();
 
     void addToThread(const std::shared_ptr<const Message> &message);
     void addToThread(const std::weak_ptr<const Message> &message);

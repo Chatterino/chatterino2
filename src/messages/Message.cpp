@@ -25,10 +25,12 @@ using namespace literals;
 Message::Message()
     : parseTime(QTime::currentTime())
 {
+    DebugCount::increase(DebugObject::Message);
 }
 
 Message::~Message()
 {
+    DebugCount::decrease(DebugObject::Message);
 }
 
 ScrollbarHighlight Message::getScrollBarHighlight() const

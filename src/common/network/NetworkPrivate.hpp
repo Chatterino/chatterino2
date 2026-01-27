@@ -30,11 +30,11 @@ Q_SIGNALS:
     void requestUrl();
 };
 
-class NetworkData : public AutoDebugCount<DebugObject::NetworkData>
+class NetworkData
 {
 public:
-    NetworkData() = default;
-    ~NetworkData() = default;
+    NetworkData();
+    ~NetworkData();
     NetworkData(const NetworkData &) = delete;
     NetworkData(NetworkData &&) = delete;
     NetworkData &operator=(const NetworkData &) = delete;

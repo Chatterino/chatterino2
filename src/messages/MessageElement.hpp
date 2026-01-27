@@ -163,7 +163,7 @@ enum class MessageElementFlag : int64_t {
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-class MessageElement : public AutoDebugCount<DebugObject::MessageElement>
+class MessageElement
 {
 public:
     virtual ~MessageElement();

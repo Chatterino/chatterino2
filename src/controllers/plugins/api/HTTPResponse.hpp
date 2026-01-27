@@ -5,7 +5,6 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkResult.hpp"
-#    include "util/DebugCount.hpp"
 
 #    include <lua.h>
 #    include <sol/sol.hpp>
@@ -22,7 +21,7 @@ namespace chatterino::lua::api {
 /**
  * @lua@class c2.HTTPResponse
  */
-class HTTPResponse : AutoDebugCount<DebugObject::LuaHTTPResponse>
+class HTTPResponse
 {
     NetworkResult result_;
 

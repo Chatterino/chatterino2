@@ -7,7 +7,6 @@
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
-#include "util/DebugCount.hpp"
 
 #include <QPixmap>
 
@@ -42,11 +41,11 @@ struct MessagePaintResult {
     bool hasAnimatedElements = false;
 };
 
-class MessageLayout : public AutoDebugCount<DebugObject::MessageLayout>
+class MessageLayout
 {
 public:
     MessageLayout(MessagePtr message_);
-    ~MessageLayout() = default;
+    ~MessageLayout();
 
     MessageLayout(const MessageLayout &) = delete;
     MessageLayout &operator=(const MessageLayout &) = delete;

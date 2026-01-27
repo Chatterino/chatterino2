@@ -41,6 +41,12 @@ QColor blendColors(const QColor &base, const QColor &apply)
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
 {
+    DebugCount::increase(DebugObject::MessageLayout);
+}
+
+MessageLayout::~MessageLayout()
+{
+    DebugCount::decrease(DebugObject::MessageLayout);
 }
 
 const Message *MessageLayout::getMessage()

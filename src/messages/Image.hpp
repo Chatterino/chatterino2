@@ -35,7 +35,7 @@ struct Frame {
     int duration;
 };
 
-class Frames : public AutoDebugCount<DebugObject::Image>
+class Frames
 {
 public:
     Frames();

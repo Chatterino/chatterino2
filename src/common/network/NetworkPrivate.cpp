@@ -103,6 +103,16 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 
 namespace chatterino {
 
+NetworkData::NetworkData()
+{
+    DebugCount::increase(DebugObject::NetworkData);
+}
+
+NetworkData::~NetworkData()
+{
+    DebugCount::decrease(DebugObject::NetworkData);
+}
+
 QString NetworkData::getHash()
 {
     if (this->hash_.isEmpty())

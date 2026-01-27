@@ -272,6 +272,12 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+    DebugCount::increase(DebugObject::BaseWindow);
+}
+
+BaseWindow::~BaseWindow()
+{
+    DebugCount::decrease(DebugObject::BaseWindow);
 }
 
 void BaseWindow::setInitialBounds(QRect bounds, widgets::BoundsChecking mode)

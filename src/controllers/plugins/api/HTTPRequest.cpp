@@ -182,6 +182,12 @@ HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
                          NetworkRequest req)
     : req_(std::move(req))
 {
+    DebugCount::increase(DebugObject::LuaHTTPRequest);
+}
+
+HTTPRequest::~HTTPRequest()
+{
+    DebugCount::decrease(DebugObject::LuaHTTPRequest);
 }
 
 QString HTTPRequest::to_string()

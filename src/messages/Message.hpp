@@ -28,7 +28,7 @@ class ScrollbarHighlight;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 using MessagePtrMut = std::shared_ptr<Message>;
-struct Message : public AutoDebugCount<DebugObject::Message> {
+struct Message {
     Message();
     ~Message();
 
