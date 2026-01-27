@@ -43,6 +43,7 @@
 #endif
 
 // Forward declaration (Qt doesn't declare this in headers)
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern void qt_set_sequence_auto_mnemonic(bool b);
 
 namespace chatterino {
