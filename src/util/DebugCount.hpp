@@ -76,6 +76,7 @@ public:
 };
 
 }  // namespace chatterino
+
 template <>
 constexpr magic_enum::customize::customize_t
     magic_enum::customize::enum_name<chatterino::DebugObject>(
