@@ -69,12 +69,24 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 
 namespace chatterino {
 
+namespace inputhighlight::detail {
+
+// FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
+QRegularExpression wordRegex()
+{
+    static QRegularExpression regex{
+        R"(\p{L}(?:\P{Z}+\p{L}+)*)",
+        QRegularExpression::PatternOption::UseUnicodePropertiesOption,
+    };
+    return regex;
+}
+
+}  // namespace inputhighlight::detail
+
 InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
-    // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
-    , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
-                QRegularExpression::PatternOption::UseUnicodePropertiesOption)
+    , wordRegex(inputhighlight::detail::wordRegex())
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     this->spellFmt.setUnderlineColor(Qt::red);
@@ -88,12 +100,36 @@ void InputHighlighter::setChannel(const std::shared_ptr<Channel> &channel)
     this->rehighlight();
 }
 
+std::vector<QString> InputHighlighter::getSpellCheckedWords(const QString &text)
+{
+    std::vector<QString> words;
+    this->visitWords(text, [&](const QString &word, qsizetype /*start*/,
+                               qsizetype /*count*/) {
+        words.emplace_back(word);
+    });
+    return words;
+}
+
 void InputHighlighter::highlightBlock(const QString &text)
 {
     if (!this->spellChecker.isLoaded())
     {
         return;
     }
+    this->visitWords(
+        text, [&](const QString &word, qsizetype start, qsizetype count) {
+            if (!this->spellChecker.check(word))
+            {
+                this->setFormat(static_cast<int>(start),
+                                static_cast<int>(count), this->spellFmt);
+            }
+        });
+}
+
+void InputHighlighter::visitWords(
+    const QString &text,
+    std::invocable<const QString &, qsizetype, qsizetype> auto &&cb)
+{
     auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
@@ -112,11 +148,10 @@ void InputHighlighter::highlightBlock(const QString &text)
     {
         auto match = it.next();
         auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
+        if (!isIgnoredWord(channel, text))
         {
-            this->setFormat(
-                static_cast<int>(match.capturedStart() + cmdTriggerLen),
-                static_cast<int>(text.size()), this->spellFmt);
+            cb(text, static_cast<int>(match.capturedStart() + cmdTriggerLen),
+               static_cast<int>(text.size()));
         }
     }
 }
