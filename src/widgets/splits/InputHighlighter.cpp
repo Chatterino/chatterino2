@@ -90,6 +90,7 @@ InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
     , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
                 QRegularExpression::PatternOption::UseUnicodePropertiesOption)
+    , tokenRegex(R"(\S+)")
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     this->spellFmt.setUnderlineColor(Qt::red);
@@ -111,10 +112,6 @@ void InputHighlighter::highlightBlock(const QString &text)
     }
     auto *channel = this->channel.lock().get();
 
-    QRegularExpression outerRegex(R"(\S+)");
-    // maybe change to  R"(\p{L}+)" to allow for more/any seperators in words (would fix #6762)
-    QRegularExpression innerRegex = this->wordRegex;
-
     QStringView textView = text;
 
     // skip leading command trigger
@@ -122,41 +119,39 @@ void InputHighlighter::highlightBlock(const QString &text)
     textView = textView.sliced(cmdTriggerLen);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto outerIt = outerRegex.globalMatchView(textView);
+    auto tokenIt = this->tokenRegex.globalMatchView(textView);
 #else
-    auto outerIt = outerRegex.globalMatch(textView);
+    auto tokenIt = this->tokenRegex.globalMatch(textView);
 #endif
 
-    // iterate over strings of any non-whitespace characters
-    while (outerIt.hasNext())
+    // iterate over whitespace-delimited tokens
+    while (tokenIt.hasNext())
     {
-        auto outerMatch = outerIt.next();
-        auto outerText = outerMatch.captured();
-        if (isIgnoredWord(channel, outerText))
+        auto tokenMatch = tokenIt.next();
+        auto token = tokenMatch.captured();
+        if (isIgnoredWord(channel, token))
         {
             continue;
         }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-        auto innerIt = innerRegex.globalMatchView(outerText);
+        auto wordIt = this->wordRegex.globalMatchView(token);
 #else
-        auto innerIt = innerRegex.globalMatch(outerText);
+        auto wordIt = this->wordRegex.globalMatch(token);
 #endif
 
-        // iterate over words that match the word regex
-        while (innerIt.hasNext())
+        while (wordIt.hasNext())
         {
-            auto innerMatch = innerIt.next();
-            auto innerText = innerMatch.captured();
+            auto wordMatch = wordIt.next();
+            auto word = wordMatch.captured();
 
-            qCDebug(chatterinoSpellcheck) << "check" << innerText;
-            if (!this->spellChecker.check(innerText))
+            qCDebug(chatterinoSpellcheck) << "check" << word;
+            if (!this->spellChecker.check(word))
             {
                 this->setFormat(static_cast<int>(cmdTriggerLen +
-                                                 outerMatch.capturedStart() +
-                                                 innerMatch.capturedStart()),
-                                static_cast<int>(innerText.size()),
-                                this->spellFmt);
+                                                 tokenMatch.capturedStart() +
+                                                 wordMatch.capturedStart()),
+                                static_cast<int>(word.size()), this->spellFmt);
             }
         }
     }

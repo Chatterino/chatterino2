@@ -42,6 +42,7 @@ private:
     std::weak_ptr<TwitchChannel> channel;
 
     QRegularExpression wordRegex;
+    QRegularExpression tokenRegex;
 };
 
 }  // namespace chatterino
