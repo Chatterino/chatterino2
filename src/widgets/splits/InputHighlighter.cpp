@@ -15,6 +15,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QTextCharFormat>
 #include <QTextDocument>
@@ -39,7 +40,19 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
             return true;
         }
 
-        if (twitch->accessChatters()->contains(word))
+        QString chatter;
+        // skip '@' to allow @chatter
+        if (word.startsWith('@'))
+        {
+            chatter = word.sliced(1);
+        }
+        else
+        {
+            chatter = word;
+        }
+        if (twitch->accessChatters()->contains(chatter) ||
+            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
+             chatter.toLower() == twitch->getName().toLower()))
         {
             return true;
         }
@@ -75,6 +88,7 @@ InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
     , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
                 QRegularExpression::PatternOption::UseUnicodePropertiesOption)
+    , tokenRegex(R"(\S+)")
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     this->spellFmt.setUnderlineColor(Qt::red);
@@ -103,20 +117,39 @@ void InputHighlighter::highlightBlock(const QString &text)
     textView = textView.sliced(cmdTriggerLen);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto it = this->wordRegex.globalMatchView(textView);
+    auto tokenIt = this->tokenRegex.globalMatchView(textView);
 #else
-    auto it = this->wordRegex.globalMatch(textView);
+    auto tokenIt = this->tokenRegex.globalMatch(textView);
 #endif
 
-    while (it.hasNext())
+    // iterate over whitespace-delimited tokens
+    while (tokenIt.hasNext())
     {
-        auto match = it.next();
-        auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
+        auto tokenMatch = tokenIt.next();
+        auto token = tokenMatch.captured();
+        if (isIgnoredWord(channel, token))
         {
-            this->setFormat(
-                static_cast<int>(match.capturedStart() + cmdTriggerLen),
-                static_cast<int>(text.size()), this->spellFmt);
+            continue;
+        }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        auto wordIt = this->wordRegex.globalMatchView(token);
+#else
+        auto wordIt = this->wordRegex.globalMatch(token);
+#endif
+
+        while (wordIt.hasNext())
+        {
+            auto wordMatch = wordIt.next();
+            auto word = wordMatch.captured();
+
+            if (!this->spellChecker.check(word))
+            {
+                this->setFormat(static_cast<int>(cmdTriggerLen +
+                                                 tokenMatch.capturedStart() +
+                                                 wordMatch.capturedStart()),
+                                static_cast<int>(word.size()), this->spellFmt);
+            }
         }
     }
 }
