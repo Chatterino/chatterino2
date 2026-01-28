@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "common/LinkParser.hpp"
-#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
@@ -27,7 +26,6 @@ using namespace chatterino;
 
 bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 {
-    qCDebug(chatterinoSpellcheck) << "isIgnoredWord" << word;
     EmoteName name{word};
     if (twitch)
     {
@@ -145,7 +143,6 @@ void InputHighlighter::highlightBlock(const QString &text)
             auto wordMatch = wordIt.next();
             auto word = wordMatch.captured();
 
-            qCDebug(chatterinoSpellcheck) << "check" << word;
             if (!this->spellChecker.check(word))
             {
                 this->setFormat(static_cast<int>(cmdTriggerLen +
