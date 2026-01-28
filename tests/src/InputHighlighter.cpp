@@ -24,6 +24,8 @@
 #include <QString>
 #include <QStringBuilder>
 
+#include <ranges>
+
 using namespace chatterino;
 using namespace Qt::Literals;
 
@@ -251,6 +253,8 @@ TEST(InputHighlight, wordRegex)
         {.input = u"123kappa123", .words = {u"kappa"}},
         {.input = u"123kappa", .words = {u"kappa"}},
         {.input = u"kappa123", .words = {u"kappa"}},
+        {.input = u"abc @foo bar@baz@", .words = {u"abc", u"foo", u"bar@baz"}},
+        {.input = u"1234567 word a123", .words = {u"word", u"a"}},
     };
 
     auto re = inputhighlight::detail::wordRegex();
