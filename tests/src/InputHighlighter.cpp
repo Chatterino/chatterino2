@@ -24,8 +24,6 @@
 #include <QString>
 #include <QStringBuilder>
 
-#include <ranges>
-
 using namespace chatterino;
 using namespace Qt::Literals;
 
@@ -226,10 +224,11 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
     SpellChecker nullSpellChecker;
     InputHighlighter highlighter(nullSpellChecker, nullptr);
     highlighter.setChannel(this->channel);
-    for (const auto &[idx, c] : cases | std::views::enumerate)
+    for (size_t i = 0; i < cases.size(); i++)
     {
+        const auto &c = cases[i];
         auto got = highlighter.getSpellCheckedWords(c.input);
-        ASSERT_EQ(got, c.words) << idx;
+        ASSERT_EQ(got, c.words) << "index=" << i;
     }
 }
 
@@ -258,14 +257,15 @@ TEST(InputHighlight, wordRegex)
     };
 
     auto re = inputhighlight::detail::wordRegex();
-    for (const auto &[idx, c] : cases | std::views::enumerate)
+    for (size_t i = 0; i < cases.size(); i++)
     {
+        const auto &c = cases[i];
         std::vector<QStringView> got;
         auto match = re.globalMatchView(c.input);
         while (match.hasNext())
         {
             got.emplace_back(match.next().capturedView());
         }
-        ASSERT_EQ(got, c.words) << idx;
+        ASSERT_EQ(got, c.words) << "index=" << i;
     }
 }
