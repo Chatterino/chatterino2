@@ -101,6 +101,7 @@
 - Dev: Updated prettier version to 3.8.1 and migrated away from using an unmaintained GH Action, instead relying on `npx`. (#6769)
 - Dev: Updated `miniaudio` to 0.11.24. (#6754)
 - Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
+- Dev: Refactored `DebugCount`. (#6753)
 - Dev: Moved `PluginMeta` to its own file. (#6757)
 
 ## 2.5.4

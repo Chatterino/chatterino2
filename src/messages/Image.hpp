@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "util/DebugCount.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>

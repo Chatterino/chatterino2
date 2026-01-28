@@ -129,7 +129,7 @@ protected:
 
         this->addClient();
         this->pendingSubscriptions_.emplace_back(subscription);
-        DebugCount::increase("LiveUpdates subscription backlog");
+        DebugCount::increase(DebugObject::LiveUpdatesSubscriptionBacklog);
     }
 
     const std::unordered_map<size_t, std::shared_ptr<Client>> &clients() const
@@ -147,7 +147,7 @@ private:
     {
         assertInGuiThread();
 
-        DebugCount::increase("LiveUpdates connections");
+        DebugCount::increase(DebugObject::LiveUpdatesConnection);
         this->addingClient_ = false;
         this->diag.connectionsOpened.fetch_add(1, std::memory_order_acq_rel);
 
@@ -173,7 +173,7 @@ private:
                 this->pendingSubscriptions_.emplace_back(std::move(last));
                 break;
             }
-            DebugCount::decrease("LiveUpdates subscription backlog");
+            DebugCount::decrease(DebugObject::LiveUpdatesSubscriptionBacklog);
             pendingSubsToTake--;
         }
 
@@ -200,7 +200,7 @@ private:
             return;
         }
 
-        DebugCount::decrease("LiveUpdates connections");
+        DebugCount::decrease(DebugObject::LiveUpdatesConnection);
         qCDebug(chatterinoLiveupdates) << "Connection" << id << "closed";
 
         auto subs = std::move(it->second->subscriptions_);
@@ -228,7 +228,7 @@ private:
             qCWarning(chatterinoLiveupdates)
                 << "Retrying after" << id << "failed";
             auto nSubs = subs.size();
-            DebugCount::increase("LiveUpdates subscription backlog",
+            DebugCount::increase(DebugObject::LiveUpdatesSubscriptionBacklog,
                                  static_cast<int64_t>(nSubs));
             this->pendingSubscriptions_.insert(
                 this->pendingSubscriptions_.end(),

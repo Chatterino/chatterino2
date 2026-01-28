@@ -33,11 +33,6 @@ void HTTPResponse::createUserType(sol::table &c2)
 HTTPResponse::HTTPResponse(NetworkResult res)
     : result_(std::move(res))
 {
-    DebugCount::increase("lua::api::HTTPResponse");
-}
-HTTPResponse::~HTTPResponse()
-{
-    DebugCount::decrease("lua::api::HTTPResponse");
 }
 
 QByteArray HTTPResponse::data()

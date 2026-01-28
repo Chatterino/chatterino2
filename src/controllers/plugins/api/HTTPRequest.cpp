@@ -182,14 +182,12 @@ HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
                          NetworkRequest req)
     : req_(std::move(req))
 {
-    DebugCount::increase("lua::api::HTTPRequest");
+    DebugCount::increase(DebugObject::LuaHTTPRequest);
 }
 
 HTTPRequest::~HTTPRequest()
 {
-    DebugCount::decrease("lua::api::HTTPRequest");
-    // We might leak a Lua function or two here if the request isn't executed
-    // but that's better than accessing a possibly invalid lua_State pointer.
+    DebugCount::decrease(DebugObject::LuaHTTPRequest);
 }
 
 QString HTTPRequest::to_string()
