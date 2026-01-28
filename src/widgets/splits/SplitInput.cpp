@@ -787,7 +787,7 @@ void SplitInput::installTextEditEvents()
             auto cursor = this->ui_.textEdit->cursorForPosition(pos);
             cursor.select(QTextCursor::WordUnderCursor);
             auto word = cursor.selectedText();
-            if (!word.isEmpty())
+            if (!word.isEmpty() && getSettings()->showSpellCheckingSuggestions)
             {
                 auto suggestions =
                     getApp()->getSpellChecker()->suggestions(word);
