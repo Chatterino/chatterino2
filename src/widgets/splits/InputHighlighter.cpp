@@ -44,9 +44,12 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 
         QString chatter;
         // skip '@' to allow @chatter
-        if (word.startsWith('@')) {
+        if (word.startsWith('@'))
+        {
             chatter = word.sliced(1);
-        } else {
+        }
+        else
+        {
             chatter = word;
         }
         if (twitch->accessChatters()->contains(chatter) ||
@@ -129,31 +132,31 @@ void InputHighlighter::highlightBlock(const QString &text)
     {
         auto outerMatch = outerIt.next();
         auto outerText = outerMatch.captured();
-        if (!isIgnoredWord(channel, outerText))
+        if (isIgnoredWord(channel, outerText))
         {
-            {
+            continue;
+        }
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-                auto innerIt = innerRegex.globalMatchView(outerText);
+        auto innerIt = innerRegex.globalMatchView(outerText);
 #else
-                auto innerIt = innerRegex.globalMatch(outerText);
+        auto innerIt = innerRegex.globalMatch(outerText);
 #endif
 
-                // iterate over words that match the word regex
-                while (innerIt.hasNext())
-                {
-                    auto innerMatch = innerIt.next();
-                    auto innerText = innerMatch.captured();
+        // iterate over words that match the word regex
+        while (innerIt.hasNext())
+        {
+            auto innerMatch = innerIt.next();
+            auto innerText = innerMatch.captured();
 
-                    qCDebug(chatterinoSpellcheck) << "check" << innerText;
-                    if (!this->spellChecker.check(innerText))
-                    {
-                        this->setFormat(
-                            static_cast<int>(cmdTriggerLen +
-                                             outerMatch.capturedStart() +
-                                             innerMatch.capturedStart()),
-                            static_cast<int>(innerText.size()), this->spellFmt);
-                    }
-                }
+            qCDebug(chatterinoSpellcheck) << "check" << innerText;
+            if (!this->spellChecker.check(innerText))
+            {
+                this->setFormat(static_cast<int>(cmdTriggerLen +
+                                                 outerMatch.capturedStart() +
+                                                 innerMatch.capturedStart()),
+                                static_cast<int>(innerText.size()),
+                                this->spellFmt);
             }
         }
     }
