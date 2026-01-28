@@ -41,12 +41,12 @@ QColor blendColors(const QColor &base, const QColor &apply)
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
 {
-    DebugCount::increase("message layout");
+    DebugCount::increase(DebugObject::MessageLayout);
 }
 
 MessageLayout::~MessageLayout()
 {
-    DebugCount::decrease("message layout");
+    DebugCount::decrease(DebugObject::MessageLayout);
 }
 
 const Message *MessageLayout::getMessage()
@@ -359,7 +359,7 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, qreal width, bool clear)
     }
 
     this->bufferValid_ = false;
-    DebugCount::increase("message drawing buffers");
+    DebugCount::increase(DebugObject::MessageDrawingBuffer);
     return this->buffer_.get();
 }
 
@@ -487,7 +487,7 @@ void MessageLayout::deleteBuffer()
 {
     if (this->buffer_ != nullptr)
     {
-        DebugCount::decrease("message drawing buffers");
+        DebugCount::decrease(DebugObject::MessageDrawingBuffer);
 
         this->buffer_ = nullptr;
     }

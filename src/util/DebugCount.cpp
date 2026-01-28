@@ -5,11 +5,13 @@
 #include "util/DebugCount.hpp"
 
 #include "common/UniqueAccess.hpp"
+#include "util/QMagicEnum.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QLocale>
 #include <QStringBuilder>
 
-#include <map>
+#include <array>
 
 namespace {
 
@@ -17,74 +19,51 @@ using namespace chatterino;
 
 struct Count {
     int64_t value = 0;
-    DebugCount::Flags flags = DebugCount::Flag::None;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-UniqueAccess<std::map<QString, Count>> COUNTS;
+UniqueAccess<std::array<Count, static_cast<size_t>(DebugObject::Count)>> COUNTS;
+
+constexpr bool isBytes(DebugObject target)
+{
+    switch (target)
+    {
+        default:
+            return false;
+
+        case DebugObject::BytesImageCurrent:
+        case DebugObject::BytesImageLoaded:
+        case DebugObject::BytesImageUnloaded:
+            return true;
+    }
+}
 
 }  // namespace
 
 namespace chatterino {
 
-void DebugCount::configure(const QString &name, Flags flags)
+void DebugCount::set(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 
-    auto it = counts->find(name);
-    if (it == counts->end())
-    {
-        counts->emplace(name, Count{.flags = flags});
-    }
-    else
-    {
-        it->second.flags = flags;
-    }
+    auto &it = counts->at(static_cast<size_t>(target));
+    it.value = amount;
 }
 
-void DebugCount::set(const QString &name, const int64_t &amount)
+void DebugCount::increase(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 
-    auto it = counts->find(name);
-    if (it == counts->end())
-    {
-        counts->emplace(name, Count{amount});
-    }
-    else
-    {
-        it->second.value = amount;
-    }
+    auto &it = counts->at(static_cast<size_t>(target));
+    it.value += amount;
 }
 
-void DebugCount::increase(const QString &name, const int64_t &amount)
+void DebugCount::decrease(DebugObject target, int64_t amount)
 {
     auto counts = COUNTS.access();
 
-    auto it = counts->find(name);
-    if (it == counts->end())
-    {
-        counts->emplace(name, Count{amount});
-    }
-    else
-    {
-        it->second.value += amount;
-    }
-}
-
-void DebugCount::decrease(const QString &name, const int64_t &amount)
-{
-    auto counts = COUNTS.access();
-
-    auto it = counts->find(name);
-    if (it == counts->end())
-    {
-        counts->emplace(name, Count{-amount});
-    }
-    else
-    {
-        it->second.value -= amount;
-    }
+    auto &it = counts->at(static_cast<size_t>(target));
+    it.value -= amount;
 }
 
 QString DebugCount::getDebugText()
@@ -94,10 +73,12 @@ QString DebugCount::getDebugText()
     auto counts = COUNTS.access();
 
     QString text;
-    for (const auto &[key, count] : *counts)
+    for (size_t key = 0; key < static_cast<size_t>(DebugObject::Count); key++)
     {
+        auto &count = counts->at(key);
+
         QString formatted;
-        if (count.flags.has(Flag::DataSize))
+        if (isBytes(static_cast<DebugObject>(key)))
         {
             formatted = locale.formattedDataSize(count.value);
         }
@@ -106,7 +87,8 @@ QString DebugCount::getDebugText()
             formatted = locale.toString(static_cast<qlonglong>(count.value));
         }
 
-        text += key % ": " % formatted % '\n';
+        text += qmagicenum::enumName(static_cast<DebugObject>(key)) % ": " %
+                formatted % '\n';
     }
     return text;
 }

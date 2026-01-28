@@ -23,12 +23,12 @@ MessageThread::MessageThread(std::shared_ptr<const Message> rootMessage)
     : rootMessageId_(rootMessage->id)
     , rootMessage_(std::move(rootMessage))
 {
-    DebugCount::increase("message threads");
+    DebugCount::increase(DebugObject::MessageThread);
 }
 
 MessageThread::~MessageThread()
 {
-    DebugCount::decrease("message threads");
+    DebugCount::decrease(DebugObject::MessageThread);
 }
 
 void MessageThread::addToThread(const std::shared_ptr<const Message> &message)
