@@ -228,7 +228,7 @@ private:
             qCWarning(chatterinoLiveupdates)
                 << "Retrying after" << id << "failed";
             auto nSubs = subs.size();
-            DebugCount::increase("LiveUpdates subscription backlog",
+            DebugCount::increase(DebugObject::LiveUpdatesSubscriptionBacklog,
                                  static_cast<int64_t>(nSubs));
             this->pendingSubscriptions_.insert(
                 this->pendingSubscriptions_.end(),
