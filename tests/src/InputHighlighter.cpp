@@ -157,9 +157,9 @@ public:
         this->mockApplication->commandController.items.append(
             Command("/my-command", ""));
         this->mockApplication->commandController.items.append(
-            Command("/my-command with spaces", ""));
-        this->mockApplication->commandController.items.append(
             Command("command space", ""));
+        this->mockApplication->commandController.items.append(
+            Command("command with more than one space", ""));
     }
 
     void TearDown() override
@@ -206,13 +206,26 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
             .words = {"some", "text"},
         },
         {
-            .input = "/my-command with spaces and some text",
-            // FIXME: 'with spaces' shouldn't show up
-            .words = {"with", "spaces", "and", "some", "text"},
-        },
-        {
             .input = "command space and some text",
             .words = {"and", "some", "text"},
+        },
+        {
+            .input = "command with more than one space and some text",
+            .words = {"and", "some", "text"},
+        },
+        {
+            .input = "command with more than one and some text",
+            .words =
+                {
+                    "command",
+                    "with",
+                    "more",
+                    "than",
+                    "one",
+                    "and",
+                    "some",
+                    "text",
+                },
         },
         {
             .input = "Hey, @userchatter a 123kappa123 b MyUser42 c",
