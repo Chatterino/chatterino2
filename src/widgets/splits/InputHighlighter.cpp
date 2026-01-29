@@ -24,7 +24,7 @@ namespace {
 
 using namespace chatterino;
 
-bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+bool isEmote(TwitchChannel *twitch, const QString &word)
 {
     EmoteName name{word};
     if (twitch)
@@ -36,23 +36,6 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         }
         auto locals = twitch->localTwitchEmotes();
         if (locals->contains(name))
-        {
-            return true;
-        }
-
-        QString chatter;
-        // skip '@' to allow @chatter
-        if (word.startsWith('@'))
-        {
-            chatter = word.sliced(1);
-        }
-        else
-        {
-            chatter = word;
-        }
-        if (twitch->accessChatters()->contains(chatter) ||
-            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
-             chatter.toLower() == twitch->getName().toLower()))
         {
             return true;
         }
@@ -73,9 +56,49 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
+    return false;
+}
+
+bool isChatter(TwitchChannel *twitch, const QString &word)
+{
+    if (twitch)
+    {
+        QString chatter;
+        // TODO: can maybe be removed (depending on wordRegex)
+        // skip '@' to allow @chatter
+        if (word.startsWith('@'))
+        {
+            chatter = word.sliced(1);
+        }
+        else
+        {
+            chatter = word;
+        }
+        if (twitch->accessChatters()->contains(chatter) ||
+            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
+             chatter.compare(twitch->getName(), Qt::CaseInsensitive) == 0))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isLink(const QString &token)
+{
     // TODO: Replace this with a link parser variant that doesn't return the parsed data
-    auto link = linkparser::parse(word);
+    auto link = linkparser::parse(token);
     return link.has_value();
+}
+
+bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+{
+    return isEmote(twitch, word) || isChatter(twitch, word);
+}
+
+bool isIgnoredToken(TwitchChannel *twitch, const QString &token)
+{
+    return isEmote(twitch, token) || isChatter(twitch, token) || isLink(token);
 }
 
 }  // namespace
@@ -85,8 +108,9 @@ namespace chatterino {
 InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
-    // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
-    , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
+    // A word is a string of unicode letters. Words are seperated by whitespace
+    // (tokenRegex) or, inside a token, by punctuation characters (except '_')
+    , wordRegex(R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
                 QRegularExpression::PatternOption::UseUnicodePropertiesOption)
     , tokenRegex(R"(\S+)")
 {
@@ -123,7 +147,7 @@ void InputHighlighter::highlightBlock(const QString &text)
     {
         auto tokenMatch = tokenIt.next();
         auto token = tokenMatch.captured();
-        if (isIgnoredWord(channel, token))
+        if (isIgnoredToken(channel, token))
         {
             continue;
         }
@@ -135,7 +159,8 @@ void InputHighlighter::highlightBlock(const QString &text)
             auto wordMatch = wordIt.next();
             auto word = wordMatch.captured();
 
-            if (!this->spellChecker.check(word))
+            if (!isIgnoredWord(channel, word) &&
+                !this->spellChecker.check(word))
             {
                 this->setFormat(static_cast<int>(cmdTriggerLen +
                                                  tokenMatch.capturedStart() +
