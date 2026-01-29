@@ -116,11 +116,7 @@ void InputHighlighter::highlightBlock(const QString &text)
     auto cmdTriggerLen = getApp()->getCommands()->commandTriggerLen(textView);
     textView = textView.sliced(cmdTriggerLen);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     auto tokenIt = this->tokenRegex.globalMatchView(textView);
-#else
-    auto tokenIt = this->tokenRegex.globalMatch(textView);
-#endif
 
     // iterate over whitespace-delimited tokens
     while (tokenIt.hasNext())
@@ -132,11 +128,7 @@ void InputHighlighter::highlightBlock(const QString &text)
             continue;
         }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         auto wordIt = this->wordRegex.globalMatchView(token);
-#else
-        auto wordIt = this->wordRegex.globalMatch(token);
-#endif
 
         while (wordIt.hasNext())
         {
