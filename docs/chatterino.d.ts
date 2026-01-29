@@ -46,11 +46,21 @@ declare namespace c2 {
         game_id: string;
     }
 
+    class ConnectionHandle {
+        disconnect(): void;
+        block(): void;
+        unblock(): void;
+        is_blocked(): boolean;
+        is_connected(): boolean;
+    }
+
     class Channel implements IWeakResource {
         is_valid(): boolean;
         get_name(): string;
         get_type(): ChannelType;
         get_display_name(): string;
+
+        on_display_name_changed(cb: () => void): ConnectionHandle;
 
         send_message(message: string, execute_commands: boolean): void;
         send_message(message: string): void;

@@ -8,6 +8,8 @@
 #    include "Application.hpp"
 #    include "common/Channel.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/SignalCallback.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/Message.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
@@ -243,6 +245,15 @@ bool ChannelRef::operator==(const ChannelRef &other) const noexcept
     return weakOwnerEquals(this->weak, other.weak);
 }
 
+api::ConnectionHandle ChannelRef::on_display_name_changed(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    return plugin->connections.managedConnect(
+        this->strong()->displayNameChanged,
+        plugin->createCallback(std::move(pfn)));
+}
+
 std::optional<ChannelRef> ChannelRef::get_by_name(const QString &name)
 {
     auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
@@ -291,6 +302,8 @@ void ChannelRef::createUserType(sol::table &c2)
         "find_message_by_id", &ChannelRef::find_message_by_id,
         "has_messages", &ChannelRef::has_messages,
         "count_messages", &ChannelRef::count_messages,
+
+        "on_display_name_changed", &ChannelRef::on_display_name_changed,
 
         // TwitchChannel
         "get_room_modes", &ChannelRef::get_room_modes, 
