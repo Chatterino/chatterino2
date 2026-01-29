@@ -12,9 +12,11 @@ namespace chatterino::lua::api {
 /* @lua-fragment
 
 ---@class c2.ConnectionHandle
----A handle to a connection. 
----This handle does not automatically disconnect a signal by itself.
----Destroying/closing it will not have any effect.
+---This type represents a handle to a registration of a callback for an event handler.
+---Conceptually, the event has a _connection_ to the callback/handler.
+---This handle can be used to modify that connection.
+---It does not automatically disconnect the connection when it's destroyed (in `__gc`) -
+---`disconnect()` has to be called manually.
 c2.ConnectionHandle = {}
 
 ---Disconnect the signal

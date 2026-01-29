@@ -60,7 +60,7 @@ declare namespace c2 {
         get_type(): ChannelType;
         get_display_name(): string;
 
-        on_display_name_changed(): ConnectionHandle;
+        on_display_name_changed(cb: () => void): ConnectionHandle;
 
         send_message(message: string, execute_commands: boolean): void;
         send_message(message: string): void;
