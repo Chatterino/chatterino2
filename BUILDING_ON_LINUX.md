@@ -30,6 +30,18 @@ If you use Wayland, you will also need to ensure `qt6-wayland` is installed.
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
+### openSUSE
+
+```sh
+sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-file-utils libappstream-glib8 hunspell ninja doxygen qt6-tools-devel
+```
+
+### Gentoo Linux
+
+```sh
+doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
+```
+
 ### Fedora 39 and above
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._

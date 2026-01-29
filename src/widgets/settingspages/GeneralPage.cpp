@@ -31,6 +31,8 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPalette>
+#include <QSignalBlocker>
 
 namespace {
 
@@ -1213,6 +1215,81 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "device-independent pixels. A negative value offsets to "
                      "the top and a positive to the bottom.")
         ->addTo(layout);
+
+    {
+        layout.addSubtitle("Search");
+        layout.addDescription(
+            "Search engine which appears when you select text and right-click "
+            "a message. Select a search engine preset from the dropdown below, "
+            "or fill in your custom search engine URL and name.");
+        SettingWidget::checkbox("Enable search in right-click context menu",
+                                s.searchEnabled)
+            ->setTooltip(
+                "Allow searching selected text using a search engine from "
+                "the right-click context menu.")
+            ->addTo(layout);
+
+        // Preset dropdown
+        QStringList presetList = {"DuckDuckGo", "Bing", "Google"};
+        auto *presetCombo =
+            layout.addDropdown("Search engine preset", presetList,
+                               "Select a search engine preset");
+        presetCombo->setPlaceholderText("Select...");
+        presetCombo->setCurrentIndex(-1);
+        // Make placeholder text more visible
+        QPalette palette = presetCombo->palette();
+        palette.setColor(QPalette::PlaceholderText,
+                         QColor(255, 255, 255));  // white
+        presetCombo->setPalette(palette);
+        s.searchEnabled.connect([presetCombo](bool value) {
+            presetCombo->setEnabled(value);
+        });
+
+        // Connect preset dropdown to update URL and name settings
+        QObject::connect(
+            presetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            [&s, presetCombo](int index) {
+                if (index < 0)
+                    return;
+
+                QString preset = presetCombo->itemText(index);
+                if (preset == "DuckDuckGo")
+                {
+                    s.searchEngineUrl = "https://duckduckgo.com/?q=";
+                    s.searchEngineName = "DuckDuckGo";
+                }
+                else if (preset == "Bing")
+                {
+                    s.searchEngineUrl = "https://www.bing.com/search?q=";
+                    s.searchEngineName = "Bing";
+                }
+                else if (preset == "Google")
+                {
+                    s.searchEngineUrl = "https://www.google.com/search?q=";
+                    s.searchEngineName = "Google";
+                }
+                // Reset to -1 after selection
+                {
+                    QSignalBlocker blocker(presetCombo);
+                    presetCombo->setCurrentIndex(-1);
+                }
+            });
+
+        // URL and Name text inputs
+        SettingWidget::lineEdit("Search engine URL", s.searchEngineUrl)
+            ->conditionallyEnabledBy(s.searchEnabled)
+            ->addTo(layout);
+
+        SettingWidget::lineEdit("Search engine name", s.searchEngineName)
+            ->conditionallyEnabledBy(s.searchEnabled)
+            ->addTo(layout);
+    }
+    if (supportsIncognitoLinks())
+    {
+        SettingWidget::checkbox("Search in incognito/private mode",
+                                s.searchIncognito)
+            ->addTo(layout);
+    }
 
     layout.addSubtitle("Miscellaneous");
 

@@ -99,6 +99,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/GetVIPs.cpp
         controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/LowTrust.cpp
+        controllers/commands/builtin/twitch/LowTrust.hpp
         controllers/commands/builtin/twitch/Poll.cpp
         controllers/commands/builtin/twitch/Poll.hpp
         controllers/commands/builtin/twitch/Prediction.cpp
@@ -285,6 +287,8 @@ set(SOURCE_FILES
         controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginMeta.cpp
+        controllers/plugins/PluginMeta.hpp
         controllers/plugins/PluginPermission.cpp
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/PluginRef.cpp
@@ -1115,6 +1119,7 @@ set_target_properties(${LIBRARY_PROJECT}
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
 target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    CHATTERINO_EXTRA_BUILD_STRING=${CHATTERINO_EXTRA_BUILD_STRING}
     $<$<BOOL:${WIN32}>:USEWINSDK>
     $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
 )
