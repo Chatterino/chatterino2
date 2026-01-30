@@ -222,7 +222,9 @@ std::optional<ClearChatMessage> parseClearChatMessage(
                        calculateMessageTime(message))
             .release();
 
-    return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
+    return ClearChatMessage{.message = timeoutMsg,
+                            .disableAllMessages = false,
+                            .username = username};
 }
 
 /**
@@ -526,6 +528,25 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
     else
     {
+        // Set send wait timer when the user is timed out
+        const auto currentUsername =
+            getApp()->getAccounts()->twitch.getCurrent()->getUserName();
+        if (currentUsername == clearChat.username)
+        {
+            bool ok = false;
+            int remainingTime =
+                message->tags().value("ban-duration").toInt(&ok);
+            if (ok)
+            {
+                auto *tc = dynamic_cast<TwitchChannel *>(chan.get());
+                assert(tc != nullptr);
+                if (tc != nullptr)
+                {
+                    tc->setSendWait(remainingTime);
+                }
+            }
+        }
+
         chan->addOrReplaceTimeout(std::move(clearChat.message), time);
     }
 
@@ -996,22 +1017,31 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         channel->addMessage(msg, MessageContext::Original);
     }
 
-    if (tags == "msg_slowmode")
-    {
-        // Notice received when the user sends a message too quickly during slow mode.
-        // @msg-id=msg_slowmode :tmi.twitch.tv NOTICE #channel :This room is in slow mode and you are sending messages too quickly. You will be able to talk again in 10 seconds.
-        QString remainingTimeText = message->content().split(u' ').value(21);
+    auto handleSendWait = [&channel](const QString &remaining) {
         bool ok = false;
-        int remainingTime = remainingTimeText.toInt(&ok);
+        int seconds = remaining.toInt(&ok);
         if (ok)
         {
             auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
             assert(tc != nullptr);
             if (tc != nullptr)
             {
-                tc->setSendWait(remainingTime);
+                tc->setSendWait(seconds);
             }
         }
+    };
+
+    if (tags == "msg_slowmode")
+    {
+        // Notice received when the user sends a message too quickly during slow mode.
+        // @msg-id=msg_slowmode :tmi.twitch.tv NOTICE #channel :This room is in slow mode and you are sending messages too quickly. You will be able to talk again in 10 seconds.
+        handleSendWait(message->content().split(u' ').value(21));
+    }
+    else if (tags == "msg_timedout")
+    {
+        // Notice received when the user sends a message while timed out.
+        // @msg-id=msg_timedout :tmi.twitch.tv NOTICE #twitch :You are timed out for 3600 more seconds.
+        handleSendWait(message->content().split(u' ').value(5));
     }
 }
 

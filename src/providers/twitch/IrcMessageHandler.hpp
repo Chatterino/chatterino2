@@ -23,6 +23,7 @@ class MessageSink;
 struct ClearChatMessage {
     MessagePtr message;
     bool disableAllMessages;
+    std::optional<QString> username;
 };
 
 class IrcMessageHandler
