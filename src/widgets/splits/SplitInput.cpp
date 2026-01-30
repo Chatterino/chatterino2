@@ -211,10 +211,16 @@ void SplitInput::initLayout()
     auto box = hboxLayout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
     {
+        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
         this->ui_.textEditLength = new QLabel();
         // Right-align the labels contents
         this->ui_.textEditLength->setAlignment(Qt::AlignRight);
-        box->addWidget(this->ui_.textEditLength);
+        hbox->addWidget(this->ui_.textEditLength);
+
+        this->ui_.sendWaitStatus = new QLabel();
+        this->ui_.sendWaitStatus->setAlignment(Qt::AlignRight);
+        this->ui_.sendWaitStatus->setHidden(true);
+        hbox->addWidget(this->ui_.sendWaitStatus);
 
         this->ui_.emoteButton = new SvgButton(
             {
@@ -1425,6 +1431,12 @@ void SplitInput::updateFonts()
         app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, this->scale()));
+}
+
+void SplitInput::setSendWaitStatus(const QString &text) const
+{
+    this->ui_.sendWaitStatus->setText(text);
+    this->ui_.sendWaitStatus->setHidden(text.isEmpty());
 }
 
 }  // namespace chatterino
