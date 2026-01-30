@@ -272,6 +272,16 @@ void SplitInput::initLayout()
             this->editTextChanged();
         },
         this->managedConnections_);
+
+    // sendWaitStatus visibility
+    getSettings()->showSendWaitTimer.connect(
+        [this](bool value, const auto &) {
+            if (!this->ui_.sendWaitStatus->text().isEmpty())
+            {
+                this->ui_.sendWaitStatus->setHidden(!value);
+            }
+        },
+        this->managedConnections_);
 }
 
 void SplitInput::triggerSelfMessageReceived()
@@ -1436,7 +1446,14 @@ void SplitInput::updateFonts()
 void SplitInput::setSendWaitStatus(const QString &text) const
 {
     this->ui_.sendWaitStatus->setText(text);
-    this->ui_.sendWaitStatus->setHidden(text.isEmpty());
+    if (text.isEmpty())
+    {
+        this->ui_.sendWaitStatus->setHidden(true);
+    }
+    else
+    {
+        this->ui_.sendWaitStatus->setHidden(!getSettings()->showSendWaitTimer);
+    }
 }
 
 }  // namespace chatterino
