@@ -383,6 +383,8 @@ public:
      */
     void setSendWait(int seconds);
 
+    bool isLoadingRecentMessages() const;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user

@@ -1004,6 +1004,12 @@ void TwitchChannel::setRoomModes(const RoomModes &newRoomModes)
 {
     this->roomModes = newRoomModes;
 
+    // Clear send wait timer when slow mode is disabled
+    if (newRoomModes.slowMode == 0)
+    {
+        this->setSendWait(newRoomModes.slowMode);
+    }
+
     this->roomModesChanged.invoke();
 }
 
@@ -2386,6 +2392,11 @@ void TwitchChannel::setSendWait(int seconds)
         this->sendWaitTimer_.start(1s);
         this->syncSendWaitTimer();
     }
+}
+
+bool TwitchChannel::isLoadingRecentMessages() const
+{
+    return this->loadingRecentMessages_.test();
 }
 
 }  // namespace chatterino

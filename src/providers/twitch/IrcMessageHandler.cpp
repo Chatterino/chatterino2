@@ -403,6 +403,22 @@ void IrcMessageHandler::parsePrivMessageInto(
             channel->setVIP(parsedBadges.contains("vip"));
             channel->setStaff(parsedBadges.contains("staff"));
         }
+
+        if (!channel->isLoadingRecentMessages())
+        {
+            // Clear the send wait timer when we are able to send a message
+            channel->setSendWait(0);
+
+            // Update send wait timer with slow mode timeout if this user is not a mod or vip.
+            if (!channel->hasHighRateLimit())
+            {
+                auto roomModes = *channel->accessRoomModes();
+                if (roomModes.slowMode > 0)
+                {
+                    channel->setSendWait(roomModes.slowMode);
+                }
+            }
+        }
     }
 
     IrcMessageHandler::addMessage(
@@ -978,6 +994,24 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     else
     {
         channel->addMessage(msg, MessageContext::Original);
+    }
+
+    if (tags == "msg_slowmode")
+    {
+        // Notice received when the user sends a message too quickly during slow mode.
+        // @msg-id=msg_slowmode :tmi.twitch.tv NOTICE #channel :This room is in slow mode and you are sending messages too quickly. You will be able to talk again in 10 seconds.
+        QString remainingTimeText = message->content().split(u' ').value(21);
+        bool ok = false;
+        int remainingTime = remainingTimeText.toInt(&ok);
+        if (ok)
+        {
+            auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            assert(tc != nullptr);
+            if (tc != nullptr)
+            {
+                tc->setSendWait(remainingTime);
+            }
+        }
     }
 }
 
