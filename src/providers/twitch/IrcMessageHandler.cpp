@@ -654,6 +654,13 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
                 tc->setMod(modTag == "1");
             }
         }
+
+        // When a user is updated to mod or vip status, any previous
+        // slow mode or timeout timers are no longer in effect.
+        if (tc->hasHighRateLimit())
+        {
+            tc->setSendWait(0);
+        }
     }
 }
 
