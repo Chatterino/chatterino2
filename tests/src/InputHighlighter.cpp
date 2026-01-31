@@ -185,17 +185,17 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
         {.input = "word word", .words = {"word", "word"}},
         {.input = "   word word  ", .words = {"word", "word"}},
         {.input = "word?", .words = {"word"}},
-        {.input = "word?word", .words = {"word?word"}},
-        {.input = "word-word", .words = {"word-word"}},
+        {.input = "word?word", .words = {"word", "word"}},
+        // FIXME: should  be "word-word"
+        {.input = "word-word", .words = {"word", "word"}},
         {
             .input = "channel emotes 7TVEmote a BTTVEmote b FFZEmote c",
-            .words = {"channel", "emotes", "TVEmote", "a", "b", "c"},
+            .words = {"channel", "emotes", "a", "b", "c"},
         },
         {
             .input = "global emotes 7TVGlobal a BTTVGlobal b FFZGlobal c "
                      "MyCoolTwitchEmote d",
-            // FIXME: TVGlobal shouldn't show up
-            .words = {"global", "emotes", "TVGlobal", "a", "b", "c", "d"},
+            .words = {"global", "emotes", "a", "b", "c", "d"},
         },
         {
             .input = "/ban a user",
@@ -228,9 +228,14 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
                 },
         },
         {
-            .input = "Hey, @userchatter a 123kappa123 b MyUser42 c",
-            // FIXME: 'kappa' and 'MyUser' shouldn't show up
-            .words = {"Hey", "a", "kappa", "b", "MyUser", "c"},
+            .input = "Hey, @userchatter, a 123kappa123 b MyUser42 c",
+            .words = {"Hey", "a", "b", "c"},
+        },
+        {
+            .input =
+                "twitch.tv ignore "
+                "https://wiki.chatterino.com/Help/#basic-troubleshooting links",
+            .words = {"ignore", "links"},
         },
     };
 
@@ -255,18 +260,18 @@ TEST(InputHighlight, wordRegex)
     std::vector<Case> cases{
         {.input = u"", .words = {}},
         {.input = u"word", .words = {u"word"}},
-        {.input = u"word word", .words = {u"word", u"word"}},
-        {.input = u"   word word  ", .words = {u"word", u"word"}},
+        {.input = u"test/man", .words = {u"test", u"man"}},
         {.input = u"word?", .words = {u"word"}},
-        {.input = u"word?word", .words = {u"word?word"}},
-        {.input = u"a12word", .words = {u"a12word"}},
+        {.input = u"word?word", .words = {u"word", u"word"}},
+        {.input = u"sentence.", .words = {u"sentence"}},
+        {.input = u"#hashtag", .words = {u"hashtag"}},
+        {.input = u"inogre123numbers", .words = {}},
+        {.input = u"under_score", .words = {}},
         {.input = u"äwördü", .words = {u"äwördü"}},
-        // FIXME: should be the whole input
-        {.input = u"123kappa123", .words = {u"kappa"}},
-        {.input = u"123kappa", .words = {u"kappa"}},
-        {.input = u"kappa123", .words = {u"kappa"}},
-        {.input = u"abc @foo bar@baz@", .words = {u"abc", u"foo", u"bar@baz"}},
-        {.input = u"1234567 word a123", .words = {u"word", u"a"}},
+        {.input = u"abc!@foo#bar&(baz]",
+         .words = {u"abc", u"foo", u"bar", u"baz"}},
+        {.input = u"1234567,word/a123", .words = {u"word"}},
+        {.input = u"'quotes\"", .words = {u"quotes"}},
     };
 
     auto re = inputhighlight::detail::wordRegex();

@@ -15,6 +15,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QTextCharFormat>
 #include <QTextDocument>
@@ -23,7 +24,7 @@ namespace {
 
 using namespace chatterino;
 
-bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+bool isEmote(TwitchChannel *twitch, const QString &word)
 {
     EmoteName name{word};
     if (twitch)
@@ -35,11 +36,6 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         }
         auto locals = twitch->localTwitchEmotes();
         if (locals->contains(name))
-        {
-            return true;
-        }
-
-        if (twitch->accessChatters()->contains(word))
         {
             return true;
         }
@@ -60,9 +56,38 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
+    return false;
+}
+
+bool isChatter(TwitchChannel *twitch, const QString &word)
+{
+    if (twitch)
+    {
+        if (twitch->accessChatters()->contains(word) ||
+            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
+             word.compare(twitch->getName(), Qt::CaseInsensitive) == 0))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isLink(const QString &token)
+{
     // TODO: Replace this with a link parser variant that doesn't return the parsed data
-    auto link = linkparser::parse(word);
+    auto link = linkparser::parse(token);
     return link.has_value();
+}
+
+bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+{
+    return isEmote(twitch, word) || isChatter(twitch, word);
+}
+
+bool isIgnoredToken(TwitchChannel *twitch, const QString &token)
+{
+    return isEmote(twitch, token) || isLink(token);
 }
 
 }  // namespace
@@ -71,11 +96,12 @@ namespace chatterino {
 
 namespace inputhighlight::detail {
 
-// FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
+// A word is a string of unicode letters. Words are seperated by whitespace
+// (tokenRegex) or, inside a token, by punctuation characters (except '_')
 QRegularExpression wordRegex()
 {
     static QRegularExpression regex{
-        R"(\p{L}(?:\P{Z}+\p{L}+)*)",
+        R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
         QRegularExpression::PatternOption::UseUnicodePropertiesOption,
     };
     return regex;
@@ -87,6 +113,7 @@ InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
     , wordRegex(inputhighlight::detail::wordRegex())
+    , tokenRegex(R"(\S+)")
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     this->spellFmt.setUnderlineColor(Qt::red);
@@ -138,20 +165,32 @@ void InputHighlighter::visitWords(
     auto cmdTriggerLen = getApp()->getCommands()->commandTriggerLen(textView);
     textView = textView.sliced(cmdTriggerLen);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto it = this->wordRegex.globalMatchView(textView);
-#else
-    auto it = this->wordRegex.globalMatch(textView);
-#endif
+    auto tokenIt = this->tokenRegex.globalMatchView(textView);
 
-    while (it.hasNext())
+    // iterate over whitespace-delimited tokens
+    while (tokenIt.hasNext())
     {
-        auto match = it.next();
-        auto text = match.captured();
-        if (!isIgnoredWord(channel, text))
+        auto tokenMatch = tokenIt.next();
+        auto token = tokenMatch.captured();
+        if (isIgnoredToken(channel, token))
         {
-            cb(text, static_cast<int>(match.capturedStart() + cmdTriggerLen),
-               static_cast<int>(text.size()));
+            continue;
+        }
+
+        auto wordIt = this->wordRegex.globalMatchView(token);
+
+        while (wordIt.hasNext())
+        {
+            auto wordMatch = wordIt.next();
+            auto word = wordMatch.captured();
+
+            if (!isIgnoredWord(channel, word))
+            {
+                cb(word,
+                   static_cast<int>(cmdTriggerLen + tokenMatch.capturedStart() +
+                                    wordMatch.capturedStart()),
+                   static_cast<int>(word.size()));
+            }
         }
     }
 }
