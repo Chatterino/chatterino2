@@ -230,6 +230,12 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
             .input = "Hey, @userchatter, a 123kappa123 b MyUser42 c",
             .words = {"Hey", "a", "b", "c"},
         },
+        {
+            .input =
+                "twitch.tv ignore "
+                "https://wiki.chatterino.com/Help/#basic-troubleshooting links",
+            .words = {"ignore", "links"},
+        },
     };
 
     SpellChecker nullSpellChecker;
