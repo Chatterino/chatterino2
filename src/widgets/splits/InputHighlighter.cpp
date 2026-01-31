@@ -105,13 +105,25 @@ bool isIgnoredToken(TwitchChannel *twitch, const QString &token)
 
 namespace chatterino {
 
+namespace inputhighlight::detail {
+
+// A word is a string of unicode letters. Words are seperated by whitespace
+// (tokenRegex) or, inside a token, by punctuation characters (except '_')
+QRegularExpression wordRegex()
+{
+    static QRegularExpression regex{
+        R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
+        QRegularExpression::PatternOption::UseUnicodePropertiesOption,
+    };
+    return regex;
+}
+
+}  // namespace inputhighlight::detail
+
 InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
-    // A word is a string of unicode letters. Words are seperated by whitespace
-    // (tokenRegex) or, inside a token, by punctuation characters (except '_')
-    , wordRegex(R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
-                QRegularExpression::PatternOption::UseUnicodePropertiesOption)
+    , wordRegex(inputhighlight::detail::wordRegex())
     , tokenRegex(R"(\S+)")
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
@@ -126,12 +138,36 @@ void InputHighlighter::setChannel(const std::shared_ptr<Channel> &channel)
     this->rehighlight();
 }
 
+std::vector<QString> InputHighlighter::getSpellCheckedWords(const QString &text)
+{
+    std::vector<QString> words;
+    this->visitWords(text, [&](const QString &word, qsizetype /*start*/,
+                               qsizetype /*count*/) {
+        words.emplace_back(word);
+    });
+    return words;
+}
+
 void InputHighlighter::highlightBlock(const QString &text)
 {
     if (!this->spellChecker.isLoaded())
     {
         return;
     }
+    this->visitWords(
+        text, [&](const QString &word, qsizetype start, qsizetype count) {
+            if (!this->spellChecker.check(word))
+            {
+                this->setFormat(static_cast<int>(start),
+                                static_cast<int>(count), this->spellFmt);
+            }
+        });
+}
+
+void InputHighlighter::visitWords(
+    const QString &text,
+    std::invocable<const QString &, qsizetype, qsizetype> auto &&cb)
+{
     auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
@@ -159,13 +195,12 @@ void InputHighlighter::highlightBlock(const QString &text)
             auto wordMatch = wordIt.next();
             auto word = wordMatch.captured();
 
-            if (!isIgnoredWord(channel, word) &&
-                !this->spellChecker.check(word))
+            if (!isIgnoredWord(channel, word))
             {
-                this->setFormat(static_cast<int>(cmdTriggerLen +
-                                                 tokenMatch.capturedStart() +
-                                                 wordMatch.capturedStart()),
-                                static_cast<int>(word.size()), this->spellFmt);
+                cb(word,
+                   static_cast<int>(cmdTriggerLen + tokenMatch.capturedStart() +
+                                    wordMatch.capturedStart()),
+                   static_cast<int>(word.size()));
             }
         }
     }
