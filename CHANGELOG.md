@@ -104,6 +104,7 @@
 - Dev: Remove unused `reloadChannelAndSubscriberEmotes`. (#6756)
 - Dev: Refactored `DebugCount`. (#6753)
 - Dev: Moved `PluginMeta` to its own file. (#6757)
+- Dev: Moves some `Channel` signals to `TwitchChannel`. (#6787)
 
 ## 2.5.4
 
