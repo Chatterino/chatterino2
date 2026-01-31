@@ -256,6 +256,11 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             ->setTooltip("Check the spelling of words in the input box of all "
                          "splits by default.")
             ->addTo(layout);
+        SettingWidget::checkbox("Show suggestions in context menu",
+                                s.showSpellCheckingSuggestions)
+            ->setTooltip("When enabled, right clicking any word in the input "
+                         "box will show alternatives.")
+            ->addTo(layout);
 
         auto toItem =
             [](const DictionaryInfo &dict) -> std::pair<QString, QVariant> {
