@@ -240,6 +240,8 @@ TwitchChannel::~TwitchChannel()
         getApp()->getSeventvEventAPI()->unsubscribeTwitchChannel(
             this->roomId());
     }
+
+    this->destroyed.invoke();
 }
 
 void TwitchChannel::initialize()
@@ -834,7 +836,7 @@ void TwitchChannel::sendMessage(const QString &message)
     }
 
     bool messageSent = false;
-    this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
+    this->sendMessageSignal.invoke(parsedMessage, messageSent);
     this->updateBttvActivity();
     this->updateSevenTVActivity();
 
@@ -876,8 +878,7 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     }
 
     bool messageSent = false;
-    this->sendReplySignal.invoke(this->getName(), parsedMessage, replyId,
-                                 messageSent);
+    this->sendReplySignal.invoke(parsedMessage, replyId, messageSent);
 
     if (messageSent)
     {

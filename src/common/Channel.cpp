@@ -37,7 +37,6 @@ Channel::~Channel()
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
-    this->destroyed.invoke();
 }
 
 Channel::Type Channel::getType() const

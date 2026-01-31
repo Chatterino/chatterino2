@@ -297,6 +297,27 @@ public:
      */
     std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
 
+    /// Fired when a message is supposed to be sent by the user in this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, bool &> sendMessageSignal;
+
+    /// Fired when a reply to a message is supposed to be sent by the user in
+    /// this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `replyToMessageID`: The ID of the replied-to message.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, const QString &, bool &>
+        sendReplySignal;
+
     /**
      * This signal fires when the local user has joined the channel
      **/
@@ -314,6 +335,8 @@ public:
     pajlada::Signals::NoArgSignal streamStatusChanged;
 
     pajlada::Signals::NoArgSignal roomModesChanged;
+
+    pajlada::Signals::NoArgSignal destroyed;
 
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
