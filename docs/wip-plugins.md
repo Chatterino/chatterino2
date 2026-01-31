@@ -422,6 +422,31 @@ channel:add_message(c2.Message.new({
 }))
 ```
 
+##### `Channel:on_messages_cleared(cb)`
+
+Callback when the messages in this channel have been cleared.
+This is called synchronously.
+
+##### `Channel:on_message_replaced(cb)`
+
+Callback when a message is replaced.
+This is called synchronously.
+`cb` receives:
+
+- `idx` (`number`) A one-based index of the replaced message
+- `old` ([`c2.Message`](#message))
+- `replacement` ([`c2.Message`](#message))
+
+##### `Channel:on_message_appended(cb)`
+
+Callback when a message is added.
+This is called synchronously.
+
+`cb` receives:
+
+- `msg` ([`c2.Message`](#message))
+- `override_flags` ([`c2.MessageFlag`](#message) or `nil`)
+
 ##### `Channel:is_twitch_channel()`
 
 Returns `true` if the channel is a Twitch channel, that is its type name has

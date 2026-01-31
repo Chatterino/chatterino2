@@ -258,6 +258,39 @@ public:
                                              sol::main_protected_function pfn);
 
     /**
+     * Callback when the messages in this channel have been cleared.
+     * This is called synchronously.
+     *
+     * @lua@param cb fun()
+     * @lua@return c2.ConnectionHandle hdl
+     * @exposed c2.Channel:on_messages_cleared
+     */
+    ConnectionHandle on_messages_cleared(ThisPluginState state,
+                                         sol::main_protected_function pfn);
+
+    /**
+     * Callback when a message is replaced.
+     * This is called synchronously.
+     *
+     * @lua@param cb fun(idx: number, old: c2.Message, replacement: c2.Message) `idx` is a one-based index (from the start) 
+     * @lua@return c2.ConnectionHandle hdl
+     * @exposed c2.Channel:on_message_replaced
+     */
+    ConnectionHandle on_message_replaced(ThisPluginState state,
+                                         sol::main_protected_function pfn);
+
+    /**
+     * Callback when a message is added.
+     * This is called synchronously.
+     *
+     * @lua@param cb fun(msg: c2.Message, override_flags?: c2.MessageFlag)
+     * @lua@return c2.ConnectionHandle hdl
+     * @exposed c2.Channel:on_message_appended
+     */
+    ConnectionHandle on_message_appended(ThisPluginState state,
+                                         sol::main_protected_function pfn);
+
+    /**
      * Static functions
      */
 
