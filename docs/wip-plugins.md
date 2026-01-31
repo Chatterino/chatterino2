@@ -352,6 +352,15 @@ saddummys:get_display_name() -- "서새봄냥"
 
 <!-- F Korean Twitch, apparently you were not profitable enough -->
 
+##### `Channel:on_display_name_changed(cb)`
+
+Callback when the channel display name changes. The callback doesn't get any
+arguments, use [`Channel:get_display_name`](#channelget_display_name) to get the
+updated name.
+
+This returns a [`ConnectionHandle`](#connectionhandle) which can be used to
+disconnect the handler.
+
 ##### `Channel:send_message(message[, execute_commands])`
 
 Sends a message to the channel with the given text. If `execute_commands` is
@@ -774,6 +783,34 @@ This table describes links available to plugins.
 | `CopyToClipboard` | Any Unicode text                   | Copy value to clipboard                                                              | n/a                                   |
 | `JumpToMessage`   | ID of the message                  | Highlight the message with given ID in current split, do nothing if it was not found | n/a                                   |
 | `InsertText`      | Any text, command or emote         | Insert text into split input                                                         | n/a                                   |
+
+#### `ConnectionHandle`
+
+This type represents a handle to a registration of a callback for an event handler.
+Conceptually, the event has a _connection_ to the callback/handler.
+This handle can be used to modify that connection.
+It does not automatically disconnect the connection when it's destroyed (in `__gc`) -
+[`disconnect()`](#connectionhandledisconnect) has to be called manually.
+
+##### `ConnectionHandle:disconnect()`
+
+Disconnect the signal.
+
+##### `ConnectionHandle:block()`
+
+Block events on this connection.
+
+##### `ConnectionHandle:unblock()`
+
+Unblock events on this connection.
+
+##### `ConnectionHandle:is_blocked()`
+
+Is this connection currently blocked?
+
+##### `ConnectionHandle:is_connected()`
+
+Is this connection still connected?
 
 ### Input/Output API
 
