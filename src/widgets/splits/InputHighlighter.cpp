@@ -63,20 +63,9 @@ bool isChatter(TwitchChannel *twitch, const QString &word)
 {
     if (twitch)
     {
-        QString chatter;
-        // TODO: can maybe be removed (depending on wordRegex)
-        // skip '@' to allow @chatter
-        if (word.startsWith('@'))
-        {
-            chatter = word.sliced(1);
-        }
-        else
-        {
-            chatter = word;
-        }
-        if (twitch->accessChatters()->contains(chatter) ||
+        if (twitch->accessChatters()->contains(word) ||
             (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
-             chatter.compare(twitch->getName(), Qt::CaseInsensitive) == 0))
+             word.compare(twitch->getName(), Qt::CaseInsensitive) == 0))
         {
             return true;
         }
@@ -98,7 +87,7 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
 
 bool isIgnoredToken(TwitchChannel *twitch, const QString &token)
 {
-    return isEmote(twitch, token) || isChatter(twitch, token) || isLink(token);
+    return isEmote(twitch, token) || isLink(token);
 }
 
 }  // namespace
