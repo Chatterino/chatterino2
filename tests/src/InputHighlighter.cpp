@@ -186,6 +186,7 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
         {.input = "   word word  ", .words = {"word", "word"}},
         {.input = "word?", .words = {"word"}},
         {.input = "word?word", .words = {"word", "word"}},
+        // FIXME: should  be "word-word"
         {.input = "word-word", .words = {"word", "word"}},
         {
             .input = "channel emotes 7TVEmote a BTTVEmote b FFZEmote c",
