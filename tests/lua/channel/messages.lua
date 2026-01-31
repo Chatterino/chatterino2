@@ -3,6 +3,7 @@
 -- SPDX-License-Identifier: CC0-1.0
 
 local chan = c2.Channel.by_name("mm2pl")
+local last_handle = nil ---@type c2.ConnectionHandle|nil
 assert(chan)
 
 ---@param ... c2.Message[]
@@ -10,6 +11,14 @@ local function add_all(...)
     for _, msg in ipairs({ ... }) do
         chan:add_message(msg)
     end
+end
+
+---@param h c2.ConnectionHandle|nil
+local function remember_handle(h)
+    if last_handle ~= nil then
+        last_handle:disconnect()
+    end
+    last_handle = h
 end
 
 local tests = {
@@ -167,10 +176,10 @@ local tests = {
         chan:add_system_message("first")
         local last_msg = nil
         local last_flags = nil
-        chan:on_message_appended(function(msg, flags)
+        remember_handle(chan:on_message_appended(function(msg, flags)
             last_msg = msg
             last_flags = flags
-        end)
+        end))
         chan:add_system_message("second")
         assert(last_msg and last_msg.message_text == "second")
         assert(last_flags == nil)
@@ -178,6 +187,16 @@ local tests = {
         chan:add_message(msg, c2.MessageContext.Original, c2.MessageFlag.Timeout)
         assert(last_msg and last_msg == msg)
         assert(last_flags and last_flags == c2.MessageFlag.Timeout)
+    end,
+    on_message_appended_recursion = function()
+        local i = 0
+        remember_handle(chan:on_message_appended(function(msg, flags)
+            i = i + 1
+            chan:add_system_message(tostring(i))
+        end))
+        chan:add_system_message("start")
+        assert(chan:message_snapshot(1)[1].message_text == "62")
+        assert(i == 63)
     end,
     on_message_replaced = function()
         local msg1 = c2.Message.new({ id = "1" })
@@ -188,7 +207,7 @@ local tests = {
         local last_idx = nil
         local last_old = nil
         local last_replacement = nil
-        chan:on_message_replaced(function(idx, old, replacement)
+        remember_handle(chan:on_message_replaced(function(idx, old, replacement)
             -- make sure that the message at `idx` always points to the new message
             local snap = chan:message_snapshot(100)
             assert(snap[idx] == replacement)
@@ -196,7 +215,7 @@ local tests = {
             last_idx = idx
             last_old = old
             last_replacement = replacement
-        end)
+        end))
         chan:replace_message_at(3, msg4)
         assert(last_idx == 3)
         assert(last_old == msg3)
@@ -206,12 +225,23 @@ local tests = {
         assert(last_old == msg1)
         assert(last_replacement == msg3)
     end,
+    on_message_replaced_recursion = function()
+        local i = 0
+        remember_handle(chan:on_message_replaced(function(idx, old, rep)
+            i = i + 1
+            chan:replace_message_at(idx, c2.Message.new({ id = tostring(i) }))
+        end))
+        chan:add_system_message("start")
+        chan:replace_message_at(1, c2.Message.new({ id = "whatever" }))
+        assert(chan:message_snapshot(1)[1].id == "62")
+        assert(i == 63)
+    end,
     on_messages_cleared = function()
         chan:add_system_message("something")
         local called = false
-        chan:on_messages_cleared(function()
+        remember_handle(chan:on_messages_cleared(function()
             called = true
-        end)
+        end))
         assert(not called)
         chan:clear_messages()
         assert(called)
@@ -219,9 +249,19 @@ local tests = {
         chan:clear_messages()
         assert(called)
     end,
+    on_messages_cleared_recursion = function()
+        local calls = 0
+        remember_handle(chan:on_messages_cleared(function()
+            calls = calls + 1
+            chan:clear_messages()
+        end))
+        chan:clear_messages()
+        assert(calls == 63) -- we're still alive
+    end,
 }
 
 for name, fn in pairs(tests) do
+    remember_handle(nil) -- clear last handle
     chan:clear_messages() -- start off without any messages
 
     local ok, res = pcall(fn)
