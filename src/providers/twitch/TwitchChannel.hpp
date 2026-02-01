@@ -338,6 +338,8 @@ public:
 
     pajlada::Signals::NoArgSignal destroyed;
 
+    pajlada::Signals::Signal<const QString &> sendWaitUpdate;
+
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
                              const QString &originalContent,
@@ -367,6 +369,21 @@ public:
      **/
     const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
+
+    /**
+     * Sync the text of the send wait timer to the actual time remaining.
+     */
+    void syncSendWaitTimer();
+    /**
+     * Set the send wait timer to given number of seconds
+     *
+     * When a channel is in slow mode or the user is timed out, calling
+     * this function sets the timer to show how long the user will need
+     * to wait before they can send again.
+     */
+    void setSendWait(int seconds);
+
+    bool isLoadingRecentMessages() const;
 
 private:
     struct NameOptions {
@@ -572,6 +589,10 @@ private:
     friend class Commands_E2E_Test;
     friend class ::TestIrcMessageHandlerP;
     friend class ::TestEventSubMessagesP;
+
+    QTimer sendWaitTimer_;
+    // Timepoint at which the user can send messages again
+    std::optional<std::chrono::steady_clock::time_point> sendWaitEnd_;
 };
 
 }  // namespace chatterino
