@@ -413,7 +413,7 @@ bool TwitchAccountManager::removeUser(TwitchAccount *account)
     auto userID(account->getUserId());
     if (!userID.isEmpty())
     {
-        pajlada::Settings::SettingManager::removeSetting(
+        pajlada::Settings::SettingManager::gRemoveSetting(
             accountFormat.arg(userID).toStdString());
     }
 
