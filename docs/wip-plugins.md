@@ -812,6 +812,53 @@ Is this connection currently blocked?
 
 Is this connection still connected?
 
+#### `Image`
+
+An image with some scale associated with it. Images are mainly used for emotes
+which often have different sizes (1x, 2x, 4x).
+
+Images have the following properties:
+
+- `url` (`string`): The url of this image.
+- `is_loaded` (`boolean`): Is this image currently loaded in RAM?
+- `is_empty` (`boolean`): Is this image empty?
+- `width` (`integer`): The scaled width of this image in pixels.
+- `height` (`integer`): The scaled height of this image in pixels.
+- `scale` (`number`): The scale factor applied to the image.
+- `size` (`{width, height}`): The scaled size of this image in pixels.
+- `animated` (`boolean`): Is this image animated? Note that this requires the image to be loaded.
+
+##### `Image.from_url(url[, scale[, expected_size]])`
+
+Create an image from a URL. Images are cached based on the URL.
+The other arguments are only used if the image is first created.
+
+Creating an image requires the [network permission](#permissions).
+
+- `scale` (`number`): The scale this image should have (e.g. `0.5`, `0.25`). Defaults to 1.
+- `expected_size` (`{width, height}`): The expected unscaled size of the image. This is only used as a hint when the image is not yet loaded to avoid layout shifts.
+
+##### `Image.empty()`
+
+Get the empty image.
+
+#### `ImageSet`
+
+A set of images. Each image should depict the same content at different sizes.
+
+Image sets have the following writable properties:
+
+- `image1` ([`Image`](#image)): The base image (1x).
+- `image2` ([`Image`](#image)): The first scaled image (often 2x, `scale=0.5`)
+- `image3` ([`Image`](#image)): The second scaled image (often 3/4x, `scale=0.25`)
+
+##### `ImageSet.new([image1[, image2[, image3]]])`
+
+Create a new image set.
+All arguments accept an [`Image`](#image) or a `string` (URL).
+
+Requires the [network permission](#permissions).
+
 ### Input/Output API
 
 These functions are wrappers for Lua's I/O library. Functions on file pointer

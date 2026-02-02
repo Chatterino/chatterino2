@@ -16,6 +16,32 @@
 #    include <QStringBuilder>
 #    include <sol/thread.hpp>
 
+namespace {
+
+/// Get a `QSize`/`QSizeF`
+template <typename T, typename Value>
+T qSizeLikeGet(lua_State *L, int index, sol::stack::record &tracking)
+{
+    auto tbl = sol::stack::get<sol::table>(L, index, tracking);
+    switch (tbl.size())
+    {
+        case 0: {
+            auto [w, h] = tbl.get<std::optional<Value>, std::optional<Value>>(
+                "width", "height");
+            return {w.value_or(Value{}), h.value_or(Value{})};
+        }
+        case 2: {
+            auto [w, h] = tbl.get<Value, Value>(1, 2);
+            return {w, h};
+        }
+        default:
+            throw std::runtime_error("Expected a table with {width, height} "
+                                     "either as an array or with named keys");
+    }
+}
+
+}  // namespace
+
 namespace chatterino::lua {
 
 using namespace Qt::Literals;
@@ -162,6 +188,48 @@ int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)
 {
     return sol::stack::push(L,
                             std::string_view(value.constData(), value.size()));
+}
+
+// QSize
+bool sol_lua_check(sol::types<QSize>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, handler, tracking);
+}
+
+QSize sol_lua_get(sol::types<QSize>, lua_State *L, int index,
+                  sol::stack::record &tracking)
+{
+    return qSizeLikeGet<QSize, int>(L, index, tracking);
+}
+
+int sol_lua_push(sol::types<QSize>, lua_State *L, const QSize &value)
+{
+    auto tbl = sol::state_view(L).create_table_with("width", value.width(),
+                                                    "height", value.height());
+    return sol::stack::push(L, tbl);
+}
+
+// QSizeF
+bool sol_lua_check(sol::types<QSizeF>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, handler, tracking);
+}
+
+QSizeF sol_lua_get(sol::types<QSizeF>, lua_State *L, int index,
+                   sol::stack::record &tracking)
+{
+    return qSizeLikeGet<QSizeF, qreal>(L, index, tracking);
+}
+
+int sol_lua_push(sol::types<QSizeF>, lua_State *L, const QSizeF &value)
+{
+    auto tbl = sol::state_view(L).create_table_with("width", value.width(),
+                                                    "height", value.height());
+    return sol::stack::push(L, tbl);
 }
 
 namespace chatterino::lua {
