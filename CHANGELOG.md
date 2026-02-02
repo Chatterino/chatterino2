@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added a countdown timer to the input box to show when you can chat again during slow mode or after a timeout. This feature is disabled by default, and can be enabled with the "Show countdown on slow mode or when timed out" setting. (#6782)
+- Minor: Added a countdown timer to the input box to show when you can chat again during slow mode or after a timeout. This feature is disabled by default, and can be enabled with the "Show countdown on slow mode or when timed out" setting. (#6782, #6791)
 - Minor: Add search engine selection for context menu search action. (#6743, #6770)
 - Minor: Add a separate highlight option for watchstreak notifications. (#6571, #6581)
 - Minor: Badges now link to their home page like emotes in the context menu. (#6437)

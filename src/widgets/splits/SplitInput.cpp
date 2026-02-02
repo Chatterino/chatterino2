@@ -319,6 +319,7 @@ void SplitInput::themeChangedEvent()
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
 
     this->ui_.textEditLength->setPalette(palette);
+    this->ui_.sendWaitStatus->setPalette(palette);
 
     // Theme changed, reset current background color
     this->setBackgroundColor(this->theme->splits.input.background);
@@ -1437,8 +1438,10 @@ void SplitInput::updateFonts()
 
     // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
     // meaning numbers get equal width & don't bounce around while the user is typing.
-    this->ui_.textEditLength->setFont(
-        app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
+    auto tsMedium =
+        app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale());
+    this->ui_.textEditLength->setFont(tsMedium);
+    this->ui_.sendWaitStatus->setFont(tsMedium);
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, this->scale()));
 }
