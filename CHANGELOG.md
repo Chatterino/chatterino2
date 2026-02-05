@@ -54,6 +54,7 @@
 - Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6710)
 - Bugfix: Fix highlight mentions not updating when username changes. (#6723, #6739)
 - Bugfix: Fixed Return and Enter being treated as different keys on Mac OS. (#6726)
+- Bugfix: Fixed messages not sending in other channels when hitting the local rate-limit. (#6796)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
 - Dev: Remove unused QTextCodec includes. (#6487)
