@@ -26,8 +26,10 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <chrono>
 #include <mutex>
 #include <optional>
+#include <queue>
 #include <unordered_map>
 
 class TestIrcMessageHandlerP;
@@ -489,6 +491,8 @@ private:
                                              const QString &actor,
                                              const QString &emoteName);
 
+    bool checkUpdateRateLimit();
+
     // Data
     const QString subscriptionUrl_;
     const QString channelUrl_;
@@ -582,6 +586,11 @@ private:
     eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
+    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
+    std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
+    std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
+    std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

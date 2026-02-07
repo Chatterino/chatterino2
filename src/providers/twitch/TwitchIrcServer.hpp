@@ -14,11 +14,9 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <queue>
 
 namespace chatterino {
 
@@ -190,8 +188,6 @@ private:
                               const QString &message, const QString &replyId,
                               bool &sent);
 
-    bool prepareToSend(const std::shared_ptr<TwitchChannel> &channel);
-
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;
 
@@ -208,12 +204,6 @@ private:
     std::mutex connectionMutex_;
 
     pajlada::Signals::SignalHolder signalHolder;
-
-    std::mutex lastMessageMutex_;
-    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
-    std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
-    std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
-    std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 };
 
 }  // namespace chatterino

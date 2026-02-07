@@ -835,6 +835,11 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
+    if (!this->checkUpdateRateLimit())
+    {
+        return;
+    }
+
     if (getSettings()->shouldSendHelixChat() && isUnknownCommand(parsedMessage))
     {
         this->addSystemMessage(QString("%1 is not a known command.")
@@ -873,6 +878,11 @@ void TwitchChannel::sendReply(const QString &message, const QString &replyId)
     // Do last message processing
     QString parsedMessage = this->prepareMessage(message);
     if (parsedMessage.isEmpty())
+    {
+        return;
+    }
+
+    if (!this->checkUpdateRateLimit())
     {
         return;
     }
@@ -1360,6 +1370,49 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     this->lastLiveUpdateMessage_ = msg;
     this->replaceMessage(last, msg);
 
+    return true;
+}
+
+bool TwitchChannel::checkUpdateRateLimit()
+{
+    auto &lastMessage = this->hasHighRateLimit() ? this->lastMessageMod_
+                                                 : this->lastMessagePleb_;
+    size_t maxMessageCount = this->hasHighRateLimit() ? 99 : 19;
+    auto minMessageOffset = (this->hasHighRateLimit() ? 100ms : 1100ms);
+
+    auto now = std::chrono::steady_clock::now();
+
+    // check if you are sending messages too fast
+    if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
+    {
+        if (this->lastErrorTimeSpeed_ + 30s < now)
+        {
+            this->addSystemMessage("You are sending messages too quickly.");
+
+            this->lastErrorTimeSpeed_ = now;
+        }
+        return false;
+    }
+
+    // remove messages older than 30 seconds
+    while (!lastMessage.empty() && lastMessage.front() + 32s < now)
+    {
+        lastMessage.pop();
+    }
+
+    // check if you are sending too many messages
+    if (lastMessage.size() >= maxMessageCount)
+    {
+        if (this->lastErrorTimeAmount_ + 30s < now)
+        {
+            this->addSystemMessage("You are sending too many messages.");
+
+            this->lastErrorTimeAmount_ = now;
+        }
+        return false;
+    }
+
+    lastMessage.push(now);
     return true;
 }
 
