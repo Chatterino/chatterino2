@@ -5,7 +5,6 @@
 #include "common/Version.hpp"
 
 #include "common/Literals.hpp"
-#include "common/Modes.hpp"
 
 #include <QFileInfo>
 #include <QStringBuilder>
@@ -19,9 +18,10 @@ Version::Version()
     , commitHash_(QStringLiteral(CHATTERINO_GIT_HASH))
     , isModified_(CHATTERINO_GIT_MODIFIED == 1)
     , dateOfBuild_(QStringLiteral(CHATTERINO_CMAKE_GEN_DATE))
+    , isNightly_(CHATTERINO_NIGHTLY_BUILD == 1)
 {
     this->fullVersion_ = "Chatterino ";
-    if (Modes::instance().isNightly)
+    if (this->isNightly())
     {
         this->fullVersion_ += "Nightly ";
     }
@@ -129,6 +129,11 @@ const QString &Version::extraString() const
     return this->extraString_;
 }
 
+bool Version::isNightly() const
+{
+    return this->isNightly_;
+}
+
 void Version::generateBuildString()
 {
     // e.g. Chatterino 2.3.5 or Chatterino Nightly 2.3.5
@@ -151,7 +156,7 @@ void Version::generateBuildString()
     s += " built";
 
     // If the build is a nightly build (decided with modes atm), include build date information
-    if (Modes::instance().isNightly)
+    if (this->isNightly())
     {
         s += " on " + this->dateOfBuild();
     }
