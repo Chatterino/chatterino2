@@ -4,14 +4,12 @@
 
 #include "common/Version.hpp"
 
-#include "common/Literals.hpp"
-
 #include <QFileInfo>
 #include <QStringBuilder>
 
-namespace chatterino {
+using namespace Qt::StringLiterals;
 
-using namespace literals;
+namespace chatterino {
 
 Version::Version()
     : version_(CHATTERINO_VERSION)
