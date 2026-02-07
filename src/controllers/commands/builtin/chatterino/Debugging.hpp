@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <QtGlobal>
+
 class QString;
 
 namespace chatterino {
