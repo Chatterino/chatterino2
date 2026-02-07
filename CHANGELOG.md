@@ -106,6 +106,9 @@
 - Dev: Refactored `DebugCount`. (#6753)
 - Dev: Moved `PluginMeta` to its own file. (#6757)
 - Dev: Moves some `Channel` signals to `TwitchChannel`. (#6787)
+- Dev: Updated `pajlada-settings` to v0.5.0. (#6797)
+- Dev: Updated `pajlada-serialize` to v0.2.1. (#6797)
+- Dev: Updated `pajlada-signals` to v0.1.1. (#6797)
 
 ## 2.5.4
 
