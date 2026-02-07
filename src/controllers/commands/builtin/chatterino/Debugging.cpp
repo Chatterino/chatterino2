@@ -26,6 +26,8 @@
 
 #include <QApplication>
 #include <QLoggingCategory>
+#include <QProcess>
+#include <QProcessEnvironment>
 #include <QString>
 
 using namespace Qt::StringLiterals;
@@ -245,5 +247,48 @@ QString debugTest(const CommandContext &ctx)
 
     return "";
 }
+
+#ifdef Q_OS_WIN
+QString relaunchWithConsole(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    const QString loggingRulesEnv = u"QT_LOGGING_RULES"_s;
+    const QString winDebugConsoleEnv = u"QT_WIN_DEBUG_CONSOLE"_s;
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    if (ctx.words.size() > 1)
+    {
+        env.insert(loggingRulesEnv, ctx.words.mid(1).join(';'));
+    }
+    else if (!env.contains(loggingRulesEnv))
+    {
+        // by default, enable all debug logging
+        env.insert(loggingRulesEnv, "chatterino.*.debug=true");
+    }
+
+    QProcess proc;
+    proc.setProgram(qApp->applicationFilePath());
+    // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
+    env.insert(winDebugConsoleEnv, "new");
+    proc.setProcessEnvironment(env);
+    if (proc.startDetached())
+    {
+        QMetaObject::invokeMethod(
+            qApp,
+            [] {
+                QApplication::exit();
+            },
+            Qt::QueuedConnection);
+        return {};
+    }
+
+    ctx.channel->addSystemMessage("Failed to start process.");
+    return {};
+}
+#endif
 
 }  // namespace chatterino::commands
