@@ -270,6 +270,8 @@ QString relaunchWithConsole(const CommandContext &ctx)
         env.insert(loggingRulesEnv, "chatterino.*.debug=true");
     }
 
+    getSettings()->requestSave();
+
     QProcess proc;
     proc.setProgram(qApp->applicationFilePath());
     // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
@@ -277,6 +279,7 @@ QString relaunchWithConsole(const CommandContext &ctx)
     proc.setProcessEnvironment(env);
     if (proc.startDetached())
     {
+        getSettings()->disableSave();  // only disable if the process started
         QMetaObject::invokeMethod(
             qApp,
             [] {
