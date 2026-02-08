@@ -116,14 +116,42 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class c2.LayeredEmoteElement : c2.MessageElementBase
 ---@field type "layered-emote"
 
+---An element showing a single image.
 ---@class c2.ImageElement : c2.MessageElementBase
 ---@field type "image"
+---@field image c2.Image The image of this element.
 
+---A table to initialize a new image element
+---@class ImageElementInit : MessageElementInitBase
+---@field type "image"
+---@field image c2.Image The image to show.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+
+---An element showing an image with a circular background color.
 ---@class c2.CircularImageElement : c2.MessageElementBase
 ---@field type "circular-image"
+---@field image c2.Image The image of this element.
+---@field padding integer The padding around the image.
+---@field background string The background color.
 
+---A table to initialize a new image element
+---@class CircularImageElementInit : MessageElementInitBase
+---@field type "circular-image"
+---@field image c2.Image The image to show.
+---@field padding integer The padding around the image.
+---@field background string The color of the background.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+
+---An element that automatically picks the quality of the image based on the UI scale.
 ---@class c2.ScalingImageElement : c2.MessageElementBase
 ---@field type "scaling-image"
+---@field images c2.ImageSet The available images.
+
+---A table to initialize a new image element
+---@class ScalingImageElementInit : MessageElementInitBase
+---@field type "scaling-image"
+---@field images c2.ImageSet The images to show.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
 
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"
@@ -138,7 +166,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field type "ffz-badge"
 
 ---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
----@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit
+---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit|ImageElementInit|CircularImageElementInit|ScalingImageElementInit
 
 ---A chat message
 ---@class c2.Message

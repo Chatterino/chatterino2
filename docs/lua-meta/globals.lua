@@ -36,6 +36,10 @@ c2.EventType = {
 ---@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
 ---@field is_first_word boolean True if this is the first word in the input
 
+
+
+---@alias QSize {width: integer, height: integer}
+---@alias QSizeF {width: number, height: number}
 -- Begin src/common/Channel.hpp
 
 ---@enum c2.ChannelType
@@ -384,6 +388,53 @@ function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
 
+-- Begin src/controllers/plugins/api/Images.hpp
+
+
+
+---@class c2.Image
+---@field url string The url of this image.
+---@field is_loaded boolean Is this image currently loaded in RAM?
+---@field is_empty boolean Is this image empty?
+---@field width integer The scaled width of this image in pixels.
+---@field height integer The scaled height of this image in pixels.
+---@field scale number The scale factor applied to the image.
+---@field size QSizeF The scaled size of this image in pixels.
+---@field animated boolean Is this image animated? Note that this requires the image to be loaded.
+c2.Image = {}
+
+---Create an image from a URL. Images are cached based on the URL.
+---The other arguments are only used if the image is first created.
+---
+---Creating an image requires the network permission.
+---@param url string The URL to create the image with.
+---@param scale? number The scale this image should have (e.g. `0.5`, `0.25`). Defaults to 1.
+---@param expected_size? QSize The expected unscaled size of the image. This is only used as a hint when the image is not yet loaded to avoid layout shifts.
+---@return c2.Image
+function c2.Image.from_url(url, scale, expected_size) end
+
+---Get the empty image
+---@return c2.Image
+function c2.Image.empty() end
+
+---A set of images. Each image should depict the same content at different sizes.
+---@class c2.ImageSet
+---@field image1 c2.Image The base image (1x).
+---@field image2 c2.Image The first scaled image (often 2x, `scale=0.5`)
+---@field image3 c2.Image The second scaled image (often 3/4x, `scale=0.25`)
+c2.ImageSet = {}
+
+---Create a new image set.
+---All arguments accept a `c2.Image` or a `string` (URL).
+---
+---Requires the network permission.
+---@param image1? c2.Image|string
+---@param image2? c2.Image|string
+---@param image3? c2.Image|string
+---@return c2.ImageSet
+function c2.ImageSet.new(image1, image2, image3) end
+-- End src/controllers/plugins/api/Images.hpp
+
 -- Begin src/controllers/plugins/api/Message.hpp
 
 
@@ -489,14 +540,42 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class c2.LayeredEmoteElement : c2.MessageElementBase
 ---@field type "layered-emote"
 
+---An element showing a single image.
 ---@class c2.ImageElement : c2.MessageElementBase
 ---@field type "image"
+---@field image c2.Image The image of this element.
 
+---A table to initialize a new image element
+---@class ImageElementInit : MessageElementInitBase
+---@field type "image"
+---@field image c2.Image The image to show.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+
+---An element showing an image with a circular background color.
 ---@class c2.CircularImageElement : c2.MessageElementBase
 ---@field type "circular-image"
+---@field image c2.Image The image of this element.
+---@field padding integer The padding around the image.
+---@field background string The background color.
 
+---A table to initialize a new image element
+---@class CircularImageElementInit : MessageElementInitBase
+---@field type "circular-image"
+---@field image c2.Image The image to show.
+---@field padding integer The padding around the image.
+---@field background string The color of the background.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+
+---An element that automatically picks the quality of the image based on the UI scale.
 ---@class c2.ScalingImageElement : c2.MessageElementBase
 ---@field type "scaling-image"
+---@field images c2.ImageSet The available images.
+
+---A table to initialize a new image element
+---@class ScalingImageElementInit : MessageElementInitBase
+---@field type "scaling-image"
+---@field images c2.ImageSet The images to show.
+---@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
 
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"
@@ -511,7 +590,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field type "ffz-badge"
 
 ---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
----@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit
+---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit|ImageElementInit|CircularImageElementInit|ScalingImageElementInit
 
 ---A chat message
 ---@class c2.Message
