@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <QtGlobal>
+
 class QString;
 
 namespace chatterino {
@@ -35,5 +37,9 @@ QString invalidateBuffers(const CommandContext &ctx);
 QString eventsub(const CommandContext &ctx);
 
 QString debugTest(const CommandContext &ctx);
+
+#ifdef Q_OS_WIN
+QString relaunchWithConsole(const CommandContext &ctx);
+#endif
 
 }  // namespace chatterino::commands
