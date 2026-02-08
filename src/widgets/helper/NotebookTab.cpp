@@ -739,25 +739,25 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     this->update();
 }
 
-void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
+bool NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
                                        const ChannelView &channelViewSource)
 {
     if (this->isSelected())
     {
         assert(this->highlightSources_.empty());
         assert(this->highlightState_ == HighlightState::None);
-        return;
+        return false;
     }
 
     if (!this->shouldMessageHighlight(channelViewSource))
     {
-        return;
+        return false;
     }
 
     if (!this->highlightEnabled_ &&
         newHighlightStyle == HighlightState::NewMessage)
     {
-        return;
+        return false;
     }
 
     // message is highlighting unvisible tab
@@ -786,11 +786,13 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
     if (this->highlightState_ == newHighlightStyle ||
         this->highlightState_ == HighlightState::Highlighted)
     {
-        return;
+        return false;
     }
 
     this->highlightState_ = newHighlightStyle;
     this->update();
+
+    return true;
 }
 
 bool NotebookTab::shouldMessageHighlight(
