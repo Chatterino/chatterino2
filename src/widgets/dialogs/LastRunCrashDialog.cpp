@@ -5,8 +5,7 @@
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include "common/Args.hpp"
-#include "common/Literals.hpp"
-#include "common/Modes.hpp"
+#include "common/Version.hpp"  // IWYU pragma: keep
 #include "singletons/Paths.hpp"
 #include "util/LayoutCreator.hpp"
 
@@ -21,9 +20,9 @@
 #include <QStringBuilder>
 #include <QVBoxLayout>
 
-namespace {
+using namespace Qt::StringLiterals;
 
-using namespace chatterino::literals;
+namespace {
 
 const std::initializer_list<QString> MESSAGES = {
     u"Oops..."_s,        u"NotLikeThis"_s,
@@ -44,8 +43,6 @@ QString randomMessage()
 }  // namespace
 
 namespace chatterino {
-
-using namespace literals;
 
 LastRunCrashDialog::LastRunCrashDialog(const Args &args, const Paths &paths)
 {
@@ -85,7 +82,7 @@ LastRunCrashDialog::LastRunCrashDialog(const Args &args, const Paths &paths)
         "the crash</a> "
         u"so it can be prevented in the future."_s;
 
-    if (Modes::instance().isNightly)
+    if (Version::instance().isNightly())
     {
         text += u" Make sure you're using the latest nightly version!"_s;
     }
