@@ -2,6 +2,11 @@
 
 I will be using `2.3.4-beta.1` as the example release in this document.
 
+## Before making the release
+
+- [ ] Are there any issues or PRs still labeled to be included in this release? If yes, consider removing the label/milestone.
+- [ ] Do the scopes in `src/providers/twitch/TwitchAccountManager.cpp` match the ones in the website repo? https://github.com/Chatterino/website/blob/main/pages/client_login.tsx
+
 ## In the release PR
 
 - [ ] Updated version code in `src/common/Version.hpp`

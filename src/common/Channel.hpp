@@ -23,6 +23,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+using MessagePtrMut = std::shared_ptr<Message>;
 
 class Channel : public std::enable_shared_from_this<Channel>, public MessageSink
 {
@@ -60,11 +61,6 @@ public:
     ~Channel() override;
 
     // SIGNALS
-    pajlada::Signals::Signal<const QString &, const QString &, bool &>
-        sendMessageSignal;
-    pajlada::Signals::Signal<const QString &, const QString &, const QString &,
-                             bool &>
-        sendReplySignal;
     pajlada::Signals::Signal<MessagePtr &, std::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
@@ -73,7 +69,6 @@ public:
         messageReplaced;
     /// Invoked when some number of messages were filled in using time received
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
-    pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
     pajlada::Signals::NoArgSignal messagesCleared;
 
@@ -86,6 +81,12 @@ public:
 
     std::vector<MessagePtr> getMessageSnapshot() const;
     std::vector<MessagePtr> getMessageSnapshot(size_t nItems) const;
+
+    /// Essentially the same as #getMessageSnapshot(size_t), but the returned
+    /// vector holds `std::shared_ptr<Message>`. This should only be used in
+    /// plugins, because they take messages as `Message` but check that they're
+    /// frozen.
+    std::vector<MessagePtrMut> getMessageSnapshotMut(size_t nItems) const;
 
     /// Returns the last message (the one at the bottom). If the channel has no
     /// messages, this will return an empty shared pointer.
@@ -121,6 +122,8 @@ public:
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
+
+    size_t countMessages() const;
 
     void applySimilarityFilters(const MessagePtr &message) const final;
 

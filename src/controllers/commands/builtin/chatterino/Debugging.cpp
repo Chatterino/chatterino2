@@ -224,6 +224,19 @@ QString debugTest(const CommandContext &ctx)
                 break;
         }
     }
+    else if (command == "set-watching")
+    {
+        if (ctx.words.size() < 3)
+        {
+            ctx.channel->addSystemMessage("Missing name");
+            return {};
+        }
+        auto chan = getApp()->getTwitch()->getOrAddChannel(ctx.words.at(2));
+        if (chan != getApp()->getTwitch()->getWatchingChannel().get())
+        {
+            getApp()->getTwitch()->setWatchingChannel(chan);
+        }
+    }
     else
     {
         ctx.channel->addSystemMessage(

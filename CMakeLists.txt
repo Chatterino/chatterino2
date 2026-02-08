@@ -32,6 +32,7 @@ option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
 option(CHATTERINO_SPELLCHECK "Enable spellchecking in Chatterino (requires Hunspell)" OFF)
+option(CHATTERINO_NIGHTLY_BUILD "Specifies whether this is a nightly build." OFF)
 
 option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
 mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
@@ -39,6 +40,8 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+set(CHATTERINO_EXTRA_BUILD_STRING "" CACHE STRING "Provide an extra string to show in the about page under the Chatterino version. This string allows the use of Qt's HTML subset.")
 
 set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
@@ -239,16 +242,19 @@ FetchContent_Declare(
     PajladaSignals
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSerialize
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSettings
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 
 FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)

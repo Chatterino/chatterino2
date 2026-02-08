@@ -2393,6 +2393,98 @@ void Helix::warnUser(
         .execute();
 }
 
+void Helix::addSuspiciousUser(const QString broadcasterID,
+                              const QString moderatorID, const QString userID,
+                              const bool restricted,
+                              ResultCallback<> successCallback,
+                              FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject payload;
+    payload["user_id"] = userID;
+    payload["status"] = restricted ? "RESTRICTED" : "ACTIVE_MONITORING";
+
+    this->makePost("moderation/suspicious_users", urlQuery)
+        .json(payload)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for treating a suspicious user was"
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+void Helix::removeSuspiciousUser(const QString broadcasterID,
+                                 const QString moderatorID,
+                                 const QString userID,
+                                 ResultCallback<> successCallback,
+                                 FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeDelete("moderation/suspicious_users", urlQuery)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for un-treating a suspicious user was"
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 // https://dev.twitch.tv/docs/api/reference#send-whisper
 void Helix::sendWhisper(
     QString fromUserID, QString toUserID, QString message,
