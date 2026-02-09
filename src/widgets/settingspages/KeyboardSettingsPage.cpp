@@ -62,13 +62,15 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         layout.emplace<EditableModelView>(model).getElement();
     this->view_ = view;
 
-    view->setTitles({"Hotkey name", "Keybinding"});
+    view->setTitles({"Hotkey name", "Keybinding", "Keybinding alt"});
     view->getTableView()->horizontalHeader()->setVisible(true);
     view->getTableView()->horizontalHeader()->setStretchLastSection(false);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::ResizeToContents);
+        0, QHeaderView::Stretch);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        2, QHeaderView::Stretch);
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([view] {
