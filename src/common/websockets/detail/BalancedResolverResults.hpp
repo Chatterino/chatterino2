@@ -19,7 +19,7 @@ public:
     using Protocol = boost::asio::ip::tcp;
     using Entry = boost::asio::ip::basic_resolver_entry<Protocol>;
 
-    constexpr BalancedResolverResults() = default;
+    BalancedResolverResults() = default;
     explicit BalancedResolverResults(
         const Protocol::resolver::results_type &results);
     explicit BalancedResolverResults(std::vector<Entry> entries);
