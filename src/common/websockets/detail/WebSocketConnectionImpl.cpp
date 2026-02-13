@@ -99,51 +99,47 @@ void WebSocketConnectionHelper<Derived, Inner>::onResolve(
         return;
     }
 
-    this->resolvedEndpoints = results;
+    this->resolvedEndpoints = BalancedResolverResults(results);
 
-    this->tryConnect(this->resolvedEndpoints.begin());
+    this->tryConnect(this->resolvedEndpoints.advanceEntry());
 }
 
 template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::tryConnect(
-    boost::asio::ip::tcp::resolver::results_type::const_iterator
-        endpointIterator)
+    std::optional<BalancedResolverResults::Entry> entry)
 {
-    if (endpointIterator == this->resolvedEndpoints.end())
+    if (!entry)
     {
         this->fail("Ran out of resolved endpoints"sv, u"connect");
         return;
     }
 
-    const auto &endpoint = endpointIterator->endpoint();
+    auto ep = entry->endpoint();
 
     qCDebug(chatterinoWebsocket)
-        << *this << "connect to" << endpoint.address().to_string();
+        << *this << "connect to" << ep.address().to_string();
 
     beast::get_lowest_layer(this->stream)
         .expires_after(std::chrono::seconds{30});
 
     beast::get_lowest_layer(this->stream)
-        .async_connect(endpoint,
-                       beast::bind_front_handler(
-                           &WebSocketConnectionHelper::onTcpHandshake,
-                           this->shared_from_this(), endpointIterator));
+        .async_connect(ep, beast::bind_front_handler(
+                               &WebSocketConnectionHelper::onTcpHandshake,
+                               this->shared_from_this(), *std::move(entry)));
 }
 
 template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onTcpHandshake(
-    boost::asio::ip::tcp::resolver::results_type::const_iterator
-        endpointIterator,
-    boost::system::error_code ec)
+    const BalancedResolverResults::Entry &entry, boost::system::error_code ec)
 {
-    const auto &ep = endpointIterator->endpoint();
+    const auto &ep = entry.endpoint();
 
     if (ec)
     {
         qCDebug(chatterinoWebsocket)
             << *this << "error in tcp handshake" << ep.address().to_string()
             << ec.message();
-        this->tryConnect(++endpointIterator);
+        this->tryConnect(this->resolvedEndpoints.advanceEntry());
         return;
     }
 
