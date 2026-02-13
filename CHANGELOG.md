@@ -110,6 +110,7 @@
 - Dev: Updated `pajlada-settings` to v0.5.0. (#6797)
 - Dev: Updated `pajlada-serialize` to v0.2.1. (#6797)
 - Dev: Updated `pajlada-signals` to v0.1.1. (#6797)
+- Dev: Balance IPv4 and IPv6 connection attempts. (#6804)
 
 ## 2.5.4
 

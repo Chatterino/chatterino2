@@ -12,7 +12,7 @@ namespace chatterino::ws::detail {
 /// balanced when iterating where possible.
 ///
 /// If enough records are available, an IPv4 record is followed by an IPv6 one
-/// and vice-versa. The resolver starts with IPv4 entries.
+/// and vice versa. The resolver starts with IPv4 entries.
 class BalancedResolverResults
 {
 public:
