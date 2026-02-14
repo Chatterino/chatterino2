@@ -140,6 +140,14 @@ void WebSocketConnectionHelper<Derived, Inner>::onTcpHandshake(
         qCDebug(chatterinoWebsocket)
             << *this << "error in tcp handshake" << ep.address().to_string()
             << ec.message();
+
+        beast::get_lowest_layer(this->stream).socket().close(ec);
+        if (ec)
+        {
+            qCDebug(chatterinoWebsocket)
+                << *this << "closing websocket after error" << ec.message();
+        }
+
         this->tryConnect(this->resolvedEndpoints.advanceEntry());
         return;
     }
