@@ -49,7 +49,7 @@ UpdateDialog::UpdateDialog()
         this->close();
     });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
-        this->buttonClicked.invoke(Dismiss);
+        this->dismissed.invoke();
         this->close();
     });
 

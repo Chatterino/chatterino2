@@ -21,11 +21,10 @@ class Label;
 class UpdateDialog : public BaseWindow
 {
 public:
-    enum Button { Dismiss, Install };
-
     UpdateDialog();
 
-    pajlada::Signals::Signal<Button> buttonClicked;
+    /// The user chose to dismiss this update.
+    pajlada::Signals::NoArgSignal dismissed;
 
 private:
     void updateStatusChanged(Updates::Status status);
