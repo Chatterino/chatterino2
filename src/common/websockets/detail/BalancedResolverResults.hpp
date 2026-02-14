@@ -48,7 +48,7 @@ private:
 
     size_t nextIPv4Idx = 0;
     size_t nextIPv6Idx = 0;
-    bool currentIsIPv6 = true;
+    bool nextIsIPv6 = true;
 
     size_t currentIdx = std::numeric_limits<size_t>::max();
 

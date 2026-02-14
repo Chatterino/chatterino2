@@ -91,8 +91,8 @@ TEST(BalancedResolverResults, singleV6)
 TEST(BalancedResolverResults, singleV4AndV6)
 {
     std::vector<Entry> entries{
-        makeV4("10.10.10.1"),
         makeV6("1234:5678:9abc:def::1"),
+        makeV4("10.10.10.1"),
     };
     runCheck(BalancedResolverResults(entries), entries);
 }
@@ -129,8 +129,8 @@ TEST(BalancedResolverResults, doubleV4SingleV6)
                  makeV4("10.10.10.2"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
+                 makeV4("10.10.10.1"),
                  makeV4("10.10.10.2"),
              });
 }
@@ -143,8 +143,8 @@ TEST(BalancedResolverResults, singleV4DoubleV6)
                  makeV4("10.10.10.1"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
+                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::2"),
              });
 }
@@ -158,10 +158,10 @@ TEST(BalancedResolverResults, doubleV4AndV6)
                  makeV6("1234:5678:9abc:def::2"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
-                 makeV4("10.10.10.2"),
+                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::2"),
+                 makeV4("10.10.10.2"),
              });
 }
 
@@ -202,8 +202,8 @@ TEST(BalancedResolverResults, tripleV4SingleV6)
                  makeV4("10.10.10.3"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
+                 makeV4("10.10.10.1"),
                  makeV4("10.10.10.2"),
                  makeV4("10.10.10.3"),
              });
@@ -218,8 +218,8 @@ TEST(BalancedResolverResults, singleV4TripleV6)
                  makeV6("1234:5678:9abc:def::3"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
+                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::2"),
                  makeV6("1234:5678:9abc:def::3"),
              });
@@ -236,11 +236,11 @@ TEST(BalancedResolverResults, tripleV4AndV6)
                  makeV6("1234:5678:9abc:def::3"),
              }),
              {
-                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::1"),
-                 makeV4("10.10.10.2"),
+                 makeV4("10.10.10.1"),
                  makeV6("1234:5678:9abc:def::2"),
-                 makeV4("10.10.10.3"),
+                 makeV4("10.10.10.2"),
                  makeV6("1234:5678:9abc:def::3"),
+                 makeV4("10.10.10.3"),
              });
 }

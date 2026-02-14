@@ -16,17 +16,18 @@ BalancedResolverResults::BalancedResolverResults(std::vector<Entry> entries)
 std::optional<BalancedResolverResults::Entry>
     BalancedResolverResults::advanceEntry()
 {
-    if (this->currentIsIPv6)
+    if (this->nextIsIPv6)
     {
-        // advance v4 first
-        if (this->advanceIPv4() || this->advanceIPv6())
+        // advance v6 first
+        if (this->advanceIPv6() || this->advanceIPv4())
         {
             return this->currentEntry();
         }
     }
     else
     {
-        if (this->advanceIPv6() || this->advanceIPv4())
+        // advance v4 first
+        if (this->advanceIPv4() || this->advanceIPv6())
         {
             return this->currentEntry();
         }
@@ -49,7 +50,7 @@ void BalancedResolverResults::reset()
     this->nextIPv4Idx = 0;
     this->nextIPv6Idx = 0;
     this->currentIdx = std::numeric_limits<size_t>::max();
-    this->currentIsIPv6 = true;
+    this->nextIsIPv6 = true;
 }
 
 bool BalancedResolverResults::advanceIPv4()
@@ -59,7 +60,7 @@ bool BalancedResolverResults::advanceIPv4()
         if (this->entries[this->nextIPv4Idx].endpoint().address().is_v4())
         {
             this->currentIdx = this->nextIPv4Idx++;
-            this->currentIsIPv6 = false;
+            this->nextIsIPv6 = true;
             return true;
         }
     }
@@ -73,7 +74,7 @@ bool BalancedResolverResults::advanceIPv6()
         if (this->entries[this->nextIPv6Idx].endpoint().address().is_v6())
         {
             this->currentIdx = this->nextIPv6Idx++;
-            this->currentIsIPv6 = true;
+            this->nextIsIPv6 = false;
             return true;
         }
     }
