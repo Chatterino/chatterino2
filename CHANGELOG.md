@@ -54,6 +54,7 @@
 - Bugfix: Disable "Sort Tabs Alphabetically" action when notebook layout is locked. (#6710)
 - Bugfix: Fix highlight mentions not updating when username changes. (#6723, #6739)
 - Bugfix: Fixed Return and Enter being treated as different keys on Mac OS. (#6726)
+- Bugfix: Fixed portable updates not showing an error if the updater is not present. (#6801)
 - Dev: Nightly builds are now defined through a build flag rather than the Modes file. (#6798)
 - Dev: Update release documentation. (#6498)
 - Dev: Make code sanitizers opt in with the `CHATTERINO_SANITIZER_SUPPORT` CMake option. After that's enabled, use the `SANITIZE_*` flag to enable individual sanitizers. (#6493)
