@@ -55,6 +55,9 @@ public:
     bool isError() const;
     bool isDowngrade() const;
 
+    /// Generates the string that the update dialog will show.
+    QString buildUpdateAvailableText() const;
+
     pajlada::Signals::Signal<Status> statusUpdated;
 
 private:

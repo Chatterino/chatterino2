@@ -15,6 +15,9 @@ namespace chatterino {
 
 class Label;
 
+/// The UpdateDialog is what's shown to the user after they clicked the update indicator in the tab bar/title bar.
+///
+/// For Nightly builds, we change the "Install" text to "Yes" to better match the question posed by the available update.
 class UpdateDialog : public BaseWindow
 {
 public:
