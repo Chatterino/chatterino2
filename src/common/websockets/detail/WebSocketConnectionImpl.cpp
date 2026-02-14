@@ -114,18 +114,19 @@ void WebSocketConnectionHelper<Derived, Inner>::tryConnect(
         return;
     }
 
-    auto ep = entry->endpoint();
+    auto endpoint = entry->endpoint();
 
     qCDebug(chatterinoWebsocket)
-        << *this << "connect to" << ep.address().to_string();
+        << *this << "connect to" << endpoint.address().to_string();
 
     beast::get_lowest_layer(this->stream)
         .expires_after(std::chrono::seconds{30});
 
     beast::get_lowest_layer(this->stream)
-        .async_connect(ep, beast::bind_front_handler(
-                               &WebSocketConnectionHelper::onTcpHandshake,
-                               this->shared_from_this(), *std::move(entry)));
+        .async_connect(endpoint,
+                       beast::bind_front_handler(
+                           &WebSocketConnectionHelper::onTcpHandshake,
+                           this->shared_from_this(), *std::move(entry)));
 }
 
 template <typename Derived, typename Inner>
