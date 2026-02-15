@@ -104,6 +104,30 @@ std::unique_ptr<ReplyCurveElement> replyCurveElementFromTable()
     return std::make_unique<ReplyCurveElement>();
 }
 
+std::unique_ptr<ImageElement> imageElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<ImageElement>(
+        requiredGet<ImagePtr>(tbl, "image"),
+        tbl.get_or("flags", MessageElementFlag::None));
+}
+
+std::unique_ptr<CircularImageElement> circularImageElementFromTable(
+    const sol::table &tbl)
+{
+    return std::make_unique<CircularImageElement>(
+        requiredGet<ImagePtr>(tbl, "image"), requiredGet<int>(tbl, "padding"),
+        QColor::fromString(requiredGet<std::string_view>(tbl, "background")),
+        tbl.get_or("flags", MessageElementFlag::None));
+}
+
+std::unique_ptr<ScalingImageElement> scalingImageElementFromTable(
+    const sol::table &tbl)
+{
+    return std::make_unique<ScalingImageElement>(
+        requiredGet<ImageSet>(tbl, "images"),
+        tbl.get_or("flags", MessageElementFlag::None));
+}
+
 void setLinkOn(MessageElement *el, const Link &link)
 {
     el->setLink(link);
@@ -176,6 +200,18 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     {
         el = replyCurveElementFromTable();
         linksAllowed = false;
+    }
+    else if (type == ImageElement::TYPE)
+    {
+        el = imageElementFromTable(tbl);
+    }
+    else if (type == CircularImageElement::TYPE)
+    {
+        el = circularImageElementFromTable(tbl);
+    }
+    else if (type == ScalingImageElement::TYPE)
+    {
+        el = scalingImageElementFromTable(tbl);
     }
     else
     {
@@ -677,10 +713,18 @@ void createUserType(sol::table &c2)
                 &CircularImageElement::padding);
         }),
         "background", sol::property([](const ElementRef &el) {
-            return el.as<CircularImageElement>().map(
+            return el.asConst<CircularImageElement>().map(
                 [](const CircularImageElement &el) {
                     return el.background().name(QColor::HexArgb);
                 });
+        }),
+        "images", sol::property([](const ElementRef &el) {
+            return el.asConst<ScalingImageElement>().map(
+                &ScalingImageElement::images);
+        }),
+        "image", sol::property([](const ElementRef &el) {
+            return el.visit<const ImageElement, const CircularImageElement>(
+                &ImageElement::image, &CircularImageElement::image);
         }),
         "words", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(

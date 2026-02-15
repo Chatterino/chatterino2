@@ -266,7 +266,10 @@ declare namespace c2 {
         | TimestampElementInit
         | TwitchModerationElementInit
         | LinebreakElementInit
-        | ReplyCurveElementInit;
+        | ReplyCurveElementInit
+        | ImageElementInit
+        | CircularImageElementInit
+        | ScalingImageElementInit;
 
     interface TextElement extends MessageElementBase {
         type: "text";
@@ -365,14 +368,39 @@ declare namespace c2 {
 
     interface ImageElement extends MessageElementBase {
         type: "image";
+        image: Image;
+    }
+
+    interface ImageElementInit extends MessageElementInitBase {
+        type: "image";
+        image: Image;
+        flags?: MessageElementFlag;
     }
 
     interface CircularImageElement extends MessageElementBase {
         type: "circular-image";
+        image: Image;
+        padding: number;
+        background: string;
+    }
+
+    interface CircularImageElementInit extends MessageElementInitBase {
+        type: "circular-image";
+        image: Image;
+        padding: number;
+        background: string;
+        flags?: MessageElementFlag;
     }
 
     interface ScalingImageElement extends MessageElementBase {
         type: "scaling-image";
+        images: ImageSet;
+    }
+
+    interface ScalingImageElementInit extends MessageElementInitBase {
+        type: "scaling-image";
+        images: ImageSet;
+        flags?: MessageElementFlag;
     }
 
     interface BadgeElement extends MessageElementBase {
@@ -534,6 +562,49 @@ declare namespace c2 {
     }
 
     function current_account(): TwitchAccount;
+
+    interface QSizeF {
+        width: number;
+        height: number;
+    }
+    interface QSize {
+        width: number;
+        height: number;
+    }
+
+    class Image {
+        readonly url: string;
+        readonly is_loaded: boolean;
+        readonly is_empty: boolean;
+        readonly width: number;
+        readonly height: number;
+        readonly scale: number;
+        readonly size: QSizeF;
+        readonly animated: boolean;
+
+        static from_url(
+            url: string,
+            scale?: number,
+            expected_size?: QSize
+        ): Image;
+        static empty(): Image;
+    }
+
+    interface ImageSet {
+        image1: Image;
+        image2: Image;
+        image3: Image;
+    }
+
+    interface ImageSetConstructor {
+        new: (
+            this: void,
+            image1?: Image | string,
+            image2?: Image | string,
+            image3?: Image | string
+        ) => ImageSet;
+    }
+    var ImageSet: ImageSetConstructor;
 }
 
 declare module "chatterino.json" {
