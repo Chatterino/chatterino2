@@ -61,6 +61,8 @@ set(SOURCE_FILES
 
         common/websockets/WebSocketPool.cpp
         common/websockets/WebSocketPool.hpp
+        common/websockets/detail/BalancedResolverResults.cpp
+        common/websockets/detail/BalancedResolverResults.hpp
         common/websockets/detail/WebSocketConnection.cpp
         common/websockets/detail/WebSocketConnection.hpp
         common/websockets/detail/WebSocketConnectionImpl.cpp
