@@ -246,7 +246,8 @@ TEST(FormatTime, formatDurationExact)
 
     for (const auto &c : cases)
     {
-        ASSERT_EQ(formatDurationExact(c.input), c.output) << c.input;
+        ASSERT_EQ(formatDurationExact(c.input), c.output)
+            << "Input: " << c.input.count() << 's';
     }
 }
 
