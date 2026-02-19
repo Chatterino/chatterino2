@@ -20,11 +20,13 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "Test.hpp"
 
 #include <QColor>
 #include <QVariant>
 
+using namespace Qt::Literals;
 using namespace chatterino;
 using namespace chatterino::filters;
 using chatterino::mock::MockChannel;
@@ -89,6 +91,11 @@ public:
         return &this->logging;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        return &this->twitchBadges;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::EmoteController emotes;
@@ -99,6 +106,7 @@ public:
     BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
+    TwitchBadges twitchBadges;
 };
 
 class FiltersF : public ::testing::Test
@@ -131,15 +139,26 @@ std::ostream &operator<<(std::ostream &os, Type t)
 
 TEST(Filters, Validity)
 {
-    struct TestCase {
-        QString input;
-        bool valid;
-    };
-
-    // clang-format off
-    std::vector<TestCase> tests{
+    std::vector<std::pair<QString, bool>> tests{
         {"", false},
         {R".(1 + 1).", true},
+        {R".(1 + (1==1)).", false},
+        {R".((1==1) + 1).", false},
+        {R".(1 + (1 + (1==1))).", false},
+        {R".(1 % "").", false},
+        {R".("" % 1).", false},
+        {R".(1 - "").", false},
+        {R".("" - 1).", false},
+        {R".(1 * "").", false},
+        {R".("" * 1).", false},
+        {R".(1 / "").", false},
+        {R".("" / 1).", false},
+        {R".("" || (1==1)).", false},
+        {R".((1!=1) && 1).", false},
+        {R".(1 < "").", false},
+        {R".("" > 1).", false},
+        {R".("" >= 1).", false},
+        {R".(author.badges <= 1).", false},
         {R".(1 + ).", false},
         {R".(1 + 1)).", false},
         {R".((1 + 1).", false},
@@ -151,9 +170,32 @@ TEST(Filters, Validity)
         {R".(123 + "abc" == "hello").", false},
         {R".(flags.reply && flags.automod).", true},
         {R".(unknown.identifier).", false},
-        {R".(channel.name == "forsen" && author.badges contains "moderator").", true},
+        {R".(10 startswith 1).", false},
+        {R".(10 startswith "").", false},
+        {R".("10" endswith 1).", false},
+        {R".(1 contains "").", false},
+        {R".("10" contains 1).", false},
+        {R".((1+"") contains 1).", false},
+        {R".("10" match 1).", false},
+        {R".(1 match r"1").", false},
+        {
+            R".(channel.name == "forsen" && author.badges contains "moderator").",
+            true,
+        },
+        {R".({(1+""), 2}).", false},
+        {R".("abc" match {ri"foo", "bar"}).", false},
+        {R".(!{}).", false},
+        {R".(!(1+"")).", false},
+        {R".({).", false},
+        {R".({,).", false},
+        {R".({1!).", false},
+        {R".((1) "").", false},
+        {R".(().", false},
+        {R".()").", false},
+        {R".((1()").", false},
+        {R".("foo).", false},
+        {R".(foo").", false},
     };
-    // clang-format on
 
     for (const auto &[input, expected] : tests)
     {
@@ -204,11 +246,6 @@ TEST(Filters, TypeSynthesis)
 
 TEST(Filters, Evaluation)
 {
-    struct TestCase {
-        QString input;
-        QVariant output;
-    };
-
     ContextMap contextMap = {
         {"author.name", QVariant("icelys")},
         {"author.color", QVariant(QColor("#ff0000"))},
@@ -219,15 +256,16 @@ TEST(Filters, Evaluation)
         {"author.external_badges", QStringList{"frankerfacez:bot"}},
     };
 
-    // clang-format off
-    std::vector<TestCase> tests
-    {
+    std::vector<std::pair<QString, QVariant>> tests{
         // Evaluation semantics
         {R".(1 + 1).", QVariant(2)},
         {R".(!(1 == 1)).", QVariant(false)},
-        {R".(2 + 3 * 4).", QVariant(20)},  // math operators have the same precedence
+        {R".(2 + 3 * 4).",
+         QVariant(20)},  // math operators have the same precedence
         {R".(1 > 2 || 3 >= 3).", QVariant(true)},
         {R".(1 > 2 && 3 > 1).", QVariant(false)},
+        {R".(1 > 0 && 3 > 1).", QVariant(true)},
+        {R".(0 <= 0 && 3 < 1).", QVariant(false)},
         {R".("abc" + 123).", QVariant("abc123")},
         {R".("abc" + "456").", QVariant("abc456")},
         {R".(3 - 4).", QVariant(-1)},
@@ -238,14 +276,21 @@ TEST(Filters, Evaluation)
         {R".(5 == "5").", QVariant(true)},
         {R".(5 != 7).", QVariant(true)},
         {R".(5 == "abc").", QVariant(false)},
-        {R".("ABC123" == "abc123").", QVariant(true)},  // String comparison is case-insensitive
+        // String comparison is case-insensitive
+        {R".("ABC123" == "abc123").", QVariant(true)},
+        {R".("ABC123" != "abc123").", QVariant(false)},
         {R".("Hello world" contains "Hello").", QVariant(true)},
-        {R".("Hello world" contains "LLO W").", QVariant(true)},  // Case-insensitive
+        {R".("Hello world" contains "LLO W").",
+         QVariant(true)},  // Case-insensitive
         {R".({"abc", "def"} contains "abc").", QVariant(true)},
-        {R".({"abc", "def"} contains "ABC").", QVariant(true)},  // Case-insensitive when list is all strings
-        {R".({123, "def"} contains "DEF").", QVariant(false)},  // Case-sensitive if list not all strings
+        {R".({"abc", "def"} contains "ABC").",
+         QVariant(true)},  // Case-insensitive when list is all strings
+        {R".({123, "def"} contains "DEF").",
+         QVariant(false)},  // Case-sensitive if list not all strings
         {R".({"a123", "b456"} startswith "a123").", QVariant(true)},
         {R".({"a123", "b456"} startswith "A123").", QVariant(true)},
+        {R".({"a123", 1} startswith "A123").", QVariant(false)},
+        {R".({"a123", 1} startswith "a123").", QVariant(true)},
         {R".({} startswith "A123").", QVariant(false)},
         {R".("Hello world" startswith "Hello").", QVariant(true)},
         {R".("Hello world" startswith "world").", QVariant(false)},
@@ -257,13 +302,16 @@ TEST(Filters, Evaluation)
         {R".(author.name).", QVariant("icelys")},
         {R".(!author.subbed).", QVariant(true)},
         {R".(author.color == "#ff0000").", QVariant(true)},
-        {R".(channel.name == "forsen" && author.badges contains "moderator").", QVariant(true)},
-        {R".(author.external_badges contains "frankerfacez:bot").", QVariant(true)},
-        {R".(message.content match {r"(\d\d\d\d)\-(\d\d)\-(\d\d)", 3}).", QVariant("19")},
+        {R".(channel.name == "forsen" && author.badges contains "moderator").",
+         QVariant(true)},
+        {R".(author.external_badges contains "frankerfacez:bot").",
+         QVariant(true)},
+        {R".(message.content match {r"(\d\d\d\d)\-(\d\d)\-(\d\d)", 3}).",
+         QVariant("19")},
+        {R".(message.content match {r"forsen", 3}).", QVariant("")},
         {R".(message.content match r"HEY THERE").", QVariant(false)},
         {R".(message.content match ri"HEY THERE").", QVariant(true)},
     };
-    // clang-format on
 
     for (const auto &[input, expected] : tests)
     {
@@ -284,7 +332,7 @@ TEST(Filters, Evaluation)
 
 TEST_F(FiltersF, TypingContextChecks)
 {
-    MockChannel channel("pajlada");
+    TwitchChannel channel("pajlada");
 
     QByteArray message =
         R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)";
@@ -299,14 +347,57 @@ TEST_F(FiltersF, TypingContextChecks)
 
     QString originalMessage = privmsg->content();
 
-    auto [msg, alert] = MessageBuilder::makeIrcMessage(
-        &channel, privmsg, MessageParseArgs{}, originalMessage, 0);
+    auto [msg, alert] = MessageBuilder::makeIrcMessage(&channel, privmsg,
+                                                       MessageParseArgs{
+                                                           .isAction = true,
+                                                       },
+                                                       originalMessage, 0);
 
     EXPECT_NE(msg.get(), nullptr);
 
     auto contextMap = buildContextMap(msg, &channel);
+    qDebug() << contextMap;
 
-    EXPECT_EQ(contextMap.size(), MESSAGE_TYPING_CONTEXT.size());
+    ContextMap expected{
+        {"author.badges", QStringList{"broadcaster", "subscriber", "partner"}},
+        {"author.color", QColor::fromString("#CC44FF")},
+        {"author.external_badges", QStringList{}},
+        {"author.name", u"pajlada"_s},
+        {"author.no_color", false},
+        {"author.sub_length", 80},
+        {"author.subbed", true},
+        {"author.user_id", u"11148817"_s},
+
+        {"channel.live", false},
+        {"channel.name", u"pajlada"_s},
+        {"channel.watching", false},
+
+        {"flags.action", true},
+        {"flags.automod", false},
+        {"flags.cheer_message", false},
+        {"flags.elevated_message", false},
+        {"flags.first_message", false},
+        {"flags.highlighted", false},
+        {"flags.hype_chat", false},
+        {"flags.monitored", false},
+        {"flags.points_redeemed", false},
+        {"flags.reply", false},
+        {"flags.restricted", false},
+        {"flags.reward_message", false},
+        {"flags.shared", false},
+        {"flags.similar", false},
+        {"flags.sub_message", false},
+        {"flags.system_message", false},
+        {"flags.whisper", false},
+
+        {"message.content", "Kappa"},
+        {"message.length", 5},
+
+        {"reward.cost", -1},
+        {"reward.id", QString{}},
+        {"reward.title", QString{}},
+    };
+    EXPECT_EQ(contextMap, expected);
 
     delete privmsg;
 }
