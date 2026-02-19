@@ -210,6 +210,46 @@ TEST(FormatTime, chrono)
     }
 }
 
+TEST(FormatTime, formatDurationExact)
+{
+    struct Case {
+        std::chrono::seconds input;
+        QStringView output;
+    };
+    std::vector<Case> cases{
+        {.input = 0s, .output = u"0s"},
+        {.input = 1s, .output = u"1s"},
+        {.input = 10s, .output = u"10s"},
+        {.input = 59s, .output = u"59s"},
+        {.input = 60s, .output = u"1m"},
+        {.input = 61s, .output = u"61s"},
+        {.input = 64s, .output = u"64s"},
+        {.input = 2min, .output = u"2m"},
+        {.input = 10min, .output = u"10m"},
+        {.input = 10min + 2s, .output = u"602s"},
+        {.input = 59min, .output = u"59m"},
+        {.input = 1h, .output = u"1h"},
+        {.input = 1h + 1min, .output = u"61m"},
+        {.input = 1h + 1min + 1s, .output = u"3,661s"},
+        {.input = 10h, .output = u"10h"},
+        {.input = 10h + 2s, .output = u"36,002s"},
+        {.input = 23h, .output = u"23h"},
+        {.input = 24h, .output = u"1d"},
+        {.input = 25h, .output = u"25h"},
+        {.input = 5 * 24h, .output = u"5d"},
+        {.input = 7 * 24h, .output = u"7d"},
+        {.input = 14 * 24h, .output = u"14d"},
+        {.input = 28 * 24h, .output = u"28d"},
+        {.input = 30 * 24h, .output = u"30d"},
+        {.input = 31 * 24h, .output = u"31d"},
+    };
+
+    for (const auto &c : cases)
+    {
+        ASSERT_EQ(formatDurationExact(c.input), c.output) << c.input;
+    }
+}
+
 TEST(FormatTime, formatLongFriendlyDuration)
 {
     struct Case {
