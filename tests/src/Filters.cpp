@@ -360,7 +360,7 @@ TEST_F(FiltersF, TypingContextChecks)
 
     ContextMap expected{
         {"author.badges", QStringList{"broadcaster", "subscriber", "partner"}},
-        {"author.color", QColor::fromString("#CC44FF")},
+        {"author.color", QColor(0xCC44FF)},
         {"author.external_badges", QStringList{}},
         {"author.name", u"pajlada"_s},
         {"author.no_color", false},
