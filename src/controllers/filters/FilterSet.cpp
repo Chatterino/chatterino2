@@ -34,6 +34,11 @@ FilterSet::FilterSet(const QList<QUuid> &filterIds)
         });
 }
 
+FilterSet::FilterSet(QMap<QUuid, FilterRecordPtr> filters)
+    : filters_(std::move(filters))
+{
+}
+
 FilterSet::~FilterSet()
 {
     this->listener_.disconnect();
