@@ -40,7 +40,7 @@ public:
             // ensure deterministic order
             auto id = QUuid(static_cast<uint>(i), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             auto filter = std::make_shared<FilterRecord>(
-                QString::number(i), this->filterTexts[i], id);
+                QString::number(i), this->filterTexts.at(i), id);
             if (!filter->valid())
             {
                 qCDebug(chatterinoApp) << i << this->filterTexts[i];
