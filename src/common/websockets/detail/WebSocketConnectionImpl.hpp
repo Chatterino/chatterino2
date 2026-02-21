@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "common/websockets/detail/BalancedResolverResults.hpp"
 #include "common/websockets/detail/WebSocketConnection.hpp"
 
 #include <boost/asio/ssl/context.hpp>
@@ -69,12 +70,9 @@ private:
     ///
     /// If the iterator is invalid, we have run out of endpoints to try, and deem this
     /// connection a failure.
-    void tryConnect(boost::asio::ip::tcp::resolver::results_type::const_iterator
-                        endpointIterator);
-    void onTcpHandshake(
-        boost::asio::ip::tcp::resolver::results_type::const_iterator
-            endpointIterator,
-        boost::system::error_code ec);
+    void tryConnect(std::optional<BalancedResolverResults::Entry> entry);
+    void onTcpHandshake(const BalancedResolverResults::Entry &entry,
+                        boost::system::error_code ec);
     void onWsHandshake(boost::system::error_code ec);
 
     void onReadDone(boost::system::error_code ec, size_t bytesRead);
@@ -86,7 +84,7 @@ private:
     ///
     /// When we successfully resolve the host, we try to connect by
     /// iterating over these results.
-    boost::asio::ip::tcp::resolver::results_type resolvedEndpoints;
+    BalancedResolverResults resolvedEndpoints;
 };
 
 /// A WebSocket connection over TLS (wss://).
