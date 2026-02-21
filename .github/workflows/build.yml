@@ -9,6 +9,16 @@ on:
       - "release/*"
   pull_request:
   workflow_dispatch:
+    inputs:
+      buildType:
+        description: "Build type"
+        required: true
+        type: choice
+        default: "auto"
+        options:
+          - auto
+          - nightly
+          - stable
   merge_group:
 
 concurrency:
@@ -18,6 +28,7 @@ concurrency:
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
+  CHATTERINO_BUILD_TYPE: ${{ case(inputs.buildType != '', inputs.buildType, 'auto') }}
   CONAN_VERSION: 2.11.0
 
 jobs:
@@ -70,6 +81,29 @@ jobs:
         run: |
           git config --global --add safe.directory '*'
 
+      - name: Determine build type
+        id: build-type
+        shell: bash
+        run: |
+          if [ "${CHATTERINO_BUILD_TYPE}" = "auto" ]; then
+            if git describe --exact-match --match 'v*'; then
+              echo "Auto - found release tag format"
+              echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+            else
+              echo "Auto - did not find release tag format"
+              echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "nightly" ]; then
+            echo "Override to nightly"
+            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "stable" ]; then
+            echo "Override to stable"
+            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: no build type variable set"
+            exit 1
+          fi
+
       - name: Install Python and libclang (24.04)
         if: matrix.os == 'ubuntu-24.04'
         run: |
@@ -93,6 +127,7 @@ jobs:
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
             -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
             -DCHATTERINO_PLUGINS=${{ matrix.plugins && 'On' || 'Off' }} \
             ..
@@ -146,6 +181,29 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+
+      - name: Determine build type
+        id: build-type
+        shell: bash
+        run: |
+          if [ "${CHATTERINO_BUILD_TYPE}" = "auto" ]; then
+            if git describe --exact-match --match 'v*'; then
+              echo "Auto - found release tag format"
+              echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+            else
+              echo "Auto - did not find release tag format"
+              echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "nightly" ]; then
+            echo "Override to nightly"
+            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "stable" ]; then
+            echo "Override to stable"
+            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: no build type variable set"
+            exit 1
+          fi
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
@@ -219,7 +277,9 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
               -DFORCE_JSON_GENERATION=On `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -242,7 +302,6 @@ jobs:
           windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           ..\.CI\deploy-crt.ps1 Chatterino2
-          echo nightly > Chatterino2/modes
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
@@ -273,8 +332,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          # brew install openssl rapidjson p7zip create-dmg cmake tree boost
-          brew install openssl rapidjson p7zip create-dmg tree boost
+          # brew install openssl rapidjson p7zip create-dmg cmake tree boost hunspell
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
         shell: bash
 
       - name: Build (MacOS)
@@ -289,6 +348,8 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash

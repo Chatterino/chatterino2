@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726692492710;subscriber=1;id=89c8f200-ae37-4279-909d-5ff4f9ed10a0;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;reply-parent-user-id=129546453;reply-parent-msg-body=ignore;reply-parent-display-name=nerixyz;reply-thread-parent-user-login=nerixyz;reply-parent-user-login=nerixyz;reply-thread-parent-display-name=nerixyz;reply-thread-parent-msg-id=68a68ef7-0ee3-4584-8937-6d20ff0a7a8a;reply-thread-parent-user-id=129546453;reply-parent-msg-id=68a68ef7-0ee3-4584-8937-6d20ff0a7a8a :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :@nerixyz CaseSensitive",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -164,6 +158,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ReplyMessage",
             "frozen": false,
             "id": "89c8f200-ae37-4279-909d-5ff4f9ed10a0",
@@ -181,6 +177,12 @@
             "searchText": "nerixyz  nerixyz: casesensitivE ",
             "serverReceivedTime": "2024-09-18T20:48:12Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

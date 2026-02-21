@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
@@ -481,6 +485,22 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     twitchChannel->createClip({}, {});
                 })
             ->setVisible(twitchChannel->isLive());
+
+        if (this->split_->getIndirectChannel().getType() ==
+            Channel::Type::TwitchWatching)
+        {
+            menu->addAction("Reset /watching", this->split_, [] {
+                if (!getApp()
+                         ->getTwitch()
+                         ->getWatchingChannel()
+                         .get()
+                         ->isEmpty())
+                {
+                    getApp()->getTwitch()->setWatchingChannel(
+                        Channel::getEmpty());
+                }
+            });
+        }
 
         menu->addSeparator();
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/UpdateDialog.hpp"
 
 #include "Application.hpp"
@@ -90,6 +94,18 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
 
         case Updates::WriteFileFailed: {
             this->ui_.label->setText("Failed to save the update to disk.");
+        }
+        break;
+
+        case Updates::MissingPortableUpdater: {
+            this->ui_.label->setText("The portable updater (expected in " %
+                                     Updates::portableUpdaterPath() %
+                                     ") was not found.");
+        }
+        break;
+
+        case Updates::RunUpdaterFailed: {
+            this->ui_.label->setText("Failed to run the updater.");
         }
         break;
 

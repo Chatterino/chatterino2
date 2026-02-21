@@ -8,10 +8,6 @@
         "}}"
     ],
     "output": {
-        "badgeInfos": {
-        },
-        "badges": [
-        ],
         "channelName": "",
         "count": 1,
         "displayName": "",
@@ -89,6 +85,8 @@
                 ]
             }
         ],
+        "externalBadges": [
+        ],
         "flags": "",
         "frozen": false,
         "id": "",
@@ -98,6 +96,10 @@
         "searchText": "",
         "serverReceivedTime": "",
         "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
         "userID": "",
         "usernameColor": "#ff000000"
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
@@ -170,7 +174,7 @@ Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
 
 namespace chatterino::linkparser {
 
-std::optional<Parsed> parse(const QString &source) noexcept
+std::optional<Parsed> parse(QStringView source) noexcept
 {
     using SizeType = QString::size_type;
 

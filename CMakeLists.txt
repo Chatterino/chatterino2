@@ -6,6 +6,7 @@ cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
 include(FetchContent)
+include(CMakeDependentOption)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -28,9 +29,15 @@ option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+# CMake doesn't detect LTO for some compilers (e.g. clang-cl: https://gitlab.kitware.com/cmake/cmake/-/issues/21635),
+# so this skips the check and assumes LTO works.
+cmake_dependent_option(CHATTERINO_FORCE_LTO "Skip check if LTO is supported" OFF CHATTERINO_LTO OFF)
+option(CHATTERINO_FORCE_LTO "Don't check if LTO is supported" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
+option(CHATTERINO_SPELLCHECK "Enable spellchecking in Chatterino (requires Hunspell)" OFF)
+option(CHATTERINO_NIGHTLY_BUILD "Specifies whether this is a nightly build." OFF)
 
 option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
 mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
@@ -38,6 +45,8 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+set(CHATTERINO_EXTRA_BUILD_STRING "" CACHE STRING "Provide an extra string to show in the about page under the Chatterino version. This string allows the use of Qt's HTML subset.")
 
 set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
@@ -72,9 +81,14 @@ if(CHATTERINO_GENERATE_COVERAGE)
 endif()
 
 if(CHATTERINO_LTO)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    if (CHATTERINO_FORCE_LTO)
+        set(CHATTERINO_ENABLE_LTO ON)
+        message(STATUS "LTO: Enabled (Force)")
+    else()
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+        message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    endif()
 else()
     message(STATUS "LTO: Disabled")
 endif()
@@ -150,6 +164,16 @@ find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
 find_package(OpenSSL REQUIRED)
 
 find_package(Threads REQUIRED)
+
+if(CHATTERINO_SPELLCHECK)
+    # Find from package manager
+    find_package(hunspell QUIET CONFIG)
+    if(NOT hunspell_FOUND)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(hunspell REQUIRED IMPORTED_TARGET hunspell)
+        add_library(hunspell::hunspell ALIAS PkgConfig::hunspell)
+    endif()
+endif()
 
 find_library(LIBRT rt)
 
@@ -228,16 +252,19 @@ FetchContent_Declare(
     PajladaSignals
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSerialize
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSettings
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 
 FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)

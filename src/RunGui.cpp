@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "RunGui.hpp"
 
 #include "Application.hpp"
@@ -37,6 +41,10 @@
 #ifdef Q_OS_MAC
 #    include "corefoundation/CFBundle.h"
 #endif
+
+// Forward declaration (Qt doesn't declare this in headers)
+// NOLINTNEXTLINE(readability-identifier-naming)
+extern void qt_set_sequence_auto_mnemonic(bool b);
 
 namespace chatterino {
 namespace {
@@ -97,6 +105,9 @@ void initQt()
     // On the Mac/Cocoa platform this attribute is enabled by default
     // We override it to ensure shortcuts show in context menus on that platform
     QApplication::setAttribute(Qt::AA_DontShowShortcutsInContextMenus, false);
+
+    // Enable mnemonics (menu hotkeys) on macOS - they are disabled by default
+    qt_set_sequence_auto_mnemonic(true);
 #endif
 
     installCustomPalette();

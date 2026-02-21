@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Updates.hpp"
 
 #include "common/Literals.hpp"
@@ -194,10 +198,19 @@ void Updates::installUpdates()
                 file.flush();
                 file.close();
 
-                QProcess::startDetached(
-                    combinePath(QCoreApplication::applicationDirPath(),
-                                "updater.1/ChatterinoUpdater.exe"),
-                    {filename, "restart"});
+                auto updaterPath = Updates::portableUpdaterPath();
+                if (!QFile::exists(updaterPath))
+                {
+                    this->setStatus_(MissingPortableUpdater);
+                    return;
+                }
+                bool ok =
+                    QProcess::startDetached(updaterPath, {filename, "restart"});
+                if (!ok)
+                {
+                    this->setStatus_(RunUpdaterFailed);
+                    return;
+                }
 
                 QApplication::exit(0);
             })
@@ -311,7 +324,7 @@ void Updates::checkForUpdates()
     }
 
     // Disable updates if on nightly
-    if (Modes::instance().isNightly)
+    if (version.isNightly())
     {
         return;
     }
@@ -395,6 +408,12 @@ Updates::Status Updates::getStatus() const
     return this->status_;
 }
 
+QString Updates::portableUpdaterPath()
+{
+    return combinePath(QCoreApplication::applicationDirPath(),
+                       "updater.1/ChatterinoUpdater.exe");
+}
+
 bool Updates::shouldShowUpdateButton() const
 {
     switch (this->getStatus())
@@ -418,6 +437,8 @@ bool Updates::isError() const
         case SearchFailed:
         case DownloadFailed:
         case WriteFileFailed:
+        case MissingPortableUpdater:
+        case RunUpdaterFailed:
             return true;
 
         default:

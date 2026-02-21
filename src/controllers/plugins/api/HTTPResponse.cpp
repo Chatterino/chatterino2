@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 
@@ -29,11 +33,6 @@ void HTTPResponse::createUserType(sol::table &c2)
 HTTPResponse::HTTPResponse(NetworkResult res)
     : result_(std::move(res))
 {
-    DebugCount::increase("lua::api::HTTPResponse");
-}
-HTTPResponse::~HTTPResponse()
-{
-    DebugCount::decrease("lua::api::HTTPResponse");
 }
 
 QByteArray HTTPResponse::data()

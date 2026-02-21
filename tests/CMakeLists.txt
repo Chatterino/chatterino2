@@ -35,6 +35,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGDirectory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NotebookTab.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SplitInput.cpp
@@ -59,6 +60,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchChannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchUserColor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FunctionRef.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/InputHighlighter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BalancedResolverResults.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp

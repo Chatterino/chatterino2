@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
@@ -14,6 +19,7 @@
 #include <QKeySequenceEdit>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSignalBlocker>
 #include <QTableView>
 
 #include <array>
@@ -90,8 +96,16 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto *searchText = new QLabel("Search keybind:", this);
 
     QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
-                     [view](const QKeySequence &keySequence) {
-                         view->filterSearchResultsHotkey(keySequence);
+                     this,
+                     [view, keySequenceInput](const QKeySequence &keySequence) {
+                         // Normalize Key_Enter (numpad) to Key_Return for consistent search
+                         auto normalized = normalizeKeySequence(keySequence);
+                         if (normalized != keySequence)
+                         {
+                             QSignalBlocker blocker(keySequenceInput);
+                             keySequenceInput->setKeySequence(normalized);
+                         }
+                         view->filterSearchResultsHotkey(normalized);
                      });
     view->addCustomButton(searchText);
     view->addCustomButton(keySequenceInput);

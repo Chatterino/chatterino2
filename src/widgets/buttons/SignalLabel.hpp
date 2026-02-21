@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <type_traits>  // IWYU: pragma keep - included before QFlags to fix a bug on macOS Qt 6.7

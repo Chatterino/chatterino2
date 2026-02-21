@@ -2,14 +2,6 @@
     "input": "@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emotes=25:0-4,8-12;first-msg=0;flags=;id=44f85d39-b5fb-475d-8555-f4244f2f7e82;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204423418;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa 😂 Kappa",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "80"
-            },
-            "badges": [
-                "broadcaster",
-                "subscriber",
-                "partner"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "pajlada",
@@ -198,6 +190,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "44f85d39-b5fb-475d-8555-f4244f2f7e82",
@@ -207,6 +201,14 @@
             "searchText": "pajlada  pajlada: Kappa 😂 Kappa ",
             "serverReceivedTime": "2022-09-03T11:27:03Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "80"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber",
+                "partner"
+            ],
             "userID": "11148817",
             "usernameColor": "#ffcc44ff"
         }

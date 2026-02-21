@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 
@@ -9,6 +13,7 @@
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/ConnectionHandle.hpp"
 #    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
@@ -240,6 +245,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(c2);
     lua::api::WebSocket::createUserType(c2, plugin);
+    lua::api::ConnectionHandle::createUserType(c2);
     lua::api::message::createUserType(c2);
     lua::api::createAccounts(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);

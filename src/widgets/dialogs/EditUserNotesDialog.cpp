@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "EditUserNotesDialog.hpp"
 
 #include "singletons/Theme.hpp"
@@ -283,9 +287,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
     headerLayout->addSpacing(175);  // group markdown toolbar buttons
 
-    auto previewCheckBox =
-        headerLayout.emplace<QCheckBox>("Show Markdown Preview")
-            .assign(&this->previewCheckBox_);
+    headerLayout.emplace<QCheckBox>("Show Markdown Preview")
+        .assign(&this->previewCheckBox_);
 
     auto splitter =
         layout.emplace<QSplitter>(Qt::Horizontal).assign(&this->splitter_);

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Message.hpp"
@@ -20,11 +24,13 @@ namespace chatterino {
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
+class InputHighlighter;
 class MessageView;
 class LabelButton;
 class ResizingTextEdit;
 class ChannelView;
 class SvgButton;
+class SpellCheckHighlighter;
 enum class CompletionKind;
 
 class SplitInput : public BaseWidget
@@ -76,7 +82,17 @@ public:
      */
     void setInputText(const QString &newInputText);
 
+    /**
+     * @brief Sets a formatted time to sendWaitStatus
+     *
+     * This method is used to update the text of the timeout and slow mode timer
+     */
+    void setSendWaitStatus(const QString &text) const;
+
     void triggerSelfMessageReceived();
+
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
 
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
@@ -102,10 +118,7 @@ protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
-#ifdef DEBUG
-    bool keyPressedEventInstalled{};
-#endif
-    void installKeyPressedEvent();
+    void installTextEditEvents();
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
@@ -155,6 +168,7 @@ protected:
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
         LabelButton *sendButton;
+        QLabel *sendWaitStatus;
         SvgButton *emoteButton;
     } ui_;
 
@@ -187,6 +201,12 @@ protected:
     void setBackgroundColor(QColor newColor);
 
     QPropertyAnimation backgroundColorAnimation;
+
+    std::optional<bool> checkSpellingOverride_;
+    bool shouldCheckSpelling() const;
+    void checkSpellingChanged();
+
+    InputHighlighter *inputHighlighter = nullptr;
 
     void updateFonts();
 

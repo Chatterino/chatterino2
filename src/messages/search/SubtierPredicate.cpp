@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/search/SubtierPredicate.hpp"
 
 #include "messages/Message.hpp"
@@ -17,7 +21,7 @@ SubtierPredicate::SubtierPredicate(const QString &subtiers, bool negate)
 
 bool SubtierPredicate::appliesToImpl(const Message &message)
 {
-    for (const Badge &badge : message.badges)
+    for (const TwitchBadge &badge : message.twitchBadges)
     {
         if (badge.key_ == "subscriber")
         {

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "Test.hpp"
 
 #include <QString>
@@ -39,4 +43,11 @@ void PrintTo(QStringView str, std::ostream *os)
 void PrintTo(const QString &str, std::ostream *os)
 {
     ::testing::internal::UniversalPrint(str.toStdU16String(), os);
+}
+
+std::unique_lock<std::mutex> environmentLock()
+{
+    static std::mutex m;
+
+    return std::unique_lock(m);
 }

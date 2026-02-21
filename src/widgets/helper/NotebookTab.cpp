@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/NotebookTab.hpp"
 
 #include "Application.hpp"
@@ -126,7 +130,6 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
 
-    const auto tabDirection = getSettings()->tabDirection.getEnum();
     this->menu_.addMenu(this->closeMultipleTabsMenu_);
     getSettings()->tabDirection.connect(
         [this](int val) {

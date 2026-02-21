@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -167,6 +171,8 @@ public:
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
+    BoolSetting showSendWaitTimer = {"/appearance/messages/showSendWaitTimer",
+                                     false};
     EnumSetting<MessageOverflow> messageOverflow = {
         "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
@@ -307,6 +313,26 @@ public:
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
 
+    /// Specifies whether the search functionality should be enabled
+    BoolSetting searchEnabled = {
+        "/behaviour/search/enabled",
+        false,
+    };
+    /// The URL of the search engine
+    QStringSetting searchEngineUrl = {
+        "/behaviour/search/engineUrl",
+        "",
+    };
+    /// The name of the search engine
+    QStringSetting searchEngineName = {
+        "/behaviour/search/engineName",
+        "",
+    };
+    BoolSetting searchIncognito = {
+        "/behaviour/search/incognito",
+        false,
+    };
+
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
         UsernameRightClickBehavior::Mention,
@@ -352,6 +378,15 @@ public:
     BoolSetting useSmartEmoteCompletion = {
         "/experiments/useSmartEmoteCompletion",
         false,
+    };
+
+    BoolSetting enableSpellChecking = {
+        "/behaviour/spellChecking/enabled",
+        false,
+    };
+    QStringSetting spellCheckingDefaultDictionary = {
+        "/behaviour/spellChecking/defaultDictionary",
+        "",
     };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};

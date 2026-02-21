@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "mocks/BaseApplication.hpp"
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"

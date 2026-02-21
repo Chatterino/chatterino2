@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -32,6 +36,8 @@ public:
         Downloading,
         DownloadFailed,
         WriteFileFailed,
+        MissingPortableUpdater,
+        RunUpdaterFailed,
     };
 
     static bool isDowngradeOf(const QString &online, const QString &current);
@@ -46,6 +52,8 @@ public:
     const QString &getOnlineVersion() const;
     void installUpdates();
     Status getStatus() const;
+
+    static QString portableUpdaterPath();
 
     bool shouldShowUpdateButton() const;
     bool isError() const;

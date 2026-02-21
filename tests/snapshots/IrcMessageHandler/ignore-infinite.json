@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726865562691;subscriber=1;id=08e1573a-c09a-4052-8cf6-dd9fc5edf35b;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :this is an infinite-loop",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -114,6 +108,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "08e1573a-c09a-4052-8cf6-dd9fc5edf35b",
@@ -123,6 +119,12 @@
             "searchText": "nerixyz  nerixyz: Too many replacements - check your ignores! ",
             "serverReceivedTime": "2024-09-20T20:52:42Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
