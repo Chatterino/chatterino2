@@ -25,7 +25,6 @@ class FilterSet
 public:
     FilterSet();
     FilterSet(const QList<QUuid> &filterIds);
-    FilterSet(QMap<QUuid, FilterRecordPtr> filters);
 
     ~FilterSet();
 

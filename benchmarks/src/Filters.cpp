@@ -34,7 +34,7 @@ public:
         auto built = recentmessages::detail::buildRecentMessages(
             parsed, this->chan.get());
 
-        QMap<QUuid, FilterRecordPtr> filters;
+        QList<QUuid> filters;
         for (qsizetype i = 0; i < this->filterTexts.size(); i++)
         {
             // ensure deterministic order
@@ -47,10 +47,12 @@ public:
                 assert(false);
                 continue;
             }
-            filters.insert(id, filter);
+            getSettings()->filterRecords.append(filter);
+            filters.append(id);
         }
         assert(filters.size() == this->filterTexts.size());
-        FilterSet set(std::move(filters));
+        FilterSet set(filters);
+        assert(set.filterIds().size() == filters.size());
 
         for (auto _ : state)
         {
