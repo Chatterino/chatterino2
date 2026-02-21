@@ -128,7 +128,8 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
 #ifdef Q_OS_LINUX
     // Needed for Sway to make the dialog floating. See
     // https://github.com/swaywm/sway/issues/3095
-    this->setFixedSize(this->minimumSize());
+    this->layout()->activate();
+    this->setFixedSize(this->layout()->totalMinimumSize());
 #endif
 }
 
