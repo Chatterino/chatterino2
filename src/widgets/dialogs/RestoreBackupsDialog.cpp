@@ -66,6 +66,7 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
     layout->addWidget(buttons);
     buttons->addButton(QDialogButtonBox::Ok)->setText(u"Restore Backup"_s);
     buttons->addButton(QDialogButtonBox::Cancel)->setText(u"Discard"_s);
+    // TODO: Add option to exit Chatterino without doing anything
 
     QObject::connect(buttons, &QDialogButtonBox::accepted, this, [this] {
         auto selected = this->backupCombo.currentData();
