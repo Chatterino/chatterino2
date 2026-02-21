@@ -65,11 +65,12 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
         {
             continue;
         }
+        auto canonicalPath = entry.filesystemCanonicalFilePath();
 
         BackupState state = BackupState::UnableToRead;
         using LoadError = pajlada::Settings::SettingManager::LoadError;
 
-        auto res = testSM.loadFrom(entry.absoluteFilePath().toStdString());
+        auto res = testSM.loadFrom(canonicalPath);
         switch (res)
         {
             case LoadError::NoError:
@@ -94,7 +95,7 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
         }
 
         backups.emplace_back(BackupFile{
-            .path = entry.filesystemCanonicalFilePath(),
+            .path = canonicalPath,
             .dstPath = dst,
             .lastModified = entry.lastModified(),
             .fileSize = entry.size(),
