@@ -23,6 +23,9 @@ public:
     RestoreBackupsDialog(backup::FileData fileData, const QString &prevError,
                          QWidget *parent = nullptr);
 
+protected:
+    void closeEvent(QCloseEvent * /*event*/) override;
+
 private:
     void refreshBackups();
 
@@ -34,6 +37,8 @@ private:
     QPushButton showButton;
     QDialogButtonBox dialogButtons;
     QLabel corruptedBackupsWarning;
+
+    bool hasChosenAnything = false;
 };
 
 }  // namespace chatterino

@@ -26,12 +26,36 @@
 
 using namespace Qt::Literals;
 
+namespace {
+
+void closeApp()
+{
+    // Using a force exit over QApplication::exit, because we're currently in
+    // the initialization. QApplication::exit only tells the eventloops to exit,
+    // but it returns to the caller. If we return, we'd continue with the
+    // initialization, which could cause settings to be loaded/overwritten.
+    _Exit(1);
+}
+
+}  // namespace
+
 namespace chatterino {
 
 RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
                                            const QString &prevError,
                                            QWidget *parent)
-    : QDialog(parent, Qt::Dialog)
+    : QDialog(parent,
+              QFlags{
+                  // same as QMessageBox
+                  Qt::Dialog,
+                  Qt::MSWindowsFixedSizeDialogHint,
+                  // Disable default style
+                  Qt::CustomizeWindowHint,
+                  // Show window title
+                  Qt::WindowTitleHint,
+                  // Show minimize button
+                  Qt::WindowMinimizeButtonHint,
+              })
     , fileData(std::move(fileData))
     , backupCombo(new QComboBox)
     , showButton(u"Show"_s)
@@ -64,12 +88,14 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
 
     auto *buttons = new QDialogButtonBox;
     layout->addWidget(buttons);
-    buttons->addButton(QDialogButtonBox::Ok)->setText(u"Restore Backup"_s);
-    buttons->addButton(QDialogButtonBox::Cancel)->setText(u"Discard"_s);
-    // TODO: Add option to exit Chatterino without doing anything.
-    // This should be the default option to be used if the user exits the dialog through other means (e.g. ALT+F4)
+    auto *restoreButton = buttons->addButton(QDialogButtonBox::Yes);
+    restoreButton->setText(u"Restore Backup"_s);
+    auto *ignoreBtn = buttons->addButton(QDialogButtonBox::No);
+    // Qt has StandardButton::Ignore, but that button has the AcceptRole
+    ignoreBtn->setText(u"Ignore"_s);
+    auto *abortBtn = buttons->addButton(QDialogButtonBox::Abort);
 
-    QObject::connect(buttons, &QDialogButtonBox::accepted, this, [this] {
+    QObject::connect(restoreButton, &QAbstractButton::clicked, this, [this] {
         auto selected = this->backupCombo.currentData();
         auto *data = get_if<backup::BackupFile>(&selected);
         if (!data)
@@ -100,18 +126,21 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
             }
         }
 
+        this->hasChosenAnything = true;
         this->accept();
     });
-    QObject::connect(buttons, &QDialogButtonBox::rejected, this, [this] {
+    QObject::connect(ignoreBtn, &QAbstractButton::clicked, this, [this] {
         auto res = QMessageBox::question(
             this, u"Chatterino - Discard Backup?"_s,
             u"Are you sure you want to discard the backup? Doing so will "_s
             "overwrite and discard any previous settings.");
         if (res == QMessageBox::Yes)
         {
+            this->hasChosenAnything = true;
             this->reject();
         }
     });
+    QObject::connect(abortBtn, &QAbstractButton::clicked, this, &closeApp);
 
     QObject::connect(&this->showButton, &QPushButton::clicked, this, [this] {
         auto selected = this->backupCombo.currentData();
@@ -132,6 +161,14 @@ RestoreBackupsDialog::RestoreBackupsDialog(backup::FileData fileData,
     this->layout()->activate();
     this->setFixedSize(this->layout()->totalMinimumSize());
 #endif
+}
+
+void RestoreBackupsDialog::closeEvent(QCloseEvent * /*event*/)
+{
+    if (!this->hasChosenAnything)
+    {
+        closeApp();
+    }
 }
 
 void RestoreBackupsDialog::refreshBackups()
