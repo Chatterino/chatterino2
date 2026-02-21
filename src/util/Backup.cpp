@@ -9,12 +9,9 @@
 #include "util/FilesystemHelpers.hpp"
 #include "widgets/dialogs/RestoreBackupsDialog.hpp"
 
+#include <pajlada/settings/settingmanager.hpp>
 #include <QDir>
-#include <QFile>
 #include <QRegularExpression>
-#include <QStringBuilder>
-#include <rapidjson/reader.h>
-#include <rapidjson/stream.h>
 
 #include <algorithm>
 
@@ -41,78 +38,6 @@ bool anyBackupsOf(const QString &directory, const QString &filename)
                                });
 }
 
-// NOLINTBEGIN(readability-identifier-naming, readability-convert-member-functions-to-static)
-class ByteArrayStreamWrapper
-{
-public:
-    using Ch = char;
-
-    ByteArrayStreamWrapper(QByteArrayView ba)
-        : begin(ba.data())
-        , cur(this->begin)
-        , end(ba.data() + ba.size())
-    {
-    }
-
-    /// Read the current character from stream without moving the read cursor.
-    Ch Peek() const
-    {
-        if (this->empty())
-        {
-            return '\0';
-        }
-        return *this->cur;
-    }
-
-    /// Read the current character from stream and moving the read cursor to next character.
-    Ch Take()
-    {
-        if (this->empty())
-        {
-            return '\0';
-        }
-        return *this->cur++;
-    }
-
-    /// Get the current read cursor.
-    /// @return Number of characters read from start.
-    size_t Tell() const
-    {
-        return this->cur - this->begin;
-    }
-
-    // only used for writing
-    Ch *PutBegin()
-    {
-        assert(false);
-        return nullptr;
-    }
-    void Put(Ch /*unused*/)
-    {
-        assert(false);
-    }
-    void Flush()
-    {
-        assert(false);
-    }
-    size_t PutEnd(Ch * /*unused*/)
-    {
-        assert(false);
-        return 0;
-    }
-
-private:
-    bool empty() const
-    {
-        return this->cur == this->end;
-    }
-
-    const char *const begin;
-    const char *cur;
-    const char *const end;
-};
-// NOLINTEND(readability-identifier-naming, readability-convert-member-functions-to-static)
-
 }  // namespace
 
 namespace chatterino::backup {
@@ -130,6 +55,10 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
     auto regex = regexForFile(filename);
     std::vector<BackupFile> backups;
     const auto entries = fileDir.entryInfoList(QDir::Files, QDir::Time);
+    auto testSM = pajlada::Settings::SettingManager();
+    testSM.saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
+
     for (const auto &entry : entries)
     {
         if (!regex.match(entry.fileName()).hasMatch())
@@ -138,22 +67,30 @@ std::vector<BackupFile> findBackupsFor(const QString &directory,
         }
 
         BackupState state = BackupState::UnableToRead;
-        QFile file(entry.absoluteFilePath());
-        if (file.open(QFile::ReadOnly))
+        using LoadError = pajlada::Settings::SettingManager::LoadError;
+
+        auto res = testSM.loadFrom(entry.absoluteFilePath().toStdString());
+        switch (res)
         {
-            auto ba = file.readAll();
-            rapidjson::BaseReaderHandler<> handler;
-            rapidjson::Reader reader;
-            ByteArrayStreamWrapper stream(ba);
-            auto res = reader.Parse(stream, handler);
-            if (res.IsError())
-            {
-                state = BackupState::BadContents;
-            }
-            else
-            {
+            case LoadError::NoError:
                 state = BackupState::Ok;
-            }
+                break;
+
+            case LoadError::CannotOpenFile:
+            case LoadError::FileHandleError:
+            case LoadError::FileReadError:
+            case LoadError::FileSeekError:
+                state = BackupState::UnableToRead;
+                break;
+
+            case LoadError::JSONParseError:
+                state = BackupState::BadContents;
+                break;
+
+            case LoadError::SavingFromTemporaryFileFailed:
+                // should never happen, temporary file loading/saving is not enabled
+                assert(false);
+                break;
         }
 
         backups.emplace_back(BackupFile{
