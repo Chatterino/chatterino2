@@ -172,7 +172,8 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
                 .directory = settingsDirectory,
                 .fileKind = u"Settings"_s,
                 .fileDescription =
-                    u"This file contains the main application settings such as accounts and hotkeys."_s},
+                    u"This file contains the main application settings such as accounts and hotkeys."_s,
+            },
             [&]() -> ExpectedStr<void> {
                 using LoadError = pajlada::Settings::SettingManager::LoadError;
                 auto err = settingsInstance->load(qPrintable(settingsPath));
