@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: CC0-1.0
+
 #pragma once
 
 #include "util/Backup.hpp"
