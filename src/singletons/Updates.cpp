@@ -124,6 +124,13 @@ void Updates::installUpdates()
         return;
     }
 
+    if (Version::instance().isNightly())
+    {
+        // Since Nightly builds can be installed in many different ways, we ask the user to download the update manually.
+        QDesktopServices::openUrl(QUrl("https://chatterino.com/#downloads"));
+        return;
+    }
+
 #ifdef Q_OS_MACOS
     QMessageBox *box = new QMessageBox(
         QMessageBox::Information, "Chatterino Update",
@@ -323,12 +330,6 @@ void Updates::checkForUpdates()
         return;
     }
 
-    // Disable updates if on nightly
-    if (version.isNightly())
-    {
-        return;
-    }
-
     QString url = "https://notitia.chatterino.com/version/chatterino/" %
                   CHATTERINO_OS % "/" % currentBranch();
 
@@ -449,6 +450,32 @@ bool Updates::isError() const
 bool Updates::isDowngrade() const
 {
     return this->isDowngrade_;
+}
+
+QString Updates::buildUpdateAvailableText() const
+{
+    const auto &version = Version::instance();
+
+    if (version.isNightly())
+    {
+        // Since Nightly builds can be installed in many different ways, we ask the user to download the update manually.
+        return QString("An update (%1) is available.\n\nDo you want to head to "
+                       "Chatterino.com to download the new update?")
+            .arg(this->getOnlineVersion());
+    }
+
+    if (this->isDowngrade())
+    {
+        return QString("The version online (%1) seems to be lower than the "
+                       "current (%2).\nEither a version was reverted or "
+                       "you are running a newer build.\n\nDo you want to "
+                       "download and install it?")
+            .arg(this->getOnlineVersion(), this->getCurrentVersion());
+    }
+
+    return QString("An update (%1) is available.\n\nDo you want to "
+                   "download and install it?")
+        .arg(this->getOnlineVersion());
 }
 
 void Updates::setStatus_(Status status)
