@@ -22,6 +22,7 @@
 - Minor: Added broadcaster-only `/poll`, `/cancelpoll`, and `/endpoll` commands. (#6583, #6605)
 - Minor: Added broadcaster-only `/prediction`, `/cancelprediction`, `/lockprediction`, and `/completeprediction` commands. (#6583, #6612, #6632, #6749)
 - Minor: Added support for BetterTTV Pro subscriber badges. (#6625, #6724)
+- Minor: Added backup restore dialog if settings fail to load. (#6662)
 - Minor: Added `debug.traceback` for plugins. (#6652)
 - Minor: Added title and duration options for `/clip` command. (#6669)
 - Minor: Added the ability to filter on messages by the author's external badges (example: `author.external_badges contains "chatterino:Top Donator"` or `author.external_badges contains "frankerfacez:bot"`). (#6709)

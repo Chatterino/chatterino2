@@ -127,7 +127,8 @@ class Settings
     bool disableSaving;
 
 public:
-    Settings(const Args &args, const QString &settingsDirectory);
+    Settings(const Args &args, const QString &settingsDirectory,
+             bool isTest = false);
     ~Settings();
 
     static Settings &instance();
