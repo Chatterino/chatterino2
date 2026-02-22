@@ -29,7 +29,7 @@
 - Minor: Moderators and VIPs in shared chats now show their channel badges. (#6653)
 - Minor: Removed guard from update checker when using a nightly release. (#6752)
 - Minor: Added message read/update methods to the `Channel` plugin API. (#6650)
-- Minor: Added a display name change event to `Channel` for plugins. (#6594)
+- Minor: Added a display name change and message events to `Channel` for plugins. (#6594, #6781)
 - Minor: Added action to reset `/watching`. (#6759)
 - Minor: Removed messaging about running flatpak. This is already apparent in the newer Flatpak runtimes. (#6768)
 - Minor: Add `/(un)monitor` and `/(un)restrict` commands for moderators. (#6750, #6785)

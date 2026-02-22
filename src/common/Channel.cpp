@@ -12,6 +12,31 @@
 #include "singletons/Settings.hpp"
 #include "util/ChannelHelpers.hpp"
 
+namespace {
+
+constexpr uint8_t MAX_RECURSION = 64;
+
+struct RecursionGuard {
+    constexpr RecursionGuard(uint8_t *count) noexcept
+        : count(count)
+    {
+        assert(*count < MAX_RECURSION);
+        *this->count += 1;
+    }
+    RecursionGuard(const RecursionGuard &) = delete;
+    RecursionGuard(RecursionGuard &&) = delete;
+    RecursionGuard &operator=(const RecursionGuard &) = delete;
+    RecursionGuard &operator=(RecursionGuard &&) = delete;
+    constexpr ~RecursionGuard()
+    {
+        *this->count -= 1;
+    }
+
+    uint8_t *count;
+};
+
+}  // namespace
+
 namespace chatterino {
 
 //
@@ -109,6 +134,12 @@ MessagePtr Channel::getLastMessage() const
 void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     message->freeze();
 
     MessagePtr deleted;
@@ -185,6 +216,12 @@ void Channel::disableAllMessages()
 
 void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : _messages)
     {
         msg->freeze();
@@ -205,6 +242,13 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     {
         return;
     }
+
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : messages)
     {
         msg->freeze();
@@ -293,6 +337,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 void Channel::replaceMessage(const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
     int index = this->messages_.replaceItem(message, replacement);
 
@@ -304,6 +354,12 @@ void Channel::replaceMessage(const MessagePtr &message,
 
 void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     MessagePtr prev;
@@ -316,6 +372,12 @@ void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 void Channel::replaceMessage(size_t hint, const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     auto index = this->messages_.replaceItem(hint, message, replacement);
@@ -336,6 +398,12 @@ void Channel::disableMessage(const QString &messageID)
 
 void Channel::clearMessages()
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     this->messages_.clear();
     this->messagesCleared.invoke();
 }
@@ -448,6 +516,11 @@ void Channel::onConnected()
 
 void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
+}
+
+bool Channel::canRecurse() const noexcept
+{
+    return this->recursionCount_ < MAX_RECURSION;
 }
 
 //
