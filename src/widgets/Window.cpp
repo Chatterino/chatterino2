@@ -677,11 +677,11 @@ void Window::addShortcuts()
 
              if (arg == "off")
              {
-                 this->notebook_->hideAllTabsAction->trigger();
+                 this->notebook_->setShowTabs(false);
              }
              else if (arg == "on")
              {
-                 this->notebook_->showAllTabsAction->trigger();
+                 this->notebook_->setShowTabs(true);
              }
              else if (arg == "toggle")
              {
@@ -689,13 +689,19 @@ void Window::addShortcuts()
              }
              else if (arg == "liveOnly")
              {
-                 this->notebook_->onlyShowLiveTabsAction->trigger();
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(NotebookTabVisibilityFlag::Live);
              }
              else if (arg == "toggleLiveOnly")
              {
                  // NOOP: Removed 2024-08-04 https://github.com/Chatterino/chatterino2/pull/5530
                  return "toggleLiveOnly is no longer a valid argument for "
                         "setTabVisibility";
+             }
+             else if (arg == "unreadOnly")
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(NotebookTabVisibilityFlag::Unread);
              }
              else
              {

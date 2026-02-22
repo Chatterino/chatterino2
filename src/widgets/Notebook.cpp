@@ -1280,49 +1280,79 @@ SplitNotebook::SplitNotebook(Window *parent)
 
     auto *tabVisibilityActionGroup = new QActionGroup(this);
     tabVisibilityActionGroup->setExclusionPolicy(
-        QActionGroup::ExclusionPolicy::Exclusive);
+        QActionGroup::ExclusionPolicy::None);
 
     this->showAllTabsAction = new QAction("Show all tabs", this);
-    this->showAllTabsAction->setCheckable(true);
     this->showAllTabsAction->setShortcut(
         getApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"on"}}));
     QObject::connect(this->showAllTabsAction, &QAction::triggered, this,
                      [this] {
                          this->setShowTabs(true);
-                         getSettings()->tabVisibility.setValue(
-                             NotebookTabVisibility::AllTabs);
-                         this->showAllTabsAction->setChecked(true);
+                         // -1 sets all bits in the enum to 1, enabling all current and future flags
+                         getSettings()->tabVisibility.setValue(-1);
                      });
-    tabVisibilityActionGroup->addAction(this->showAllTabsAction);
 
-    this->onlyShowLiveTabsAction = new QAction("Only show live tabs", this);
-    this->onlyShowLiveTabsAction->setCheckable(true);
-    this->onlyShowLiveTabsAction->setShortcut(
+    this->showLiveTabsAction = new QAction("Live tabs", this);
+    this->showLiveTabsAction->setCheckable(true);
+    this->showLiveTabsAction->setShortcut(
         getApp()->getHotkeys()->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{"liveOnly"}}));
-    QObject::connect(this->onlyShowLiveTabsAction, &QAction::triggered, this,
+            HotkeyCategory::Window, "setTabVisibility", {{"toggleLive"}}));
+    QObject::connect(this->showLiveTabsAction, &QAction::triggered, this,
                      [this] {
-                         this->setShowTabs(true);
-                         getSettings()->tabVisibility.setValue(
-                             NotebookTabVisibility::LiveOnly);
-                         this->onlyShowLiveTabsAction->setChecked(true);
+                         auto currentFlags = NotebookTabVisibilityFlags(getSettings()->tabVisibility.getEnum());
+                         currentFlags.set(NotebookTabVisibilityFlag::Live,
+                                          !currentFlags.has(NotebookTabVisibilityFlag::Live));
+                         getSettings()->tabVisibility.setValue(currentFlags.value());
+                         this->setShowTabs(currentFlags.hasAny(NotebookTabVisibilityFlag::Live,
+                                                                NotebookTabVisibilityFlag::Unread,
+                                                                NotebookTabVisibilityFlag::Other));
                      });
-    tabVisibilityActionGroup->addAction(this->onlyShowLiveTabsAction);
+    tabVisibilityActionGroup->addAction(this->showLiveTabsAction);
+
+    this->showUnreadTabsAction = new QAction("Unread tabs", this);
+    this->showUnreadTabsAction->setCheckable(true);
+    this->showUnreadTabsAction->setShortcut(
+        getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggleUnread"}}));
+    QObject::connect(this->showUnreadTabsAction, &QAction::triggered, this,
+                     [this] {
+                         auto currentFlags = NotebookTabVisibilityFlags(getSettings()->tabVisibility.getEnum());
+                         currentFlags.set(NotebookTabVisibilityFlag::Unread,
+                                          !currentFlags.has(NotebookTabVisibilityFlag::Unread));
+                         getSettings()->tabVisibility.setValue(currentFlags.value());
+                         this->setShowTabs(currentFlags.hasAny(NotebookTabVisibilityFlag::Live,
+                                                                NotebookTabVisibilityFlag::Unread,
+                                                                NotebookTabVisibilityFlag::Other));
+                     });
+    tabVisibilityActionGroup->addAction(this->showUnreadTabsAction);
+
+    this->showOtherTabsAction = new QAction("Other tabs", this);
+    this->showOtherTabsAction->setCheckable(true);
+    this->showOtherTabsAction->setShortcut(
+        getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggleOther"}}));
+    QObject::connect(this->showOtherTabsAction, &QAction::triggered, this,
+                     [this] {
+                         auto currentFlags = NotebookTabVisibilityFlags(getSettings()->tabVisibility.getEnum());
+                         currentFlags.set(NotebookTabVisibilityFlag::Other,
+                                          !currentFlags.has(NotebookTabVisibilityFlag::Other));
+                         getSettings()->tabVisibility.setValue(currentFlags.value());
+                         this->setShowTabs(currentFlags.hasAny(NotebookTabVisibilityFlag::Live,
+                                                               NotebookTabVisibilityFlag::Unread,
+                                                               NotebookTabVisibilityFlag::Other));
+                     });
+    tabVisibilityActionGroup->addAction(this->showOtherTabsAction);
 
     this->hideAllTabsAction = new QAction("Hide all tabs", this);
-    this->hideAllTabsAction->setCheckable(true);
     this->hideAllTabsAction->setShortcut(
         getApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"off"}}));
     QObject::connect(this->hideAllTabsAction, &QAction::triggered, this,
                      [this] {
                          this->setShowTabs(false);
-                         getSettings()->tabVisibility.setValue(
-                             NotebookTabVisibility::AllTabs);
-                         this->hideAllTabsAction->setChecked(true);
+                         getSettings()->tabVisibility.setValue(0);
                      });
-    tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
 
     this->sortTabsAlphabeticallyAction_ =
         new QAction("Sort Tabs Alphabetically", this);
@@ -1335,37 +1365,50 @@ SplitNotebook::SplitNotebook(Window *parent)
                          this->sortTabsAlphabetically();
                      });
 
-    switch (getSettings()->tabVisibility.getEnum())
-    {
-        case NotebookTabVisibility::AllTabs: {
-            this->showAllTabsAction->setChecked(true);
-        }
-        break;
-
-        case NotebookTabVisibility::LiveOnly: {
-            this->onlyShowLiveTabsAction->setChecked(true);
-        }
-        break;
-    }
+    this->updateTabActionCheckedState();
 
     getSettings()->tabVisibility.connect(
         [this](int val, auto) {
-            auto visibility = NotebookTabVisibility(val);
+            const auto visibility = static_cast<NotebookTabVisibilityFlag>(val);
+            const auto visibilityFlags = NotebookTabVisibilityFlags(visibility);
+            this->updateTabActionCheckedState();
             // Set the correct TabVisibilityFilter for the given visibility setting.
             // Note that selected tabs are always shown regardless of what the tab
             // filter returns, so no need to include `tab->isSelected()` in the
             // predicate. See Notebook::setTabVisibilityFilter.
-            switch (visibility)
-            {
-                case NotebookTabVisibility::LiveOnly:
-                    this->setTabVisibilityFilter([](const NotebookTab *tab) {
+
+            if (visibilityFlags.hasAll(NotebookTabVisibilityFlag::Live,
+                                       NotebookTabVisibilityFlag::Unread,
+                                       NotebookTabVisibilityFlag::Other) ||
+                visibilityFlags.hasNone(NotebookTabVisibilityFlag::Live,
+                                        NotebookTabVisibilityFlag::Unread,
+                                        NotebookTabVisibilityFlag::Other)) {
+                this->setTabVisibilityFilter(nullptr);
+            } else {
+                std::array<bool (*)(const NotebookTab *tab), 3> checks{nullptr, nullptr, nullptr};
+                if (visibilityFlags.has(NotebookTabVisibilityFlag::Live)) {
+                    checks[0] = [](const NotebookTab *tab) {
                         return tab->isLive();
-                    });
-                    break;
-                case NotebookTabVisibility::AllTabs:
-                default:
-                    this->setTabVisibilityFilter(nullptr);
-                    break;
+                    };
+                }
+                if (visibilityFlags.has(NotebookTabVisibilityFlag::Unread)) {
+                    checks[1] = [](const NotebookTab *tab) {
+                        return tab->highlightState() != HighlightState::None;
+                    };
+                }
+                if (visibilityFlags.has(NotebookTabVisibilityFlag::Other)) {
+                    checks[2] = [](const NotebookTab *tab) {
+                        return !tab->isLive() && tab->highlightState() == HighlightState::None;
+                    };
+                }
+                this->setTabVisibilityFilter([checks](const NotebookTab *tab) {
+                    for (const auto check: checks) {
+                        if (check && check(tab)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
             }
         },
         this->signalHolder_, true);
@@ -1427,20 +1470,25 @@ void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
 
     auto *submenu = menu->addMenu("Tab visibility");
     submenu->addAction(this->showAllTabsAction);
-    submenu->addAction(this->onlyShowLiveTabsAction);
+    submenu->addSeparator();
+    submenu->addAction(this->showLiveTabsAction);
+    submenu->addAction(this->showUnreadTabsAction);
+    submenu->addAction(this->showOtherTabsAction);
+    submenu->addSeparator();
     submenu->addAction(this->hideAllTabsAction);
 }
 
 void SplitNotebook::toggleTabVisibility()
 {
-    if (this->getShowTabs())
-    {
-        this->hideAllTabsAction->trigger();
-    }
-    else
-    {
-        this->showAllTabsAction->trigger();
-    }
+    this->setShowTabs(!this->getShowTabs());
+}
+
+void SplitNotebook::updateTabActionCheckedState()
+{
+    NotebookTabVisibilityFlags visibilityFlags = getSettings()->tabVisibility.getEnum();
+    this->showLiveTabsAction->setChecked(visibilityFlags.has(NotebookTabVisibilityFlag::Live));
+    this->showUnreadTabsAction->setChecked(visibilityFlags.has(NotebookTabVisibilityFlag::Unread));
+    this->showOtherTabsAction->setChecked(visibilityFlags.has(NotebookTabVisibilityFlag::Other));
 }
 
 void SplitNotebook::showEvent(QShowEvent * /*event*/)
