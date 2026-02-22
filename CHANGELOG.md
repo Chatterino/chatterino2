@@ -118,6 +118,7 @@
 - Dev: Balance IPv4 and IPv6 connection attempts. (#6804)
 - Dev: Factored out recent messages benchmark helper. (#6815)
 - Dev: Added `CHATTERINO_FORCE_LTO` CMake option to skip LTO check. (#6816)
+- Dev: Added more tests and benchmarks for filters. (#6814)
 
 ## 2.5.4
 
