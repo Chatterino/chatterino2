@@ -204,12 +204,16 @@ set(SOURCE_FILES
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
+        controllers/highlights/HighlightBetaModel.cpp
+        controllers/highlights/HighlightBetaModel.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
+        controllers/highlights/SharedHighlight.cpp
+        controllers/highlights/SharedHighlight.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
@@ -815,6 +819,12 @@ set(SOURCE_FILES
         widgets/settingspages/GeneralPageView.hpp
         widgets/settingspages/HighlightingPage.cpp
         widgets/settingspages/HighlightingPage.hpp
+        widgets/settingspages/HighlightsBetaConfigureDelegate.cpp
+        widgets/settingspages/HighlightsBetaConfigureDelegate.hpp
+        widgets/settingspages/HighlightsBetaConfigureDialog.cpp
+        widgets/settingspages/HighlightsBetaConfigureDialog.hpp
+        widgets/settingspages/HighlightsBetaWidget.cpp
+        widgets/settingspages/HighlightsBetaWidget.hpp
         widgets/settingspages/IgnoresPage.cpp
         widgets/settingspages/IgnoresPage.hpp
         widgets/settingspages/KeyboardSettingsPage.cpp
