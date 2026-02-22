@@ -43,6 +43,8 @@ public:
     /// checked by the spell checker.
     std::vector<QString> getSpellCheckedWords(const QString &text);
 
+    QString getWordAt(QStringView text, qsizetype pos);
+
 protected:
     void highlightBlock(const QString &text) override;
 

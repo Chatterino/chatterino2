@@ -801,9 +801,14 @@ void SplitInput::installTextEditEvents()
                              });
             menu->addAction(spellcheckAction);
 
+            if (!this->inputHighlighter)
+            {
+                return;
+            }
+
             auto cursor = this->ui_.textEdit->cursorForPosition(pos);
-            cursor.select(QTextCursor::WordUnderCursor);
-            auto word = cursor.selectedText();
+            auto word = this->inputHighlighter->getWordAt(
+                this->ui_.textEdit->toPlainText(), cursor.position());
             if (!word.isEmpty())
             {
                 auto suggestions =
