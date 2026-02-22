@@ -530,8 +530,34 @@ private:
     bool staff_ = false;
     UniqueAccess<QString> roomID_;
 
-    // --
+    // Duplicate messages
     QString lastSentMessage_;
+    mutable int variantIndex_{0};
+    mutable uint64_t currentMask_{0};
+    mutable uint64_t currentMagic_{0};
+    /**
+     * Generates a variant of a duplicate message
+     *
+     * This method works by determining all eligible space positions in the original message
+     * (ignoring the very first space if the message begins with a command character such as '/' or '.')
+     * and generating alternate variants by inserting an extra space at each eligible position.
+     * Additionally, a magic suffix is appended in one of two modes (either directly or prefixed by a space).
+     *
+     * The variants come in three groups:
+     *   - Group 0: Variants with only modified spacing.
+     *   - Group 1: Variants with the magic suffix appended without an extra space.
+     *   - Group 2: Variants with the magic suffix appended with a preceding space.
+     *
+     * In total there are 3 × (2^(# eligible space positions)) possible variants
+     * The number of variants we use is capped at MAX_VARIANT_COUNT
+     * When the cap is reached, we reset to the original message and repeat
+     *
+     * @param message The original user message.
+     * @return A modified message variant.
+     */
+    QString getNextVariant(const QString &message) const;
+
+    // --
     QObject lifetimeGuard_;
     QTimer chattersListTimer_;
     QTimer threadClearTimer_;
