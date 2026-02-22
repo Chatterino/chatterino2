@@ -17,6 +17,7 @@
 #    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
+#    include "controllers/plugins/api/Images.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
@@ -247,6 +248,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::WebSocket::createUserType(c2, plugin);
     lua::api::ConnectionHandle::createUserType(c2);
     lua::api::message::createUserType(c2);
+    lua::api::images::createUserTypes(c2, *plugin);
     lua::api::createAccounts(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
