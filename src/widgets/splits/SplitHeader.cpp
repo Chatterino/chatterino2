@@ -21,6 +21,7 @@
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
@@ -82,8 +83,9 @@ auto formatRoomModeUnclean(
     {
         if (modes->followerOnly != 0)
         {
-            text += QString("follow(%1m), ")
-                        .arg(localizeNumbers(modes->followerOnly));
+            text += QString("follow(%1), ")
+                        .arg(formatDurationExact(
+                            std::chrono::minutes{modes->followerOnly}));
         }
         else
         {
