@@ -407,6 +407,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 .assign(&this->ui_.createdDateLabel);
             vbox.emplace<Label>("").assign(&this->ui_.followageLabel);
             vbox.emplace<Label>("").assign(&this->ui_.subageLabel);
+            vbox.emplace<Label>("").assign(&this->ui_.gifterLabel);
         }
     }
 
@@ -1087,6 +1088,18 @@ void UserInfoPopup::updateUserData()
                             QString("★ Tier %1 - Subscribed for %2 months")
                                 .arg(subageInfo.subTier)
                                 .arg(subageInfo.totalSubMonths));
+
+                        if (!subageInfo.gifterName.isEmpty())
+                        {
+                            this->ui_.gifterLabel->setText(
+                                "★ Sub was gifted by: " +
+                                subageInfo.gifterName);
+                        }
+                        else if (subageInfo.isGifted)
+                        {
+                            this->ui_.gifterLabel->setText(
+                                "★ Sub was gifted anonymously");
+                        }
                     }
                     else if (subageInfo.totalSubMonths)
                     {
