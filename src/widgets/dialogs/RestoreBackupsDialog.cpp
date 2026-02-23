@@ -171,6 +171,13 @@ void RestoreBackupsDialog::closeEvent(QCloseEvent * /*event*/)
     }
 }
 
+void RestoreBackupsDialog::keyPressEvent(QKeyEvent *event)
+{
+    event->ignore();
+    // Don't call QDialog here, as it would handle QKeySequence::Cancel, Enter,
+    // and Return.
+}
+
 void RestoreBackupsDialog::refreshBackups()
 {
     this->backupCombo.clear();
