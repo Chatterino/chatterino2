@@ -13,6 +13,7 @@
 #include <QComboBox>
 #include <QDesktopServices>
 #include <QDialogButtonBox>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLocale>
 #include <QMessageBox>
