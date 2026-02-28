@@ -48,6 +48,7 @@ namespace chatterino::bench {
 MockMessageApplication::MockMessageApplication()
     : highlights(this->settings, &this->accounts)
 {
+    this->settings.disableSave();
 }
 
 MessageBenchmark::MessageBenchmark(QString name)
