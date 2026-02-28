@@ -43,6 +43,10 @@ public:
     /// checked by the spell checker.
     std::vector<QString> getSpellCheckedWords(const QString &text);
 
+    /// Get the word in \p text at \p pos. If there isn't any word, returns an
+    /// empty view.
+    QStringView getWordAt(QStringView text, qsizetype pos);
+
 protected:
     void highlightBlock(const QString &text) override;
 
