@@ -6,6 +6,7 @@ cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
 include(FetchContent)
+include(CMakeDependentOption)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -28,6 +29,10 @@ option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+# CMake doesn't detect LTO for some compilers (e.g. clang-cl: https://gitlab.kitware.com/cmake/cmake/-/issues/21635),
+# so this skips the check and assumes LTO works.
+cmake_dependent_option(CHATTERINO_FORCE_LTO "Skip check if LTO is supported" OFF CHATTERINO_LTO OFF)
+option(CHATTERINO_FORCE_LTO "Don't check if LTO is supported" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
@@ -76,9 +81,14 @@ if(CHATTERINO_GENERATE_COVERAGE)
 endif()
 
 if(CHATTERINO_LTO)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    if (CHATTERINO_FORCE_LTO)
+        set(CHATTERINO_ENABLE_LTO ON)
+        message(STATUS "LTO: Enabled (Force)")
+    else()
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+        message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    endif()
 else()
     message(STATUS "LTO: Disabled")
 endif()
