@@ -486,6 +486,22 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 })
             ->setVisible(twitchChannel->isLive());
 
+        if (this->split_->getIndirectChannel().getType() ==
+            Channel::Type::TwitchWatching)
+        {
+            menu->addAction("Reset /watching", this->split_, [] {
+                if (!getApp()
+                         ->getTwitch()
+                         ->getWatchingChannel()
+                         .get()
+                         ->isEmpty())
+                {
+                    getApp()->getTwitch()->setWatchingChannel(
+                        Channel::getEmpty());
+                }
+            });
+        }
+
         menu->addSeparator();
     }
 

@@ -18,12 +18,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
 
       - name: Check formatting with Prettier
-        uses: Nerixyz/actionsx-prettier@v3-adj
-        with:
-          # prettier CLI arguments.
-          args: --write .
+        run: |
+          npx prettier@3.8.1 --write .
       - name: Show diff
         run: git --no-pager diff --exit-code --color=never
         shell: bash

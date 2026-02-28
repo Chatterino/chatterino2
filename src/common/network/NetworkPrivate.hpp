@@ -6,6 +6,7 @@
 
 #include "common/Common.hpp"
 #include "common/network/NetworkCommon.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>

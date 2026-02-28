@@ -15,6 +15,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QTextCharFormat>
 #include <QTextDocument>
@@ -23,7 +24,7 @@ namespace {
 
 using namespace chatterino;
 
-bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+bool isEmote(TwitchChannel *twitch, const QString &word)
 {
     EmoteName name{word};
     if (twitch)
@@ -35,11 +36,6 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         }
         auto locals = twitch->localTwitchEmotes();
         if (locals->contains(name))
-        {
-            return true;
-        }
-
-        if (twitch->accessChatters()->contains(word))
         {
             return true;
         }
@@ -60,21 +56,64 @@ bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
         return true;
     }
 
+    return false;
+}
+
+bool isChatter(TwitchChannel *twitch, const QString &word)
+{
+    if (twitch)
+    {
+        if (twitch->accessChatters()->contains(word) ||
+            (getSettings()->alwaysIncludeBroadcasterInUserCompletions &&
+             word.compare(twitch->getName(), Qt::CaseInsensitive) == 0))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isLink(const QString &token)
+{
     // TODO: Replace this with a link parser variant that doesn't return the parsed data
-    auto link = linkparser::parse(word);
+    auto link = linkparser::parse(token);
     return link.has_value();
+}
+
+bool isIgnoredWord(TwitchChannel *twitch, const QString &word)
+{
+    return isEmote(twitch, word) || isChatter(twitch, word);
+}
+
+bool isIgnoredToken(TwitchChannel *twitch, const QString &token)
+{
+    return isEmote(twitch, token) || isLink(token);
 }
 
 }  // namespace
 
 namespace chatterino {
 
+namespace inputhighlight::detail {
+
+// A word is a string of unicode letters. Words are seperated by whitespace
+// (tokenRegex) or, inside a token, by punctuation characters (except '_')
+QRegularExpression wordRegex()
+{
+    static QRegularExpression regex{
+        R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
+        QRegularExpression::PatternOption::UseUnicodePropertiesOption,
+    };
+    return regex;
+}
+
+}  // namespace inputhighlight::detail
+
 InputHighlighter::InputHighlighter(SpellChecker &spellChecker, QObject *parent)
     : QSyntaxHighlighter(parent)
     , spellChecker(spellChecker)
-    // FIXME: this also matches URLs - this probably needs to be some function like Firefox' mozEnglishWordUtils::FindNextWord
-    , wordRegex(R"(\p{L}(?:\P{Z}+\p{L}+)*)",
-                QRegularExpression::PatternOption::UseUnicodePropertiesOption)
+    , wordRegex(inputhighlight::detail::wordRegex())
+    , tokenRegex(R"(\S+)")
 {
     this->spellFmt.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     this->spellFmt.setUnderlineColor(Qt::red);
@@ -88,12 +127,36 @@ void InputHighlighter::setChannel(const std::shared_ptr<Channel> &channel)
     this->rehighlight();
 }
 
+std::vector<QString> InputHighlighter::getSpellCheckedWords(const QString &text)
+{
+    std::vector<QString> words;
+    this->visitWords(text, [&](const QString &word, qsizetype /*start*/,
+                               qsizetype /*count*/) {
+        words.emplace_back(word);
+    });
+    return words;
+}
+
 void InputHighlighter::highlightBlock(const QString &text)
 {
     if (!this->spellChecker.isLoaded())
     {
         return;
     }
+    this->visitWords(
+        text, [&](const QString &word, qsizetype start, qsizetype count) {
+            if (!this->spellChecker.check(word))
+            {
+                this->setFormat(static_cast<int>(start),
+                                static_cast<int>(count), this->spellFmt);
+            }
+        });
+}
+
+void InputHighlighter::visitWords(
+    const QString &text,
+    std::invocable<const QString &, qsizetype, qsizetype> auto &&cb)
+{
     auto *channel = this->channel.lock().get();
 
     QStringView textView = text;
@@ -102,21 +165,32 @@ void InputHighlighter::highlightBlock(const QString &text)
     auto cmdTriggerLen = getApp()->getCommands()->commandTriggerLen(textView);
     textView = textView.sliced(cmdTriggerLen);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    auto it = this->wordRegex.globalMatchView(textView);
-#else
-    auto it = this->wordRegex.globalMatch(textView);
-#endif
+    auto tokenIt = this->tokenRegex.globalMatchView(textView);
 
-    while (it.hasNext())
+    // iterate over whitespace-delimited tokens
+    while (tokenIt.hasNext())
     {
-        auto match = it.next();
-        auto text = match.captured();
-        if (!isIgnoredWord(channel, text) && !this->spellChecker.check(text))
+        auto tokenMatch = tokenIt.next();
+        auto token = tokenMatch.captured();
+        if (isIgnoredToken(channel, token))
         {
-            this->setFormat(
-                static_cast<int>(match.capturedStart() + cmdTriggerLen),
-                static_cast<int>(text.size()), this->spellFmt);
+            continue;
+        }
+
+        auto wordIt = this->wordRegex.globalMatchView(token);
+
+        while (wordIt.hasNext())
+        {
+            auto wordMatch = wordIt.next();
+            auto word = wordMatch.captured();
+
+            if (!isIgnoredWord(channel, word))
+            {
+                cb(word,
+                   static_cast<int>(cmdTriggerLen + tokenMatch.capturedStart() +
+                                    wordMatch.capturedStart()),
+                   static_cast<int>(word.size()));
+            }
         }
     }
 }

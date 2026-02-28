@@ -96,6 +96,7 @@ devPoland | https://github.com/devPoland | :/avatars/devpoland.png
 Solomoncyj | https://github.com/solomoncyj |
 Juliapixel | https://github.com/Juliapixel | :/avatars/juliapixel.png
 Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
+Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 
 # If you are a contributor add yourself above this line
 

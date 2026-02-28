@@ -297,6 +297,27 @@ public:
      */
     std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
 
+    /// Fired when a message is supposed to be sent by the user in this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, bool &> sendMessageSignal;
+
+    /// Fired when a reply to a message is supposed to be sent by the user in
+    /// this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `replyToMessageID`: The ID of the replied-to message.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, const QString &, bool &>
+        sendReplySignal;
+
     /**
      * This signal fires when the local user has joined the channel
      **/
@@ -314,6 +335,10 @@ public:
     pajlada::Signals::NoArgSignal streamStatusChanged;
 
     pajlada::Signals::NoArgSignal roomModesChanged;
+
+    pajlada::Signals::NoArgSignal destroyed;
+
+    pajlada::Signals::Signal<const QString &> sendWaitUpdate;
 
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
@@ -344,6 +369,21 @@ public:
      **/
     const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
+
+    /**
+     * Sync the text of the send wait timer to the actual time remaining.
+     */
+    void syncSendWaitTimer();
+    /**
+     * Set the send wait timer to given number of seconds
+     *
+     * When a channel is in slow mode or the user is timed out, calling
+     * this function sets the timer to show how long the user will need
+     * to wait before they can send again.
+     */
+    void setSendWait(int seconds);
+
+    bool isLoadingRecentMessages() const;
 
 private:
     struct NameOptions {
@@ -549,6 +589,10 @@ private:
     friend class Commands_E2E_Test;
     friend class ::TestIrcMessageHandlerP;
     friend class ::TestEventSubMessagesP;
+
+    QTimer sendWaitTimer_;
+    // Timepoint at which the user can send messages again
+    std::optional<std::chrono::steady_clock::time_point> sendWaitEnd_;
 };
 
 }  // namespace chatterino

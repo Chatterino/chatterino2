@@ -105,7 +105,7 @@ protected:
         }
 
         qCDebug(chatterinoLiveupdates) << "Subscribing to" << subscription;
-        DebugCount::increase("LiveUpdates subscriptions");
+        DebugCount::increase(DebugObject::LiveUpdatesSubscription);
 
         QByteArray encoded =
             static_cast<Derived *>(this)->encodeSubscription(subscription);
@@ -126,7 +126,7 @@ protected:
         }
 
         qCDebug(chatterinoLiveupdates) << "Unsubscribing from" << subscription;
-        DebugCount::decrease("LiveUpdates subscriptions");
+        DebugCount::decrease(DebugObject::LiveUpdatesSubscription);
 
         QByteArray encoded =
             static_cast<Derived *>(this)->encodeUnsubscription(subscription);

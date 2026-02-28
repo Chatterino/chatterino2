@@ -55,12 +55,12 @@ QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
-    DebugCount::increase("message elements");
+    DebugCount::increase(DebugObject::MessageElement);
 }
 
 MessageElement::~MessageElement()
 {
-    DebugCount::decrease("message elements");
+    DebugCount::decrease(DebugObject::MessageElement);
 }
 
 MessageElement *MessageElement::setLink(const Link &link)

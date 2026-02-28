@@ -66,6 +66,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QStringBuilder>
+#include <QUrl>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -2706,6 +2707,39 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         {
             menu->addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
+            });
+        }
+    }
+
+    // Add search action when text is selected and search feature is enabled
+    if (!this->selection_.isEmpty() && getSettings()->searchEnabled.getValue())
+    {
+        QString searchURL = getSettings()->searchEngineUrl.getValue();
+        QString searchName = getSettings()->searchEngineName.getValue();
+
+        if (!searchURL.isEmpty())
+        {
+            QString actionText =
+                searchName.isEmpty() ? "&Search" : "&Search with " + searchName;
+
+            if (getSettings()->searchIncognito && supportsIncognitoLinks())
+            {
+                actionText += " in private mode";
+            }
+
+            menu->addAction(actionText, [this, searchURL] {
+                QString query = this->getSelectedText().trimmed();
+                QString encodedQuery = QUrl::toPercentEncoding(query);
+                QString url = searchURL + encodedQuery;
+
+                if (getSettings()->searchIncognito && supportsIncognitoLinks())
+                {
+                    openLinkIncognito(url);
+                }
+                else
+                {
+                    QDesktopServices::openUrl(QUrl(url));
+                }
             });
         }
     }

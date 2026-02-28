@@ -1506,6 +1506,56 @@ TEST_F(PluginTest, LuaVersion)
     static_assert(LUA_VERSION_NUM >= 504);
 }
 
+TEST_F(PluginTest, ChannelOnDisplayNameChanged)
+{
+    this->configure();
+
+    bool gotEvent = false;
+    this->lua->set_function("on_test_event", [&] {
+        gotEvent = true;
+    });
+
+    auto chan = std::make_shared<MockChannel>("mock");
+    this->lua->set("chan", lua::api::ChannelRef(chan));
+    sol::protected_function init = this->lua->script(R"lua(
+        hdl = nil
+        return function(chan)
+            hdl = chan:on_display_name_changed(on_test_event)
+        end
+    )lua");
+
+    ASSERT_TRUE(init(lua::api::ChannelRef(chan)).valid());
+
+    ASSERT_TRUE(this->lua->script("assert(hdl ~= nil)").valid());
+
+    // regular delivery
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // blocked connection
+    ASSERT_TRUE(this->lua->script("hdl:block()").valid());
+    ASSERT_TRUE(this->lua->script("assert(hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_FALSE(gotEvent);
+
+    // unblocked connection
+    ASSERT_TRUE(this->lua->script("hdl:unblock()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // disconnect
+    ASSERT_TRUE(this->lua->script("hdl:disconnect()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_connected())").valid());
+
+    gotEvent = false;
+    ASSERT_FALSE(gotEvent);
+}
+
 class PluginMessageConstructionTest
     : public PluginTest,
       public ::testing::WithParamInterface<QString>
@@ -1578,6 +1628,19 @@ TEST_P(PluginMessageTest, Run)
 
 INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
                          testing::ValuesIn(discoverLuaTests("message")));
+
+class PluginChannelTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginChannelTest, Run)
+{
+    this->configure();
+    runLuaTest("channel", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
+                         testing::ValuesIn(discoverLuaTests("channel")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
