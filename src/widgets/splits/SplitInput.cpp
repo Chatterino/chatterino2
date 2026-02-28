@@ -801,13 +801,27 @@ void SplitInput::installTextEditEvents()
                              });
             menu->addAction(spellcheckAction);
 
-            auto cursor = this->ui_.textEdit->cursorForPosition(pos);
-            cursor.select(QTextCursor::WordUnderCursor);
-            auto word = cursor.selectedText();
+            if (!this->inputHighlighter)
+            {
+                return;
+            }
+
+            auto cursorAtPos = this->ui_.textEdit->cursorForPosition(pos);
+            QString text = this->ui_.textEdit->toPlainText();
+            QStringView word =
+                this->inputHighlighter->getWordAt(text, cursorAtPos.position());
             if (!word.isEmpty())
             {
+                auto cursor = this->ui_.textEdit->textCursor();
+                // Select `word`. `word` is a view into `text`, so we can use
+                // the offsets of `word` from the start of `text`.
+                cursor.setPosition(
+                    static_cast<int>(word.begin() - text.begin()));
+                cursor.setPosition(static_cast<int>(word.end() - text.begin()),
+                                   QTextCursor::KeepAnchor);
+
                 auto suggestions =
-                    getApp()->getSpellChecker()->suggestions(word);
+                    getApp()->getSpellChecker()->suggestions(word.toString());
                 for (const auto &sugg : suggestions)
                 {
                     auto qSugg = QString::fromStdString(sugg);
