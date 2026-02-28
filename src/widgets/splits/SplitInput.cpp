@@ -39,6 +39,7 @@
 #include <QSignalBlocker>
 
 #include <functional>
+#include <ranges>
 
 using namespace Qt::Literals;
 
