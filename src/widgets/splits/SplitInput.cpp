@@ -817,7 +817,6 @@ void SplitInput::installTextEditEvents()
             QString text = this->ui_.textEdit->toPlainText();
             QStringView word =
                 this->inputHighlighter->getWordAt(text, cursorAtPos.position());
-
             if (!word.isEmpty())
             {
                 auto cursor = this->ui_.textEdit->textCursor();
