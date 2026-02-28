@@ -137,11 +137,12 @@ std::vector<QString> InputHighlighter::getSpellCheckedWords(const QString &text)
     return words;
 }
 
-QString InputHighlighter::getWordAt(QStringView text, qsizetype pos)
+QStringView InputHighlighter::getWordAt(QStringView text, qsizetype pos)
 {
     auto tokenIt = this->tokenRegex.globalMatchView(text);
     QString token;
     qsizetype posInWord = 0;
+    qsizetype tokenStart = 0;
     while (tokenIt.hasNext())
     {
         auto match = tokenIt.next();
@@ -149,7 +150,8 @@ QString InputHighlighter::getWordAt(QStringView text, qsizetype pos)
         if (match.capturedStart() <= pos && pos <= match.capturedEnd())
         {
             token = match.captured();
-            posInWord = pos - match.capturedStart();
+            tokenStart = match.capturedStart();
+            posInWord = pos - tokenStart;
             break;
         }
     }
@@ -158,15 +160,15 @@ QString InputHighlighter::getWordAt(QStringView text, qsizetype pos)
         return {};
     }
 
-    QString word;
-    this->visitWords(
-        token, [&](const QString &curWord, qsizetype start, qsizetype count) {
-            if (start <= posInWord && posInWord <= start + count)
-            {
-                assert(word.isEmpty());
-                word = curWord;
-            }
-        });
+    QStringView word;
+    this->visitWords(token, [&](const QString & /*curWord*/, qsizetype start,
+                                qsizetype count) {
+        if (start <= posInWord && posInWord <= start + count)
+        {
+            assert(word.isEmpty());
+            word = text.sliced(tokenStart + start, count);
+        }
+    });
     return word;
 }
 
