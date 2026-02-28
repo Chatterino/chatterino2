@@ -39,6 +39,7 @@
 #include <QSignalBlocker>
 
 #include <functional>
+#include <ranges>
 
 using namespace Qt::Literals;
 
@@ -801,7 +802,13 @@ void SplitInput::installTextEditEvents()
                              });
             menu->addAction(spellcheckAction);
 
-            if (!this->inputHighlighter)
+            int nSuggestions = getSettings()->nSpellCheckingSuggestions;
+            if (nSuggestions < 0)
+            {
+                nSuggestions = std::numeric_limits<int>::max();
+            }
+
+            if (!this->inputHighlighter || nSuggestions == 0)
             {
                 return;
             }
@@ -822,7 +829,8 @@ void SplitInput::installTextEditEvents()
 
                 auto suggestions =
                     getApp()->getSpellChecker()->suggestions(word.toString());
-                for (const auto &sugg : suggestions)
+                for (const auto &sugg :
+                     suggestions | std::views::take(nSuggestions))
                 {
                     auto qSugg = QString::fromStdString(sugg);
                     menu->addAction(qSugg, [this, qSugg, cursor]() mutable {

@@ -388,6 +388,10 @@ public:
         "/behaviour/spellChecking/defaultDictionary",
         "",
     };
+    IntSetting nSpellCheckingSuggestions = {
+        "/behaviour/spellChecking/suggestions/count",
+        -1,
+    };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
