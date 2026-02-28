@@ -804,11 +804,19 @@ void SplitInput::installTextEditEvents()
             auto cursor = this->ui_.textEdit->cursorForPosition(pos);
             cursor.select(QTextCursor::WordUnderCursor);
             auto word = cursor.selectedText();
-            if (!word.isEmpty() && getSettings()->showSpellCheckingSuggestions)
+
+            int nSuggestions = getSettings()->nSpellCheckingSuggestions;
+            if (nSuggestions < 0)
+            {
+                nSuggestions = std::numeric_limits<int>::max();
+            }
+
+            if (!word.isEmpty() && nSuggestions != 0)
             {
                 auto suggestions =
                     getApp()->getSpellChecker()->suggestions(word);
-                for (const auto &sugg : suggestions)
+                for (const auto &sugg :
+                     suggestions | std::views::take(nSuggestions))
                 {
                     auto qSugg = QString::fromStdString(sugg);
                     menu->addAction(qSugg, [this, qSugg, cursor]() mutable {

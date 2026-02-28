@@ -256,10 +256,16 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             ->setTooltip("Check the spelling of words in the input box of all "
                          "splits by default.")
             ->addTo(layout);
-        SettingWidget::checkbox("Show suggestions in context menu",
-                                s.showSpellCheckingSuggestions)
-            ->setTooltip("When enabled, right clicking any word in the input "
-                         "box will show alternatives.")
+        SettingWidget::intInput("Number of suggestions in context menu",
+                                s.nSpellCheckingSuggestions,
+                                {
+                                    .min = -1,
+                                    .max = std::numeric_limits<int>::max(),
+                                })
+            ->setTooltip(
+                "When right clicking any word, show this many suggestions. If "
+                "this is 0, no suggestions will be shown and if it's -1, no "
+                "limit is set.")
             ->addTo(layout);
 
         auto toItem =
