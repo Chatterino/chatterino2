@@ -135,6 +135,7 @@ private:
 
     QWidget *label = nullptr;
     QWidget *actionWidget = nullptr;
+    QLabel *tooltipLabel;
 
     QVBoxLayout *vLayout;
     QHBoxLayout *hLayout;

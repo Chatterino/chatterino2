@@ -19,6 +19,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPixmap>
 
 namespace {
 
@@ -33,7 +34,8 @@ const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
 namespace chatterino {
 
 SettingWidget::SettingWidget(const QString &mainKeyword)
-    : vLayout(new QVBoxLayout(this))
+    : tooltipLabel(new QLabel(this))
+    , vLayout(new QVBoxLayout(this))
     , hLayout(new QHBoxLayout)
 {
     this->vLayout->setContentsMargins(0, 0, 0, 0);
@@ -52,6 +54,7 @@ SettingWidget *SettingWidget::checkbox(const QString &label,
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipLabel, 1);
 
     // update when setting changes
     setting.connect(
@@ -80,6 +83,7 @@ SettingWidget *SettingWidget::inverseCheckbox(const QString &label,
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipLabel, 1);
 
     // update when setting changes
     setting.connect(
@@ -109,6 +113,7 @@ SettingWidget *SettingWidget::customCheckbox(
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipLabel, 1);
 
     check->setChecked(initialValue);
 
@@ -147,6 +152,7 @@ SettingWidget *SettingWidget::intInput(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(input);
 
@@ -192,6 +198,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -265,6 +272,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -343,6 +351,7 @@ SettingWidget *SettingWidget::dropdown(
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -395,6 +404,7 @@ SettingWidget *SettingWidget::colorButton(const QString &label,
     auto *colorButton = new ColorButton(color);
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(colorButton);
 
@@ -442,6 +452,7 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addWidget(edit);
 
     // Update the setting when the widget changes.
@@ -480,6 +491,7 @@ SettingWidget *SettingWidget::fontButton(const QString &label,
     auto *button = new SPushButton(currentFont().family());
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipLabel);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(button);
 
@@ -528,6 +540,8 @@ SettingWidget *SettingWidget::setTooltip(QString tooltip)
     {
         this->actionWidget->setToolTip(tooltip);
     }
+    this->tooltipLabel->setPixmap(QPixmap(":/settings/hint.svg"));
+    this->tooltipLabel->setToolTip(tooltip);
 
     this->keywords.append(tooltip);
 
