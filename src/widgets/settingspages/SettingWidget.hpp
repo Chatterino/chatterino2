@@ -25,6 +25,7 @@
 
 class QFormLayout;
 class QLayout;
+class QSvgWidget;
 
 namespace chatterino {
 
@@ -135,7 +136,7 @@ private:
 
     QWidget *label = nullptr;
     QWidget *actionWidget = nullptr;
-    QLabel *tooltipLabel;
+    QSvgWidget *tooltipIcon;
 
     QVBoxLayout *vLayout;
     QHBoxLayout *hLayout;
