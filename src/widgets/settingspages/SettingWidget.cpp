@@ -24,6 +24,8 @@
 #include <QSvgWidget>
 #include <Qt>
 
+#include <algorithm>
+
 namespace {
 
 constexpr int MAX_TOOLTIP_LINE_LENGTH = 50;
@@ -47,6 +49,7 @@ SettingWidget::SettingWidget(const QString &mainKeyword)
     this->vLayout->addLayout(this->hLayout);
 
     this->keywords.append(mainKeyword);
+    this->tooltipIcon->setVisible(false);
 }
 
 SettingWidget *SettingWidget::checkbox(const QString &label,
@@ -537,18 +540,27 @@ SettingWidget *SettingWidget::setTooltip(QString tooltip)
         tooltip.replace(MAX_TOOLTIP_LINE_LENGTH_REGEX, "\n");
     }
 
+    int sz = 0;
     if (this->label != nullptr)
     {
         this->label->setToolTip(tooltip);
+        sz = this->label->sizeHint().height();
     }
 
     if (this->actionWidget != nullptr)
     {
         this->actionWidget->setToolTip(tooltip);
+        sz = std::max(sz, this->actionWidget->sizeHint().height());
     }
-    this->tooltipIcon->renderer()->setAspectRatioMode(Qt::KeepAspectRatio);
+
+    this->tooltipIcon->setVisible(true);
     this->tooltipIcon->load(u":/settings/hint.svg"_qs);
     this->tooltipIcon->setToolTip(tooltip);
+    auto *r = this->tooltipIcon->renderer();
+    auto vb = r->viewBox();
+    this->tooltipIcon->setFixedHeight(sz);
+    this->tooltipIcon->setFixedWidth(
+        int(double(sz) / double(vb.height()) * double(vb.width())));
 
     this->keywords.append(tooltip);
 
