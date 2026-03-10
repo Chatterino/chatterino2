@@ -90,6 +90,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.restricted
      * flags.monitored
      * flags.shared
+     * flags.similar
      * flags.watch_streak
      *
      * message.content
