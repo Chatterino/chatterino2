@@ -43,6 +43,7 @@ const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
     {"flags.monitored", Type::Bool},
     {"flags.shared", Type::Bool},
     {"flags.similar", Type::Bool},
+    {"flags.watch_streak", Type::Bool},
     {"message.content", Type::String},
     {"message.length", Type::Int},
     {"reward.title", Type::String},
@@ -89,6 +90,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.restricted
      * flags.monitored
      * flags.shared
+     * flags.watch_streak
      *
      * message.content
      * message.length
@@ -156,6 +158,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.monitored", m->flags.has(MessageFlag::MonitoredMessage)},
         {"flags.shared", m->flags.has(MessageFlag::SharedMessage)},
         {"flags.similar", m->flags.has(MessageFlag::Similar)},
+        {"flags.watch_streak", m->flags.has(MessageFlag::WatchStreak)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},
