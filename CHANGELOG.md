@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Improve nightly downgrade message. (#6842)
+
 ## 2.5.5-beta.1
 
 - Minor: Added a countdown timer to the input box to show when you can chat again during slow mode or after a timeout. This feature is disabled by default, and can be enabled with the "Show countdown on slow mode or when timed out" setting. (#6782, #6791)
