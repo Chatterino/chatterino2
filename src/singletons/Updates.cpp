@@ -462,7 +462,7 @@ QString Updates::buildUpdateAvailableText() const
         if (this->isDowngrade())
         {
             return QString("The version online (%1) seems to be lower than the "
-                           "current (%2).\nEither a version war reverted or "
+                           "current (%2).\nEither a version was reverted or "
                            "you are running a newer build.\n\nDo you want to "
                            "head to Chatterino.com to download it?")
                 .arg(this->getOnlineVersion(), this->getCurrentVersion());
