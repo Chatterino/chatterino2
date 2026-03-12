@@ -126,6 +126,8 @@ void TwitchAccount::tryLoadBlocks()
     this->ignoresUserIds_.clear();
     this->ignoresUserLogins_.clear();
 
+    CancellationToken retryToken = token;
+
     getHelix()->loadBlocks(
         getApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](const std::vector<HelixBlock> &blocks) {
@@ -140,21 +142,22 @@ void TwitchAccount::tryLoadBlocks()
                 this->ignoresUserLogins_.insert(blockedUser.name);
             }
         },
-        [this, token](const QString &error) {
-            if (token.isCancelled())
+        [this, retryToken](const QString &error) {
+            if (retryToken.isCancelled())
             {
                 return;
             }
             qCWarning(chatterinoTwitch).noquote()
                 << "Fetching blocks failed:" << error << "- retrying";
             auto delay = this->blocksRetryBackoff_.next();
-            QTimer::singleShot(static_cast<int>(delay.count()), [this, token] {
-                if (token.isCancelled())
-                {
-                    return;
-                }
-                this->tryLoadBlocks();
-            });
+            QTimer::singleShot(static_cast<int>(delay.count()),
+                               [this, retryToken] {
+                                   if (retryToken.isCancelled())
+                                   {
+                                       return;
+                                   }
+                                   this->tryLoadBlocks();
+                               });
         },
         std::move(token));
 }
