@@ -150,8 +150,7 @@ void TwitchAccount::tryLoadBlocks()
             qCWarning(chatterinoTwitch).noquote()
                 << "Fetching blocks failed:" << error << "- retrying";
             auto delay = this->blocksRetryBackoff_.next();
-            QTimer::singleShot(static_cast<int>(delay.count()),
-                               [this, retryToken] {
+            QTimer::singleShot(delay, [this, retryToken] {
                                    if (retryToken.isCancelled())
                                    {
                                        return;
