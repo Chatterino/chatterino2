@@ -151,12 +151,12 @@ void TwitchAccount::tryLoadBlocks()
                 << "Fetching blocks failed:" << error << "- retrying";
             auto delay = this->blocksRetryBackoff_.next();
             QTimer::singleShot(delay, [this, retryToken] {
-                                   if (retryToken.isCancelled())
-                                   {
-                                       return;
-                                   }
-                                   this->tryLoadBlocks();
-                               });
+                if (retryToken.isCancelled())
+                {
+                    return;
+                }
+                this->tryLoadBlocks();
+            });
         },
         std::move(token));
 }
