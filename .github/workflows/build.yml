@@ -221,7 +221,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.20
+        uses: hendrikmuhs/ccache-action@v1.2.21
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
