@@ -478,6 +478,8 @@ public:
         "/streamerMode/hideBlockedTermText",
         true,
     };
+    BoolSetting streamerModeHideUserNotes = {"/streamerMode/hideUserNotes",
+                                             true};
 
     /// Blocked Users
     BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",

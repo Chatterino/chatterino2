@@ -756,6 +756,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "that you don't want to show on stream.")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Hide user notes", s.streamerModeHideUserNotes)
+        ->setTooltip("Hide user notes from showing in usercards.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Mute mention sounds", s.streamerModeMuteMentions)
         ->setTooltip("Mute your ping sound from playing.")
         ->addTo(layout);
