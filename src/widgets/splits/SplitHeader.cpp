@@ -5,6 +5,7 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkCommon.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -46,6 +47,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace chatterino::literals;
 
 /// The width of the standard button.
 constexpr const int BUTTON_WIDTH = 28;
@@ -435,12 +437,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Popup overlay",
         h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"),
         this->split_, &Split::showOverlayWindow);
-    menu->addAction("Search",
+    menu->addAction(u"Search\u2026"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "showSearch"),
                     this->split_, [this] {
                         this->split_->showSearch(true);
                     });
-    menu->addAction("Set filters",
+    menu->addAction(u"Set filters\u2026"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"),
                     this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
