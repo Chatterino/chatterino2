@@ -181,6 +181,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
                 QSignalBlocker dontTriggerCursorMovement(this);
                 this->completer_->complete();
             }
+            this->textChanged();
             return;
         }
 
@@ -210,6 +211,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             QSignalBlocker dontTriggerCursorMovement(this);
             this->completer_->complete();
         }
+        this->textChanged();
         return;
     }
 
