@@ -20,6 +20,7 @@
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
+#    include "controllers/plugins/api/ModuleDateTime.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
@@ -49,6 +50,7 @@ PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
 {
     this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
+    this->loaders_.emplace_back("qt.datetime", &lua::api::qt::createModule);
 }
 
 void PluginController::initialize(Settings &settings)

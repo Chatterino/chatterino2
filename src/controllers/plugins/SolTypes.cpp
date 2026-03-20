@@ -14,6 +14,7 @@
 
 #    include <QObject>
 #    include <QStringBuilder>
+#    include <QTimeZone>
 #    include <sol/thread.hpp>
 
 namespace chatterino::lua {
@@ -234,6 +235,72 @@ int sol_lua_push(sol::types<chatterino::Link>, lua_State *L,
 }
 
 }  // namespace chatterino
+
+bool sol_lua_check(sol::types<QTimeZone::OffsetData>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, handler, tracking);
+}
+
+QTimeZone::OffsetData sol_lua_get(sol::types<QTimeZone::OffsetData>,
+                                  lua_State *L, int index,
+                                  sol::stack::record &tracking)
+{
+    sol::table table = sol::stack::get<sol::table>(L, index, tracking);
+
+    auto abbreviation = table.get<sol::optional<QString>>("abbreviation");
+    if (!abbreviation)
+    {
+        throw std::runtime_error(
+            "Missing 'abbreviation' in QTimeZone::OffsetData");
+    }
+    auto atUtc = table.get<sol::optional<QDateTime>>("atUtc");
+    if (!atUtc)
+    {
+        throw std::runtime_error("Missing 'atUtc' in QTimeZone::OffsetData");
+    }
+    auto offsetFromUtc = table.get<sol::optional<int>>("offsetFromUtc");
+    if (!offsetFromUtc)
+    {
+        throw std::runtime_error(
+            "Missing 'offsetFromUtc' in QTimeZone::OffsetData");
+    }
+    auto standardTimeOffset =
+        table.get<sol::optional<int>>("standardTimeOffset");
+    if (!standardTimeOffset)
+    {
+        throw std::runtime_error(
+            "Missing 'standardTimeOffset' in QTimeZone::OffsetData");
+    }
+    auto daylightTimeOffset =
+        table.get<sol::optional<int>>("daylightTimeOffset");
+    if (!daylightTimeOffset)
+    {
+        throw std::runtime_error(
+            "Missing 'daylightTimeOffset' in QTimeZone::OffsetData");
+    }
+
+    return {
+        .abbreviation = *abbreviation,
+        .atUtc = *atUtc,
+        .offsetFromUtc = *offsetFromUtc,
+        .standardTimeOffset = *standardTimeOffset,
+        .daylightTimeOffset = *daylightTimeOffset,
+    };
+}
+
+int sol_lua_push(sol::types<QTimeZone::OffsetData>, lua_State *L,
+                 const QTimeZone::OffsetData &value)
+{
+    sol::table table = sol::table::create(L, 0, 4);
+    table.set("abbreviation", value.abbreviation);
+    table.set("atUtc", value.atUtc);
+    table.set("offsetFromUtc", value.offsetFromUtc);
+    table.set("standardTimeOffset", value.standardTimeOffset);
+    table.set("daylightTimeOffset", value.daylightTimeOffset);
+    return sol::stack::push(L, table);
+}
 
 // NOLINTEND(readability-named-parameter)
 

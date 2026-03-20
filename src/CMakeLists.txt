@@ -281,6 +281,8 @@ set(SOURCE_FILES
         controllers/plugins/api/WebSocket.hpp
         controllers/plugins/ConnectionManager.cpp
         controllers/plugins/ConnectionManager.hpp
+        controllers/plugins/api/ModuleDateTime.cpp
+        controllers/plugins/api/ModuleDateTime.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp

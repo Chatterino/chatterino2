@@ -13,6 +13,7 @@
 #    include <QString>
 #    include <QStringBuilder>
 #    include <QStringList>
+#    include <QTimeZone>
 #    include <sol/sol.hpp>
 
 namespace chatterino::detail {
@@ -199,6 +200,7 @@ SOL_STACK_FUNCTIONS(chatterino::Link)
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)
 SOL_STACK_FUNCTIONS(QByteArray)
+SOL_STACK_FUNCTIONS(QTimeZone::OffsetData)
 
 #    undef SOL_STACK_FUNCTIONS
 
