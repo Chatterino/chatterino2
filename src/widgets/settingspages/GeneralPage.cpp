@@ -1586,6 +1586,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Change this only if you're noticing issues with sound "
                      "playback on your system")
         ->addTo(layout);
+    SettingWidget::checkbox("Keep sound backend alive (requires restart)",
+                            s.soundMiniaudioKeepEngineAlive)
+        ->setTooltip(
+            "This setting makes Chatterino output silence to your sound "
+            "device, even if no ping is being played. Try this setting if you "
+            "have issues with wireless devices not playing the first sound.")
+        ->addTo(layout);
 
     SettingWidget::checkbox(
         "Enable experimental Twitch EventSub support (requires restart)",

@@ -797,6 +797,10 @@ public:
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
+    BoolSetting soundMiniaudioKeepEngineAlive = {
+        "/sound/miniaudio/keepEngineAlive",
+        false,
+    };
     BoolSetting enableExperimentalEventSub = {
         "/eventsub/enableExperimental",
         true,
