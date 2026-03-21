@@ -3909,6 +3909,8 @@ void Helix::paginate(
         if (!onPage(json, state))
         {
             // The consumer doesn't want any more pages
+            qCDebug(chatterinoTwitch)
+                << "paginate onPage returned false for" << url;
             return;
         }
 
