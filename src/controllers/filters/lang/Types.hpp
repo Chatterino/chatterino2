@@ -78,30 +78,18 @@ bool isList(const PossibleType &possibleType);
 
 inline bool variantIs(const QVariant &a, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     return a.typeId() == type;
-#else
-    return a.type() == type;
-#endif
 }
 
 inline bool variantIsNot(const QVariant &a, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     return a.typeId() != type;
-#else
-    return a.type() != type;
-#endif
 }
 
 inline bool convertVariantTypes(QVariant &a, QVariant &b, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QMetaType ty(type);
     return a.convert(ty) && b.convert(ty);
-#else
-    return a.convert(type) && b.convert(type);
-#endif
 }
 
 inline bool variantTypesMatch(QVariant &a, QVariant &b, int type)

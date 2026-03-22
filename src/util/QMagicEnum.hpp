@@ -135,19 +135,12 @@ public:
 ///
 /// @param view The view to turn into a static string
 /// @returns Qt6: A static string (never gets freed), Qt5: regular string
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 [[nodiscard]] inline QString staticString(QStringView view) noexcept
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     return QString(QStringPrivate(nullptr, const_cast<char16_t *>(view.utf16()),
                                   view.size()));
 }
-#else
-[[nodiscard]] inline QString staticString(QStringView view)
-{
-    return view.toString();
-}
-#endif
 
 }  // namespace chatterino::qmagicenum::detail
 

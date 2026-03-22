@@ -243,11 +243,7 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
             return;
         }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto words = midrepl.tokenize(u' ');
-#else
-        auto words = midrepl.split(' ');
-#endif
         SizeType pos = 0;
         for (const auto &word : words)
         {
