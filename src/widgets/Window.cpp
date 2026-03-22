@@ -524,7 +524,7 @@ void Window::addShortcuts()
              Split *split = new Split(splitContainer);
              split->setChannel(
                  getApp()->getTwitch()->getOrAddChannel(si.channelName));
-             split->setFilters(si.filters);
+             split->setFilters(si.filters, si.filtersAnyOf);
              splitContainer->insertSplit(split);
              splitContainer->setSelected(split);
              this->notebook_->select(splitContainer);

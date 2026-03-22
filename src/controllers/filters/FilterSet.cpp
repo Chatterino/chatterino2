@@ -17,7 +17,8 @@ FilterSet::FilterSet()
         });
 }
 
-FilterSet::FilterSet(const QList<QUuid> &filterIds)
+FilterSet::FilterSet(const QList<QUuid> &filterIds, bool anyOf)
+    : anyOf_(anyOf)
 {
     auto filters = getSettings()->filterRecords.readOnly();
     for (const auto &f : *filters)
@@ -47,15 +48,24 @@ bool FilterSet::filter(const MessagePtr &m, ChannelPtr channel) const
     }
 
     filters::ContextMap context = filters::buildContextMap(m, channel.get());
+    bool result = !this->anyOf_;
     for (const auto &f : this->filters_.values())
     {
-        if (!f->valid() || !f->filter(context))
+        if (!f->valid())
         {
             return false;
         }
+        if (this->anyOf_)
+        {
+            result = result || f->filter(context);
+        }
+        else
+        {
+            result = result && f->filter(context);
+        }
     }
 
-    return true;
+    return result;
 }
 
 const QList<QUuid> FilterSet::filterIds() const
@@ -82,6 +92,11 @@ void FilterSet::reloadFilters()
             this->filters_.remove(key);
         }
     }
+}
+
+bool FilterSet::getAnyOf() const
+{
+    return this->anyOf_;
 }
 
 }  // namespace chatterino

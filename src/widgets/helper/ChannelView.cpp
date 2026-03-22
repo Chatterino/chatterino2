@@ -1106,9 +1106,9 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
     }
 }
 
-void ChannelView::setFilters(const QList<QUuid> &ids)
+void ChannelView::setFilters(const QList<QUuid> &ids, bool anyOf)
 {
-    this->channelFilters_ = std::make_shared<FilterSet>(ids);
+    this->channelFilters_ = std::make_shared<FilterSet>(ids, anyOf);
 
     this->updateID();
 }
@@ -1126,6 +1126,15 @@ QList<QUuid> ChannelView::getFilterIds() const
 FilterSetPtr ChannelView::getFilterSet() const
 {
     return this->channelFilters_;
+}
+
+bool ChannelView::getFilterSetAnyOf() const
+{
+    if (!this->channelFilters_)
+    {
+        return false;
+    }
+    return this->channelFilters_->getAnyOf();
 }
 
 bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const

@@ -22,6 +22,7 @@ public:
     struct SplitInfo {
         QString channelName;
         QList<QUuid> filters;
+        bool filtersAnyOf;
         NotebookTab *tab;  // non owning ptr
     };
 

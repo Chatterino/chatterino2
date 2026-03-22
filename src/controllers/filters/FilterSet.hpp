@@ -24,16 +24,19 @@ class FilterSet
 {
 public:
     FilterSet();
-    FilterSet(const QList<QUuid> &filterIds);
+    FilterSet(const QList<QUuid> &filterIds, bool anyOf);
 
     ~FilterSet();
 
     bool filter(const MessagePtr &m, ChannelPtr channel) const;
     const QList<QUuid> filterIds() const;
+    bool getAnyOf() const;
 
 private:
     QMap<QUuid, FilterRecordPtr> filters_;
     pajlada::Signals::Connection listener_;
+
+    bool anyOf_{false};
 
     void reloadFilters();
 };

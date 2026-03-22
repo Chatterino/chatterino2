@@ -12,12 +12,14 @@ class SelectChannelFiltersDialog : public QDialog
 {
 public:
     SelectChannelFiltersDialog(const QList<QUuid> &previousSelection,
-                               QWidget *parent = nullptr);
+                               bool previousAnyOf, QWidget *parent = nullptr);
 
     const QList<QUuid> &getSelection() const;
+    bool getAnyOf() const;
 
 private:
     QList<QUuid> currentSelection_;
+    bool anyOf_;
 };
 
 }  // namespace chatterino

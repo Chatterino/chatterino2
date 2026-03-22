@@ -879,6 +879,7 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(
         result.type_ = channelTypeToString(channelType);
         result.channelName_ = currentNode->split_->getChannel()->getName();
         result.filters_ = currentNode->split_->getFilters();
+        result.filtersAnyOf_ = currentNode->split_->getFiltersAnyOf();
         return result;
     }
 
@@ -911,7 +912,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
-        split->setFilters(splitNode.filters_);
+        split->setFilters(splitNode.filters_, splitNode.filtersAnyOf_);
         split->setCheckSpellingOverride(splitNode.spellCheckOverride);
 
         this->insertSplit(split);
@@ -945,7 +946,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 }
                 const auto &splitNode = *inner;
                 auto *split = new Split(this);
-                split->setFilters(splitNode.filters_);
+                split->setFilters(splitNode.filters_, splitNode.filtersAnyOf_);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
                 split->setCheckSpellingOverride(splitNode.spellCheckOverride);

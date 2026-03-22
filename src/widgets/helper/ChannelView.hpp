@@ -164,9 +164,10 @@ public:
     /// @see #underlyingChannel()
     void setChannel(const ChannelPtr &underlyingChannel);
 
-    void setFilters(const QList<QUuid> &ids);
+    void setFilters(const QList<QUuid> &ids, bool anyOf);
     QList<QUuid> getFilterIds() const;
     FilterSetPtr getFilterSet() const;
+    bool getFilterSetAnyOf() const;
 
     /// @brief The channel this is derived from
     ///

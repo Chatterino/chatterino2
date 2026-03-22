@@ -60,8 +60,9 @@ public:
     ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 
-    void setFilters(const QList<QUuid> ids);
+    void setFilters(const QList<QUuid> ids, bool anyOf);
     QList<QUuid> getFilters() const;
+    bool getFiltersAnyOf() const;
 
     void setModerationMode(bool value);
     bool getModerationMode() const;

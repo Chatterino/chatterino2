@@ -16,8 +16,9 @@
 namespace chatterino {
 
 SelectChannelFiltersDialog::SelectChannelFiltersDialog(
-    const QList<QUuid> &previousSelection, QWidget *parent)
+    const QList<QUuid> &previousSelection, bool previousAnyOf, QWidget *parent)
     : QDialog(parent)
+    , anyOf_(previousAnyOf)
 {
     auto *vbox = new QVBoxLayout(this);
     auto *itemVbox = new QVBoxLayout;
@@ -34,6 +35,23 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
     scrollArea->setWidget(scrollAreaContent);
 
     vbox->addWidget(scrollArea);
+
+    auto *anyOfCheckbox = new QCheckBox("Match if any filter applies", this);
+    anyOfCheckbox->setCheckState(previousAnyOf ? Qt::CheckState::Checked
+                                               : Qt::CheckState::Unchecked);
+    QObject::connect(anyOfCheckbox, &QCheckBox::stateChanged,
+                     [this](int state) {
+                         if (state == 0)
+                         {
+                             this->anyOf_ = false;
+                         }
+                         else
+                         {
+                             this->anyOf_ = true;
+                         }
+                     });
+    vbox->addWidget(anyOfCheckbox);
+
     vbox->addLayout(buttonBox);
 
     buttonBox->addStretch(1);
@@ -94,6 +112,11 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
 const QList<QUuid> &SelectChannelFiltersDialog::getSelection() const
 {
     return this->currentSelection_;
+}
+
+bool SelectChannelFiltersDialog::getAnyOf() const
+{
+    return this->anyOf_;
 }
 
 }  // namespace chatterino

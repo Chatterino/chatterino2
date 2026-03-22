@@ -26,7 +26,8 @@ class OverlayWindow : public BaseWindow
 {
     Q_OBJECT
 public:
-    OverlayWindow(IndirectChannel channel, const QList<QUuid> &filterIDs);
+    OverlayWindow(IndirectChannel channel, const QList<QUuid> &filterIDs,
+                  bool filtersAnyOf);
     ~OverlayWindow() override;
     OverlayWindow(const OverlayWindow &) = delete;
     OverlayWindow(OverlayWindow &&) = delete;

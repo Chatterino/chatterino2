@@ -686,6 +686,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             WindowManager::encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
+            obj.insert("filtersAnyOf", node->getSplit()->getFiltersAnyOf());
 
             auto spellOverride = node->getSplit()->checkSpellingOverride();
             if (spellOverride)

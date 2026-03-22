@@ -115,6 +115,7 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
         descriptor.channelName_ = data.value("name").toString();
     }
     descriptor.filters_ = loadFilters(root.value("filters"));
+    descriptor.filtersAnyOf_ = root.value("filtersAnyOf").toBool();
 
     auto spellOverride = root["checkSpelling"];
     if (spellOverride.isBool())

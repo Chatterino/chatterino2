@@ -1095,7 +1095,7 @@ void Split::popup()
 
     split->setChannel(this->getIndirectChannel());
     split->setModerationMode(this->getModerationMode());
-    split->setFilters(this->getFilters());
+    split->setFilters(this->getFilters(), this->getFiltersAnyOf());
 
     window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
@@ -1111,7 +1111,8 @@ void Split::showOverlayWindow()
     if (!this->overlayWindow_)
     {
         this->overlayWindow_ =
-            new OverlayWindow(this->getIndirectChannel(), this->getFilters());
+            new OverlayWindow(this->getIndirectChannel(), this->getFilters(),
+                              this->getFiltersAnyOf());
     }
     this->overlayWindow_->show();
 }
@@ -1216,24 +1217,30 @@ void Split::openSubPage()
 
 void Split::setFiltersDialog()
 {
-    SelectChannelFiltersDialog d(this->getFilters(), this);
+    SelectChannelFiltersDialog d(this->getFilters(), this->getFiltersAnyOf(),
+                                 this);
     d.setWindowTitle("Select filters");
 
     if (d.exec() == QDialog::Accepted)
     {
-        this->setFilters(d.getSelection());
+        this->setFilters(d.getSelection(), d.getAnyOf());
     }
 }
 
-void Split::setFilters(const QList<QUuid> ids)
+void Split::setFilters(const QList<QUuid> ids, bool anyOf)
 {
-    this->view_->setFilters(ids);
+    this->view_->setFilters(ids, anyOf);
     this->header_->updateChannelText();
 }
 
 QList<QUuid> Split::getFilters() const
 {
     return this->view_->getFilterIds();
+}
+
+bool Split::getFiltersAnyOf() const
+{
+    return this->view_->getFilterSetAnyOf();
 }
 
 void Split::showSearch(bool singleChannel)

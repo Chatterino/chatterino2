@@ -51,6 +51,7 @@ struct SplitDescriptor {
     std::optional<bool> spellCheckOverride;
 
     QList<QUuid> filters_;
+    bool filtersAnyOf_;
 
     static void loadFromJSON(SplitDescriptor &descriptor,
                              const QJsonObject &root, const QJsonObject &data);
