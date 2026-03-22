@@ -134,7 +134,7 @@ public:
 ///      the entire duration of the program).
 ///
 /// @param view The view to turn into a static string
-/// @returns Qt6: A static string (never gets freed), Qt5: regular string
+/// @returns A static string (never gets freed)
 [[nodiscard]] inline QString staticString(QStringView view) noexcept
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
