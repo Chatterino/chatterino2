@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.5
+
 - Minor: Update emoji data to Unicode 17.0. (#6471)
 - Minor: Added a setting to disable sound device sleeping. This can help ensure highlight sounds play more reliably when using a wireless sound device. (#6859)
 - Bugfix: Make it possible to filter Watch Streak messages again. Previously, these messages were labeled `sub_messages`. This was fixed in #6571, but we didn't add a new filter to compensate. (#6741)
