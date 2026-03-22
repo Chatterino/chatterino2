@@ -334,8 +334,7 @@ void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10,
                         {
                             s.append(u", ["_s);
                         }
-                        s.append(QString::fromUtf8(
-                            key.data(), static_cast<qsizetype>(key.size())));
+                        s.append(QUtf8StringView(key));
                         s.append("] = <dyn>");
                         n++;
                     }

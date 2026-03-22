@@ -829,7 +829,7 @@ FontStyle TextElement::fontStyle() const noexcept
 
 void TextElement::appendText(QStringView text)
 {
-    for (auto word : text.split(' '))  // creates a QList
+    for (auto word : text.tokenize(u' '))
     {
         this->words_.append(word.toString());
     }
@@ -837,7 +837,19 @@ void TextElement::appendText(QStringView text)
 
 void TextElement::appendText(const QString &text)
 {
-    this->appendText(QStringView{text});
+    qsizetype firstSpace = text.indexOf(u' ');
+    if (firstSpace == -1)
+    {
+        // reuse (ref) `text`
+        this->words_.emplace_back(text);
+        return;
+    }
+
+    this->words_.emplace_back(text.sliced(0, firstSpace));
+    for (auto word : QStringView{text}.sliced(firstSpace + 1).tokenize(u' '))
+    {
+        this->words_.emplace_back(word.toString());
+    }
 }
 
 QJsonObject TextElement::toJson() const
