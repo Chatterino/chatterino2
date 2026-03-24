@@ -2247,7 +2247,8 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
                                    MessageElementFlag::Username, selfMsgColor,
-                                   FontStyle::ChatMediumBold);
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserWhisper, currentUser->getUserName()});
     }
     else
     {
