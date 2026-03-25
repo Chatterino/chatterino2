@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added `bits.amount` to filter by the amount of bits cheered in a message. (#6871)
+
 ## 2.5.5
 
 - Minor: Update emoji data to Unicode 17.0. (#6471)

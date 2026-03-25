@@ -194,6 +194,12 @@ const AccessorMap &accessorMap()
             },
         },
 
+        // bits.*
+        {
+            u"bits.amount"_s,
+            {Type::Int, memberAccessor<&Message::bits>},
+        },
+
         // channel.*
         {
             u"channel.live"_s,
