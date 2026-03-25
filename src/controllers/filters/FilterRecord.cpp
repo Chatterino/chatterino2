@@ -62,7 +62,7 @@ bool FilterRecord::valid() const
     return this->filter_ != nullptr;
 }
 
-bool FilterRecord::filter(const filters::ContextMap &context) const
+bool FilterRecord::filter(const filters::RunContext &context) const
 {
     assert(this->valid());
     return this->filter_->execute(context).toBool();

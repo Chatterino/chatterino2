@@ -184,6 +184,8 @@ set(SOURCE_FILES
         controllers/filters/lang/expressions/RegexExpression.hpp
         controllers/filters/lang/expressions/UnaryOperation.hpp
         controllers/filters/lang/expressions/UnaryOperation.cpp
+        controllers/filters/lang/expressions/ValueAccessorExpression.cpp
+        controllers/filters/lang/expressions/ValueAccessorExpression.hpp
         controllers/filters/lang/expressions/ValueExpression.cpp
         controllers/filters/lang/expressions/ValueExpression.hpp
         controllers/filters/lang/Filter.cpp

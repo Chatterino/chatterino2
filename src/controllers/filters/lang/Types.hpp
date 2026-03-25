@@ -108,4 +108,57 @@ inline bool variantTypesMatch(QVariant &a, QVariant &b, int type)
     return variantIs(a, type) && variantIs(b, type);
 }
 
+namespace detail {
+
+template <typename T>
+struct TypeTraits {
+};
+
+template <>
+struct TypeTraits<QString> {
+    static constexpr Type TYPE = Type::String;
+};
+
+template <>
+struct TypeTraits<int> {
+    static constexpr Type TYPE = Type::Int;
+    using Narrow = int;
+};
+template <>
+struct TypeTraits<uint64_t> : TypeTraits<int> {
+};
+template <>
+struct TypeTraits<int64_t> : TypeTraits<int> {
+};
+
+template <>
+struct TypeTraits<bool> {
+    static constexpr Type TYPE = Type::Bool;
+};
+
+template <>
+struct TypeTraits<QColor> {
+    static constexpr Type TYPE = Type::Color;
+};
+
+template <>
+struct TypeTraits<QRegularExpression> {
+    static constexpr Type TYPE = Type::RegularExpression;
+};
+
+template <>
+struct TypeTraits<QVariantList> {
+    static constexpr Type TYPE = Type::List;
+};
+
+template <>
+struct TypeTraits<QStringList> {
+    static constexpr Type TYPE = Type::StringList;
+};
+
+}  // namespace detail
+
+template <typename T>
+inline constexpr Type TYPE_OF_V = detail::TypeTraits<T>::TYPE;
+
 }  // namespace chatterino::filters
