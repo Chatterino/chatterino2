@@ -186,8 +186,7 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
         {.input = "   word word  ", .words = {"word", "word"}},
         {.input = "word?", .words = {"word"}},
         {.input = "word?word", .words = {"word", "word"}},
-        // FIXME: should  be "word-word"
-        {.input = "word-word", .words = {"word", "word"}},
+        {.input = "word-word", .words = {"word-word"}},
         {
             .input = "channel emotes 7TVEmote a BTTVEmote b FFZEmote c",
             .words = {"channel", "emotes", "a", "b", "c"},
@@ -268,10 +267,30 @@ TEST(InputHighlight, wordRegex)
         {.input = u"inogre123numbers", .words = {}},
         {.input = u"under_score", .words = {}},
         {.input = u"äwördü", .words = {u"äwördü"}},
-        {.input = u"abc!@foo#bar&(baz]",
-         .words = {u"abc", u"foo", u"bar", u"baz"}},
+        {
+            .input = u"abc!@foo#bar&(baz]",
+            .words = {u"abc", u"foo", u"bar", u"baz"},
+        },
         {.input = u"1234567,word/a123", .words = {u"word"}},
         {.input = u"'quotes\"", .words = {u"quotes"}},
+        {.input = u"doesn't", .words = {u"doesn't"}},
+        {.input = u"wouldn't've", .words = {u"wouldn't've"}},
+        {
+            .input = u"abc'd'efg'hij-klm'n-o-p",
+            .words = {u"abc'd'efg'hij-klm'n-o-p"},
+        },
+        {.input = u"'abc'", .words = {u"abc"}},
+        {.input = u"'abc'def", .words = {u"abc'def"}},
+        {.input = u"'abc'def'", .words = {u"abc'def"}},
+        {.input = u"follow-up", .words = {u"follow-up"}},
+        {.input = u"abc-def", .words = {u"abc-def"}},
+        {.input = u"-abc-def-", .words = {u"abc-def"}},
+        {.input = u"abc--def", .words = {u"abc", u"def"}},
+        {.input = u"'abc--def'", .words = {u"abc", u"def"}},
+        {.input = u"abc_def", .words = {}},
+        {.input = u"abc_", .words = {}},
+        {.input = u"_def", .words = {}},
+        {.input = u"abc'def_ghi'jkl", .words = {u"abc", u"jkl"}},
     };
 
     auto re = inputhighlight::detail::wordRegex();
