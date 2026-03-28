@@ -7,18 +7,18 @@
 #include <QString>
 #include <QStringView>
 
-QString PUBSUB_WSS_ADDR =
+const QString PUBSUB_WSS_ADDR =
     qEnvironmentVariable("CHATTERINO_TEST_PUBSUB_WSS_ADDR", "127.0.0.1:9050");
-QString PUBSUB_WS_ADDR =
+const QString PUBSUB_WS_ADDR =
     qEnvironmentVariable("CHATTERINO_TEST_PUBSUB_WS_ADDR", "127.0.0.1:9052");
 
 #ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
 // Using our self-hosted version of httpbox https://github.com/kevinastone/httpbox
-QString HTTPBIN_BASE_URL =
+const QString HTTPBIN_BASE_URL =
     "https://" + qEnvironmentVariable("CHATTERINO_TEST_HTTPBOX_ADDR",
                                       "braize.pajlada.com/httpbox");
 #else
-QString HTTPBIN_BASE_URL =
+const QString HTTPBIN_BASE_URL =
     "http://" +
     qEnvironmentVariable("CHATTERINO_TEST_HTTPBOX_ADDR", "127.0.0.1:9050");
 #endif
