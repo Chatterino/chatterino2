@@ -15,6 +15,7 @@ list(APPEND CMAKE_MODULE_PATH
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
+option(BUILD_EMBED "Build the chatterino-embed plugin" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
@@ -317,6 +318,10 @@ endif ()
 
 if (BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
+endif ()
+
+if (BUILD_EMBED)
+    add_subdirectory(tools/chatterino-embed)
 endif ()
 
 feature_summary(WHAT ALL)
