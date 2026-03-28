@@ -46,7 +46,7 @@ class MiniaudioBackend : public ISoundController
     std::atomic<State> state{State::Uninitialized};
 
 public:
-    MiniaudioBackend();
+    explicit MiniaudioBackend(bool keepEngineAlive_);
     ~MiniaudioBackend() override;
 
     // Play a sound from the given url
@@ -81,6 +81,9 @@ private:
     std::unique_ptr<std::thread> audioThread;
     OnceFlag stoppedFlag;
     boost::asio::steady_timer sleepTimer;
+
+    /// This setting controls whether the miniaudio sound engine should be kept alive at all times
+    bool keepEngineAlive;
 
     friend class Application;
 };
