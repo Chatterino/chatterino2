@@ -11,6 +11,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
 
+#include <QApplication>
 #include <QColor>
 #include <QDir>
 #include <QElapsedTimer>
@@ -18,8 +19,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSet>
-#    include <QStyleHints>
-#include <QApplication>
+#include <QStyleHints>
 
 #include <cmath>
 #include <numbers>

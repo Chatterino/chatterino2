@@ -8,8 +8,7 @@
 #include <QString>
 #include <QStringView>
 #include <QtGlobal>
-
-#    include <QUtf8StringView>
+#include <QUtf8StringView>
 
 namespace chatterino {
 
