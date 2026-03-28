@@ -14,12 +14,6 @@ namespace {
 
 using namespace chatterino;
 
-template <typename T, typename... Args>
-T noPermissionFn(Args... /* unused */)
-{
-    throw std::runtime_error("Missing network permission to create images");
-}
-
 void validateUrl(const QString &urlString)
 {
     QUrl url(urlString);
@@ -32,6 +26,12 @@ void validateUrl(const QString &urlString)
 
 ImagePtr imageCtor(const QString &urlString, sol::variadic_args args)
 {
+    lua::ThisPluginState state(args.lua_state());
+    if (!state.plugin()->hasNetworkPermission())
+    {
+        throw std::runtime_error("Missing network permission to create images");
+    }
+
     double scale = 1;
     QSize expectedSize = {};
     if (args.size() >= 1)
@@ -48,6 +48,12 @@ ImagePtr imageCtor(const QString &urlString, sol::variadic_args args)
 
 ImageSet imageSetCtor(sol::variadic_args args)
 {
+    lua::ThisPluginState state(args.lua_state());
+    if (!state.plugin()->hasNetworkPermission())
+    {
+        throw std::runtime_error("Missing network permission to create images");
+    }
+
     auto getAt = [&](std::ptrdiff_t offset) {
         auto raw = args.get<std::variant<ImagePtr, QString>>(offset);
         return std::visit(
@@ -87,20 +93,11 @@ ImageSet imageSetCtor(sol::variadic_args args)
 
 namespace chatterino::lua::api::images {
 
-void createUserTypes(sol::table &c2, const Plugin &plugin)
+void createUserTypes(sol::table &c2)
 {
-    auto *imageCtorPtr =
-        &noPermissionFn<ImagePtr, const QString &, sol::variadic_args>;
-    auto *imageSetCtorPtr = &noPermissionFn<ImageSet, sol::variadic_args>;
-    if (plugin.hasNetworkPermission())
-    {
-        imageCtorPtr = &imageCtor;
-        imageSetCtorPtr = &imageSetCtor;
-    }
-
     c2.new_usertype<Image>(
         "Image", sol::no_constructor,  //
-        "from_url", imageCtorPtr,      //
+        "from_url", &imageCtor,        //
         "empty",
         [] {
             return Image::getEmpty();
@@ -118,7 +115,7 @@ void createUserTypes(sol::table &c2, const Plugin &plugin)
     );
 
     c2.new_usertype<ImageSet>(
-        "ImageSet", sol::factories(imageSetCtorPtr),                          //
+        "ImageSet", sol::factories(&imageSetCtor),                            //
         "image1", sol::property(&ImageSet::getImage1, &ImageSet::setImage1),  //
         "image2", sol::property(&ImageSet::getImage2, &ImageSet::setImage2),  //
         "image3", sol::property(&ImageSet::getImage3, &ImageSet::setImage3)   //

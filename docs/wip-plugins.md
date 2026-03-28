@@ -850,7 +850,7 @@ Image sets have the following writable properties:
 
 - `image1` ([`Image`](#image)): The base image (1x).
 - `image2` ([`Image`](#image)): The first scaled image (often 2x, `scale=0.5`)
-- `image3` ([`Image`](#image)): The second scaled image (often 3/4x, `scale=0.25`)
+- `image3` ([`Image`](#image)): The second scaled image (often 3x or 4x, `scale=0.25`)
 
 ##### `ImageSet.new([image1[, image2[, image3]]])`
 

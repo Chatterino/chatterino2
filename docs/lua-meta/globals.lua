@@ -421,7 +421,7 @@ function c2.Image.empty() end
 ---@class c2.ImageSet
 ---@field image1 c2.Image The base image (1x).
 ---@field image2 c2.Image The first scaled image (often 2x, `scale=0.5`)
----@field image3 c2.Image The second scaled image (often 3/4x, `scale=0.25`)
+---@field image3 c2.Image The second scaled image (often 3x or 4x, `scale=0.25`)
 c2.ImageSet = {}
 
 ---Create a new image set.
