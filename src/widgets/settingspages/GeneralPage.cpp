@@ -134,14 +134,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     {
         auto *themes = getApp()->getThemes();
         auto available = themes->availableThemes();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         available.emplace_back("System", "System");
-#endif
 
         SettingWidget::dropdown("Theme", themes->themeName, available)
             ->addTo(layout);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         SettingWidget::dropdown("Dark system theme",
                                 themes->darkSystemThemeName,
                                 themes->availableThemes())
@@ -157,7 +154,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                          "theme and you enabled the adaptive 'System' theme.")
             ->conditionallyEnabledBy(themes->themeName, "System")
             ->addTo(layout);
-#endif
     }
 
     layout.addDropdown<float>(
@@ -1006,6 +1002,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addLayout(box);
     }
 
+    layout.addTitle("Sound");
+
+    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
+        ->setTooltip("Change this only if you're noticing issues with sound "
+                     "playback on your system")
+        ->addTo(layout);
+    SettingWidget::checkbox("Keep sound backend alive (requires restart)",
+                            s.soundMiniaudioKeepEngineAlive)
+        ->setTooltip(
+            "This setting makes Chatterino output silence to your sound "
+            "device, even if no ping is being played. Try this setting if you "
+            "have issues with wireless devices not playing the first sound. "
+            "Note that this can prevent your monitor or computer from "
+            "sleeping.")
+        ->addTo(layout);
+
     layout.addTitle("Advanced");
 
     layout.addSubtitle("Chat title");
@@ -1580,11 +1592,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Show send message button", s.showSendButton)
         ->setTooltip("Show a Send button next to each split input that can be "
                      "clicked to send the message")
-        ->addTo(layout);
-
-    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
-        ->setTooltip("Change this only if you're noticing issues with sound "
-                     "playback on your system")
         ->addTo(layout);
 
     SettingWidget::checkbox(

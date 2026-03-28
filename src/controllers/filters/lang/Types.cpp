@@ -43,8 +43,6 @@ QString typeToString(Type type)
             return "StringList";
         case T::MatchingSpecifier:
             return "MatchingSpecifier";
-        case T::Map:
-            return "Map";
         default:
             return "Unknown";
     }

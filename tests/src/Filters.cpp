@@ -389,6 +389,7 @@ TEST_F(FiltersF, TypingContextChecks)
         {"flags.sub_message", false},
         {"flags.system_message", false},
         {"flags.whisper", false},
+        {"flags.watch_streak", false},
 
         {"message.content", "Kappa"},
         {"message.length", 5},

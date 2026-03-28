@@ -12,7 +12,6 @@ namespace {
 /// This attempts to convert both variants to a common type if they're not equal.
 bool looselyCompareVariants(QVariant &lhs, QVariant &rhs)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     // Qt 6 and later don't convert types as much as Qt 5 did when comparing.
     //
     // Based on QVariant::cmp from Qt 5.15
@@ -36,7 +35,6 @@ bool looselyCompareVariants(QVariant &lhs, QVariant &rhs)
             }
         }
     }
-#endif
 
     return lhs == rhs;
 }
@@ -152,12 +150,6 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                                     Qt::CaseInsensitive);
             }
 
-            if (variantIs(left, QMetaType::QVariantMap) &&
-                right.canConvert<QString>())
-            {
-                return left.toMap().contains(right.toString());
-            }
-
             if (variantIs(left, QMetaType::QVariantList))
             {
                 return left.toList().contains(right);
@@ -223,11 +215,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             auto matching = left.toString();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             switch (static_cast<QMetaType::Type>(right.typeId()))
-#else
-            switch (static_cast<QMetaType::Type>(right.type()))
-#endif
             {
                 case QMetaType::QRegularExpression: {
                     return right.toRegularExpression()
@@ -352,7 +340,7 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
                 this,
                 "Can only perform starts/ends with a List or two Strings"};
         case CONTAINS:
-            if (isList(left) || left == Type::Map)
+            if (isList(left))
             {
                 return TypeClass{Type::Bool};
             }
@@ -362,8 +350,7 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
             }
 
             return IllTyped{
-                this,
-                "Can only perform contains with a List, a Map, or two Strings"};
+                this, "Can only perform contains with a List or two Strings"};
         case MATCH: {
             if (left != Type::String)
             {
