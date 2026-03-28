@@ -25,7 +25,6 @@ enum class Type {
     List,
     StringList,         // List of only strings
     MatchingSpecifier,  // 2-element list in {RegularExpression, Int} form
-    Map
 };
 
 using ContextMap = QMap<QString, QVariant>;
