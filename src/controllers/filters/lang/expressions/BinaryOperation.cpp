@@ -152,12 +152,6 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                                                     Qt::CaseInsensitive);
             }
 
-            if (variantIs(left, QMetaType::QVariantMap) &&
-                right.canConvert<QString>())
-            {
-                return left.toMap().contains(right.toString());
-            }
-
             if (variantIs(left, QMetaType::QVariantList))
             {
                 return left.toList().contains(right);
@@ -352,7 +346,7 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
                 this,
                 "Can only perform starts/ends with a List or two Strings"};
         case CONTAINS:
-            if (isList(left) || left == Type::Map)
+            if (isList(left))
             {
                 return TypeClass{Type::Bool};
             }
@@ -362,8 +356,7 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
             }
 
             return IllTyped{
-                this,
-                "Can only perform contains with a List, a Map, or two Strings"};
+                this, "Can only perform contains with a List or two Strings"};
         case MATCH: {
             if (left != Type::String)
             {
