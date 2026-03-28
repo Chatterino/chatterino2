@@ -61,6 +61,8 @@ set(SOURCE_FILES
 
         common/websockets/WebSocketPool.cpp
         common/websockets/WebSocketPool.hpp
+        common/websockets/detail/BalancedResolverResults.cpp
+        common/websockets/detail/BalancedResolverResults.hpp
         common/websockets/detail/WebSocketConnection.cpp
         common/websockets/detail/WebSocketConnection.hpp
         common/websockets/detail/WebSocketConnectionImpl.cpp
@@ -539,6 +541,8 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/Backup.cpp
+        util/Backup.hpp
         util/BadgeRegistry.cpp
         util/BadgeRegistry.hpp
         util/CancellationToken.hpp
@@ -705,6 +709,8 @@ set(SOURCE_FILES
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
+        widgets/dialogs/RestoreBackupsDialog.cpp
+        widgets/dialogs/RestoreBackupsDialog.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp
@@ -929,6 +935,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni

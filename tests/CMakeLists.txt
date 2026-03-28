@@ -61,6 +61,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchUserColor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FunctionRef.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/InputHighlighter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BalancedResolverResults.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp

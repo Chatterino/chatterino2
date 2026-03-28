@@ -10,6 +10,8 @@ set(benchmark_SOURCES
     src/LimitedQueue.cpp
     src/LinkParser.cpp
     src/RecentMessages.cpp
+    src/MessageBuilding.cpp
+    src/Filters.cpp
     # Add your new file above this line!
     )
 

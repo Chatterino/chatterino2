@@ -37,21 +37,10 @@ void initUpdateButton(PixmapButton &button,
         // be destroyed before the button is destroyed, since it is destroyed on focus loss
         //
         // The button is either attached to a Notebook, or a Window frame
-        std::ignore =
-            dialog->buttonClicked.connect([&button, relayout](auto buttonType) {
-                switch (buttonType)
-                {
-                    case UpdateDialog::Dismiss: {
-                        button.hide();
-                        relayout();
-                    }
-                    break;
-                    case UpdateDialog::Install: {
-                        getApp()->getUpdates().installUpdates();
-                    }
-                    break;
-                }
-            });
+        std::ignore = dialog->dismissed.connect([&button, relayout]() {
+            button.hide();
+            relayout();
+        });
 
         //        handle.reset(dialog);
         //        dialog->closing.connect([&handle] { handle.release(); });
