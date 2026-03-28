@@ -20,7 +20,7 @@ const QString HTTPBIN_BASE_URL =
 #else
 const QString HTTPBIN_BASE_URL =
     "http://" +
-    qEnvironmentVariable("CHATTERINO_TEST_HTTPBOX_ADDR", "127.0.0.1:9050");
+    qEnvironmentVariable("CHATTERINO_TEST_HTTPBOX_ADDR", "127.0.0.1:9051");
 #endif
 
 std::ostream &operator<<(std::ostream &os, QStringView str)
