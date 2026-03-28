@@ -286,6 +286,22 @@ void TwitchIrcServer::initialize()
                 }
             });
         });
+
+    getSettings()->enableBTTVChannelEmotes.connect(
+        [this] {
+            this->reloadAllBTTVChannelEmotes();
+        },
+        this->signalHolder, false);
+    getSettings()->enableFFZChannelEmotes.connect(
+        [this] {
+            this->reloadAllFFZChannelEmotes();
+        },
+        this->signalHolder, false);
+    getSettings()->enableSevenTVChannelEmotes.connect(
+        [this] {
+            this->reloadAllSevenTVChannelEmotes();
+        },
+        this->signalHolder, false);
 }
 
 void TwitchIrcServer::aboutToQuit()

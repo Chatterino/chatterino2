@@ -212,7 +212,7 @@ void Application::initialize(Settings &settings, const Modes &modes,
     assert(!this->initialized);
 
     // Show changelog
-    if (!this->args_.isFramelessEmbed &&
+    if (!this->args_.isAnyEmbed() &&
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
@@ -227,7 +227,7 @@ void Application::initialize(Settings &settings, const Modes &modes,
         }
     }
 
-    if (!this->args_.isFramelessEmbed)
+    if (!this->args_.isAnyEmbed())
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
@@ -260,7 +260,7 @@ void Application::initialize(Settings &settings, const Modes &modes,
     // Show crash message.
     // On Windows, the crash message was already shown.
 #ifndef Q_OS_WIN
-    if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
+    if (!this->args_.isAnyEmbed() && this->args_.crashRecovery)
     {
         if (auto *selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
@@ -282,7 +282,7 @@ void Application::initialize(Settings &settings, const Modes &modes,
     }
 #endif
 
-    if (!this->args_.isFramelessEmbed)
+    if (!this->args_.isAnyEmbed())
     {
         this->initNm(modes, paths);
     }
@@ -295,32 +295,21 @@ void Application::initialize(Settings &settings, const Modes &modes,
     this->initialized = true;
 }
 
-int Application::run()
+void Application::connect()
 {
     assert(this->initialized);
 
     this->twitch->connect();
+}
 
-    if (!this->args_.isFramelessEmbed)
+int Application::run()
+{
+    this->connect();
+
+    if (!this->args_.isAnyEmbed())
     {
         this->windows->getMainWindow().show();
     }
-
-    getSettings()->enableBTTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllBTTVChannelEmotes();
-        },
-        false);
-    getSettings()->enableFFZChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllFFZChannelEmotes();
-        },
-        false);
-    getSettings()->enableSevenTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllSevenTVChannelEmotes();
-        },
-        false);
 
     return QApplication::exec();
 }
