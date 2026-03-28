@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/filters/lang/Types.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageFlag.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
@@ -9,6 +10,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 #include <QString>
+
 
 namespace {
 

@@ -130,6 +130,12 @@ struct TypeTraits<uint64_t> : TypeTraits<int> {
 template <>
 struct TypeTraits<int64_t> : TypeTraits<int> {
 };
+template <>
+struct TypeTraits<long> : TypeTraits<int> {
+};
+template <>
+struct TypeTraits<unsigned long> : TypeTraits<int> {
+};
 
 template <>
 struct TypeTraits<bool> {
