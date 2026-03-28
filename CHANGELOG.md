@@ -5,7 +5,6 @@
 - Bugfix: Make it possible to filter Watch Streak messages again. Previously, these messages were labeled `sub_messages`. This was fixed in #6571, but we didn't add a new filter to compensate. (#6741)
 - Bugfix: Improve nightly downgrade message. (#6842)
 - Bugfix: Improved blocked user loading on poor internet connections. (#6846)
-- Bugfix: Fixed message length label not updating when tab-completing. (#6856)
 
 ## 2.5.5-beta.1
 
