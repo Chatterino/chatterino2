@@ -102,8 +102,7 @@ int main(int argc, char **argv)
             QString("%1 (commit %2%3)")
                 .arg(version.fullVersion())
                 .arg(version.commitHash())
-                .arg(Modes::instance().isNightly ? ", " + version.dateOfBuild()
-                                                 : "");
+                .arg(version.isNightly() ? ", " + version.dateOfBuild() : "");
         std::cout << versionMessage.toLocal8Bit().constData() << '\n';
         std::cout.flush();
     }

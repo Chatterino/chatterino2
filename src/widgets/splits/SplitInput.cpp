@@ -39,6 +39,7 @@
 #include <QSignalBlocker>
 
 #include <functional>
+#include <ranges>
 
 using namespace Qt::Literals;
 
@@ -319,6 +320,7 @@ void SplitInput::themeChangedEvent()
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
 
     this->ui_.textEditLength->setPalette(palette);
+    this->ui_.sendWaitStatus->setPalette(palette);
 
     // Theme changed, reset current background color
     this->setBackgroundColor(this->theme->splits.input.background);
@@ -800,14 +802,35 @@ void SplitInput::installTextEditEvents()
                              });
             menu->addAction(spellcheckAction);
 
-            auto cursor = this->ui_.textEdit->cursorForPosition(pos);
-            cursor.select(QTextCursor::WordUnderCursor);
-            auto word = cursor.selectedText();
+            int nSuggestions = getSettings()->nSpellCheckingSuggestions;
+            if (nSuggestions < 0)
+            {
+                nSuggestions = std::numeric_limits<int>::max();
+            }
+
+            if (!this->inputHighlighter || nSuggestions == 0)
+            {
+                return;
+            }
+
+            auto cursorAtPos = this->ui_.textEdit->cursorForPosition(pos);
+            QString text = this->ui_.textEdit->toPlainText();
+            QStringView word =
+                this->inputHighlighter->getWordAt(text, cursorAtPos.position());
             if (!word.isEmpty())
             {
+                auto cursor = this->ui_.textEdit->textCursor();
+                // Select `word`. `word` is a view into `text`, so we can use
+                // the offsets of `word` from the start of `text`.
+                cursor.setPosition(
+                    static_cast<int>(word.begin() - text.begin()));
+                cursor.setPosition(static_cast<int>(word.end() - text.begin()),
+                                   QTextCursor::KeepAnchor);
+
                 auto suggestions =
-                    getApp()->getSpellChecker()->suggestions(word);
-                for (const auto &sugg : suggestions)
+                    getApp()->getSpellChecker()->suggestions(word.toString());
+                for (const auto &sugg :
+                     suggestions | std::views::take(nSuggestions))
                 {
                     auto qSugg = QString::fromStdString(sugg);
                     menu->addAction(qSugg, [this, qSugg, cursor]() mutable {
@@ -1437,8 +1460,10 @@ void SplitInput::updateFonts()
 
     // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
     // meaning numbers get equal width & don't bounce around while the user is typing.
-    this->ui_.textEditLength->setFont(
-        app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale()));
+    auto tsMedium =
+        app->getFonts()->getFont(FontStyle::TimestampMedium, this->scale());
+    this->ui_.textEditLength->setFont(tsMedium);
+    this->ui_.sendWaitStatus->setFont(tsMedium);
     this->ui_.replyLabel->setFont(
         app->getFonts()->getFont(FontStyle::ChatMediumBold, this->scale()));
 }

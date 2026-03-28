@@ -127,7 +127,8 @@ class Settings
     bool disableSaving;
 
 public:
-    Settings(const Args &args, const QString &settingsDirectory);
+    Settings(const Args &args, const QString &settingsDirectory,
+             bool isTest = false);
     ~Settings();
 
     static Settings &instance();
@@ -386,6 +387,10 @@ public:
     QStringSetting spellCheckingDefaultDictionary = {
         "/behaviour/spellChecking/defaultDictionary",
         "",
+    };
+    IntSetting nSpellCheckingSuggestions = {
+        "/behaviour/spellChecking/suggestions/count",
+        -1,
     };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
@@ -787,11 +792,18 @@ public:
     ChatterinoSetting<std::vector<QString>> enabledPlugins = {
         "/plugins/enabledPlugins", {}};
 
-    // Advanced
+    // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
+
+    BoolSetting soundMiniaudioKeepEngineAlive = {
+        "/sound/miniaudio/keepEngineAlive",
+        false,
+    };
+
+    // Advanced
     BoolSetting enableExperimentalEventSub = {
         "/eventsub/enableExperimental",
         true,
