@@ -2,8 +2,6 @@
 
 ## Unversioned
 
-- Dev: Added `CHATTERINO_TEST_PUBSUB_WSS_ADDR`, `CHATTERINO_TEST_HTTPBOX_ADDR`, and `CHATTERINO_TEST_PUBSUB_WS_ADDR` environment variables to set test API server addresses. (#6877)
-
 ## 2.5.5
 
 - Minor: Update emoji data to Unicode 17.0. (#6471)
