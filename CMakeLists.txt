@@ -65,7 +65,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.4
+    VERSION 2.5.5
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
@@ -144,6 +144,7 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Gui
     Network
     Svg
+    SvgWidgets
     Concurrent
     )
 if(CHATTERINO_ALLOW_PRIVATE_QT_API)
