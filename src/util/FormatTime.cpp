@@ -5,6 +5,7 @@
 #include "util/FormatTime.hpp"
 
 #include "common/QLogging.hpp"
+#include "util/Helpers.hpp"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -125,7 +126,7 @@ BalancedDuration durationBetween(const QDateTime &a, const QDateTime &b)
 
 }  // namespace
 
-QString formatTime(int totalSeconds)
+QString formatTime(int totalSeconds, int components)
 {
     QString res;
 
@@ -135,46 +136,83 @@ QString formatTime(int totalSeconds)
     int timeoutHours = timeoutMinutes / 60;
     int hours = timeoutHours % 24;
     int days = timeoutHours / 24;
-    if (days > 0)
+    if (days > 0 && components > 0)
     {
         appendShortDuration(days, 'd', res);
+        components--;
     }
-    if (hours > 0)
+    if (hours > 0 && components > 0)
     {
         appendShortDuration(hours, 'h', res);
+        components--;
     }
-    if (minutes > 0)
+    if (minutes > 0 && components > 0)
     {
         appendShortDuration(minutes, 'm', res);
+        components--;
     }
-    if (seconds > 0)
+    if (seconds > 0 && components > 0)
     {
         appendShortDuration(seconds, 's', res);
+        components--;
     }
     return res;
 }
 
-QString formatTime(const QString &totalSecondsString)
+QString formatTime(const QString &totalSecondsString, int components)
 {
     bool ok = true;
     int totalSeconds(totalSecondsString.toInt(&ok));
     if (ok)
     {
-        return formatTime(totalSeconds);
+        return formatTime(totalSeconds, components);
     }
 
     return "n/a";
 }
 
-QString formatTime(std::chrono::seconds totalSeconds)
+QString formatTime(std::chrono::seconds totalSeconds, int components)
 {
     auto count = totalSeconds.count();
 
-    return formatTime(static_cast<int>(std::clamp(
-        count,
-        static_cast<std::chrono::seconds::rep>(std::numeric_limits<int>::min()),
-        static_cast<std::chrono::seconds::rep>(
-            std::numeric_limits<int>::max()))));
+    return formatTime(
+        static_cast<int>(std::clamp(count,
+                                    static_cast<std::chrono::seconds::rep>(
+                                        std::numeric_limits<int>::min()),
+                                    static_cast<std::chrono::seconds::rep>(
+                                        std::numeric_limits<int>::max()))),
+        components);
+}
+
+QString formatDurationExact(std::chrono::seconds seconds)
+{
+    if (seconds.count() == 0)
+    {
+        return u"0s"_s;
+    }
+
+    auto [value, unit] = [&]() -> std::pair<int64_t, char16_t> {
+        int64_t value = seconds.count();
+        if ((value % 60) != 0)
+        {
+            return {value, 's'};
+        }
+        value /= 60;
+        if ((value % 60) != 0)
+        {
+            return {value, 'm'};
+        }
+        value /= 60;
+        if ((value % 24) != 0)
+        {
+            return {value, 'h'};
+        }
+        return {value / 24, 'd'};
+    }();
+
+    auto str = localizeNumbers(value);
+    str += unit;
+    return str;
 }
 
 QString formatLongFriendlyDuration(const QDateTime &from, const QDateTime &to)

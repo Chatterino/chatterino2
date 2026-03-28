@@ -61,6 +61,8 @@ set(SOURCE_FILES
 
         common/websockets/WebSocketPool.cpp
         common/websockets/WebSocketPool.hpp
+        common/websockets/detail/BalancedResolverResults.cpp
+        common/websockets/detail/BalancedResolverResults.hpp
         common/websockets/detail/WebSocketConnection.cpp
         common/websockets/detail/WebSocketConnection.hpp
         common/websockets/detail/WebSocketConnectionImpl.cpp
@@ -539,6 +541,8 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/Backup.cpp
+        util/Backup.hpp
         util/BadgeRegistry.cpp
         util/BadgeRegistry.hpp
         util/CancellationToken.hpp
@@ -705,6 +709,8 @@ set(SOURCE_FILES
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
+        widgets/dialogs/RestoreBackupsDialog.cpp
+        widgets/dialogs/RestoreBackupsDialog.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp
@@ -912,14 +918,14 @@ if (CHATTERINO_GENERATE_COVERAGE)
 endif ()
 
 if(TARGET rapidjson)
-    message(DEBUG "Linking to rapidjson target")
+    message(STATUS "rapidjson: Linking to rapidjson target")
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
-elseif(DEFINED RapidJSON_SOURCE_DIR)
-    message(DEBUG "RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
-    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
-else()
-    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+elseif(DEFINED RAPIDJSON_INCLUDE_DIRS)
+    message(STATUS "rapidjson: RAPIDJSON_INCLUDE_DIRS defined (${RAPIDJSON_INCLUDE_DIRS}). Most likely a system install.")
     target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(STATUS "rapidjson: RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
 endif()
 
 target_link_libraries(${LIBRARY_PROJECT}
@@ -929,6 +935,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
@@ -1133,6 +1140,7 @@ target_compile_definitions(${VERSION_PROJECT} PRIVATE
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     CHATTERINO_GIT_MODIFIED=${GIT_MODIFIED}
+    CHATTERINO_NIGHTLY_BUILD=$<BOOL:${CHATTERINO_NIGHTLY_BUILD}>
 
     CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
 )

@@ -381,6 +381,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "limit, or a lower limit enforced by a moderation bot")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Show countdown on slow mode or when timed out",
+                            s.showSendWaitTimer)
+        ->setTooltip("Show how long you may need to wait before being able to "
+                     "send in a Twitch channel again if the channel is in slow "
+                     "mode or if you have been timed out")
+        ->addKeywords({"slowmode", "timeout"})
+        ->addTo(layout);
+
     SettingWidget::checkbox("Allow sending duplicate messages",
                             s.allowDuplicateMessages)
         ->setTooltip(
@@ -998,6 +1006,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addLayout(box);
     }
 
+    layout.addTitle("Sound");
+
+    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
+        ->setTooltip("Change this only if you're noticing issues with sound "
+                     "playback on your system")
+        ->addTo(layout);
+    SettingWidget::checkbox("Keep sound backend alive (requires restart)",
+                            s.soundMiniaudioKeepEngineAlive)
+        ->setTooltip(
+            "This setting makes Chatterino output silence to your sound "
+            "device, even if no ping is being played. Try this setting if you "
+            "have issues with wireless devices not playing the first sound. "
+            "Note that this can prevent your monitor or computer from "
+            "sleeping.")
+        ->addTo(layout);
+
     layout.addTitle("Advanced");
 
     layout.addSubtitle("Chat title");
@@ -1572,11 +1596,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Show send message button", s.showSendButton)
         ->setTooltip("Show a Send button next to each split input that can be "
                      "clicked to send the message")
-        ->addTo(layout);
-
-    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
-        ->setTooltip("Change this only if you're noticing issues with sound "
-                     "playback on your system")
         ->addTo(layout);
 
     SettingWidget::checkbox(

@@ -51,6 +51,7 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"flags.monitored", "monitored message?"},
     {"flags.shared", "shared message?"},
     {"flags.similar", "r9k filtered message?"},
+    {"flags.watch_streak", "watch streak message?"},
     {"message.content", "message text"},
     {"message.length", "message length"},
     {"reward.title", "point reward title"},
