@@ -14,7 +14,7 @@ class ListExpression : public Expression
 public:
     ListExpression(ExpressionList &&list);
 
-    QVariant execute(const RunContext &context) override;
+    QVariant execute(RunContext context) override;
     PossibleType synthesizeType() const override;
     QString debug() const override;
     QString filterString() const override;

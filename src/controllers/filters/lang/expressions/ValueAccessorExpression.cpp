@@ -35,6 +35,12 @@ QVariant makeVariantFor(T &&v)
 }
 
 struct AccessorExpressionBase : public Expression {
+    ~AccessorExpressionBase() override = default;
+    AccessorExpressionBase(const AccessorExpressionBase &) = delete;
+    AccessorExpressionBase(AccessorExpressionBase &&) = delete;
+    AccessorExpressionBase &operator=(const AccessorExpressionBase &) = delete;
+    AccessorExpressionBase &operator=(AccessorExpressionBase &&) = delete;
+
     PossibleType synthesizeType() const override
     {
         if (this->type_)
@@ -73,7 +79,7 @@ struct AccessorExpression final : public AccessorExpressionBase {
     {
     }
 
-    QVariant execute(const RunContext &ctx) override
+    QVariant execute(RunContext ctx) override
     {
         return Fn(ctx);
     }
@@ -87,14 +93,14 @@ ExpressionCreator *functionAccessor()
     return +[](QString name) -> std::unique_ptr<AccessorExpressionBase> {
         return std::make_unique<AccessorExpression<Fn>>(
             std::move(name),
-            TYPE_OF_V<std::invoke_result_t<decltype(Fn), const RunContext &>>);
+            TYPE_OF_V<std::invoke_result_t<decltype(Fn), RunContext>>);
     };
 }
 
 template <auto Ptr>
 ExpressionCreator *memberAccessor()
 {
-    return functionAccessor<[](const RunContext &ctx) {
+    return functionAccessor<[](RunContext ctx) {
         return ctx.message.*Ptr;
     }>();
 }
@@ -102,7 +108,7 @@ ExpressionCreator *memberAccessor()
 template <MessageFlag Flag>
 ExpressionCreator *flagAccessor()
 {
-    return functionAccessor<[](const RunContext &ctx) {
+    return functionAccessor<[](RunContext ctx) {
         return ctx.message.flags.has(Flag);
     }>();
 }
@@ -112,7 +118,7 @@ const AccessorMap &accessorMap()
 {
     static AccessorMap map{
         // author.*
-        {u"author.badges"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"author.badges"_s, functionAccessor<[](RunContext ctx) {
              QStringList badges(
                  static_cast<qsizetype>(ctx.message.twitchBadges.size()));
              for (const auto &e : ctx.message.twitchBadges)
@@ -126,16 +132,16 @@ const AccessorMap &accessorMap()
         {u"author.color"_s, memberAccessor<&Message::usernameColor>()},
         {u"author.name"_s, memberAccessor<&Message::displayName>()},
         {u"author.user_id"_s, memberAccessor<&Message::userID>()},
-        {u"author.no_color"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"author.no_color"_s, functionAccessor<[](RunContext ctx) {
              return !ctx.message.usernameColor.isValid();
          }>()},
-        {u"author.subbed"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"author.subbed"_s, functionAccessor<[](RunContext ctx) {
              return std::ranges::any_of(
                  ctx.message.twitchBadges, [](const auto &it) {
                      return it.key_ == u"subscriber" || it.key_ == u"founder";
                  });
          }>()},
-        {u"author.sub_length"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"author.sub_length"_s, functionAccessor<[](RunContext ctx) {
              auto it = ctx.message.twitchBadgeInfos.find(u"subscriber"_s);
              if (it == ctx.message.twitchBadgeInfos.end())
              {
@@ -149,7 +155,7 @@ const AccessorMap &accessorMap()
          }>()},
 
         // channel.*
-        {u"channel.live"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"channel.live"_s, functionAccessor<[](RunContext ctx) {
              auto *tc = dynamic_cast<TwitchChannel *>(ctx.channel);
              if (tc)
              {
@@ -158,7 +164,7 @@ const AccessorMap &accessorMap()
              return false;
          }>()},
         {u"channel.name"_s, memberAccessor<&Message::channelName>()},
-        {u"channel.watching"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"channel.watching"_s, functionAccessor<[](RunContext ctx) {
              auto chan = getApp()->getTwitch()->getWatchingChannel().get();
              return !chan->getName().isEmpty() &&
                     chan->getName().compare(ctx.message.channelName,
@@ -190,12 +196,12 @@ const AccessorMap &accessorMap()
 
         // message.*
         {u"message.content"_s, memberAccessor<&Message::messageText>()},
-        {u"message.length"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"message.length"_s, functionAccessor<[](RunContext ctx) {
              return ctx.message.messageText.length();
          }>()},
 
         // reward.*
-        {u"reward.cost"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"reward.cost"_s, functionAccessor<[](RunContext ctx) {
              auto r = ctx.message.reward;
              if (r)
              {
@@ -203,7 +209,7 @@ const AccessorMap &accessorMap()
              }
              return -1;
          }>()},
-        {u"reward.id"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"reward.id"_s, functionAccessor<[](RunContext ctx) {
              auto r = ctx.message.reward;
              if (r)
              {
@@ -211,7 +217,7 @@ const AccessorMap &accessorMap()
              }
              return QString{};
          }>()},
-        {u"reward.title"_s, functionAccessor<[](const RunContext &ctx) {
+        {u"reward.title"_s, functionAccessor<[](RunContext ctx) {
              auto r = ctx.message.reward;
              if (r)
              {
@@ -233,7 +239,7 @@ std::unique_ptr<Expression> createValueAccessorExpression(const QString &name)
     auto it = map.find(name);
     if (it == map.end())
     {
-        // FIXME: return an error here
+        // FIXME: Return an error here immediately instead of failing when type-checking.
         return std::unique_ptr<Expression>{new AccessorExpression<[](auto &&) {
             return false;
         }>(name, std::nullopt)};

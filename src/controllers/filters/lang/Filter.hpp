@@ -35,7 +35,7 @@ public:
     static FilterResult fromString(const QString &str);
 
     Type returnType() const;
-    QVariant execute(const RunContext &context) const;
+    QVariant execute(RunContext context) const;
 
     QString filterString() const;
     QString debugString() const;

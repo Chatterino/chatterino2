@@ -33,7 +33,7 @@ Type Filter::returnType() const
     return this->returnType_;
 }
 
-QVariant Filter::execute(const RunContext &context) const
+QVariant Filter::execute(RunContext context) const
 {
     return this->expression_->execute(context);
 }

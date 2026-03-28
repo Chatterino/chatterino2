@@ -14,7 +14,7 @@ ValueExpression::ValueExpression(QVariant value, TokenType type)
 {
 }
 
-QVariant ValueExpression::execute(const RunContext & /* context */)
+QVariant ValueExpression::execute(RunContext /* context */)
 {
     return this->value_;
 }

@@ -16,7 +16,7 @@ class RegexExpression : public Expression
 public:
     RegexExpression(const QString &regex, bool caseInsensitive);
 
-    QVariant execute(const RunContext &context) override;
+    QVariant execute(RunContext context) override;
     PossibleType synthesizeType() const override;
     QString debug() const override;
     QString filterString() const override;

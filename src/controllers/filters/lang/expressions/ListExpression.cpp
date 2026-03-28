@@ -9,7 +9,7 @@ namespace chatterino::filters {
 ListExpression::ListExpression(ExpressionList &&list)
     : list_(std::move(list)) {};
 
-QVariant ListExpression::execute(const RunContext &context)
+QVariant ListExpression::execute(RunContext context)
 {
     QList<QVariant> results;
     bool allStrings = true;
@@ -76,9 +76,9 @@ QString ListExpression::debug() const
     QStringList debugs;
     for (const auto &exp : this->list_)
     {
-        debugs.append(QString("%1 : %2")
-                          .arg(exp->debug())
-                          .arg(possibleTypeToString(exp->synthesizeType())));
+        debugs.append(QStringView(u"%1 : %2")
+                          .arg(exp->debug(),
+                               possibleTypeToString(exp->synthesizeType())));
     }
 
     return QString("List(%1)").arg(debugs.join(", "));
