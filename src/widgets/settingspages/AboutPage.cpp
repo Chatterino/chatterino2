@@ -191,11 +191,6 @@ AboutPage::AboutPage()
             }
 
             QTextStream stream(&contributorsFile);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            // Default encoding of QTextStream is already UTF-8
-#else
-            stream.setCodec("UTF-8");
-#endif
 
             QString line;
 

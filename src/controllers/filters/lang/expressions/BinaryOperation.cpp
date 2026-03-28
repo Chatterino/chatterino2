@@ -12,7 +12,6 @@ namespace {
 /// This attempts to convert both variants to a common type if they're not equal.
 bool looselyCompareVariants(QVariant &lhs, QVariant &rhs)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     // Qt 6 and later don't convert types as much as Qt 5 did when comparing.
     //
     // Based on QVariant::cmp from Qt 5.15
@@ -36,7 +35,6 @@ bool looselyCompareVariants(QVariant &lhs, QVariant &rhs)
             }
         }
     }
-#endif
 
     return lhs == rhs;
 }
@@ -217,11 +215,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             auto matching = left.toString();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             switch (static_cast<QMetaType::Type>(right.typeId()))
-#else
-            switch (static_cast<QMetaType::Type>(right.type()))
-#endif
             {
                 case QMetaType::QRegularExpression: {
                     return right.toRegularExpression()
