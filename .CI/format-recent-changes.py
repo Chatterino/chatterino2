@@ -36,7 +36,7 @@ def get_unreleased_commits():
     args = [
         "log",
         log_range,
-        "--pretty=format:%cI|%s",
+        "--pretty=format:%cI|%an|%s",
         "--no-merges",
     ]
     if limit:
@@ -46,7 +46,9 @@ def get_unreleased_commits():
     for line in log_output.splitlines():
         if not line.strip():
             continue
-        date_str, subject = line.split("|", 1)
+        date_str, author, subject = line.split("|", 2)
+        if author.lower() == "dependabot[bot]":
+            continue
         d = datetime.fromisoformat(date_str).astimezone(timezone.utc)
         content = f"- [{d.strftime('%Y-%m-%d')}] {subject}"
         unreleased.append((d, content))
