@@ -374,7 +374,7 @@ declare namespace c2 {
     interface ImageElementInit extends MessageElementInitBase {
         type: "image";
         image: Image;
-        flags?: MessageElementFlag;
+        flags: MessageElementFlag;
     }
 
     interface CircularImageElement extends MessageElementBase {
@@ -389,7 +389,7 @@ declare namespace c2 {
         image: Image;
         padding: number;
         background: string;
-        flags?: MessageElementFlag;
+        flags: MessageElementFlag;
     }
 
     interface ScalingImageElement extends MessageElementBase {
@@ -400,7 +400,7 @@ declare namespace c2 {
     interface ScalingImageElementInit extends MessageElementInitBase {
         type: "scaling-image";
         images: ImageSet;
-        flags?: MessageElementFlag;
+        flags: MessageElementFlag;
     }
 
     interface BadgeElement extends MessageElementBase {

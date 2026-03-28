@@ -125,7 +125,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class ImageElementInit : MessageElementInitBase
 ---@field type "image"
 ---@field image c2.Image The image to show.
----@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
 
 ---An element showing an image with a circular background color.
 ---@class c2.CircularImageElement : c2.MessageElementBase
@@ -140,7 +140,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field image c2.Image The image to show.
 ---@field padding integer The padding around the image.
 ---@field background string The color of the background.
----@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
 
 ---An element that automatically picks the quality of the image based on the UI scale.
 ---@class c2.ScalingImageElement : c2.MessageElementBase
@@ -151,7 +151,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class ScalingImageElementInit : MessageElementInitBase
 ---@field type "scaling-image"
 ---@field images c2.ImageSet The images to show.
----@field flags? c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`)
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
 
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"

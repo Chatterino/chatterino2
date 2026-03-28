@@ -108,7 +108,7 @@ std::unique_ptr<ImageElement> imageElementFromTable(const sol::table &tbl)
 {
     return std::make_unique<ImageElement>(
         requiredGet<ImagePtr>(tbl, "image"),
-        tbl.get_or("flags", MessageElementFlag::None));
+        requiredGet<MessageElementFlag>(tbl, "flags"));
 }
 
 std::unique_ptr<CircularImageElement> circularImageElementFromTable(
@@ -117,7 +117,7 @@ std::unique_ptr<CircularImageElement> circularImageElementFromTable(
     return std::make_unique<CircularImageElement>(
         requiredGet<ImagePtr>(tbl, "image"), requiredGet<int>(tbl, "padding"),
         QColor::fromString(requiredGet<std::string_view>(tbl, "background")),
-        tbl.get_or("flags", MessageElementFlag::None));
+        requiredGet<MessageElementFlag>(tbl, "flags"));
 }
 
 std::unique_ptr<ScalingImageElement> scalingImageElementFromTable(
@@ -125,7 +125,7 @@ std::unique_ptr<ScalingImageElement> scalingImageElementFromTable(
 {
     return std::make_unique<ScalingImageElement>(
         requiredGet<ImageSet>(tbl, "images"),
-        tbl.get_or("flags", MessageElementFlag::None));
+        requiredGet<MessageElementFlag>(tbl, "flags"));
 }
 
 void setLinkOn(MessageElement *el, const Link &link)
