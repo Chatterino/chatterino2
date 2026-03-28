@@ -16,13 +16,6 @@
 
 namespace chatterino {
 
-#ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
-// Using our self-hosted version of httpbox https://github.com/kevinastone/httpbox
-const char *const HTTPBIN_BASE_URL = "https://braize.pajlada.com/httpbox";
-#else
-const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
-#endif
-
 class RequestWaiter
 {
 public:
