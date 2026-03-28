@@ -16,43 +16,58 @@ LINE_REGEX = re.compile(
 )
 VERSION_REGEX = re.compile(r"^#+\s*v?\d")
 
+def get_last_version_tag() -> str | None:
+    try:
+        p = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0", "--match", "v*"],
+            cwd=os.path.dirname(os.path.realpath(__file__)),
+            text=True,
+            check=True,
+            capture_output=True,
+        )
+        return p.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
 
-def get_unreleased_lines(file: str):
-    # contains lines in the form of
-    # {commit-sha} (<{email}>\s+{date}\s+{line-no}) {line}
-    p = subprocess.run(
-        ["git", "blame", "-e", "--date=iso", file],
-        cwd=os.path.dirname(os.path.realpath(__file__)),
-        text=True,
-        check=True,
-        capture_output=True,
-    )
-
-    unreleased_lines: list[tuple[datetime, str]] = []
-    for line in p.stdout.splitlines():
-        if not line:
+def get_unreleased_commits():
+    last_tag = get_last_version_tag()
+    if last_tag:
+        log_range = f"{last_tag}..HEAD"
+        limit = None
+    else:
+        # no version tag -> just take a few recent commits
+        log_range = "HEAD"
+        limit = 10
+    args = [
+        "log",
+        log_range,
+        "--pretty=format:%cI|%s",
+        "--no-merges",
+    ]
+    if limit:
+        args.insert(1, f"-n{limit}")
+    try:
+        p = subprocess.run(
+            ["git", *args],
+            cwd=os.path.dirname(os.path.realpath(__file__)),
+            text=True,
+            check=True,
+            capture_output=True,
+        )
+        log_output = p.stdout.strip()
+    except subprocess.CalledProcessError:
+        log_output = None
+    unreleased: list[tuple[datetime, str]] = []
+    for line in log_output.splitlines():
+        if not line.strip():
             continue
-        m = LINE_REGEX.match(line)
-        assert m, f"Failed to match '{line}'"
-        content = m.group("content")
+        date_str, subject = line.split("|", 1)
+        d = datetime.fromisoformat(date_str).astimezone(timezone.utc)
+        content = f"- [{d.strftime('%Y-%m-%d')}] {subject}"
+        unreleased.sort(key=lambda it: it[0], reverse=True)
+        return unreleased
 
-        if not content:
-            continue
-        if content.startswith("#"):
-            if VERSION_REGEX.match(content):
-                break
-            continue  # ignore lines with '#'
-
-        d = datetime.fromisoformat(m.group("date"))
-        d = d.astimezone(tz=timezone.utc)
-        content = content.replace("- ", f"- [{d.strftime('%Y-%m-%d')}] ", 1)
-        unreleased_lines.append((d, content))
-
-    unreleased_lines.sort(key=lambda it: it[0], reverse=True)
-    return unreleased_lines
-
-
-unreleased_lines = get_unreleased_lines("../CHANGELOG.md")
+unreleased_lines = get_unreleased_commits()
 
 if len(unreleased_lines) == 0:
     print("No changes since last release.")
