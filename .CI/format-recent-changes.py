@@ -64,8 +64,9 @@ def get_unreleased_commits():
         date_str, subject = line.split("|", 1)
         d = datetime.fromisoformat(date_str).astimezone(timezone.utc)
         content = f"- [{d.strftime('%Y-%m-%d')}] {subject}"
-        unreleased.sort(key=lambda it: it[0], reverse=True)
-        return unreleased
+        unreleased.append((d, content))
+    unreleased.sort(key=lambda it: it[0], reverse=True)
+    return unreleased
 
 unreleased_lines = get_unreleased_commits()
 
