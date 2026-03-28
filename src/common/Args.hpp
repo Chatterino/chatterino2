@@ -57,6 +57,8 @@ public:
     bool shouldRunBrowserExtensionHost{};
     // Shows a single chat. Used on windows to embed in another application.
     bool isFramelessEmbed{};
+    /// Loaded from chatterino-embed
+    bool isInjectedEmbed = false;
     std::optional<unsigned long long> parentWindowId{};
 
     // Not settings directly
@@ -81,6 +83,11 @@ public:
     QStringList currentArguments() const;
     std::optional<WindowLayout> makeCustomChannelLayout(
         const QString &windowLayoutFile) const;
+
+    bool isAnyEmbed() const
+    {
+        return this->isFramelessEmbed || this->isInjectedEmbed;
+    }
 
 private:
     QStringList currentArguments_;
