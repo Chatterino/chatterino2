@@ -127,16 +127,16 @@ struct TypeTraits<int> {
     using Narrow = int;
 };
 template <>
-struct TypeTraits<uint64_t> : TypeTraits<int> {
-};
-template <>
-struct TypeTraits<int64_t> : TypeTraits<int> {
-};
-template <>
 struct TypeTraits<long> : TypeTraits<int> {
 };
 template <>
 struct TypeTraits<unsigned long> : TypeTraits<int> {
+};
+template <>
+struct TypeTraits<unsigned long long> : TypeTraits<int> {
+};
+template <>
+struct TypeTraits<long long> : TypeTraits<int> {
 };
 
 template <>
