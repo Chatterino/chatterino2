@@ -1,31 +1,26 @@
 from datetime import datetime, timezone
 import os
 import subprocess
-import re
 
-LINE_REGEX = re.compile(
-    r"""(?x)
-^(?P<commit>[A-Fa-f0-9]+)\s+
-\(
-    <(?P<email>[^>]+)>\s+
-    (?P<date>[^\s]+\s[^\s]+\s[^\s]+)\s+
-    (?P<line>\d+)
-\)\s
-(?P<content>.*)$
-"""
-)
-VERSION_REGEX = re.compile(r"^#+\s*v?\d")
+def run_git_command(args: list[str]) -> str:
+    p = subprocess.run(
+        ["git", *args],
+        cwd=os.path.dirname(os.path.realpath(__file__)),
+        text=True,
+        check=True,
+        capture_output=True,
+    )
+    return p.stdout.strip()
 
 def get_last_version_tag() -> str | None:
     try:
-        p = subprocess.run(
-            ["git", "describe", "--tags", "--abbrev=0", "--match", "v*"],
-            cwd=os.path.dirname(os.path.realpath(__file__)),
-            text=True,
-            check=True,
-            capture_output=True,
-        )
-        return p.stdout.strip()
+        return run_git_command([
+            "describe",
+            "--tags",
+            "--abbrev=0",
+            "--match",
+            "v*"
+        ])
     except subprocess.CalledProcessError:
         return None
 
@@ -46,17 +41,7 @@ def get_unreleased_commits():
     ]
     if limit:
         args.insert(1, f"-n{limit}")
-    try:
-        p = subprocess.run(
-            ["git", *args],
-            cwd=os.path.dirname(os.path.realpath(__file__)),
-            text=True,
-            check=True,
-            capture_output=True,
-        )
-        log_output = p.stdout.strip()
-    except subprocess.CalledProcessError:
-        log_output = None
+    log_output = run_git_command(args)
     unreleased: list[tuple[datetime, str]] = []
     for line in log_output.splitlines():
         if not line.strip():
