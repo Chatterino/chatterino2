@@ -122,6 +122,8 @@ struct TypeTraits<QString> {
 template <>
 struct TypeTraits<int> {
     static constexpr Type TYPE = Type::Int;
+    // When creating a QVariant, static_cast to int, to ensure all (u)intXX_ts
+    // are represented as the same type.
     using Narrow = int;
 };
 template <>

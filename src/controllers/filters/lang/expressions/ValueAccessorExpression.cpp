@@ -11,22 +11,13 @@
 
 #include <QString>
 
-
 namespace {
 
 using namespace chatterino;
 using namespace filters;
 using namespace Qt::Literals;
 
-template <typename T>
-struct MemberPointerTraits;
-
-template <typename C, typename T>
-struct MemberPointerTraits<T C::*> {
-    using Type = T;
-    using Class = C;
-};
-
+// Type to create the QVariant as (e.g. uint64_t narrows to int).
 template <typename T>
 struct Narrow {
     using Type = T;
@@ -44,8 +35,6 @@ QVariant makeVariantFor(T &&v)
 }
 
 struct AccessorExpressionBase : public Expression {
-    virtual std::unique_ptr<AccessorExpressionBase> clone() const = 0;
-
     PossibleType synthesizeType() const override
     {
         if (this->type_)
@@ -88,12 +77,6 @@ struct AccessorExpression final : public AccessorExpressionBase {
     {
         return Fn(ctx);
     }
-
-    std::unique_ptr<AccessorExpressionBase> clone() const override
-    {
-        return std::unique_ptr<AccessorExpression<Fn>>{
-            new AccessorExpression<Fn>(this->name, this->type_)};
-    }
 };
 
 using ExpressionCreator = std::unique_ptr<AccessorExpressionBase>(QString name);
@@ -111,13 +94,9 @@ ExpressionCreator *functionAccessor()
 template <auto Ptr>
 ExpressionCreator *memberAccessor()
 {
-    return +[](QString name) -> std::unique_ptr<AccessorExpressionBase> {
-        return std::make_unique<
-            AccessorExpression<[](const RunContext &ctx) -> QVariant {
-                return makeVariantFor(ctx.message.*Ptr);
-            }>>(std::move(name),
-                TYPE_OF_V<typename MemberPointerTraits<decltype(Ptr)>::Type>);
-    };
+    return functionAccessor<[](const RunContext &ctx) {
+        return ctx.message.*Ptr;
+    }>();
 }
 
 template <MessageFlag Flag>
@@ -132,6 +111,7 @@ using AccessorMap = std::map<QString, ExpressionCreator *>;
 const AccessorMap &accessorMap()
 {
     static AccessorMap map{
+        // author.*
         {u"author.badges"_s, functionAccessor<[](const RunContext &ctx) {
              QStringList badges(
                  static_cast<qsizetype>(ctx.message.twitchBadges.size()));
