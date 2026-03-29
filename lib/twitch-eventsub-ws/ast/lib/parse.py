@@ -10,6 +10,7 @@ def parse(filename: str, additional_includes: list[str] = []) -> clang.cindex.Tr
 
     parse_args = [
         "-std=c++17",
+        "-Wno-deprecated-literal-operator",
         # Uncomment this if you need to debug where it tries to find headers
         # "-H",
     ]
