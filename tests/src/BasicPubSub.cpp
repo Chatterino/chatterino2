@@ -151,7 +151,7 @@ void MyClient::onMessage(const QByteArray &msg)
 TEST(BasicPubSub, SubscriptionCycle)
 {
     mock::BaseApplication app;
-    const QString host("wss://127.0.0.1:9050/liveupdates/sub-unsub");
+    const QString host("wss://" + PUBSUB_WSS_ADDR + "/liveupdates/sub-unsub");
     MyManager manager(host);
     manager.sub({1, "foo"});
     QTest::qWait(500);
@@ -184,7 +184,7 @@ TEST(BasicPubSub, SubscriptionCycle)
 TEST(BasicPubSub, SubLimits)
 {
     mock::BaseApplication app;
-    const QString host("wss://127.0.0.1:9050/liveupdates/sub-unsub");
+    const QString host("wss://" + PUBSUB_WSS_ADDR + "/liveupdates/sub-unsub");
     MyManager manager(host, 1);
     manager.sub({.type = 1, .condition = "foo"});
     manager.sub({.type = 2, .condition = "foo"});

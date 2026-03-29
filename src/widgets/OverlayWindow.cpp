@@ -299,7 +299,7 @@ void OverlayWindow::toggleInertia()
     this->setInert(!this->inert_);
 }
 
-void OverlayWindow::enterEvent(EnterEvent * /*event*/)
+void OverlayWindow::enterEvent(QEnterEvent * /*event*/)
 {
 #ifndef OVERLAY_NATIVE_MOVE
     this->startInteraction();
@@ -315,7 +315,7 @@ void OverlayWindow::leaveEvent(QEvent * /*event*/)
 
 #ifdef Q_OS_WIN
 bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
-                                NativeResult *result)
+                                qintptr *result)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -368,7 +368,7 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
     return returnValue;
 }
 
-void OverlayWindow::handleNCHITTEST(MSG *msg, NativeResult *result)
+void OverlayWindow::handleNCHITTEST(MSG *msg, qintptr *result)
 {
     // This implementation is similar to the one of BaseWindow, but has the
     // following differences:
