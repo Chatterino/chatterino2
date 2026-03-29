@@ -119,7 +119,7 @@ jobs:
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
             -DFORCE_JSON_GENERATION=Off \
-            -DCHATTERINO_PLUGINS=${{ matrix.plugins && 'On' || 'Off' }} \
+            -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
             ..
           make -j"$(nproc)"
 
@@ -137,7 +137,7 @@ jobs:
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
