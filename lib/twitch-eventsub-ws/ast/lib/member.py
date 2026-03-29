@@ -20,8 +20,7 @@ def get_type_name(type: clang.cindex.Type, cursor: clang.cindex.Cursor, namespac
     else:
         namespace_str = ""
     pp = clang.cindex.PrintingPolicy.create(cursor)
-    pp.set_property(clang.cindex.PrintingPolicyProperty.FullyQualifiedName, 1)
-    type_name = type.pretty_printed(pp)
+    type_name = type.get_fully_qualified_name(pp)
 
     if type.is_const_qualified():
         type_name = type_name.replace("const", "").strip()

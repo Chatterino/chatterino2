@@ -13,7 +13,7 @@ on:
 jobs:
   eventsub-test:
     name: "EventSub python test"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v6
@@ -22,12 +22,19 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # 24.04, see https://apt.llvm.org/
+          deb http://apt.llvm.org/noble/ llvm-toolchain-noble main
+          deb-src http://apt.llvm.org/noble/ llvm-toolchain-noble main
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+
           sudo apt update
           sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
-            python3 python3-venv clang-20 clang-format-20 libclang-20-dev
-          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-20.so" >> "$GITHUB_ENV"
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 42
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-20 42
+            python3 python3-venv \
+            clang-21 clang-format-21 libclang-21-dev \
+            qt6-base-dev
+          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-21.so" >> "$GITHUB_ENV"
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 42
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-21 42
 
       - name: Setup virtual environment
         run: |
@@ -40,3 +47,13 @@ jobs:
         run: |
           ./venv/bin/pytest
         working-directory: lib/twitch-eventsub-ws/ast
+
+      - name: Build
+        run: |
+          cmake -B build -S lib/twitch-eventsub-ws -DFORCE_JSON_GENERATION=On
+          make -C build -j"$(nproc)" twitch-eventsub-ws
+
+      - name: Check generated sources
+        run: |
+          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
+          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src

@@ -1,5 +1,5 @@
 # parsing of header files
-clang==20.1.5
+clang==21.1.7
 
 # ensures formatting of generated files is consistent
 clang-format==16.0.6
