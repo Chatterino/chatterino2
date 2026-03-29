@@ -9,7 +9,7 @@ namespace chatterino::filters {
 ListExpression::ListExpression(ExpressionList &&list)
     : list_(std::move(list)) {};
 
-QVariant ListExpression::execute(RunContext context)
+QVariant ListExpression::execute(RunContext context) const
 {
     QList<QVariant> results;
     bool allStrings = true;

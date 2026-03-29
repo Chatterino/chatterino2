@@ -93,7 +93,7 @@ struct IdentifierExpression final : public Expression {
         return this->name;
     }
 
-    QVariant execute(RunContext context) override
+    QVariant execute(RunContext context) const override
     {
         return this->accessor.fn(context);
     }

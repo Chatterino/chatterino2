@@ -15,7 +15,7 @@ public:
     ValueExpression(QVariant value, TokenType type);
     TokenType type();
 
-    QVariant execute(RunContext context) override;
+    QVariant execute(RunContext context) const override;
     PossibleType synthesizeType() const override;
     QString debug() const override;
     QString filterString() const override;

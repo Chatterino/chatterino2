@@ -30,7 +30,7 @@ class Expression
 public:
     virtual ~Expression() = default;
 
-    virtual QVariant execute(RunContext context) = 0;
+    virtual QVariant execute(RunContext context) const = 0;
     virtual PossibleType synthesizeType() const = 0;
     virtual QString debug() const = 0;
     virtual QString filterString() const = 0;

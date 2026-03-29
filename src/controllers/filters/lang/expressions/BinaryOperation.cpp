@@ -53,7 +53,7 @@ BinaryOperation::BinaryOperation(TokenType op, ExpressionPtr left,
 {
 }
 
-QVariant BinaryOperation::execute(RunContext context)
+QVariant BinaryOperation::execute(RunContext context) const
 {
     auto left = this->left_->execute(context);
     auto right = this->right_->execute(context);
