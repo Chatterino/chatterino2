@@ -178,14 +178,14 @@ set(SOURCE_FILES
         controllers/filters/lang/expressions/Expression.hpp
         controllers/filters/lang/expressions/BinaryOperation.cpp
         controllers/filters/lang/expressions/BinaryOperation.hpp
+        controllers/filters/lang/expressions/IdentifierExpression.cpp
+        controllers/filters/lang/expressions/IdentifierExpression.hpp
         controllers/filters/lang/expressions/ListExpression.cpp
         controllers/filters/lang/expressions/ListExpression.hpp
         controllers/filters/lang/expressions/RegexExpression.cpp
         controllers/filters/lang/expressions/RegexExpression.hpp
         controllers/filters/lang/expressions/UnaryOperation.hpp
         controllers/filters/lang/expressions/UnaryOperation.cpp
-        controllers/filters/lang/expressions/ValueAccessorExpression.cpp
-        controllers/filters/lang/expressions/ValueAccessorExpression.hpp
         controllers/filters/lang/expressions/ValueExpression.cpp
         controllers/filters/lang/expressions/ValueExpression.hpp
         controllers/filters/lang/Filter.cpp
