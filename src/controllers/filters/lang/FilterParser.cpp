@@ -6,13 +6,13 @@
 
 #include "controllers/filters/lang/expressions/BinaryOperation.hpp"
 #include "controllers/filters/lang/expressions/Expression.hpp"
+#include "controllers/filters/lang/expressions/IdentifierExpression.hpp"
 #include "controllers/filters/lang/expressions/ListExpression.hpp"
 #include "controllers/filters/lang/expressions/RegexExpression.hpp"
 #include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 #include "controllers/filters/lang/expressions/ValueExpression.hpp"
 #include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
-#include "expressions/ValueAccessorExpression.hpp"
 
 namespace {
 
