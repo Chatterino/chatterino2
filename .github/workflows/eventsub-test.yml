@@ -30,7 +30,7 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
             python3 python3-venv \
             clang-21 clang-format-21 libclang-21-dev \
-            qt6-base-dev
+            qt6-base-dev libboost-dev
           echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-21.so" >> "$GITHUB_ENV"
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 42
           sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-21 42
