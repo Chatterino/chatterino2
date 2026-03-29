@@ -24,10 +24,10 @@ jobs:
         run: |
           sudo apt update
           sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
-            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
-          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
+            python3 python3-venv clang-20 clang-format-20 libclang-20-dev
+          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-20.so" >> "$GITHUB_ENV"
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 42
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-20 42
 
       - name: Setup virtual environment
         run: |
