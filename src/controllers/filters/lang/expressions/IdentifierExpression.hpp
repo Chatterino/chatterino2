@@ -6,6 +6,6 @@
 
 namespace chatterino::filters {
 
-std::unique_ptr<Expression> createValueAccessorExpression(const QString &name);
+std::unique_ptr<Expression> createIdentifierExpression(const QString &name);
 
 }  // namespace chatterino::filters

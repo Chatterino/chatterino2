@@ -223,7 +223,7 @@ ExpressionPtr FilterParser::parseValue()
         }
         else if (type == TokenType::IDENTIFIER)
         {
-            return createValueAccessorExpression(this->tokenizer_.next());
+            return createIdentifierExpression(this->tokenizer_.next());
         }
         else if (type == TokenType::REGULAR_EXPRESSION)
         {

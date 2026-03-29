@@ -1,4 +1,4 @@
-#include "controllers/filters/lang/expressions/ValueAccessorExpression.hpp"
+#include "controllers/filters/lang/expressions/IdentifierExpression.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -61,8 +61,8 @@ struct Accessor {
     std::optional<Type> type;
 };
 
-struct AccessorExpression final : public Expression {
-    AccessorExpression(QString name, Accessor accessor)
+struct IdentifierExpression final : public Expression {
+    IdentifierExpression(QString name, Accessor accessor)
         : name(std::move(name))
         , accessor(std::move(accessor))
     {
@@ -260,16 +260,16 @@ const AccessorMap &accessorMap()
 
 namespace chatterino::filters {
 
-std::unique_ptr<Expression> createValueAccessorExpression(const QString &name)
+std::unique_ptr<Expression> createIdentifierExpression(const QString &name)
 {
     const auto &map = accessorMap();
     auto it = map.find(name);
     if (it == map.end())
     {
         // FIXME: Return an error here immediately instead of failing when type-checking.
-        return std::make_unique<AccessorExpression>(name, Accessor());
+        return std::make_unique<IdentifierExpression>(name, Accessor());
     }
-    return std::make_unique<AccessorExpression>(it->first, it->second);
+    return std::make_unique<IdentifierExpression>(it->first, it->second);
 }
 
 }  // namespace chatterino::filters
