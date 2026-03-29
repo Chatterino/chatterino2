@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/XDGHelper.hpp"
 
 #include "common/Literals.hpp"
@@ -11,7 +15,6 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QStringLiteral>
-#include <QTextCodec>
 #include <QtGlobal>
 
 #include <unordered_set>

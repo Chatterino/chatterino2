@@ -85,6 +85,18 @@ MiguVT | https://github.com/MiguVT | :/avatars/miguvt.png
 jacob-thompson | https://github.com/jacob-thompson |
 Jujufrost | https://github.com/Jujufrost |
 occluder | https://github.com/occluder | :/avatars/occluder.png
+knobby-tires | https://github.com/knobby-tires | :/avatars/knobby-tires.jpg
+droidicus | https://github.com/droidicus | :/avatars/droidicus.png
+vincent0955 | https://github.com/vincent0955 | :/avatars/vincent0955.png
+isgkm | https://github.com/isgkm |
+otaviobia | https://github.com/otaviobia | :/avatars/otaviobia.png
+obertura777 | https://github.com/obertura777 | :/avatars/obertura777.png
+Supa | https://github.com/0Supa | :/avatars/supa.jpg
+devPoland | https://github.com/devPoland | :/avatars/devpoland.png
+Solomoncyj | https://github.com/solomoncyj |
+Juliapixel | https://github.com/Juliapixel | :/avatars/juliapixel.png
+Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
+Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 
 # If you are a contributor add yourself above this line
 

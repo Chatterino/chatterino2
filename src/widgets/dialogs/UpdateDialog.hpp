@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "singletons/Updates.hpp"
@@ -11,14 +15,16 @@ namespace chatterino {
 
 class Label;
 
+/// The UpdateDialog is what's shown to the user after they clicked the update indicator in the tab bar/title bar.
+///
+/// For Nightly builds, we change the "Install" text to "Yes" to better match the question posed by the available update.
 class UpdateDialog : public BaseWindow
 {
 public:
-    enum Button { Dismiss, Install };
-
     UpdateDialog();
 
-    pajlada::Signals::Signal<Button> buttonClicked;
+    /// The user chose to dismiss this update.
+    pajlada::Signals::NoArgSignal dismissed;
 
 private:
     void updateStatusChanged(Updates::Status status);

@@ -35,6 +35,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/XDGDirectory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NotebookTab.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SplitInput.cpp
@@ -56,6 +57,11 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/WebSocketPool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NativeMessaging.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ImageUploader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchChannel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchUserColor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FunctionRef.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/InputHighlighter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BalancedResolverResults.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp
@@ -63,7 +69,10 @@ set(test_SOURCES
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})
-add_sanitizers(${PROJECT_NAME})
+
+if(CHATTERINO_SANITIZER_SUPPORT)
+    add_sanitizers(${PROJECT_NAME})
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
@@ -90,6 +99,17 @@ endif()
 
 if(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_TEST_USE_PUBLIC_HTTPBIN)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    # The warnings are stateful, options from target_compile_options get placed
+    # before the cxx flags. /W4 enables the initializer warnings.
+    string(REGEX REPLACE "/W4\\b" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /W4
+        -Wno-missing-designated-field-initializers
+        -Wno-missing-field-initializers
+    )
 endif()
 
 set_target_properties(${PROJECT_NAME}

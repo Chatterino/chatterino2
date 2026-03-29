@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
@@ -6,6 +10,7 @@
 
 namespace chatterino {
 
+/** @exposeenum c2.MessageFlag [flags] */
 enum class MessageFlag : std::int64_t {
     None = 0LL,
     System = (1LL << 0),
@@ -65,6 +70,13 @@ enum class MessageFlag : std::int64_t {
     ///  - forsen added "blockedterm" as a blocked term
     ///  - Your message is being checked by mods and has not been sent
     ModerationAction = (1LL << 41),
+    /// The message can't be replied to
+    /// Examples:
+    ///  - message was deleted via single channel chat message deletion (IRC: CLEARMSG, EVENTSUB: channel.chat.message_delete)
+    ///  - message was deleted via chat clear user messages (IRC: CLEARCHAT(user), EVENTSUB: channel.chat.clear_user_messages)
+    /// Note: If this message is inside a reply thread, the root must not have the flag either.
+    InvalidReplyTarget = (1LL << 42),
+    WatchStreak = (1LL << 43),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

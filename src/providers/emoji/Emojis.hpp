@@ -1,13 +1,18 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/emoji/EmojiStyle.hpp"
 
-#include <boost/variant.hpp>
 #include <QMap>
 #include <QRegularExpression>
 #include <QVector>
 
 #include <memory>
+#include <variant>
 #include <vector>
 
 namespace chatterino {
@@ -30,12 +35,9 @@ struct EmojiData {
     // i.e. thinking
     std::vector<QString> shortCodes;
 
-    enum class Capability : uint8_t {
-        Apple = 1 << 0,
-        Google = 1 << 1,
-        Twitter = 1 << 2,
-        Facebook = 1 << 3,
-    };
+    QString category;
+
+    using Capability = EmojiStyle;
     using Capabilities = FlagsEnum<Capability>;
 
     Capabilities capabilities;
@@ -52,8 +54,8 @@ class IEmojis
 public:
     virtual ~IEmojis() = default;
 
-    virtual std::vector<boost::variant<EmotePtr, QString>> parse(
-        const QString &text) const = 0;
+    virtual std::vector<std::variant<EmotePtr, QStringView>> parse(
+        QStringView text) const = 0;
     virtual const std::vector<EmojiPtr> &getEmojis() const = 0;
     virtual const std::vector<QString> &getShortCodes() const = 0;
     virtual QString replaceShortCodes(const QString &text) const = 0;
@@ -62,10 +64,9 @@ public:
 class Emojis : public IEmojis
 {
 public:
-    void initialize();
     void load();
-    std::vector<boost::variant<EmotePtr, QString>> parse(
-        const QString &text) const override;
+    std::vector<std::variant<EmotePtr, QStringView>> parse(
+        QStringView text) const override;
 
     std::vector<QString> shortCodes;
     QString replaceShortCodes(const QString &text) const override;

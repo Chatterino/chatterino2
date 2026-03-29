@@ -1,0 +1,124 @@
+{
+    "input": "@tmi-sent-ts=1757929420105;room-id=111448817;target-msg-id=862716db-9a7c-4563-8480-af799769ae81;rm-received-ts=1757929420186;login=kooby_ :tmi.twitch.tv CLEARMSG #pajlada sup",
+    "output": [
+        {
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "0:00"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "00:00:00",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "A",
+                        "message",
+                        "from"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "kooby_"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "KOOBY_"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "was",
+                        "deleted:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "JumpToMessage",
+                        "value": "862716db-9a7c-4563-8480-af799769ae81"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "sup"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|ModerationAction",
+            "frozen": false,
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "A message from kooby_ was deleted: sup",
+            "searchText": "A message from kooby_ was deleted: sup",
+            "serverReceivedTime": "",
+            "timeoutUser": "msg:862716db-9a7c-4563-8480-af799769ae81",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ],
+    "params": {
+        "prevMessages": [
+            "@display-name=KOOBY_;rm-received-ts=1757929402936;returning-chatter=0;historical=1;turbo=0;badges=no_audio/1;mod=0;subscriber=0;user-type=;flags=;room-id=11148817;badge-info=;color=#B9CCED;emotes=;id=862716db-9a7c-4563-8480-af799769ae81;first-msg=0;user-id=71642781;rm-deleted=1;tmi-sent-ts=1757929402746 :kooby_!kooby_@kooby_.tmi.twitch.tv PRIVMSG #pajlada sup"
+        ]
+    }
+}

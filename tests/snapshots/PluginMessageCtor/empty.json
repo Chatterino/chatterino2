@@ -1,0 +1,27 @@
+{
+    "input": "msg = {}",
+    "output": {
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+        ],
+        "externalBadges": [
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

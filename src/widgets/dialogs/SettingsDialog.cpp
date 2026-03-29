@@ -1,13 +1,17 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/Button.hpp"
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -48,7 +52,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->resize(915, 600);
     this->themeChangedEvent();
     QFile styleFile(":/qss/settings.qss");
-    styleFile.open(QFile::ReadOnly);
+    if (!styleFile.open(QFile::ReadOnly))
+    {
+        assert(false && "Resources not loaded");
+        qCWarning(chatterinoWidget) << "Resources not loaded";
+    }
     QString stylesheet = QString::fromUtf8(styleFile.readAll());
     this->setStyleSheet(stylesheet);
 

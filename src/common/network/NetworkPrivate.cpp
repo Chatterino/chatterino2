@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/network/NetworkPrivate.hpp"
 
 #include "Application.hpp"
@@ -44,7 +48,7 @@ void runCallback(bool concurrent, auto &&fn)
 
 void loadUncached(std::shared_ptr<NetworkData> &&data)
 {
-    DebugCount::increase("http request started");
+    DebugCount::increase(DebugObject::HTTPRequestStarted);
 
     NetworkRequester requester;
     auto *worker = new NetworkTask(std::move(data));
@@ -59,8 +63,24 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
 
 void loadCached(std::shared_ptr<NetworkData> &&data)
 {
-    QFile cachedFile(getApp()->getPaths().cacheDirectory() + "/" +
-                     data->getHash());
+    if (isAppAboutToQuit())
+    {
+        qCDebug(chatterinoHTTP)
+            << "Skipping cached network load " << data->request.url()
+            << "because app is about to quit";
+        return;
+    }
+
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        qCDebug(chatterinoHTTP)
+            << "Skipping cached network load " << data->request.url()
+            << "because app is about to quit";
+        return;
+    }
+
+    QFile cachedFile(app->getPaths().cacheDirectory() + "/" + data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
     {
@@ -85,12 +105,12 @@ namespace chatterino {
 
 NetworkData::NetworkData()
 {
-    DebugCount::increase("NetworkData");
+    DebugCount::increase(DebugObject::NetworkData);
 }
 
 NetworkData::~NetworkData()
 {
-    DebugCount::decrease("NetworkData");
+    DebugCount::decrease(DebugObject::NetworkData);
 }
 
 QString NetworkData::getHash()

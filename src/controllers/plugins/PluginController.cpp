@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 
@@ -7,15 +11,21 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/ConnectionHandle.hpp"
+#    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/JSON.hpp"
+#    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/MessageBuilder.hpp"
+#    include "messages/MessageElement.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 
@@ -38,6 +48,7 @@ namespace chatterino {
 PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
 {
+    this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
 }
 
 void PluginController::initialize(Settings &settings)
@@ -90,7 +101,12 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
         return false;
     }
     QFile infoFile(infojson.absoluteFilePath());
-    infoFile.open(QIODevice::ReadOnly);
+    if (!infoFile.open(QIODevice::ReadOnly))
+    {
+        qCWarning(chatterinoLua)
+            << "Could not open info.json" << infoFile.errorString();
+        return false;
+    }
     auto everything = infoFile.readAll();
     auto doc = QJsonDocument::fromJson(everything);
     if (!doc.isObject())
@@ -197,6 +213,13 @@ void PluginController::openLibrariesFor(Plugin *plugin)
         r["_IO_input"] = sol::nil;
         r["_IO_output"] = sol::nil;
     }
+    // set up debug lib
+    {
+        auto debuglib = lua.create_table();
+        g["debug"] = debuglib;
+
+        debuglib.set_function("traceback", lua::api::debugTraceback);
+    }
     PluginController::initSol(lua, plugin);
 }
 
@@ -222,10 +245,20 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(c2);
     lua::api::WebSocket::createUserType(c2, plugin);
+    lua::api::ConnectionHandle::createUserType(c2);
+    lua::api::message::createUserType(c2);
+    lua::api::createAccounts(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
+    c2["MessageFlag"] =
+        lua::createEnumTable<MessageFlag, MessageFlag::None>(lua);
+    c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
+    c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
+    c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
+    c2["LinkType"] =
+        lua::createEnumTable<lua::api::message::ExposedLinkType>(lua);
 
     sol::table io = g["io"];
     io.set_function(
@@ -249,6 +282,14 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 
     sol::table package = g["package"];
     package.set_function("loadlib", &lua::api::package_loadlib);
+
+    for (const auto &[name, fn] : this->loaders_)
+    {
+        package["preload"][name] = [fn](sol::this_main_state state) {
+            sol::state_view sv(state);
+            return fn(sv);
+        };
+    }
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -267,7 +308,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                  << " because safe mode is enabled.";
         return;
     }
-    PluginController::openLibrariesFor(temp);
+    this->openLibrariesFor(temp);
 
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
@@ -278,6 +319,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     }
     temp->dataDirectory().mkpath(".");
 
+    // make sure we capture log messages during load
+    this->onPluginLoaded(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -413,7 +456,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
                 qCDebug(chatterinoLua)
                     << "Got error from plugin " << pl->meta.name
                     << " while refreshing tab completion: "
-                    << errOrList.get_unexpected().error();
+                    << errOrList.error();
                 continue;
             }
 

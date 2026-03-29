@@ -1,6 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QByteArray>
+#include <QString>
 #include <QUrl>
 
 #include <memory>
@@ -42,6 +47,11 @@ private:
 struct WebSocketListener {
     virtual ~WebSocketListener() = default;
 
+    /// The WebSocket handshake completed successfully.
+    ///
+    /// This function is called from the websocket thread.
+    virtual void onOpen() = 0;
+
     /// A text message was received.
     ///
     /// This function is called from the websocket thread.
@@ -69,7 +79,7 @@ struct WebSocketOptions {
 class WebSocketPool
 {
 public:
-    WebSocketPool();
+    WebSocketPool(QString shortName = {});
     ~WebSocketPool();
 
     [[nodiscard]] WebSocketHandle createSocket(
@@ -77,6 +87,7 @@ public:
 
 private:
     std::unique_ptr<ws::detail::WebSocketPoolImpl> impl;
+    QString shortName;
 };
 
 }  // namespace chatterino

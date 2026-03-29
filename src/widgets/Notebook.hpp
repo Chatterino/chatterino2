@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
@@ -15,9 +19,10 @@
 
 namespace chatterino {
 
+class Button;
+class PixmapButton;
 class Window;
-class UpdateDialog;
-class NotebookButton;
+class DrawnButton;
 class NotebookTab;
 class SplitContainer;
 class Split;
@@ -114,7 +119,7 @@ public:
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
-    void setLockNotebookLayout(bool value);
+    virtual void setLockNotebookLayout(bool value);
 
     virtual void addNotebookActionsToMenu(QMenu *menu);
 
@@ -130,8 +135,16 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *) override;
 
-    NotebookButton *getAddButton();
-    NotebookButton *addCustomButton();
+    DrawnButton *addButton_;
+
+    template <typename T>
+    T *addCustomButton(auto &&...args)
+    {
+        auto *btn = new T(std::forward<decltype(args)>(args)..., this);
+        this->customButtons_.push_back(btn);
+
+        return btn;
+    }
 
     struct Item {
         NotebookTab *tab{};
@@ -141,7 +154,7 @@ protected:
 
     const QList<Item> items()
     {
-        return items_;
+        return this->items_;
     }
 
     /**
@@ -158,9 +171,11 @@ protected:
      **/
     bool shouldShowTab(const NotebookTab *tab) const;
 
-private:
     void performLayout(bool animate = false);
 
+    void sortTabsAlphabetically();
+
+private:
     struct LayoutContext {
         int left = 0;
         int right = 0;
@@ -205,8 +220,7 @@ private:
     QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
 
-    NotebookButton *addButton_;
-    std::vector<NotebookButton *> customButtons_;
+    std::vector<Button *> customButtons_;
 
     bool allowUserTabManagement_ = false;
     bool showTabs_ = true;
@@ -256,13 +270,17 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
+    QAction *sortTabsAlphabeticallyAction_;
+
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Main window on Windows has basically a duplicate of this in Window
-    NotebookButton *streamerModeIcon_{};
+    PixmapButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    void setLockNotebookLayout(bool value) override;
 };
 
 }  // namespace chatterino

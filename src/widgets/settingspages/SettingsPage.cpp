@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include "Application.hpp"
@@ -132,22 +136,6 @@ QComboBox *SettingsPage::createComboBox(
                      });
 
     return combo;
-}
-
-QLineEdit *SettingsPage::createLineEdit(
-    pajlada::Settings::Setting<QString> &setting)
-{
-    QLineEdit *edit = new QLineEdit();
-
-    edit->setText(setting);
-
-    // update when setting changes
-    QObject::connect(edit, &QLineEdit::textChanged,
-                     [&setting](const QString &newValue) {
-                         setting = newValue;
-                     });
-
-    return edit;
 }
 
 QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting,

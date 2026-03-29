@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/helper/LoggingChannel.hpp"
 
 #include "Application.hpp"
@@ -64,27 +68,28 @@ LoggingChannel::LoggingChannel(QString _channelName, QString _platform)
     {
         this->subDirectory = "Whispers";
     }
-    else if (channelName.startsWith("/mentions"))
+    else if (this->channelName.startsWith("/mentions"))
     {
         this->subDirectory = "Mentions";
     }
-    else if (channelName.startsWith("/live"))
+    else if (this->channelName.startsWith("/live"))
     {
         this->subDirectory = "Live";
     }
-    else if (channelName.startsWith("/automod"))
+    else if (this->channelName.startsWith("/automod"))
     {
         this->subDirectory = "AutoMod";
     }
     else
     {
         this->subDirectory =
-            QStringLiteral("Channels") + QDir::separator() + channelName;
+            QStringLiteral("Channels") + QDir::separator() + this->channelName;
     }
 
     // enforce capitalized platform names
-    this->subDirectory = platform[0].toUpper() + platform.mid(1).toLower() +
-                         QDir::separator() + this->subDirectory;
+    this->subDirectory = this->platform[0].toUpper() +
+                         this->platform.mid(1).toLower() + QDir::separator() +
+                         this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         this->baseDirectory = logPath.isEmpty()
@@ -128,7 +133,12 @@ void LoggingChannel::openLogFile()
     qCDebug(chatterinoHelper) << "Logging to" << fileName;
     this->fileHandle.setFileName(fileName);
 
-    this->fileHandle.open(QIODevice::Append);
+    if (!this->fileHandle.open(QIODevice::Append))
+    {
+        qCDebug(chatterinoHelper)
+            << "Failed to open file" << this->fileHandle.errorString();
+        return;
+    }
 
     appendLine(this->fileHandle, generateOpeningString(now));
 }
@@ -159,16 +169,31 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
     qCDebug(chatterinoHelper) << "Logging stream to" << fileName;
     this->currentStreamFileHandle.setFileName(fileName);
 
-    this->currentStreamFileHandle.open(QIODevice::Append);
+    if (!this->currentStreamFileHandle.open(QIODevice::Append))
+    {
+        qCDebug(chatterinoHelper)
+            << "Failed to open file"
+            << this->currentStreamFileHandle.errorString();
+        return;
+    }
     appendLine(this->currentStreamFileHandle, generateOpeningString(now));
 }
 
 void LoggingChannel::addMessage(const MessagePtr &message,
                                 const QString &streamID)
 {
-    QDateTime now = QDateTime::currentDateTime();
+    QDateTime messageTimestamp;
+    if (getSettings()->tryUseTwitchTimestamps &&
+        !message->serverReceivedTime.isNull())
+    {
+        messageTimestamp = message->serverReceivedTime;
+    }
+    else
+    {
+        messageTimestamp = QDateTime::currentDateTime();
+    }
 
-    QString messageDateString = generateDateString(now);
+    QString messageDateString = generateDateString(messageTimestamp);
     if (messageDateString != this->dateString)
     {
         this->dateString = messageDateString;
@@ -176,15 +201,19 @@ void LoggingChannel::addMessage(const MessagePtr &message,
     }
 
     QString str;
-    if (channelName.startsWith("/mentions") ||
-        channelName.startsWith("/automod"))
+    if (this->channelName.startsWith("/mentions") ||
+        this->channelName.startsWith("/automod"))
     {
         str.append("#" + message->channelName + " ");
     }
 
-    str.append('[');
-    str.append(now.toString("HH:mm:ss"));
-    str.append("] ");
+    QString logTimestampFormat = getSettings()->logTimestampFormat;
+    if (logTimestampFormat != "Disable")
+    {
+        str.append('[');
+        str.append(messageTimestamp.toString(logTimestampFormat));
+        str.append("] ");
+    }
 
     QString messageText;
     if (message->loginName.isEmpty())

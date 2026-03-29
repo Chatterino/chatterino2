@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/NotebookTab.hpp"
 
 #include "Application.hpp"
@@ -33,52 +37,52 @@
 
 namespace chatterino {
 namespace {
-    // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
-    // For example, if location is Top, the rectangle will be translated in the negative Y direction,
-    // or "up" on the screen, by amount.
-    void translateRectForLocation(QRect &rect, NotebookTabLocation location,
-                                  int amount)
+// Translates the given rectangle by an amount in the direction to appear like the tab is selected.
+// For example, if location is Top, the rectangle will be translated in the negative Y direction,
+// or "up" on the screen, by amount.
+void translateRectForLocation(QRect &rect, NotebookTabLocation location,
+                              int amount)
+{
+    switch (location)
     {
-        switch (location)
-        {
-            case NotebookTabLocation::Top:
-                rect.translate(0, -amount);
-                break;
-            case NotebookTabLocation::Left:
-                rect.translate(-amount, 0);
-                break;
-            case NotebookTabLocation::Right:
-                rect.translate(amount, 0);
-                break;
-            case NotebookTabLocation::Bottom:
-                rect.translate(0, amount);
-                break;
-        }
+        case NotebookTabLocation::Top:
+            rect.translate(0, -amount);
+            break;
+        case NotebookTabLocation::Left:
+            rect.translate(-amount, 0);
+            break;
+        case NotebookTabLocation::Right:
+            rect.translate(amount, 0);
+            break;
+        case NotebookTabLocation::Bottom:
+            rect.translate(0, amount);
+            break;
     }
+}
 
-    float getCompactDivider(TabStyle tabStyle)
+float getCompactDivider(TabStyle tabStyle)
+{
+    switch (tabStyle)
     {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 1.5;
-            case TabStyle::Normal:
-            default:
-                return 1.0;
-        }
+        case TabStyle::Compact:
+            return 1.5;
+        case TabStyle::Normal:
+        default:
+            return 1.0;
     }
+}
 
-    float getCompactReducer(TabStyle tabStyle)
+float getCompactReducer(TabStyle tabStyle)
+{
+    switch (tabStyle)
     {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 4.0;
-            case TabStyle::Normal:
-            default:
-                return 0.0;
-        }
+        case TabStyle::Compact:
+            return 4.0;
+        case TabStyle::Normal:
+        default:
+            return 0.0;
     }
+}
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -87,6 +91,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     , notebook_(notebook)
     , menu_(this)
 {
+    this->setContentCacheEnabled(false);
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation_.setEasingCurve(
@@ -123,6 +128,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
                               this->notebook_->removePage(this->page);
                           });
 
+    this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
+
+    this->menu_.addMenu(this->closeMultipleTabsMenu_);
+    getSettings()->tabDirection.connect(
+        [this](int val) {
+            this->recreateCloseMultipleTabsMenu(
+                static_cast<NotebookTabLocation>(val));
+        },
+        this->signalHolder_);
+
     this->menu_.addAction(
         "Popup Tab",
         getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
@@ -138,19 +153,192 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->notebook_->duplicatePage(this->page);
     });
 
-    highlightNewMessagesAction_ =
+    this->highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
-    highlightNewMessagesAction_->setCheckable(true);
-    highlightNewMessagesAction_->setChecked(highlightEnabled_);
-    QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
+    this->highlightNewMessagesAction_->setCheckable(true);
+    this->highlightNewMessagesAction_->setChecked(this->highlightEnabled_);
+    QObject::connect(this->highlightNewMessagesAction_, &QAction::triggered,
                      [this](bool checked) {
                          this->highlightEnabled_ = checked;
                      });
-    this->menu_.addAction(highlightNewMessagesAction_);
+    this->menu_.addAction(this->highlightNewMessagesAction_);
 
     this->menu_.addSeparator();
 
     this->notebook_->addNotebookActionsToMenu(&this->menu_);
+}
+
+void NotebookTab::recreateCloseMultipleTabsMenu(
+    const NotebookTabLocation tabLocation)
+{
+    this->closeMultipleTabsMenu_->clear();
+
+    this->closeMultipleTabsMenu_->addAction("Close All Visible Tabs", [this]() {
+        auto reply = QMessageBox::question(
+            this, "Close All Visible Tabs",
+            "Are you sure you want to close all visible tabs?",
+            QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (reply != QMessageBox::Yes)
+        {
+            return;
+        }
+
+        for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+        {
+            auto *page = this->notebook_->getPageAt(i);
+
+            auto *container = dynamic_cast<SplitContainer *>(page);
+            if (!container)
+            {
+                continue;
+            }
+
+            auto *tab = container->getTab();
+            if (!tab || !tab->isVisible())
+            {
+                continue;
+            }
+
+            this->notebook_->removePage(page);
+        }
+    });
+
+    QString beforeSelectedName;
+    QString afterSelectedName;
+    switch (tabLocation)
+    {
+        case Top:
+        case Bottom:
+            beforeSelectedName = "Left";
+            afterSelectedName = "Right";
+            break;
+        case Left:
+        case Right:
+            beforeSelectedName = "Top";
+            afterSelectedName = "Bottom";
+            break;
+    }
+
+    this->closeTabsBeforeSelectedAction_ =
+        this->closeMultipleTabsMenu_->addAction(
+            "Close Visible Tabs to " + beforeSelectedName,
+            [this, beforeSelectedName]() {
+                auto reply = QMessageBox::question(
+                    this, "Close Visible Tabs to " + beforeSelectedName,
+                    "Are you sure you want to close all visible tabs to the " +
+                        beforeSelectedName.toLower() + "?",
+                    QMessageBox::Yes | QMessageBox::Cancel);
+
+                if (reply != QMessageBox::Yes)
+                {
+                    return;
+                }
+
+                std::vector<QWidget *> pagesToRemove;
+                for (int i = 0; i < this->notebook_->getPageCount(); ++i)
+                {
+                    auto *page = this->notebook_->getPageAt(i);
+                    if (page == this->page)
+                    {
+                        break;
+                    }
+
+                    auto *container = dynamic_cast<SplitContainer *>(page);
+                    if (!container)
+                    {
+                        continue;
+                    }
+
+                    auto *tab = container->getTab();
+                    if (!tab || !tab->isVisible())
+                    {
+                        continue;
+                    }
+
+                    pagesToRemove.push_back(page);
+                }
+
+                for (auto *page : pagesToRemove)
+                {
+                    this->notebook_->removePage(page);
+                }
+            });
+
+    this->closeTabsAfterSelectedAction_ =
+        this->closeMultipleTabsMenu_->addAction(
+            "Close Visible Tabs to " + afterSelectedName,
+            [this, afterSelectedName]() {
+                auto reply = QMessageBox::question(
+                    this, "Close Visible Tabs to " + afterSelectedName,
+                    "Are you sure you want to close all visible tabs to the " +
+                        afterSelectedName + "?",
+                    QMessageBox::Yes | QMessageBox::Cancel);
+
+                if (reply != QMessageBox::Yes)
+                {
+                    return;
+                }
+
+                for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+                {
+                    auto *p = this->notebook_->getPageAt(i);
+                    if (p == this->page)
+                    {
+                        break;
+                    }
+
+                    auto *container = dynamic_cast<SplitContainer *>(p);
+                    if (!container)
+                    {
+                        continue;
+                    }
+
+                    auto *tab = container->getTab();
+                    if (!tab || !tab->isVisible())
+                    {
+                        continue;
+                    }
+
+                    this->notebook_->removePage(p);
+                }
+            });
+
+    this->closeMultipleTabsMenu_->addAction(
+        "Close Other Visible Tabs", [this]() {
+            auto reply = QMessageBox::question(
+                this, "Close Other Visible Tabs",
+                "Are you sure you want to close all other visible tabs?",
+                QMessageBox::Yes | QMessageBox::Cancel);
+
+            if (reply != QMessageBox::Yes)
+            {
+                return;
+            }
+
+            for (int i = this->notebook_->getPageCount() - 1; i >= 0; --i)
+            {
+                auto *p = this->notebook_->getPageAt(i);
+                if (p == this->page)
+                {
+                    continue;
+                }
+
+                auto *container = dynamic_cast<SplitContainer *>(p);
+                if (!container)
+                {
+                    continue;
+                }
+
+                auto *tab = container->getTab();
+                if (!tab || !tab->isVisible())
+                {
+                    continue;
+                }
+
+                this->notebook_->removePage(p);
+            }
+        });
 }
 
 void NotebookTab::showRenameDialog()
@@ -232,19 +420,19 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     float scale = this->scale();
     int width = 0;
 
-    QFontMetrics metrics =
+    auto metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(32 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (32 / compactDivider * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(16 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (16 / compactDivider * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -639,7 +827,7 @@ bool NotebookTab::hasHighlightsEnabled() const
 
 QRect NotebookTab::getDesiredRect() const
 {
-    return QRect(this->positionAnimationDesiredPoint_, size());
+    return QRect(this->positionAnimationDesiredPoint_, this->size());
 }
 
 void NotebookTab::tabSizeChanged()
@@ -679,8 +867,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     float scale = this->scale();
 
     painter.setFont(app->getFonts()->getFont(FontStyle::UiTabs, scale));
-    QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
+    auto metrics = app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
@@ -897,7 +1084,7 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         this->mouseDown_ = true;
         this->mouseDownX_ = this->getXRect().contains(event->pos());
 
-        this->notebook_->select(page);
+        this->notebook_->select(this->page);
     }
 
     this->update();
@@ -909,6 +1096,19 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
             case Qt::RightButton: {
                 this->menu_.popup(event->globalPosition().toPoint() +
                                   QPoint(0, 8));
+
+                const int visibleTabCount =
+                    this->notebook_->getVisibleTabCount();
+                const int selectedTabIndex =
+                    this->notebook_->visibleIndexOf(this->page);
+
+                this->closeMultipleTabsMenu_->setEnabled(visibleTabCount > 1);
+
+                this->closeTabsBeforeSelectedAction_->setEnabled(
+                    selectedTabIndex > 0);
+                this->closeTabsAfterSelectedAction_->setEnabled(
+                    selectedTabIndex != -1 &&
+                    selectedTabIndex < (visibleTabCount - 1));
             }
             break;
             default:;
@@ -967,11 +1167,7 @@ void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void NotebookTab::enterEvent(QEnterEvent *event)
-#else
-void NotebookTab::enterEvent(QEvent *event)
-#endif
 {
     this->mouseOver_ = true;
 

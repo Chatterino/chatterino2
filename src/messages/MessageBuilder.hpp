@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -37,7 +41,7 @@ struct ChannelPointReward;
 struct TwitchEmoteOccurrence;
 
 namespace linkparser {
-    struct Parsed;
+struct Parsed;
 }  // namespace linkparser
 
 struct SystemMessageTag {
@@ -139,12 +143,12 @@ public:
     std::weak_ptr<const Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
-    void addLink(const linkparser::Parsed &parsedLink, const QString &source);
+    void addLink(const linkparser::Parsed &parsedLink, QStringView source);
 
     template <typename T, typename... Args>
     T *emplace(Args &&...args)
     {
-        static_assert(std::is_base_of<MessageElement, T>::value,
+        static_assert(std::is_base_of_v<MessageElement, T>,
                       "T must extend MessageElement");
 
         auto unique = std::make_unique<T>(std::forward<Args>(args)...);
@@ -175,6 +179,7 @@ public:
     /// Make a "CHANNEL_NAME has gone live!" message
     static MessagePtr makeLiveMessage(const QString &channelName,
                                       const QString &channelID,
+                                      const QString &title,
                                       MessageFlags extraFlags = {});
 
     // Messages in normal chat for channel stuff
@@ -240,7 +245,8 @@ public:
 
     static MessagePtrMut makeSubgiftMessage(const QString &text,
                                             const QVariantMap &tags,
-                                            const QTime &time);
+                                            const QTime &time,
+                                            TwitchChannel *channel);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
 
@@ -313,6 +319,7 @@ private:
                             TwitchChannel *twitchChannel);
     void appendChatterinoBadges(const QString &userID);
     void appendFfzBadges(TwitchChannel *twitchChannel, const QString &userID);
+    void appendBttvBadges(const QString &userID);
     void appendSeventvBadges(const QString &userID);
 
     [[nodiscard]] static bool isIgnored(const QString &originalMessage,

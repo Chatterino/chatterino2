@@ -1,0 +1,74 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'linebreak' },",
+        "  { type = 'linebreak', flags = c2.MessageElementFlag.EmoteImage },",
+        "  { type = 'linebreak', tooltip = 't' },",
+        "  { type = 'linebreak', trailing_space = false },",
+        "}}"
+    ],
+    "output": {
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "flags": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "LinebreakElement"
+            },
+            {
+                "flags": "EmoteImage",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "LinebreakElement"
+            },
+            {
+                "flags": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "t",
+                "trailingSpace": true,
+                "type": "LinebreakElement"
+            },
+            {
+                "flags": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": false,
+                "type": "LinebreakElement"
+            }
+        ],
+        "externalBadges": [
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

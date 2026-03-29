@@ -1,0 +1,133 @@
+{
+    "input": "@rm-received-ts=1757929422007;login=kooby_;room-id=111448817;tmi-sent-ts=1757929421924;target-msg-id=ee436bee-aaac-49db-9a87-755c29105f6a :tmi.twitch.tv CLEARMSG #pajlada :Hello! its me Winston! Go to your fridge and stuff your big belly with food. I need you big and fat. FAT. FATTER. FATTER... FATTER! I need you to gain weight and get bulbous.",
+    "output": [
+        {
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "0:00"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "00:00:00",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "A",
+                        "message",
+                        "from"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "kooby_"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "KOOBY_"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "was",
+                        "deleted:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "JumpToMessage",
+                        "value": "ee436bee-aaac-49db-9a87-755c29105f6a"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Hello!",
+                        "its",
+                        "me",
+                        "Winston!",
+                        "Go",
+                        "to",
+                        "your",
+                        "fridge",
+                        "and",
+                        "stuff…"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|ModerationAction",
+            "frozen": false,
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "A message from kooby_ was deleted: Hello! its me Winston! Go to your fridge and stuff…",
+            "searchText": "A message from kooby_ was deleted: Hello! its me Winston! Go to your fridge and stuff…",
+            "serverReceivedTime": "",
+            "timeoutUser": "msg:ee436bee-aaac-49db-9a87-755c29105f6a",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ],
+    "params": {
+        "prevMessages": [
+            "@tmi-sent-ts=1757929410864;user-type=;room-id=11148817;mod=0;user-id=71642781;flags=;rm-received-ts=1757929411035;historical=1;subscriber=0;display-name=KOOBY_;id=ee436bee-aaac-49db-9a87-755c29105f6a;badge-info=;color=#B9CCED;emotes=;turbo=0;rm-deleted=1;first-msg=0;returning-chatter=0;badges=no_audio/1 :kooby_!kooby_@kooby_.tmi.twitch.tv PRIVMSG #pajlada :Hello! its me Winston! Go to your fridge and stuff your big belly with food. I need you big and fat. FAT. FATTER. FATTER... FATTER! I need you to gain weight and get bulbous."
+        ]
+    }
+}

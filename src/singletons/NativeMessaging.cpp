@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
@@ -76,14 +80,16 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
                         const Config &config, const QJsonDocument &document)
 {
 #ifdef Q_OS_WIN
-    writeManifestTo(paths.miscDirectory, u"."_s, config.fileName, document);
+    std::ignore =
+        writeManifestTo(paths.miscDirectory, u"."_s, config.fileName, document);
 
     QSettings registry(config.registryKey, QSettings::NativeFormat);
     registry.setValue("Default",
                       QString(paths.miscDirectory % u'/' % config.fileName));
 #else
-    writeManifestTo(config.browserDirectory, config.nmDirectory,
-                    u"com.chatterino.chatterino.json"_s, document);
+    std::ignore =
+        writeManifestTo(config.browserDirectory, config.nmDirectory,
+                        u"com.chatterino.chatterino.json"_s, document);
 #endif
 }
 
@@ -91,9 +97,10 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
 
 namespace chatterino::nm::detail {
 
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json)
+Expected<void, WriteManifestError> writeManifestTo(QString directory,
+                                                   const QString &nmDirectory,
+                                                   const QString &filename,
+                                                   const QJsonDocument &json)
 {
     if (directory.startsWith('~'))
     {
@@ -200,22 +207,22 @@ std::string &getNmQueueName(const Paths &paths)
 
 namespace nm::client {
 
-    void sendMessage(const QByteArray &array)
-    {
-        ipc::sendMessage("chatterino_gui", array);
-    }
+void sendMessage(const QByteArray &array)
+{
+    ipc::sendMessage("chatterino_gui", array);
+}
 
-    void writeToCout(const QByteArray &array)
-    {
-        const auto *data = array.data();
-        auto size = uint32_t(array.size());
+void writeToCout(const QByteArray &array)
+{
+    const auto *data = array.data();
+    auto size = uint32_t(array.size());
 
-        // We're writing the raw bytes to cout.
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        std::cout.write(reinterpret_cast<char *>(&size), 4);
-        std::cout.write(data, size);
-        std::cout.flush();
-    }
+    // We're writing the raw bytes to cout.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    std::cout.write(reinterpret_cast<char *>(&size), 4);
+    std::cout.write(data, size);
+    std::cout.flush();
+}
 
 }  // namespace nm::client
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/CommandController.hpp"
 
 #include "Application.hpp"
@@ -15,6 +19,9 @@
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
 #include "controllers/commands/builtin/twitch/GetModerators.hpp"
 #include "controllers/commands/builtin/twitch/GetVIPs.hpp"
+#include "controllers/commands/builtin/twitch/LowTrust.hpp"
+#include "controllers/commands/builtin/twitch/Poll.hpp"
+#include "controllers/commands/builtin/twitch/Prediction.hpp"
 #include "controllers/commands/builtin/twitch/Raid.hpp"
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
@@ -30,13 +37,14 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
@@ -444,6 +452,11 @@ CommandController::CommandController(const Paths &paths)
 
     this->registerCommand("/warn", &commands::sendWarn);
 
+    this->registerCommand("/monitor", &commands::monitorUser);
+    this->registerCommand("/restrict", &commands::restrictUser);
+    this->registerCommand("/unmonitor", &commands::unmonitorUser);
+    this->registerCommand("/unrestrict", &commands::unrestrictUser);
+
     for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
     {
         this->registerCommand(cmd, &commands::sendWhisper);
@@ -462,12 +475,37 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-force-image-unload",
                           &commands::forceImageUnload);
 
+    this->registerCommand("/debug-force-layout-channel-views",
+                          &commands::forceLayoutChannelViews);
+
+    this->registerCommand("/debug-increment-image-generation",
+                          &commands::incrementImageGeneration);
+
+    this->registerCommand("/debug-invalidate-buffers",
+                          &commands::invalidateBuffers);
+
+    this->registerCommand("/debug-eventsub", &commands::eventsub);
+
     this->registerCommand("/debug-test", &commands::debugTest);
+
+#ifdef Q_OS_WIN
+    this->registerCommand("/debug-relaunch-with-console",
+                          &commands::relaunchWithConsole);
+#endif
 
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
     this->registerCommand("/shoutout", &commands::sendShoutout);
+
+    this->registerCommand("/poll", &commands::createPoll);
+    this->registerCommand("/cancelpoll", &commands::cancelPoll);
+    this->registerCommand("/endpoll", &commands::endPoll);
+
+    this->registerCommand("/prediction", &commands::createPrediction);
+    this->registerCommand("/lockprediction", &commands::lockPrediction);
+    this->registerCommand("/cancelprediction", &commands::cancelPrediction);
+    this->registerCommand("/completeprediction", &commands::completePrediction);
 
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
     this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
@@ -704,6 +742,38 @@ QString CommandController::execCustomCommand(
 QStringList CommandController::getDefaultChatterinoCommandList()
 {
     return this->defaultChatterinoCommandAutoCompletions_;
+}
+
+qsizetype CommandController::commandTriggerLen(QStringView text)
+{
+    auto words = text.split(' ');
+
+    qsizetype triggerLen = 0;
+    qsizetype spaces = 0;
+    QString commandName{};
+
+    for (qsizetype i = 0; i < words.length() && spaces <= this->maxSpaces_; ++i)
+    {
+        commandName += words[i];
+        triggerLen += words[i].length();
+
+        if (this->commands_.contains(commandName) ||
+            this->userCommands_.contains(commandName))
+        {
+            return triggerLen;
+        }
+
+        // ignore consecutive spaces
+        if (!words[i].isEmpty())
+        {
+            commandName += ' ';
+            ++spaces;
+        }
+        // account for the space between the current and next word
+        ++triggerLen;
+    }
+
+    return 0;
 }
 
 }  // namespace chatterino

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayoutContext.hpp"
 
 #include "singletons/Settings.hpp"
@@ -67,6 +71,12 @@ void MessagePreferences::connectSettings(Settings *settings,
     settings->enableSubHighlight.connect(
         [this](const auto &newValue) {
             this->enableSubHighlight = newValue;
+        },
+        holder);
+
+    settings->enableWatchStreakHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableWatchStreakHighlight = newValue;
         },
         holder);
 

@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/ignores/IgnorePhrase.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "singletons/Settings.hpp"
+#include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 
 namespace chatterino {
 
@@ -18,12 +21,12 @@ IgnorePhrase::IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock,
 {
     if (this->isCaseSensitive_)
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::UseUnicodePropertiesOption);
     }
     else
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::CaseInsensitiveOption |
             QRegularExpression::UseUnicodePropertiesOption);
     }
@@ -115,8 +118,9 @@ bool IgnorePhrase::containsEmote() const
 
 IgnorePhrase IgnorePhrase::createEmpty()
 {
-    return IgnorePhrase(QString(), false, false,
-                        getSettings()->ignoredPhraseReplace.getValue(), true);
+    return {
+        {}, false, false, DEFAULT_IGNORE_PHRASE_REPLACE.toString(), true,
+    };
 }
 
 }  // namespace chatterino

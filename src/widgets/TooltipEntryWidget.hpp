@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Image.hpp"
@@ -35,8 +39,7 @@ private:
     bool attemptRefresh_ = false;
 
     ImagePtr image_ = nullptr;
-    int customImgWidth_ = 0;
-    int customImgHeight_ = 0;
+    QSize customSize;
 };
 
 }  // namespace chatterino

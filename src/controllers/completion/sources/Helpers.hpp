@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/listview/GenericListModel.hpp"
@@ -10,14 +14,14 @@ namespace chatterino::completion {
 
 namespace {
 
-    size_t sizeWithinLimit(size_t size, size_t limit)
+size_t sizeWithinLimit(size_t size, size_t limit)
+{
+    if (limit == 0)
     {
-        if (limit == 0)
-        {
-            return size;
-        }
-        return std::min(size, limit);
+        return size;
     }
+    return std::min(size, limit);
+}
 
 }  // namespace
 

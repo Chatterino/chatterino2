@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/SendReply.hpp"
 
 #include "controllers/commands/CommandContext.hpp"
@@ -5,6 +9,8 @@
 #include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Twitch.hpp"
+
+#include <ranges>
 
 namespace chatterino::commands {
 
@@ -32,9 +38,8 @@ QString sendReply(const CommandContext &ctx)
     stripChannelName(username);
 
     auto snapshot = ctx.twitchChannel->getMessageSnapshot();
-    for (auto it = snapshot.rbegin(); it != snapshot.rend(); ++it)
+    for (const auto &msg : snapshot | std::views::reverse)
     {
-        const auto &msg = *it;
         if (msg->loginName.compare(username, Qt::CaseInsensitive) == 0)
         {
             // found most recent message by user

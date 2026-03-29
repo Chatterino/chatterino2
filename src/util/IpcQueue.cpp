@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/IpcQueue.hpp"
 
 #include "common/QLogging.hpp"
@@ -81,7 +85,7 @@ public:
 };
 
 IpcQueue::IpcQueue(IpcQueuePrivate *priv)
-    : private_(priv){};
+    : private_(priv) {};
 IpcQueue::~IpcQueue() = default;
 
 std::pair<std::unique_ptr<IpcQueue>, QString> IpcQueue::tryReplaceOrCreate(

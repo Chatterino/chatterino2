@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkResult.hpp"
@@ -27,7 +31,7 @@ public:
     HTTPResponse &operator=(HTTPResponse &&) = default;
     HTTPResponse &operator=(HTTPResponse &) = delete;
     HTTPResponse(const HTTPResponse &other) = delete;
-    ~HTTPResponse();
+    ~HTTPResponse() = default;
 
 private:
     static void createUserType(sol::table &c2);

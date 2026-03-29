@@ -1,0 +1,24 @@
+{
+    "input": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "{more}",
+        "FileFormName": "file",
+        "Headers": {
+            "Another": "header",
+            "My-Header": "Foo ; Bar : Baz ; KeyOnly",
+            "X-My-Header": "1"
+        },
+        "Name": "Chatterino Image Uploader Settings",
+        "RequestMethod": "POST",
+        "RequestURL": "https://example.com",
+        "URL": "foo{bar}baz",
+        "Version": "1.0.0"
+    },
+    "output": {
+        "deletionLink": "{more}",
+        "formField": "file",
+        "headers": "Another: header;My-Header: Foo ; Bar : Baz ; KeyOnly;X-My-Header: 1",
+        "link": "foo{bar}baz",
+        "url": "https://example.com"
+    }
+}

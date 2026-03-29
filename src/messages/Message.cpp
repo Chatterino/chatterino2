@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/Message.hpp"
 
 #include "Application.hpp"
@@ -21,12 +25,12 @@ using namespace literals;
 Message::Message()
     : parseTime(QTime::currentTime())
 {
-    DebugCount::increase("messages");
+    DebugCount::increase(DebugObject::Message);
 }
 
 Message::~Message()
 {
-    DebugCount::decrease("messages");
+    DebugCount::decrease(DebugObject::Message);
 }
 
 ScrollbarHighlight Message::getScrollBarHighlight() const
@@ -36,6 +40,14 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
     {
         return {
             this->highlightColor,
+        };
+    }
+
+    if (this->flags.has(MessageFlag::WatchStreak) &&
+        getSettings()->enableWatchStreakHighlight)
+    {
+        return {
+            ColorProvider::instance().color(ColorType::WatchStreak),
         };
     }
 
@@ -107,21 +119,24 @@ QJsonObject Message::toJson() const
         {"count"_L1, static_cast<qint64>(this->count)},
         {"serverReceivedTime"_L1,
          this->serverReceivedTime.toString(Qt::ISODate)},
+        {"frozen"_L1, this->frozen},
     };
 
-    QJsonArray badges;
-    for (const auto &badge : this->badges)
+    QJsonArray twitchBadges;
+    for (const auto &badge : this->twitchBadges)
     {
-        badges.append(badge.key_);
+        twitchBadges.append(badge.key_);
     }
-    msg["badges"_L1] = badges;
+    msg["twitchBadges"_L1] = twitchBadges;
 
-    QJsonObject badgeInfos;
-    for (const auto &[key, value] : this->badgeInfos)
+    QJsonObject twitchBadgeInfos;
+    for (const auto &[key, value] : this->twitchBadgeInfos)
     {
-        badgeInfos.insert(key, value);
+        twitchBadgeInfos.insert(key, value);
     }
-    msg["badgeInfos"_L1] = badgeInfos;
+    msg["twitchBadgeInfos"_L1] = twitchBadgeInfos;
+
+    msg["externalBadges"_L1] = QJsonArray::fromStringList(this->externalBadges);
 
     if (this->highlightColor)
     {
@@ -157,6 +172,46 @@ QJsonObject Message::toJson() const
     msg["elements"_L1] = elements;
 
     return msg;
+}
+
+Message::ReplyStatus Message::isReplyable() const
+{
+    if (this->loginName.isEmpty())
+    {
+        // no replies can happen
+        return ReplyStatus::NotReplyable;
+    }
+
+    constexpr int oneDayInSeconds = 24 * 60 * 60;
+    bool messageReplyable = true;
+    if (this->flags.hasAny({MessageFlag::System, MessageFlag::Subscription,
+                            MessageFlag::Timeout, MessageFlag::Whisper,
+                            MessageFlag::ModerationAction,
+                            MessageFlag::InvalidReplyTarget}) ||
+        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
+            oneDayInSeconds)
+    {
+        messageReplyable = false;
+    }
+
+    if (this->replyThread != nullptr)
+    {
+        if (const auto &rootPtr = this->replyThread->root(); rootPtr != nullptr)
+        {
+            assert(this != rootPtr.get());
+            if (rootPtr->isReplyable() == ReplyStatus::NotReplyable)
+            {
+                // thread parent must be replyable to be replyable
+                return ReplyStatus::NotReplyableDueToThread;
+            }
+
+            return messageReplyable ? ReplyStatus::ReplyableWithThread
+                                    : ReplyStatus::NotReplyableWithThread;
+        }
+    }
+
+    return messageReplyable ? ReplyStatus::Replyable
+                            : ReplyStatus::NotReplyable;
 }
 
 }  // namespace chatterino

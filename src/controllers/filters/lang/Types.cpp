@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/Types.hpp"
 
 #include "controllers/filters/lang/expressions/Expression.hpp"
@@ -39,8 +43,6 @@ QString typeToString(Type type)
             return "StringList";
         case T::MatchingSpecifier:
             return "MatchingSpecifier";
-        case T::Map:
-            return "Map";
         default:
             return "Unknown";
     }

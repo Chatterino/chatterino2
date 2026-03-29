@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/detail/WebSocketConnectionImpl.hpp"
 
 #include "common/QLogging.hpp"
@@ -6,6 +10,8 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+
+using namespace std::literals::string_view_literals;
 
 namespace chatterino::ws::detail {
 
@@ -93,29 +99,65 @@ void WebSocketConnectionHelper<Derived, Inner>::onResolve(
         return;
     }
 
-    qCDebug(chatterinoWebsocket) << *this << "Resolved host";
+    this->resolvedEndpoints = BalancedResolverResults(results);
+
+    this->tryConnect(this->resolvedEndpoints.advanceEntry());
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::tryConnect(
+    std::optional<BalancedResolverResults::Entry> entry)
+{
+    if (!entry)
+    {
+        this->fail("Ran out of resolved endpoints"sv, u"connect");
+        return;
+    }
+
+    auto endpoint = entry->endpoint();
+
+    qCDebug(chatterinoWebsocket)
+        << *this << "connect to" << endpoint.address().to_string();
 
     beast::get_lowest_layer(this->stream)
         .expires_after(std::chrono::seconds{30});
+
     beast::get_lowest_layer(this->stream)
-        .async_connect(results, beast::bind_front_handler(
-                                    &WebSocketConnectionHelper::onTcpHandshake,
-                                    this->shared_from_this()));
+        .async_connect(endpoint,
+                       beast::bind_front_handler(
+                           &WebSocketConnectionHelper::onTcpHandshake,
+                           this->shared_from_this(), *std::move(entry)));
 }
 
 template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onTcpHandshake(
-    boost::system::error_code ec,
-    const asio::ip::tcp::resolver::endpoint_type &ep)
+    const BalancedResolverResults::Entry &entry, boost::system::error_code ec)
 {
+    const auto &ep = entry.endpoint();
+
     if (ec)
     {
-        this->fail(ec, u"TCP handshake");
+        qCDebug(chatterinoWebsocket)
+            << *this << "error in tcp handshake" << ep.address().to_string()
+            << ec.message();
+
+        beast::get_lowest_layer(this->stream).socket().close(ec);
+        if (ec)
+        {
+            qCDebug(chatterinoWebsocket)
+                << *this << "closing websocket after error" << ec.message();
+        }
+
+        this->tryConnect(this->resolvedEndpoints.advanceEntry());
         return;
     }
 
-    qCDebug(chatterinoWebsocket) << *this << "TCP handshake done";
+    qCDebug(chatterinoWebsocket)
+        << *this << "TCP handshake done" << ep.address().to_string();
     this->options.url.setPort(ep.port());
+
+    // We are done with the endpoints, we can clear the range.
+    this->resolvedEndpoints = {};
 
     this->derived()->afterTcpHandshake();
 }
@@ -167,13 +209,18 @@ void WebSocketConnectionHelper<Derived, Inner>::doWsHandshake()
 
     auto host = this->options.url.host(QUrl::FullyEncoded).toStdString() + ':' +
                 std::to_string(this->options.url.port(Derived::DEFAULT_PORT));
-    auto path = this->options.url.path(QUrl::FullyEncoded).toStdString();
-    if (path.empty())
+    auto path = this->options.url.path(QUrl::FullyEncoded);
+    if (path.isEmpty())
     {
         path = "/";
     }
+    if (this->options.url.hasQuery())
+    {
+        path += '?';
+        path += this->options.url.query(QUrl::FullyEncoded);
+    }
     this->stream.async_handshake(
-        host, path,
+        host, path.toStdString(),
         beast::bind_front_handler(&WebSocketConnectionHelper::onWsHandshake,
                                   this->shared_from_this()));
 }
@@ -194,6 +241,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
 
     qCDebug(chatterinoWebsocket) << *this << "WS handshake done";
 
+    this->listener->onOpen();
     this->trySend();
     this->stream.async_read(
         this->readBuffer,
@@ -314,8 +362,15 @@ template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::fail(
     boost::system::error_code ec, QStringView op)
 {
+    this->fail(ec.message(), op);
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::fail(std::string_view ec,
+                                                     QStringView op)
+{
     qCWarning(chatterinoWebsocket)
-        << *this << "Failed:" << op << QUtf8StringView(ec.message());
+        << *this << "Failed:" << op << QUtf8StringView(ec);
     if (this->stream.is_open())
     {
         this->closeImpl();

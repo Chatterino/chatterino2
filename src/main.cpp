@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "BrowserExtension.hpp"
 #include "common/Args.hpp"
 #include "common/Env.hpp"
@@ -40,7 +44,8 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
 #ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"ChatterinoTeam.Chatterino");
+    SetCurrentProcessExplicitAppUserModelID(
+        Version::instance().appUserModelID().c_str());
 #endif
 
     std::unique_ptr<Paths> paths;
@@ -97,8 +102,7 @@ int main(int argc, char **argv)
             QString("%1 (commit %2%3)")
                 .arg(version.fullVersion())
                 .arg(version.commitHash())
-                .arg(Modes::instance().isNightly ? ", " + version.dateOfBuild()
-                                                 : "");
+                .arg(version.isNightly() ? ", " + version.dateOfBuild() : "");
         std::cout << versionMessage.toLocal8Bit().constData() << '\n';
         std::cout.flush();
     }
@@ -115,18 +119,16 @@ int main(int argc, char **argv)
         qCInfo(chatterinoApp).noquote()
             << "Chatterino Qt SSL library version:"
             << QSslSocket::sslLibraryVersionString();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
         qCInfo(chatterinoApp).noquote()
             << "Chatterino Qt SSL active backend:"
             << QSslSocket::activeBackend() << "of"
             << QSslSocket::availableBackends().join(", ");
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
                               << QSslSocket::supportedFeatures();
-#    endif
+#endif
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
                               << QSslSocket::supportedProtocols();
-#endif
 
         Settings settings(args, paths->settingsDirectory);
 

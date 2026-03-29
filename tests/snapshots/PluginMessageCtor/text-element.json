@@ -1,0 +1,191 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'text', text = '' },",
+        "  { type = 'text', text = 'foo' },",
+        "  { type = 'text', text = 'foo bar' },",
+        "  { type = 'text', text = 'foo\\nbar' },",
+        "  { type = 'text', text = 'foo', flags = c2.MessageElementFlag.Text | c2.MessageElementFlag.Timestamp },",
+        "  { type = 'text', text = 'foo', color = 'text' },",
+        "  { type = 'text', text = 'foo', color = 'system' },",
+        "  { type = 'text', text = 'foo', color = 'link' },",
+        "  { type = 'text', text = 'foo', color = 'green' },",
+        "  { type = 'text', text = 'foo', style = c2.FontStyle.ChatSmall },",
+        "}}"
+    ],
+    "output": {
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    ""
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo",
+                    "bar"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo\nbar"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text|Timestamp",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "System",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Link",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "#ff008000",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            },
+            {
+                "color": "Text",
+                "flags": "Text",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "style": "ChatSmall",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "foo"
+                ]
+            }
+        ],
+        "externalBadges": [
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

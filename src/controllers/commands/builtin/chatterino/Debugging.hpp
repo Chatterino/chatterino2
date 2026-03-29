@@ -1,4 +1,10 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
+
+#include <QtGlobal>
 
 class QString;
 
@@ -22,6 +28,18 @@ QString forceImageGarbageCollection(const CommandContext &ctx);
 
 QString forceImageUnload(const CommandContext &ctx);
 
+QString forceLayoutChannelViews(const CommandContext &ctx);
+
+QString incrementImageGeneration(const CommandContext &ctx);
+
+QString invalidateBuffers(const CommandContext &ctx);
+
+QString eventsub(const CommandContext &ctx);
+
 QString debugTest(const CommandContext &ctx);
+
+#ifdef Q_OS_WIN
+QString relaunchWithConsole(const CommandContext &ctx);
+#endif
 
 }  // namespace chatterino::commands

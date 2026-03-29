@@ -1,0 +1,286 @@
+{
+    "input": "@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=11148817;subscriber=1;system-msg=ronni\\shas\\ssubscribed\\sfor\\s6\\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!",
+    "output": [
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "ronni",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "23:36"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "23:36:12",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
+                        },
+                        "name": "",
+                        "tooltip": "Staff"
+                    },
+                    "flags": "BadgeGlobalAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Staff",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                        },
+                        "name": "",
+                        "tooltip": "Broadcaster"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Broadcaster",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/3"
+                        },
+                        "name": "",
+                        "tooltip": "Turbo"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Turbo",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ffff00ff",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "ronni"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "ronni:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Great",
+                        "stream",
+                        "--",
+                        "keep",
+                        "it",
+                        "up!"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "db25007f-7a18-43eb-9379-80131e44d633"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "Collapsed|Subscription",
+            "frozen": false,
+            "highlightColor": "#64c466ff",
+            "id": "db25007f-7a18-43eb-9379-80131e44d633",
+            "localizedName": "",
+            "loginName": "ronni",
+            "messageText": "Great stream -- keep it up!",
+            "searchText": "ronni  ronni: Great stream -- keep it up! ",
+            "serverReceivedTime": "2017-10-05T23:36:12Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "staff",
+                "broadcaster",
+                "turbo"
+            ],
+            "userID": "1337",
+            "usernameColor": "#ffff00ff"
+        },
+        {
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "23:36"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "23:36:12",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffff00ff",
+                    "userLoginName": "ronni",
+                    "words": [
+                        "ronni"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "has",
+                        "subscribed",
+                        "for",
+                        "6",
+                        "months!"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|Subscription",
+            "frozen": false,
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "ronni has subscribed for 6 months!",
+            "searchText": "ronni has subscribed for 6 months!",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ],
+    "params": {
+        "userData": {
+            "1337": {
+                "color": "#FF00FF"
+            }
+        }
+    }
+}

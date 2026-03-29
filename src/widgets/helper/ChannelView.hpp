@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageFlag.hpp"
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
@@ -40,7 +43,7 @@ enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
-class EffectLabel;
+class LabelButton;
 struct Link;
 class MessageLayoutElement;
 class Split;
@@ -61,6 +64,7 @@ enum class FromTwitchLinkOpenChannelIn {
     Tab,
     BrowserPlayer,
     Streamlink,
+    CustomPlayer,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -177,7 +181,7 @@ public:
     /// Checks if this view has a #sourceChannel
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
+    std::vector<MessageLayoutPtr> &getMessagesSnapshot();
 
     void queueLayout();
     void invalidateBuffers();
@@ -228,6 +232,9 @@ public:
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
 
+    /// This signal fires when a message passed filters and was added to the channel view
+    Q_SIGNAL void messageAddedToChannel(MessagePtr &message);
+
 protected:
     void themeChangedEvent() override;
     void scaleChangedEvent(float scale) override;
@@ -237,11 +244,7 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void wheelEvent(QWheelEvent *event) override;
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
-#else
-    void enterEvent(QEvent * /*event*/) override;
-#endif
     void leaveEvent(QEvent * /*event*/) override;
 
     bool event(QEvent *event) override;
@@ -258,8 +261,8 @@ protected:
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
-                         QPoint &relativePos, int &index);
+    bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
+                         QPointF &relativePos, int &index);
 
 private:
     struct InternalCtor {
@@ -282,9 +285,8 @@ private:
 
     void performLayout(bool causedByScrollbar = false,
                        bool causedByShow = false);
-    void layoutVisibleMessages(
-        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
+    void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
+    void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool causedByShow);
 
     void drawMessages(QPainter &painter, const QRect &area);
@@ -350,7 +352,7 @@ private:
     MessageLayoutPtr lastReadMessage_;
 
     ThreadGuard snapshotGuard_;
-    LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
+    std::vector<MessageLayoutPtr> snapshot_;
 
     /// @brief The backing (internal) channel
     ///
@@ -381,7 +383,7 @@ private:
     Split *split_;
 
     Scrollbar *scrollBar_;
-    EffectLabel *goToBottom_{};
+    LabelButton *goToBottom_{};
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;

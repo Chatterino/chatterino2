@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/FilterParser.hpp"
 
 #include "controllers/filters/lang/expressions/BinaryOperation.hpp"

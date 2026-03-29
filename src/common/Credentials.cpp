@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Credentials.hpp"
 
 #include "Application.hpp"
@@ -18,11 +22,7 @@
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
-#        if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#            include "qt6keychain/keychain.h"
-#        else
-#            include "qt5keychain/keychain.h"
-#        endif
+#        include "qt6keychain/keychain.h"
 #    else
 #        include <qtkeychain/keychain.h>
 #    endif
@@ -65,14 +65,21 @@ QString insecurePath()
 QJsonDocument loadInsecure()
 {
     QFile file(insecurePath());
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return {};
+    }
+
     return QJsonDocument::fromJson(file.readAll());
 }
 
 void storeInsecure(const QJsonDocument &doc)
 {
     QSaveFile file(insecurePath());
-    file.open(QIODevice::WriteOnly);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return;
+    }
     file.write(doc.toJson());
     file.commit();
 }

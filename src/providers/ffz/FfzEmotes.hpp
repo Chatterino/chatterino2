@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -27,12 +31,10 @@ using FfzChannelBadgeMap =
 
 namespace ffz::detail {
 
-    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot);
+EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot);
 
-    /**
-     * Parse the `user_badge_ids` into a map of User IDs -> Badge IDs
-     */
-    FfzChannelBadgeMap parseChannelBadges(const QJsonObject &badgeRoot);
+/// Parse the `user_badge_ids` into a map of User IDs -> Badge IDs
+FfzChannelBadgeMap parseChannelBadges(const QJsonObject &badgeRoot);
 
 }  // namespace ffz::detail
 

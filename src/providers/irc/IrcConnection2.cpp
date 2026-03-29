@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/irc/IrcConnection2.hpp"
 
 #include "common/QLogging.hpp"
@@ -11,7 +15,7 @@ namespace chatterino {
 
 namespace {
 
-    const auto payload = "chatterino/" + CHATTERINO_VERSION;
+const auto payload = "chatterino/" + CHATTERINO_VERSION;
 
 }  // namespace
 

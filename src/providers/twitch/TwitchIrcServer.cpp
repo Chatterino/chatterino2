@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 #include "Application.hpp"
@@ -7,11 +11,11 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"  // IWYU pragma: keep
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"  // IWYU pragma: keep
@@ -127,22 +131,6 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
             }();
             chan->addSystemMessage(errorMessage);
         });
-}
-
-/// Returns true if chat messages should be sent over Helix
-bool shouldSendHelixChat()
-{
-    switch (getSettings()->chatSendProtocol)
-    {
-        case ChatSendProtocol::Helix:
-            return true;
-        case ChatSendProtocol::Default:
-        case ChatSendProtocol::IRC:
-            return false;
-        default:
-            assert(false && "Invalid chat protocol value");
-            return false;
-    }
 }
 
 }  // namespace
@@ -333,8 +321,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     // no Channel's should live
     // NOTE: CHANNEL_LIFETIME
     std::ignore = channel->sendMessageSignal.connect(
-        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
-                                                 bool &sent) {
+        [this, channel = std::weak_ptr(channel)](auto &msg, bool &sent) {
             auto c = channel.lock();
             if (!c)
             {
@@ -343,8 +330,8 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
             this->onMessageSendRequested(c, msg, sent);
         });
     std::ignore = channel->sendReplySignal.connect(
-        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
-                                                 auto &replyId, bool &sent) {
+        [this, channel = std::weak_ptr(channel)](auto &msg, auto &replyId,
+                                                 bool &sent) {
             auto c = channel.lock();
             if (!c)
             {
@@ -479,6 +466,11 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     // join channels
     for (const auto &channel : activeChannels)
     {
+        // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+        if (channel->getName().startsWith("/"))
+        {
+            continue;
+        }
         this->joinBucket_->send(channel->getName());
     }
 
@@ -490,15 +482,14 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 
     for (const auto &chan : activeChannels)
     {
-        LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
+        MessagePtr last = chan->getLastMessage();
 
         bool replaceMessage =
-            snapshot.size() > 0 && snapshot[snapshot.size() - 1]->flags.has(
-                                       MessageFlag::DisconnectedMessage);
+            last && last->flags.has(MessageFlag::DisconnectedMessage);
 
         if (replaceMessage)
         {
-            chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
+            chan->replaceMessage(last, reconnected);
         }
         else
         {
@@ -762,7 +753,7 @@ void TwitchIrcServer::onMessageSendRequested(
         return;
     }
 
-    if (shouldSendHelixChat())
+    if (getSettings()->shouldSendHelixChat())
     {
         sendHelixMessage(channel, message);
     }
@@ -786,7 +777,7 @@ void TwitchIrcServer::onReplySendRequested(
         return;
     }
 
-    if (shouldSendHelixChat())
+    if (getSettings()->shouldSendHelixChat())
     {
         sendHelixMessage(channel, message, replyId);
     }
@@ -891,8 +882,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                     },
                     this);
             });
-
-        bttvLiveUpdates->start();
     }
     else
     {
@@ -943,8 +932,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                                              chan.updateSeventvUser(data);
                                          });
             });
-
-        seventvEventAPI->start();
     }
     else
     {
@@ -1167,32 +1154,39 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
     // value doesn't exist
     chan = this->createChannel(channelName);
-    if (!chan)
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+    if (!chan || !twitchChannel)
     {
         return Channel::getEmpty();
     }
 
     this->channels.insert(channelName, chan);
-    this->signalHolder.managedConnect(chan->destroyed, [this, channelName] {
-        // fourtf: issues when the server itself is destroyed
+    this->signalHolder.managedConnect(
+        twitchChannel->destroyed, [this, channelName] {
+            // fourtf: issues when the server itself is destroyed
 
-        qCDebug(chatterinoIrc) << "[TwitchIrcServer::addChannel]" << channelName
-                               << "was destroyed";
-        this->channels.remove(channelName);
+            qCDebug(chatterinoIrc) << "[TwitchIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
+            this->channels.remove(channelName);
 
-        if (this->readConnection_)
-        {
-            this->readConnection_->sendRaw("PART #" + channelName);
-        }
-    });
+            if (this->readConnection_)
+            {
+                // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+                if (!channelName.startsWith("/"))
+                {
+                    this->readConnection_->sendRaw("PART #" + channelName);
+                }
+            }
+        });
 
     // join IRC channel
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
-        if (this->readConnection_)
+        if (this->readConnection_ && this->readConnection_->isConnected())
         {
-            if (this->readConnection_->isConnected())
+            // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+            if (!channelName.startsWith("/"))
             {
                 this->joinBucket_->send(channelName);
             }

@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 namespace chatterino {
+
+/** @exposeenum c2.MessageContext */
 
 /// Context of the message being added to a channel
 enum class MessageContext {

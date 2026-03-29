@@ -1,12 +1,16 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"

@@ -1,19 +1,91 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 
+#include "controllers/spellcheck/SpellChecker.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
+#include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
+
+#include <algorithm>
 
 namespace chatterino {
+
+namespace {
 
 inline const QStringList STREAMLINK_QUALITY = {
     "Choose", "Source", "High", "Medium", "Low", "Audio only",
 };
+
+void exportImageUploaderSettings(QWidget *parent)
+{
+    const auto &s = *getSettings();
+
+    QJsonObject settingsObj = imageuploader::detail::exportSettings(s);
+    QJsonDocument doc(settingsObj);
+    crossPlatformCopy(doc.toJson(QJsonDocument::Indented));
+
+    QMessageBox::information(
+        parent, "Settings Exported",
+        "Image uploader settings have been copied to clipboard as JSON.");
+}
+
+void importImageUploaderSettings(QWidget *parent)
+{
+    QString clipboardText = getClipboardText().trimmed();
+
+    auto res = imageuploader::detail::validateImportJson(clipboardText);
+    if (!res)
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            QString("Error validating image uploader import: %1.")
+                .arg(res.error()));
+        return;
+    }
+    const auto &settingsObj = *res;
+
+    int ret = QMessageBox::question(
+        parent, "Import Settings",
+        "This will overwrite your current image uploader settings. Continue?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (ret != QMessageBox::Yes)
+    {
+        return;
+    }
+
+    auto &s = *getSettings();
+    if (imageuploader::detail::importSettings(settingsObj, s))
+    {
+        QMessageBox::information(
+            parent, "Import Successful",
+            "Image uploader settings have been imported successfully!");
+    }
+    else
+    {
+        QMessageBox::warning(
+            parent, "Import Failed",
+            "No valid image uploader settings found in the JSON.");
+    }
+}
+
+}  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
     : view(GeneralPageView::withoutNavigation(this))
@@ -26,7 +98,7 @@ ExternalToolsPage::ExternalToolsPage()
     y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*view);
+    this->initLayout(*this->view);
 }
 
 bool ExternalToolsPage::filterElements(const QString &query)
@@ -135,7 +207,88 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
 
         SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
             ->addTo(layout, form);
+
+        layout.addDescription(
+            "Export your current image uploader settings as JSON to share with "
+            "others, or import settings from clipboard (compatible with ShareX "
+            ".sxcu format).");
+
+        auto *buttonLayout = new QHBoxLayout;
+
+        auto *importButton = new QPushButton("Import Settings from Clipboard");
+        importButton->setToolTip(
+            "Import image uploader settings from clipboard JSON");
+        QObject::connect(importButton, &QPushButton::clicked, [this]() {
+            importImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(importButton);
+
+        auto *exportButton = new QPushButton("Export Settings to Clipboard");
+        exportButton->setToolTip(
+            "Copy current image uploader settings to clipboard as JSON");
+        QObject::connect(exportButton, &QPushButton::clicked, [this]() {
+            exportImageUploaderSettings(this);
+        });
+        buttonLayout->addWidget(exportButton);
+
+        buttonLayout->addStretch();
+        layout.addLayout(buttonLayout);
     }
+
+#ifdef CHATTERINO_WITH_SPELLCHECK
+    {
+        // auto *form = new QFormLayout;
+        layout.addTitle("Spell checker (experimental)");
+
+        layout.addDescription(
+            u"Check the spelling of words in the input box of splits."
+            " Chatterino does not include dictionaries - they have to "
+            "be downloaded or created manually. Chatterino expects "
+            "Hunspell "
+            "dictionaries in " %
+            formatRichNamedLink(getApp()->getPaths().dictionariesDirectory,
+                                getApp()->getPaths().dictionariesDirectory) %
+            u". Dictionaries are pairs of .aff (affixes) and .dic (dictionary) "
+            u"files.");
+
+        SettingWidget::checkbox("Check spelling by default",
+                                s.enableSpellChecking)
+            ->setTooltip("Check the spelling of words in the input box of all "
+                         "splits by default.")
+            ->addTo(layout);
+        SettingWidget::intInput("Number of suggestions in context menu",
+                                s.nSpellCheckingSuggestions,
+                                {
+                                    .min = -1,
+                                    .max = std::numeric_limits<int>::max(),
+                                })
+            ->setTooltip(
+                "When right clicking any word, show this many suggestions. If "
+                "this is 0, no suggestions will be shown and if it's -1, no "
+                "limit is set.")
+            ->addTo(layout);
+
+        auto toItem =
+            [](const DictionaryInfo &dict) -> std::pair<QString, QVariant> {
+            return {
+                dict.name,
+                dict.path,
+            };
+        };
+        std::vector<std::pair<QString, QVariant>> dictList{{"None", ""}};
+
+        std::ranges::transform(
+            getApp()->getSpellChecker()->getAvailableDictionaries(),
+            std::back_inserter(dictList), toItem);
+
+        if (dictList.size() > 1)
+        {
+            SettingWidget::dropdown("Default dictionary (requires restart)",
+                                    s.spellCheckingDefaultDictionary, dictList)
+                ->addTo(layout);
+        }
+    }
+#endif
 
     layout.addStretch();
 }

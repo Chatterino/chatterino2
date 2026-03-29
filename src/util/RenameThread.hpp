@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QString>
@@ -11,7 +15,7 @@ namespace chatterino {
 
 #ifdef Q_OS_WIN
 namespace windows::detail {
-    void renameThread(void *hThread, const QString &name);
+void renameThread(void *hThread, const QString &name);
 }  // namespace windows::detail
 #endif
 

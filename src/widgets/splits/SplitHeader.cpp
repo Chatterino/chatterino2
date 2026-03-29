@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
@@ -13,16 +17,18 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
+#include "widgets/buttons/DrawnButton.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -40,6 +46,14 @@
 namespace {
 
 using namespace chatterino;
+
+/// The width of the standard button.
+constexpr const int BUTTON_WIDTH = 28;
+
+/// The width of the "Add split" button.
+///
+/// This matches the scrollbar's full width.
+constexpr const int ADD_SPLIT_BUTTON_WIDTH = 16;
 
 // 5 minutes
 constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
@@ -69,8 +83,9 @@ auto formatRoomModeUnclean(
     {
         if (modes->followerOnly != 0)
         {
-            text += QString("follow(%1m), ")
-                        .arg(localizeNumbers(modes->followerOnly));
+            text += QString("follow(%1), ")
+                        .arg(formatDurationExact(
+                            std::chrono::minutes{modes->followerOnly}));
         }
         else
         {
@@ -279,6 +294,36 @@ void SplitHeader::initializeLayout()
 {
     assert(this->layout() == nullptr);
 
+    this->moderationButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/moderationDisabled-darkMode.svg",
+            .light = ":/buttons/moderationDisabled-lightMode.svg",
+        },
+        this, {5, 5});
+
+    this->chattersButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/chatters-darkMode.svg",
+            .light = ":/buttons/chatters-lightMode.svg",
+        },
+        this, {4, 4});
+
+    this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
+                                       {
+                                           .padding = 3,
+                                           .thickness = 1,
+                                       },
+                                       this);
+
+    this->dropdownButton_ =
+        new DrawnButton(DrawnButton::Symbol::Kebab, {}, this);
+
+    /// XXX: this never gets disconnected
+    QObject::connect(this->dropdownButton_, &Button::leftMousePress, this,
+                     [this] {
+                         this->dropdownButton_->setMenu(this->createMainMenu());
+                     });
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -289,75 +334,68 @@ void SplitHeader::initializeLayout()
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
                              QSizePolicy::Preferred);
             w->setCentered(true);
-            w->setHasOffset(false);
+            w->setPadding(QMargins{});
         }),
         // space
         makeWidget<BaseWidget>([](auto w) {
             w->setScaleIndependentSize(8, 4);
         }),
         // mode
-        this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
+        this->modeButton_ = makeWidget<LabelButton>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             w->hide();
             w->setMenu(this->createChatModeMenu());
         }),
         // moderator
-        this->moderationButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(
-                w, &Button::clicked, this,
-                [this, w](Qt::MouseButton button) mutable {
-                    switch (button)
-                    {
-                        case Qt::LeftButton:
-                            if (getSettings()->moderationActions.empty())
-                            {
-                                getApp()->getWindows()->showSettingsDialog(
-                                    this, SettingsDialogPreference::
-                                              ModerationActions);
-                                this->split_->setModerationMode(true);
-                            }
-                            else
-                            {
-                                auto moderationMode =
-                                    this->split_->getModerationMode();
-
-                                this->split_->setModerationMode(
-                                    !moderationMode);
-                                w->setDim(Button::Dim(moderationMode));
-                            }
-                            break;
-
-                        case Qt::RightButton:
-                        case Qt::MiddleButton:
-                            getApp()->getWindows()->showSettingsDialog(
-                                this,
-                                SettingsDialogPreference::ModerationActions);
-                            break;
-                    }
-                });
-        }),
+        this->moderationButton_,
         // chatter list
-        this->chattersButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showChatterList();
-            });
-        }),
+        this->chattersButton_,
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
-            /// XXX: this never gets disconnected
-            QObject::connect(w, &Button::leftMousePress, this, [this] {
-                this->dropdownButton_->setMenu(this->createMainMenu());
-            });
-        }),
+        this->dropdownButton_,
         // add split
-        this->addButton_ = makeWidget<Button>([&](auto w) {
-            w->setPixmap(getResources().buttons.addSplitDark);
-            w->setEnableMargin(false);
+        this->addButton_,
+    });
 
-            QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->addSibling();
-            });
-        }),
+    QObject::connect(
+        this->moderationButton_, &Button::clicked, this,
+        [this](Qt::MouseButton button) mutable {
+            switch (button)
+            {
+                case Qt::LeftButton:
+                    if (getSettings()->moderationActions.empty())
+                    {
+                        getApp()->getWindows()->showSettingsDialog(
+                            this, SettingsDialogPreference::ModerationActions);
+                        this->split_->setModerationMode(true);
+                    }
+                    else
+                    {
+                        auto moderationMode = this->split_->getModerationMode();
+
+                        this->split_->setModerationMode(!moderationMode);
+                        // w->setDim(moderationMode ? DimButton::Dim::Some
+                        //                          : DimButton::Dim::None);
+                    }
+                    break;
+
+                case Qt::RightButton:
+                case Qt::MiddleButton:
+                    getApp()->getWindows()->showSettingsDialog(
+                        this, SettingsDialogPreference::ModerationActions);
+                    break;
+
+                default:
+                    break;
+            }
+        });
+
+    QObject::connect(this->chattersButton_, &Button::leftClicked, this,
+                     [this]() {
+                         this->split_->openChatterList();
+                     });
+
+    QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
+        this->split_->addSibling();
     });
 
     getSettings()->customURIScheme.connect(
@@ -446,9 +484,25 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),
                 this->split_,
                 [twitchChannel] {
-                    twitchChannel->createClip();
+                    twitchChannel->createClip({}, {});
                 })
             ->setVisible(twitchChannel->isLive());
+
+        if (this->split_->getIndirectChannel().getType() ==
+            Channel::Type::TwitchWatching)
+        {
+            menu->addAction("Reset /watching", this->split_, [] {
+                if (!getApp()
+                         ->getTwitch()
+                         ->getWatchingChannel()
+                         .get()
+                         ->isEmpty())
+                {
+                    getApp()->getTwitch()->setWatchingChannel(
+                        Channel::getEmpty());
+                }
+            });
+        }
 
         menu->addSeparator();
     }
@@ -540,7 +594,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             moreMenu->addAction(
                 "Show chatter list",
                 h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"),
-                this->split_, &Split::showChatterList);
+                this->split_, &Split::openChatterList);
         }
 
         moreMenu->addAction("Subscribe",
@@ -725,7 +779,7 @@ void SplitHeader::updateRoomModes()
     if (auto *twitchChannel =
             dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
-        this->modeButton_->setEnable(twitchChannel->hasModRights());
+        this->modeButton_->setEnabled(twitchChannel->hasModRights());
 
         QString text;
         {
@@ -746,7 +800,7 @@ void SplitHeader::updateRoomModes()
 
         if (!text.isEmpty())
         {
-            this->modeButton_->getLabel().setText(text);
+            this->modeButton_->setText(text);
             this->modeButton_->show();
         }
         else
@@ -788,13 +842,15 @@ void SplitHeader::handleChannelChanged()
 
 void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = int(28 * scale);
+    int w = int(BUTTON_WIDTH * scale);
+    int addSplitWidth = int(ADD_SPLIT_BUTTON_WIDTH * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
-    this->addButton_->setFixedWidth(w * 5 / 8);
+
+    this->addButton_->setFixedWidth(addSplitWidth);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
@@ -892,9 +948,20 @@ void SplitHeader::updateIcons()
         auto moderationMode = this->split_->getModerationMode() &&
                               !getSettings()->moderationActions.empty();
 
-        this->moderationButton_->setPixmap(
-            moderationMode ? getResources().buttons.modModeEnabled
-                           : getResources().buttons.modModeDisabled);
+        if (moderationMode)
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationEnabled-darkMode.svg",
+                .light = ":/buttons/moderationEnabled-lightMode.svg",
+            });
+        }
+        else
+        {
+            this->moderationButton_->setSource({
+                .dark = ":/buttons/moderationDisabled-darkMode.svg",
+                .light = ":/buttons/moderationDisabled-lightMode.svg",
+            });
+        }
 
         if (twitchChannel->hasModRights() || moderationMode)
         {
@@ -934,10 +1001,10 @@ void SplitHeader::paintEvent(QPaintEvent * /*event*/)
         border = this->theme->splits.header.focusedBorder;
     }
 
-    painter.fillRect(rect(), background);
+    painter.fillRect(this->rect(), background);
     painter.setPen(border);
-    painter.drawRect(0, 0, width() - 1, height() - 2);
-    painter.fillRect(0, height() - 1, width(), 1, background);
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 2);
+    painter.fillRect(0, this->height() - 1, this->width(), 1, background);
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
@@ -999,11 +1066,7 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void SplitHeader::enterEvent(QEnterEvent *event)
-#else
-void SplitHeader::enterEvent(QEvent *event)
-#endif
 {
     if (!this->tooltipText_.isEmpty())
     {
@@ -1058,19 +1121,11 @@ void SplitHeader::themeChangedEvent()
     }
     this->titleLabel_->setPalette(palette);
 
-    // --
-    if (this->theme->isLightTheme())
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
-        this->addButton_->setPixmap(getResources().buttons.addSplit);
-    }
-    else
-    {
-        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
-        this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
-        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
-    }
+    auto bg = this->theme->splits.header.background;
+    this->addButton_->setOptions({
+        .background = bg,
+        .backgroundHover = bg,
+    });
 
     this->update();
 }

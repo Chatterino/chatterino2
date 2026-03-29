@@ -1,6 +1,11 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "util/DebugCount.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -98,6 +103,7 @@ public:
     bool isEmpty() const;
     int width() const;
     int height() const;
+    QSizeF size() const;
     bool animated() const;
 
     bool operator==(const Image &image) = delete;

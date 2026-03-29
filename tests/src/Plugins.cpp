@@ -1,7 +1,13 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
+#include "mocks/Helix.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "common/Channel.hpp"
 #    include "common/network/NetworkCommon.hpp"
+#    include "controllers/accounts/AccountController.hpp"
 #    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
@@ -10,9 +16,12 @@
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "lib/Snapshot.hpp"
+#    include "messages/Message.hpp"
+#    include "messages/MessageElement.hpp"
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
-#    include "mocks/Emotes.hpp"
+#    include "mocks/EmoteController.hpp"
 #    include "mocks/Logging.hpp"
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
@@ -29,8 +38,11 @@
 
 using namespace chatterino;
 using chatterino::mock::MockChannel;
+using namespace std::chrono_literals;
 
 namespace {
+
+constexpr bool UPDATE_SNAPSHOTS = false;
 
 const QString TEST_SETTINGS = R"(
 {
@@ -39,6 +51,15 @@ const QString TEST_SETTINGS = R"(
         "enabledPlugins": [
             "test"
         ]
+    },
+    "accounts": {
+        "uid117166826": {
+            "username": "testaccount_420",
+            "userID": "117166826",
+            "clientID": "abc",
+            "oauthToken": "def"
+        },
+        "current": "testaccount_420"
     }
 }
 )";
@@ -88,7 +109,7 @@ public:
         return &this->commands;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -103,12 +124,61 @@ public:
         return &this->logging;
     }
 
+    AccountController *getAccounts() override
+    {
+        return &this->accounts;
+    }
+
     PluginController plugins;
-    mock::EmptyLogging logging;
+    mock::Logging logging;
     CommandController commands;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     MockTwitch twitch;
+    AccountController accounts;
+    mock::Helix helix;
 };
+
+QDir luaTestBaseDir(const QString &category)
+{
+    QDir snapshotDir(QStringLiteral(__FILE__));
+    snapshotDir.cd("../../lua/");
+    snapshotDir.cd(category);
+    return snapshotDir;
+}
+
+QStringList discoverLuaTests(const QString &category)
+{
+    auto files =
+        luaTestBaseDir(category).entryList(QDir::NoDotAndDotDot | QDir::Files);
+    for (auto &file : files)
+    {
+        file.remove(".lua");
+    }
+    return files;
+}
+
+std::string luaTestPath(const QString &category, const QString &entry)
+{
+    return luaTestBaseDir(category).filePath(entry + ".lua").toStdString();
+}
+
+bool runLuaTest(const QString &category, const QString &entry,
+                sol::state_view lua)
+{
+    auto loadResult = lua.load_file(luaTestPath(category, entry));
+    auto pfn = loadResult.get<sol::protected_function>();
+    pfn.set_error_handler(lua["debug"]["traceback"]);
+    auto pfr = pfn.call();
+    EXPECT_TRUE(pfr.valid());
+    if (!pfr.valid())
+    {
+        qDebug().noquote() << "Test" << entry << "failed:";
+        sol::error err = pfr;
+        qDebug().noquote() << err.what();
+        return false;
+    }
+    return true;
+}
 
 }  // namespace
 
@@ -124,7 +194,7 @@ public:
 
     static void openLibrariesFor(Plugin *plugin)
     {
-        return PluginController::openLibrariesFor(plugin);
+        getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
     static std::map<QString, std::unique_ptr<Plugin>> &plugins()
@@ -172,6 +242,8 @@ protected:
 
         this->channel = app->twitch.mm2pl;
         this->rawpl->dataDirectory().mkpath(".");
+        initializeHelix(&this->app->helix);
+        this->app->accounts.load();
     }
 
     void TearDown() override
@@ -305,6 +377,15 @@ TEST_F(PluginTest, testChannel)
         lua->script(R"lua( return chn:is_twitch_channel() )lua").get<bool>(0),
         true);
 
+    ASSERT_TRUE(lua->script(R"lua(
+        assert(c2.Channel.by_name("mm2pl") == c2.Channel.by_name("mm2pl"))
+        assert(not c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("mm2pl"))
+        assert(c2.Channel.by_name("mm2pl") ~= c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("twitchdev"))
+        assert(c2.Channel.by_name("twitchdev") == c2.Channel.by_name("other")) -- empty channel
+    )lua")
+                    .valid());
+
     // this is not a TwitchChannel
     const auto *shouldThrow1 = R"lua(
         return chn:is_broadcaster()
@@ -396,7 +477,7 @@ TEST_F(PluginTest, testHttp)
             waiter.requestDone();
         };
 
-        (*lua)["DoReq"](HTTPBIN_BASE_URL + c.url, c.data);
+        (*lua)["DoReq"](HTTPBIN_BASE_URL.toStdString().c_str() + c.url, c.data);
         waiter.waitForRequest();
 
         EXPECT_EQ(lua->get<bool>("success"), c.success);
@@ -466,7 +547,7 @@ TEST_F(PluginTest, ioNoPerms)
     configure();
     auto file = rawpl->dataDirectory().filePath("testfile");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(TEST_FILE_DATA);
     f.close();
 
@@ -518,7 +599,7 @@ TEST_F(PluginTest, requireNoData)
 
     auto file = rawpl->dataDirectory().filePath("thisiscode.lua");
     QFile f(file);
-    f.open(QFile::WriteOnly);
+    EXPECT_TRUE(f.open(QFile::WriteOnly));
     f.write(R"lua(print("Data was executed"))lua");
     f.close();
 
@@ -550,7 +631,7 @@ TEST_F(PluginTest, testTimerRec)
         end
         c2.later(f, 1)
     )lua");
-    waiter.waitForRequest();
+    waiter.waitForRequest(1ms);
 }
 
 TEST_F(PluginTest, tryCallTest)
@@ -645,15 +726,24 @@ TEST_F(PluginTest, testTcpWebSocket)
 
     RequestWaiter waiter;
     std::vector<std::pair<bool, QByteArray>> messages;
+    bool open = false;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
     });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
+    });
+
+    lua->set("url", "ws://" + PUBSUB_WS_ADDR + "/echo");
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_text = function(data)
             add(true, data)
         end
@@ -671,6 +761,9 @@ TEST_F(PluginTest, testTcpWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -682,6 +775,7 @@ TEST_F(PluginTest, testTcpWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 7);
     ASSERT_EQ(messages[0].first, true);
@@ -709,16 +803,25 @@ TEST_F(PluginTest, testTlsWebSocket)
     configure({PluginPermission{{{"type", "Network"}}}});
 
     RequestWaiter waiter;
+    bool open = false;
     std::vector<std::pair<bool, QByteArray>> messages;
     lua->set("done", [&] {
         waiter.requestDone();
     });
     lua->set("add", [&](bool isText, QByteArray data) {
+        EXPECT_TRUE(open);
         messages.emplace_back(isText, std::move(data));
     });
+    // On GCC in release mode, using set() would cause the done function to be called instead.
+    lua->set_function("open", [&] {
+        EXPECT_FALSE(open);
+        open = true;
+    });
+
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
 
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             headers = {
                 ["User-Agent"] = "Lua",
                 ["A-Header"] = "A value",
@@ -744,6 +847,9 @@ TEST_F(PluginTest, testTlsWebSocket)
         ws.on_close = function()
             done()
         end
+        ws.on_open = function()
+            open()
+        end
         ws:send_text("message1")
         ws:send_text("message2")
         ws:send_text("message3")
@@ -755,6 +861,7 @@ TEST_F(PluginTest, testTlsWebSocket)
     ws.reset();
 
     waiter.waitForRequest();
+    ASSERT_TRUE(open);
 
     ASSERT_EQ(messages.size(), 9);
     ASSERT_EQ(messages[0].first, true);
@@ -790,8 +897,10 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     )lua");
     ASSERT_TRUE(res);
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     const char *shouldThrow = R"lua(
-        return c2.WebSocket.new('wss://127.0.0.1:9050/echo')
+        return c2.WebSocket.new(url)
     )lua";
     EXPECT_ANY_THROW(lua->script(shouldThrow));
 }
@@ -799,12 +908,13 @@ TEST_F(PluginTest, testWebSocketNoPerms)
 TEST_F(PluginTest, testWebSocketApi)
 {
     configure({PluginPermission{{{"type", "Network"}}}});
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
 
     bool ok = lua->script(R"lua(
         local t = function () end
         local b = function () end
         local c = function () end
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             on_text = t,
             on_binary = b,
             on_close = c,
@@ -814,6 +924,810 @@ TEST_F(PluginTest, testWebSocketApi)
     )lua");
 
     ASSERT_TRUE(ok);
+}
+
+TEST_F(PluginTest, testWebSocketUnsetFns)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    RequestWaiter waiter;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
+    lua->script(R"lua(
+        local ws = c2.WebSocket.new(url)
+        ws.on_close = function()
+            done()
+        end
+        ws:send_text("message1")
+        ws:send_text("message2")
+        ws:send_binary("message3")
+        ws:send_binary("/CLOSE")
+    )lua");
+
+    waiter.waitForRequest();
+}
+
+TEST_F(PluginTest, MessageElementFlag)
+{
+    configure();
+    lua->script(R"lua(
+        values = {}
+        for k, v in pairs(c2.MessageElementFlag) do
+            table.insert(values, ("%s=0x%x"):format(k, v))
+        end
+        table.sort(values, function(a, b) return a:lower() < b:lower() end)
+        out = table.concat(values, ",")
+    )lua");
+
+    const char *VALUES = "AlwaysShow=0x2000000,"
+                         "BadgeBttv=0x40,"
+                         "BadgeChannelAuthority=0x8000,"
+                         "BadgeChatterino=0x40000,"
+                         "BadgeFfz=0x80000,"
+                         "BadgeGlobalAuthority=0x2000,"
+                         "BadgePredictions=0x4000,"
+                         "BadgeSevenTV=0x1000000000,"
+                         "BadgeSharedChannel=0x2000000000,"
+                         "BadgeSubscription=0x10000,"
+                         "BadgeVanity=0x20000,"
+                         "BitsAmount=0x200000,"
+                         "BitsAnimated=0x1000,"
+                         "BitsStatic=0x800,"
+                         "ChannelName=0x100000,"
+                         "ChannelPointReward=0x100,"
+                         "Collapsed=0x4000000,"
+                         "EmojiImage=0x800000,"
+                         "EmojiText=0x1000000,"
+                         "EmoteImage=0x10,"
+                         "EmoteText=0x20,"
+                         "LowercaseLinks=0x20000000,"
+                         "Mention=0x8000000,"
+                         "Misc=0x1,"
+                         "ModeratorTools=0x400000,"
+                         "RepliedMessage=0x100000000,"
+                         "ReplyButton=0x200000000,"
+                         "Text=0x2,"
+                         "Timestamp=0x8,"
+                         "Username=0x4";
+
+    std::string got = (*lua)["out"];
+    ASSERT_EQ(got, VALUES);
+}
+
+TEST_F(PluginTest, ChannelAddMessage)
+{
+    configure();
+    lua->script(R"lua(
+        function do_it(chan)
+            local Repost = c2.MessageContext.Repost
+            local Original = c2.MessageContext.Original
+            chan:add_message(c2.Message.new({ id = "1" }))
+            chan:add_message(c2.Message.new({ id = "2" }), Repost)
+            chan:add_message(c2.Message.new({ id = "3" }), Original, nil)
+            chan:add_message(c2.Message.new({ id = "4" }), Repost, c2.MessageFlag.DoNotLog)
+            chan:add_message(c2.Message.new({ id = "5" }), Original, c2.MessageFlag.DoNotLog)
+            chan:add_message(c2.Message.new({ id = "6" }), Original, c2.MessageFlag.System)
+        end
+    )lua");
+
+    auto chan = std::make_shared<MockChannel>("mock");
+
+    std::vector<MessagePtr> logged;
+    EXPECT_CALL(this->app->logging, addMessage)
+        .Times(3)
+        .WillRepeatedly(
+            [&](const auto &, const auto &msg, const auto &, const auto &) {
+                logged.emplace_back(msg);
+            });
+
+    std::vector<std::pair<MessagePtr, std::optional<MessageFlags>>> added;
+    std::ignore = chan->messageAppended.connect([&](auto &&...args) {
+        added.emplace_back(std::forward<decltype(args)>(args)...);
+    });
+
+    (*lua)["do_it"](lua::api::ChannelRef(chan));
+
+    ASSERT_EQ(added.size(), 6);
+    ASSERT_EQ(added[0].first->id, "1");
+    ASSERT_FALSE(added[0].second.has_value());
+    ASSERT_EQ(added[1].first->id, "2");
+    ASSERT_FALSE(added[1].second.has_value());
+    ASSERT_EQ(added[2].first->id, "3");
+    ASSERT_FALSE(added[2].second.has_value());
+    ASSERT_EQ(added[3].first->id, "4");
+    ASSERT_EQ(added[3].second, MessageFlags{MessageFlag::DoNotLog});
+    ASSERT_EQ(added[4].first->id, "5");
+    ASSERT_EQ(added[4].second, MessageFlags{MessageFlag::DoNotLog});
+    ASSERT_EQ(added[5].first->id, "6");
+    ASSERT_EQ(added[5].second, MessageFlags{MessageFlag::System});
+
+    ASSERT_EQ(logged.size(), 3);
+    ASSERT_EQ(added[0].first, logged[0]);
+    ASSERT_EQ(added[2].first, logged[1]);
+    ASSERT_EQ(added[5].first, logged[2]);
+}
+
+TEST_F(PluginTest, MessageFrozenFlag)
+{
+    configure();
+    sol::protected_function isFrozenFn = lua->script(R"lua(
+        return function(msg)
+            return msg.frozen
+        end
+    )lua");
+    sol::protected_function setFrozenFn = lua->script(R"lua(
+        return function(msg, val)
+            msg.frozen = val
+        end
+    )lua");
+
+    auto liquid = std::make_shared<Message>();
+    auto res = isFrozenFn(liquid);
+    ASSERT_TRUE(res.valid());
+    ASSERT_FALSE(res.get<bool>());
+
+    auto frozen = std::make_shared<Message>();
+    frozen->freeze();
+    res = isFrozenFn(frozen);
+    ASSERT_TRUE(res.valid());
+    ASSERT_TRUE(res.get<bool>());
+
+    // we shouldn't be able to modify the flag
+    ASSERT_FALSE(setFrozenFn(liquid, true).valid());
+    ASSERT_FALSE(setFrozenFn(liquid, false).valid());
+    ASSERT_FALSE(setFrozenFn(frozen, true).valid());
+    ASSERT_FALSE(setFrozenFn(frozen, false).valid());
+}
+
+TEST_F(PluginTest, MessageFlagModification)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            assert(msg.flags == c2.MessageFlag.Debug)
+            msg.flags = c2.MessageFlag.System
+            assert(msg.flags == c2.MessageFlag.System)
+        end
+    )lua");
+    sol::protected_function isFrozenFn = lua->script(R"lua(
+        return function(msg)
+            return msg.frozen
+        end
+    )lua");
+
+    auto liquid = std::make_shared<Message>();
+    liquid->flags = MessageFlag::Debug;
+    auto res = pfn(liquid);
+    ASSERT_TRUE(res.valid());
+
+    // for the flags, it shouldn't matter if the message is frozen
+    auto frozen = std::make_shared<Message>();
+    frozen->flags = MessageFlag::Debug;
+    frozen->freeze();
+    res = pfn(frozen);
+    ASSERT_TRUE(res.valid());
+}
+
+TEST_F(PluginTest, MessageModification)
+{
+    configure();
+
+    // Test that we can modify properties and that Lua sees the modification
+    sol::table tests = lua->script(R"lua(
+        return {
+            function(msg)
+                msg.parse_time = 1234567
+            end,
+            function(msg)
+                assert(msg.id == "abc")
+                msg.id = "1234"
+                assert(msg.id == "1234")
+            end,
+            function(msg)
+                assert(msg.search_text == "search")
+                msg.search_text = "query"
+                assert(msg.search_text == "query")
+            end,
+            function(msg)
+                assert(msg.message_text == "msg")
+                msg.message_text = "text"
+                assert(msg.message_text == "text")
+            end,
+            function(msg)
+                assert(msg.login_name == "login")
+                msg.login_name = "name"
+                assert(msg.login_name == "name")
+            end,
+            function(msg)
+                assert(msg.display_name == "display")
+                msg.display_name = "name"
+                assert(msg.display_name == "name")
+            end,
+            function(msg)
+                assert(msg.localized_name == "localized")
+                msg.localized_name = "name"
+                assert(msg.localized_name == "name")
+            end,
+            function(msg)
+                assert(msg.user_id == "id")
+                msg.user_id = "id"
+                assert(msg.user_id == "id")
+            end,
+            function(msg)
+                assert(msg.channel_name == "channel")
+                msg.channel_name = "name"
+                assert(msg.channel_name == "name")
+            end,
+            function(msg)
+                assert(msg.username_color == "#ffaabbcc")
+                msg.username_color = "#ccbbaaff"
+                assert(msg.username_color == "#ccbbaaff")
+            end,
+            function(msg)
+                assert(msg.server_received_time == 1230000)
+                msg.server_received_time = 1240000
+                assert(msg.server_received_time == 1240000)
+            end,
+            function(msg)
+                print(msg.highlight_color)
+                assert(msg.highlight_color == "#ff223344")
+                msg.highlight_color = "#44332211"
+                assert(msg.highlight_color == "#44332211")
+            end,
+            function(msg)
+                assert(#msg:elements() == 2)
+                msg:append_element({ type = "linebreak" })
+                assert(#msg:elements() == 3)
+                assert(msg:elements()[3].type == "linebreak")
+            end,
+        }
+    )lua");
+
+    auto makeMsg = [] {
+        auto msg = std::make_shared<Message>();
+        msg->flags = MessageFlag::Debug;
+        msg->id = "abc";
+        msg->searchText = "search";
+        msg->messageText = "msg";
+        msg->loginName = "login";
+        msg->displayName = "display";
+        msg->localizedName = "localized";
+        msg->userID = "id";
+        msg->channelName = "channel";
+        msg->usernameColor = QColor(0xaabbcc);
+        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->highlightColor = std::make_shared<QColor>(0x223344);
+        msg->elements.push_back(
+            std::make_unique<TextElement>("lol", MessageElementFlag::Text));
+        msg->elements.push_back(
+            std::make_unique<TextElement>("wow", MessageElementFlag::Text));
+        return msg;
+    };
+
+    auto liquid = makeMsg();
+    ASSERT_TRUE(tests.valid());
+    for (const auto &[_key, cb] : tests)
+    {
+        sol::protected_function pf = cb;
+        auto res = pf(liquid);
+        if (!res.valid())
+        {
+            sol::error err = res;
+            ASSERT_TRUE(false) << err.what();
+        }
+    }
+
+    // If the message is frozen, all modifications should fail with an error
+    auto frozen = makeMsg();
+    frozen->freeze();
+    for (const auto &[key, cb] : tests)
+    {
+        sol::protected_function pf = cb;
+        auto res = pf(frozen);
+        ASSERT_FALSE(res.valid());
+        sol::error err = res;
+        ASSERT_EQ(std::string_view(err.what()), "Message is frozen");
+    }
+}
+
+TEST_F(PluginTest, MessageConstness)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            assert(msg.login_name == "hello")
+            msg.login_name = "alien"
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->loginName = "hello";
+    MessagePtr cmsg = msg;
+
+    auto res = pfn(cmsg);
+    ASSERT_TRUE(res.valid());
+    cmsg->freeze();
+    res = pfn(cmsg);
+    ASSERT_FALSE(res.valid());
+}
+
+// Test that we can access properties of message elements
+TEST_F(PluginTest, MessageElementAccess)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg, idx, prop)
+            return msg:elements()[idx][prop]
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->elements.emplace_back(
+        std::make_unique<TextElement>("my text", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<SingleLineTextElement>(
+        "single line", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<CircularImageElement>(
+        ImagePtr{}, 2, QColor(0xabcdef), MessageElementFlag::ReplyButton));
+    msg->elements.emplace_back(std::make_unique<MentionElement>(
+        "display", "login", MessageColor::Text, MessageColor::System));
+
+    msg->elements[1]->setTooltip("tooltip");
+    msg->elements[2]->setTrailingSpace(false);
+    msg->freeze();
+
+    auto getAll = [&](std::string_view key) {
+        return std::array{
+            pfn(msg, 1, key).get<sol::object>(),
+            pfn(msg, 2, key).get<sol::object>(),
+            pfn(msg, 3, key).get<sol::object>(),
+            pfn(msg, 4, key).get<sol::object>(),
+        };
+    };
+
+    auto types = getAll("type");
+    ASSERT_EQ(types[0].as<std::string>(), "text");
+    ASSERT_EQ(types[1].as<std::string>(), "single-line-text");
+    ASSERT_EQ(types[2].as<std::string>(), "circular-image");
+    ASSERT_EQ(types[3].as<std::string>(), "mention");
+
+    auto flags = getAll("flags");
+    ASSERT_EQ(flags[0].as<MessageElementFlag>(), MessageElementFlag::Text);
+    ASSERT_EQ(flags[1].as<MessageElementFlag>(), MessageElementFlag::Text);
+    ASSERT_EQ(flags[2].as<MessageElementFlag>(),
+              MessageElementFlag::ReplyButton);
+    ASSERT_EQ(flags[3].as<MessageElementFlag>(),
+              (MessageElementFlags(MessageElementFlag::Text,
+                                   MessageElementFlag::Mention)));
+
+    auto tooltips = getAll("tooltip");
+    ASSERT_EQ(tooltips[0].as<std::string>(), "");
+    ASSERT_EQ(tooltips[1].as<std::string>(), "tooltip");
+    ASSERT_EQ(tooltips[2].as<std::string>(), "");
+    ASSERT_EQ(tooltips[3].as<std::string>(), "");
+
+    auto spaces = getAll("trailing_space");
+    ASSERT_TRUE(spaces[0].as<bool>());
+    ASSERT_TRUE(spaces[1].as<bool>());
+    ASSERT_FALSE(spaces[2].as<bool>());
+    ASSERT_TRUE(spaces[3].as<bool>());
+
+    // Properties only found on _some_ elements should not error
+    // (like non existent properties)
+    auto paddings = getAll("padding");
+    ASSERT_TRUE(paddings[0].is<std::nullptr_t>());
+    ASSERT_TRUE(paddings[1].is<std::nullptr_t>());
+    ASSERT_EQ(paddings[2].as<int>(), 2);
+    ASSERT_TRUE(paddings[3].is<std::nullptr_t>());
+
+    auto words = getAll("words");
+    ASSERT_EQ(words[0].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"my", "text"}));
+    ASSERT_EQ(words[1].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"single", "line"}));
+    ASSERT_TRUE(words[2].is<std::nullptr_t>());
+    // mention elements are also text elements
+    ASSERT_EQ(words[3].as<std::vector<std::string>>(),
+              (std::vector<std::string>{"display"}));
+
+    auto userLogins = getAll("user_login_name");
+    ASSERT_TRUE(userLogins[0].is<std::nullptr_t>());
+    ASSERT_TRUE(userLogins[1].is<std::nullptr_t>());
+    ASSERT_TRUE(userLogins[2].is<std::nullptr_t>());
+    ASSERT_EQ(userLogins[3].as<std::string>(), "login");
+
+    auto times = getAll("time");
+    ASSERT_TRUE(times[0].is<std::nullptr_t>());
+    ASSERT_TRUE(times[1].is<std::nullptr_t>());
+    ASSERT_TRUE(times[2].is<std::nullptr_t>());
+    ASSERT_TRUE(times[3].is<std::nullptr_t>());
+
+    auto nonExistent = getAll("non_existent");
+    ASSERT_TRUE(nonExistent[0].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[1].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[2].is<std::nullptr_t>());
+    ASSERT_TRUE(nonExistent[3].is<std::nullptr_t>());
+
+    auto links = getAll("link");
+    ASSERT_TRUE(links[0].is<Link>());
+    ASSERT_TRUE(links[1].is<Link>());
+    ASSERT_TRUE(links[2].is<Link>());
+    ASSERT_TRUE(links[3].is<Link>());
+
+    // test that accessing anything outside the elements vector causes an error
+    auto res = pfn(msg, 0, "flags");
+    ASSERT_FALSE(res.valid());
+    res = pfn(msg, 42, "flags");
+    ASSERT_FALSE(res.valid());
+}
+
+// Test that we can modify properties of message elements
+TEST_F(PluginTest, MessageElementModification)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg, idx, prop, val)
+            msg:elements()[idx][prop] = val
+        end
+    )lua");
+
+    // same as MessageElementAccess...
+    auto msg = std::make_shared<Message>();
+    msg->elements.emplace_back(
+        std::make_unique<TextElement>("my text", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<SingleLineTextElement>(
+        "single line", MessageElementFlag::Text));
+    msg->elements.emplace_back(std::make_unique<CircularImageElement>(
+        ImagePtr{}, 2, QColor(0xabcdef), MessageElementFlag::ReplyButton));
+    msg->elements.emplace_back(std::make_unique<MentionElement>(
+        "display", "login", MessageColor::Text, MessageColor::System));
+
+    msg->elements[1]->setTooltip("tooltip");
+    msg->elements[2]->setTrailingSpace(false);
+    // ...but we don't freeze the message here
+
+    auto setAll = [&](std::string_view key, auto value) {
+        for (size_t i = 1; i <= 4; i++)
+        {
+            EXPECT_TRUE(pfn(msg, i, key, value).valid());
+        }
+    };
+    setAll("tooltip", "tool");
+    ASSERT_EQ(msg->elements[0]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[1]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[2]->getTooltip(), "tool");
+    ASSERT_EQ(msg->elements[3]->getTooltip(), "tool");
+
+    setAll("trailing_space", false);
+    ASSERT_FALSE(msg->elements[0]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[1]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[2]->hasTrailingSpace());
+    ASSERT_FALSE(msg->elements[3]->hasTrailingSpace());
+
+    pfn(msg, 1, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 2, "link", Link{Link::CopyToClipboard, "foo"});
+    pfn(msg, 3, "link", Link{Link::CopyToClipboard, "foo"});
+    // can't modify links of mention elements
+    ASSERT_FALSE(
+        pfn(msg, 4, "link", Link{Link::CopyToClipboard, "foo"}).valid());
+
+    ASSERT_EQ(msg->elements[0]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[0]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[0]->getTooltip(), "<b>Copy to clipboard</b>");
+    ASSERT_EQ(msg->elements[1]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[1]->getLink().value, "foo");
+    ASSERT_EQ(msg->elements[2]->getLink().type, Link::CopyToClipboard);
+    ASSERT_EQ(msg->elements[2]->getLink().value, "foo");
+
+    auto expectErr = [&](std::string_view key, auto value) {
+        for (size_t i = 1; i <= 4; i++)
+        {
+            auto result = pfn(msg, i, key, value);
+            EXPECT_FALSE(result.valid()) << key;
+        }
+    };
+    expectErr("type", "something");
+    expectErr("trailing_space", "something");
+
+    // can't set these types
+    expectErr("link", Link{Link::ViewThread, "foo"});
+    expectErr("link", Link{Link::AutoModAllow, "foo"});
+
+    // We can't modify these yet
+    expectErr("padding", 1);
+    expectErr("background", 0xabcdef12);
+    expectErr("words", QStringList{"a", "b"});
+    expectErr("color", 0x1234);
+    expectErr("style", FontStyle::ChatMedium);
+    expectErr("lowercase", "abc");
+    expectErr("original", "or");
+    expectErr("fallback_color", "system");
+    expectErr("user_color", "system");
+    expectErr("user_login_name", "system");
+    expectErr("time", 42);
+
+    // test that accessing anything outside the elements vector causes an error
+    auto res = pfn(msg, 0, "trailing_space", true);
+    ASSERT_FALSE(res.valid());
+    res = pfn(msg, 42, "trailing_space", true);
+    ASSERT_FALSE(res.valid());
+
+    // we can't modify anything on frozen messages
+    msg->freeze();
+    expectErr("tooltip", "tool");
+    expectErr("trailing_space", false);
+    expectErr("padding", 1);
+}
+
+/// Test that both C++ exceptions and luaL_error properly unwind the stack.
+TEST_F(PluginTest, LuaUnwind)
+{
+    configure();
+
+    size_t i = 0;
+    lua->set_function(
+        "do_something",
+        [&](sol::this_state state, bool should_error, bool use_lua_error) {
+            auto g = qScopeGuard([&] {
+                ++i;
+            });
+            if (should_error)
+            {
+                if (use_lua_error)
+                {
+                    luaL_error(state.lua_state(), "My message");
+                }
+                else
+                {
+                    throw std::runtime_error("My message");
+                }
+            }
+        });
+
+    ASSERT_EQ(i, 0);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, false)").valid());
+    ASSERT_EQ(i, 1);
+
+    ASSERT_TRUE(lua->do_string("do_something(false, true)").valid());
+    ASSERT_EQ(i, 2);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, false)").valid());
+    ASSERT_EQ(i, 3);
+
+    ASSERT_FALSE(lua->do_string("do_something(true, true)").valid());
+    ASSERT_EQ(i, 4);
+}
+
+/// Test that we're running with the Lua version we're compiled against.
+TEST_F(PluginTest, LuaVersion)
+{
+    configure();
+
+    lua->set_function("check_it", [](sol::this_state state) {
+        luaL_checkversion(state.lua_state());
+    });
+    ASSERT_TRUE(lua->script("check_it()").valid());
+
+    static_assert(LUA_VERSION_NUM >= 504);
+}
+
+TEST_F(PluginTest, ChannelOnDisplayNameChanged)
+{
+    this->configure();
+
+    bool gotEvent = false;
+    this->lua->set_function("on_test_event", [&] {
+        gotEvent = true;
+    });
+
+    auto chan = std::make_shared<MockChannel>("mock");
+    this->lua->set("chan", lua::api::ChannelRef(chan));
+    sol::protected_function init = this->lua->script(R"lua(
+        hdl = nil
+        return function(chan)
+            hdl = chan:on_display_name_changed(on_test_event)
+        end
+    )lua");
+
+    ASSERT_TRUE(init(lua::api::ChannelRef(chan)).valid());
+
+    ASSERT_TRUE(this->lua->script("assert(hdl ~= nil)").valid());
+
+    // regular delivery
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // blocked connection
+    ASSERT_TRUE(this->lua->script("hdl:block()").valid());
+    ASSERT_TRUE(this->lua->script("assert(hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_FALSE(gotEvent);
+
+    // unblocked connection
+    ASSERT_TRUE(this->lua->script("hdl:unblock()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // disconnect
+    ASSERT_TRUE(this->lua->script("hdl:disconnect()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_connected())").valid());
+
+    gotEvent = false;
+    ASSERT_FALSE(gotEvent);
+}
+
+class PluginMessageConstructionTest
+    : public PluginTest,
+      public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginMessageConstructionTest, Run)
+{
+    auto fixture = testlib::Snapshot::read("PluginMessageCtor", GetParam());
+
+    configure();
+    std::string script;
+    if (fixture->input().isArray())
+    {
+        for (auto line : fixture->input().toArray())
+        {
+            script += line.toString().toStdString() + '\n';
+        }
+    }
+    else
+    {
+        script = fixture->inputString().toStdString() + '\n';
+    }
+
+    script += "out = c2.Message.new(msg)";
+    lua->script(script);
+
+    Message *got = (*lua)["out"];
+
+    ASSERT_TRUE(fixture->run(got->toJson(), UPDATE_SNAPSHOTS));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    PluginMessageConstruction, PluginMessageConstructionTest,
+    testing::ValuesIn(testlib::Snapshot::discover("PluginMessageCtor")));
+
+class PluginJsonTest : public PluginTest,
+                       public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginJsonTest, Run)
+{
+    configure();
+    auto reg = lua->registry().size();
+    auto globals = lua->globals().size();
+
+    runLuaTest("json", GetParam(), *this->lua);
+
+    for (size_t i = 0; i < 5; i++)
+    {
+        lua->collect_garbage();
+    }
+    // make sure we don't leak anything to globals or the registry
+    // but give the registry some room of 3 slots (two from getting the debug library)
+    EXPECT_LE(lua->registry().size(), reg + 3);
+    EXPECT_EQ(lua->globals().size(), globals);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginJson, PluginJsonTest,
+                         testing::ValuesIn(discoverLuaTests("json")));
+
+class PluginMessageTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginMessageTest, Run)
+{
+    this->configure();
+    runLuaTest("message", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
+                         testing::ValuesIn(discoverLuaTests("message")));
+
+class PluginChannelTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginChannelTest, Run)
+{
+    this->configure();
+    runLuaTest("channel", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
+                         testing::ValuesIn(discoverLuaTests("channel")));
+
+// verify that all snapshots are included
+TEST(PluginMessageConstructionTest, Integrity)
+{
+    ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST_F(PluginTest, testAccounts)
+{
+    configure();
+
+    auto res = lua->script(R"lua(
+        local current = c2.current_account()
+        assert(current:login() == "testaccount_420")
+        assert(current:id() == "117166826")
+        assert(current:color() == nil) -- unset
+        assert(not current:is_anon())
+    )lua");
+    ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
+}
+
+TEST_F(PluginTest, debugTraceback)
+{
+    configure();
+
+    QString traceback = lua->script(R"lua(
+        local function other()
+            error("oh no")
+        end
+        local function main()
+            local function inner()
+                other()
+            end
+            inner()
+        end
+
+        local ok, res = xpcall(main, debug.traceback)
+        return res
+    )lua")
+                            .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'error'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:3: in upvalue 'other'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:7: in local 'inner'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:9: in function <[string \"...\"]:5>"));
+    ASSERT_TRUE(traceback.contains("[C]: in function 'xpcall'"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:12: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback()
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        return debug.traceback("my message")
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("my message"));
+    ASSERT_TRUE(traceback.contains("[string \"...\"]:2: in main chunk"));
+
+    traceback = lua->script(R"lua(
+        local coro = coroutine.create(function ()
+            coroutine.yield()
+        end)
+        coroutine.resume(coro)
+        return debug.traceback(coro)
+    )lua")
+                    .get<QString>();
+    ASSERT_TRUE(traceback.contains("[C]: in function 'coroutine.yield'"));
+    ASSERT_TRUE(traceback.contains(
+        "[string \"...\"]:3: in function <[string \"...\"]:2>"));
+
+    auto msg = lua->script(R"lua(
+        return debug.traceback(c2.Message.new({id = "who would do this"}))
+    )lua")
+                   .get<std::shared_ptr<Message>>();
+    ASSERT_EQ(msg->id, "who would do this");
 }
 
 #endif

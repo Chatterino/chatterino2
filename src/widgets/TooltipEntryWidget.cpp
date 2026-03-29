@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/TooltipEntryWidget.hpp"
 
 #include <QVBoxLayout>
@@ -14,8 +18,7 @@ TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
                                        QWidget *parent)
     : QWidget(parent)
     , image_(image)
-    , customImgWidth_(customWidth)
-    , customImgHeight_(customHeight)
+    , customSize(customWidth, customHeight)
 {
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -40,12 +43,11 @@ void TooltipEntryWidget::setWordWrap(bool wrap)
 
 void TooltipEntryWidget::setImageScale(int w, int h)
 {
-    if (this->customImgWidth_ == w && this->customImgHeight_ == h)
+    if (this->customSize == QSize{w, h})
     {
         return;
     }
-    this->customImgWidth_ = w;
-    this->customImgHeight_ = h;
+    this->customSize = QSize{w, h};
     this->refreshPixmap();
 }
 
@@ -88,13 +90,12 @@ bool TooltipEntryWidget::refreshPixmap()
     }
     pixmap->setDevicePixelRatio(this->devicePixelRatio());
 
-    if (this->customImgWidth_ > 0 || this->customImgHeight_ > 0)
+    if (!this->customSize.isEmpty())
     {
-        this->displayImage_->setPixmap(pixmap->scaled(this->customImgWidth_,
-                                                      this->customImgHeight_,
-                                                      Qt::KeepAspectRatio));
-        if (this->displayImage_->size() !=
-            QSize{this->customImgWidth_, this->customImgHeight_})
+        this->displayImage_->setPixmap(
+            pixmap->scaled(this->customSize, Qt::KeepAspectRatio));
+
+        if (this->displayImage_->pixmap().size() != this->customSize)
         {
             this->adjustSize();
         }

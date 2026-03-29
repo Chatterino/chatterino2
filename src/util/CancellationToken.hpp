@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <atomic>
@@ -19,7 +23,7 @@ public:
 
     CancellationToken(const CancellationToken &) = default;
     CancellationToken(CancellationToken &&other) noexcept
-        : isCancelled_(std::move(other.isCancelled_)){};
+        : isCancelled_(std::move(other.isCancelled_)) {};
 
     /// @brief This destructor doesn't cancel the token
     ///
@@ -64,7 +68,7 @@ public:
 
     ScopedCancellationToken(const ScopedCancellationToken &) = delete;
     ScopedCancellationToken(ScopedCancellationToken &&other) noexcept
-        : backingToken_(std::move(other.backingToken_)){};
+        : backingToken_(std::move(other.backingToken_)) {};
 
     ~ScopedCancellationToken()
     {

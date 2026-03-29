@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/settingspages/GeneralPageView.hpp"
@@ -15,7 +19,7 @@ public:
 private:
     void initLayout(GeneralPageView &layout);
 
-    GeneralPageView *view;
+    GeneralPageView *view{};
 };
 
 }  // namespace chatterino

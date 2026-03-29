@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/IgnoresPage.hpp"
 
 #include "Application.hpp"
@@ -64,9 +68,13 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([] {
-        getSettings()->ignoredMessages.append(
-            IgnorePhrase{"my pattern", false, false,
-                         getSettings()->ignoredPhraseReplace.getValue(), true});
+        getSettings()->ignoredMessages.append(IgnorePhrase{
+            "my pattern",
+            false,
+            false,
+            DEFAULT_IGNORE_PHRASE_REPLACE.toString(),
+            true,
+        });
     });
 }
 

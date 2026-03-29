@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/notifications/NotificationController.hpp"
 
 #include "Application.hpp"
@@ -15,6 +19,8 @@
 #include "util/Helpers.hpp"
 
 #include <QUrl>
+
+#include <ranges>
 
 namespace ranges = std::ranges;
 
@@ -62,7 +68,7 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p) const
 {
-    return ranges::any_of(channelMap.at(p).raw(), [&](const auto &name) {
+    return ranges::any_of(this->channelMap.at(p).raw(), [&](const auto &name) {
         return name.compare(channelName, Qt::CaseInsensitive) == 0;
     });
 }
@@ -70,19 +76,19 @@ bool NotificationController::isChannelNotified(const QString &channelName,
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap[p].append(channelName);
+    this->channelMap[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
-         i++)
+    for (std::vector<int>::size_type i = 0;
+         i != this->channelMap[p].raw().size(); i++)
     {
-        if (channelMap[p].raw()[i].compare(channelName, Qt::CaseInsensitive) ==
-            0)
+        if (this->channelMap[p].raw()[i].compare(channelName,
+                                                 Qt::CaseInsensitive) == 0)
         {
-            channelMap[p].removeAt(static_cast<int>(i));
+            this->channelMap[p].removeAt(static_cast<int>(i));
             i--;
         }
     }
@@ -138,7 +144,8 @@ void NotificationController::notifyTwitchChannelLive(
 
     // Message in /live channel
     getApp()->getTwitch()->getLiveChannel()->addMessage(
-        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId),
+        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId,
+                                        payload.title),
         MessageContext::Original);
 
     // Notify on all channels with a ping sound
@@ -153,16 +160,10 @@ void NotificationController::notifyTwitchChannelLive(
 void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
-    LimitedQueueSnapshot<MessagePtr> snapshot =
-        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
-    int snapshotLength = static_cast<int>(snapshot.size());
-
-    int end = std::max(0, snapshotLength - 200);
-
-    for (int i = snapshotLength - 1; i >= end; --i)
+    auto snapshot =
+        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot(200);
+    for (const auto &s : snapshot | std::views::reverse)
     {
-        const auto &s = snapshot[i];
-
         if (s->id == id)
         {
             s->flags.set(MessageFlag::Disabled);
@@ -176,9 +177,9 @@ void NotificationController::fetchFakeChannels()
     qCDebug(chatterinoNotification) << "fetching fake channels";
 
     QStringList channels;
-    for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
+    for (size_t i = 0; i < this->channelMap[Platform::Twitch].raw().size(); i++)
     {
-        const auto &name = channelMap[Platform::Twitch].raw()[i];
+        const auto &name = this->channelMap[Platform::Twitch].raw()[i];
         auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Channel.hpp"
@@ -120,6 +124,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
                 // FOURTF: disabled for now
                 // PAJLADA: Shitty solution described in Message.hpp
                 s->flags.set(MessageFlag::Disabled);
+                s->flags.set(MessageFlag::InvalidReplyTarget);
             }
         }
     }

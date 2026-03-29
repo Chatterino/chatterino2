@@ -1,14 +1,21 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "widgets/settingspages/PluginsPage.hpp"
 
 #    include "Application.hpp"
 #    include "common/Args.hpp"
+#    include "controllers/accounts/AccountController.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 #    include "util/Helpers.hpp"
 #    include "util/LayoutCreator.hpp"
 #    include "util/RemoveScrollAreaBackground.hpp"
+#    include "widgets/PluginRepl.hpp"
+#    include "widgets/settingspages/SettingWidget.hpp"
 
 #    include <QCheckBox>
 #    include <QFormLayout>
@@ -77,6 +84,17 @@ PluginsPage::PluginsPage()
                                    "Chatterino is in safe mode. You can still "
                                    "enable and disable them.");
             groupLayout->addRow(disabledLabel);
+        }
+
+        if (getSettings()->pluginRepl.enabled)
+        {
+            groupLayout->addRow(SettingWidget::fontButton(
+                "REPL font", getSettings()->pluginRepl.fontFamily,
+                &PluginRepl::currentFont, [](const QFont &font) {
+                    getSettings()->pluginRepl.fontFamily = font.family();
+                    getSettings()->pluginRepl.fontSize = font.pointSize();
+                    getSettings()->pluginRepl.fontStyle = font.styleName();
+                }));
         }
     }
 
@@ -230,6 +248,16 @@ void PluginsPage::rebuildContent()
         if (getApp()->getArgs().safeMode)
         {
             reloadButton->setEnabled(false);
+        }
+
+        if (getSettings()->pluginRepl.enabled)
+        {
+            auto *replButton = new QPushButton("Open REPL", this->dataFrame_);
+            QObject::connect(replButton, &QPushButton::clicked, [id]() {
+                auto *repl = new PluginRepl(id);
+                repl->show();
+            });
+            pluginEntry->addRow(replButton);
         }
     }
 }

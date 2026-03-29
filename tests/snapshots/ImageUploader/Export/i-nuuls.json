@@ -1,0 +1,19 @@
+{
+    "input": {
+        "deletionLink": "",
+        "formField": "attachment",
+        "headers": "",
+        "link": "",
+        "url": "https://i.nuuls.com/upload"
+    },
+    "output": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "",
+        "FileFormName": "attachment",
+        "Name": "Chatterino Image Uploader Settings",
+        "RequestMethod": "POST",
+        "RequestURL": "https://i.nuuls.com/upload",
+        "URL": "",
+        "Version": "1.0.0"
+    }
+}

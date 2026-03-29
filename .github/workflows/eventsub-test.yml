@@ -1,0 +1,42 @@
+---
+name: EventSub python test
+
+on:
+  pull_request:
+  workflow_dispatch:
+  merge_group:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  eventsub-test:
+    name: "EventSub python test"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
+            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
+          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
+
+      - name: Setup virtual environment
+        run: |
+          python3 -m venv venv
+          ./venv/bin/pip3 install -r requirements.txt
+          ./venv/bin/pip3 install -r requirements-dev.txt
+        working-directory: lib/twitch-eventsub-ws/ast
+
+      - name: Run pytest
+        run: |
+          ./venv/bin/pytest
+        working-directory: lib/twitch-eventsub-ws/ast

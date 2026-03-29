@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/HighlightingPage.hpp"
 
 #include "Application.hpp"
@@ -27,19 +31,20 @@
 namespace chatterino {
 
 namespace {
-    // Add additional badges for highlights here
-    QList<DisplayBadge> availableBadges = {
-        {"Broadcaster", "broadcaster"},
-        {"Admin", "admin"},
-        {"Staff", "staff"},
-        {"Moderator", "moderator"},
-        {"Verified", "partner"},
-        {"VIP", "vip"},
-        {"Founder", "founder"},
-        {"Subscriber", "subscriber"},
-        {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
-        {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
-    };
+// Add additional badges for highlights here
+QList<DisplayBadge> availableBadges = {
+    {"Broadcaster", "broadcaster"},
+    {"Admin", "admin"},
+    {"Staff", "staff"},
+    {"Moderator", "moderator"},
+    {"Lead Moderator", "lead_moderator"},
+    {"Verified", "partner"},
+    {"VIP", "vip"},
+    {"Founder", "founder"},
+    {"Subscriber", "subscriber"},
+    {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
+    {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
+};
 }  // namespace
 
 HighlightingPage::HighlightingPage()
@@ -389,6 +394,9 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
             }
         }
         break;
+
+        case HighlightTab::Blacklist:
+            break;
     }
 }
 

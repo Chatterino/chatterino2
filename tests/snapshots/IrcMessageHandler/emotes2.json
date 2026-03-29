@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726868573676;subscriber=1;id=23c8b81c-7c73-44e4-84f1-7d37e99714e4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:10-14/305954156:50-57/1902:69-73 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -89,25 +83,10 @@
                         "name": "BTTVEmote",
                         "tooltip": "BTTVEmote Tooltip"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "BTTVEmote"
-                        ]
                     },
                     "tooltip": "BTTVEmote Tooltip",
                     "trailingSpace": true,
@@ -123,25 +102,10 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
                     },
                     "tooltip": "Kappa<br>Twitch Emote",
                     "trailingSpace": true,
@@ -160,7 +124,7 @@
                                 "name": "7TVEmote",
                                 "tooltip": "7TVEmote Tooltip"
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         },
                         {
                             "emote": {
@@ -175,7 +139,7 @@
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         },
                         {
                             "emote": {
@@ -190,10 +154,10 @@
                                 "tooltip": "7TVEmote0w Tooltip",
                                 "zeroWidth": true
                             },
-                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                            "flags": "EmoteImage|EmoteText"
                         }
                     ],
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -235,21 +199,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "😂"
-                        ]
-                    },
                     "tooltip": ":joy:<br/>Emoji",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -267,21 +216,6 @@
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "😂"
-                        ]
-                    },
                     "tooltip": ":joy:<br/>Emoji",
                     "trailingSpace": true,
                     "type": "EmoteElement"
@@ -296,25 +230,10 @@
                         "name": "PogChamp",
                         "tooltip": "PogChamp<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "PogChamp"
-                        ]
                     },
                     "tooltip": "PogChamp<br>Twitch Emote",
                     "trailingSpace": true,
@@ -331,25 +250,10 @@
                         "name": "7TVGlobal",
                         "tooltip": "7TVGlobal Tooltip"
                     },
-                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "7TVGlobal"
-                        ]
                     },
                     "tooltip": "7TVGlobal Tooltip",
                     "trailingSpace": true,
@@ -365,25 +269,10 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Keepo"
-                        ]
                     },
                     "tooltip": "Keepo<br>Twitch Emote",
                     "trailingSpace": true,
@@ -399,25 +288,10 @@
                         "name": "FFZEmote",
                         "tooltip": "FFZEmote Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "FFZEmote"
-                        ]
                     },
                     "tooltip": "FFZEmote Tooltip",
                     "trailingSpace": true,
@@ -433,25 +307,10 @@
                         "name": "FFZGlobal",
                         "tooltip": "FFZGlobal Tooltip"
                     },
-                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "FFZGlobal"
-                        ]
                     },
                     "tooltip": "FFZGlobal Tooltip",
                     "trailingSpace": true,
@@ -471,7 +330,10 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
+            "frozen": false,
             "id": "23c8b81c-7c73-44e4-84f1-7d37e99714e4",
             "localizedName": "",
             "loginName": "nerixyz",
@@ -479,6 +341,12 @@
             "searchText": "nerixyz  nerixyz: BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal ",
             "serverReceivedTime": "2024-09-20T21:42:53Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

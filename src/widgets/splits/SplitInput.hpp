@@ -1,14 +1,18 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/Button.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPaintEvent>
 #include <QPointer>
+#include <QPropertyAnimation>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -20,10 +24,13 @@ namespace chatterino {
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
-class EffectLabel;
+class InputHighlighter;
 class MessageView;
+class LabelButton;
 class ResizingTextEdit;
 class ChannelView;
+class SvgButton;
+class SpellCheckHighlighter;
 enum class CompletionKind;
 
 class SplitInput : public BaseWidget
@@ -75,6 +82,18 @@ public:
      */
     void setInputText(const QString &newInputText);
 
+    /**
+     * @brief Sets a formatted time to sendWaitStatus
+     *
+     * This method is used to update the text of the timeout and slow mode timer
+     */
+    void setSendWaitStatus(const QString &text) const;
+
+    void triggerSelfMessageReceived();
+
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
+
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
 
@@ -99,10 +118,7 @@ protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
-#ifdef DEBUG
-    bool keyPressedEventInstalled{};
-#endif
-    void installKeyPressedEvent();
+    void installTextEditEvents();
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
@@ -144,15 +160,16 @@ protected:
         QHBoxLayout *replyHbox;
         MessageView *replyMessage;
         QLabel *replyLabel;
-        Button *cancelReplyButton;
+        SvgButton *cancelReplyButton;
 
         // input widgets
         QWidget *inputWrapper;
         QHBoxLayout *inputHbox;
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
-        EffectLabel *sendButton;
-        Button *emoteButton;
+        LabelButton *sendButton;
+        QLabel *sendWaitStatus;
+        SvgButton *emoteButton;
     } ui_;
 
     MessagePtr replyTarget_ = nullptr;
@@ -168,6 +185,30 @@ protected:
     // focus events don't work as expected, so instead we use this bool and
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
+
+    /// Updates the text edit palette using the current theme
+    /// and current "backgroundColor" property
+    void updateTextEditPalette();
+
+    // the background color defines the current background color of this split input
+    // instead of reading straight from the theme, we store a property here
+    // to be used by a property to be able to pulse a highlight color on demand
+    Q_PROPERTY(
+        QColor backgroundColor READ backgroundColor WRITE setBackgroundColor);
+
+    QColor backgroundColor_{"#000000"};
+    QColor backgroundColor() const;
+    void setBackgroundColor(QColor newColor);
+
+    QPropertyAnimation backgroundColorAnimation;
+
+    std::optional<bool> checkSpellingOverride_;
+    bool shouldCheckSpelling() const;
+    void checkSpellingChanged();
+
+    InputHighlighter *inputHighlighter = nullptr;
+
+    void updateFonts();
 
 private Q_SLOTS:
     void editTextChanged();

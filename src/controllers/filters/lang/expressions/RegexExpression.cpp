@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/expressions/RegexExpression.hpp"
 
 namespace chatterino::filters {
@@ -7,7 +11,7 @@ RegexExpression::RegexExpression(const QString &regex, bool caseInsensitive)
     , caseInsensitive_(caseInsensitive)
     , regex_(QRegularExpression(
           regex, caseInsensitive ? QRegularExpression::CaseInsensitiveOption
-                                 : QRegularExpression::NoPatternOption)){};
+                                 : QRegularExpression::NoPatternOption)) {};
 
 QVariant RegexExpression::execute(const ContextMap & /*context*/) const
 {

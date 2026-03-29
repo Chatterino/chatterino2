@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Args.hpp"
 #include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
@@ -6,6 +10,7 @@
 
 #include <QApplication>
 #include <QJsonArray>
+#include <QLocale>
 #include <QLoggingCategory>
 #include <QtConcurrent>
 #include <QTimer>
@@ -25,6 +30,8 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     // make sure to always debug-log
     QLoggingCategory::setFilterRules("chatterino.*=true");
+    // make sure we use the same language when formatting
+    QLocale::setDefault(QLocale("en_GB"));
 
     initResources();
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"

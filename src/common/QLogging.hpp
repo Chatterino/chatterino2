@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QLoggingCategory>
@@ -9,6 +13,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoBttv);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCache);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCommands);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCommon);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoCompletion);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoCrashhandler);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoEmoji);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoEnv);
@@ -35,6 +40,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoSettings);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSeventv);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSeventvEventAPI);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSound);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoSpellcheck);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamerMode);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoStreamlink);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoTheme);

@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -14,9 +17,13 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class MarkdownLabel;
 class EditUserNotesDialog;
 class ChannelView;
 class Split;
+class LabelButton;
+class PixmapButton;
+class LiveIndicator;
 
 class UserInfoPopup final : public DraggablePopup
 {
@@ -72,8 +79,8 @@ private:
     const bool closeAutomatically_;
 
     struct {
-        Button *avatarButton = nullptr;
-        Button *localizedNameCopyButton = nullptr;
+        PixmapButton *avatarButton = nullptr;
+        PixmapButton *localizedNameCopyButton = nullptr;
 
         Label *nameLabel = nullptr;
         Label *localizedNameLabel = nullptr;
@@ -84,15 +91,17 @@ private:
         Label *followageLabel = nullptr;
         Label *subageLabel = nullptr;
 
+        LiveIndicator *liveIndicator = nullptr;
+
         QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
-        Label *notesPreview = nullptr;
-        EffectLabel2 *notesAdd = nullptr;
+        MarkdownLabel *notesPreview = nullptr;
+        LabelButton *notesAdd = nullptr;
 
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
 
-        EffectLabel2 *usercardLabel = nullptr;
+        LabelButton *usercardLabel = nullptr;
     } ui_;
 
     QPointer<EditUserNotesDialog> editUserNotesDialog_;

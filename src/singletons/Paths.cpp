@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Paths.hpp"
 
 #include "common/Modes.hpp"
@@ -145,6 +149,7 @@ void Paths::initSubDirectories()
     this->pluginsDirectory = makePath("Plugins");
     this->themesDirectory = makePath("Themes");
     this->crashdumpDirectory = makePath("Crashes");
+    this->dictionariesDirectory = makePath("Dictionaries");
 #ifdef Q_OS_WIN
     this->ipcDirectory = makePath("IPC");
 #else

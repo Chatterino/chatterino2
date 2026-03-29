@@ -1,4 +1,8 @@
-﻿#include "common/LinkParser.hpp"
+﻿// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
+#include "common/LinkParser.hpp"
 
 #include <benchmark/benchmark.h>
 #include <QDebug>
@@ -23,7 +27,7 @@ static void BM_LinkParsing(benchmark::State &state)
 
     // Make sure the TLDs are loaded
     {
-        benchmark::DoNotOptimize(linkparser::parse("xd.com"));
+        benchmark::DoNotOptimize(linkparser::parse(u"xd.com"));
     }
 
     for (auto _ : state)

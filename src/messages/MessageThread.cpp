@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/MessageThread.hpp"
 
 #include "common/Literals.hpp"
@@ -19,12 +23,12 @@ MessageThread::MessageThread(std::shared_ptr<const Message> rootMessage)
     : rootMessageId_(rootMessage->id)
     , rootMessage_(std::move(rootMessage))
 {
-    DebugCount::increase("message threads");
+    DebugCount::increase(DebugObject::MessageThread);
 }
 
 MessageThread::~MessageThread()
 {
-    DebugCount::decrease("message threads");
+    DebugCount::decrease(DebugObject::MessageThread);
 }
 
 void MessageThread::addToThread(const std::shared_ptr<const Message> &message)
@@ -40,7 +44,7 @@ void MessageThread::addToThread(const std::weak_ptr<const Message> &message)
 size_t MessageThread::liveCount() const
 {
     size_t count = 0;
-    for (auto reply : this->replies_)
+    for (const auto &reply : this->replies_)
     {
         if (!reply.expired())
         {
@@ -55,7 +59,7 @@ size_t MessageThread::liveCount(
     const std::shared_ptr<const Message> &exclude) const
 {
     size_t count = 0;
-    for (auto reply : this->replies_)
+    for (const auto &reply : this->replies_)
     {
         if (!reply.expired() && reply.lock() != exclude)
         {

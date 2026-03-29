@@ -1,9 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
-add_compile_definitions(QT_NO_KEYWORDS)
+# used for QT_DISABLE_DEPRECATED_BEFORE/QT_WARN_DEPRECATED_UP_TO
+set(CHATTERINO_MIN_QT_VERSION 0x060403)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
@@ -31,6 +30,7 @@ set(SOURCE_FILES
         common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
+        common/LastMessageLineStyle.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Literals.hpp
@@ -38,6 +38,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/ThumbnailPreviewMode.hpp
         common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
@@ -60,6 +61,8 @@ set(SOURCE_FILES
 
         common/websockets/WebSocketPool.cpp
         common/websockets/WebSocketPool.hpp
+        common/websockets/detail/BalancedResolverResults.cpp
+        common/websockets/detail/BalancedResolverResults.hpp
         common/websockets/detail/WebSocketConnection.cpp
         common/websockets/detail/WebSocketConnection.hpp
         common/websockets/detail/WebSocketConnectionImpl.cpp
@@ -98,6 +101,12 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/GetVIPs.cpp
         controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/LowTrust.cpp
+        controllers/commands/builtin/twitch/LowTrust.hpp
+        controllers/commands/builtin/twitch/Poll.cpp
+        controllers/commands/builtin/twitch/Poll.hpp
+        controllers/commands/builtin/twitch/Prediction.cpp
+        controllers/commands/builtin/twitch/Prediction.hpp
         controllers/commands/builtin/twitch/Raid.cpp
         controllers/commands/builtin/twitch/Raid.hpp
         controllers/commands/builtin/twitch/RemoveModerator.cpp
@@ -156,6 +165,9 @@ set(SOURCE_FILES
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
+        controllers/emotes/EmoteController.cpp
+        controllers/emotes/EmoteController.hpp
+
         controllers/filters/FilterModel.cpp
         controllers/filters/FilterModel.hpp
         controllers/filters/FilterRecord.cpp
@@ -189,12 +201,15 @@ set(SOURCE_FILES
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
+        controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
+        controllers/highlights/HighlightResult.cpp
+        controllers/highlights/HighlightResult.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
@@ -239,8 +254,14 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.hpp
 
 
+        controllers/plugins/api/Accounts.cpp
+        controllers/plugins/api/Accounts.hpp
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
+        controllers/plugins/api/ConnectionHandle.cpp
+        controllers/plugins/api/ConnectionHandle.hpp
+        controllers/plugins/api/DebugLibrary.cpp
+        controllers/plugins/api/DebugLibrary.hpp
         controllers/plugins/api/EventType.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
@@ -248,8 +269,18 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/JSON.cpp
+        controllers/plugins/api/JSON.hpp
+        controllers/plugins/api/JSONParse.cpp
+        controllers/plugins/api/JSONParse.hpp
+        controllers/plugins/api/JSONStringify.cpp
+        controllers/plugins/api/JSONStringify.hpp
+        controllers/plugins/api/Message.cpp
+        controllers/plugins/api/Message.hpp
         controllers/plugins/api/WebSocket.cpp
         controllers/plugins/api/WebSocket.hpp
+        controllers/plugins/ConnectionManager.cpp
+        controllers/plugins/ConnectionManager.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
@@ -258,8 +289,12 @@ set(SOURCE_FILES
         controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginMeta.cpp
+        controllers/plugins/PluginMeta.hpp
         controllers/plugins/PluginPermission.cpp
         controllers/plugins/PluginPermission.hpp
+        controllers/plugins/PluginRef.cpp
+        controllers/plugins/PluginRef.hpp
         controllers/plugins/SolTypes.cpp
         controllers/plugins/SolTypes.hpp
 
@@ -268,6 +303,9 @@ set(SOURCE_FILES
         controllers/sound/MiniaudioBackend.hpp
         controllers/sound/NullBackend.cpp
         controllers/sound/NullBackend.hpp
+
+        controllers/spellcheck/SpellChecker.cpp
+        controllers/spellcheck/SpellChecker.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
@@ -332,11 +370,15 @@ set(SOURCE_FILES
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
+        providers/bttv/BttvBadges.cpp
+        providers/bttv/BttvBadges.hpp
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
         providers/bttv/BttvLiveUpdates.cpp
         providers/bttv/BttvLiveUpdates.hpp
 
+        providers/bttv/liveupdates/BttvLiveUpdateClient.cpp
+        providers/bttv/liveupdates/BttvLiveUpdateClient.hpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.cpp
         providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp
         providers/bttv/liveupdates/BttvLiveUpdateSubscription.cpp
@@ -350,6 +392,7 @@ set(SOURCE_FILES
 
         providers/emoji/Emojis.cpp
         providers/emoji/Emojis.hpp
+        providers/emoji/EmojiStyle.hpp
 
         providers/ffz/FfzBadges.cpp
         providers/ffz/FfzBadges.hpp
@@ -367,8 +410,8 @@ set(SOURCE_FILES
         providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
+        providers/liveupdates/BasicPubSubListener.hpp
         providers/liveupdates/BasicPubSubManager.hpp
-        providers/liveupdates/BasicPubSubWebsocket.hpp
 
         providers/pronouns/Pronouns.cpp
         providers/pronouns/Pronouns.hpp
@@ -407,12 +450,9 @@ set(SOURCE_FILES
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
-        providers/twitch/PubSubClientOptions.hpp
-        providers/twitch/PubSubHelpers.hpp
         providers/twitch/PubSubManager.cpp
         providers/twitch/PubSubManager.hpp
         providers/twitch/PubSubMessages.hpp
-        providers/twitch/PubSubWebsocket.hpp
         providers/twitch/TwitchAccount.cpp
         providers/twitch/TwitchAccount.hpp
         providers/twitch/TwitchAccountManager.cpp
@@ -437,6 +477,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+        providers/twitch/UserColor.cpp
+        providers/twitch/UserColor.hpp
 
         providers/twitch/eventsub/Connection.cpp
         providers/twitch/eventsub/Connection.hpp
@@ -466,8 +508,6 @@ set(SOURCE_FILES
 
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
-        singletons/Emotes.cpp
-        singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
         singletons/ImageUploader.cpp
@@ -501,6 +541,10 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/Backup.cpp
+        util/Backup.hpp
+        util/BadgeRegistry.cpp
+        util/BadgeRegistry.hpp
         util/CancellationToken.hpp
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
@@ -521,10 +565,10 @@ set(SOURCE_FILES
         util/FuzzyConvert.hpp
         util/Helpers.cpp
         util/Helpers.hpp
+        util/ImageUploader.cpp
+        util/ImageUploader.hpp
         util/IncognitoBrowser.cpp
         util/IncognitoBrowser.hpp
-        util/InitUpdateButton.cpp
-        util/InitUpdateButton.hpp
         util/IpcQueue.cpp
         util/IpcQueue.hpp
         util/IrcHelpers.cpp
@@ -583,16 +627,22 @@ set(SOURCE_FILES
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/ChatterListWidget.cpp
+        widgets/ChatterListWidget.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
         widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
         widgets/Label.hpp
+        widgets/MarkdownLabel.cpp
+        widgets/MarkdownLabel.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
+        widgets/PluginRepl.cpp
+        widgets/PluginRepl.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
@@ -601,6 +651,27 @@ set(SOURCE_FILES
         widgets/TooltipWidget.hpp
         widgets/Window.cpp
         widgets/Window.hpp
+
+        widgets/buttons/Button.cpp
+        widgets/buttons/Button.hpp
+        widgets/buttons/DimButton.cpp
+        widgets/buttons/DimButton.hpp
+        widgets/buttons/DrawnButton.cpp
+        widgets/buttons/DrawnButton.hpp
+        widgets/buttons/InitUpdateButton.cpp
+        widgets/buttons/InitUpdateButton.hpp
+        widgets/buttons/LabelButton.cpp
+        widgets/buttons/LabelButton.hpp
+        widgets/buttons/PixmapButton.cpp
+        widgets/buttons/PixmapButton.hpp
+        widgets/buttons/SignalLabel.cpp
+        widgets/buttons/SignalLabel.hpp
+        widgets/buttons/SvgButton.cpp
+        widgets/buttons/SvgButton.hpp
+        widgets/buttons/TitlebarButton.cpp
+        widgets/buttons/TitlebarButton.hpp
+        widgets/buttons/TitlebarButtons.cpp
+        widgets/buttons/TitlebarButtons.hpp
 
         widgets/dialogs/BadgePickerDialog.cpp
         widgets/dialogs/BadgePickerDialog.hpp
@@ -614,6 +685,22 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+
+        widgets/dialogs/font/FontDialog.cpp
+        widgets/dialogs/font/FontDialog.hpp
+        widgets/dialogs/font/FontFamilyWidget.cpp
+        widgets/dialogs/font/FontFamilyWidget.hpp
+        widgets/dialogs/font/FontSettingDialog.cpp
+        widgets/dialogs/font/FontSettingDialog.hpp
+        widgets/dialogs/font/FontSizeWidget.cpp
+        widgets/dialogs/font/FontSizeWidget.hpp
+        widgets/dialogs/font/FontWeightWidget.cpp
+        widgets/dialogs/font/FontWeightWidget.hpp
+        widgets/dialogs/font/IntItem.cpp
+        widgets/dialogs/font/IntItem.hpp
+        widgets/dialogs/font/PreviewWidget.cpp
+        widgets/dialogs/font/PreviewWidget.hpp
+
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
@@ -622,6 +709,8 @@ set(SOURCE_FILES
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
+        widgets/dialogs/RestoreBackupsDialog.cpp
+        widgets/dialogs/RestoreBackupsDialog.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp
@@ -660,26 +749,24 @@ set(SOURCE_FILES
         widgets/helper/color/SBCanvas.cpp
         widgets/helper/color/SBCanvas.hpp
 
-        widgets/helper/Button.cpp
-        widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
+        widgets/helper/CmdDeleteKeyFilter.cpp
+        widgets/helper/CmdDeleteKeyFilter.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
         widgets/helper/ComboBoxItemDelegate.hpp
         widgets/helper/DebugPopup.cpp
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
-        widgets/helper/EffectLabel.cpp
-        widgets/helper/EffectLabel.hpp
+        widgets/helper/FontSettingWidget.cpp
+        widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
-        widgets/helper/NotebookButton.cpp
-        widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/OverlayInteraction.cpp
@@ -688,20 +775,18 @@ set(SOURCE_FILES
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
+        widgets/helper/ScalingSpacerItem.cpp
+        widgets/helper/ScalingSpacerItem.hpp
         widgets/helper/ScrollbarHighlight.cpp
         widgets/helper/ScrollbarHighlight.hpp
         widgets/helper/SearchPopup.cpp
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/SignalLabel.cpp
-        widgets/helper/SignalLabel.hpp
+        widgets/helper/LiveIndicator.cpp
+        widgets/helper/LiveIndicator.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
-        widgets/helper/TitlebarButton.cpp
-        widgets/helper/TitlebarButton.hpp
-        widgets/helper/TitlebarButtons.cpp
-        widgets/helper/TitlebarButtons.hpp
         widgets/helper/TrimRegExpValidator.cpp
         widgets/helper/TrimRegExpValidator.hpp
 
@@ -723,6 +808,7 @@ set(SOURCE_FILES
         widgets/settingspages/AccountsPage.hpp
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
+        widgets/settingspages/CustomWidgets.hpp
         widgets/settingspages/ExternalToolsPage.cpp
         widgets/settingspages/ExternalToolsPage.hpp
         widgets/settingspages/FiltersPage.cpp
@@ -758,6 +844,8 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
         widgets/splits/InputCompletionPopup.hpp
+        widgets/splits/InputHighlighter.cpp
+        widgets/splits/InputHighlighter.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
         widgets/splits/SplitCommon.hpp
@@ -822,13 +910,23 @@ if (CHATTERINO_GENERATE_COVERAGE)
         EXCLUDE "lib/settings/*"
         EXCLUDE "lib/signals/*"
         EXCLUDE "lib/sol2/*"
-        EXCLUDE "lib/websocketpp/*"
         EXCLUDE "lib/WinToast/*"
 
         EXCLUDE "*/ui_*.h"
         EXCLUDE "*/moc_*.cpp"
         )
 endif ()
+
+if(TARGET rapidjson)
+    message(STATUS "rapidjson: Linking to rapidjson target")
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
+elseif(DEFINED RAPIDJSON_INCLUDE_DIRS)
+    message(STATUS "rapidjson: RAPIDJSON_INCLUDE_DIRS defined (${RAPIDJSON_INCLUDE_DIRS}). Most likely a system install.")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(STATUS "rapidjson: RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
+endif()
 
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
@@ -837,15 +935,14 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
-        websocketpp::websocketpp
         Threads::Threads
-        RapidJSON::RapidJSON
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
@@ -854,6 +951,17 @@ target_link_libraries(${LIBRARY_PROJECT}
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
+endif()
+
+if (CHATTERINO_SPELLCHECK)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
+    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
+endif()
+
+if (CHATTERINO_ALLOW_PRIVATE_QT_API)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+        CHATTERINO_WITH_PRIVATE_QT_API)
 endif()
 
 if (BUILD_WITH_QTKEYCHAIN)
@@ -891,10 +999,8 @@ if (BUILD_APP)
         add_executable(${EXECUTABLE_PROJECT} main.cpp)
     endif()
 
-    if(COMMAND add_sanitizers)
+    if(CHATTERINO_SANITIZER_SUPPORT)
         add_sanitizers(${EXECUTABLE_PROJECT})
-    else()
-        message(WARNING "Sanitizers support is disabled")
     endif()
 
     if (CHATTERINO_STATIC_QT_BUILD)
@@ -1020,6 +1126,7 @@ set_target_properties(${LIBRARY_PROJECT}
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
 target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    CHATTERINO_EXTRA_BUILD_STRING=${CHATTERINO_EXTRA_BUILD_STRING}
     $<$<BOOL:${WIN32}>:USEWINSDK>
     $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
 )
@@ -1033,6 +1140,7 @@ target_compile_definitions(${VERSION_PROJECT} PRIVATE
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     CHATTERINO_GIT_MODIFIED=${GIT_MODIFIED}
+    CHATTERINO_NIGHTLY_BUILD=$<BOOL:${CHATTERINO_NIGHTLY_BUILD}>
 
     CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
 )
@@ -1047,7 +1155,19 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
+    # Disable min/max macros from Windows.h
+    $<$<BOOL:${WIN32}>:NOMINMAX>
+    # Exclude some headers when including Windows.h
+    $<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>
     )
+
+set(_c2_qt_defs
+    QT_DISABLE_DEPRECATED_BEFORE=${CHATTERINO_MIN_QT_VERSION}
+    QT_WARN_DEPRECATED_UP_TO=${CHATTERINO_MIN_QT_VERSION}
+    QT_NO_KEYWORDS
+)
+target_compile_definitions(${VERSION_PROJECT} PUBLIC ${_c2_qt_defs})
+target_compile_definitions(${LIBRARY_PROJECT} PUBLIC ${_c2_qt_defs})
 
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
@@ -1135,8 +1255,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         OpenSSL::Crypto
         )
 
-target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
-
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
@@ -1197,8 +1315,13 @@ if (MSVC)
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
-    # Disable min/max macros from Windows.h
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC NOMINMAX)
+
+    # Warnings on clang-cl
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${LIBRARY_PROJECT} PUBLIC
+            -Wno-missing-designated-field-initializers
+        )
+    endif()
 else ()
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         -Wall

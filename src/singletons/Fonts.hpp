@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "pajlada/settings/settinglistener.hpp"
@@ -14,6 +18,7 @@ namespace chatterino {
 class Settings;
 class Paths;
 
+/** @exposeenum c2.FontStyle */
 enum class FontStyle : uint8_t {
     Tiny,
     ChatSmall,
@@ -46,7 +51,7 @@ public:
     // font data gets set in createFontData(...)
 
     QFont getFont(FontStyle type, float scale);
-    QFontMetrics getFontMetrics(FontStyle type, float scale);
+    QFontMetricsF getFontMetrics(FontStyle type, float scale);
 
     pajlada::Signals::NoArgSignal fontChanged;
 
@@ -59,7 +64,7 @@ private:
         }
 
         const QFont font;
-        const QFontMetrics metrics;
+        const QFontMetricsF metrics;
     };
 
     struct ChatFontData {

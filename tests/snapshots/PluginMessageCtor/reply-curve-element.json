@@ -1,0 +1,74 @@
+{
+    "input": [
+        "msg = {elements={",
+        "  { type = 'reply-curve' },",
+        "  { type = 'reply-curve', flags = c2.MessageElementFlag.BttvEmote },",
+        "  { type = 'reply-curve', tooltip = 't' },",
+        "  { type = 'reply-curve', trailing_space = false },",
+        "}}"
+    ],
+    "output": {
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+            {
+                "flags": "RepliedMessage",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "ReplyCurveElement"
+            },
+            {
+                "flags": "RepliedMessage",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "ReplyCurveElement"
+            },
+            {
+                "flags": "RepliedMessage",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "t",
+                "trailingSpace": true,
+                "type": "ReplyCurveElement"
+            },
+            {
+                "flags": "RepliedMessage",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "tooltip": "",
+                "trailingSpace": false,
+                "type": "ReplyCurveElement"
+            }
+        ],
+        "externalBadges": [
+        ],
+        "flags": "",
+        "frozen": false,
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
+        "userID": "",
+        "usernameColor": "#ff000000"
+    }
+}

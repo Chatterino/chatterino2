@@ -45,7 +45,7 @@ IncludeCategories:
   # Third party library includes
   - Regex: "^<([a-zA-Z_0-9-]+/)*[a-zA-Z_0-9-]+.h(pp)?>$"
     Priority: 3
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Standard: Auto

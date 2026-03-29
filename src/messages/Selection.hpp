@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <algorithm>
@@ -57,7 +61,7 @@ struct Selection {
         , selectionMin(start)
         , selectionMax(end)
     {
-        if (selectionMin > selectionMax)
+        if (this->selectionMin > this->selectionMax)
         {
             std::swap(this->selectionMin, this->selectionMax);
         }

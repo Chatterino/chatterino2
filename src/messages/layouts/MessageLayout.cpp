@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
@@ -23,26 +27,26 @@ namespace chatterino {
 
 namespace {
 
-    QColor blendColors(const QColor &base, const QColor &apply)
-    {
-        const qreal &alpha = apply.alphaF();
-        QColor result;
-        result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
-                       base.greenF() * (1 - alpha) + apply.greenF() * alpha,
-                       base.blueF() * (1 - alpha) + apply.blueF() * alpha);
-        return result;
-    }
+QColor blendColors(const QColor &base, const QColor &apply)
+{
+    const qreal &alpha = apply.alphaF();
+    QColor result;
+    result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
+                   base.greenF() * (1 - alpha) + apply.greenF() * alpha,
+                   base.blueF() * (1 - alpha) + apply.blueF() * alpha);
+    return result;
+}
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
 {
-    DebugCount::increase("message layout");
+    DebugCount::increase(DebugObject::MessageLayout);
 }
 
 MessageLayout::~MessageLayout()
 {
-    DebugCount::decrease("message layout");
+    DebugCount::decrease(DebugObject::MessageLayout);
 }
 
 const Message *MessageLayout::getMessage()
@@ -58,12 +62,12 @@ const MessagePtr &MessageLayout::getMessagePtr() const
 // Height
 int MessageLayout::getHeight() const
 {
-    return this->container_.getHeight();
+    return static_cast<int>(this->container_.getHeight());
 }
 
 int MessageLayout::getWidth() const
 {
-    return this->container_.getWidth();
+    return static_cast<int>(this->container_.getWidth());
 }
 
 // Layout
@@ -113,7 +117,7 @@ bool MessageLayout::layout(const MessageLayoutContext &ctx,
         return false;
     }
 
-    int oldHeight = this->container_.getHeight();
+    qreal oldHeight = this->container_.getHeight();
     this->actuallyLayout(ctx);
     if (widthChanged || this->container_.getHeight() != oldHeight)
     {
@@ -236,7 +240,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     // draw on buffer
-    ctx.painter.drawPixmap(0, ctx.y, *pixmap);
+    ctx.painter.drawPixmap(QPoint{0, ctx.y}, *pixmap);
 
     // draw gif emotes
     result.hasAnimatedElements =
@@ -245,15 +249,27 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
     {
-        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
-                             ctx.messageColors.disabled);
+        ctx.painter.fillRect(
+            QRect{
+                0,
+                ctx.y,
+                pixmap->width(),
+                pixmap->height(),
+            },
+            ctx.messageColors.disabled);
     }
 
     if (this->message_->flags.has(MessageFlag::RecentMessage) &&
         ctx.preferences.fadeMessageHistory)
     {
-        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
-                             ctx.messageColors.disabled);
+        ctx.painter.fillRect(
+            QRect{
+                0,
+                ctx.y,
+                pixmap->width(),
+                pixmap->height(),
+            },
+            ctx.messageColors.disabled);
     }
 
     if (!ctx.isMentions &&
@@ -262,7 +278,12 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
         ctx.preferences.enableRedeemedHighlight)
     {
         ctx.painter.fillRect(
-            0, ctx.y, int(this->scale_ * 4), pixmap->height(),
+            QRect{
+                0,
+                ctx.y,
+                static_cast<int>(this->scale_ * 4),
+                pixmap->height(),
+            },
             *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
 
@@ -276,8 +297,14 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     // draw message seperation line
     if (ctx.preferences.separateMessages)
     {
-        ctx.painter.fillRect(0, ctx.y, this->container_.getWidth() + 64, 1,
-                             ctx.messageColors.messageSeperator);
+        ctx.painter.fillRect(
+            QRectF{
+                0.0,
+                static_cast<qreal>(ctx.y),
+                this->container_.getWidth() + 64,
+                1.0,
+            },
+            ctx.messageColors.messageSeperator);
     }
 
     // draw last read message line
@@ -297,8 +324,14 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
 
         QBrush brush(color, ctx.preferences.lastMessagePattern);
 
-        ctx.painter.fillRect(0, ctx.y + this->container_.getHeight() - 1,
-                             pixmap->width(), 1, brush);
+        ctx.painter.fillRect(
+            QRectF{
+                0,
+                ctx.y + this->container_.getHeight() - 1,
+                static_cast<qreal>(pixmap->width()),
+                1,
+            },
+            brush);
     }
 
     this->bufferValid_ = true;
@@ -306,7 +339,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     return result;
 }
 
-QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
+QPixmap *MessageLayout::ensureBuffer(QPainter &painter, qreal width, bool clear)
 {
     if (this->buffer_ != nullptr)
     {
@@ -315,9 +348,9 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
 
     // Create new buffer
     this->buffer_ = std::make_unique<QPixmap>(
-        int(width * painter.device()->devicePixelRatioF()),
-        int(this->container_.getHeight() *
-            painter.device()->devicePixelRatioF()));
+        static_cast<int>(width * painter.device()->devicePixelRatioF()),
+        static_cast<int>(this->container_.getHeight() *
+                         painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 
     if (clear)
@@ -326,7 +359,7 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
     }
 
     this->bufferValid_ = false;
-    DebugCount::increase("message drawing buffers");
+    DebugCount::increase(DebugObject::MessageDrawingBuffer);
     return this->buffer_.get();
 }
 
@@ -366,6 +399,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         backgroundColor = blendColors(
             backgroundColor,
             *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
+    }
+    else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
+             ctx.preferences.enableWatchStreakHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor, *ctx.colorProvider.color(ColorType::WatchStreak));
     }
     else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
@@ -448,7 +487,7 @@ void MessageLayout::deleteBuffer()
 {
     if (this->buffer_ != nullptr)
     {
-        DebugCount::decrease("message drawing buffers");
+        DebugCount::decrease(DebugObject::MessageDrawingBuffer);
 
         this->buffer_ = nullptr;
     }
@@ -469,14 +508,14 @@ void MessageLayout::deleteCache()
 // returns nullptr if none was found
 
 // fourtf: this should return a MessageLayoutItem
-const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
+const MessageLayoutElement *MessageLayout::getElementAt(QPointF point) const
 {
     // go through all words and return the first one that contains the point.
     return this->container_.getElementAt(point);
 }
 
 std::pair<int, int> MessageLayout::getWordBounds(
-    const MessageLayoutElement *hoveredElement, QPoint relativePos) const
+    const MessageLayoutElement *hoveredElement, QPointF relativePos) const
 {
     // An element with wordId != -1 can be multiline, so we need to check all
     // elements in the container
@@ -504,7 +543,7 @@ size_t MessageLayout::getFirstMessageCharacterIndex() const
     return this->container_.getFirstMessageCharacterIndex();
 }
 
-size_t MessageLayout::getSelectionIndex(QPoint position) const
+size_t MessageLayout::getSelectionIndex(QPointF position) const
 {
     return this->container_.getSelectionIndex(position);
 }
@@ -513,24 +552,6 @@ void MessageLayout::addSelectionText(QString &str, uint32_t from, uint32_t to,
                                      CopyMode copymode)
 {
     this->container_.addSelectionText(str, from, to, copymode);
-}
-
-bool MessageLayout::isReplyable() const
-{
-    if (this->message_->loginName.isEmpty())
-    {
-        return false;
-    }
-
-    if (this->message_->flags.hasAny(
-            {MessageFlag::System, MessageFlag::Subscription,
-             MessageFlag::Timeout, MessageFlag::Whisper,
-             MessageFlag::ModerationAction}))
-    {
-        return false;
-    }
-
-    return true;
 }
 
 }  // namespace chatterino

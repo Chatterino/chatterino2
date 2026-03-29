@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/QMagicEnum.hpp"
@@ -62,11 +66,13 @@ using StringSetting = ChatterinoSetting<std::string>;
 using QStringSetting = ChatterinoSetting<QString>;
 using QSizeSetting = ChatterinoSetting<QSize>;
 
+/// Accepts any enum and saves the enum value as an integer
+///
+/// e.g. for enum class {Foo = 2, Bar = 6}, Foo would be saved as 2 and Bar would be saved as 6
 template <typename Enum>
-class EnumSetting
-    : public ChatterinoSetting<typename std::underlying_type<Enum>::type>
+class EnumSetting : public ChatterinoSetting<std::underlying_type_t<Enum>>
 {
-    using Underlying = typename std::underlying_type<Enum>::type;
+    using Underlying = std::underlying_type_t<Enum>;
 
 public:
     using ChatterinoSetting<Underlying>::ChatterinoSetting;
@@ -131,7 +137,7 @@ public:
         return this->getEnum();
     }
 
-    Enum getEnum()
+    Enum getEnum() const
     {
         return qmagicenum::enumCast<Enum>(this->getValue(),
                                           qmagicenum::CASE_INSENSITIVE)

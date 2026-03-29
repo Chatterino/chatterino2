@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/SignalVector.hpp"
@@ -18,9 +22,10 @@ template <typename T>
 struct SignalVectorItemEvent;
 
 template <typename TVectorItem>
-class SignalVectorModel : public QAbstractTableModel,
-                          pajlada::Signals::SignalHolder
+class SignalVectorModel : public QAbstractTableModel
 {
+    pajlada::Signals::SignalHolder signalHolder;
+
 public:
     SignalVectorModel(int columnCount, QObject *parent = nullptr)
         : QAbstractTableModel(parent)
@@ -66,9 +71,9 @@ public:
             insert(args);
         }
 
-        this->managedConnect(vec->itemInserted, insert);
+        this->signalHolder.managedConnect(vec->itemInserted, insert);
 
-        this->managedConnect(vec->itemRemoved, [this](auto args) {
+        this->signalHolder.managedConnect(vec->itemRemoved, [this](auto args) {
             if (args.caller == this)
             {
                 return;
@@ -137,7 +142,7 @@ public:
             return QVariant();
         }
 
-        return rows_[row].items[column]->data(role);
+        return this->rows_[row].items[column]->data(role);
     }
 
     bool setData(const QModelIndex &index, const QVariant &value,

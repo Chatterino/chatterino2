@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/Filter.hpp"
 
 #include "Application.hpp"
@@ -12,6 +16,7 @@ namespace chatterino::filters {
 
 const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
     {"author.badges", Type::StringList},
+    {"author.external_badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
     {"author.user_id", Type::String},
@@ -38,6 +43,7 @@ const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
     {"flags.monitored", Type::Bool},
     {"flags.shared", Type::Bool},
     {"flags.similar", Type::Bool},
+    {"flags.watch_streak", Type::Bool},
     {"message.content", Type::String},
     {"message.length", Type::Int},
     {"reward.title", Type::String},
@@ -49,16 +55,17 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel = getApp()->getTwitch()->getWatchingChannel().get();
 
-    /* 
-     * Looking to add a new identifier to filters? Here's what to do: 
-     *  1. Update validIdentifiersMap in Tokenizer.cpp
+    /*
+     * Looking to add a new identifier to filters? Here's what to do:
+     *  1. Update VALID_IDENTIFIERS_MAP in Tokenizer.cpp
      *  2. Add the identifier to the list below
-     *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT in Filter.hpp
+     *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT at the top of this file
      *  4. Add the value for the identifier to the ContextMap returned by this function
-     * 
+     *
      * List of identifiers:
      *
      * author.badges
+     * author.external_badges
      * author.color
      * author.name
      * author.user_id
@@ -83,6 +90,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.restricted
      * flags.monitored
      * flags.shared
+     * flags.similar
+     * flags.watch_streak
      *
      * message.content
      * message.length
@@ -95,8 +104,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
     using MessageFlag = chatterino::MessageFlag;
 
     QStringList badges;
-    badges.reserve(m->badges.size());
-    for (const auto &e : m->badges)
+    badges.reserve(m->twitchBadges.size());
+    for (const auto &e : m->twitchBadges)
     {
         badges << e.key_;
     }
@@ -114,13 +123,14 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
             continue;
         }
         subscribed = true;
-        if (m->badgeInfos.find(subBadge) != m->badgeInfos.end())
+        if (m->twitchBadgeInfos.find(subBadge) != m->twitchBadgeInfos.end())
         {
-            subLength = m->badgeInfos.at(subBadge).toInt();
+            subLength = m->twitchBadgeInfos.at(subBadge).toInt();
         }
     }
     ContextMap vars = {
         {"author.badges", std::move(badges)},
+        {"author.external_badges", m->externalBadges},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
         {"author.user_id", m->userID},
@@ -149,6 +159,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.monitored", m->flags.has(MessageFlag::MonitoredMessage)},
         {"flags.shared", m->flags.has(MessageFlag::SharedMessage)},
         {"flags.similar", m->flags.has(MessageFlag::Similar)},
+        {"flags.watch_streak", m->flags.has(MessageFlag::WatchStreak)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

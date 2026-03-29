@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 
 #include "controllers/filters/lang/Tokenizer.hpp"
@@ -8,14 +12,13 @@
 namespace chatterino {
 
 namespace {
-    const QStringList friendlyBinaryOps = {
-        "and", "or",       "+",           "-",         "*",        "/",
-        "%",   "equals",   "not equals",  "<",         ">",        "<=",
-        ">=",  "contains", "starts with", "ends with", "(nothing)"};
-    const QStringList realBinaryOps = {
-        "&&", "||",       "+",          "-",        "*", "/",
-        "%",  "==",       "!=",         "<",        ">", "<=",
-        ">=", "contains", "startswith", "endswith", ""};
+const QStringList friendlyBinaryOps = {
+    "and", "or",       "+",           "-",         "*",        "/",
+    "%",   "equals",   "not equals",  "<",         ">",        "<=",
+    ">=",  "contains", "starts with", "ends with", "(nothing)"};
+const QStringList realBinaryOps = {
+    "&&", "||", "+",  "-",  "*",        "/",          "%",        "==", "!=",
+    "<",  ">",  "<=", ">=", "contains", "startswith", "endswith", ""};
 }  // namespace
 
 ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)

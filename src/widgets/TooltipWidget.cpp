@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/TooltipWidget.hpp"
 
 #include "Application.hpp"
@@ -6,6 +10,8 @@
 #include "singletons/WindowManager.hpp"
 
 #include <QPainter>
+
+#include <utility>
 
 namespace {
 
@@ -30,6 +36,23 @@ inline constexpr T *tooltipParentFor(T *desiredParent)
 
 namespace chatterino {
 
+TooltipEntry TooltipEntry::scaled(ImagePtr image, QString text, float scale)
+{
+    auto entry = TooltipEntry{
+        .image = std::move(image),
+        .text = std::move(text),
+    };
+
+    if (entry.image)
+    {
+        auto imgWidth = entry.image->width() / entry.image->scale();
+        auto imgHeight = entry.image->height() / entry.image->scale();
+        entry.customWidth = static_cast<int>(imgWidth * scale);
+        entry.customHeight = static_cast<int>(imgHeight * scale);
+    }
+    return entry;
+}
+
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},
@@ -40,6 +63,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
+    this->setAttribute(Qt::WA_TransparentForMouseEvents);
     this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 
     // Default to using vertical layout

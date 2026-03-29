@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Scrollbar.hpp"
 
 #include "common/QLogging.hpp"
@@ -465,16 +469,17 @@ void Scrollbar::updateScroll()
 {
     this->trackHeight_ = this->height() - MIN_THUMB_HEIGHT - 1;
 
-    auto div = std::max<qreal>(0.0000001, this->maximum_ - this->minimum_);
+    auto nMessages = std::max<qreal>(1.0, this->maximum_ - this->minimum_);
 
-    this->thumbRect_ =
-        QRect(0,
-              static_cast<int>((this->getRelativeCurrentValue()) / div *
-                               this->trackHeight_) +
-                  1,
-              this->width(),
-              static_cast<int>(this->pageSize_ / div * this->trackHeight_) +
-                  MIN_THUMB_HEIGHT);
+    this->thumbRect_ = QRect{
+        0,
+        static_cast<int>((this->getRelativeCurrentValue()) / nMessages *
+                         this->trackHeight_) +
+            1,
+        this->width(),
+        static_cast<int>(this->pageSize_ / nMessages * this->trackHeight_) +
+            MIN_THUMB_HEIGHT,
+    };
 
     this->update();
 }

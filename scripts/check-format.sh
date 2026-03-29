@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2019 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 set -eu
 
 fail="0"

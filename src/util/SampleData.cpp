@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/SampleData.hpp"
 
 namespace chatterino {
+
+using namespace Qt::Literals;
 
 /// Sample messages coming from IRC
 
@@ -104,6 +110,9 @@ const QStringList &getSampleSubMessages()
 
         // resub without message
         R"(@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol):\s$9.99\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\sjust\ssubscribed\swith\sa\sTier\s2\ssub.\scspice\ssubscribed\sfor\s12\smonths\sin\sa\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada)",
+
+        // pajlada gifted a sub to rustafur
+        R"(@tmi-sent-ts=1751793597378;subscriber=1;id=ac51c358-0525-468f-9e0f-e9f2b7953c29;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/114;color=#CC44FF;flags=;user-type=;emotes=;msg-param-sub-plan-name=look\sat\sthose\sshitty\semotes,\srip\s$5\sLUL;msg-param-gift-months=1;system-msg=pajlada\sgifted\sa\sTier\s1\ssub\sto\srustafur!;msg-param-months=6;msg-param-origin-id=4645652708379472175;msg-param-recipient-id=27787997;msg-param-sub-plan=1000;msg-id=subgift;msg-param-recipient-display-name=rustafur;msg-param-recipient-user-name=rustafur;msg-param-community-gift-id=4645652708379472175;msg-param-sender-count=0 :tmi.twitch.tv USERNOTICE #pajlada)",
     };
     return list;
 }
@@ -160,20 +169,14 @@ const QStringList &getSampleEmoteTestMessages()
 
 /// Channel point reward tests
 
-const QString &getSampleChannelRewardMessage()
+QByteArray getSampleChannelRewardMessage()
 {
-    static QString str{
-        R"({"type":"MESSAGE","data":{"topic":"community-points-channel-v1.11148817","message":"{\"type\":\"reward-redeemed\",\"data\":{\"timestamp\":\"2022-11-19T13:36:49.536938653Z\",\"redemption\":{\"id\":\"fd8af65d-3532-4e91-b30e-3995cefe576b\",\"user\":{\"id\":\"11148817\",\"login\":\"pajlada\",\"display_name\":\"pajlada\"},\"channel_id\":\"11148817\",\"redeemed_at\":\"2022-11-19T13:36:49.536938653Z\",\"reward\":{\"id\":\"44c3554e-58bc-4753-bf94-b615931d1072\",\"channel_id\":\"11148817\",\"title\":\"Test\",\"prompt\":\"\",\"cost\":1,\"is_user_input_required\":false,\"is_sub_only\":false,\"image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-4.png\"},\"default_image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\"},\"background_color\":\"#9147FF\",\"is_enabled\":true,\"is_paused\":false,\"is_in_stock\":true,\"max_per_stream\":{\"is_enabled\":false,\"max_per_stream\":0},\"should_redemptions_skip_request_queue\":false,\"template_id\":null,\"updated_for_indicator_at\":\"2021-03-16T00:40:29.385327044Z\",\"max_per_user_per_stream\":{\"is_enabled\":false,\"max_per_user_per_stream\":0},\"global_cooldown\":{\"is_enabled\":false,\"global_cooldown_seconds\":0},\"redemptions_redeemed_current_stream\":null,\"cooldown_expires_at\":null},\"status\":\"UNFULFILLED\",\"cursor\":\"ZmQ4YWY2NWQtMzUzMi00ZTkxLWIzMGUtMzk5NWNlZmU1NzZiX18yMDIyLTExLTE5VDEzOjM2OjQ5LjUzNjkzODY1M1o=\"}}}"}})",
-    };
-    return str;
+    return R"({"type":"MESSAGE","data":{"topic":"community-points-channel-v1.11148817","message":"{\"type\":\"reward-redeemed\",\"data\":{\"timestamp\":\"2022-11-19T13:36:49.536938653Z\",\"redemption\":{\"id\":\"fd8af65d-3532-4e91-b30e-3995cefe576b\",\"user\":{\"id\":\"11148817\",\"login\":\"pajlada\",\"display_name\":\"pajlada\"},\"channel_id\":\"11148817\",\"redeemed_at\":\"2022-11-19T13:36:49.536938653Z\",\"reward\":{\"id\":\"44c3554e-58bc-4753-bf94-b615931d1072\",\"channel_id\":\"11148817\",\"title\":\"Test\",\"prompt\":\"\",\"cost\":1,\"is_user_input_required\":false,\"is_sub_only\":false,\"image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/11148817/44c3554e-58bc-4753-bf94-b615931d1072/effc017c-861d-410d-abff-8bd98f1937eb/custom-4.png\"},\"default_image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\"},\"background_color\":\"#9147FF\",\"is_enabled\":true,\"is_paused\":false,\"is_in_stock\":true,\"max_per_stream\":{\"is_enabled\":false,\"max_per_stream\":0},\"should_redemptions_skip_request_queue\":false,\"template_id\":null,\"updated_for_indicator_at\":\"2021-03-16T00:40:29.385327044Z\",\"max_per_user_per_stream\":{\"is_enabled\":false,\"max_per_user_per_stream\":0},\"global_cooldown\":{\"is_enabled\":false,\"global_cooldown_seconds\":0},\"redemptions_redeemed_current_stream\":null,\"cooldown_expires_at\":null},\"status\":\"UNFULFILLED\",\"cursor\":\"ZmQ4YWY2NWQtMzUzMi00ZTkxLWIzMGUtMzk5NWNlZmU1NzZiX18yMDIyLTExLTE5VDEzOjM2OjQ5LjUzNjkzODY1M1o=\"}}}"}})"_ba;
 }
 
-const QString &getSampleChannelRewardMessage2()
+QByteArray getSampleChannelRewardMessage2()
 {
-    static QString str{
-        R"({"type":"MESSAGE","data":{"topic":"community-points-channel-v1.11148817","message":"{\"type\":\"reward-redeemed\",\"data\":{\"timestamp\":\"2022-11-19T13:37:55.860377616Z\",\"redemption\":{\"id\":\"e8712d29-7564-40e9-a972-d70997665605\",\"user\":{\"id\":\"11148817\",\"login\":\"pajlada\",\"display_name\":\"pajlada\"},\"channel_id\":\"11148817\",\"redeemed_at\":\"2022-11-19T13:37:55.860377616Z\",\"reward\":{\"id\":\"649ecb1f-3fa8-491e-a48d-bd50720929d9\",\"channel_id\":\"11148817\",\"title\":\"asdd\",\"prompt\":\"asd\",\"cost\":5,\"is_user_input_required\":true,\"is_sub_only\":false,\"image\":null,\"default_image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\"},\"background_color\":\"#0013A3\",\"is_enabled\":true,\"is_paused\":false,\"is_in_stock\":true,\"max_per_stream\":{\"is_enabled\":false,\"max_per_stream\":0},\"should_redemptions_skip_request_queue\":false,\"template_id\":null,\"updated_for_indicator_at\":\"2021-03-16T00:45:25.236177469Z\",\"max_per_user_per_stream\":{\"is_enabled\":false,\"max_per_user_per_stream\":0},\"global_cooldown\":{\"is_enabled\":false,\"global_cooldown_seconds\":0},\"redemptions_redeemed_current_stream\":null,\"cooldown_expires_at\":null},\"user_input\":\"TEST\",\"status\":\"UNFULFILLED\",\"cursor\":\"ZTg3MTJkMjktNzU2NC00MGU5LWE5NzItZDcwOTk3NjY1NjA1X18yMDIyLTExLTE5VDEzOjM3OjU1Ljg2MDM3NzYxNlo=\"}}}"}})",
-    };
-    return str;
+    return R"({"type":"MESSAGE","data":{"topic":"community-points-channel-v1.11148817","message":"{\"type\":\"reward-redeemed\",\"data\":{\"timestamp\":\"2022-11-19T13:37:55.860377616Z\",\"redemption\":{\"id\":\"e8712d29-7564-40e9-a972-d70997665605\",\"user\":{\"id\":\"11148817\",\"login\":\"pajlada\",\"display_name\":\"pajlada\"},\"channel_id\":\"11148817\",\"redeemed_at\":\"2022-11-19T13:37:55.860377616Z\",\"reward\":{\"id\":\"649ecb1f-3fa8-491e-a48d-bd50720929d9\",\"channel_id\":\"11148817\",\"title\":\"asdd\",\"prompt\":\"asd\",\"cost\":5,\"is_user_input_required\":true,\"is_sub_only\":false,\"image\":null,\"default_image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\",\"url_4x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\"},\"background_color\":\"#0013A3\",\"is_enabled\":true,\"is_paused\":false,\"is_in_stock\":true,\"max_per_stream\":{\"is_enabled\":false,\"max_per_stream\":0},\"should_redemptions_skip_request_queue\":false,\"template_id\":null,\"updated_for_indicator_at\":\"2021-03-16T00:45:25.236177469Z\",\"max_per_user_per_stream\":{\"is_enabled\":false,\"max_per_user_per_stream\":0},\"global_cooldown\":{\"is_enabled\":false,\"global_cooldown_seconds\":0},\"redemptions_redeemed_current_stream\":null,\"cooldown_expires_at\":null},\"user_input\":\"TEST\",\"status\":\"UNFULFILLED\",\"cursor\":\"ZTg3MTJkMjktNzU2NC00MGU5LWE5NzItZDcwOTk3NjY1NjA1X18yMDIyLTExLTE5VDEzOjM3OjU1Ljg2MDM3NzYxNlo=\"}}}"}})"_ba;
 }
 
 const QString &getSampleChannelRewardIRCMessage()
