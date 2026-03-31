@@ -56,11 +56,6 @@ bool HighlightResult::operator==(const HighlightResult &other) const
     return true;
 }
 
-bool HighlightResult::operator!=(const HighlightResult &other) const
-{
-    return !(*this == other);
-}
-
 bool HighlightResult::empty() const
 {
     return !this->alert && !this->playSound &&
