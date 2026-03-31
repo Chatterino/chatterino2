@@ -455,7 +455,7 @@ void WindowManager::initialize()
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (this->appArgs.isFramelessEmbed)
+        if (this->appArgs.isAnyEmbed())
         {
             this->mainWindow_->hide();
         }

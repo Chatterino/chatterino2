@@ -223,7 +223,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     assert(!this->initialized);
 
     // Show changelog
-    if (!this->args_.isFramelessEmbed &&
+    if (!this->args_.isAnyEmbed() &&
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
@@ -238,7 +238,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
         }
     }
 
-    if (!this->args_.isFramelessEmbed)
+    if (!this->args_.isAnyEmbed())
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
@@ -271,7 +271,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     // Show crash message.
     // On Windows, the crash message was already shown.
 #ifndef Q_OS_WIN
-    if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
+    if (!this->args_.isAnyEmbed() && this->args_.crashRecovery)
     {
         if (auto *selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
@@ -293,7 +293,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     }
 #endif
 
-    if (!this->args_.isFramelessEmbed)
+    if (!this->args_.isAnyEmbed())
     {
         this->initNm(paths);
     }
@@ -312,7 +312,7 @@ int Application::run()
 
     this->twitch->connect();
 
-    if (!this->args_.isFramelessEmbed)
+    if (!this->args_.isAnyEmbed())
     {
         this->windows->getMainWindow().show();
     }

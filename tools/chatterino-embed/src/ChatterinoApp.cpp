@@ -24,7 +24,7 @@ Args makeArgs(const CreateAppArgs &appArgs)
     Args args;
     args.dontSaveSettings = !appArgs.saveSettingsOnExit;
     args.dontLoadMainWindow = true;
-    args.isFramelessEmbed = true;
+    args.isInjectedEmbed = true;
     return args;
 }
 
