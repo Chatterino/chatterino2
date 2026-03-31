@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chatterino-embed/Config.hpp>
 #include <QWidget>
 
 class QByteArray;
@@ -13,7 +14,7 @@ class Split;
 
 namespace embed {
 
-class Split : public QWidget
+class CHATTERINO_EMBED_EXPORT Split : public QWidget
 {
     Q_OBJECT
 
