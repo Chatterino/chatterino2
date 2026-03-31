@@ -17,8 +17,10 @@ class CHATTERINO_EMBED_EXPORT ChatterinoApp : public QObject
 public:
     ~ChatterinoApp() override;
 
-    QWidget *createSplitFromData(const QString &data);
-    QWidget *createEmptySplit();
+    QWidget *createSplitFromData(QWidget *parent, QByteArrayView data);
+    QWidget *createEmptySplit(QWidget *parent);
+
+    QByteArray serializeSplit(QWidget *split);
 
 protected:
     ChatterinoApp(ChatterinoAppPrivate *private_, QObject *parent = nullptr);

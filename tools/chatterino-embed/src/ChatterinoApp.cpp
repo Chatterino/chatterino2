@@ -11,6 +11,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <chatterino-embed/ChatterinoApp.hpp>
 
@@ -95,6 +96,40 @@ ChatterinoApp::ChatterinoApp(ChatterinoAppPrivate *private_, QObject *parent)
 }
 
 ChatterinoApp::~ChatterinoApp() = default;
+
+// NOLINTBEGIN(readability-convert-member-functions-to-static)
+QWidget *ChatterinoApp::createSplitFromData(QWidget *parent,
+                                            QByteArrayView data)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    const auto obj = QJsonValue::fromJson(data).toObject();
+#else
+    const auto obj = QJsonDocument::fromJson(data.toByteArray()).object();
+#endif
+    SplitDescriptor descr;
+    SplitDescriptor::loadFromJSON(descr, obj, obj["data"].toObject());
+    auto *split = new Split(parent);
+    split->applyDescriptor(descr);
+    return split;
+}
+
+QWidget *ChatterinoApp::createEmptySplit(QWidget *parent)
+{
+    return new Split(parent);
+}
+
+QByteArray ChatterinoApp::serializeSplit(QWidget *split)
+{
+    auto *realSplit = qobject_cast<Split *>(split);
+    if (!realSplit)
+    {
+        return {};
+    }
+    QJsonObject obj;
+    realSplit->appendJsonDescriptor(obj);
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+}
+// NOLINTEND(readability-convert-member-functions-to-static)
 
 ChatterinoApp *createAppPrivate(const CreateAppArgs &args)
 {

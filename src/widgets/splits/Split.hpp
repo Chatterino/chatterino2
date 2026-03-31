@@ -12,6 +12,7 @@
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QFont>
+#include <QJsonObject>
 #include <QPointer>
 #include <QShortcut>
 #include <QVBoxLayout>
@@ -26,6 +27,7 @@ class SplitContainer;
 class SplitOverlay;
 class SelectChannelDialog;
 class OverlayWindow;
+struct SplitDescriptor;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of
 // the chat widget: ChatWidgetHeader
@@ -89,6 +91,10 @@ public:
     void unpause();
 
     OverlayWindow *overlayWindow();
+
+    void appendJsonDescriptor(QJsonObject &obj);
+    SplitDescriptor buildDescriptor();
+    void applyDescriptor(const SplitDescriptor &descriptor);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
