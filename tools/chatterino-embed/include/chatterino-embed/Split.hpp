@@ -2,6 +2,11 @@
 
 #include <QWidget>
 
+class QByteArray;
+class QByteArrayView;
+class QString;
+class QJsonObject;
+
 namespace chatterino {
 
 class Split;

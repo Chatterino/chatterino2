@@ -3,6 +3,11 @@
 #include "common/WindowDescriptors.hpp"
 
 #include <chatterino-embed/Split.hpp>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QString>
 
 namespace chatterino::embed {
 
