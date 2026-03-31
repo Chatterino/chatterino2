@@ -7,14 +7,16 @@ include(GNUInstallDirs)
 
 # All public headers
 set(HEADERS
-    ChatterinoApp.hpp
-    ChatterinoAppBuilder.hpp
-    ChatterinoConfig.hpp
+    App.hpp
+    AppBuilder.hpp
+    Config.hpp
+    Split.hpp
 )
 # All private sources
 set(SOURCES
-    ChatterinoApp.cpp
-    ChatterinoAppBuilder.cpp
+    App.cpp
+    AppBuilder.cpp
+    Split.cpp
 )
 
 list(TRANSFORM HEADERS PREPEND include/chatterino-embed/)

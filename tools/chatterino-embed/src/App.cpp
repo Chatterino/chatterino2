@@ -1,5 +1,5 @@
 #include "Application.hpp"
-#include "ChatterinoAppPrivate.hpp"
+#include "AppPrivate.hpp"
 #include "common/Args.hpp"
 #include "common/Env.hpp"
 #include "common/network/NetworkManager.hpp"
@@ -11,9 +11,8 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
-#include "widgets/splits/Split.hpp"
 
-#include <chatterino-embed/ChatterinoApp.hpp>
+#include <chatterino-embed/App.hpp>
 
 namespace chatterino::embed {
 
@@ -46,10 +45,10 @@ void preInitialize()
 
 }  // namespace
 
-class ChatterinoAppPrivate
+class AppPrivate
 {
 public:
-    ChatterinoAppPrivate(const CreateAppArgs &args)
+    AppPrivate(const CreateAppArgs &args)
         : paths(args.rootDirectory)
         , args(makeArgs(args))
         , settings(this->args, this->paths.settingsDirectory)
@@ -77,9 +76,9 @@ public:
             false);
     }
 
-    static ChatterinoApp *createPublic(const CreateAppArgs &args)
+    static App *createPublic(const CreateAppArgs &args)
     {
-        return new ChatterinoApp(new ChatterinoAppPrivate(args));
+        return new App(new AppPrivate(args));
     }
 
     Paths paths;
@@ -89,52 +88,18 @@ public:
     Application app;
 };
 
-ChatterinoApp::ChatterinoApp(ChatterinoAppPrivate *private_, QObject *parent)
+App::App(AppPrivate *private_, QObject *parent)
     : QObject(parent)
     , private_(private_)
 {
 }
 
-ChatterinoApp::~ChatterinoApp() = default;
+App::~App() = default;
 
-// NOLINTBEGIN(readability-convert-member-functions-to-static)
-QWidget *ChatterinoApp::createSplitFromData(QWidget *parent,
-                                            QByteArrayView data)
-{
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    const auto obj = QJsonValue::fromJson(data).toObject();
-#else
-    const auto obj = QJsonDocument::fromJson(data.toByteArray()).object();
-#endif
-    SplitDescriptor descr;
-    SplitDescriptor::loadFromJSON(descr, obj, obj["data"].toObject());
-    auto *split = new Split(parent);
-    split->applyDescriptor(descr);
-    return split;
-}
-
-QWidget *ChatterinoApp::createEmptySplit(QWidget *parent)
-{
-    return new Split(parent);
-}
-
-QByteArray ChatterinoApp::serializeSplit(QWidget *split)
-{
-    auto *realSplit = qobject_cast<Split *>(split);
-    if (!realSplit)
-    {
-        return {};
-    }
-    QJsonObject obj;
-    realSplit->appendJsonDescriptor(obj);
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
-}
-// NOLINTEND(readability-convert-member-functions-to-static)
-
-ChatterinoApp *createAppPrivate(const CreateAppArgs &args)
+App *createAppPrivate(const CreateAppArgs &args)
 {
     preInitialize();
-    return ChatterinoAppPrivate::createPublic(args);
+    return AppPrivate::createPublic(args);
 }
 
 }  // namespace chatterino::embed
