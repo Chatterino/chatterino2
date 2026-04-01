@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
+if(POLICY CMP0207)
+    cmake_policy(SET CMP0207 NEW) # file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching
+endif()
 include(FeatureSummary)
 include(FetchContent)
 include(CMakeDependentOption)
