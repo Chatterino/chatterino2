@@ -32,7 +32,8 @@ auto highlightPhraseCheck(const HighlightPhrase &highlight) -> HighlightCheck
             (void)twitchBadges;     // unused
             (void)senderName;       // unused
             (void)flags;        // unused
-
+            
+            if (self)
             {
                 // Phrase checks should ignore highlights from the user
                 return std::nullopt;
