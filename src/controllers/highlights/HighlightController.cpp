@@ -25,18 +25,21 @@ using namespace chatterino;
 auto highlightPhraseCheck(const HighlightPhrase &highlight) -> HighlightCheck
 {
     return HighlightCheck{
-        [highlight](const auto &args, const auto &twitchBadges,
-                    const auto &senderName, const auto &originalMessage,
-                    const auto &flags,
+        [highlight](const auto &args,
+                    const auto &twitchBadges, const auto &senderName,
+                    const auto &originalMessage, const auto &flags,
                     const auto self) -> std::optional<HighlightResult> {
-            (void)args;          // unused
-            (void)twitchBadges;  // unused
-            (void)senderName;    // unused
-            (void)flags;         // unused
+            (void)twitchBadges;     // unused
+            (void)senderName;       // unused
+            (void)flags;        // unused
 
-            if (self)
             {
                 // Phrase checks should ignore highlights from the user
+                return std::nullopt;
+            }
+
+            if (!highlight.appliesToChannel(args.channelName))
+            {
                 return std::nullopt;
             }
 
@@ -76,9 +79,9 @@ void rebuildSubscriptionHighlights(Settings &settings,
         // The custom sub highlight color is handled in ColorProvider
 
         checks.emplace_back(HighlightCheck{
-            [=](const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
+        [=](const auto &args,
+                const auto &twitchBadges, const auto &senderName,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> std::optional<HighlightResult> {
                 (void)twitchBadges;     // unused
                 (void)senderName;       // unused
@@ -123,9 +126,9 @@ void rebuildWhisperHighlights(Settings &settings,
         // The custom whisper highlight color is handled in ColorProvider
 
         checks.emplace_back(HighlightCheck{
-            [=](const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
+            [=](const auto &args,
+                const auto &twitchBadges, const auto &senderName,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> std::optional<HighlightResult> {
                 (void)twitchBadges;     // unused
                 (void)senderName;       // unused
@@ -166,9 +169,9 @@ void rebuildReplyThreadHighlight(Settings &settings,
         auto highlightInMentions =
             settings.showThreadHighlightInMentions.getValue();
         checks.emplace_back(HighlightCheck{
-            [=](const auto & /*args*/, const auto & /*twitchBadges*/,
-                const auto & /*senderName*/, const auto & /*originalMessage*/,
-                const auto &flags,
+            [=](const auto & /*args*/,
+                const auto & /*twitchBadges*/, const auto & /*senderName*/,
+                const auto & /*originalMessage*/, const auto &flags,
                 const auto self) -> std::optional<HighlightResult> {
                 if (flags.has(MessageFlag::SubscribedThread) && !self)
                 {
@@ -224,9 +227,9 @@ void rebuildMessageHighlights(Settings &settings,
             ColorProvider::instance().color(ColorType::AutomodHighlight);
 
         checks.emplace_back(HighlightCheck{
-            [=](const auto & /*args*/, const auto & /*twitchBadges*/,
-                const auto & /*senderName*/, const auto & /*originalMessage*/,
-                const auto &flags,
+            [=](const auto & /*args*/,
+                const auto & /*twitchBadges*/, const auto & /*senderName*/,
+                const auto & /*originalMessage*/, const auto &flags,
                 const auto /*self*/) -> std::optional<HighlightResult> {
                 if (!flags.has(MessageFlag::AutoModOffendingMessage))
                 {
@@ -261,9 +264,9 @@ void rebuildUserHighlights(Settings &settings,
 
         checks.emplace_back(HighlightCheck{
             [showInMentions](
-                const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
+                const auto &args,
+                const auto &twitchBadges, const auto &senderName,
+                const auto &originalMessage, const auto &flags,
                 const auto self) -> std::optional<HighlightResult> {
                 (void)args;             //unused
                 (void)twitchBadges;     //unused
@@ -288,9 +291,9 @@ void rebuildUserHighlights(Settings &settings,
     for (const auto &highlight : *userHighlights)
     {
         checks.emplace_back(HighlightCheck{
-            [highlight](const auto &args, const auto &twitchBadges,
-                        const auto &senderName, const auto &originalMessage,
-                        const auto &flags,
+            [highlight](const auto &args,
+                        const auto &twitchBadges, const auto &senderName,
+                        const auto &originalMessage, const auto &flags,
                         const auto self) -> std::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)twitchBadges;     // unused
@@ -328,9 +331,9 @@ void rebuildBadgeHighlights(Settings &settings,
     for (const auto &highlight : *badgeHighlights)
     {
         checks.emplace_back(HighlightCheck{
-            [highlight](const auto &args, const auto &twitchBadges,
-                        const auto &senderName, const auto &originalMessage,
-                        const auto &flags,
+            [highlight](const auto &args,
+                        const auto &twitchBadges, const auto &senderName,
+                        const auto &originalMessage, const auto &flags,
                         const auto self) -> std::optional<HighlightResult> {
                 (void)args;             // unused
                 (void)senderName;       // unused
@@ -473,7 +476,8 @@ void HighlightController::rebuildChecks(Settings &settings)
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
-    const MessageParseArgs &args, const std::vector<TwitchBadge> &twitchBadges,
+    const MessageParseArgs &args,
+    const std::vector<TwitchBadge> &twitchBadges,
     const QString &senderName, const QString &originalMessage,
     const MessageFlags &messageFlags) const
 {

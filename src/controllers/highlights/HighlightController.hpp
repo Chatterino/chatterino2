@@ -38,8 +38,9 @@ public:
      **/
     [[nodiscard]] std::pair<bool, HighlightResult> check(
         const MessageParseArgs &args,
-        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags) const;
+        const std::vector<TwitchBadge> &twitchBadges,
+        const QString &senderName, const QString &originalMessage,
+        const MessageFlags &messageFlags) const;
 
 private:
     /**

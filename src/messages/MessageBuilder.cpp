@@ -1721,7 +1721,10 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
                           builder->searchText;
 
     // highlights
-    HighlightAlert highlight = builder.parseHighlights(tags, content, args);
+    MessageParseArgs argsWithChannel = args;
+    argsWithChannel.channelName = channel->getName();
+    HighlightAlert highlight = builder.parseHighlights(tags, content,
+                                                       argsWithChannel);
     if (tags.contains("historical"))
     {
         highlight.playSound = false;

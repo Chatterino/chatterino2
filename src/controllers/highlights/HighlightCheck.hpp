@@ -25,9 +25,9 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 struct HighlightCheck {
     using Checker = std::function<std::optional<HighlightResult>(
         const MessageParseArgs &args,
-        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags,
-        bool self)>;
+        const std::vector<TwitchBadge> &twitchBadges,
+        const QString &senderName, const QString &originalMessage,
+        const MessageFlags &messageFlags, bool self)>;
     Checker cb;
 };
 

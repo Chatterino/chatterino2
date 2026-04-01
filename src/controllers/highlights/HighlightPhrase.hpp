@@ -29,7 +29,8 @@ public:
      */
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
                     bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, QColor color);
+                    const QString &soundUrl, QColor color,
+                    const QString &channelName = QString());
 
     /**
      * @brief Create a new HighlightPhrase.
@@ -38,7 +39,8 @@ public:
      */
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
                     bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, std::shared_ptr<QColor> color);
+                    const QString &soundUrl, std::shared_ptr<QColor> color,
+                    const QString &channelName = QString());
 
     const QString &getPattern() const;
     bool showInMentions() const;
@@ -51,7 +53,7 @@ public:
      * In distinction from `HighlightPhrase::hasCustomSound`, this method only
      * checks whether or not ANY sound should be played when the phrase is
      * triggered.
-     * 
+     *
      * To check whether a custom sound is set, use
      * `HighlightPhrase::hasCustomSound` instead.
      *
@@ -75,8 +77,11 @@ public:
     bool isValid() const;
     bool isMatch(const QString &subject) const;
     bool isCaseSensitive() const;
+    bool appliesToChannel(const QString &channelName) const;
+    const QString &getChannelName() const;
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
+
 
     /*
      * XXX: Use the constexpr constructor here once we are building with
@@ -103,6 +108,7 @@ private:
     QUrl soundUrl_;
     std::shared_ptr<QColor> color_;
     QRegularExpression regex_;
+    QString channelName_;
 };
 
 }  // namespace chatterino
@@ -131,6 +137,7 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
         chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
+        chatterino::rj::set(ret, "channelName", value.getChannelName(), a);
         chatterino::rj::set(ret, "color",
                             value.getColor()->name(QColor::HexArgb), a);
 
@@ -157,6 +164,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         bool _isRegex = false;
         bool _isCaseSensitive = false;
         QString _soundUrl;
+        QString _channelName;
         QString encodedColor;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
@@ -166,6 +174,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "case", _isCaseSensitive);
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
+        chatterino::rj::getSafe(value, "channelName", _channelName);
         chatterino::rj::getSafe(value, "color", encodedColor);
 
         auto _color = QColor(encodedColor);
@@ -176,7 +185,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
                                            _hasSound, _isRegex,
-                                           _isCaseSensitive, _soundUrl, _color);
+                                           _isCaseSensitive, _soundUrl, _color,
+                                           _channelName);
     }
 };
 

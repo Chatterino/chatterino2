@@ -82,6 +82,7 @@ struct MessageParseArgs {
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
+    QString channelName = "";
     bool allowIgnore = true;
     bool isAction = false;
     QString channelPointRewardId = "";
