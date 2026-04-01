@@ -80,7 +80,7 @@ HighlightingPage::HighlightingPage()
                 view->setTitles({"Pattern", "Show in\nMentions",
                                  "Flash\ntaskbar", "Enable\nregex",
                                  "Case-\nsensitive", "Play\nsound",
-                                 "Custom\nsound", "Color"});
+                                 "Custom\nsound", "Filter\nChannels", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(

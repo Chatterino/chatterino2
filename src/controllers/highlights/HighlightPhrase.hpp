@@ -30,7 +30,7 @@ public:
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
                     bool hasSound, bool isRegex, bool isCaseSensitive,
                     const QString &soundUrl, QColor color,
-                    const QString &channelName = QString());
+                    const QString &channelNames = QString());
 
     /**
      * @brief Create a new HighlightPhrase.
@@ -40,7 +40,7 @@ public:
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
                     bool hasSound, bool isRegex, bool isCaseSensitive,
                     const QString &soundUrl, std::shared_ptr<QColor> color,
-                    const QString &channelName = QString());
+                    const QString &channelNames = QString());
 
     const QString &getPattern() const;
     bool showInMentions() const;
@@ -78,7 +78,7 @@ public:
     bool isMatch(const QString &subject) const;
     bool isCaseSensitive() const;
     bool appliesToChannel(const QString &channelName) const;
-    const QString &getChannelName() const;
+    const QString &getChannelNames() const;
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
 
@@ -108,7 +108,7 @@ private:
     QUrl soundUrl_;
     std::shared_ptr<QColor> color_;
     QRegularExpression regex_;
-    QString channelName_;
+    QString channelNames_;
 };
 
 }  // namespace chatterino
@@ -137,7 +137,7 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
         chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
-        chatterino::rj::set(ret, "channelName", value.getChannelName(), a);
+        chatterino::rj::set(ret, "channelNames", value.getChannelNames(), a);
         chatterino::rj::set(ret, "color",
                             value.getColor()->name(QColor::HexArgb), a);
 

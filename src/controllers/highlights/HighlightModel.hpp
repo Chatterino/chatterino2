@@ -26,7 +26,8 @@ public:
         CaseSensitive = 4,
         PlaySound = 5,
         SoundPath = 6,
-        Color = 7,
+        Channel = 7,
+        Color = 8,
         COUNT  // keep this as last member of enum
     };
 
