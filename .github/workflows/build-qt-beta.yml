@@ -1,0 +1,225 @@
+---
+name: Build with Qt Beta/RC
+
+on:
+  push:
+    branches:
+      - master
+      - "bugfix-release/*"
+      - "release/*"
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Run daily at 2 AM UTC to catch new Qt releases
+    - cron: '0 2 * * *'
+
+concurrency:
+  group: build-qt-beta-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
+  CONAN_VERSION: 2.11.0
+
+jobs:
+  build-qt-beta:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Test with latest Qt versions
+          - os: ubuntu-latest
+            qt-version: 6.11.0
+          - os: ubuntu-latest
+            qt-version: 6.10.0
+          - os: windows-latest
+            qt-version: 6.11.0
+          - os: windows-latest
+            qt-version: 6.10.0
+          - os: macos-14
+            qt-version: 6.11.0
+          - os: macos-14
+            qt-version: 6.10.0
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Determine build type
+        id: build-type
+        shell: bash
+        run: |
+          if git describe --exact-match --match 'v*'; then
+            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+          else
+            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ubuntu
+      - name: Install Qt6 (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          mkdir build
+          cd build
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
+            -DFORCE_JSON_GENERATION=Off \
+            -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
+            ..
+          make -j"$(nproc)"
+
+      # windows
+      - name: Install Qt6 (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Enable Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Setup sccache (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: hendrikmuhs/ccache-action@v1.2.20
+        with:
+          variant: sccache
+          save: false
+          key: sccache-qt-beta-${{ matrix.os }}-${{ matrix.qt-version }}
+
+      - name: Cache conan packages (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v5
+        with:
+          key: ${{ runner.os }}-conan-qt-beta-${{ hashFiles('**/conanfile.py') }}-QT6
+          path: ~/.conan2/
+
+      - name: Install Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          pip3 install --user "conan==${{ env.CONAN_VERSION }}"
+        shell: powershell
+
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan --version
+          conan profile detect -f
+        shell: powershell
+
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          mkdir build
+          cd build
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=. `
+              -o with_openssl3="True"
+        shell: powershell
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: pwsh
+        run: |
+          cd build
+          cmake `
+              -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=ON `
+              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
+              -DFORCE_JSON_GENERATION=Off `
+              -DCHATTERINO_SPELLCHECK=On `
+              ..
+          set cl=/MP
+          nmake /S /NOLOGO
+
+      # macos  
+      - name: Install Qt6 (macOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Install dependencies (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
+
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
+              -DCHATTERINO_SPELLCHECK=On \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
+
+      - name: Upload build results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-logs-${{ matrix.os }}-qt-${{ matrix.qt-version }}
+          path: |
+            build/compile_commands.json
+            build/CMakeFiles/CMakeError.log
+            build/CMakeFiles/CMakeOutput.log
+          retention-days: 7
+
+  report-results:
+    name: "Report Qt Beta Build Results"
+    needs: build-qt-beta
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## Qt Beta Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow tests Chatterino with newer Qt versions to ensure compatibility." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Matrix Results:" >> $GITHUB_STEP_SUMMARY
+          echo "| OS | Qt Version | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ubuntu-latest | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ubuntu-latest | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| windows-latest | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| windows-latest | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| macos-14 | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| macos-14 | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Overall Status**: ${{ needs.build-qt-beta.result }}" >> $GITHUB_STEP_SUMMARY
