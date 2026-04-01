@@ -951,9 +951,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
-    if (VCPKG_TARGET_TRIPLET)
-        target_link_libraries(${LIBRARY_PROJECT} PUBLIC Boost::json)
-    endif()
 endif()
 
 if (CHATTERINO_SPELLCHECK)
