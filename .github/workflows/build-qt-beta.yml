@@ -22,25 +22,62 @@ env:
   CONAN_VERSION: 2.11.0
 
 jobs:
+  detect-latest-qt:
+    name: "Detect Latest Qt Versions"
+    runs-on: ubuntu-latest
+    outputs:
+      qt-versions: ${{ steps.detect.outputs.qt-versions }}
+      latest-beta: ${{ steps.detect.outputs.latest-beta }}
+      latest-stable: ${{ steps.detect.outputs.latest-stable }}
+    steps:
+      - name: Detect available Qt versions
+        id: detect
+        run: |
+          # Try to detect latest Qt versions from Qt's download servers
+          QT_VERSIONS="[]"
+          LATEST_BETA=""
+          LATEST_STABLE="6.11.0"  # fallback
+          
+          # Check for Qt 6.12 beta/RC versions first
+          for version in "6.12.0-rc1" "6.12.0-beta1" "6.12.0-beta2"; do
+            echo "Checking Qt $version..."
+            if curl -s -f -L "https://download.qt.io/development_releases/qt/${version%.*}/$version/qt-opensource-linux-x64-$version.run" > /dev/null 2>&1; then
+              echo "✓ Found Qt $version (beta/RC)"
+              QT_VERSIONS=$(echo "$QT_VERSIONS" | jq ". + [\"$version\"]")
+              if [ -z "$LATEST_BETA" ]; then
+                LATEST_BETA="$version"
+              fi
+            fi
+          done
+          
+          # Check for latest stable versions
+          for version in "6.11.0" "6.10.0" "6.9.0"; do
+            echo "Checking Qt $version..."
+            if curl -s -f -L "https://download.qt.io/archive/qt/${version%.*}/$version/qt-opensource-linux-x64-$version.run" > /dev/null 2>&1; then
+              echo "✓ Found Qt $version (stable)"
+              QT_VERSIONS=$(echo "$QT_VERSIONS" | jq ". + [\"$version\"]")
+              if [ -z "$LATEST_STABLE" ] || [ "$version" = "6.11.0" ]; then
+                LATEST_STABLE="$version"
+              fi
+            fi
+          done
+          
+          echo "Available Qt versions: $QT_VERSIONS"
+          echo "Latest beta/RC: $LATEST_BETA"
+          echo "Latest stable: $LATEST_STABLE"
+          
+          echo "qt-versions=$QT_VERSIONS" >> "$GITHUB_OUTPUT"
+          echo "latest-beta=$LATEST_BETA" >> "$GITHUB_OUTPUT"
+          echo "latest-stable=$LATEST_STABLE" >> "$GITHUB_OUTPUT"
+
   build-qt-beta:
     name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
+    needs: detect-latest-qt
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          # Test with latest Qt versions
-          - os: ubuntu-latest
-            qt-version: 6.11.0
-          - os: ubuntu-latest
-            qt-version: 6.10.0
-          - os: windows-latest
-            qt-version: 6.11.0
-          - os: windows-latest
-            qt-version: 6.10.0
-          - os: macos-14
-            qt-version: 6.11.0
-          - os: macos-14
-            qt-version: 6.10.0
+        os: [ubuntu-latest, windows-latest, macos-14]
+        qt-version: ${{ fromJson(needs.detect-latest-qt.outputs.qt-versions) }}
       fail-fast: false
 
     steps:
@@ -202,7 +239,7 @@ jobs:
 
   report-results:
     name: "Report Qt Beta Build Results"
-    needs: build-qt-beta
+    needs: [detect-latest-qt, build-qt-beta]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -210,16 +247,9 @@ jobs:
         run: |
           echo "## Qt Beta Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow tests Chatterino with newer Qt versions to ensure compatibility." >> $GITHUB_STEP_SUMMARY
+          echo "**Latest Beta/RC**: ${{ needs.detect-latest-qt.outputs.latest-beta }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Latest Stable**: ${{ needs.detect-latest-qt.outputs.latest-stable }}" >> $GITHUB_STEP_SUMMARY
+          echo "**All Tested Versions**: ${{ needs.detect-latest-qt.outputs.qt-versions }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status**: ${{ needs.build-qt-beta.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Matrix Results:" >> $GITHUB_STEP_SUMMARY
-          echo "| OS | Qt Version | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----|------------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ubuntu-latest | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ubuntu-latest | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| windows-latest | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| windows-latest | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| macos-14 | 6.11.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| macos-14 | 6.10.0 | ${{ contains(needs.build-qt-beta.result, 'success') && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Overall Status**: ${{ needs.build-qt-beta.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow automatically detects and tests with the latest Qt beta/RC versions to ensure Chatterino remains compatible." >> $GITHUB_STEP_SUMMARY
