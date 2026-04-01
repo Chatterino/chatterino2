@@ -9,6 +9,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <boost/json/basic_parser.hpp>
+#    include <boost/json/basic_parser_impl.hpp>
 #    include <boost/json/serialize.hpp>
 #    include <QVarLengthArray>
 #    include <sol/sol.hpp>
@@ -414,11 +415,5 @@ int jsonParse(lua_State *L)
 }
 
 }  // namespace chatterino::lua::api
-
-#    ifndef BOOST_ALL_DYN_LINK
-#        include <boost/json/src.hpp>
-#    else
-#        include <boost/json.hpp>
-#    endif // BOOST_ALL_DYN_LINK
 
 #endif  // CHATTERINO_HAVE_PLUGINS
