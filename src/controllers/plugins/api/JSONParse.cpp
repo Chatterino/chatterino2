@@ -415,6 +415,10 @@ int jsonParse(lua_State *L)
 
 }  // namespace chatterino::lua::api
 
-#    include <boost/json/src.hpp>
+#    ifndef BOOST_ALL_DYN_LINK
+#        include <boost/json/src.hpp>
+#    else
+#        include <boost/json.hpp>
+#    endif // BOOST_ALL_DYN_LINK
 
 #endif  // CHATTERINO_HAVE_PLUGINS
