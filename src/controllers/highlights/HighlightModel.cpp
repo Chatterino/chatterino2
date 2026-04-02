@@ -79,10 +79,11 @@ void HighlightModel::afterInit()
 
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
     setFilePathItem(usernameRow[Column::SoundPath], selfSound, false);
+    setStringItem(usernameRow[Column::Channel],
+                  getSettings()->selfHighlightChannelNames.getValue());
 
     auto selfColor = ColorProvider::instance().color(ColorType::SelfHighlight);
     setColorItem(usernameRow[Column::Color], *selfColor, false);
-    setStringItem(usernameRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(usernameRow, HighlightRowIndexes::SelfHighlightRow);
 
@@ -500,6 +501,15 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->automodHighlightSoundUrl.setValue(
                         value.toString());
                 }
+            }
+        }
+        break;
+        case Column::Channel: {
+            if (role == Qt::EditRole &&
+                rowIndex == HighlightRowIndexes::SelfHighlightRow)
+            {
+                getSettings()->selfHighlightChannelNames.setValue(
+                    value.toString());
             }
         }
         break;

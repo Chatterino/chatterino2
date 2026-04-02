@@ -509,6 +509,8 @@ public:
         "/highlighting/selfHighlightSoundUrl", ""};
     QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
                                          ""};
+    QStringSetting selfHighlightChannelNames = {
+        "/highlighting/selfHighlight/channelNames", ""};
 
     BoolSetting enableSelfMessageHighlight = {
         "/highlighting/selfMessageHighlight/enabled", false};

@@ -205,7 +205,8 @@ void rebuildMessageHighlights(Settings &settings,
             settings.enableSelfHighlightTaskbar,
             settings.enableSelfHighlightSound, false, false,
             settings.selfHighlightSoundUrl.getValue(),
-            ColorProvider::instance().color(ColorType::SelfHighlight));
+            ColorProvider::instance().color(ColorType::SelfHighlight),
+            settings.selfHighlightChannelNames.getValue());
 
         checks.emplace_back(highlightPhraseCheck(highlight));
     }
@@ -380,6 +381,7 @@ HighlightController::HighlightController(Settings &settings,
     this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSelfHighlightTaskbar);
     this->rebuildListener_.addSetting(settings.selfHighlightSoundUrl);
+    this->rebuildListener_.addSetting(settings.selfHighlightChannelNames);
     this->rebuildListener_.addSetting(settings.showSelfHighlightInMentions);
 
     this->rebuildListener_.addSetting(settings.enableWhisperHighlight);
