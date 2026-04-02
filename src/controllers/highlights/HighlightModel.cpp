@@ -82,6 +82,7 @@ void HighlightModel::afterInit()
 
     auto selfColor = ColorProvider::instance().color(ColorType::SelfHighlight);
     setColorItem(usernameRow[Column::Color], *selfColor, false);
+    setStringItem(usernameRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(usernameRow, HighlightRowIndexes::SelfHighlightRow);
 
@@ -106,6 +107,7 @@ void HighlightModel::afterInit()
 
     auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
     setColorItem(whisperRow[Column::Color], *whisperColor, false);
+    setStringItem(whisperRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(whisperRow, HighlightRowIndexes::WhisperRow);
 
@@ -128,6 +130,7 @@ void HighlightModel::afterInit()
 
     auto subColor = ColorProvider::instance().color(ColorType::Subscription);
     setColorItem(subRow[Column::Color], *subColor, false);
+    setStringItem(subRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(subRow, HighlightRowIndexes::SubRow);
 
@@ -153,6 +156,7 @@ void HighlightModel::afterInit()
     auto RedeemedColor =
         ColorProvider::instance().color(ColorType::RedeemedHighlight);
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
+    setStringItem(redeemedRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(redeemedRow, HighlightRowIndexes::RedeemedRow);
 
@@ -179,6 +183,7 @@ void HighlightModel::afterInit()
     auto FirstMessageColor =
         ColorProvider::instance().color(ColorType::FirstMessageHighlight);
     setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
+    setStringItem(firstMessageRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(firstMessageRow,
                           HighlightRowIndexes::FirstMessageRow);
@@ -206,6 +211,7 @@ void HighlightModel::afterInit()
         ColorProvider::instance().color(ColorType::ElevatedMessageHighlight);
     setColorItem(elevatedMessageRow[Column::Color], *elevatedMessageColor,
                  false);
+    setStringItem(elevatedMessageRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(elevatedMessageRow,
                           HighlightRowIndexes::ElevatedMessageRow);
@@ -236,6 +242,7 @@ void HighlightModel::afterInit()
     auto threadMessageColor =
         ColorProvider::instance().color(ColorType::ThreadMessageHighlight);
     setColorItem(threadMessageRow[Column::Color], *threadMessageColor, false);
+    setStringItem(threadMessageRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(threadMessageRow,
                           HighlightRowIndexes::ThreadMessageRow);
@@ -263,6 +270,7 @@ void HighlightModel::afterInit()
     auto automodColor =
         ColorProvider::instance().color(ColorType::AutomodHighlight);
     setColorItem(automodRow[Column::Color], *automodColor, false);
+    setStringItem(automodRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(automodRow, HighlightRowIndexes::AutomodRow);
 
@@ -281,6 +289,7 @@ void HighlightModel::afterInit()
     auto watchStreakColor =
         ColorProvider::instance().color(ColorType::WatchStreak);
     setColorItem(watchStreakRow[Column::Color], *watchStreakColor, false);
+    setStringItem(watchStreakRow[Column::Channel], QString(), false, true);
 
     this->insertCustomRow(watchStreakRow, HighlightRowIndexes::WatchStreakRow);
 }
