@@ -164,7 +164,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         bool _isRegex = false;
         bool _isCaseSensitive = false;
         QString _soundUrl;
-        QString _channelName;
+        QString _channelNames;
         QString encodedColor;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
@@ -174,7 +174,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "case", _isCaseSensitive);
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
-        chatterino::rj::getSafe(value, "channelName", _channelName);
+        chatterino::rj::getSafe(value, "channelNames", _channelNames);
         chatterino::rj::getSafe(value, "color", encodedColor);
 
         auto _color = QColor(encodedColor);
@@ -186,7 +186,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
                                            _hasSound, _isRegex,
                                            _isCaseSensitive, _soundUrl, _color,
-                                           _channelName);
+                                           _channelNames);
     }
 };
 
