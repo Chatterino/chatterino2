@@ -5,13 +5,11 @@ on:
   push:
     branches:
       - master
-      - "bugfix-release/*"
-      - "release/*"
   pull_request:
   workflow_dispatch:
   schedule:
     # Run daily at 2 AM UTC to catch new Qt releases
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 concurrency:
   group: build-qt-beta-${{ github.ref }}
@@ -27,48 +25,51 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       qt-versions: ${{ steps.detect.outputs.qt-versions }}
-      latest-beta: ${{ steps.detect.outputs.latest-beta }}
-      latest-stable: ${{ steps.detect.outputs.latest-stable }}
     steps:
       - name: Detect available Qt versions
         id: detect
         run: |
-          # Try to detect latest Qt versions from Qt's download servers
-          QT_VERSIONS="[]"
-          LATEST_BETA=""
-          LATEST_STABLE="6.11.0"  # fallback
-          
-          # Check for Qt 6.12 beta/RC versions first
-          for version in "6.12.0-rc1" "6.12.0-beta1" "6.12.0-beta2"; do
-            echo "Checking Qt $version..."
-            if curl -s -f -L "https://download.qt.io/development_releases/qt/${version%.*}/$version/qt-opensource-linux-x64-$version.run" > /dev/null 2>&1; then
-              echo "✓ Found Qt $version (beta/RC)"
-              QT_VERSIONS=$(echo "$QT_VERSIONS" | jq ". + [\"$version\"]")
-              if [ -z "$LATEST_BETA" ]; then
-                LATEST_BETA="$version"
-              fi
-            fi
-          done
-          
-          # Check for latest stable versions
-          for version in "6.11.0" "6.10.0" "6.9.0"; do
-            echo "Checking Qt $version..."
-            if curl -s -f -L "https://download.qt.io/archive/qt/${version%.*}/$version/qt-opensource-linux-x64-$version.run" > /dev/null 2>&1; then
-              echo "✓ Found Qt $version (stable)"
-              QT_VERSIONS=$(echo "$QT_VERSIONS" | jq ". + [\"$version\"]")
-              if [ -z "$LATEST_STABLE" ] || [ "$version" = "6.11.0" ]; then
-                LATEST_STABLE="$version"
-              fi
-            fi
-          done
-          
-          echo "Available Qt versions: $QT_VERSIONS"
-          echo "Latest beta/RC: $LATEST_BETA"
-          echo "Latest stable: $LATEST_STABLE"
-          
-          echo "qt-versions=$QT_VERSIONS" >> "$GITHUB_OUTPUT"
-          echo "latest-beta=$LATEST_BETA" >> "$GITHUB_OUTPUT"
-          echo "latest-stable=$LATEST_STABLE" >> "$GITHUB_OUTPUT"
+          # Use aqt to list available Qt versions including beta/RC
+          pip3 install aqtinstall
+
+          # Get all available Qt versions including beta/RC
+          LATEST_VERSIONS=$(python3 -c "
+          import json
+          import subprocess
+          import re
+
+          try:
+              # Get all available Qt versions
+              result = subprocess.run(['aqt', 'list-qt', 'linux', 'desktop'], capture_output=True, text=True)
+              versions = result.stdout.strip().split('\n')
+              
+              # Filter for recent versions including beta/RC
+              qt_versions = []
+              for version in versions:
+                  # Include stable versions (6.11.0, 6.12.0, etc.)
+                  if re.match(r'6\.(1[1-9]|[2-9]\d)\.\d+', version):
+                      qt_versions.append(version)
+                  # Include beta/RC versions (6.12.0-beta1, 6.12.0-rc1, etc.)
+                  elif re.match(r'6\.(1[1-9]|[2-9]\d)\.\d+-(beta|rc)\d*', version):
+                      qt_versions.append(version)
+              
+              # Sort versions (stable first, then beta/RC)
+              def version_key(v):
+                  parts = v.split('-')
+                  base = list(map(int, parts[0].split('.')))
+                  if len(parts) > 1:  # beta/RC version
+                      return (base, 1, parts[1])  # put after stable
+                  return (base, 0, '')  # stable first
+              
+              qt_versions.sort(key=version_key)
+              latest_versions = qt_versions[:8]  # Take latest 8 versions
+              
+              print(json.dumps(latest_versions))
+          except Exception as e:
+              print('["6.11.0", "6.10.0", "6.9.0"]')  # fallback
+          ")
+
+          echo "qt-versions=$LATEST_VERSIONS" >> "$GITHUB_OUTPUT"
 
   build-qt-beta:
     name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
@@ -85,16 +86,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Determine build type
-        id: build-type
-        shell: bash
-        run: |
-          if git describe --exact-match --match 'v*'; then
-            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
-          else
-            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
-          fi
 
       # ubuntu
       - name: Install Qt6 (Ubuntu)
@@ -116,7 +107,6 @@ jobs:
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
             -DUSE_PRECOMPILED_HEADERS=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
-            -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
             -DFORCE_JSON_GENERATION=Off \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             ..
@@ -188,14 +178,14 @@ jobs:
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=ON `
-              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
               -DFORCE_JSON_GENERATION=Off `
               -DCHATTERINO_SPELLCHECK=On `
+              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
               ..
           set cl=/MP
           nmake /S /NOLOGO
 
-      # macos  
+      # macos
       - name: Install Qt6 (macOS)
         if: startsWith(matrix.os, 'macos')
         uses: jurplel/install-qt-action@v4.3.0
@@ -221,7 +211,6 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DFORCE_JSON_GENERATION=Off \
-              -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
               -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
@@ -247,9 +236,7 @@ jobs:
         run: |
           echo "## Qt Beta Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Latest Beta/RC**: ${{ needs.detect-latest-qt.outputs.latest-beta }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Latest Stable**: ${{ needs.detect-latest-qt.outputs.latest-stable }}" >> $GITHUB_STEP_SUMMARY
-          echo "**All Tested Versions**: ${{ needs.detect-latest-qt.outputs.qt-versions }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tested Versions**: ${{ needs.detect-latest-qt.outputs.qt-versions }}" >> $GITHUB_STEP_SUMMARY
           echo "**Build Status**: ${{ needs.build-qt-beta.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow automatically detects and tests with the latest Qt beta/RC versions to ensure Chatterino remains compatible." >> $GITHUB_STEP_SUMMARY
+          echo "This workflow automatically detects and tests with the latest Qt versions to ensure Chatterino remains compatible." >> $GITHUB_STEP_SUMMARY
