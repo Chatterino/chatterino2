@@ -42,9 +42,6 @@ struct TypeClass {
     bool operator==(Type t) const;
     bool operator==(const TypeClass &t) const;
     bool operator==(const IllTyped &t) const;
-    bool operator!=(Type t) const;
-    bool operator!=(const TypeClass &t) const;
-    bool operator!=(const IllTyped &t) const;
 };
 
 struct IllTyped {
