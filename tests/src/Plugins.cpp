@@ -477,7 +477,7 @@ TEST_F(PluginTest, testHttp)
             waiter.requestDone();
         };
 
-        (*lua)["DoReq"](HTTPBIN_BASE_URL + c.url, c.data);
+        (*lua)["DoReq"](HTTPBIN_BASE_URL.toStdString().c_str() + c.url, c.data);
         waiter.waitForRequest();
 
         EXPECT_EQ(lua->get<bool>("success"), c.success);
@@ -740,8 +740,10 @@ TEST_F(PluginTest, testTcpWebSocket)
         open = true;
     });
 
+    lua->set("url", "ws://" + PUBSUB_WS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_text = function(data)
             add(true, data)
         end
@@ -816,8 +818,10 @@ TEST_F(PluginTest, testTlsWebSocket)
         open = true;
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             headers = {
                 ["User-Agent"] = "Lua",
                 ["A-Header"] = "A value",
@@ -893,8 +897,10 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     )lua");
     ASSERT_TRUE(res);
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     const char *shouldThrow = R"lua(
-        return c2.WebSocket.new('wss://127.0.0.1:9050/echo')
+        return c2.WebSocket.new(url)
     )lua";
     EXPECT_ANY_THROW(lua->script(shouldThrow));
 }
@@ -902,12 +908,13 @@ TEST_F(PluginTest, testWebSocketNoPerms)
 TEST_F(PluginTest, testWebSocketApi)
 {
     configure({PluginPermission{{{"type", "Network"}}}});
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
 
     bool ok = lua->script(R"lua(
         local t = function () end
         local b = function () end
         local c = function () end
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             on_text = t,
             on_binary = b,
             on_close = c,
@@ -928,8 +935,10 @@ TEST_F(PluginTest, testWebSocketUnsetFns)
         waiter.requestDone();
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_close = function()
             done()
         end

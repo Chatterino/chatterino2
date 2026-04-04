@@ -1055,12 +1055,14 @@ if (BUILD_APP)
         endif()
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        install(TARGETS ${EXECUTABLE_PROJECT} 
-            RUNTIME_DEPENDENCIES 
+        install(TARGETS ${EXECUTABLE_PROJECT}
+            RUNTIME_DEPENDENCIES
                 PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
                 DIRECTORIES ${QT_BIN_DIR}
-            RUNTIME DESTINATION .)
+            COMPONENT ${PROJECT_NAME}
+            RUNTIME DESTINATION .
+        )
 
         # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
         install(FILES
@@ -1070,31 +1072,45 @@ if (BUILD_APP)
             ${QT_BIN_DIR}/libwebp.dll
             ${QT_BIN_DIR}/libsharpyuv.dll
             DESTINATION .
-            OPTIONAL)
+            COMPONENT ${PROJECT_NAME}
+            OPTIONAL
+        )
 
-        install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")   
+        install(
+            CODE
+                "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")"
+            COMPONENT ${PROJECT_NAME}
+        )
+        install(
+            CODE
+                "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)"
+            COMPONENT ${PROJECT_NAME}
+        )
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
                 BUNDLE DESTINATION bin
                 LIBRARY DESTINATION lib
                 ARCHIVE DESTINATION lib/static
+                COMPONENT ${PROJECT_NAME}
                 )
     else ()
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
                 LIBRARY DESTINATION lib
                 ARCHIVE DESTINATION lib/static
+                COMPONENT ${PROJECT_NAME}
                 )
 
         install(FILES ${CMAKE_SOURCE_DIR}/resources/com.chatterino.chatterino.desktop
                 DESTINATION share/applications
+                COMPONENT ${PROJECT_NAME}
                 )
 
         install(FILES ${CMAKE_SOURCE_DIR}/resources/icon.png
                 RENAME com.chatterino.chatterino.png
                 DESTINATION share/icons/hicolor/256x256/apps
+                COMPONENT ${PROJECT_NAME}
                 )
     endif ()
 
