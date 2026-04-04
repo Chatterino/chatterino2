@@ -72,7 +72,11 @@ QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
             // empty terms can be hit if the blocked term is an emote - this is a Twitch bug
             continue;
         }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         hitTerms.emplace(hitTerm);
+#else
+        hitTerms.emplace(hitTerm.toString());
+#endif
     }
 
     if (hitTerms.empty())
