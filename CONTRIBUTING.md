@@ -8,7 +8,7 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 ## Use of AI
 
-You **may** use AI assistants for contributing to Chatterino, as long as you follow the principles below.
+You **may** use AI assistance for contributing to Chatterino, as long as you follow the principles below.
 
 **Accountability**: You are responsible for your contribution. Regardless of AI use, your contribution must meet the standards (e.g. quality and license compliance).
 The contributor is always the author and is fully accountable for the entirety of these contributions.
