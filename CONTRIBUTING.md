@@ -2,9 +2,30 @@
 
 This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), people who haven't used Qt, or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
-### General (non-code related) guidelines for contributing to Chatterino
+## General (non-code related) guidelines for contributing to Chatterino
 
 - Make a specific branch for your pull request instead of using the master, main, or mainline branch. This will prevent future problems with updating your branch after your PR is merged.
+
+## Use of AI
+
+You **may** use AI assistants to help with your contributions to Chatterino.
+
+AI tools **should not** be used for fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
+These issues are intended for humans to get familiar with the Chatterino codebase.
+
+> [!IMPORTANT]
+> If you use an AI tool for your contribution, add an indicator like `Assisted-by: <name-of-tool>` to your description.
+
+**Avoid** using the tool to generate a description for your pull request.
+AI tools often only explain "what" instead of "why". The latter part is more important.
+
+In general it's important that a human is still involved in the process.
+
+See also:
+
+- [Linux Kernel: AI Coding Assistants](https://docs.kernel.org/process/coding-assistants.html)
+- [Fedora: AI-Assisted Contributions Policy](https://docs.fedoraproject.org/en-US/council/policy/ai-contribution-policy/)
+- [LLVM: AI Tool Use Policy](https://llvm.org/docs/AIToolPolicy.html)
 
 # Tooling
 
