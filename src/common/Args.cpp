@@ -144,6 +144,13 @@ Args::Args(const QApplication &app, const Paths &paths)
         "specified, Twitch is assumed.",
         "t:channel");
 
+    QCommandLineOption useOldScalingOption(
+        "use-old-scaling",
+        "Starts Chatterino with the old scaling option applied. This is not a "
+        "setting that will stick around. If you have issues where you feel "
+        "like you have to use this, please reach out to our issue tracker at "
+        "https://github.com/Chatterino/chatterino2/issues");
+
 #ifndef NDEBUG
     QCommandLineOption useLocalEventsubOption(
         "use-local-eventsub",
@@ -162,6 +169,7 @@ Args::Args(const QApplication &app, const Paths &paths)
         loginOption,
         channelLayout,
         activateOption,
+        useOldScalingOption,
 #ifndef NDEBUG
         useLocalEventsubOption,
 #endif
@@ -227,6 +235,11 @@ Args::Args(const QApplication &app, const Paths &paths)
     {
         this->activateChannel =
             parseActivateOption(parser.value(activateOption));
+    }
+
+    if (parser.isSet(useOldScalingOption))
+    {
+        this->useOldScaling = true;
     }
 
 #ifndef NDEBUG

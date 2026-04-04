@@ -40,11 +40,6 @@ struct SelectionItem {
         return this->messageIndex == b.messageIndex &&
                this->charIndex == b.charIndex;
     }
-
-    bool operator!=(const SelectionItem &b) const
-    {
-        return !this->operator==(b);
-    }
 };
 
 struct Selection {
@@ -70,11 +65,6 @@ struct Selection {
     bool operator==(const Selection &b) const
     {
         return this->start == b.start && this->end == b.end;
-    }
-
-    bool operator!=(const Selection &b) const
-    {
-        return !this->operator==(b);
     }
 
     //union of both selections

@@ -119,18 +119,16 @@ int main(int argc, char **argv)
         qCInfo(chatterinoApp).noquote()
             << "Chatterino Qt SSL library version:"
             << QSslSocket::sslLibraryVersionString();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
         qCInfo(chatterinoApp).noquote()
             << "Chatterino Qt SSL active backend:"
             << QSslSocket::activeBackend() << "of"
             << QSslSocket::availableBackends().join(", ");
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
                               << QSslSocket::supportedFeatures();
-#    endif
+#endif
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
                               << QSslSocket::supportedProtocols();
-#endif
 
         Settings settings(args, paths->settingsDirectory);
 

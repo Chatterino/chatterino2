@@ -834,11 +834,7 @@ FontStyle TextElement::fontStyle() const noexcept
 
 void TextElement::appendText(QStringView text)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    for (auto word : text.split(' '))  // creates a QList
-#else
     for (auto word : text.tokenize(u' '))
-#endif
     {
         this->words_.append(word.toString());
     }
@@ -846,9 +842,6 @@ void TextElement::appendText(QStringView text)
 
 void TextElement::appendText(const QString &text)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    this->appendText(QStringView{text});
-#else
     qsizetype firstSpace = text.indexOf(u' ');
     if (firstSpace == -1)
     {
@@ -862,7 +855,6 @@ void TextElement::appendText(const QString &text)
     {
         this->words_.emplace_back(word.toString());
     }
-#endif
 }
 
 QJsonObject TextElement::toJson() const
