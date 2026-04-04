@@ -35,7 +35,6 @@ struct SubscriptionRequest {
 };
 
 bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
-bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
 
 }  // namespace chatterino::eventsub
 
