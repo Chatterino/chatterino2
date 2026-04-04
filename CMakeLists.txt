@@ -162,7 +162,11 @@ if (WIN32)
 endif ()
 
 # Find boost on the system
-find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
+set(BOOST_REQUIRED_COMPONENTS "")
+if (VCPKG_TARGET_TRIPLET)
+    list(APPEND BOOST_REQUIRED_COMPONENTS json)
+endif ()
+find_package(Boost REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_COMPONENTS} OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
