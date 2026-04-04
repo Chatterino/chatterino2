@@ -38,8 +38,8 @@ c2.EventType = {
 
 
 
----@alias QSize {width: integer, height: integer}
----@alias QSizeF {width: number, height: number}
+---@alias QSize [integer, integer] A pair of [width, height]
+---@alias QSizeF [number, number] A pair of [width, height]
 -- Begin src/common/Channel.hpp
 
 ---@enum c2.ChannelType

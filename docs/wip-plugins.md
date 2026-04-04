@@ -825,7 +825,7 @@ Images have the following properties:
 - `width` (`integer`): The scaled width of this image in pixels.
 - `height` (`integer`): The scaled height of this image in pixels.
 - `scale` (`number`): The scale factor applied to the image.
-- `size` (`{width, height}`): The scaled size of this image in pixels.
+- `size` (`[width, height]`): The scaled size of this image in pixels.
 - `animated` (`boolean`): Is this image animated? Note that this requires the image to be loaded.
 
 ##### `Image.from_url(url[, scale[, expected_size]])`

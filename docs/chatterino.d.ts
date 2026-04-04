@@ -563,14 +563,8 @@ declare namespace c2 {
 
     function current_account(): TwitchAccount;
 
-    interface QSizeF {
-        width: number;
-        height: number;
-    }
-    interface QSize {
-        width: number;
-        height: number;
-    }
+    type QSize = [number, number];
+    type QSizeF = [number, number];
 
     class Image {
         readonly url: string;

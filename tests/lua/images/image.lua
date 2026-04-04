@@ -8,8 +8,8 @@ local tests = {
         assert(img.width == 16) -- default width
         assert(img.height == 16) -- default height
         assert(img.scale == 1) -- default scale
-        assert(img.size.width == img.width)
-        assert(img.size.height == img.height)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
     end,
     from_url_and_scale = function()
         local img = c2.Image.from_url("https://chatterino.com/foo/2x", 0.5)
@@ -20,8 +20,8 @@ local tests = {
         assert(img.width == 4) -- default width * scale * scale (once in the constructor and once in the width accessor)
         assert(img.height == 4) -- default height * scale * scale
         assert(img.scale == 0.5)
-        assert(img.size.width == img.width)
-        assert(img.size.height == img.height)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
     end,
     from_url_scale_exp_size = function()
         local img = c2.Image.from_url("https://chatterino.com/bar/2x", 0.5, { 64, 32 })
@@ -32,8 +32,8 @@ local tests = {
         assert(img.width == 32) -- width * scale
         assert(img.height == 16) -- height * scale
         assert(img.scale == 0.5)
-        assert(img.size.width == img.width)
-        assert(img.size.height == img.height)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
     end,
     from_invalid_url = function()
         local ok, res = pcall(c2.Image.from_url, "ws://foo")
@@ -48,8 +48,8 @@ local tests = {
         assert(img.width == 0)
         assert(img.height == 0)
         assert(img.scale == 1)
-        assert(img.size.width == img.width)
-        assert(img.size.height == img.height)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
     end,
     equality = function()
         local imageA = c2.Image.from_url("https://chatterino.com/image-equality/A")

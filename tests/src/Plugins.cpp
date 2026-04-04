@@ -1680,8 +1680,8 @@ TEST_F(PluginImageTest, NoPerms)
         assert(img.width == 0)
         assert(img.height == 0)
         assert(img.scale == 1)
-        assert(img.size.width == img.width)
-        assert(img.size.height == img.height)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
     )lua");
     ASSERT_TRUE(res.valid());
 }

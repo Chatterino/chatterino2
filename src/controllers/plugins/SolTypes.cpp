@@ -206,8 +206,9 @@ QSize sol_lua_get(sol::types<QSize>, lua_State *L, int index,
 
 int sol_lua_push(sol::types<QSize>, lua_State *L, const QSize &value)
 {
-    auto tbl = sol::state_view(L).create_table_with("width", value.width(),
-                                                    "height", value.height());
+    auto tbl = sol::state_view(L).create_table(2);
+    tbl[1] = value.width();
+    tbl[2] = value.height();
     return sol::stack::push(L, tbl);
 }
 
@@ -227,8 +228,9 @@ QSizeF sol_lua_get(sol::types<QSizeF>, lua_State *L, int index,
 
 int sol_lua_push(sol::types<QSizeF>, lua_State *L, const QSizeF &value)
 {
-    auto tbl = sol::state_view(L).create_table_with("width", value.width(),
-                                                    "height", value.height());
+    auto tbl = sol::state_view(L).create_table(2);
+    tbl[1] = value.width();
+    tbl[2] = value.height();
     return sol::stack::push(L, tbl);
 }
 
