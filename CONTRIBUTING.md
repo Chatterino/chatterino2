@@ -8,24 +8,22 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 ## Use of AI
 
-You **may** use AI assistants to help with your contributions to Chatterino.
+You **may** use AI assistants for contributing to Chatterino, as long as you follow the principles below.
 
-AI tools **should not** be used for fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
-These issues are intended for humans to get familiar with the Chatterino codebase.
+**Accountability**: You are responsible for your contribution. Regardless of AI use, your contribution must meet the standards (e.g. quality and license compliance).
+The contributor is always the author and is fully accountable for the entirety of these contributions.
 
-> [!IMPORTANT]
-> If you use an AI tool for your contribution, add an indicator like `Assisted-by: <name-of-tool>` to your description.
+**Transparency**: You must disclose the use of AI tools when the significant part of the contribution is taken from a tool without changes.
+You should disclose the other uses of AI tools, where it might be useful.
+Routine use of assistive tools for correcting grammar and spelling, or for clarifying language, does not require disclosure.
 
 **Avoid** using the tool to generate a description for your pull request.
 AI tools often only explain "what" instead of "why". The latter part is more important.
 
-In general it's important that a human is still involved in the process.
+AI tools **should not** be used for fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
+These issues are intended for humans to get familiar with the Chatterino codebase.
 
-See also:
-
-- [Linux Kernel: AI Coding Assistants](https://docs.kernel.org/process/coding-assistants.html)
-- [Fedora: AI-Assisted Contributions Policy](https://docs.fedoraproject.org/en-US/council/policy/ai-contribution-policy/)
-- [LLVM: AI Tool Use Policy](https://llvm.org/docs/AIToolPolicy.html)
+This guideline is based on the [Fedora AI-Assisted Contributions Policy](https://docs.fedoraproject.org/en-US/council/policy/ai-contribution-policy/) with some sections copied (licensed under [CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/legalcode)).
 
 # Tooling
 
