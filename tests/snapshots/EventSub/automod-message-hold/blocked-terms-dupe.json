@@ -5,86 +5,61 @@
             "terms_found": [
                 {
                     "boundary": {
-                        "end_pos": 7,
-                        "start_pos": 5
+                        "end_pos": 11,
+                        "start_pos": 4
                     },
-                    "owner_broadcaster_user_id": "489584266",
-                    "owner_broadcaster_user_login": "uint128",
-                    "owner_broadcaster_user_name": "uint128",
-                    "term_id": "b48d9032-5033-4598-9650-da7a1e4b1f4c"
+                    "owner_broadcaster_user_id": "117166826",
+                    "owner_broadcaster_user_login": "testaccount_420",
+                    "owner_broadcaster_user_name": "테스트계정420",
+                    "term_id": "e77e672e-a5c3-4d0a-89a3-ee2d940fd9c6"
                 },
                 {
                     "boundary": {
-                        "end_pos": 19,
-                        "start_pos": 9
+                        "end_pos": 24,
+                        "start_pos": 17
                     },
-                    "owner_broadcaster_user_id": "489584266",
-                    "owner_broadcaster_user_login": "uint128",
-                    "owner_broadcaster_user_name": "uint128",
-                    "term_id": "1a79a074-4aaf-4d84-ac87-eba0a65b9a26"
-                },
-                {
-                    "boundary": {
-                        "end_pos": 23,
-                        "start_pos": 23
-                    },
-                    "owner_broadcaster_user_id": "489584266",
-                    "owner_broadcaster_user_login": "uint128",
-                    "owner_broadcaster_user_name": "uint128",
-                    "term_id": "84b1f858-7170-4c33-be4c-97612dde8e10"
+                    "owner_broadcaster_user_id": "117166826",
+                    "owner_broadcaster_user_login": "testaccount_420",
+                    "owner_broadcaster_user_name": "테스트계정420",
+                    "term_id": "e77e672e-a5c3-4d0a-89a3-ee2d940fd9c6"
                 }
             ]
         },
         "broadcaster_user_id": "11148817",
         "broadcaster_user_login": "pajlada",
         "broadcaster_user_name": "pajlada",
-        "held_at": "2025-02-28T16:14:38.089369252Z",
+        "held_at": "2026-04-04T12:08:51.413482599Z",
         "message": {
             "fragments": [
                 {
                     "cheermote": null,
                     "emote": null,
-                    "text": "😂  😂 ",
+                    "text": "foo ",
                     "type": "text"
                 },
                 {
                     "cheermote": null,
-                    "emote": null,
-                    "text": "🍋‍🟩",
-                    "type": "text"
+                    "emote": {
+                        "emote_set_id": "0",
+                        "id": "84608"
+                    },
+                    "text": "cmonBruh",
+                    "type": "emote"
                 },
                 {
                     "cheermote": null,
                     "emote": null,
-                    "text": " ",
-                    "type": "text"
-                },
-                {
-                    "cheermote": null,
-                    "emote": null,
-                    "text": "blockedterm",
-                    "type": "text"
-                },
-                {
-                    "cheermote": null,
-                    "emote": null,
-                    "text": " 😂 ",
-                    "type": "text"
-                },
-                {
-                    "cheermote": null,
-                    "emote": null,
-                    "text": "🍩",
+                    "text": " bar",
                     "type": "text"
                 }
             ],
-            "text": "😂  😂 🍋‍🟩 blockedterm 😂 🍩"
+            "text": "foo cmonBruh bar"
         },
-        "message_id": "45a63ca1-1b0c-46ef-9075-d112f9a9f376",
+        "message_id": "af40eeff-3b0d-4099-81ad-bca76c9bc214",
         "reason": "blocked_term",
-        "user_id": "129546453",
-        "user_login": "nerixyz",
-        "user_name": "nerixyz"
+        "user_id": "11148817",
+        "user_login": "pajlada",
+        "user_name": "pajlada"
     },
     "output": [
         {
@@ -143,12 +118,10 @@
                         "for",
                         "reason:",
                         "matches",
-                        "3",
+                        "1",
                         "blocked",
-                        "terms",
-                        "\"blockedterm\",",
-                        "\"🍋‍🟩\",",
-                        "\"🍩\".",
+                        "term",
+                        "\"cmonBruh\".",
                         "Allow",
                         "will",
                         "post",
@@ -163,7 +136,7 @@
                     "flags": "Text",
                     "link": {
                         "type": "AutoModAllow",
-                        "value": "45a63ca1-1b0c-46ef-9075-d112f9a9f376"
+                        "value": "af40eeff-3b0d-4099-81ad-bca76c9bc214"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
@@ -178,7 +151,7 @@
                     "flags": "Text",
                     "link": {
                         "type": "AutoModDeny",
-                        "value": "45a63ca1-1b0c-46ef-9075-d112f9a9f376"
+                        "value": "af40eeff-3b0d-4099-81ad-bca76c9bc214"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
@@ -194,11 +167,11 @@
             ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
-            "id": "automod_45a63ca1-1b0c-46ef-9075-d112f9a9f376",
+            "id": "automod_af40eeff-3b0d-4099-81ad-bca76c9bc214",
             "localizedName": "",
             "loginName": "automod",
-            "messageText": "AutoMod: Held a message for reason: matches 3 blocked terms \"blockedterm\", \"🍋‍🟩\", \"🍩\". Allow will post it in chat. Allow Deny",
-            "searchText": "AutoMod: Held a message for reason: matches 3 blocked terms \"blockedterm\", \"🍋‍🟩\", \"🍩\". Allow will post it in chat. Allow Deny",
+            "messageText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny",
+            "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
@@ -278,9 +251,9 @@
                     "trailingSpace": true,
                     "type": "MentionElement",
                     "userColor": "Text",
-                    "userLoginName": "nerixyz",
+                    "userLoginName": "pajlada",
                     "words": [
-                        "nerixyz:"
+                        "pajlada:"
                     ]
                 },
                 {
@@ -295,13 +268,9 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "😂",
-                        "",
-                        "😂",
-                        "🍋‍🟩",
-                        "blockedterm",
-                        "😂",
-                        "🍩"
+                        "foo",
+                        "cmonBruh",
+                        "bar"
                     ]
                 }
             ],
@@ -311,9 +280,9 @@
             "frozen": true,
             "id": "",
             "localizedName": "",
-            "loginName": "nerixyz",
-            "messageText": "nerixyz: 😂  😂 🍋‍🟩 blockedterm 😂 🍩",
-            "searchText": "nerixyz: 😂  😂 🍋‍🟩 blockedterm 😂 🍩",
+            "loginName": "pajlada",
+            "messageText": "pajlada: foo cmonBruh bar",
+            "searchText": "pajlada: foo cmonBruh bar",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
