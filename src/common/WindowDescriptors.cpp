@@ -232,7 +232,8 @@ ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
 
     descriptor.vertical_ = root.value("type").toString() == "vertical";
 
-    for (const auto val : root.value("items").toArray())
+    const auto items = root.value("items").toArray();
+    for (const auto val : items)
     {
         const auto obj = val.toObject();
         auto type = obj.value("type");
