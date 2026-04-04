@@ -65,6 +65,9 @@ struct SplitDescriptor {
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
+    SplitNodeDescriptor() = default;
+    SplitNodeDescriptor(SplitDescriptor descriptor);
+
     qreal flexH_ = 1;
     qreal flexV_ = 1;
 

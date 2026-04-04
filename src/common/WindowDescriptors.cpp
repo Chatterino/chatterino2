@@ -201,6 +201,11 @@ void SplitDescriptor::applyTo(Split &split) const
     split.setCheckSpellingOverride(this->spellCheckOverride);
 }
 
+SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)
+    : SplitDescriptor(std::move(descriptor))
+{
+}
+
 SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
 {
     SplitNodeDescriptor descriptor(SplitDescriptor::loadFromJSON(root));
