@@ -425,12 +425,19 @@ channel:add_message(c2.Message.new({
 ##### `Channel:on_messages_cleared(cb)`
 
 Callback when the messages in this channel have been cleared.
-This is called synchronously.
+This is called synchronously. It's also called when plugins clear messages
+([`Channel:clear_messages`](#channelclear_messages))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
 
 ##### `Channel:on_message_replaced(cb)`
 
 Callback when a message is replaced.
-This is called synchronously.
+This is called synchronously. It's also called when plugins replace messages
+([`Channel:replace_message`](#channelreplace_messagemessage-replacement-hint))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
+
 `cb` receives:
 
 - `idx` (`number`) A one-based index of the replaced message
@@ -440,7 +447,10 @@ This is called synchronously.
 ##### `Channel:on_message_appended(cb)`
 
 Callback when a message is added.
-This is called synchronously.
+This is called synchronously. It's also called when plugins add messages
+([`Channel:add_message`](#channeladd_messagemessage-context-override_flags))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
 
 `cb` receives:
 

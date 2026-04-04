@@ -251,21 +251,27 @@ function c2.Channel:__tostring() end
 function c2.Channel:on_display_name_changed(cb) end
 
 --- Callback when the messages in this channel have been cleared.
---- This is called synchronously.
+--- This is called synchronously. It's also called when plugins clear messages
+--- (`Channel:clear_messages`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
 ---
 ---@param cb fun()
 ---@return c2.ConnectionHandle hdl
 function c2.Channel:on_messages_cleared(cb) end
 
 --- Callback when a message is replaced.
---- This is called synchronously.
+--- This is called synchronously. It's also called when plugins replace messages
+--- (`Channel:replace_message`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
 ---
 ---@param cb fun(idx: number, old: c2.Message, replacement: c2.Message) `idx` is a one-based index (from the start)
 ---@return c2.ConnectionHandle hdl
 function c2.Channel:on_message_replaced(cb) end
 
 --- Callback when a message is added.
---- This is called synchronously.
+--- This is called synchronously. It's also called when plugins add messages
+--- (`Channel:add_message`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
 ---
 ---@param cb fun(msg: c2.Message, override_flags?: c2.MessageFlag)
 ---@return c2.ConnectionHandle hdl
