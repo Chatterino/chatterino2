@@ -178,6 +178,8 @@ set(SOURCE_FILES
         controllers/filters/lang/expressions/Expression.hpp
         controllers/filters/lang/expressions/BinaryOperation.cpp
         controllers/filters/lang/expressions/BinaryOperation.hpp
+        controllers/filters/lang/expressions/IdentifierExpression.cpp
+        controllers/filters/lang/expressions/IdentifierExpression.hpp
         controllers/filters/lang/expressions/ListExpression.cpp
         controllers/filters/lang/expressions/ListExpression.hpp
         controllers/filters/lang/expressions/RegexExpression.cpp
