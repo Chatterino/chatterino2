@@ -799,6 +799,11 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return this->baseNode_.get();
 }
 
+const SplitContainer::Node *SplitContainer::getBaseNode() const
+{
+    return this->baseNode_.get();
+}
+
 NodeDescriptor SplitContainer::buildDescriptor() const
 {
     return this->buildDescriptorRecursively(this->baseNode_.get());
@@ -819,9 +824,7 @@ void SplitContainer::popup()
     Window &window = getApp()->getWindows()->createWindow(WindowType::Popup);
     auto *popupContainer = window.getNotebook().getOrAddSelectedPage();
 
-    QJsonObject encodedTab;
-    WindowManager::encodeTab(this, true, encodedTab);
-    TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
+    auto tab = TabDescriptor::fromRootContainer(*this, true);
 
     // custom title
     if (!tab.customTitle_.isEmpty())
@@ -841,45 +844,16 @@ void SplitContainer::popup()
     window.show();
 }
 
-QString channelTypeToString(Channel::Type value) noexcept
-{
-    using Type = chatterino::Channel::Type;
-    switch (value)
-    {
-        default:
-            assert(false && "value cannot be serialized");
-            return "never";
-
-        case Type::Twitch:
-            return "twitch";
-        case Type::TwitchWhispers:
-            return "whispers";
-        case Type::TwitchWatching:
-            return "watching";
-        case Type::TwitchMentions:
-            return "mentions";
-        case Type::TwitchLive:
-            return "live";
-        case Type::TwitchAutomod:
-            return "automod";
-        case Type::Misc:
-            return "misc";
-    }
-}
-
 NodeDescriptor SplitContainer::buildDescriptorRecursively(
     const Node *currentNode) const
 {
     if (currentNode->children_.empty())
     {
-        const auto channelType =
-            currentNode->split_->getIndirectChannel().getType();
-
-        SplitNodeDescriptor result;
-        result.type_ = channelTypeToString(channelType);
-        result.channelName_ = currentNode->split_->getChannel()->getName();
-        result.filters_ = currentNode->split_->getFilters();
-        return result;
+        SplitNodeDescriptor descriptor(
+            SplitDescriptor::fromSplit(*currentNode->split_));
+        descriptor.flexH_ = currentNode->flexH_;
+        descriptor.flexV_ = currentNode->flexV_;
+        return descriptor;
     }
 
     ContainerNodeDescriptor descriptor;
@@ -909,10 +883,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         const auto &splitNode = *n;
 
         auto *split = new Split(this);
-        split->setChannel(WindowManager::decodeChannel(splitNode));
-        split->setModerationMode(splitNode.moderationMode_);
-        split->setFilters(splitNode.filters_);
-        split->setCheckSpellingOverride(splitNode.spellCheckOverride);
+        splitNode.applyTo(*split);
 
         this->insertSplit(split);
 
@@ -945,10 +916,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 }
                 const auto &splitNode = *inner;
                 auto *split = new Split(this);
-                split->setFilters(splitNode.filters_);
-                split->setChannel(WindowManager::decodeChannel(splitNode));
-                split->setModerationMode(splitNode.moderationMode_);
-                split->setCheckSpellingOverride(splitNode.spellCheckOverride);
+                splitNode.applyTo(*split);
 
                 auto node = std::make_shared<Node>();
                 node->parent_ = baseNode;
@@ -1078,7 +1046,7 @@ qreal SplitContainer::Node::getVerticalFlex() const
 }
 
 const std::vector<std::shared_ptr<SplitContainer::Node>> &
-    SplitContainer::Node::getChildren()
+    SplitContainer::Node::getChildren() const
 {
     return this->children_;
 }

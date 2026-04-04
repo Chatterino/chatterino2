@@ -188,3 +188,36 @@ private:
 };
 
 }  // namespace chatterino
+
+// NOLINTBEGIN(readability-identifier-naming)
+template <>
+constexpr magic_enum::customize::customize_t
+    magic_enum::customize::enum_name<chatterino::Channel::Type>(
+        chatterino::Channel::Type value) noexcept
+{
+    using Type = chatterino::Channel::Type;
+    switch (value)
+    {
+        case Type::Twitch:
+            return "twitch";
+        case Type::TwitchAutomod:
+            return "automod";
+        case Type::TwitchMentions:
+            return "mentions";
+        case Type::TwitchWatching:
+            return "watching";
+        case Type::TwitchWhispers:
+            return "whispers";
+        case Type::TwitchLive:
+            return "live";
+        case Type::Misc:
+            return "misc";
+
+        case Type::None:
+        case Type::Direct:
+        case Type::TwitchEnd:
+            return default_tag;  // FIXME: Remove these (#5703)
+    }
+    return default_tag;
+}
+// NOLINTEND(readability-identifier-naming)

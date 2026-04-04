@@ -56,7 +56,7 @@ public:
     ChannelView &getChannelView();
     SplitInput &getInput();
 
-    IndirectChannel getIndirectChannel();
+    IndirectChannel getIndirectChannel() const;
     ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 

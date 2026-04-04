@@ -60,12 +60,6 @@ public:
     WindowManager &operator=(const WindowManager &) = delete;
     WindowManager &operator=(WindowManager &&) = delete;
 
-    static void encodeTab(SplitContainer *tab, bool isSelected,
-                          QJsonObject &obj);
-    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static void encodeFilters(Split *split, QJsonArray &arr);
-    static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
-
     void showSettingsDialog(
         QWidget *parent,
         SettingsDialogPreference preference = SettingsDialogPreference());
@@ -160,9 +154,6 @@ public:
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
 private:
-    static void encodeNodeRecursively(SplitContainer::Node *node,
-                                      QJsonObject &obj);
-
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;
 
