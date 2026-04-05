@@ -1143,9 +1143,9 @@ LinkElement::LinkElement(LinkElement::CloneConstructorTag /*hack*/,
     , lowercase_(std::move(lowercase))
     , original_(std::move(original))
 {
-    if (!original.isEmpty())
+    if (!this->original_.isEmpty())
     {
-        this->setTooltip(original.at(0));
+        this->setTooltip(this->original_.at(0));
     }
 }
 
