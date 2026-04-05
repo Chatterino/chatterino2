@@ -263,8 +263,6 @@ if (CHATTERINO_PLUGINS)
     if (NOT Lua_FOUND)
         set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
         add_subdirectory(lib/lua)
-    else()
-        set(LUA_INCLUDE_DIRS "${Lua_INCLUDE_DIRS}")
     endif()
 
     find_package(Sol2 REQUIRED)
