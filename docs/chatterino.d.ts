@@ -61,6 +61,13 @@ declare namespace c2 {
         get_display_name(): string;
 
         on_display_name_changed(cb: () => void): ConnectionHandle;
+        on_messages_cleared(cb: () => void): ConnectionHandle;
+        on_message_replaced(
+            cb: (idx: number, old: Message, replacement: Message) => void
+        ): ConnectionHandle;
+        on_message_appended(
+            cb: (msg: Message, override_flags: MessageFlag | null) => void
+        ): ConnectionHandle;
 
         send_message(message: string, execute_commands: boolean): void;
         send_message(message: string): void;

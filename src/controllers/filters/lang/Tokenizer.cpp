@@ -29,6 +29,7 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"author.no_color", "author has no color?"},
     {"author.subbed", "author subscribed?"},
     {"author.sub_length", "author sub length"},
+    {"bits.amount", "bits cheered"},
     {"channel.name", "channel name"},
     {"channel.watching", "/watching channel?"},
     {"channel.live", "channel live?"},
