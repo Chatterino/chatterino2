@@ -196,6 +196,9 @@ public:
     /// member.
     virtual std::string_view type() const = 0;
 
+    /// Creates a new identical message element. Used for Lua plugins.
+    virtual std::unique_ptr<MessageElement> clone() const = 0;
+
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
@@ -220,6 +223,8 @@ public:
     QJsonObject toJson() const override;
     std::string_view type() const override;
 
+    std::unique_ptr<MessageElement> clone() const override;
+
 private:
     ImagePtr image_;
 };
@@ -238,6 +243,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
     int padding() const
     {
@@ -270,6 +276,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
     const MessageColor &color() const noexcept;
     FontStyle fontStyle() const noexcept;
@@ -305,6 +312,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
     const MessageColor &color() const
     {
@@ -369,6 +377,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     LinkInfo linkInfo_;
@@ -428,6 +437,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     /**
@@ -460,6 +470,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -505,6 +516,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     MessageLayoutElement *makeImageLayoutElement(
@@ -536,6 +548,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -554,6 +567,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -569,6 +583,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -585,6 +600,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -615,6 +631,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     QTime time_;
@@ -636,6 +653,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 // Forces a linebreak
@@ -651,6 +669,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 // Image element which will pick the quality of the image based on ui scale
@@ -666,6 +685,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 
 private:
     ImageSet images_;
@@ -683,6 +703,7 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+    std::unique_ptr<MessageElement> clone() const override;
 };
 
 }  // namespace chatterino

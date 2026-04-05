@@ -25,6 +25,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <memory>
+
 #ifdef CHATTERINO_WITH_PRIVATE_QT_API
 #    include <QtGui/private/qtextengine_p.h>
 #endif
@@ -153,6 +155,15 @@ std::string_view ImageElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> ImageElement::clone() const
+{
+    auto im = std::make_unique<ImageElement>(this->image_, this->getFlags());
+    im->setLink(this->getLink());
+    im->setTooltip(this->getTooltip());
+    im->setTrailingSpace(this->hasTrailingSpace());
+    return im;
+}
+
 CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
@@ -190,6 +201,16 @@ QJsonObject CircularImageElement::toJson() const
 std::string_view CircularImageElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> CircularImageElement::clone() const
+{
+    auto im = std::make_unique<CircularImageElement>(
+        this->image_, this->padding(), this->background(), this->getFlags());
+    im->setLink(this->getLink());
+    im->setTooltip(this->getTooltip());
+    im->setTrailingSpace(this->hasTrailingSpace());
+    return im;
 }
 
 // EMOTE
@@ -283,6 +304,16 @@ QJsonObject EmoteElement::toJson() const
 std::string_view EmoteElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> EmoteElement::clone() const
+{
+    auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
+                                               this->textColor_);
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 LayeredEmoteElement::LayeredEmoteElement(
@@ -485,6 +516,17 @@ std::string_view LayeredEmoteElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> LayeredEmoteElement::clone() const
+{
+    std::vector<Emote> emotesCopy = this->emotes_;
+    auto elem = std::make_unique<LayeredEmoteElement>(
+        std::move(emotesCopy), this->getFlags(), this->textElementColor_);
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -536,6 +578,14 @@ std::string_view BadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> BadgeElement::clone() const
+{
+    auto elem = std::make_unique<BadgeElement>(this->emote_, this->getFlags());
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
 
 // MOD BADGE
 ModBadgeElement::ModBadgeElement(const EmotePtr &data,
@@ -568,6 +618,16 @@ std::string_view ModBadgeElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> ModBadgeElement::clone() const
+{
+    auto elem =
+        std::make_unique<ModBadgeElement>(this->getEmote(), this->getFlags());
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 // VIP BADGE
 VipBadgeElement::VipBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -594,6 +654,15 @@ QJsonObject VipBadgeElement::toJson() const
 std::string_view VipBadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+std::unique_ptr<MessageElement> VipBadgeElement::clone() const
+{
+    auto elem =
+        std::make_unique<VipBadgeElement>(this->getEmote(), this->getFlags());
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 // FFZ Badge
@@ -625,6 +694,16 @@ QJsonObject FfzBadgeElement::toJson() const
 std::string_view FfzBadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> FfzBadgeElement::clone() const
+{
+    auto elem = std::make_unique<FfzBadgeElement>(
+        this->getEmote(), this->getFlags(), this->color);
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 // TEXT
@@ -867,6 +946,17 @@ std::string_view TextElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> TextElement::clone() const
+{
+    auto text = this->words_.join(' ');
+    auto elem = std::make_unique<TextElement>(text, this->getFlags(),
+                                              this->color_, this->style_);
+
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
 
 SingleLineTextElement::SingleLineTextElement(const QString &text,
                                              MessageElementFlags flags,
@@ -1009,6 +1099,18 @@ std::string_view SingleLineTextElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
+{
+    auto text = this->words_.join(' ');
+    auto elem = std::make_unique<SingleLineTextElement>(
+        text, this->getFlags(), this->color_, this->style_);
+
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
                          MessageElementFlags flags, const MessageColor &color,
                          FontStyle style)
@@ -1047,6 +1149,21 @@ QJsonObject LinkElement::toJson() const
 std::string_view LinkElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> LinkElement::clone() const
+{
+    auto text = this->words_.join(' ');
+    auto elem = std::make_unique<LinkElement>(
+        Parsed{.lowercase = this->lowercase_.join(""),
+               .original = this->original_.join("")},
+        this->linkInfo_.originalUrl(), this->getFlags(), this->color_,
+        this->style_);
+
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
@@ -1136,6 +1253,17 @@ std::string_view MentionElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> MentionElement::clone() const
+{
+    auto elem = std::make_unique<MentionElement>(
+        this->words_.join(' '), this->userLoginName_, this->fallbackColor_,
+        this->userColor_);
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement()
     : TimestampElement(getApp()->isTest() ? QTime::fromMSecsSinceStartOfDay(0)
@@ -1204,6 +1332,15 @@ std::string_view TimestampElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> TimestampElement::clone() const
+{
+    auto elem = std::make_unique<TimestampElement>(this->time_);
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
     : MessageElement(MessageElementFlag::ModeratorTools)
@@ -1253,6 +1390,15 @@ std::string_view TwitchModerationElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> TwitchModerationElement::clone() const
+{
+    auto elem = std::make_unique<TwitchModerationElement>();
+    elem->setLink(this->getLink());
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
+
 LinebreakElement::LinebreakElement(MessageElementFlags flags)
     : MessageElement(flags)
 {
@@ -1278,6 +1424,13 @@ QJsonObject LinebreakElement::toJson() const
 std::string_view LinebreakElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> LinebreakElement::clone() const
+{
+    auto elem = std::make_unique<LinebreakElement>(this->getFlags());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
@@ -1317,6 +1470,13 @@ std::string_view ScalingImageElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> ScalingImageElement::clone() const
+{
+    auto elem =
+        std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
 
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
@@ -1351,6 +1511,13 @@ QJsonObject ReplyCurveElement::toJson() const
 std::string_view ReplyCurveElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> ReplyCurveElement::clone() const
+{
+    auto elem = std::make_unique<ReplyCurveElement>();
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 }  // namespace chatterino
