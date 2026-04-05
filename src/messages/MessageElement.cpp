@@ -108,6 +108,14 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
+void MessageElement::cloneFrom(const MessageElement &source)
+{
+    this->link_ = source.link_;
+    this->tooltip_ = source.tooltip_;
+    this->flags_ = source.flags_;
+    this->trailingSpace = source.trailingSpace;
+}
+
 QJsonObject MessageElement::toJson() const
 {
     return {
@@ -158,9 +166,7 @@ std::string_view ImageElement::type() const
 std::unique_ptr<MessageElement> ImageElement::clone() const
 {
     auto im = std::make_unique<ImageElement>(this->image_, this->getFlags());
-    im->setLink(this->getLink());
-    im->setTooltip(this->getTooltip());
-    im->setTrailingSpace(this->hasTrailingSpace());
+    im->cloneFrom(*this);
     return im;
 }
 
@@ -207,9 +213,7 @@ std::unique_ptr<MessageElement> CircularImageElement::clone() const
 {
     auto im = std::make_unique<CircularImageElement>(
         this->image_, this->padding(), this->background(), this->getFlags());
-    im->setLink(this->getLink());
-    im->setTooltip(this->getTooltip());
-    im->setTrailingSpace(this->hasTrailingSpace());
+    im->cloneFrom(*this);
     return im;
 }
 
@@ -310,9 +314,7 @@ std::unique_ptr<MessageElement> EmoteElement::clone() const
 {
     auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
                                                this->textColor_);
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -521,9 +523,7 @@ std::unique_ptr<MessageElement> LayeredEmoteElement::clone() const
     std::vector<Emote> emotesCopy = this->emotes_;
     auto elem = std::make_unique<LayeredEmoteElement>(
         std::move(emotesCopy), this->getFlags(), this->textElementColor_);
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -581,9 +581,7 @@ std::string_view BadgeElement::type() const
 std::unique_ptr<MessageElement> BadgeElement::clone() const
 {
     auto elem = std::make_unique<BadgeElement>(this->emote_, this->getFlags());
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -622,9 +620,7 @@ std::unique_ptr<MessageElement> ModBadgeElement::clone() const
 {
     auto elem =
         std::make_unique<ModBadgeElement>(this->getEmote(), this->getFlags());
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -659,9 +655,7 @@ std::unique_ptr<MessageElement> VipBadgeElement::clone() const
 {
     auto elem =
         std::make_unique<VipBadgeElement>(this->getEmote(), this->getFlags());
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -700,9 +694,7 @@ std::unique_ptr<MessageElement> FfzBadgeElement::clone() const
 {
     auto elem = std::make_unique<FfzBadgeElement>(
         this->getEmote(), this->getFlags(), this->color);
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -952,9 +944,7 @@ std::unique_ptr<MessageElement> TextElement::clone() const
     auto elem = std::make_unique<TextElement>(text, this->getFlags(),
                                               this->color_, this->style_);
 
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -1105,9 +1095,7 @@ std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
     auto elem = std::make_unique<SingleLineTextElement>(
         text, this->getFlags(), this->color_, this->style_);
 
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -1160,9 +1148,7 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
         this->linkInfo_.originalUrl(), this->getFlags(), this->color_,
         this->style_);
 
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -1258,8 +1244,8 @@ std::unique_ptr<MessageElement> MentionElement::clone() const
     auto elem = std::make_unique<MentionElement>(
         this->words_.join(' '), this->userLoginName_, this->fallbackColor_,
         this->userColor_);
+
     elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
     elem->setTrailingSpace(this->hasTrailingSpace());
     return elem;
 }
@@ -1335,9 +1321,7 @@ std::string_view TimestampElement::type() const
 std::unique_ptr<MessageElement> TimestampElement::clone() const
 {
     auto elem = std::make_unique<TimestampElement>(this->time_);
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
@@ -1393,9 +1377,7 @@ std::string_view TwitchModerationElement::type() const
 std::unique_ptr<MessageElement> TwitchModerationElement::clone() const
 {
     auto elem = std::make_unique<TwitchModerationElement>();
-    elem->setLink(this->getLink());
-    elem->setTooltip(this->getTooltip());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 

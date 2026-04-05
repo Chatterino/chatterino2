@@ -203,6 +203,8 @@ protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
+    void cloneFrom(const MessageElement &source);
+
 private:
     Link link_;
     QString tooltip_;
