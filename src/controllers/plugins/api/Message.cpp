@@ -203,70 +203,6 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     return el;
 }
 
-std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
-{
-    auto msg = std::make_shared<Message>();
-    msg->flags = tbl.get_or("flags", MessageFlag::None);
-
-    // This takes a UTC offset (not the milliseconds since the start of the day)
-    auto parseTime = tbl.get<std::optional<qint64>>("parse_time");
-    if (parseTime)
-    {
-        msg->parseTime = datetimeFromOffset(*parseTime).time();
-    }
-
-    msg->id = tbl.get_or("id", QString{});
-    msg->searchText = tbl.get_or("search_text", QString{});
-    msg->messageText = tbl.get_or("message_text", QString{});
-    msg->loginName = tbl.get_or("login_name", QString{});
-    msg->displayName = tbl.get_or("display_name", QString{});
-    msg->localizedName = tbl.get_or("localized_name", QString{});
-    msg->userID = tbl.get_or("user_id", QString{});
-    // missing: timeoutUser
-    msg->channelName = tbl.get_or("channel_name", QString{});
-
-    auto usernameColor = tbl.get_or("username_color", QString{});
-    if (!usernameColor.isEmpty())
-    {
-        msg->usernameColor = QColor(usernameColor);
-    }
-
-    auto serverReceivedTime =
-        tbl.get<std::optional<qint64>>("server_received_time");
-    if (serverReceivedTime)
-    {
-        msg->serverReceivedTime = datetimeFromOffset(*serverReceivedTime);
-    }
-
-    // missing: badges
-    // missing: badgeInfos
-
-    // we construct a color on the fly here
-    auto highlightColor = tbl.get_or("highlight_color", QString{});
-    if (!highlightColor.isEmpty())
-    {
-        msg->highlightColor = std::make_shared<QColor>(highlightColor);
-    }
-
-    // missing: replyThread
-    // missing: replyParent
-    // missing: count
-
-    auto elements = tbl.get<std::optional<sol::table>>("elements");
-    if (elements)
-    {
-        auto size = elements->size();
-        for (size_t i = 1; i <= size; i++)
-        {
-            msg->elements.emplace_back(
-                elementFromTable(elements->get<sol::table>(i)));
-        }
-    }
-
-    // missing: reward
-    return msg;
-}
-
 void checkWritable(Message *msg)
 {
     if (msg->frozen)
@@ -296,6 +232,8 @@ decltype(auto) memberAccessor()
             msg->*T = std::forward<decltype(v)>(v);
         });
 }
+
+std::shared_ptr<Message> messageFromTable(const sol::table &tbl);
 
 }  // namespace
 
@@ -808,16 +746,101 @@ void createUserType(sol::table &c2)
             return MessageElements(msg);
         },
         "append_element",
-        [](Message *msg, const sol::table &tbl) {
-            checkWritable(msg);
-            auto el = elementFromTable(tbl);
-            if (el)
-            {
-                msg->elements.emplace_back(std::move(el));
-            }
-        });
+        sol::overload(
+            [](Message *msg, const sol::table &tbl) {
+                checkWritable(msg);
+                auto el = elementFromTable(tbl);
+                if (el)
+                {
+                    msg->elements.emplace_back(std::move(el));
+                }
+            },
+            [](Message *msg, ElementRef &element) {
+                checkWritable(msg);
+                msg->elements.emplace_back(
+                    std::move(element.constElement()->clone()));
+            }));
 }
 
 }  // namespace chatterino::lua::api::message
+
+namespace {
+
+using namespace chatterino;
+
+std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
+{
+    auto msg = std::make_shared<Message>();
+    msg->flags = tbl.get_or("flags", MessageFlag::None);
+
+    // This takes a UTC offset (not the milliseconds since the start of the day)
+    auto parseTime = tbl.get<std::optional<qint64>>("parse_time");
+    if (parseTime)
+    {
+        msg->parseTime = datetimeFromOffset(*parseTime).time();
+    }
+
+    msg->id = tbl.get_or("id", QString{});
+    msg->searchText = tbl.get_or("search_text", QString{});
+    msg->messageText = tbl.get_or("message_text", QString{});
+    msg->loginName = tbl.get_or("login_name", QString{});
+    msg->displayName = tbl.get_or("display_name", QString{});
+    msg->localizedName = tbl.get_or("localized_name", QString{});
+    msg->userID = tbl.get_or("user_id", QString{});
+    // missing: timeoutUser
+    msg->channelName = tbl.get_or("channel_name", QString{});
+
+    auto usernameColor = tbl.get_or("username_color", QString{});
+    if (!usernameColor.isEmpty())
+    {
+        msg->usernameColor = QColor(usernameColor);
+    }
+
+    auto serverReceivedTime =
+        tbl.get<std::optional<qint64>>("server_received_time");
+    if (serverReceivedTime)
+    {
+        msg->serverReceivedTime = datetimeFromOffset(*serverReceivedTime);
+    }
+
+    // missing: badges
+    // missing: badgeInfos
+
+    // we construct a color on the fly here
+    auto highlightColor = tbl.get_or("highlight_color", QString{});
+    if (!highlightColor.isEmpty())
+    {
+        msg->highlightColor = std::make_shared<QColor>(highlightColor);
+    }
+
+    // missing: replyThread
+    // missing: replyParent
+    // missing: count
+
+    auto elements = tbl.get<std::optional<sol::table>>("elements");
+    if (elements)
+    {
+        auto size = elements->size();
+        for (size_t i = 1; i <= size; i++)
+        {
+            auto ref =
+                elements->get<std::optional<lua::api::message::ElementRef>>(i);
+            if (ref.has_value())
+            {
+                msg->elements.emplace_back(ref->constElement()->clone());
+            }
+            else
+            {
+                msg->elements.emplace_back(
+                    elementFromTable(elements->get<sol::table>(i)));
+            }
+        }
+    }
+
+    // missing: reward
+    return msg;
+}
+
+}  // namespace
 
 #endif
