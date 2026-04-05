@@ -272,12 +272,21 @@ private:
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
+    struct CloneConstructorTag {
+    };
+
 public:
     static constexpr std::string_view TYPE = "text";
 
     TextElement(const QString &text, MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
+
+    TextElement(TextElement::CloneConstructorTag, QStringList words,
+                MessageElementFlags flags,
+                const MessageColor &color = MessageColor::Text,
+                FontStyle style = FontStyle::ChatMedium);
+
     ~TextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
@@ -308,12 +317,21 @@ protected:
 // contains a text that will be truncated to one line
 class SingleLineTextElement : public MessageElement
 {
+    struct CloneConstructorTag {
+    };
+
 public:
     static constexpr std::string_view TYPE = "single-line-text";
 
     SingleLineTextElement(const QString &text, MessageElementFlags flags,
                           const MessageColor &color = MessageColor::Text,
                           FontStyle style = FontStyle::ChatMedium);
+
+    SingleLineTextElement(SingleLineTextElement::CloneConstructorTag,
+                          QStringList words, MessageElementFlags flags,
+                          const MessageColor &color = MessageColor::Text,
+                          FontStyle style = FontStyle::ChatMedium);
+
     ~SingleLineTextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
@@ -345,6 +363,9 @@ private:
 
 class LinkElement : public TextElement
 {
+    struct CloneConstructorTag {
+    };
+
 public:
     static constexpr std::string_view TYPE = "link";
 
@@ -359,6 +380,13 @@ public:
                 MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
+
+    LinkElement(CloneConstructorTag, QStringList lowercase,
+                QStringList original, const QString &fullUrl,
+                MessageElementFlags flags,
+                const MessageColor &color = MessageColor::Text,
+                FontStyle style = FontStyle::ChatMedium);
+
     ~LinkElement() override = default;
     LinkElement(const LinkElement &) = delete;
     LinkElement(LinkElement &&) = delete;

@@ -26,6 +26,7 @@
 #include <QJsonValue>
 
 #include <memory>
+#include <utility>
 
 #ifdef CHATTERINO_WITH_PRIVATE_QT_API
 #    include <QtGui/private/qtextengine_p.h>
@@ -713,6 +714,15 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     this->words_ = text.split(' ');
     // fourtf: add logic to store multiple spaces after message
 }
+TextElement::TextElement(TextElement::CloneConstructorTag /*hack*/,
+                         QStringList words, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : MessageElement(flags)
+    , words_(std::move(words))
+    , color_(color)
+    , style_(style)
+{
+}
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  const MessageLayoutContext &ctx)
@@ -945,9 +955,9 @@ std::string_view TextElement::type() const
 }
 std::unique_ptr<MessageElement> TextElement::clone() const
 {
-    auto text = this->words_.join(' ');
-    auto elem = std::make_unique<TextElement>(text, this->getFlags(),
-                                              this->color_, this->style_);
+    auto elem = std::make_unique<TextElement>(
+        TextElement::CloneConstructorTag{}, this->words_, this->getFlags(),
+        this->color_, this->style_);
 
     elem->cloneFrom(*this);
     return elem;
@@ -961,6 +971,15 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
     , color_(color)
     , style_(style)
     , words_(text.split(' '))
+{
+}
+SingleLineTextElement::SingleLineTextElement(
+    SingleLineTextElement::CloneConstructorTag /*hack*/, QStringList words,
+    MessageElementFlags flags, const MessageColor &color, FontStyle style)
+    : MessageElement(flags)
+    , color_(color)
+    , style_(style)
+    , words_(std::move(words))
 {
 }
 
@@ -1096,9 +1115,9 @@ std::string_view SingleLineTextElement::type() const
 
 std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
 {
-    auto text = this->words_.join(' ');
     auto elem = std::make_unique<SingleLineTextElement>(
-        text, this->getFlags(), this->color_, this->style_);
+        SingleLineTextElement::CloneConstructorTag{}, this->words_,
+        this->getFlags(), this->color_, this->style_);
 
     elem->cloneFrom(*this);
     return elem;
@@ -1113,6 +1132,21 @@ LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
     , original_({parsed.original})
 {
     this->setTooltip(parsed.original);
+}
+
+LinkElement::LinkElement(LinkElement::CloneConstructorTag /*hack*/,
+                         QStringList lowercase, QStringList original,
+                         const QString &fullUrl, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : TextElement({}, flags, color, style)
+    , linkInfo_(fullUrl)
+    , lowercase_(std::move(lowercase))
+    , original_(std::move(original))
+{
+    if (!original.isEmpty())
+    {
+        this->setTooltip(original.at(0));
+    }
 }
 
 void LinkElement::addToContainer(MessageLayoutContainer &container,
@@ -1146,10 +1180,8 @@ std::string_view LinkElement::type() const
 
 std::unique_ptr<MessageElement> LinkElement::clone() const
 {
-    auto text = this->words_.join(' ');
     auto elem = std::make_unique<LinkElement>(
-        Parsed{.lowercase = this->lowercase_.join(""),
-               .original = this->original_.join("")},
+        LinkElement::CloneConstructorTag{}, this->lowercase_, this->original_,
         this->linkInfo_.originalUrl(), this->getFlags(), this->color_,
         this->style_);
 
