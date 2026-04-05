@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/filters/lang/expressions/IdentifierExpression.hpp"
 #include "controllers/filters/lang/expressions/UnaryOperation.hpp"
 #include "controllers/filters/lang/Filter.hpp"
+#include "controllers/filters/lang/Tokenizer.hpp"
 #include "controllers/filters/lang/Types.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
@@ -332,6 +334,17 @@ TEST(Filters, Evaluation)
             << "Filter{ " << input << " } evaluated to " << result.toString()
             << " instead of " << expected.toString()
             << ".\nDebug: " << filter.debugString();
+    }
+}
+
+TEST(Filters, Identifier)
+{
+    for (const auto &[identifier, _] : VALID_IDENTIFIERS_MAP.asKeyValueRange())
+    {
+        auto expr = createIdentifierExpression(identifier);
+        ASSERT_TRUE(isWellTyped(expr->synthesizeType()))
+            << "the identifier '" << identifier
+            << "' must create a well typed expression";
     }
 }
 
