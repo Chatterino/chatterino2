@@ -61,6 +61,8 @@ set(SOURCE_FILES
 
         common/websockets/WebSocketPool.cpp
         common/websockets/WebSocketPool.hpp
+        common/websockets/detail/BalancedResolverResults.cpp
+        common/websockets/detail/BalancedResolverResults.hpp
         common/websockets/detail/WebSocketConnection.cpp
         common/websockets/detail/WebSocketConnection.hpp
         common/websockets/detail/WebSocketConnectionImpl.cpp
@@ -99,6 +101,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/GetModerators.hpp
         controllers/commands/builtin/twitch/GetVIPs.cpp
         controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/LowTrust.cpp
+        controllers/commands/builtin/twitch/LowTrust.hpp
         controllers/commands/builtin/twitch/Poll.cpp
         controllers/commands/builtin/twitch/Poll.hpp
         controllers/commands/builtin/twitch/Prediction.cpp
@@ -254,6 +258,8 @@ set(SOURCE_FILES
         controllers/plugins/api/Accounts.hpp
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
+        controllers/plugins/api/ConnectionHandle.cpp
+        controllers/plugins/api/ConnectionHandle.hpp
         controllers/plugins/api/DebugLibrary.cpp
         controllers/plugins/api/DebugLibrary.hpp
         controllers/plugins/api/EventType.hpp
@@ -275,6 +281,8 @@ set(SOURCE_FILES
         controllers/plugins/api/WebSocket.hpp
         controllers/plugins/api/WindowManager.cpp
         controllers/plugins/api/WindowManager.hpp
+        controllers/plugins/ConnectionManager.cpp
+        controllers/plugins/ConnectionManager.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
@@ -283,8 +291,12 @@ set(SOURCE_FILES
         controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginMeta.cpp
+        controllers/plugins/PluginMeta.hpp
         controllers/plugins/PluginPermission.cpp
         controllers/plugins/PluginPermission.hpp
+        controllers/plugins/PluginRef.cpp
+        controllers/plugins/PluginRef.hpp
         controllers/plugins/SolTypes.cpp
         controllers/plugins/SolTypes.hpp
 
@@ -293,6 +305,9 @@ set(SOURCE_FILES
         controllers/sound/MiniaudioBackend.hpp
         controllers/sound/NullBackend.cpp
         controllers/sound/NullBackend.hpp
+
+        controllers/spellcheck/SpellChecker.cpp
+        controllers/spellcheck/SpellChecker.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
@@ -528,6 +543,8 @@ set(SOURCE_FILES
         util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/Backup.cpp
+        util/Backup.hpp
         util/BadgeRegistry.cpp
         util/BadgeRegistry.hpp
         util/CancellationToken.hpp
@@ -694,6 +711,8 @@ set(SOURCE_FILES
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
+        widgets/dialogs/RestoreBackupsDialog.cpp
+        widgets/dialogs/RestoreBackupsDialog.hpp
         widgets/dialogs/SelectChannelDialog.cpp
         widgets/dialogs/SelectChannelDialog.hpp
         widgets/dialogs/SelectChannelFiltersDialog.cpp
@@ -827,6 +846,8 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionItem.hpp
         widgets/splits/InputCompletionPopup.cpp
         widgets/splits/InputCompletionPopup.hpp
+        widgets/splits/InputHighlighter.cpp
+        widgets/splits/InputHighlighter.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
         widgets/splits/SplitCommon.hpp
@@ -899,14 +920,14 @@ if (CHATTERINO_GENERATE_COVERAGE)
 endif ()
 
 if(TARGET rapidjson)
-    message(DEBUG "Linking to rapidjson target")
+    message(STATUS "rapidjson: Linking to rapidjson target")
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC rapidjson)
-elseif(DEFINED RapidJSON_SOURCE_DIR)
-    message(DEBUG "RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
-    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
-else()
-    message(DEBUG "No rapidjson target found, this is most likely a system install. Adding include directories (${RAPIDJSON_INCLUDE_DIRS}) instead")
+elseif(DEFINED RAPIDJSON_INCLUDE_DIRS)
+    message(STATUS "rapidjson: RAPIDJSON_INCLUDE_DIRS defined (${RAPIDJSON_INCLUDE_DIRS}). Most likely a system install.")
     target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+elseif(DEFINED RapidJSON_SOURCE_DIR)
+    message(STATUS "rapidjson: RapidJSON_SOURCE_DIR defined, assuming this is a submodule/source build. (${RapidJSON_SOURCE_DIR})")
+    target_include_directories(${LIBRARY_PROJECT} SYSTEM PUBLIC ${RapidJSON_SOURCE_DIR}/include)
 endif()
 
 target_link_libraries(${LIBRARY_PROJECT}
@@ -916,6 +937,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
@@ -931,6 +953,11 @@ target_link_libraries(${LIBRARY_PROJECT}
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
+endif()
+
+if (CHATTERINO_SPELLCHECK)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
+    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
 endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)
@@ -1030,12 +1057,14 @@ if (BUILD_APP)
         endif()
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
-        install(TARGETS ${EXECUTABLE_PROJECT} 
-            RUNTIME_DEPENDENCIES 
+        install(TARGETS ${EXECUTABLE_PROJECT}
+            RUNTIME_DEPENDENCIES
                 PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
-                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" 
+                POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
                 DIRECTORIES ${QT_BIN_DIR}
-            RUNTIME DESTINATION .)
+            COMPONENT ${PROJECT_NAME}
+            RUNTIME DESTINATION .
+        )
 
         # Hardcoded list of DLLs to install from Qt - these are marked as optional since they only exist for vcpkg
         install(FILES
@@ -1045,31 +1074,45 @@ if (BUILD_APP)
             ${QT_BIN_DIR}/libwebp.dll
             ${QT_BIN_DIR}/libsharpyuv.dll
             DESTINATION .
-            OPTIONAL)
+            COMPONENT ${PROJECT_NAME}
+            OPTIONAL
+        )
 
-        install(CODE "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")")
-        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)")   
+        install(
+            CODE
+                "message(\"-- Running: ${WINDEPLOYQT_COMMAND} --dir \\\"\${CMAKE_INSTALL_PREFIX}\\\"\")"
+            COMPONENT ${PROJECT_NAME}
+        )
+        install(
+            CODE
+                "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \"\${CMAKE_INSTALL_PREFIX}\" COMMAND_ERROR_IS_FATAL ANY)"
+            COMPONENT ${PROJECT_NAME}
+        )
     elseif (APPLE)
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
                 BUNDLE DESTINATION bin
                 LIBRARY DESTINATION lib
                 ARCHIVE DESTINATION lib/static
+                COMPONENT ${PROJECT_NAME}
                 )
     else ()
         install(TARGETS ${EXECUTABLE_PROJECT}
                 RUNTIME DESTINATION bin
                 LIBRARY DESTINATION lib
                 ARCHIVE DESTINATION lib/static
+                COMPONENT ${PROJECT_NAME}
                 )
 
         install(FILES ${CMAKE_SOURCE_DIR}/resources/com.chatterino.chatterino.desktop
                 DESTINATION share/applications
+                COMPONENT ${PROJECT_NAME}
                 )
 
         install(FILES ${CMAKE_SOURCE_DIR}/resources/icon.png
                 RENAME com.chatterino.chatterino.png
                 DESTINATION share/icons/hicolor/256x256/apps
+                COMPONENT ${PROJECT_NAME}
                 )
     endif ()
 
@@ -1101,6 +1144,7 @@ set_target_properties(${LIBRARY_PROJECT}
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
 target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    CHATTERINO_EXTRA_BUILD_STRING=${CHATTERINO_EXTRA_BUILD_STRING}
     $<$<BOOL:${WIN32}>:USEWINSDK>
     $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
 )
@@ -1114,6 +1158,7 @@ target_compile_definitions(${VERSION_PROJECT} PRIVATE
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     CHATTERINO_GIT_MODIFIED=${GIT_MODIFIED}
+    CHATTERINO_NIGHTLY_BUILD=$<BOOL:${CHATTERINO_NIGHTLY_BUILD}>
 
     CHATTERINO_CMAKE_GEN_DATE=\"${cmake_gen_date}\"
 )

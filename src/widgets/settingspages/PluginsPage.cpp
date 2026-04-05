@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "widgets/settingspages/PluginsPage.hpp"
 

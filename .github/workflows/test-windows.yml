@@ -29,8 +29,8 @@ jobs:
       fail-fast: false
     env:
       QT_MODULES: qtimageformats
-      C2_USE_OPENSSL3: ${{ startsWith(matrix.qt-version, '6.') && 'True' || 'False' }}
-      C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
+      C2_USE_OPENSSL3: ${{ case(startsWith(matrix.qt-version, '6.'), 'True', 'False') }}
+      C2_CONAN_CACHE_SUFFIX: ${{ case(startsWith(matrix.qt-version, '6.'), '-QT6', '') }}
 
     steps:
       - name: Set Crashpad
@@ -115,6 +115,7 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=On `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO

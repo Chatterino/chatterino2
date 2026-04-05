@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "debug/Benchmark.hpp"
 
 #include "common/QLogging.hpp"
@@ -7,18 +11,19 @@ namespace chatterino {
 BenchmarkGuard::BenchmarkGuard(const QString &_name)
     : name_(_name)
 {
-    timer_.start();
+    this->timer_.start();
 }
 
 BenchmarkGuard::~BenchmarkGuard()
 {
     qCDebug(chatterinoBenchmark)
-        << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f << "ms";
+        << this->name_ << float(this->timer_.nsecsElapsed()) / 1000000.0f
+        << "ms";
 }
 
 qreal BenchmarkGuard::getElapsedMs()
 {
-    return qreal(timer_.nsecsElapsed()) / 1000000.0;
+    return qreal(this->timer_.nsecsElapsed()) / 1000000.0;
 }
 
 }  // namespace chatterino

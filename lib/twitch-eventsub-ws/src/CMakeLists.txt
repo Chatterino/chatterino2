@@ -65,8 +65,10 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
-    $<$<BOOL:${MSVC}>:BOOST_JSON_NO_LIB>
+    $<$<AND:$<BOOL:${MSVC}>,$<NOT:$<BOOL:${VCPKG_TARGET_TRIPLET}>>>:BOOST_JSON_NO_LIB>
     $<$<BOOL:${MSVC}>:BOOST_CONTAINER_NO_LIB>
+    QT_NO_KEYWORDS
+    $<$<BOOL:${VCPKG_TARGET_TRIPLET}>:CHATTERINO_EXPECT_BOOST_JSON_FROM_DLL>
 )
 
 if (MSVC)

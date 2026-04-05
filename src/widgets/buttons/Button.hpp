@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
@@ -178,11 +182,7 @@ protected:
     /// Setter for #opaqueContent()
     void setOpaqueContent(bool opaqueContent);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
-#else
-    void enterEvent(QEvent * /*event*/) override;
-#endif
     void leaveEvent(QEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;

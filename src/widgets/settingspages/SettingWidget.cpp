@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include "common/QLogging.hpp"
@@ -15,6 +19,12 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPixmap>
+#include <QSvgRenderer>
+#include <QSvgWidget>
+#include <Qt>
+
+#include <algorithm>
 
 namespace {
 
@@ -29,15 +39,17 @@ const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
 namespace chatterino {
 
 SettingWidget::SettingWidget(const QString &mainKeyword)
-    : vLayout(new QVBoxLayout(this))
+    : tooltipIcon(new QSvgWidget(this))
+    , vLayout(new QVBoxLayout(this))
     , hLayout(new QHBoxLayout)
 {
     this->vLayout->setContentsMargins(0, 0, 0, 0);
 
     this->hLayout->setContentsMargins(0, 0, 0, 0);
-    this->vLayout->addLayout(hLayout);
+    this->vLayout->addLayout(this->hLayout);
 
     this->keywords.append(mainKeyword);
+    this->tooltipIcon->setVisible(false);
 }
 
 SettingWidget *SettingWidget::checkbox(const QString &label,
@@ -48,6 +60,8 @@ SettingWidget *SettingWidget::checkbox(const QString &label,
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipIcon);
+    widget->hLayout->addStretch(1);
 
     // update when setting changes
     setting.connect(
@@ -76,6 +90,8 @@ SettingWidget *SettingWidget::inverseCheckbox(const QString &label,
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipIcon);
+    widget->hLayout->addStretch(1);
 
     // update when setting changes
     setting.connect(
@@ -105,6 +121,8 @@ SettingWidget *SettingWidget::customCheckbox(
     auto *check = new SCheckBox(label);
 
     widget->hLayout->addWidget(check);
+    widget->hLayout->addWidget(widget->tooltipIcon);
+    widget->hLayout->addStretch(1);
 
     check->setChecked(initialValue);
 
@@ -143,6 +161,7 @@ SettingWidget *SettingWidget::intInput(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(input);
 
@@ -188,6 +207,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -261,6 +281,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -339,6 +360,7 @@ SettingWidget *SettingWidget::dropdown(
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(combo);
 
@@ -391,6 +413,7 @@ SettingWidget *SettingWidget::colorButton(const QString &label,
     auto *colorButton = new ColorButton(color);
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(colorButton);
 
@@ -438,6 +461,7 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
     }
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addWidget(edit);
 
     // Update the setting when the widget changes.
@@ -476,6 +500,7 @@ SettingWidget *SettingWidget::fontButton(const QString &label,
     auto *button = new SPushButton(currentFont().family());
 
     widget->hLayout->addWidget(lbl);
+    widget->hLayout->addWidget(widget->tooltipIcon);
     widget->hLayout->addStretch(1);
     widget->hLayout->addWidget(button);
 
@@ -515,15 +540,27 @@ SettingWidget *SettingWidget::setTooltip(QString tooltip)
         tooltip.replace(MAX_TOOLTIP_LINE_LENGTH_REGEX, "\n");
     }
 
+    int sz = 0;
     if (this->label != nullptr)
     {
         this->label->setToolTip(tooltip);
+        sz = this->label->sizeHint().height();
     }
 
     if (this->actionWidget != nullptr)
     {
         this->actionWidget->setToolTip(tooltip);
+        sz = std::max(sz, this->actionWidget->sizeHint().height());
     }
+
+    this->tooltipIcon->setVisible(true);
+    this->tooltipIcon->load(u":/settings/hint.svg"_qs);
+    this->tooltipIcon->setToolTip(tooltip);
+    auto *r = this->tooltipIcon->renderer();
+    auto vb = r->viewBox();
+    this->tooltipIcon->setFixedHeight(sz);
+    this->tooltipIcon->setFixedWidth(
+        int(double(sz) / double(vb.height()) * double(vb.width())));
 
     this->keywords.append(tooltip);
 

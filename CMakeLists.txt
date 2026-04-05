@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
+# CMake upgrade notes:
+#  - In CMake >= 3.29, we should deprecate USE_ALTERNATE_LINKER in favour of CMake's CMAKE_LINKER_TYPE
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
+if(POLICY CMP0207)
+    cmake_policy(SET CMP0207 NEW) # file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching
+endif()
 include(FeatureSummary)
 include(FetchContent)
+include(CMakeDependentOption)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
@@ -26,9 +32,15 @@ option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+# CMake doesn't detect LTO for some compilers (e.g. clang-cl: https://gitlab.kitware.com/cmake/cmake/-/issues/21635),
+# so this skips the check and assumes LTO works.
+cmake_dependent_option(CHATTERINO_FORCE_LTO "Skip check if LTO is supported" OFF CHATTERINO_LTO OFF)
+option(CHATTERINO_FORCE_LTO "Don't check if LTO is supported" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
+option(CHATTERINO_SPELLCHECK "Enable spellchecking in Chatterino (requires Hunspell)" OFF)
+option(CHATTERINO_NIGHTLY_BUILD "Specifies whether this is a nightly build." OFF)
 
 option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the test and app targets. Actual sanitizers can then be enabled with the SANITIZE_* options." OFF)
 mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
@@ -36,6 +48,10 @@ add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPOR
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
+
+set(CHATTERINO_EXTRA_BUILD_STRING "" CACHE STRING "Provide an extra string to show in the about page under the Chatterino version. This string allows the use of Qt's HTML subset.")
+
+set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default. CMake 3.29 users can use CMAKE_LINKER_TYPE instead.")
 
 if(CHATTERINO_SANITIZER_SUPPORT)
     list(APPEND CMAKE_MODULE_PATH
@@ -52,7 +68,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.4
+    VERSION 2.5.5
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
@@ -68,9 +84,14 @@ if(CHATTERINO_GENERATE_COVERAGE)
 endif()
 
 if(CHATTERINO_LTO)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    if (CHATTERINO_FORCE_LTO)
+        set(CHATTERINO_ENABLE_LTO ON)
+        message(STATUS "LTO: Enabled (Force)")
+    else()
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+        message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    endif()
 else()
     message(STATUS "LTO: Disabled")
 endif()
@@ -90,25 +111,14 @@ elseif (CCACHE_PROGRAM)
     set(_compiler_launcher ${CCACHE_PROGRAM})
 endif ()
 
-
-# Alternate linker code taken from heavyai/heavydb
-# https://github.com/heavyai/heavydb/blob/0517d99b467806f6af7b4c969e351368a667497d/CMakeLists.txt#L87-L103
-macro(set_alternate_linker linker)
-  find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
-  if(LINKER_EXECUTABLE)
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
-      add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+if(USE_ALTERNATE_LINKER)
+    find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+    if(LINKER_EXECUTABLE)
+        message(STATUS "Using alternate linker '${USE_ALTERNATE_LINKER}'")
+        add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
     else()
-      add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        message(FATAL_ERROR "Alternate linker ${USE_ALTERNATE_LINKER} could not be found under ld.${USE_ALTERNATIVE_LINKER} or ${USE_ALTERNATE_LINKER}")
     endif()
-  else()
-    set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
-  endif()
-endmacro()
-
-set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
-if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
-  set_alternate_linker(${USE_ALTERNATE_LINKER})
 endif()
 
 if (_compiler_launcher)
@@ -137,6 +147,7 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Gui
     Network
     Svg
+    SvgWidgets
     Concurrent
     )
 if(CHATTERINO_ALLOW_PRIVATE_QT_API)
@@ -151,12 +162,26 @@ if (WIN32)
 endif ()
 
 # Find boost on the system
-find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
+set(BOOST_REQUIRED_COMPONENTS "")
+if (VCPKG_TARGET_TRIPLET)
+    list(APPEND BOOST_REQUIRED_COMPONENTS json)
+endif ()
+find_package(Boost REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_COMPONENTS} OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
 
 find_package(Threads REQUIRED)
+
+if(CHATTERINO_SPELLCHECK)
+    # Find from package manager
+    find_package(hunspell QUIET CONFIG)
+    if(NOT hunspell_FOUND)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(hunspell REQUIRED IMPORTED_TARGET hunspell)
+        add_library(hunspell::hunspell ALIAS PkgConfig::hunspell)
+    endif()
+endif()
 
 find_library(LIBRT rt)
 
@@ -235,16 +260,19 @@ FetchContent_Declare(
     PajladaSignals
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSerialize
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_Declare(
     PajladaSettings
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
     EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS CONFIG
 )
 
 FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)
@@ -277,7 +305,7 @@ else ()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
 endif ()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Generate resource files

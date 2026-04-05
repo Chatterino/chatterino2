@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 
 #include "Application.hpp"
@@ -19,7 +23,7 @@ RawSubscriptionHandle::~RawSubscriptionHandle()
         // We're shutting down, assume the unsubscription has been taken care of
         return;
     }
-    app->getEventSub()->removeRef(request);
+    app->getEventSub()->removeRef(this->request);
 }
 
 }  // namespace chatterino::eventsub

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/QStringHash.hpp"
@@ -47,11 +51,6 @@ struct TwitchUser {
     bool operator==(const TwitchUser &rhs) const
     {
         return this->id == rhs.id;
-    }
-
-    bool operator!=(const TwitchUser &rhs) const
-    {
-        return !(*this == rhs);
     }
 };
 

@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726868573676;subscriber=1;id=23c8b81c-7c73-44e4-84f1-7d37e99714e4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:10-14/305954156:50-57/1902:69-73 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -336,6 +330,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "23c8b81c-7c73-44e4-84f1-7d37e99714e4",
@@ -345,6 +341,12 @@
             "searchText": "nerixyz  nerixyz: BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal ",
             "serverReceivedTime": "2024-09-20T21:42:53Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

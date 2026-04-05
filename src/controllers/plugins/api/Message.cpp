@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/Message.hpp"
 
@@ -442,7 +446,7 @@ private:
             }
             else
             {
-                return visitOne<TReturn, Rest...>(
+                return this->visitOne<TReturn, Rest...>(
                     std::forward<decltype(rest)>(rest)...);
             }
         }

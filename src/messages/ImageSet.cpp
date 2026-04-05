@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/ImageSet.hpp"
 
 #include "messages/Image.hpp"
@@ -130,11 +134,6 @@ bool ImageSet::operator==(const ImageSet &other) const
 {
     return std::tie(this->imageX1_, this->imageX2_, this->imageX3_) ==
            std::tie(other.imageX1_, other.imageX2_, other.imageX3_);
-}
-
-bool ImageSet::operator!=(const ImageSet &other) const
-{
-    return !this->operator==(other);
 }
 
 QJsonObject ImageSet::toJson() const

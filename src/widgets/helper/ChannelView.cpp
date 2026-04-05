@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/ChannelView.hpp"
 
 #include "Application.hpp"
@@ -62,6 +66,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QStringBuilder>
+#include <QUrl>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -461,7 +466,7 @@ Scrollbar *ChannelView::scrollbar()
 
 bool ChannelView::pausable() const
 {
-    return pausable_;
+    return this->pausable_;
 }
 
 void ChannelView::setPausable(bool value)
@@ -620,11 +625,6 @@ void ChannelView::scaleChangedEvent(float scale)
     if (this->goToBottom_)
     {
         auto factor = this->scale();
-#ifdef Q_OS_MACOS
-        factor = scale * 80.F /
-                 std::max<float>(
-                     0.01, this->logicalDpiX() * this->devicePixelRatioF());
-#endif
         this->goToBottom_->setFont(
             getApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
     }
@@ -867,7 +867,7 @@ bool ChannelView::hasSelection()
 void ChannelView::clearSelection()
 {
     this->selection_ = Selection();
-    queueLayout();
+    this->queueLayout();
 }
 
 void ChannelView::copySelectedText()
@@ -1543,7 +1543,7 @@ void ChannelView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->messageColors_.channelBackground);
+    painter.fillRect(this->rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter, event->rect());
@@ -1864,11 +1864,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     }
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void ChannelView::enterEvent(QEnterEvent * /*event*/)
-#else
-void ChannelView::enterEvent(QEvent * /*event*/)
-#endif
 {
 }
 
@@ -1961,7 +1957,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     int messageIndex;
 
     // no message under cursor
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         this->setCursor(Qt::ArrowCursor);
         this->tooltipWidget_->hide();
@@ -2164,9 +2160,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
         auto &messagesSnapshot = this->getMessagesSnapshot();
         if (messagesSnapshot.size() == 0)
         {
@@ -2271,7 +2267,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     int messageIndex;
 
     bool foundElement =
-        tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+        this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
@@ -2706,6 +2702,39 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         }
     }
 
+    // Add search action when text is selected and search feature is enabled
+    if (!this->selection_.isEmpty() && getSettings()->searchEnabled.getValue())
+    {
+        QString searchURL = getSettings()->searchEngineUrl.getValue();
+        QString searchName = getSettings()->searchEngineName.getValue();
+
+        if (!searchURL.isEmpty())
+        {
+            QString actionText =
+                searchName.isEmpty() ? "&Search" : "&Search with " + searchName;
+
+            if (getSettings()->searchIncognito && supportsIncognitoLinks())
+            {
+                actionText += " in private mode";
+            }
+
+            menu->addAction(actionText, [this, searchURL] {
+                QString query = this->getSelectedText().trimmed();
+                QString encodedQuery = QUrl::toPercentEncoding(query);
+                QString url = searchURL + encodedQuery;
+
+                if (getSettings()->searchIncognito && supportsIncognitoLinks())
+                {
+                    openLinkIncognito(url);
+                }
+                else
+                {
+                    QDesktopServices::openUrl(QUrl(url));
+                }
+            });
+        }
+    }
+
     auto *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
@@ -2915,7 +2944,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     QPointF relativePos;
     int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!this->tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         return;
     }

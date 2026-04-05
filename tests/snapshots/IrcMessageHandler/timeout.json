@@ -2,10 +2,6 @@
     "input": "@tmi-sent-ts=1729628658012;rm-received-ts=1729628658106;historical=1;ban-duration=1;room-id=11148817;target-user-id=129546453 :tmi.twitch.tv CLEARCHAT #pajlada nerixyz",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -73,6 +69,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -82,6 +80,10 @@
             "searchText": "nerixyz has been timed out for 1s. ",
             "serverReceivedTime": "2024-10-22T20:24:18Z",
             "timeoutUser": "nerixyz",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchAccount.hpp"
 
 #include "Application.hpp"
@@ -19,6 +23,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <QStringBuilder>
 #include <QThread>
+#include <QTimer>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -107,11 +112,21 @@ void TwitchAccount::loadBlocks()
 {
     assertInGuiThread();
 
+    this->blocksRetryBackoff_.reset();
+    this->tryLoadBlocks();
+}
+
+void TwitchAccount::tryLoadBlocks()
+{
+    assertInGuiThread();
+
     auto token = CancellationToken(false);
     this->blockToken_ = token;
     this->ignores_.clear();
     this->ignoresUserIds_.clear();
     this->ignoresUserLogins_.clear();
+
+    CancellationToken retryToken = token;
 
     getHelix()->loadBlocks(
         getApp()->getAccounts()->twitch.getCurrent()->userId_,
@@ -127,9 +142,21 @@ void TwitchAccount::loadBlocks()
                 this->ignoresUserLogins_.insert(blockedUser.name);
             }
         },
-        [](auto error) {
+        [this, retryToken](const QString &error) {
+            if (retryToken.isCancelled())
+            {
+                return;
+            }
             qCWarning(chatterinoTwitch).noquote()
-                << "Fetching blocks failed:" << error;
+                << "Fetching blocks failed:" << error << "- retrying";
+            auto delay = this->blocksRetryBackoff_.next();
+            QTimer::singleShot(delay, [this, retryToken] {
+                if (retryToken.isCancelled())
+                {
+                    return;
+                }
+                this->tryLoadBlocks();
+            });
         },
         std::move(token));
 }
@@ -188,6 +215,16 @@ void TwitchAccount::blockUserLocally(const QString &userID,
     this->ignores_.insert(blockedUser);
     this->ignoresUserIds_.insert(blockedUser.id);
     this->ignoresUserLogins_.insert(blockedUser.name);
+}
+
+bool TwitchAccount::setUserName(const QString &newUserName)
+{
+    if (this->userName_.compare(newUserName, Qt::CaseInsensitive) == 0)
+    {
+        return false;
+    }
+    this->userName_ = newUserName;
+    return true;
 }
 
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
@@ -336,7 +373,7 @@ void TwitchAccount::loadSeventvUserID()
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)
-                << "Failed to load 7TV user-id:" << result.formatError();
+                << "Failed to load your 7TV user-id:" << result.formatError();
         });
 }
 

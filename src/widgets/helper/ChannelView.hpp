@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
@@ -240,11 +244,7 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void wheelEvent(QWheelEvent *event) override;
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
-#else
-    void enterEvent(QEvent * /*event*/) override;
-#endif
     void leaveEvent(QEvent * /*event*/) override;
 
     bool event(QEvent *event) override;

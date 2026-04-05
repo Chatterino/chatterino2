@@ -2,10 +2,6 @@
     "input": "@rm-received-ts=1757929422007;login=kooby_;room-id=111448817;tmi-sent-ts=1757929421924;target-msg-id=ee436bee-aaac-49db-9a87-755c29105f6a :tmi.twitch.tv CLEARMSG #pajlada :Hello! its me Winston! Go to your fridge and stuff your big belly with food. I need you big and fat. FAT. FATTER. FATTER... FATTER! I need you to gain weight and get bulbous.",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -110,6 +106,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -119,6 +117,10 @@
             "searchText": "A message from kooby_ was deleted: Hello! its me Winston! Go to your fridge and stuff…",
             "serverReceivedTime": "",
             "timeoutUser": "msg:ee436bee-aaac-49db-9a87-755c29105f6a",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

@@ -44,10 +44,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -148,6 +144,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
             "id": "automod_0cbb6e48-1606-46c6-b1ac-c97626e1c5cb",
@@ -157,14 +155,14 @@
             "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"🍋‍🟩blockedterm😂\". Allow will post it in chat. Allow Deny",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -257,6 +255,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -266,6 +266,10 @@
             "searchText": "nerixyz: 😂 😂 🍋‍🟩blockedterm😂",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

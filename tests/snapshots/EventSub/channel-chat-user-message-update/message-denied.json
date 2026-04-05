@@ -28,10 +28,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -89,6 +85,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "PubSub|AutoMod|EventSub",
             "frozen": true,
             "id": "automod_fc90dc3b-0634-41c3-8365-f40719f076ab",
@@ -98,6 +96,10 @@
             "searchText": "AutoMod: Mods have denied your message.",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

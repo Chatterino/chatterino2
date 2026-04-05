@@ -123,10 +123,6 @@
     ],
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 2,
             "displayName": "",
@@ -224,6 +220,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -233,14 +231,14 @@
             "searchText": "nerixyz timed out twitchdev for 1s: pajlada (2 times) ",
             "serverReceivedTime": "2025-02-22T17:53:50Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -379,6 +377,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -388,6 +388,10 @@
             "searchText": "nerixyz timed out twitchdev for 1s: pajlada ",
             "serverReceivedTime": "2025-02-22T17:54:50Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

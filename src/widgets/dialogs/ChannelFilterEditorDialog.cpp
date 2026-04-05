@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 
 #include "controllers/filters/lang/Tokenizer.hpp"

@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726690593888;subscriber=1;id=5e5f526a-5d60-4d81-800b-3b81b8a34c2c;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=1902:11-15;reply-parent-display-name=nerixyz;reply-thread-parent-msg-id=d95d04a6-5c6a-476a-8dbd-7c6d3b3c277f;reply-thread-parent-user-login=nerixyz;reply-thread-parent-display-name=nerixyz;reply-parent-msg-body=a\\sKappa\\sBTTVEmote\\s😂\\sb;reply-parent-user-login=nerixyz;reply-parent-user-id=129546453;reply-thread-parent-user-id=129546453;reply-parent-msg-id=d95d04a6-5c6a-476a-8dbd-7c6d3b3c277f :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :@nerixyz c Keepo FFZEmote 😭 d",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -238,6 +232,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ReplyMessage",
             "frozen": false,
             "id": "5e5f526a-5d60-4d81-800b-3b81b8a34c2c",
@@ -255,6 +251,12 @@
             "searchText": "nerixyz  nerixyz: c Keepo FFZEmote 😭 d ",
             "serverReceivedTime": "2024-09-18T20:16:33Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

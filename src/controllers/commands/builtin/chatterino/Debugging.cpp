@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "Application.hpp"
@@ -5,6 +9,7 @@
 #include "common/Env.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -21,6 +26,8 @@
 
 #include <QApplication>
 #include <QLoggingCategory>
+#include <QProcess>
+#include <QProcessEnvironment>
 #include <QString>
 
 using namespace Qt::StringLiterals;
@@ -219,6 +226,19 @@ QString debugTest(const CommandContext &ctx)
                 break;
         }
     }
+    else if (command == "set-watching")
+    {
+        if (ctx.words.size() < 3)
+        {
+            ctx.channel->addSystemMessage("Missing name");
+            return {};
+        }
+        auto chan = getApp()->getTwitch()->getOrAddChannel(ctx.words.at(2));
+        if (chan != getApp()->getTwitch()->getWatchingChannel().get())
+        {
+            getApp()->getTwitch()->setWatchingChannel(chan);
+        }
+    }
     else
     {
         ctx.channel->addSystemMessage(
@@ -227,5 +247,51 @@ QString debugTest(const CommandContext &ctx)
 
     return "";
 }
+
+#ifdef Q_OS_WIN
+QString relaunchWithConsole(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    const QString loggingRulesEnv = u"QT_LOGGING_RULES"_s;
+    const QString winDebugConsoleEnv = u"QT_WIN_DEBUG_CONSOLE"_s;
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    if (ctx.words.size() > 1)
+    {
+        env.insert(loggingRulesEnv, ctx.words.mid(1).join(';'));
+    }
+    else if (!env.contains(loggingRulesEnv))
+    {
+        // by default, enable all debug logging
+        env.insert(loggingRulesEnv, "chatterino.*.debug=true");
+    }
+
+    getSettings()->requestSave();
+
+    QProcess proc;
+    proc.setProgram(qApp->applicationFilePath());
+    // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
+    env.insert(winDebugConsoleEnv, "new");
+    proc.setProcessEnvironment(env);
+    if (proc.startDetached())
+    {
+        getSettings()->disableSave();  // only disable if the process started
+        QMetaObject::invokeMethod(
+            qApp,
+            [] {
+                QApplication::exit();
+            },
+            Qt::QueuedConnection);
+        return {};
+    }
+
+    ctx.channel->addSystemMessage("Failed to start process.");
+    return {};
+}
+#endif
 
 }  // namespace chatterino::commands

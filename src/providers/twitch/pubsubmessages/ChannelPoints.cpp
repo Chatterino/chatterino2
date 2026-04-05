@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/pubsubmessages/ChannelPoints.hpp"
 
 #include "util/QMagicEnum.hpp"

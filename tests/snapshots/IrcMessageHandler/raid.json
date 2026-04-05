@@ -2,10 +2,6 @@
     "input": "@badges=subscriber/24;login=nerixyz;msg-param-displayName=nerixyz;user-type=;tmi-sent-ts=1729626466361;system-msg=2\\sraiders\\sfrom\\snerixyz\\shave\\sjoined!;room-id=11148817;user-id=129546453;display-name=nerixyz;subscriber=1;historical=1;rm-received-ts=1729626466492;msg-id=raid;vip=0;id=7299b7bc-61ce-423c-85ce-8d651b56cce4;msg-param-login=nerixyz;color=#FF0000;mod=0;msg-param-viewerCount=2;flags=;msg-param-profileImageURL=https://static-cdn.jtvnw.net/jtv_user_pictures/e065218b-49df-459d-afd3-c6557870f551-profile_image-%s.png;emotes=;badge-info=subscriber/28 :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -89,6 +85,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -98,6 +96,10 @@
             "searchText": "2 raiders from nerixyz have joined!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

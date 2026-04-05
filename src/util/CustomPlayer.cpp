@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/CustomPlayer.hpp"
 
 #include "common/QLogging.hpp"
@@ -21,8 +25,9 @@ void openInCustomPlayer(QStringView channelName)
         return;
     }
 
-    QDesktopServices::openUrl(
-        QUrl{scheme % u"https://www.twitch.tv/" % channelName});
+    QString encodedTwitchUrl = QString::fromUtf8(
+        QUrl::toPercentEncoding(u"https://www.twitch.tv/" % channelName));
+    QDesktopServices::openUrl(QUrl{scheme % encodedTwitchUrl});
 }
 
 }  // namespace chatterino

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
 #include "Application.hpp"
@@ -161,9 +165,9 @@ void EventSubMessageBuilder::appendUser(const lib::String &userName,
                                         QString &text, bool trailingSpace)
 {
     auto login = userLogin.qt();
-    auto *el = this->emplace<MentionElement>(userName.qt(), login,
-                                             MessageColor::System,
-                                             channel->getUserColor(login));
+    auto *el = this->emplace<MentionElement>(
+        userName.qt(), login, MessageColor::System,
+        this->channel->getUserColor(login));
     text.append(login);
 
     if (trailingSpace)

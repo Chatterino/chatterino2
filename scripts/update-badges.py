@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Nerixyz <nerixdev@outlook.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 import sys
 import json
 from pathlib import Path

@@ -2,10 +2,6 @@
     "input": "@system-msg=calm__like_a_tom\\ssubscribed\\sat\\sTier\\s3.\\sThey've\\ssubscribed\\sfor\\s9\\smonths!;msg-param-cumulative-months=9;mod=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Executive\\sProducer;color=#0000FF;msg-param-months=0;msg-param-multimonth-duration=6;user-type=;flags=;msg-id=resub;user-id=609242230;room-id=11148817;msg-param-multimonth-tenure=0;msg-param-sub-plan=3000;emotes=;badge-info=subscriber/9;msg-param-was-gifted=false;id=4a6e270c-8cdb-46e9-b602-f8177a79d472;badges=subscriber/3009;display-name=calm__like_a_tom;tmi-sent-ts=1725938011176;login=calm__like_a_tom;vip=0;subscriber=1 :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -85,6 +81,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -94,6 +92,10 @@
             "searchText": "calm__like_a_tom subscribed at Tier 3 for 6 months in advance, reaching 9 months cumulatively so far!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

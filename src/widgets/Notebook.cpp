@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
@@ -356,7 +360,7 @@ void Notebook::select(QWidget *page, bool focusPage)
         // Hide the previously selected page
         this->selectedPage_->hide();
 
-        auto *item = this->findItem(selectedPage_);
+        auto *item = this->findItem(this->selectedPage_);
         if (!item)
         {
             return;
@@ -830,7 +834,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
             auto isLast = &item == &ctx.items.back();
 
             auto fitsInLine = ((isLast ? ctx.addButtonWidth : 0) + x +
-                               item.tab->width()) <= width();
+                               item.tab->width()) <= this->width();
 
             if (!isFirst && !fitsInLine)
             {
@@ -884,7 +888,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, 0);
-            this->selectedPage_->resize(width(), tabsStart);
+            this->selectedPage_->resize(this->width(), tabsStart);
             this->selectedPage_->raise();
         }
     }
@@ -905,7 +909,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, y);
-            this->selectedPage_->resize(width(), height() - y);
+            this->selectedPage_->resize(this->width(), this->height() - y);
             this->selectedPage_->raise();
         }
     }
@@ -1010,7 +1014,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
             {
                 if (isRight)
                 {
-                    int distanceFromRight = width() - x;
+                    int distanceFromRight = this->width() - x;
                     largestWidth = std::max(
                         largestWidth, consumedButtonWidths - distanceFromRight);
                 }
@@ -1069,7 +1073,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(0, 0);
-            this->selectedPage_->resize(tabsStart, height());
+            this->selectedPage_->resize(tabsStart, this->height());
             this->selectedPage_->raise();
         }
     }
@@ -1087,7 +1091,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
         if (this->selectedPage_ != nullptr)
         {
             this->selectedPage_->move(x, 0);
-            this->selectedPage_->resize(width() - x, height());
+            this->selectedPage_->resize(this->width() - x, this->height());
             this->selectedPage_->raise();
         }
     }
@@ -1158,8 +1162,8 @@ void Notebook::paintEvent(QPaintEvent *event)
             {
                 painter.fillRect(this->lineOffset_,
                                  int(NOTEBOOK_TAB_HEIGHT * scale),
-                                 width() - this->lineOffset_, int(2 * scale),
-                                 this->theme->tabs.dividerLine);
+                                 this->width() - this->lineOffset_,
+                                 int(2 * scale), this->theme->tabs.dividerLine);
             }
         }
 
@@ -1247,6 +1251,8 @@ bool Notebook::shouldShowTab(const NotebookTab *tab) const
 
 void Notebook::sortTabsAlphabetically()
 {
+    assert(!this->isNotebookLayoutLocked() &&
+           "sortTabsAlphabetically called while notebook layout is locked");
     std::ranges::sort(this->items_, [](const Item &a, const Item &b) {
         const QString &lhs = a.tab->getTitle();
         const QString &rhs = b.tab->getTitle();
@@ -1320,6 +1326,10 @@ SplitNotebook::SplitNotebook(Window *parent)
 
     this->sortTabsAlphabeticallyAction_ =
         new QAction("Sort Tabs Alphabetically", this);
+    if (this->isNotebookLayoutLocked())
+    {
+        this->sortTabsAlphabeticallyAction_->setEnabled(false);
+    }
     QObject::connect(this->sortTabsAlphabeticallyAction_, &QAction::triggered,
                      [this] {
                          this->sortTabsAlphabetically();
@@ -1630,6 +1640,12 @@ void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
             cb(split);
         }
     }
+}
+
+void SplitNotebook::setLockNotebookLayout(bool value)
+{
+    Notebook::setLockNotebookLayout(value);
+    this->sortTabsAlphabeticallyAction_->setEnabled(!value);
 }
 
 }  // namespace chatterino

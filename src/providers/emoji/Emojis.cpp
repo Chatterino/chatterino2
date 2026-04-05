@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/emoji/Emojis.hpp"
 
 #include "common/QLogging.hpp"
@@ -172,7 +176,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v15.1.1/emoji.json (Emoji version 15.1 (2023))
+    // Current version: https://github.com/Nerixyz/emoji-data/blob/feat/17-0/emoji.json (Emoji version 17.0 (2025))
     QFile file(":/emoji.json");
     if (!file.open(QFile::ReadOnly))
     {
@@ -312,10 +316,10 @@ void Emojis::loadEmojiSet()
     });
 }
 
-std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
-    const QString &text) const
+std::vector<std::variant<EmotePtr, QStringView>> Emojis::parse(
+    QStringView text) const
 {
-    auto result = std::vector<boost::variant<EmotePtr, QString>>();
+    auto result = std::vector<std::variant<EmotePtr, QStringView>>();
     QString::size_type lastParsedEmojiEndIndex = 0;
 
     for (qsizetype i = 0; i < text.length(); ++i)
@@ -351,7 +355,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
             {
                 // look in emoji->value
                 bool match = QStringView{emoji->value}.mid(1) ==
-                             QStringView{text}.mid(i + 1, emojiExtraCharacters);
+                             text.mid(i + 1, emojiExtraCharacters);
 
                 if (match)
                 {
@@ -367,8 +371,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
                 // This checking here relies on the fact that the nonQualified string
                 // always starts with the same byte as value (the unified string)
                 bool match = QStringView{emoji->nonQualified}.mid(1) ==
-                             QStringView{text}.mid(
-                                 i + 1, emojiNonQualifiedExtraCharacters);
+                             text.mid(i + 1, emojiNonQualifiedExtraCharacters);
 
                 if (match)
                 {

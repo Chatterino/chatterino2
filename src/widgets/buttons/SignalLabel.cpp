@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/buttons/SignalLabel.hpp"
 
 namespace chatterino {
@@ -16,7 +20,7 @@ void SignalLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        leftMouseDown();
+        this->leftMouseDown();
     }
 
     event->ignore();
@@ -26,7 +30,7 @@ void SignalLabel::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        leftMouseUp();
+        this->leftMouseUp();
     }
 
     event->ignore();

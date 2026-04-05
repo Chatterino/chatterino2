@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2025 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-License-Identifier: CC0-1.0
+
+version = 1
+
+[[annotations]]
+path = "**/*.json"
+SPDX-FileCopyrightText = "Contributors to Chatterino <https://chatterino.com>"
+SPDX-License-Identifier = "CC0-1.0"

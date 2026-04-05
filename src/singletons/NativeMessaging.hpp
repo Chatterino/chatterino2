@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Atomic.hpp"
@@ -16,9 +20,10 @@ enum class WriteManifestError : std::uint8_t {
     FailedToCreateFile,
 };
 
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json);
+Expected<void, WriteManifestError> writeManifestTo(QString directory,
+                                                   const QString &nmDirectory,
+                                                   const QString &filename,
+                                                   const QJsonDocument &json);
 
 }  // namespace chatterino::nm::detail
 

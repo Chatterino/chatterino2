@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 #include "Application.hpp"
@@ -317,8 +321,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     // no Channel's should live
     // NOTE: CHANNEL_LIFETIME
     std::ignore = channel->sendMessageSignal.connect(
-        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
-                                                 bool &sent) {
+        [this, channel = std::weak_ptr(channel)](auto &msg, bool &sent) {
             auto c = channel.lock();
             if (!c)
             {
@@ -327,8 +330,8 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
             this->onMessageSendRequested(c, msg, sent);
         });
     std::ignore = channel->sendReplySignal.connect(
-        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
-                                                 auto &replyId, bool &sent) {
+        [this, channel = std::weak_ptr(channel)](auto &msg, auto &replyId,
+                                                 bool &sent) {
             auto c = channel.lock();
             if (!c)
             {
@@ -1151,28 +1154,30 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
     // value doesn't exist
     chan = this->createChannel(channelName);
-    if (!chan)
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+    if (!chan || !twitchChannel)
     {
         return Channel::getEmpty();
     }
 
     this->channels.insert(channelName, chan);
-    this->signalHolder.managedConnect(chan->destroyed, [this, channelName] {
-        // fourtf: issues when the server itself is destroyed
+    this->signalHolder.managedConnect(
+        twitchChannel->destroyed, [this, channelName] {
+            // fourtf: issues when the server itself is destroyed
 
-        qCDebug(chatterinoIrc) << "[TwitchIrcServer::addChannel]" << channelName
-                               << "was destroyed";
-        this->channels.remove(channelName);
+            qCDebug(chatterinoIrc) << "[TwitchIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
+            this->channels.remove(channelName);
 
-        if (this->readConnection_)
-        {
-            // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
-            if (!channelName.startsWith("/"))
+            if (this->readConnection_)
             {
-                this->readConnection_->sendRaw("PART #" + channelName);
+                // HACK(mm2pl): This prevents custom invalid twitch channels used by plugins from being joined
+                if (!channelName.startsWith("/"))
+                {
+                    this->readConnection_->sendRaw("PART #" + channelName);
+                }
             }
-        }
-    });
+        });
 
     // join IRC channel
     {

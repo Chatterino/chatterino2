@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchIrc.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -90,7 +94,7 @@ TEST(TwitchIrc, BadgeInfoParsing)
     struct TestCase {
         QByteArray input;
         std::unordered_map<QString, QString> expectedBadgeInfo;
-        std::vector<Badge> expectedBadges;
+        std::vector<TwitchBadge> expectedBadges;
     };
 
     std::vector<TestCase> testCases{
@@ -100,7 +104,7 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"predictions", R"(<<<<<<\sHEAD[15A⸝asdf/test)"},
             },
             {
-                Badge{"predictions", "pink-2"},
+                TwitchBadge{"predictions", "pink-2"},
             },
         },
         {
@@ -110,10 +114,10 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"founder", "17"},
             },
             {
-                Badge{"predictions", "pink-2"},
-                Badge{"vip", "1"},
-                Badge{"founder", "0"},
-                Badge{"bits", "1"},
+                TwitchBadge{"predictions", "pink-2"},
+                TwitchBadge{"vip", "1"},
+                TwitchBadge{"founder", "0"},
+                TwitchBadge{"bits", "1"},
             },
         },
         {
@@ -122,9 +126,9 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"predictions", "foo/bar/baz"},
             },
             {
-                Badge{"predictions", "blue-1"},
-                Badge{"moderator", "1"},
-                Badge{"glhf-pledge", "1"},
+                TwitchBadge{"predictions", "blue-1"},
+                TwitchBadge{"moderator", "1"},
+                TwitchBadge{"glhf-pledge", "1"},
             },
         },
         {
@@ -133,9 +137,9 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"subscriber", "22"},
             },
             {
-                Badge{"broadcaster", "1"},
-                Badge{"subscriber", "18"},
-                Badge{"glhf-pledge", "1"},
+                TwitchBadge{"broadcaster", "1"},
+                TwitchBadge{"subscriber", "18"},
+                TwitchBadge{"glhf-pledge", "1"},
             },
         },
     };

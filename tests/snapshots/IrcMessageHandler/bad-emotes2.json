@@ -2,11 +2,6 @@
     "input": "@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:4-0;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-                "no_audio"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "Mm2PL",
@@ -130,6 +125,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474",
@@ -139,6 +136,11 @@
             "searchText": "mm2pl  mm2pl: Kappa ",
             "serverReceivedTime": "2022-09-03T10:31:42Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "no_audio"
+            ],
             "userID": "117691339",
             "usernameColor": "#ffdaa521"
         }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
@@ -51,12 +55,12 @@ QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
-    DebugCount::increase("message elements");
+    DebugCount::increase(DebugObject::MessageElement);
 }
 
 MessageElement::~MessageElement()
 {
-    DebugCount::decrease("message elements");
+    DebugCount::decrease(DebugObject::MessageElement);
 }
 
 MessageElement *MessageElement::setLink(const Link &link)
@@ -428,7 +432,7 @@ std::vector<LayeredEmoteElement::Emote> LayeredEmoteElement::getUniqueEmotes()
     struct NotDuplicate {
         bool operator()(const Emote &element)
         {
-            return seen.insert(element.ptr).second;
+            return this->seen.insert(element.ptr).second;
         }
 
     private:
@@ -825,11 +829,7 @@ FontStyle TextElement::fontStyle() const noexcept
 
 void TextElement::appendText(QStringView text)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    for (auto word : text.split(' '))  // creates a QList
-#else
     for (auto word : text.tokenize(u' '))
-#endif
     {
         this->words_.append(word.toString());
     }
@@ -837,9 +837,6 @@ void TextElement::appendText(QStringView text)
 
 void TextElement::appendText(const QString &text)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    this->appendText(QStringView{text});
-#else
     qsizetype firstSpace = text.indexOf(u' ');
     if (firstSpace == -1)
     {
@@ -853,7 +850,6 @@ void TextElement::appendText(const QString &text)
     {
         this->words_.emplace_back(word.toString());
     }
-#endif
 }
 
 QJsonObject TextElement::toJson() const
@@ -929,9 +925,9 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             for (const auto &parsedWord :
                  app->getEmotes()->getEmojis()->parse(word))
             {
-                if (parsedWord.type() == typeid(QString))
+                if (std::holds_alternative<QStringView>(parsedWord))
                 {
-                    currentText += boost::get<QString>(parsedWord);
+                    currentText += std::get<QStringView>(parsedWord);
                     QString prev =
                         currentText;  // only increments the ref-count
                     currentText =
@@ -943,9 +939,9 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                         break;
                     }
                 }
-                else if (parsedWord.type() == typeid(EmotePtr))
+                else if (std::holds_alternative<EmotePtr>(parsedWord))
                 {
-                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    auto emote = std::get<EmotePtr>(parsedWord);
                     auto image =
                         emote->images.getImageOrLoaded(container.getScale());
                     if (!image->isEmpty())

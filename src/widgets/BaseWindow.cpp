@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/BaseWindow.hpp"
 
 #include "Application.hpp"
@@ -127,17 +131,13 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
     {
         // GetDpiForWindow and GetSystemMetricsForDpi are only supported on
         // Windows 10 and later. Qt 6 requires Windows 10.
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto dpi = GetDpiForWindow(hwnd);
-#    endif
 
         auto systemMetric = [&](auto index) {
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             if (dpi != 0)
             {
                 return GetSystemMetricsForDpi(index, dpi);
             }
-#    endif
             return GetSystemMetrics(index);
         };
 
@@ -268,12 +268,12 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
-    DebugCount::increase("BaseWindow");
+    DebugCount::increase(DebugObject::BaseWindow);
 }
 
 BaseWindow::~BaseWindow()
 {
-    DebugCount::decrease("BaseWindow");
+    DebugCount::decrease(DebugObject::BaseWindow);
 }
 
 void BaseWindow::setInitialBounds(QRect bounds, widgets::BoundsChecking mode)
@@ -751,7 +751,7 @@ bool BaseWindow::applyLastBoundsCheck()
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
-    if (!flags_.has(DisableLayoutSave))
+    if (!this->flags_.has(DisableLayoutSave))
     {
         getApp()->getWindows()->queueSave();
     }
@@ -766,7 +766,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    if (!flags_.has(DisableLayoutSave))
+    if (!this->flags_.has(DisableLayoutSave))
     {
         getApp()->getWindows()->queueSave();
     }
@@ -800,13 +800,8 @@ void BaseWindow::showEvent(QShowEvent *)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              qintptr *result)
-#else
-bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
-                             long *result)
-#endif
 {
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -1130,11 +1125,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     if (!this->hasCustomWindowFrame())
@@ -1246,11 +1237,7 @@ bool BaseWindow::handleMOVE(MSG *msg)
     return false;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     const LONG borderWidth = 8;  // in device independent pixels

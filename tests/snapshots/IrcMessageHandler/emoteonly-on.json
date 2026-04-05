@@ -2,10 +2,6 @@
     "input": "@historical=1;rm-received-ts=1729627965650;msg-id=emote_only_on :tmi.twitch.tv NOTICE #pajlada :This room is now in emote-only mode.",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -59,6 +55,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification",
             "frozen": false,
             "id": "",
@@ -68,6 +66,10 @@
             "searchText": "This room is now in emote-only mode.",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

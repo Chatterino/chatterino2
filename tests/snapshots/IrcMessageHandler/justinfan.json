@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726918643421;subscriber=1;id=e5a690e7-74c8-41cb-977f-55b903f6be23;room-id=11148817;user-id=64537;display-name=justinfan64537;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :justinfan64537!justinfan64537@justinfan64537.tmi.twitch.tv PRIVMSG #pajlada :a",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "justinfan64537",
@@ -108,6 +102,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "e5a690e7-74c8-41cb-977f-55b903f6be23",
@@ -117,6 +113,12 @@
             "searchText": "justinfan64537  justinfan64537: a ",
             "serverReceivedTime": "2024-09-21T11:37:23Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "64537",
             "usernameColor": "#ffff0000"
         }

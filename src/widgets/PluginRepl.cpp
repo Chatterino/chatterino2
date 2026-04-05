@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/PluginRepl.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -330,12 +334,7 @@ void stringify(sol::stack_proxy it, QString &s, size_t maxItems = 10,
                         {
                             s.append(u", ["_s);
                         }
-#    if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
-                        s.append(QString::fromUtf8(
-                            key.data(), static_cast<qsizetype>(key.size())));
-#    else
                         s.append(QUtf8StringView(key));
-#    endif
                         s.append("] = <dyn>");
                         n++;
                     }

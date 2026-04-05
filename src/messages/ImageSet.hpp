@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -34,7 +38,6 @@ public:
     const ImagePtr &getImage(float scale) const;
 
     bool operator==(const ImageSet &other) const;
-    bool operator!=(const ImageSet &other) const;
 
     QJsonObject toJson() const;
 

@@ -27,10 +27,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -85,6 +81,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "LowTrustUsers|RestrictedMessage|EventSub",
             "frozen": true,
             "id": "",
@@ -94,14 +92,14 @@
             "searchText": "Suspicious User: Restricted",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -192,6 +190,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "PubSub|LowTrustUsers|RestrictedMessage|EventSub",
             "frozen": true,
             "id": "",
@@ -201,6 +201,10 @@
             "searchText": "nerixyz: FeelsDankMan",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

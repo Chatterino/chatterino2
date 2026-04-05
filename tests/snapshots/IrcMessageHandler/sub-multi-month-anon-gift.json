@@ -2,10 +2,6 @@
     "input": "@msg-param-goal-user-contributions=1;system-msg=An\\sanonymous\\suser\\sgifted\\sa\\sTier\\s1\\ssub\\sto\\sMohammadrezaDH!\\s;msg-param-goal-current-contributions=2;vip=0;color=;user-id=274598607;mod=0;flags=;msg-param-months=2;historical=1;id=afa2155b-f563-4973-a5c2-e4075882bbfb;msg-param-gift-months=6;msg-id=subgift;badge-info=;msg-param-recipient-user-name=mohammadrezadh;login=ananonymousgifter;room-id=441388138;msg-param-goal-target-contributions=25;rm-received-ts=1712002037736;msg-param-recipient-id=204174899;emotes=;display-name=AnAnonymousGifter;badges=;msg-param-fun-string=FunStringFive;msg-param-goal-contribution-type=NEW_SUB_POINTS;msg-param-origin-id=8862142563198473546;msg-param-recipient-display-name=MohammadrezaDH;msg-param-sub-plan-name=jmarxists;user-type=;subscriber=0;tmi-sent-ts=1712002037615;msg-param-sub-plan=1000;msg-param-goal-description=day\\slee\\sgoal\\s:-) :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -97,6 +93,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -106,6 +104,10 @@
             "searchText": "An anonymous user gifted 6 months of a Tier 1 sub to MohammadrezaDH!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

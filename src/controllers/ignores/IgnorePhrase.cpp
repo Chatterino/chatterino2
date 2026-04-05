@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/ignores/IgnorePhrase.hpp"
 
 #include "Application.hpp"
@@ -17,12 +21,12 @@ IgnorePhrase::IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock,
 {
     if (this->isCaseSensitive_)
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::UseUnicodePropertiesOption);
     }
     else
     {
-        regex_.setPatternOptions(
+        this->regex_.setPatternOptions(
             QRegularExpression::CaseInsensitiveOption |
             QRegularExpression::UseUnicodePropertiesOption);
     }

@@ -41,10 +41,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -202,6 +198,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -211,6 +209,10 @@
             "searchText": "nerixyz added \"my phrase\" as a permitted term on AutoMod. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

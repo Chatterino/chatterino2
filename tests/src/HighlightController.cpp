@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/highlights/HighlightController.hpp"
 
 #include "controllers/accounts/AccountController.hpp"
@@ -166,7 +170,7 @@ struct TestCase {
     // TODO: create one of these from a raw irc message? hmm xD
     struct {
         MessageParseArgs args;
-        std::vector<Badge> badges;
+        std::vector<TwitchBadge> badges;
         QString senderName;
         QString originalMessage;
         MessageFlags flags;

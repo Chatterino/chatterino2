@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
@@ -17,6 +21,7 @@
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
@@ -78,8 +83,9 @@ auto formatRoomModeUnclean(
     {
         if (modes->followerOnly != 0)
         {
-            text += QString("follow(%1m), ")
-                        .arg(localizeNumbers(modes->followerOnly));
+            text += QString("follow(%1), ")
+                        .arg(formatDurationExact(
+                            std::chrono::minutes{modes->followerOnly}));
         }
         else
         {
@@ -481,6 +487,22 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     twitchChannel->createClip({}, {});
                 })
             ->setVisible(twitchChannel->isLive());
+
+        if (this->split_->getIndirectChannel().getType() ==
+            Channel::Type::TwitchWatching)
+        {
+            menu->addAction("Reset /watching", this->split_, [] {
+                if (!getApp()
+                         ->getTwitch()
+                         ->getWatchingChannel()
+                         .get()
+                         ->isEmpty())
+                {
+                    getApp()->getTwitch()->setWatchingChannel(
+                        Channel::getEmpty());
+                }
+            });
+        }
 
         menu->addSeparator();
     }
@@ -979,10 +1001,10 @@ void SplitHeader::paintEvent(QPaintEvent * /*event*/)
         border = this->theme->splits.header.focusedBorder;
     }
 
-    painter.fillRect(rect(), background);
+    painter.fillRect(this->rect(), background);
     painter.setPen(border);
-    painter.drawRect(0, 0, width() - 1, height() - 2);
-    painter.fillRect(0, height() - 1, width(), 1, background);
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 2);
+    painter.fillRect(0, this->height() - 1, this->width(), 1, background);
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
@@ -1044,11 +1066,7 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void SplitHeader::enterEvent(QEnterEvent *event)
-#else
-void SplitHeader::enterEvent(QEvent *event)
-#endif
 {
     if (!this->tooltipText_.isEmpty())
     {

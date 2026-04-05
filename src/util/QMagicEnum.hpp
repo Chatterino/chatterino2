@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <magic_enum/magic_enum.hpp>
@@ -130,20 +134,13 @@ public:
 ///      the entire duration of the program).
 ///
 /// @param view The view to turn into a static string
-/// @returns Qt6: A static string (never gets freed), Qt5: regular string
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+/// @returns A static string (never gets freed)
 [[nodiscard]] inline QString staticString(QStringView view) noexcept
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     return QString(QStringPrivate(nullptr, const_cast<char16_t *>(view.utf16()),
                                   view.size()));
 }
-#else
-[[nodiscard]] inline QString staticString(QStringView view)
-{
-    return view.toString();
-}
-#endif
 
 }  // namespace chatterino::qmagicenum::detail
 

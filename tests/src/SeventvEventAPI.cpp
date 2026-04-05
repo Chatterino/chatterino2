@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/seventv/SeventvEventAPI.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -23,7 +27,8 @@ const QString TARGET_USER_ID = "60b39e943e203cc169dfc106";
 TEST(SeventvEventAPI, AllEvents)
 {
     mock::BaseApplication app;
-    const QString host("wss://127.0.0.1:9050/liveupdates/seventv/all-events");
+    const QString host("wss://" + PUBSUB_WSS_ADDR +
+                       "/liveupdates/seventv/all-events");
     SeventvEventAPI eventAPI(host, std::chrono::milliseconds(1000));
 
     std::optional<EmoteAddDispatch> addDispatch;
@@ -101,7 +106,8 @@ TEST(SeventvEventAPI, AllEvents)
 TEST(SeventvEventAPI, NoHeartbeat)
 {
     mock::BaseApplication app;
-    const QString host("wss://127.0.0.1:9050/liveupdates/seventv/no-heartbeat");
+    const QString host("wss://" + PUBSUB_WSS_ADDR +
+                       "/liveupdates/seventv/no-heartbeat");
     SeventvEventAPI eventApi(host, std::chrono::milliseconds(1000));
 
     eventApi.subscribeUser("", EMOTE_SET_A);

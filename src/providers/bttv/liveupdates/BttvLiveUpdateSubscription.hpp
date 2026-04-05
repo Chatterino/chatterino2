@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <boost/functional/hash.hpp>
@@ -15,7 +19,6 @@ struct BttvLiveUpdateSubscriptionChannel {
 
     QJsonObject encode(bool isSubscribe) const;
     bool operator==(const BttvLiveUpdateSubscriptionChannel &rhs) const;
-    bool operator!=(const BttvLiveUpdateSubscriptionChannel &rhs) const;
     friend QDebug &operator<<(QDebug &dbg,
                               const BttvLiveUpdateSubscriptionChannel &data);
 };
@@ -26,7 +29,6 @@ struct BttvLiveUpdateBroadcastMe {
 
     QJsonObject encode(bool isSubscribe) const;
     bool operator==(const BttvLiveUpdateBroadcastMe &rhs) const;
-    bool operator!=(const BttvLiveUpdateBroadcastMe &rhs) const;
     friend QDebug &operator<<(QDebug &dbg,
                               const BttvLiveUpdateBroadcastMe &data);
 };
@@ -43,10 +45,6 @@ struct BttvLiveUpdateSubscription {
     bool operator==(const BttvLiveUpdateSubscription &rhs) const
     {
         return this->data == rhs.data;
-    }
-    bool operator!=(const BttvLiveUpdateSubscription &rhs) const
-    {
-        return !(*this == rhs);
     }
 
     friend QDebug &operator<<(QDebug &dbg,

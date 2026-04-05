@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/AttachedWindow.hpp"
 
 #include "Application.hpp"
@@ -57,7 +61,7 @@ AttachedWindow::AttachedWindow(void *_target)
     split->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout->addWidget(split);
 
-    DebugCount::increase("attached window");
+    DebugCount::increase(DebugObject::AttachedWindow);
 }
 
 AttachedWindow::~AttachedWindow()
@@ -71,7 +75,7 @@ AttachedWindow::~AttachedWindow()
         }
     }
 
-    DebugCount::decrease("attached window");
+    DebugCount::decrease(DebugObject::AttachedWindow);
 }
 
 AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
