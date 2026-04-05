@@ -149,6 +149,11 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+ImagePtr ImageElement::image() const
+{
+    return this->image_;
+}
+
 QJsonObject ImageElement::toJson() const
 {
     auto base = MessageElement::toJson();
@@ -1437,6 +1442,11 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
         container.addElement(new ImageLayoutElement(
             *this, image, image->size() * container.getScale()));
     }
+}
+
+const ImageSet &ScalingImageElement::images() const
+{
+    return this->images_;
 }
 
 QJsonObject ScalingImageElement::toJson() const

@@ -158,6 +158,11 @@ QJsonObject Message::toJson() const
         msg["reward"_L1] = this->reward->toJson();
     }
 
+    if (this->bits > 0)
+    {
+        msg["bits"_L1] = static_cast<qint64>(this->bits);
+    }
+
     // XXX: figure out if we can add this in tests
     if (!getApp()->isTest())
     {
