@@ -196,7 +196,7 @@ public:
     /// member.
     virtual std::string_view type() const = 0;
 
-    /// Creates a new identical message element. Used for Lua plugins.
+    /// Creates a new identical message element.
     virtual std::unique_ptr<MessageElement> clone() const = 0;
 
 protected:
