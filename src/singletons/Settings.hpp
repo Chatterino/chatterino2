@@ -803,6 +803,7 @@ public:
         false,
     };
 
+    // Advanced
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
 
 private:
