@@ -130,14 +130,7 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
 
 eventsub::IController *makeEventSubController(Settings &settings)
 {
-    bool enabled = settings.enableExperimentalEventSub;
-
-    if (enabled)
-    {
-        return new eventsub::Controller();
-    }
-
-    return new eventsub::DummyController();
+    return new eventsub::Controller();
 }
 
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
