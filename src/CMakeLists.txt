@@ -178,6 +178,8 @@ set(SOURCE_FILES
         controllers/filters/lang/expressions/Expression.hpp
         controllers/filters/lang/expressions/BinaryOperation.cpp
         controllers/filters/lang/expressions/BinaryOperation.hpp
+        controllers/filters/lang/expressions/IdentifierExpression.cpp
+        controllers/filters/lang/expressions/IdentifierExpression.hpp
         controllers/filters/lang/expressions/ListExpression.cpp
         controllers/filters/lang/expressions/ListExpression.hpp
         controllers/filters/lang/expressions/RegexExpression.cpp
@@ -267,6 +269,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPRequest.hpp
         controllers/plugins/api/HTTPResponse.cpp
         controllers/plugins/api/HTTPResponse.hpp
+        controllers/plugins/api/Images.cpp
+        controllers/plugins/api/Images.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
         controllers/plugins/api/JSON.cpp
@@ -1168,7 +1172,6 @@ target_link_libraries(${LIBRARY_PROJECT} PRIVATE ${VERSION_PROJECT})
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
-    AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
@@ -1177,6 +1180,9 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     $<$<BOOL:${WIN32}>:NOMINMAX>
     # Exclude some headers when including Windows.h
     $<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>
+    # Don't allow the use of deprecated Boost.Asio functionality
+    # https://www.boost.org/doc/libs/latest/doc/html/boost_asio/using.html#boost_asio.using.macros
+    BOOST_ASIO_NO_DEPRECATED
     )
 
 set(_c2_qt_defs
