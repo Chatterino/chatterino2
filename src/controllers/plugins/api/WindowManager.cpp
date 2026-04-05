@@ -3,7 +3,6 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "controllers/plugins/api/ChannelRef.hpp"
-#    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "singletons/WindowManager.hpp"
 #    include "util/WeakPtrHelpers.hpp"
@@ -28,6 +27,12 @@ sol::table qPointerWrapped(const auto &items, sol::this_state state)
     return tbl;
 }
 
+/// Wraps a `std::weak_ptr<SplitContainer::Node>` and adds convenience functions
+/// and an `operator==`.
+///
+/// In Lua, all nodes have this type instead of a raw `weak_ptr`. In Chatterino,
+/// nodes are `std::shared_ptr`s and often nodes are passed around as raw
+/// pointers.
 struct SplitContainerNodeWrap {
     SplitContainerNodeWrap(std::weak_ptr<SplitContainer::Node> ptr)
         : ptr(std::move(ptr))
