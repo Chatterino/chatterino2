@@ -2,6 +2,7 @@
     "input": "@badge-info=;badges=bits-leader/3;bits=5;color=;display-name=slyckity;emotes=;flags=;id=fd6c5507-3a4e-4d24-8f6e-fadf07f520d3;mod=0;room-id=111448817;subscriber=0;tmi-sent-ts=1567824273752;turbo=0;user-id=143114011;user-type= :slyckity!slyckity@slyckity.tmi.twitch.tv PRIVMSG #pajlada :Cheer100",
     "output": [
         {
+            "bits": 5,
             "channelName": "pajlada",
             "count": 1,
             "displayName": "slyckity",
