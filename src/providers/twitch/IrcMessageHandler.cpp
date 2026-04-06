@@ -52,6 +52,7 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "ritual",           // new viewer ritual
     "announcement",     // new mod announcement thing
     "viewermilestone",  // watch streak, but other categories possible in future
+    "socialsharingbadge",  // social media badge from sharing clips
 };
 
 const QString ANONYMOUS_GIFTER_ID = "274598607";
@@ -880,6 +881,13 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                     }
                 }
             }
+        }
+        else if (msgType == "socialsharingbadge")
+        {
+            int level = tags.value("msg-param-current-badge-level").toInt();
+            messageText = QString("%1 earned a Level %2 Social Media Badge!")
+                              .arg(tags.value("display-name").toString(),
+                                   QString::number(level));
         }
 
         auto displayName = [&] {
