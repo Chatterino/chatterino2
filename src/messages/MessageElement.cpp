@@ -1134,7 +1134,7 @@ LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
     this->setTooltip(parsed.original);
 }
 
-LinkElement::LinkElement(LinkElement::CloneConstructorTag /*hack*/,
+LinkElement::LinkElement(TextElement::CloneConstructorTag /*hack*/,
                          QStringList lowercase, QStringList original,
                          const QString &fullUrl, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -1193,6 +1193,18 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
                                MessageColor fallbackColor_,
                                MessageColor userColor_)
     : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor_(fallbackColor_)
+    , userColor_(userColor_)
+    , userLoginName_(std::move(loginName_))
+{
+}
+
+MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
+                               QStringList words, QString loginName_,
+                               MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
     , userColor_(userColor_)
@@ -1279,8 +1291,8 @@ std::string_view MentionElement::type() const
 std::unique_ptr<MessageElement> MentionElement::clone() const
 {
     auto elem = std::make_unique<MentionElement>(
-        this->words_.join(' '), this->userLoginName_, this->fallbackColor_,
-        this->userColor_);
+        TextElement::CloneConstructorTag{}, this->words_, this->userLoginName_,
+        this->fallbackColor_, this->userColor_);
 
     elem->setTooltip(this->getTooltip());
     elem->setTrailingSpace(this->hasTrailingSpace());

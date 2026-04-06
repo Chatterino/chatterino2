@@ -272,6 +272,7 @@ private:
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
+protected:
     struct CloneConstructorTag {
     };
 
@@ -363,9 +364,6 @@ private:
 
 class LinkElement : public TextElement
 {
-    struct CloneConstructorTag {
-    };
-
 public:
     static constexpr std::string_view TYPE = "link";
 
@@ -381,7 +379,7 @@ public:
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
 
-    LinkElement(CloneConstructorTag, QStringList lowercase,
+    LinkElement(TextElement::CloneConstructorTag, QStringList lowercase,
                 QStringList original, const QString &fullUrl,
                 MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
@@ -440,6 +438,9 @@ public:
 
     explicit MentionElement(const QString &displayName, QString loginName_,
                             MessageColor fallbackColor_,
+                            MessageColor userColor_);
+    explicit MentionElement(TextElement::CloneConstructorTag, QStringList words,
+                            QString loginName_, MessageColor fallbackColor_,
                             MessageColor userColor_);
     /// Deprioritized ctor allowing us to pass through a potentially invalid userColor_
     ///
