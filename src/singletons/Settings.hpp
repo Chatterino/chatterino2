@@ -149,6 +149,8 @@ public:
     bool shouldSendHelixChat() const;
 
     FloatSetting uiScale = {"/appearance/uiScale2", 1};
+    /// Match pre–high-DPI-default scaling (Qt::AA_Use96Dpi). Restart to apply.
+    BoolSetting useLegacyScaling = {"/appearance/useLegacyScaling", false};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
 
     float getClampedUiScale() const;
