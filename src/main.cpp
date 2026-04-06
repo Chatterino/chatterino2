@@ -55,7 +55,8 @@ bool argvRequestsLegacyScaling(int argc, char **argv)
 {
     for (int i = 1; i < argc; ++i)
     {
-        if (argv[i] != nullptr && std::strcmp(argv[i], "--use-old-scaling") == 0)
+        if (argv[i] != nullptr &&
+            std::strcmp(argv[i], "--use-old-scaling") == 0)
         {
             return true;
         }
@@ -63,8 +64,7 @@ bool argvRequestsLegacyScaling(int argc, char **argv)
     return false;
 }
 
-bool jsonPointerBoolIsTrue(const QString &filePath,
-                           const char *jsonPointerPath)
+bool jsonPointerBoolIsTrue(const QString &filePath, const char *jsonPointerPath)
 {
     QFile f(filePath);
     if (!f.open(QIODevice::ReadOnly))
@@ -85,51 +85,50 @@ bool jsonPointerBoolIsTrue(const QString &filePath,
 QStringList legacyScalingSettingsJsonCandidates(int argc, char **argv)
 {
     QStringList candidates;
-    const QFileInfo fi(QString::fromLocal8Bit(argc > 0 ? argv[0] : ""));
-    const QString appDir = fi.absoluteDir().absolutePath();
-    if (QFile::exists(combinePath(appDir, QStringLiteral("portable"))))
-    {
-        candidates << combinePath(appDir,
-                                  QStringLiteral("Settings/settings.json"));
-        return candidates;
-    }
+const QFileInfo fi(QString::fromLocal8Bit(argc > 0 ? argv[0] : ""));
+const QString appDir = fi.absoluteDir().absolutePath();
+if (QFile::exists(combinePath(appDir, QStringLiteral("portable"))))
+{
+    candidates << combinePath(appDir, QStringLiteral("Settings/settings.json"));
+    return candidates;
+}
 
 #if defined(Q_OS_WIN)
-    QString base = QString::fromLocal8Bit(qgetenv("APPDATA"));
-    if (!base.isEmpty())
-    {
-        base.replace(QStringLiteral("chatterino"), QStringLiteral("Chatterino"),
-                     Qt::CaseInsensitive);
-        base += QStringLiteral("2");
-        candidates << combinePath(base, QStringLiteral("Settings/settings.json"));
-    }
+QString base = QString::fromLocal8Bit(qgetenv("APPDATA"));
+if (!base.isEmpty())
+{
+    base.replace(QStringLiteral("chatterino"), QStringLiteral("Chatterino"),
+                 Qt::CaseInsensitive);
+    base += QStringLiteral("2");
+    candidates << combinePath(base, QStringLiteral("Settings/settings.json"));
+}
 #elif defined(Q_OS_MACOS)
-    const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
-    if (!home.isEmpty())
-    {
-        candidates << combinePath(
-            combinePath(home,
-                        QStringLiteral("Library/Application Support/chatterino")),
-            QStringLiteral("Settings/settings.json"));
-    }
+const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
+if (!home.isEmpty())
+{
+    candidates << combinePath(
+        combinePath(home,
+                    QStringLiteral("Library/Application Support/chatterino")),
+        QStringLiteral("Settings/settings.json"));
+}
 #else
-    const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
-    if (!home.isEmpty())
+const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
+if (!home.isEmpty())
+{
+    QString xdgData = QString::fromLocal8Bit(qgetenv("XDG_DATA_HOME"));
+    if (xdgData.isEmpty())
     {
-        QString xdgData = QString::fromLocal8Bit(qgetenv("XDG_DATA_HOME"));
-        if (xdgData.isEmpty())
-        {
-            xdgData = combinePath(home, QStringLiteral(".local/share"));
-        }
-        candidates << combinePath(
-            combinePath(xdgData, QStringLiteral("chatterino")),
-            QStringLiteral("Settings/settings.json"));
-        candidates << combinePath(
-            combinePath(xdgData, QStringLiteral("chatterino.com")),
-            QStringLiteral("chatterino/Settings/settings.json"));
+        xdgData = combinePath(home, QStringLiteral(".local/share"));
     }
+    candidates << combinePath(
+        combinePath(xdgData, QStringLiteral("chatterino")),
+        QStringLiteral("Settings/settings.json"));
+    candidates << combinePath(
+        combinePath(xdgData, QStringLiteral("chatterino.com")),
+        QStringLiteral("chatterino/Settings/settings.json"));
+}
 #endif
-    return candidates;
+return candidates;
 }
 
 bool settingsFileRequestsLegacyScaling(int argc, char **argv)

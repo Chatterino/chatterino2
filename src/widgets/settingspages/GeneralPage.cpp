@@ -171,7 +171,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    SettingWidget::checkbox("Use legacy scaling (requires restart)", s.useLegacyScaling)
+    SettingWidget::checkbox("Use legacy scaling (requires restart)",
+                            s.useLegacyScaling)
         ->setTooltip(
             "Approximate older Chatterino scaling by treating the display as "
             "96 DPI (Qt::AA_Use96Dpi). Useful if the UI or text feels wrong "
