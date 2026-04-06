@@ -94,7 +94,7 @@ QStringList legacyScalingSettingsJsonCandidates(int argc, char **argv)
         return candidates;
     }
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
     QString base = QString::fromLocal8Bit(qgetenv("APPDATA"));
     if (!base.isEmpty())
     {
@@ -104,7 +104,7 @@ QStringList legacyScalingSettingsJsonCandidates(int argc, char **argv)
         candidates << combinePath(base,
                                   QStringLiteral("Settings/settings.json"));
     }
-#elif defined(Q_OS_MACOS)
+#elifdef Q_OS_MACOS
     const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
     if (!home.isEmpty())
     {
