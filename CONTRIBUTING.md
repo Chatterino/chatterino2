@@ -8,22 +8,16 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 ## Use of AI
 
-You **may** use AI assistance for contributing to Chatterino, as long as you follow the principles below.
+You may use AI assistance for contributing to Chatterino, as long as you follow these points:
 
-**Accountability**: You are responsible for your contribution. Regardless of AI use, your contribution must meet the standards (e.g. quality and license compliance).
-The contributor is always the author and is fully accountable for the entirety of these contributions.
-
-**Transparency**: You must disclose the use of AI tools when the significant part of the contribution is taken from a tool without changes.
-You should disclose the other uses of AI tools, where it might be useful.
-Routine use of assistive tools for correcting grammar and spelling, or for clarifying language, does not require disclosure.
-
-**Avoid** using the tool to generate a description for your pull request.
-AI tools often only explain "what" instead of "why". The latter part is more important.
-
-AI tools **should not** be used for fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
-These issues are intended for humans to get familiar with the Chatterino codebase.
-
-This guideline is based on the [Fedora AI-Assisted Contributions Policy](https://docs.fedoraproject.org/en-US/council/policy/ai-contribution-policy/) with some sections copied (licensed under [CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/legalcode)).
+- Test your changes locally on your computer and check that no other functionality was broken.
+- When making significant changes, add a note in the Pull Request description if a significant portion of the code is generated.
+- Do not use AI tools for the following:
+  - Pull request and issue descriptions
+  - Writing documentation
+  - Fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
+    These issues are intended for humans to get familiar with the Chatterino codebase.
+  - Generating images (e.g. button icons)
 
 # Tooling
 
