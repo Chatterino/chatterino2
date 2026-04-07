@@ -451,12 +451,29 @@ void TextLayoutElement::paint(QPainter &painter,
     }
 
     painter.setPen(this->color_);
+    auto font = app->getFonts()->getFont(this->style_, this->scale_);
 
-    painter.setFont(app->getFonts()->getFont(this->style_, this->scale_));
+    // Some glyphs, usually those outside the Latin alphabet,
+    // can change the height of the bounding rectangle of the
+    // text. This may cause the text to appear shifted up or down
+    // on its line.
+    // A simple way to compensate for this is to shift the top
+    // of the bounding rectangle we draw the text into back to
+    // the position where it would have been for a text composed only
+    // of the "usual" glyphs.
+    auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
+
+    auto standardTop = metrics.boundingRect("x").y();
+    auto actualTop = metrics.boundingRect(text).y();
+    auto topCorrection = standardTop - actualTop;
+
+    painter.setFont(font);
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
-        QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        QRectF(this->getRect().x(), this->getRect().y() - topCorrection,
+               this->getRect().width(),
+               this->getRect().height() + topCorrection),
+        text, QTextOption(Qt::AlignLeft));
 }
 
 bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, qreal /*yOffset*/)
