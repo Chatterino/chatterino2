@@ -1,0 +1,244 @@
+{
+    "input": "@room-id=169185650;user-type=;badge-info=;flags=;emotes=;vip=0;color=#FF4500;id=b468ef1c-f072-4ef9-a620-d7c4bdb8832f;badges=social-sharing/1;mod=0;msg-param-current-badge-level=1;user-id=216501643;display-name=Gunny_Q;msg-id=socialsharingbadge;login=gunny_q;tmi-sent-ts=1775444557100;subscriber=0;system-msg=Unlocked\\sa\\ssocial\\ssharing\\sbadge :tmi.twitch.tv USERNOTICE #robcdee :Wooohooo, I got a social media badge! or another one",
+    "output": [
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "Gunny_Q",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "3:02"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "03:02:37",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d2030c7e-c400-4605-a2cf-ce32bd06af8f/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d2030c7e-c400-4605-a2cf-ce32bd06af8f/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d2030c7e-c400-4605-a2cf-ce32bd06af8f/3"
+                        },
+                        "name": "",
+                        "tooltip": "Social Media Badge"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Social Media Badge",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ffff4500",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "Gunny_Q"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Gunny_Q:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Wooohooo,",
+                        "I",
+                        "got",
+                        "a",
+                        "social",
+                        "media",
+                        "badge!",
+                        "or",
+                        "another",
+                        "one"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "b468ef1c-f072-4ef9-a620-d7c4bdb8832f"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "Collapsed|Subscription",
+            "frozen": false,
+            "highlightColor": "#64ffd641",
+            "id": "b468ef1c-f072-4ef9-a620-d7c4bdb8832f",
+            "localizedName": "",
+            "loginName": "gunny_q",
+            "messageText": "Wooohooo, I got a social media badge! or another one",
+            "searchText": "gunny_q  gunny_q: Wooohooo, I got a social media badge! or another one ",
+            "serverReceivedTime": "2026-04-06T03:02:37Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "social-sharing"
+            ],
+            "userID": "216501643",
+            "usernameColor": "#ffff4500"
+        },
+        {
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "3:02"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "03:02:37",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffff4500",
+                    "userLoginName": "gunny_q",
+                    "words": [
+                        "Gunny_Q"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "earned",
+                        "a",
+                        "Level",
+                        "1",
+                        "Social",
+                        "Media",
+                        "Badge!"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|Subscription",
+            "frozen": false,
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Gunny_Q earned a Level 1 Social Media Badge!",
+            "searchText": "Gunny_Q earned a Level 1 Social Media Badge!",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}
