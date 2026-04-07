@@ -463,16 +463,17 @@ void TextLayoutElement::paint(QPainter &painter,
     // of the "usual" glyphs.
     auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
 
-    auto standardTop = metrics.boundingRect("x").y();
-    auto actualTop = metrics.boundingRect(text).y();
-    auto topCorrection = standardTop - actualTop;
+    auto expectedBrectHeight =
+        app->getFonts()->getExpectedBrectHeight(this->style_, this->scale_);
+    auto actualBrectHeight = metrics.boundingRect(text).y();
+    auto brectCorrection = expectedBrectHeight - actualBrectHeight;
 
     painter.setFont(font);
 
     painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y() - topCorrection,
+        QRectF(this->getRect().x(), this->getRect().y() - brectCorrection,
                this->getRect().width(),
-               this->getRect().height() + topCorrection),
+               this->getRect().height() + brectCorrection),
         text, QTextOption(Qt::AlignLeft));
 }
 

@@ -207,6 +207,11 @@ QFontMetricsF Fonts::getFontMetrics(FontStyle type, float scale)
     return this->getOrCreateFontData(type, scale).metrics;
 }
 
+float Fonts::getExpectedBrectHeight(FontStyle type, float scale)
+{
+    return this->getOrCreateFontData(type, scale).expectedBrectHeight;
+}
+
 Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 {
     assertInGuiThread();
