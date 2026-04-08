@@ -206,7 +206,7 @@ declare namespace c2 {
         highlight_color: string | null;
         frozen: boolean;
         elements(): MessageElement[];
-        append_element(init: MessageElementInit): void;
+        append_element(init: MessageElementInit | MessageElement): void;
     }
 
     interface MessageConstructor {
@@ -228,7 +228,7 @@ declare namespace c2 {
         username_color?: string;
         server_received_time?: number;
         highlight_color?: string | null;
-        elements?: MessageElementInit[];
+        elements?: (MessageElementInit | MessageElement)[];
     }
 
     interface MessageElementBase {
