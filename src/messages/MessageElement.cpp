@@ -1190,8 +1190,8 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
 }
 
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
-                               MessageColor fallbackColor_,
-                               MessageColor userColor_)
+                               const MessageColor &fallbackColor_,
+                               const MessageColor &userColor_)
     : TextElement(displayName,
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
@@ -1202,8 +1202,8 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 
 MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
                                QStringList words, QString loginName_,
-                               MessageColor fallbackColor_,
-                               MessageColor userColor_)
+                               const MessageColor &fallbackColor_,
+                               const MessageColor &userColor_)
     : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
@@ -1214,7 +1214,8 @@ MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
 
 template <typename>
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
-                               MessageColor fallbackColor_, QColor userColor_)
+                               const MessageColor &fallbackColor_,
+                               QColor userColor_)
     : TextElement(displayName,
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
@@ -1225,7 +1226,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 
 template MentionElement::MentionElement(const QString &displayName,
                                         QString loginName_,
-                                        MessageColor fallbackColor_,
+                                        const MessageColor &fallbackColor_,
                                         QColor userColor_);
 
 void MentionElement::addToContainer(MessageLayoutContainer &container,
