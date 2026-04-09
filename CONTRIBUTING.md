@@ -14,7 +14,7 @@ You may use AI assistance for contributing to Chatterino, as long as you follow 
 - When making significant changes, add a note in the Pull Request description if a significant portion of the code is generated.
 - Do not use AI tools for the following:
   - Pull request and issue descriptions
-  - Writing documentation
+  - Writing documentation (except for grammar checking or wording improvements)
   - Fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
     These issues are intended for humans to get familiar with the Chatterino codebase.
   - Generating images (e.g. button icons)
