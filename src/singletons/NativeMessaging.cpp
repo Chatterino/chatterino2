@@ -147,8 +147,8 @@ QJsonDocument getFirefoxManifest(const QStringList &extensionIDs)
 #ifndef Q_OS_WIN
 void writeManifestToCustomPath(const QJsonDocument &manifest)
 {
-    auto customPath =
-        parseCustomPath(getSettings()->customNativeMessagingManifestPath.getValue());
+    auto customPath = parseCustomPath(
+        getSettings()->customNativeMessagingManifestPath.getValue());
     if (!customPath.has_value())
     {
         return;
