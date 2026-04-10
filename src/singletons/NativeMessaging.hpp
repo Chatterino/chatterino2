@@ -25,6 +25,10 @@ Expected<void, WriteManifestError> writeManifestTo(QString directory,
                                                    const QString &filename,
                                                    const QJsonDocument &json);
 
+#ifndef Q_OS_WIN
+std::optional<QString> parseCustomPath(QString path);
+#endif
+
 }  // namespace chatterino::nm::detail
 
 namespace chatterino {
@@ -85,6 +89,11 @@ private:
     std::vector<ChannelPtr> channelWarmer_;
 
     friend ReceiverThread;
+};
+
+enum class BrowserManifestFormat {
+    Chrome,
+    Firefox,
 };
 
 }  // namespace chatterino
