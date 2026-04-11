@@ -470,6 +470,11 @@ void TextLayoutElement::paint(QPainter &painter,
 
     painter.setFont(font);
 
+    // Set clipping region to prevent too tall glyphs from bleeding over to
+    // the line above them.
+    QRect clip(this->getRect().x(), this->getRect().y(), this->getRect().width(), this->getRect().height());
+    painter.setClipRegion(clip);
+
     painter.drawText(
         QRectF(this->getRect().x(), this->getRect().y() - brectCorrection,
                this->getRect().width(),
