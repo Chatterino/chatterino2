@@ -814,10 +814,12 @@ public:
 
 #ifndef Q_OS_WIN
     QStringSetting customNativeMessagingManifestPath{
-        "/misc/extension/customNativeMessagingManifestPath", ""};
+        "/misc/extension/customManifestPath",
+        "",
+    };
     EnumStringSetting<BrowserManifestFormat>
         customNativeMessagingManifestFormat = {
-            "/misc/extension/customNativeMessagingManifestFormat",
+            "/misc/extension/customManifestFormat",
             BrowserManifestFormat::Chrome,
     };
 #endif
