@@ -17,7 +17,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
-#include "util/CombinePath.hpp"
 #include "util/IpcQueue.hpp"
 
 #ifdef Q_OS_MACOS
@@ -26,135 +25,19 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QFile>
-#include <QFileInfo>
 #include <QMessageBox>
 #include <QSslSocket>
 #include <QStringList>
-#include <Qt>
-#include <QtCore/QtPlugin>
 #ifdef Q_OS_WIN
 #    include <shobjidl_core.h>
 #endif
 
-#include <rapidjson/document.h>
-#include <rapidjson/pointer.h>
-
-#include <cstring>
 #include <memory>
-
-#ifdef CHATTERINO_WITH_AVIF_PLUGIN
-Q_IMPORT_PLUGIN(QAVIFPlugin)
-#endif
 
 using namespace chatterino;
 
-namespace {
-
-bool argvRequestsLegacyScaling(int argc, char **argv)
-{
-    for (int i = 1; i < argc; ++i)
-    {
-        if (argv[i] != nullptr &&
-            std::strcmp(argv[i], "--use-old-scaling") == 0)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool jsonPointerBoolIsTrue(const QString &filePath, const char *jsonPointerPath)
-{
-    QFile f(filePath);
-    if (!f.open(QIODevice::ReadOnly))
-    {
-        return false;
-    }
-    const QByteArray data = f.readAll();
-    rapidjson::Document doc;
-    if (doc.Parse(data.constData(), data.size()).HasParseError())
-    {
-        return false;
-    }
-    const auto *v = rapidjson::Pointer(jsonPointerPath).Get(doc);
-    return v != nullptr && v->IsBool() && v->GetBool();
-}
-
-// Find possible `settings.json` locations before QApplication is created
-QStringList legacyScalingSettingsJsonCandidates(int argc, char **argv)
-{
-    QStringList candidates;
-    const QFileInfo fi(QString::fromLocal8Bit(argc > 0 ? argv[0] : ""));
-    const QString appDir = fi.absoluteDir().absolutePath();
-    if (QFile::exists(combinePath(appDir, QStringLiteral("portable"))))
-    {
-        candidates << combinePath(appDir,
-                                  QStringLiteral("Settings/settings.json"));
-        return candidates;
-    }
-
-#ifdef Q_OS_WIN
-    QString base = QString::fromLocal8Bit(qgetenv("APPDATA"));
-    if (!base.isEmpty())
-    {
-        base.replace(QStringLiteral("chatterino"), QStringLiteral("Chatterino"),
-                     Qt::CaseInsensitive);
-        base += QStringLiteral("2");
-        candidates << combinePath(base,
-                                  QStringLiteral("Settings/settings.json"));
-    }
-#elifdef Q_OS_MACOS
-    const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
-    if (!home.isEmpty())
-    {
-        candidates << combinePath(
-            combinePath(
-                home, QStringLiteral("Library/Application Support/chatterino")),
-            QStringLiteral("Settings/settings.json"));
-    }
-#else
-    const QString home = QString::fromLocal8Bit(qgetenv("HOME"));
-    if (!home.isEmpty())
-    {
-        QString xdgData = QString::fromLocal8Bit(qgetenv("XDG_DATA_HOME"));
-        if (xdgData.isEmpty())
-        {
-            xdgData = combinePath(home, QStringLiteral(".local/share"));
-        }
-        candidates << combinePath(
-            combinePath(xdgData, QStringLiteral("chatterino")),
-            QStringLiteral("Settings/settings.json"));
-        candidates << combinePath(
-            combinePath(xdgData, QStringLiteral("chatterino.com")),
-            QStringLiteral("chatterino/Settings/settings.json"));
-    }
-#endif
-    return candidates;
-}
-
-bool settingsFileRequestsLegacyScaling(int argc, char **argv)
-{
-    for (const auto &path : legacyScalingSettingsJsonCandidates(argc, argv))
-    {
-        if (jsonPointerBoolIsTrue(path, "/appearance/useLegacyScaling"))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-}  // namespace
-
 int main(int argc, char **argv)
 {
-    if (argvRequestsLegacyScaling(argc, argv) ||
-        settingsFileRequestsLegacyScaling(argc, argv))
-    {
-        QApplication::setAttribute(Qt::AA_Use96Dpi, true);
-    }
-
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("chatterino");

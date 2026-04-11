@@ -146,8 +146,10 @@ Args::Args(const QApplication &app, const Paths &paths)
 
     QCommandLineOption useOldScalingOption(
         "use-old-scaling",
-        "Starts Chatterino with legacy scaling (96 DPI) for this run only. "
-        "To persist it, enable \"Use legacy scaling\" in Settings → General.");
+        "Starts Chatterino with the old scaling option applied. This is not a "
+        "setting that will stick around. If you have issues where you feel "
+        "like you have to use this, please reach out to our issue tracker at "
+        "https://github.com/Chatterino/chatterino2/issues");
 
 #ifndef NDEBUG
     QCommandLineOption useLocalEventsubOption(

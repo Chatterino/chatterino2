@@ -171,16 +171,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
         });
-    SettingWidget::checkbox("Use legacy scaling (requires restart)",
-                            s.useLegacyScaling)
-        ->setTooltip(
-            "Approximate older Chatterino scaling by treating the display as "
-            "96 DPI (Qt::AA_Use96Dpi). Useful if the UI or text feels wrong "
-            "after an update on a high-DPI or fractional-scale display. "
-            "Restart required. You can also pass "
-            "--use-old-scaling on the command line for a single run.")
-        ->addKeywords({"dpi", "hidpi", "high dpi", "fractional"})
-        ->addTo(layout);
     ComboBox *tabDirectionDropdown =
         layout.addDropdown<std::underlying_type_t<NotebookTabLocation>>(
             "Tab layout", {"Top", "Left", "Right", "Bottom"}, s.tabDirection,

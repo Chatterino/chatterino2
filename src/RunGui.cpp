@@ -83,9 +83,9 @@ void installCustomPalette()
     QApplication::setPalette(dark);
 }
 
-void initQt(const Args &args, Settings &settings)
+void initQt(const Args &args)
 {
-    if (args.useOldScaling || settings.useLegacyScaling.getValue())
+    if (args.useOldScaling)
     {
         qCWarning(chatterinoApp) << "Using old scaling";
         QApplication::setAttribute(Qt::AA_Use96Dpi, true);
@@ -245,7 +245,7 @@ void clearCrashes(QDir dir)
 void runGui(QApplication &a, const Paths &paths, Settings &settings,
             const Args &args, Updates &updates)
 {
-    initQt(args, settings);
+    initQt(args);
     initResources();
     initSignalHandler();
 
