@@ -16,6 +16,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -33,6 +34,7 @@
 
 #include <optional>
 #include <string_view>
+#include <vector>
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -747,6 +749,12 @@ public:
     IntSetting hideSimilarMaxDelay = {"/similarity/hideSimilarMaxDelay", 5};
     IntSetting hideSimilarMaxMessagesToCheck = {
         "/similarity/hideSimilarMaxMessagesToCheck", 3};
+
+    /// Hotkeys
+    ChatterinoSetting<std::vector<Hotkey>> hotkeys = {
+        "/hotkeys2",
+        {},
+    };
 
     /// Timeout buttons
 

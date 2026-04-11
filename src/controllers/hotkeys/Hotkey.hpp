@@ -5,9 +5,14 @@
 #pragma once
 
 #include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
+#include <pajlada/serialize/serialize.hpp>
 #include <QKeySequence>
 #include <QString>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
 
 #include <vector>
 
@@ -99,3 +104,61 @@ private:
 };
 
 }  // namespace chatterino
+
+namespace pajlada {
+
+template <>
+struct Serialize<chatterino::Hotkey> {
+    static rapidjson::Value get(const chatterino::Hotkey &hotkey,
+                                rapidjson::Document::AllocatorType &a)
+    {
+        rapidjson::Value ret(rapidjson::kObjectType);
+
+        chatterino::rj::set(ret, "action", hotkey.action(), a);
+        chatterino::rj::set(ret, "keySequence", hotkey.keySequence().toString(),
+                            a);
+        chatterino::rj::set(ret, "category",
+                            hotkeyCategoryName(hotkey.category()), a);
+        chatterino::rj::set(ret, "arguments", hotkey.arguments(), a);
+
+        return ret;
+    }
+};
+
+template <>
+struct Deserialize<chatterino::Hotkey> {
+    static chatterino::Hotkey get(const rapidjson::Value &value,
+                                  bool *error = nullptr)
+    {
+        //         if (!value.IsObject())
+        //         {
+        //             PAJLADA_REPORT_ERROR(error);
+        //             return hotkey;
+        //         }
+        //
+        QString action;
+        chatterino::rj::getSafe(value, "action", action);
+
+        QString name;
+        chatterino::rj::getSafe(value, "name", name);
+
+        QString categoryName;
+        chatterino::rj::getSafe(value, "category", categoryName);
+
+        QString keySequence;
+        chatterino::rj::getSafe(value, "keySequence", keySequence);
+
+        std::vector<QString> arguments;
+        chatterino::rj::getSafe(value, "arguments", arguments);
+
+        return {
+            chatterino::hotkeyCategoryFromName(categoryName).value(),
+            QKeySequence(keySequence),
+            action,
+            arguments,
+            name,
+        };
+    }
+};
+
+}  // namespace pajlada

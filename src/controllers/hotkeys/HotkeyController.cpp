@@ -8,6 +8,7 @@
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
+#include "singletons/Settings.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
 #include <pajlada/settings.hpp>
@@ -588,12 +589,20 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
                                      QKeySequence keySequence, QString action,
                                      std::vector<QString> args, QString name)
 {
+    const auto &currentHotkeys = getSettings()->hotkeys.getValue();
+
+    auto found =
+        std::ranges::find_if(currentHotkeys, [&](const auto &hotkey) -> bool {
+            return hotkey.name() == name;
+        });
+
     qCDebug(chatterinoHotkeys) << "Try add default" << name;
-    if (addedHotkeys.count(name) != 0)
+    if (found != currentHotkeys.end())
     {
         qCDebug(chatterinoHotkeys) << "Already exists";
         return;  // hotkey was added before
     }
+
     qCDebug(chatterinoHotkeys) << "Inserted";
     this->hotkeys_.append(
         std::make_shared<Hotkey>(category, keySequence, action, args, name));
