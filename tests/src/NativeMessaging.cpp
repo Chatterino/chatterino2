@@ -71,13 +71,12 @@ TEST(NativeMessaging, parseCustomPath)
     ASSERT_EQ(parseCustomPath("/my/custom/path/to/manifest.json"),
               std::optional{"/my/custom/path/to/manifest.json"});
 
-    ASSERT_EQ(parseCustomPath(""), std::optional<QString>{});
+    ASSERT_EQ(parseCustomPath(""), std::nullopt);
 
     ASSERT_EQ(parseCustomPath("~/path/to/manifest.json"),
               std::optional{QDir::homePath() % "/path/to/manifest.json"});
 
-    ASSERT_EQ(parseCustomPath("relative/path/to/manifest.json"),
-              std::optional<QString>{});
+    ASSERT_EQ(parseCustomPath("relative/path/to/manifest.json"), std::nullopt);
 
 #    ifdef Q_OS_LINUX
     ASSERT_EQ(
