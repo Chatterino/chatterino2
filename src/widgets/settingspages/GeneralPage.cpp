@@ -958,12 +958,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
         auto *form = new QFormLayout();
         layout.addLayout(form);
-        SettingWidget::lineEdit("Custom Native Messaging Manifest Path",
+        SettingWidget::lineEdit("Custom manifest path",
                                 s.customNativeMessagingManifestPath,
                                 "/full/path/to/native/messaging/manifest.json")
             ->addTo(layout, form);
 
-        SettingWidget::dropdown("Custom Native Messaging Manifest Format",
+        SettingWidget::dropdown("Custom manifest format",
                                 s.customNativeMessagingManifestFormat)
             ->addTo(layout);
     }
