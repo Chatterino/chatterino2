@@ -94,7 +94,7 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
 #endif
 }
 
-QJsonObject getBaseDocument()
+QJsonObject buildBaseDocument()
 {
     return QJsonObject{
         {u"name"_s, "com.chatterino.chatterino"_L1},
@@ -104,9 +104,9 @@ QJsonObject getBaseDocument()
     };
 }
 
-QJsonDocument getChromeManifest(const QStringList &extensionIDs)
+QJsonDocument buildChromeManifest(const QStringList &extensionIDs)
 {
-    auto obj = getBaseDocument();
+    auto obj = buildBaseDocument();
     QJsonArray allowedOriginsArr = {
         u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
 
@@ -125,9 +125,9 @@ QJsonDocument getChromeManifest(const QStringList &extensionIDs)
     return QJsonDocument{obj};
 }
 
-QJsonDocument getFirefoxManifest(const QStringList &extensionIDs)
+QJsonDocument buildFirefoxManifest(const QStringList &extensionIDs)
 {
-    auto obj = getBaseDocument();
+    auto obj = buildBaseDocument();
     QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
 
     for (const auto &id : extensionIDs)
@@ -249,8 +249,8 @@ void registerNmHost(const Paths &paths)
         getSettings()->additionalExtensionIDs.getValue().split(
             ';', Qt::SkipEmptyParts);
 
-    QJsonDocument chromeManifest = getChromeManifest(extensionIDs);
-    QJsonDocument firefoxManifest = getFirefoxManifest(extensionIDs);
+    QJsonDocument chromeManifest = buildChromeManifest(extensionIDs);
+    QJsonDocument firefoxManifest = buildFirefoxManifest(extensionIDs);
 
     registerNmManifest(paths, CHROME, chromeManifest);
     registerNmManifest(paths, FIREFOX, firefoxManifest);
