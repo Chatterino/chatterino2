@@ -422,6 +422,7 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
     , scale_(_scale)
 {
     this->setText(_text);
+    this->setClipRegion();
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
@@ -472,8 +473,7 @@ void TextLayoutElement::paint(QPainter &painter,
 
     // Set clipping region to prevent too tall glyphs from bleeding over to
     // the line above them.
-    QRect clip(this->getRect().x(), this->getRect().y(), this->getRect().width(), this->getRect().height());
-    painter.setClipRegion(clip);
+    painter.setClipRegion(this->clip_);
 
     painter.drawText(
         QRectF(this->getRect().x(), this->getRect().y() - brectCorrection,
@@ -525,6 +525,19 @@ int TextLayoutElement::getMouseOverIndex(QPointF abs) const
     //    }
 
     return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
+}
+
+void TextLayoutElement::setClipRegion()
+{
+    QRect clipRect(this->getRect().x(), this->getRect().y(),
+                   this->getRect().width(), this->getRect().height());
+    this->clip_ = QRegion(clipRect);
+}
+
+void TextLayoutElement::setPosition(QPointF point)
+{
+    MessageLayoutElement::setPosition(point);
+    this->setClipRegion();
 }
 
 qreal TextLayoutElement::getXFromIndex(size_t index)
