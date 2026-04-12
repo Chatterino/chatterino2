@@ -27,7 +27,8 @@ namespace chatterino {
 LoggerToFile::LoggerToFile(const QString &filePath)
     : logFile_(filePath)
 {
-    this->logFile_.open(QIODevice::WriteOnly);
+    bool success = this->logFile_.open(QIODevice::WriteOnly);
+    (void)success;
 
     this->originalHandler_ = qInstallMessageHandler(logToFile);
 }
