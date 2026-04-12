@@ -462,8 +462,8 @@ void TextLayoutElement::paint(QPainter &painter,
     // We can safely "oversize" it to avoid odd clipping
     // issues on the right and bottom.
     QRect clipRect(this->getRect().x(), this->getRect().y(),
-                   2 * this->getRect().width(),
-                   2 * brect.height());
+                   std::ceil(this->getRect().width()),
+                   std::ceil(brect.height()));
     painter.setClipRegion(QRegion(clipRect));
 
     QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
