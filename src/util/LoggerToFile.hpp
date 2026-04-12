@@ -19,7 +19,7 @@ class LoggerToFile
 public:
     ~LoggerToFile();
 
-    static void enable(const QString &filePath);
+    static bool enable(const QString &filePath);
     void log(QtMsgType type, const QMessageLogContext &context,
              const QString &msg);
 
