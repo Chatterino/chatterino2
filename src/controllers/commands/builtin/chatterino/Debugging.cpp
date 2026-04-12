@@ -326,7 +326,7 @@ QString enableLogfile(const CommandContext &ctx)
             "This command requires path to the log file");
     }
 
-    QString logFilePath = ctx.words[1];
+    QString logFilePath = ctx.words.mid(1).join(" ");
     bool success = LoggerToFile::enable(logFilePath);
     if (!success)
     {
@@ -351,8 +351,9 @@ QString relaunchWithLogfile(const CommandContext &ctx)
             "This command requires path to the log file");
     }
 
-    auto env = setUpEnvironmentForLogging(ctx.words.mid(2));
-    env.insert(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, ctx.words[1]);
+    auto env = setUpEnvironmentForLogging({});
+    QString logFilePath = ctx.words.mid(1).join(" ");
+    env.insert(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, logFilePath);
 
     getSettings()->requestSave();
 
