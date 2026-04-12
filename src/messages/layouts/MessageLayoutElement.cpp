@@ -422,7 +422,6 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
     , scale_(_scale)
 {
     this->setText(_text);
-    this->setClipRegion();
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,
@@ -453,33 +452,22 @@ void TextLayoutElement::paint(QPainter &painter,
 
     painter.setPen(this->color_);
     auto font = app->getFonts()->getFont(this->style_, this->scale_);
-
-    // Some glyphs, usually those outside the Latin alphabet,
-    // can change the height of the bounding rectangle of the
-    // text. This may cause the text to appear shifted up or down
-    // on its line.
-    // A simple way to compensate for this is to shift the top
-    // of the bounding rectangle we draw the text into back to
-    // the position where it would have been for a text composed only
-    // of the "usual" glyphs.
     auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
-
-    auto expectedBrectHeight =
-        app->getFonts()->getExpectedBrectHeight(this->style_, this->scale_);
-    auto actualBrectHeight = metrics.boundingRect(text).y();
-    auto brectCorrection = expectedBrectHeight - actualBrectHeight;
+    auto brect = metrics.boundingRect(text);
 
     painter.setFont(font);
 
-    // Set clipping region to prevent too tall glyphs from bleeding over to
-    // the line above them.
-    painter.setClipRegion(this->clip_);
+    // We only need the clip to cut off the top to prevent
+    // too tall glyphs from bleeding over to the line above them.
+    // We can safely "oversize" it to avoid odd clipping
+    // issues on the right and bottom.
+    QRect clipRect(this->getRect().x(), this->getRect().y(),
+                   2 * this->getRect().width(),
+		   2 * brect.height());
+    painter.setClipRegion(QRegion(clipRect));
 
-    painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y() - brectCorrection,
-               this->getRect().width(),
-               this->getRect().height() + brectCorrection),
-        text, QTextOption(Qt::AlignLeft));
+    QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
+    painter.drawText(pivot, text);
 }
 
 bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, qreal /*yOffset*/)
@@ -525,19 +513,6 @@ int TextLayoutElement::getMouseOverIndex(QPointF abs) const
     //    }
 
     return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
-}
-
-void TextLayoutElement::setClipRegion()
-{
-    QRect clipRect(this->getRect().x(), this->getRect().y(),
-                   this->getRect().width(), this->getRect().height());
-    this->clip_ = QRegion(clipRect);
-}
-
-void TextLayoutElement::setPosition(QPointF point)
-{
-    MessageLayoutElement::setPosition(point);
-    this->setClipRegion();
 }
 
 qreal TextLayoutElement::getXFromIndex(size_t index)

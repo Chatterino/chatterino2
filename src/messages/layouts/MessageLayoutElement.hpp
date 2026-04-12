@@ -42,7 +42,7 @@ public:
 
     const QRectF &getRect() const;
     MessageElement &getCreator() const;
-    virtual void setPosition(QPointF point);
+    void setPosition(QPointF point);
     bool hasTrailingSpace() const;
     size_t getLine() const;
     void setLine(size_t line);
@@ -173,7 +173,6 @@ class TextLayoutElement : public MessageLayoutElement
 public:
     TextLayoutElement(MessageElement &creator_, QString &text, QSizeF size,
                       QColor color_, FontStyle style_, float scale_);
-    void setPosition(QPointF point) override;
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -183,12 +182,10 @@ protected:
     bool paintAnimated(QPainter &painter, qreal yOffset) override;
     int getMouseOverIndex(QPointF abs) const override;
     qreal getXFromIndex(size_t index) override;
-    void setClipRegion();
 
     QColor color_;
     FontStyle style_;
     float scale_;
-    QRegion clip_;
 };
 
 // TEXT ICON
