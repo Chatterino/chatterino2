@@ -22,6 +22,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/emoji/EmojiStyle.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
@@ -810,6 +811,18 @@ public:
     };
 
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
+
+#ifndef Q_OS_WIN
+    QStringSetting customNativeMessagingManifestPath{
+        "/misc/extension/customManifestPath",
+        "",
+    };
+    EnumStringSetting<BrowserManifestFormat>
+        customNativeMessagingManifestFormat = {
+            "/misc/extension/customManifestFormat",
+            BrowserManifestFormat::Chrome,
+    };
+#endif
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
