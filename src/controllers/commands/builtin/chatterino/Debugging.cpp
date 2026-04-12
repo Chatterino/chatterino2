@@ -22,6 +22,7 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/LoggerToFile.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QApplication>
@@ -33,6 +34,46 @@
 using namespace Qt::StringLiterals;
 
 namespace chatterino::commands {
+
+static bool restartChatterino(const QProcessEnvironment &env)
+{
+    QProcess proc;
+    proc.setProgram(qApp->applicationFilePath());
+    // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
+    proc.setProcessEnvironment(env);
+    if (proc.startDetached())
+    {
+        getSettings()->disableSave();  // only disable if the process started
+        QMetaObject::invokeMethod(
+            qApp,
+            [] {
+                QApplication::exit();
+            },
+            Qt::QueuedConnection);
+        return true;
+    }
+
+    return false;
+}
+
+static QProcessEnvironment setUpEnvironmentForLogging(
+    const QStringList &loggingRules)
+{
+    static constexpr QLatin1String loggingRulesEnv("QT_LOGGING_RULES");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    if (!loggingRules.isEmpty())
+    {
+        env.insert(loggingRulesEnv, loggingRules.join(';'));
+    }
+    else if (!env.contains(loggingRulesEnv))
+    {
+        // by default, enable all debug logging
+        env.insert(loggingRulesEnv, "chatterino.*.debug=true");
+    }
+
+    return env;
+}
 
 QString setLoggingRules(const CommandContext &ctx)
 {
@@ -256,42 +297,66 @@ QString relaunchWithConsole(const CommandContext &ctx)
         return {};
     }
 
-    const QString loggingRulesEnv = u"QT_LOGGING_RULES"_s;
     const QString winDebugConsoleEnv = u"QT_WIN_DEBUG_CONSOLE"_s;
-
-    auto env = QProcessEnvironment::systemEnvironment();
-    if (ctx.words.size() > 1)
-    {
-        env.insert(loggingRulesEnv, ctx.words.mid(1).join(';'));
-    }
-    else if (!env.contains(loggingRulesEnv))
-    {
-        // by default, enable all debug logging
-        env.insert(loggingRulesEnv, "chatterino.*.debug=true");
-    }
+    auto env = setUpEnvironmentForLogging(ctx.words.mid(1));
+    env.insert(winDebugConsoleEnv, "new");
 
     getSettings()->requestSave();
 
-    QProcess proc;
-    proc.setProgram(qApp->applicationFilePath());
-    // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
-    env.insert(winDebugConsoleEnv, "new");
-    proc.setProcessEnvironment(env);
-    if (proc.startDetached())
+    bool success = restartChatterino(env);
+    if (!success)
     {
-        getSettings()->disableSave();  // only disable if the process started
-        QMetaObject::invokeMethod(
-            qApp,
-            [] {
-                QApplication::exit();
-            },
-            Qt::QueuedConnection);
-        return {};
+        ctx.channel->addSystemMessage("Failed to start process.");
     }
 
-    ctx.channel->addSystemMessage("Failed to start process.");
     return {};
 }
 #endif
+
+QString enableLogfile(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addSystemMessage(
+            "This command requires path to the log file");
+    }
+
+    QString logFilePath = ctx.words[1];
+    LoggerToFile::enable(logFilePath);
+
+    return {};
+}
+
+QString relaunchWithLogfile(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addSystemMessage(
+            "This command requires path to the log file");
+    }
+
+    auto env = setUpEnvironmentForLogging(ctx.words.mid(2));
+    env.insert(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, ctx.words[1]);
+
+    getSettings()->requestSave();
+
+    bool success = restartChatterino(env);
+    if (!success)
+    {
+        ctx.channel->addSystemMessage("Failed to start process.");
+    }
+
+    return {};
+}
 
 }  // namespace chatterino::commands

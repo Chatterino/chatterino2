@@ -493,6 +493,10 @@ CommandController::CommandController(const Paths &paths)
                           &commands::relaunchWithConsole);
 #endif
 
+    this->registerCommand("/debug-enable-logfile", &commands::enableLogfile);
+    this->registerCommand("/debug-relaunch-with-logfile",
+                          &commands::relaunchWithLogfile);
+
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 

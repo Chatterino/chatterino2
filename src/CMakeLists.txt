@@ -581,6 +581,8 @@ set(SOURCE_FILES
         util/LayoutHelper.hpp
         util/LoadPixmap.cpp
         util/LoadPixmap.hpp
+        util/LoggerToFile.cpp
+        util/LoggerToFile.hpp
         util/OnceFlag.cpp
         util/OnceFlag.hpp
         util/RapidjsonHelpers.cpp
