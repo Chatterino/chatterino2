@@ -317,6 +317,13 @@ QString relaunchWithConsole(const CommandContext &ctx)
 }
 #endif
 
+QString disableLogfile(const CommandContext &ctx)
+{
+    LoggerToFile::instance().disable();
+
+    return {};
+}
+
 QString enableLogfile(const CommandContext &ctx)
 {
     if (!ctx.channel)
