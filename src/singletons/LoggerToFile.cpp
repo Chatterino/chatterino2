@@ -81,13 +81,20 @@ LoggerToFile &LoggerToFile::instance()
     return *instance_;
 }
 
-void LoggerToFile::log(QtMsgType /*type*/,
-                       const QMessageLogContext & /*context*/,
+void LoggerToFile::log(QtMsgType type, const QMessageLogContext &context,
                        const QString &msg)
 {
     std::scoped_lock lk(this->logLock_);
 
-    this->logFile_->write((msg + "\n").toUtf8());
+    auto formatted = qFormatLogMessage(type, context, msg);
+
+    this->logFile_->write((formatted + "\n").toUtf8());
+    if (this->originalHandler_)
+    {
+        this->originalHandler_(type, context, msg);
+    }
+
+    this->logFile_->flush();
 }
 
 }  // namespace chatterino
