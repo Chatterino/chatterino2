@@ -59,7 +59,9 @@ Expected<void, LoggerToFile::Error> LoggerToFile::enable(
     bool success = f->open(QIODevice::WriteOnly);
     if (!success)
     {
-        Error error(absFilePath, f->errorString());
+        Error error{};
+        error.absFilePath = absFilePath;
+        error.errorDesc = f->errorString();
 
         // Abort if we cannot open the log file for writing
         return makeUnexpected(std::move(error));
