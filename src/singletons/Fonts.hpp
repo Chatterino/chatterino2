@@ -59,7 +59,7 @@ private:
     struct FontData {
         FontData(const QFont &_font)
             : font(_font)
-            , metrics(this->font)
+            , metrics(_font)
         {
         }
 
