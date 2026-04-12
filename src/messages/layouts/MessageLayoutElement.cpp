@@ -453,7 +453,6 @@ void TextLayoutElement::paint(QPainter &painter,
     painter.setPen(this->color_);
     auto font = app->getFonts()->getFont(this->style_, this->scale_);
     auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
-    auto brect = metrics.boundingRect(text);
 
     painter.setFont(font);
 
@@ -463,7 +462,7 @@ void TextLayoutElement::paint(QPainter &painter,
     // issues on the right and bottom.
     QRect clipRect(this->getRect().x(), this->getRect().y(),
                    std::ceil(this->getRect().width()),
-                   std::ceil(brect.height()));
+                   std::ceil(this->getRect().height()));
     painter.setClipRegion(QRegion(clipRect));
 
     QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
