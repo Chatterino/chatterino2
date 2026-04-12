@@ -11,6 +11,7 @@
 #include "util/Helpers.hpp"
 #include "util/ImageUploader.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/dialogs/DownloadDictionaryDialog.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFormLayout>
@@ -281,12 +282,39 @@ void ExternalToolsPage::initLayout(GeneralPageView &layout)
             getApp()->getSpellChecker()->getAvailableDictionaries(),
             std::back_inserter(dictList), toItem);
 
-        if (dictList.size() > 1)
-        {
+        auto *defaultDict =
             SettingWidget::dropdown("Default dictionary (requires restart)",
-                                    s.spellCheckingDefaultDictionary, dictList)
-                ->addTo(layout);
-        }
+                                    s.spellCheckingDefaultDictionary, dictList);
+        defaultDict->addTo(layout);
+
+        this->managedConnections_.managedConnect(
+            getApp()->getSpellChecker()->dictionariesUpdated, [defaultDict] {
+                auto *cb =
+                    qobject_cast<QComboBox *>(defaultDict->actionWidget());
+                if (!cb)
+                {
+                    return;
+                }
+                QString prevDict =
+                    getSettings()->spellCheckingDefaultDictionary;
+                cb->clear();
+                cb->addItem("None", "");
+                for (const DictionaryInfo &dict :
+                     getApp()->getSpellChecker()->getAvailableDictionaries())
+                {
+                    cb->addItem(dict.name, dict.path);
+                }
+                // Restore previous path. This might no longer be valid.
+                getSettings()->spellCheckingDefaultDictionary = prevDict;
+            });
+        auto *buttons = new QHBoxLayout;
+        auto *download = new QPushButton("Download Dictionary");
+        QObject::connect(download, &QPushButton::clicked, this, [this] {
+            (new DownloadDictionaryDialog(this))->show();
+        });
+        buttons->addWidget(download);
+        buttons->addStretch();
+        layout.addLayout(buttons);
     }
 #endif
 

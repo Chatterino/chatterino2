@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <pajlada/signals/signal.hpp>
 #include <QString>
 
 #include <memory>
@@ -48,8 +49,16 @@ public:
     /// System-dictionary loading is currently only implemented on Linux.
     std::vector<DictionaryInfo> getAvailableDictionaries() const;
 
+    pajlada::Signals::NoArgSignal dictionariesUpdated;
+
 private:
     std::unique_ptr<SpellCheckerPrivate> private_;
 };
+
+namespace spellcheck {
+
+QString prettyLossyBcp47Description(const QString &bcp47Str);
+
+}  // namespace spellcheck
 
 }  // namespace chatterino

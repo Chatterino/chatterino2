@@ -76,7 +76,7 @@ SettingWidget *SettingWidget::checkbox(const QString &label,
                          setting = state;
                      });
 
-    widget->actionWidget = check;
+    widget->actionWidget_ = check;
     widget->label = check;
 
     return widget;
@@ -106,7 +106,7 @@ SettingWidget *SettingWidget::inverseCheckbox(const QString &label,
                          setting = !state;
                      });
 
-    widget->actionWidget = check;
+    widget->actionWidget_ = check;
     widget->label = check;
 
     return widget;
@@ -128,7 +128,7 @@ SettingWidget *SettingWidget::customCheckbox(
 
     QObject::connect(check, &QCheckBox::toggled, widget, save);
 
-    widget->actionWidget = check;
+    widget->actionWidget_ = check;
     widget->label = check;
 
     return widget;
@@ -178,7 +178,7 @@ SettingWidget *SettingWidget::intInput(const QString &label,
                          setting = newValue;
                      });
 
-    widget->actionWidget = input;
+    widget->actionWidget_ = input;
     widget->label = lbl;
 
     return widget;
@@ -203,7 +203,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     // TODO: this can probably use some other size hint/size strategy
     combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
-    widget->actionWidget = combo;
+    widget->actionWidget_ = combo;
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
@@ -277,7 +277,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
     // TODO: this can probably use some other size hint/size strategy
     combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
-    widget->actionWidget = combo;
+    widget->actionWidget_ = combo;
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
@@ -356,7 +356,7 @@ SettingWidget *SettingWidget::dropdown(
     // TODO: this can probably use some other size hint/size strategy
     combo->setMinimumWidth(combo->minimumSizeHint().width() + 30);
 
-    widget->actionWidget = combo;
+    widget->actionWidget_ = combo;
     widget->label = lbl;
 
     widget->hLayout->addWidget(lbl);
@@ -439,7 +439,7 @@ SettingWidget *SettingWidget::colorButton(const QString &label,
         dialog->show();
     });
 
-    widget->actionWidget = colorButton;
+    widget->actionWidget_ = colorButton;
     widget->label = lbl;
 
     return widget;
@@ -482,7 +482,7 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
         },
         widget->managedConnections, false);
 
-    widget->actionWidget = edit;
+    widget->actionWidget_ = edit;
     widget->label = lbl;
 
     return widget;
@@ -522,7 +522,7 @@ SettingWidget *SettingWidget::fontButton(const QString &label,
                          }
                      });
 
-    widget->actionWidget = button;
+    widget->actionWidget_ = button;
     widget->label = lbl;
 
     return widget;
@@ -547,10 +547,10 @@ SettingWidget *SettingWidget::setTooltip(QString tooltip)
         sz = this->label->sizeHint().height();
     }
 
-    if (this->actionWidget != nullptr)
+    if (this->actionWidget_ != nullptr)
     {
-        this->actionWidget->setToolTip(tooltip);
-        sz = std::max(sz, this->actionWidget->sizeHint().height());
+        this->actionWidget_->setToolTip(tooltip);
+        sz = std::max(sz, this->actionWidget_->sizeHint().height());
     }
 
     this->tooltipIcon->setVisible(true);
@@ -594,7 +594,7 @@ SettingWidget *SettingWidget::conditionallyEnabledBy(BoolSetting &setting)
 {
     setting.connect(
         [this](const auto &value, const auto &) {
-            this->actionWidget->setEnabled(value);
+            this->actionWidget_->setEnabled(value);
         },
         this->managedConnections);
 
@@ -606,7 +606,7 @@ SettingWidget *SettingWidget::conditionallyEnabledBy(
 {
     setting.connect(
         [this, expectedValue](const auto &value, const auto &) {
-            this->actionWidget->setEnabled(value == expectedValue);
+            this->actionWidget_->setEnabled(value == expectedValue);
         },
         this->managedConnections);
 
@@ -624,14 +624,14 @@ void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
 {
     this->registerWidget(view);
 
-    formLayout->addRow(this->label, this->actionWidget);
+    formLayout->addRow(this->label, this->actionWidget_);
 }
 
 void SettingWidget::addToLayout(QLayout *layout)
 {
-    if (this->label == this->actionWidget)
+    if (this->label == this->actionWidget_)
     {
-        layout->addWidget(this->actionWidget);
+        layout->addWidget(this->actionWidget_);
         return;
     }
 
@@ -644,7 +644,7 @@ void SettingWidget::registerWidget(GeneralPageView &view)
     {
         view.registerWidget(this->label, this->keywords, this);
     }
-    view.registerWidget(this->actionWidget, this->keywords, this);
+    view.registerWidget(this->actionWidget_, this->keywords, this);
 }
 
 }  // namespace chatterino

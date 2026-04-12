@@ -130,12 +130,17 @@ public:
     /// For settings pages without a page view
     void addToLayout(QLayout *layout);
 
+    QWidget *actionWidget()
+    {
+        return this->actionWidget_;
+    }
+
 private:
     /// Registers this widget & its optional label to the given page view
     void registerWidget(GeneralPageView &view);
 
     QWidget *label = nullptr;
-    QWidget *actionWidget = nullptr;
+    QWidget *actionWidget_ = nullptr;
     QSvgWidget *tooltipIcon;
 
     QVBoxLayout *vLayout;
