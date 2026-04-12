@@ -516,6 +516,8 @@ set(SOURCE_FILES
         singletons/Fonts.hpp
         singletons/ImageUploader.cpp
         singletons/ImageUploader.hpp
+        singletons/LoggerToFile.cpp
+        singletons/LoggerToFile.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp
@@ -581,8 +583,6 @@ set(SOURCE_FILES
         util/LayoutHelper.hpp
         util/LoadPixmap.cpp
         util/LoadPixmap.hpp
-        util/LoggerToFile.cpp
-        util/LoggerToFile.hpp
         util/OnceFlag.cpp
         util/OnceFlag.hpp
         util/RapidjsonHelpers.cpp

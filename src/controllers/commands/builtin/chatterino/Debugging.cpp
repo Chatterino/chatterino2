@@ -17,12 +17,12 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/LoggerToFile.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/LoggerToFile.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QApplication>
@@ -33,17 +33,20 @@
 
 using namespace Qt::StringLiterals;
 
-namespace chatterino::commands {
+namespace {
 
-static bool restartChatterino(const QProcessEnvironment &env)
+bool restartChatterino(const QProcessEnvironment &env)
 {
+    chatterino::getSettings()->requestSave();
+
     QProcess proc;
     proc.setProgram(qApp->applicationFilePath());
     // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
     proc.setProcessEnvironment(env);
     if (proc.startDetached())
     {
-        getSettings()->disableSave();  // only disable if the process started
+        chatterino::getSettings()
+            ->disableSave();  // only disable if the process started
         QMetaObject::invokeMethod(
             qApp,
             [] {
@@ -56,8 +59,7 @@ static bool restartChatterino(const QProcessEnvironment &env)
     return false;
 }
 
-static QProcessEnvironment setUpEnvironmentForLogging(
-    const QStringList &loggingRules)
+QProcessEnvironment setUpEnvironmentForLogging(const QStringList &loggingRules)
 {
     static constexpr QLatin1String loggingRulesEnv("QT_LOGGING_RULES");
 
@@ -74,6 +76,10 @@ static QProcessEnvironment setUpEnvironmentForLogging(
 
     return env;
 }
+
+}  // namespace
+
+namespace chatterino::commands {
 
 QString setLoggingRules(const CommandContext &ctx)
 {
@@ -301,8 +307,6 @@ QString relaunchWithConsole(const CommandContext &ctx)
     auto env = setUpEnvironmentForLogging(ctx.words.mid(1));
     env.insert(winDebugConsoleEnv, "new");
 
-    getSettings()->requestSave();
-
     bool success = restartChatterino(env);
     if (!success)
     {
@@ -329,7 +333,7 @@ QString enableLogfile(const CommandContext &ctx)
     }
 
     QString logFilePath = ctx.words.mid(1).join(" ");
-    bool success = LoggerToFile::enable(logFilePath);
+    bool success = LoggerToFile::instance().enable(logFilePath);
     if (!success)
     {
         ctx.channel->addSystemMessage(
@@ -358,8 +362,6 @@ QString relaunchWithLogfile(const CommandContext &ctx)
     auto env = setUpEnvironmentForLogging({});
     QString logFilePath = ctx.words.mid(1).join(" ");
     env.insert(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, logFilePath);
-
-    getSettings()->requestSave();
 
     bool success = restartChatterino(env);
     if (!success)

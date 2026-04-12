@@ -13,12 +13,12 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "RunGui.hpp"
 #include "singletons/CrashHandler.hpp"
+#include "singletons/LoggerToFile.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
 #include "util/IpcQueue.hpp"
-#include "util/LoggerToFile.hpp"
 
 #ifdef Q_OS_MACOS
 #    include "util/MacOsHelpers.h"
@@ -51,11 +51,13 @@ int main(int argc, char **argv)
 
     std::unique_ptr<Paths> paths;
 
+    LoggerToFile logger;
+
     QString logFilePath =
         qEnvironmentVariable(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, "");
     if (!logFilePath.isEmpty())
     {
-        LoggerToFile::enable(logFilePath);
+        logger.enable(logFilePath);
     }
 
     try

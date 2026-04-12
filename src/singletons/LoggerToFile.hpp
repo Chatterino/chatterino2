@@ -4,29 +4,33 @@
 
 #pragma once
 
-#define CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR "CHATTERINO_REDIRECT_LOG_TO_FILE"
-
 #include <QFile>
 #include <QString>
 
-#include <memory>
 #include <mutex>
 
 namespace chatterino {
 
+constexpr const char *CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR =
+    "CHATTERINO_REDIRECT_LOG_TO_FILE";
+
 class LoggerToFile
 {
 public:
-    ~LoggerToFile();
+    LoggerToFile();
 
-    static bool enable(const QString &filePath);
+    static LoggerToFile &instance();
+
+    void disable();
+    bool enable(const QString &filePath);
     void log(QtMsgType type, const QMessageLogContext &context,
              const QString &msg);
 
 private:
-    LoggerToFile(const QString &filePath);
+    static LoggerToFile *instance_;
+    std::mutex logLock_;
 
-    QFile logFile_;
+    std::unique_ptr<QFile> logFile_;
     QtMessageHandler originalHandler_;
 };
 
