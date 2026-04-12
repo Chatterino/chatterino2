@@ -463,7 +463,7 @@ void TextLayoutElement::paint(QPainter &painter,
     // issues on the right and bottom.
     QRect clipRect(this->getRect().x(), this->getRect().y(),
                    2 * this->getRect().width(),
-		   2 * brect.height());
+                   2 * brect.height());
     painter.setClipRegion(QRegion(clipRect));
 
     QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
