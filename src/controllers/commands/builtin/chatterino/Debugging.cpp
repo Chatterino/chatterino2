@@ -323,7 +323,9 @@ QString enableLogfile(const CommandContext &ctx)
     if (ctx.words.size() < 2)
     {
         ctx.channel->addSystemMessage(
-            "This command requires path to the log file");
+            "Usage: /debug-enable-logfile <path-to-logfile>");
+
+        return {};
     }
 
     QString logFilePath = ctx.words.mid(1).join(" ");
@@ -348,7 +350,9 @@ QString relaunchWithLogfile(const CommandContext &ctx)
     if (ctx.words.size() < 2)
     {
         ctx.channel->addSystemMessage(
-            "This command requires path to the log file");
+            "Usage: /debug-relaunch-with-logfile <path-to-logfile>");
+
+        return {};
     }
 
     auto env = setUpEnvironmentForLogging({});
