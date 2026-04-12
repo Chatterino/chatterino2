@@ -340,12 +340,15 @@ QString enableLogfile(const CommandContext &ctx)
     }
 
     QString logFilePath = ctx.words.mid(1).join(" ");
-    bool success = LoggerToFile::instance().enable(logFilePath);
-    if (!success)
+    auto result = LoggerToFile::instance().enable(logFilePath);
+    if (!result.has_value())
     {
-        ctx.channel->addSystemMessage(
-            "Unable to open log file. Check the file path and that you have "
-            "write permissions to it");
+        auto error = result.error();
+
+        QString msg = QString("Unable to open log file %1. Error reported by
+                              "the system was: %2")
+                          .arg(error.absFilePath, error.errorDesc);
+        ctx.channel->addSystemMessage(msg);
     }
 
     return {};

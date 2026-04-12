@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "util/Expected.hpp"
+
 #include <QFile>
 #include <QString>
 
@@ -17,12 +19,17 @@ constexpr const char *CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR =
 class LoggerToFile
 {
 public:
+    struct Error {
+        QString absFilePath;
+        QString errorDesc;
+    };
+
     LoggerToFile();
 
     static LoggerToFile &instance();
 
     void disable();
-    bool enable(const QString &filePath);
+    Expected<void, Error> enable(const QString &filePath);
     void log(QtMsgType type, const QMessageLogContext &context,
              const QString &msg);
 

@@ -57,7 +57,16 @@ int main(int argc, char **argv)
         qEnvironmentVariable(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, "");
     if (!logFilePath.isEmpty())
     {
-        logger.enable(logFilePath);
+        auto result = logger.enable(logFilePath);
+        if (!result.has_value())
+        {
+            auto error = result.error();
+            QString errorMessage = QString("Unable to open log file %1. Error "
+                                           "reported by the system was: %2")
+                                       .arg(error.absFilePath, error.errorDesc);
+
+            std::cerr << errorMessage.toLocal8Bit().constData() << std::endl;
+        }
     }
 
     try

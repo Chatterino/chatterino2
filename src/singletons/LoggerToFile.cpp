@@ -36,7 +36,8 @@ void LoggerToFile::disable()
     }
 }
 
-bool LoggerToFile::enable(const QString &filePath)
+Expected<void, LoggerToFile::Error> LoggerToFile::enable(
+    const QString &filePath)
 {
     std::scoped_lock lk(this->logLock_);
 
@@ -50,7 +51,7 @@ bool LoggerToFile::enable(const QString &filePath)
         if (finfoCurrent.absoluteFilePath() == absFilePath)
         {
             // Don't do anything if the current and new target log file are the same
-            return true;
+            return {};
         }
     }
 
@@ -58,8 +59,10 @@ bool LoggerToFile::enable(const QString &filePath)
     bool success = f->open(QIODevice::WriteOnly);
     if (!success)
     {
+        Error error(absFilePath, f->errorString());
+
         // Abort if we cannot open the log file for writing
-        return false;
+        return makeUnexpected(std::move(error));
     }
 
     if (this->logFile_ == nullptr)
@@ -69,7 +72,7 @@ bool LoggerToFile::enable(const QString &filePath)
 
     this->logFile_ = std::move(f);
 
-    return true;
+    return {};
 }
 
 LoggerToFile &LoggerToFile::instance()
