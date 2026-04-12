@@ -92,7 +92,7 @@ DownloadDictionaryDialog::DownloadDictionaryDialog(QWidget *parent)
             QComboBox *dicts = this->ui.dictionaries;
             dicts->setEnabled(true);
 
-            auto json = result.parseJsonArray();
+            const auto json = result.parseJsonArray();
             for (const auto val : json)
             {
                 auto parsed = RemoteDictionary::fromJson(val.toObject());
