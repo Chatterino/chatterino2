@@ -932,6 +932,11 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     auto msg = parseNoticeMessage(message);
 
+    if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
+    {
+        getApp()->getAccounts()->twitch.loginExpired.invoke();
+    }
+
     QString channelName;
     if (!trimChannelName(message->target(), channelName) ||
         channelName == "jtv")

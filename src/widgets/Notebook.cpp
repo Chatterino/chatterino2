@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -36,6 +37,7 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <memory>
 #include <ranges>
 #include <utility>
 
@@ -1498,16 +1500,29 @@ void SplitNotebook::addCustomButtons()
     });
 
     // account
-    auto *userBtn = this->addCustomButton<SvgButton>(SvgButton::Src{
+    const SvgButton::Src normalAccountSrc{
         .dark = ":/buttons/account-darkMode.svg",
         .light = ":/buttons/account-lightMode.svg",
-    });
+    };
+    const SvgButton::Src expiredAccountSrc{
+        .dark = ":/buttons/account-expired.svg",
+        .light = ":/buttons/account-expired.svg",
+    };
 
+    auto *userBtn = this->addCustomButton<SvgButton>(normalAccountSrc);
     userBtn->setPadding({0, 0});
+
+    // Shared state: whether login is currently expired.
+    // While expired the button is always shown regardless of the user's setting.
+    auto loginExpiredState = std::make_shared<bool>(false);
 
     userBtn->setVisible(!getSettings()->hideUserButton.getValue());
     getSettings()->hideUserButton.connect(
-        [this, userBtn](bool hide) {
+        [this, userBtn, loginExpiredState](bool hide) {
+            if (*loginExpiredState)
+            {
+                return;
+            }
             auto oldVisibility = userBtn->isVisible();
             auto newVisibility = !hide;
             userBtn->setVisible(newVisibility);
@@ -1517,6 +1532,35 @@ void SplitNotebook::addCustomButtons()
             }
         },
         this->signalHolder_, false);
+
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.loginExpired,
+        [this, userBtn, expiredAccountSrc, loginExpiredState] {
+            *loginExpiredState = true;
+            userBtn->setSource(expiredAccountSrc);
+            if (!userBtn->isVisible())
+            {
+                userBtn->setVisible(true);
+                this->performLayout();
+            }
+        });
+
+    getApp()->getAccounts()->twitch.currentUserChanged.connect(
+        [this, userBtn, normalAccountSrc, loginExpiredState] {
+            if (!*loginExpiredState)
+            {
+                return;
+            }
+            *loginExpiredState = false;
+            userBtn->setSource(normalAccountSrc);
+            auto oldVisibility = userBtn->isVisible();
+            auto newVisibility = !getSettings()->hideUserButton.getValue();
+            userBtn->setVisible(newVisibility);
+            if (oldVisibility != newVisibility)
+            {
+                this->performLayout();
+            }
+        });
 
     QObject::connect(userBtn, &Button::leftClicked, [this, userBtn] {
         getApp()->getWindows()->showAccountSelectPopup(
