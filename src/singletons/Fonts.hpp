@@ -52,7 +52,6 @@ public:
 
     QFont getFont(FontStyle type, float scale);
     QFontMetricsF getFontMetrics(FontStyle type, float scale);
-    float getExpectedBrectHeight(FontStyle type, float scale);
 
     pajlada::Signals::NoArgSignal fontChanged;
 
@@ -61,13 +60,11 @@ private:
         FontData(const QFont &_font)
             : font(_font)
             , metrics(this->font)
-            , expectedBrectHeight(float(this->metrics.boundingRect("x").y()))
         {
         }
 
         const QFont font;
         const QFontMetricsF metrics;
-        const float expectedBrectHeight;
     };
 
     struct ChatFontData {
