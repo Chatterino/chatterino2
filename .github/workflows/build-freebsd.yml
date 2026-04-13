@@ -33,12 +33,19 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
+      - name: Get memory
+        id: mem
+        run: |
+          MEM_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
+          echo "mem_mb=$MEM_MB" >> $GITHUB_OUTPUT
+
       - name: Build using FreeBSD
         uses: vmactions/freebsd-vm@v1.4.4
         with:
           envs: "C2_ENABLE_LTO"
           release: "14.4"
           arch: x86_64
+          mem: ${{ steps.mem.outputs.mem_mb }}
           prepare: |
             pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
           run: |
