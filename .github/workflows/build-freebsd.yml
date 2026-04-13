@@ -37,13 +37,11 @@ jobs:
         uses: vmactions/freebsd-vm@v1.4.4
         with:
           envs: "C2_ENABLE_LTO"
-          release: "14.2"
+          release: "14.4"
           arch: x86_64
           mem: 4096
           cpu: 2
           prepare: |
-            pkg update
-            pkg install pcre2 # Try updating pcre2 to fix build
             pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
           run: |
             git submodule init
