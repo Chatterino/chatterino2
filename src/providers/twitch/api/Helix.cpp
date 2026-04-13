@@ -39,7 +39,7 @@ HelixChatters::HelixChatters(const QJsonObject &jsonObject)
           jsonObject.value("pagination").toObject().value("cursor").toString())
 {
     const auto &data = jsonObject.value("data").toArray();
-    for (const auto &chatter : data)
+    for (const auto chatter : data)
     {
         auto userLogin = chatter.toObject().value("user_login").toString();
         this->chatters.insert(userLogin);
@@ -598,7 +598,7 @@ void Helix::loadBlocks(QString userId,
             std::vector<HelixBlock> ignores;
             ignores.reserve(data.count());
 
-            for (const auto &ignore : data)
+            for (const auto ignore : data)
             {
                 ignores.emplace_back(ignore.toObject());
             }
@@ -901,7 +901,7 @@ void Helix::getChannelEmotes(
 
             std::vector<HelixChannelEmote> channelEmotes;
 
-            for (const auto &jsonStream : data.toArray())
+            for (const auto jsonStream : data.toArray())
             {
                 channelEmotes.emplace_back(jsonStream.toObject());
             }
@@ -3227,7 +3227,7 @@ void Helix::getUserEmotes(
             std::vector<HelixChannelEmote> emotes;
             emotes.reserve(data.count());
 
-            for (const auto &emote : data)
+            for (const auto emote : data)
             {
                 emotes.emplace_back(emote.toObject());
             }
