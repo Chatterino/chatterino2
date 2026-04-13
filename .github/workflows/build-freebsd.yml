@@ -44,6 +44,7 @@ jobs:
           prepare: |
             pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
           run: |
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
             git submodule init
             git submodule update
             mkdir build
