@@ -5,7 +5,6 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
 #include "Application.hpp"
-#include "common/Literals.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
@@ -15,14 +14,16 @@
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "util/Helpers.hpp"
+#include "util/QCompareTransparent.hpp"
 
 #include <QStringBuilder>
+
+using namespace Qt::StringLiterals;
 
 namespace {
 
 using namespace chatterino;
 using namespace chatterino::eventsub;
-using namespace chatterino::literals;
 
 /// <MODERATOR> turned {on/off} <MODE> mode. [<DURATION>]
 void makeModeMessage(EventSubMessageBuilder &builder,
@@ -60,12 +61,35 @@ QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
         return u"blocked term usage"_s;
     }
 
+    // dedupe hit terms case-insensitively and remove any empty terms
+    std::set<QString, QCompareCaseInsensitive> hitTerms;
+    for (const auto &term : reason.termsFound)
+    {
+        const auto hitTerm = codepointSlice(message, term.boundary.startPos,
+                                            term.boundary.endPos + 1);
+        if (hitTerm.isEmpty())
+        {
+            // empty terms can be hit if the blocked term is an emote - this is a Twitch bug
+            continue;
+        }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+        hitTerms.emplace(hitTerm);
+#else
+        hitTerms.emplace(hitTerm.toString());
+#endif
+    }
+
+    if (hitTerms.empty())
+    {
+        return u"blocked term usage"_s;
+    }
+
     QString msg = [&] {
-        if (reason.termsFound.size() == 1)
+        if (hitTerms.size() == 1)
         {
             return u"matches 1 blocked term"_s;
         }
-        return u"matches %1 blocked terms"_s.arg(reason.termsFound.size());
+        return u"matches %1 blocked terms"_s.arg(hitTerms.size());
     }();
 
     if (getSettings()->streamerModeHideBlockedTermText &&
@@ -74,19 +98,20 @@ QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
         return msg;
     }
 
-    for (size_t i = 0; i < reason.termsFound.size(); i++)
+    bool first = true;
+    for (const auto &hitTerm : hitTerms)
     {
-        if (i == 0)
+        if (first)
         {
             msg.append(u" \"");
+            first = false;
         }
         else
         {
             msg.append(u"\", \"");
         }
-        msg.append(codepointSlice(message,
-                                  reason.termsFound[i].boundary.startPos,
-                                  reason.termsFound[i].boundary.endPos + 1));
+
+        msg.append(hitTerm);
     }
     msg.append(u'"');
 

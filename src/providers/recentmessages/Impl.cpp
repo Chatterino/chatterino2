@@ -28,7 +28,7 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
         return messages;
     }
 
-    for (const auto &jsonMessage : jsonMessages)
+    for (const auto jsonMessage : jsonMessages)
     {
         auto content = unescapeZeroWidthJoiner(jsonMessage.toString());
 

@@ -88,7 +88,7 @@ const QList<QUuid> loadFilters(QJsonValue val)
     {
         const auto array = val.toArray();
         filterIds.reserve(array.size());
-        for (const auto &id : array)
+        for (const auto id : array)
         {
             filterIds.append(QUuid::fromString(id.toString()));
         }
@@ -166,7 +166,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     bool hasSetAMainWindow = false;
 
     // "deserialize"
-    for (const QJsonValue &windowVal : loadWindowArray(path))
+    for (const auto windowVal : loadWindowArray(path))
     {
         QJsonObject windowObj = windowVal.toObject();
 
