@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed Twitch announcements appearing in search results when searching for subscriptions (`is:sub`/`is:subscription`). (#6925)
+
 ## 2.5.5
 
 - Minor: Update emoji data to Unicode 17.0. (#6471)
