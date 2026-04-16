@@ -914,7 +914,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         {
             msg->flags.set(MessageFlag::WatchStreak);
         }
-        else
+        else if (msgType != "announcement")
         {
             msg->flags.set(MessageFlag::Subscription);
         }
@@ -1235,15 +1235,16 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             {
                 msg->flags.set(MessageFlag::WatchStreak);
             }
-            else
+            else if (msgType != "announcement")
             {
                 msg->flags.set(MessageFlag::Subscription);
             }
 
-            if (tags.value("msg-id") != "announcement")
+            if (msgType != "announcement")
             {
-                // Announcements are currently tagged as subscriptions,
-                // but we want them to be able to show up in mentions
+                // Subscription events shouldn't trigger mention-style
+                // highlights. Announcements aren't subscriptions, so
+                // they keep their highlight.
                 msg->flags.unset(MessageFlag::Highlighted);
             }
         }
