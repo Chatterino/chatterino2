@@ -147,6 +147,10 @@ void createUserTypes(sol::table &c2)
         }),
         "page_count", sol::readonly_property(&SplitNotebook::getPageCount),
         "page_at", [](const SplitNotebook &self, int index) {
+            if (index < 0 || index >= self.getPageCount())
+            {
+                return QPointer<SplitContainer>(nullptr);
+            }
             return QPointer(
                 dynamic_cast<SplitContainer *>(self.getPageAt(index)));
         });

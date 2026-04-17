@@ -897,7 +897,7 @@ Requires the [network permission](#permissions).
 #### `Split`
 
 A split. See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
-This holds a `channel` ([Channel]()) that's open in this split.
+This holds a `channel` ([Channel](#channel)) that's open in this split.
 
 #### `SplitContainerNode`
 
