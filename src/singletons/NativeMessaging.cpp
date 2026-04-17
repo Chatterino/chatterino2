@@ -485,7 +485,7 @@ void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
 
     std::vector<ChannelPtr> updated;
     updated.reserve(twitchChannels.size());
-    for (const auto &value : twitchChannels)
+    for (const auto value : twitchChannels)
     {
         auto name = value.toString();
         if (name.isEmpty())
