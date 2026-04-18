@@ -9,6 +9,7 @@
 
 #include <QDir>
 #include <QJsonDocument>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 
 using namespace chatterino;
@@ -79,13 +80,17 @@ TEST(NativeMessaging, parseCustomPath)
     ASSERT_EQ(parseCustomPath("relative/path/to/manifest.json"), std::nullopt);
 
 #    ifdef Q_OS_LINUX
-    ASSERT_EQ(
-        parseCustomPath("$XDG_CONFIG_HOME/path/to/manifest.json"),
-        std::optional{QDir::homePath() % "/.config/path/to/manifest.json"});
+    ASSERT_EQ(parseCustomPath("$XDG_CONFIG_HOME/path/to/manifest.json"),
+              std::optional{QStandardPaths::standardLocations(
+                                QStandardPaths::GenericConfigLocation)
+                                .first() %
+                            "/path/to/manifest.json"});
 
     ASSERT_EQ(parseCustomPath("$XDG_DATA_HOME/path/to/manifest.json"),
-              std::optional{QDir::homePath() %
-                            "/.local/share/path/to/manifest.json"});
+              std::optional{QStandardPaths::standardLocations(
+                                QStandardPaths::GenericDataLocation)
+                                .first() %
+                            "/path/to/manifest.json"});
 #    endif
 }
 #endif
