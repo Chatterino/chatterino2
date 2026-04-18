@@ -290,6 +290,16 @@ std::string_view EmoteElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+EmotePtr EmoteElement::emote() const
+{
+    return this->emote_;
+}
+
+MessageColor EmoteElement::textElementColor() const
+{
+    return this->textColor_;
+}
+
 LayeredEmoteElement::LayeredEmoteElement(
     std::vector<LayeredEmoteElement::Emote> &&emotes, MessageElementFlags flags,
     const MessageColor &textElementColor)
@@ -490,6 +500,11 @@ std::string_view LayeredEmoteElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+MessageColor LayeredEmoteElement::textElementColor() const
+{
+    return this->textElementColor_;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -540,6 +555,11 @@ QJsonObject BadgeElement::toJson() const
 std::string_view BadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+EmotePtr BadgeElement::emote() const
+{
+    return this->emote_;
 }
 
 // MOD BADGE
@@ -605,7 +625,7 @@ std::string_view VipBadgeElement::type() const
 FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_, QColor color_)
     : BadgeElement(data, flags_)
-    , color(std::move(color_))
+    , color_(color_)
 {
 }
 
@@ -613,7 +633,7 @@ MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, QSizeF size)
 {
     auto *element =
-        new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
+        new ImageWithBackgroundLayoutElement(*this, image, size, this->color_);
 
     return element;
 }
@@ -622,7 +642,7 @@ QJsonObject FfzBadgeElement::toJson() const
 {
     auto base = BadgeElement::toJson();
     base["type"_L1] = u"FfzBadgeElement"_s;
-    base["color"_L1] = this->color.name(QColor::HexArgb);
+    base["color"_L1] = this->color_.name(QColor::HexArgb);
 
     return base;
 }
@@ -630,6 +650,11 @@ QJsonObject FfzBadgeElement::toJson() const
 std::string_view FfzBadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+QColor FfzBadgeElement::color() const
+{
+    return this->color_;
 }
 
 // TEXT

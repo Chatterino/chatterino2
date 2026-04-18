@@ -894,6 +894,26 @@ All arguments accept an [`Image`](#image) or a `string` (URL).
 
 Requires the [network permission](#permissions).
 
+#### `Emote`
+
+An emote has the following fields:
+
+- `name` (`string`)
+- `images` ([`ImageSet`](#imageset))
+- `tooltip` (`string`)
+- `home_page` (`string`) URL to the platform specific emote page.
+- `zero_width` (`boolean`)
+- `id` (`string`) Platform specific ID.
+- `author` (`string`) Username of the emote creator.
+- `base_name` (`string | nil`) If this emote is aliased, this contains the
+  original (base) name of the emote.
+
+##### `Emote.new_uncached(init)`
+
+Creates a new emote. As the name suggests, this emote is not deduplicated
+(unlike images). `init` is a table with the desired fields (see above). `names`,
+`images`, and `tooltip` are required.
+
 #### `Split`
 
 A split. See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).

@@ -468,6 +468,9 @@ public:
     QJsonObject toJson() const override;
     std::string_view type() const override;
 
+    EmotePtr emote() const;
+    MessageColor textElementColor() const;
+
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                          QSizeF size);
@@ -513,6 +516,8 @@ public:
     QJsonObject toJson() const override;
     std::string_view type() const override;
 
+    MessageColor textElementColor() const;
+
 private:
     MessageLayoutElement *makeImageLayoutElement(
         const std::vector<ImagePtr> &image, const std::vector<QSizeF> &sizes,
@@ -543,6 +548,8 @@ public:
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
+
+    EmotePtr emote() const;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -593,10 +600,12 @@ public:
     QJsonObject toJson() const override;
     std::string_view type() const override;
 
+    QColor color() const;
+
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  QSizeF size) override;
-    const QColor color;
+    const QColor color_;
 };
 
 // contains a text, formated depending on the preferences

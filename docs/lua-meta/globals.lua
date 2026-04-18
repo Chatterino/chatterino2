@@ -332,6 +332,26 @@ function c2.ConnectionHandle:is_connected() end
 
 -- End src/controllers/plugins/api/ConnectionHandle.hpp
 
+-- Begin src/controllers/plugins/api/Emotes.hpp
+
+
+
+---@class c2.Emote
+---@field name string
+---@field images c2.ImageSet
+---@field tooltip string
+---@field home_page string URL to the platform specific emote page.
+---@field zero_width boolean
+---@field id string Platform specific ID.
+---@field author string Username of the emote creator.
+---@field base_name string|nil If this emote is aliased, this contains the original (base) name of the emote.
+
+---Create a new emote. This emote is not cached anywhere.
+---@param tbl {name: string, images: c2.ImageSet, tooltip: string, home_page?: string, zero_width?: boolean, id?: string, author?: string, base_name?: string}
+---@return c2.Emote
+function c2.Emote.new_uncached(tbl) end
+-- End src/controllers/plugins/api/Emotes.hpp
+
 -- Begin src/controllers/plugins/api/HTTPResponse.hpp
 
 ---@class c2.HTTPResponse
@@ -563,9 +583,28 @@ function c2.MessageElementBase:add_flags(flags) end
 
 ---@class c2.EmoteElement : c2.MessageElementBase
 ---@field type "emote"
+---@field emote c2.Emote The displayed emote.
+---@field text_element_color MessageColor Color of the text element if this emote is not displayed.
 
+---A table to initialize a new emote element
+---@class EmoteElementInit : MessageElementInitBase
+---@field type "emote"
+---@field emote c2.Emote The displayed emote.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+---@field text_element_color MessageColor? Color of the text element if this emote is not displayed.
+
+---An element showing multiple emotes stacked on top of each other. Used for zero-width emotes.
 ---@class c2.LayeredEmoteElement : c2.MessageElementBase
 ---@field type "layered-emote"
+---@field emotes {emote: c2.Emote, flags: c2.MessageElementFlag}[] Emotes stacked in this element.
+---@field text_element_color MessageColor Color of the text element if an emote is not displayed.
+
+---A table to initialize a new layered emote element
+---@class LayeredEmoteElementInit : MessageElementInitBase
+---@field type "layered-emote"
+---@field emotes {emote: c2.Emote, flags: c2.MessageElementFlag}[] Emotes stacked in this element.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+---@field text_element_color MessageColor? Color of the text element if an emote is not displayed.
 
 ---An element showing a single image.
 ---@class c2.ImageElement : c2.MessageElementBase
@@ -604,20 +643,51 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field images c2.ImageSet The images to show.
 ---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
 
+---An element that shows an emote as a badge. Internally, badges are emotes, hence this holds an emote.
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"
+---@field emote c2.Emote The emote to show as a badge.
 
+---A table to initialize a new badge element
+---@class BadgeElementInit : MessageElementInitBase
+---@field type "badge"
+---@field emote c2.Emote The emote to show as a badge.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+
+---An element showing a mod badge with the background being filled green.
 ---@class c2.ModBadgeElement : c2.BadgeElement
 ---@field type "mod-badge"
 
+---A table to initialize a new mod element
+---@class ModBadgeElementInit : MessageElementInitBase
+---@field type "mod-badge"
+---@field emote c2.Emote The emote to show as a badge.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+
+---An element showing a VIP badge.
 ---@class c2.VipBadgeElement : c2.BadgeElement
 ---@field type "vip-badge"
 
+---A table to initialize a new VIP element
+---@class VipBadgeElementInit : MessageElementInitBase
+---@field type "vip-badge"
+---@field emote c2.Emote The emote to show as a badge.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+
+---An element showing a badge with a custom background color.
 ---@class c2.FfzBadgeElement : c2.BadgeElement
 ---@field type "ffz-badge"
+---@field color string The background color of this badge.
+
+---A table to initialize a new ffz badge element
+---@class FfzBadgeElementInit : MessageElementInitBase
+---@field type "ffz-badge"
+---@field emote c2.Emote The emote to show as a badge.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+---@field color string The background color of this badge.
 
 ---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
----@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit|ImageElementInit|CircularImageElementInit|ScalingImageElementInit
+---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit|EmoteElementInit|LayeredEmoteElementInit|ImageElementInit|CircularImageElementInit|ScalingImageElementInit|BadgeElementInit|ModBadgeElementInit|VipBadgeElementInit|FfzBadgeElementInit
 
 ---A chat message
 ---@class c2.Message

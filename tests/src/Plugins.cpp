@@ -1640,7 +1640,7 @@ class PluginMessageTest : public PluginTest,
 };
 TEST_P(PluginMessageTest, Run)
 {
-    this->configure();
+    this->configure({PluginPermission({{"type", "network"}})});
     runLuaTest("message", GetParam(), *this->lua);
 }
 
