@@ -298,13 +298,15 @@ void HighlightModel::afterInit()
         ColorProvider::instance().color(ColorType::AnnouncementHighlight);
     setColorItem(announcementRow[Column::Color], *announcementColor, false);
 
-    this->insertCustomRow(announcementRow, HighlightRowIndexes::AnnouncementRow);
+    this->insertCustomRow(announcementRow,
+                          HighlightRowIndexes::AnnouncementRow);
 
     std::vector<QStandardItem *> coloredAnnouncementRow = this->createRow();
     setBoolItem(coloredAnnouncementRow[Column::Pattern],
-                getSettings()->enableColoredAnnouncementHighlight.getValue(), true,
-                false);
-    coloredAnnouncementRow[Column::Pattern]->setData("Colored Announcements", Qt::DisplayRole);
+                getSettings()->enableColoredAnnouncementHighlight.getValue(),
+                true, false);
+    coloredAnnouncementRow[Column::Pattern]->setData("Colored Announcements",
+                                                     Qt::DisplayRole);
     coloredAnnouncementRow[Column::ShowInMentions]->setFlags({});
     coloredAnnouncementRow[Column::FlashTaskbar]->setFlags({});
     coloredAnnouncementRow[Column::PlaySound]->setFlags({});
@@ -313,7 +315,8 @@ void HighlightModel::afterInit()
     coloredAnnouncementRow[Column::SoundPath]->setFlags(Qt::NoItemFlags);
     coloredAnnouncementRow[Column::Color]->setFlags(Qt::NoItemFlags);
 
-    this->insertCustomRow(coloredAnnouncementRow, HighlightRowIndexes::ColoredAnnouncementRow);
+    this->insertCustomRow(coloredAnnouncementRow,
+                          HighlightRowIndexes::ColoredAnnouncementRow);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -373,7 +376,8 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableAnnouncementHighlight.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == HighlightRowIndexes::ColoredAnnouncementRow)
+                else if (rowIndex ==
+                         HighlightRowIndexes::ColoredAnnouncementRow)
                 {
                     getSettings()->enableColoredAnnouncementHighlight.setValue(
                         value.toBool());
