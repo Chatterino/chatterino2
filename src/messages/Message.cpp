@@ -206,6 +206,12 @@ QJsonObject Message::toJson() const
         msg["bits"_L1] = static_cast<qint64>(this->bits);
     }
 
+    if (this->flags.has(MessageFlag::Announcement))
+    {
+        msg["announcementColor"_L1] =
+            qmagicenum::enumNameString(this->announcementColor);
+    }
+
     // XXX: figure out if we can add this in tests
     if (!getApp()->isTest())
     {
