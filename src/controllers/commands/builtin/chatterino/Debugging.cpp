@@ -389,7 +389,7 @@ QString relaunchWithLogfile(const CommandContext &ctx)
 
     auto env = setUpEnvironmentForLogging({});
     QString logFilePath = ctx.words.mid(1).join(" ");
-    env.insert(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, logFilePath);
+    env.insert(env::LOG_TO_FILE, logFilePath);
 
     bool success = restartChatterino(env);
     if (!success)

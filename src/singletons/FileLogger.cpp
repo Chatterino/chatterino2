@@ -1,8 +1,11 @@
 #include "singletons/FileLogger.hpp"
 
+#include "common/Env.hpp"
+
 #include <QFileInfo>
 
 #include <cassert>
+#include <iostream>
 
 namespace {
 
@@ -16,36 +19,54 @@ void logToFile(QtMsgType type, const QMessageLogContext &context,
 
 namespace chatterino {
 
-FileLogger *FileLogger::instance_ = nullptr;
+FileLogger *FileLogger::INSTANCE = nullptr;
 
 FileLogger::FileLogger()
-    : logFile_(nullptr)
-    , originalHandler_(nullptr)
 {
-    this->instance_ = this;
+    FileLogger::INSTANCE = this;
+
+    const auto &env = Env::get();
+    if (!env.logToFile.isEmpty())
+    {
+        auto result = this->enable(env.logToFile);
+        if (!result.has_value())
+        {
+            auto error = result.error();
+            QString errorMessage = QString("Unable to open log file %1. Error "
+                                           "reported by the system was: %2")
+                                       .arg(error.absFilePath, error.errorDesc);
+
+            std::cerr << errorMessage.toLocal8Bit().constData() << '\n';
+        }
+    }
+}
+
+FileLogger::~FileLogger()
+{
+    this->disable();
 }
 
 void FileLogger::disable()
 {
-    std::scoped_lock lk(this->logLock_);
+    std::scoped_lock lk(this->logLock);
 
-    if (this->logFile_ != nullptr)
+    if (this->logFile != nullptr)
     {
-        qInstallMessageHandler(this->originalHandler_);
-        this->logFile_ = nullptr;
+        qInstallMessageHandler(this->originalHandler);
+        this->logFile = nullptr;
     }
 }
 
 Expected<void, FileLogger::Error> FileLogger::enable(const QString &filePath)
 {
-    std::scoped_lock lk(this->logLock_);
+    std::scoped_lock lk(this->logLock);
 
     QFileInfo finfo(filePath);
     QString absFilePath = finfo.absoluteFilePath();
 
-    if (this->logFile_ != nullptr)
+    if (this->logFile != nullptr)
     {
-        QFileInfo finfoCurrent(*this->logFile_);
+        QFileInfo finfoCurrent(*this->logFile);
 
         if (finfoCurrent.absoluteFilePath() == absFilePath)
         {
@@ -66,38 +87,40 @@ Expected<void, FileLogger::Error> FileLogger::enable(const QString &filePath)
         return makeUnexpected(std::move(error));
     }
 
-    if (this->logFile_ == nullptr)
+    if (this->logFile == nullptr)
     {
-        this->originalHandler_ = qInstallMessageHandler(logToFile);
+        this->originalHandler = qInstallMessageHandler(logToFile);
     }
 
-    this->logFile_ = std::move(f);
+    this->logFile = std::move(f);
 
     return {};
 }
 
 FileLogger &FileLogger::instance()
 {
-    assert(instance_ != nullptr &&
+    assert(INSTANCE != nullptr &&
            "Attempted to get instance of FileLogger prior to initializing it");
 
-    return *instance_;
+    return *INSTANCE;
 }
 
 void FileLogger::log(QtMsgType type, const QMessageLogContext &context,
                      const QString &msg)
 {
-    std::scoped_lock lk(this->logLock_);
+    assert(this->logFile != nullptr);
+
+    std::scoped_lock lk(this->logLock);
 
     auto formatted = qFormatLogMessage(type, context, msg);
 
-    this->logFile_->write((formatted + "\n").toUtf8());
-    if (this->originalHandler_)
+    this->logFile->write((formatted + "\n").toUtf8());
+    if (this->originalHandler)
     {
-        this->originalHandler_(type, context, msg);
+        this->originalHandler(type, context, msg);
     }
 
-    this->logFile_->flush();
+    this->logFile->flush();
 }
 
 }  // namespace chatterino

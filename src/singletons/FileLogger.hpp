@@ -8,13 +8,12 @@
 
 #include <QFile>
 #include <QString>
+#include <QtLogging>
 
+#include <memory>
 #include <mutex>
 
 namespace chatterino {
-
-constexpr const char *CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR =
-    "CHATTERINO_REDIRECT_LOG_TO_FILE";
 
 class FileLogger
 {
@@ -25,6 +24,7 @@ public:
     };
 
     FileLogger();
+    ~FileLogger();
 
     static FileLogger &instance();
 
@@ -34,11 +34,11 @@ public:
              const QString &msg);
 
 private:
-    static FileLogger *instance_;
-    std::mutex logLock_;
+    static FileLogger *INSTANCE;
+    std::mutex logLock;
 
-    std::unique_ptr<QFile> logFile_;
-    QtMessageHandler originalHandler_;
+    std::unique_ptr<QFile> logFile;
+    QtMessageHandler originalHandler = nullptr;
 };
 
 }  // namespace chatterino
