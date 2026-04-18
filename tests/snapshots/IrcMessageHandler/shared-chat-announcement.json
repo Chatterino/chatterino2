@@ -188,9 +188,8 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Subscription|SharedMessage",
+            "flags": "Collapsed|SharedMessage|Announcement",
             "frozen": false,
-            "highlightColor": "#64c466ff",
             "id": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22",
             "localizedName": "",
             "loginName": "lahoooo",
@@ -257,7 +256,7 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription|SharedMessage",
+            "flags": "System|DoNotTriggerNotification|SharedMessage|Announcement",
             "frozen": false,
             "id": "",
             "localizedName": "",

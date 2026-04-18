@@ -24,6 +24,11 @@ enum class ColorType {
     // Used in automatic highlights of your own messages
     SelfMessageHighlight,
     AutomodHighlight,
+    AnnouncementHighlight,
+    AnnouncementBlue,
+    AnnouncementGreen,
+    AnnouncementOrange,
+    AnnouncementPurple,
 };
 
 class ColorProvider
