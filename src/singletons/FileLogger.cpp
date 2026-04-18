@@ -42,7 +42,7 @@ FileLogger::FileLogger()
                                            "reported by the system was: %2")
                                        .arg(error.absFilePath, error.errorDesc);
 
-            std::cerr << errorMessage.constData() << '\n';
+            std::cerr << errorMessage.constData() << '\n' << std::flush;
         }
     }
 }
