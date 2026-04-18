@@ -1,4 +1,4 @@
-#include "singletons/LoggerToFile.hpp"
+#include "singletons/FileLogger.hpp"
 
 #include <QFileInfo>
 
@@ -9,23 +9,23 @@ namespace {
 void logToFile(QtMsgType type, const QMessageLogContext &context,
                const QString &msg)
 {
-    chatterino::LoggerToFile::instance().log(type, context, msg);
+    chatterino::FileLogger::instance().log(type, context, msg);
 }
 
 }  // namespace
 
 namespace chatterino {
 
-LoggerToFile *LoggerToFile::instance_ = nullptr;
+FileLogger *FileLogger::instance_ = nullptr;
 
-LoggerToFile::LoggerToFile()
+FileLogger::FileLogger()
     : logFile_(nullptr)
     , originalHandler_(nullptr)
 {
     this->instance_ = this;
 }
 
-void LoggerToFile::disable()
+void FileLogger::disable()
 {
     std::scoped_lock lk(this->logLock_);
 
@@ -36,8 +36,7 @@ void LoggerToFile::disable()
     }
 }
 
-Expected<void, LoggerToFile::Error> LoggerToFile::enable(
-    const QString &filePath)
+Expected<void, FileLogger::Error> FileLogger::enable(const QString &filePath)
 {
     std::scoped_lock lk(this->logLock_);
 
@@ -77,17 +76,16 @@ Expected<void, LoggerToFile::Error> LoggerToFile::enable(
     return {};
 }
 
-LoggerToFile &LoggerToFile::instance()
+FileLogger &FileLogger::instance()
 {
-    assert(
-        instance_ != nullptr &&
-        "Attempted to get instance of LoggerToFile prior to initializing it");
+    assert(instance_ != nullptr &&
+           "Attempted to get instance of FileLogger prior to initializing it");
 
     return *instance_;
 }
 
-void LoggerToFile::log(QtMsgType type, const QMessageLogContext &context,
-                       const QString &msg)
+void FileLogger::log(QtMsgType type, const QMessageLogContext &context,
+                     const QString &msg)
 {
     std::scoped_lock lk(this->logLock_);
 

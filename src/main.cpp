@@ -13,7 +13,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "RunGui.hpp"
 #include "singletons/CrashHandler.hpp"
-#include "singletons/LoggerToFile.hpp"
+#include "singletons/FileLogger.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 
     std::unique_ptr<Paths> paths;
 
-    LoggerToFile logger;
+    FileLogger logger;
 
     QString logFilePath =
         qEnvironmentVariable(CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR, "");

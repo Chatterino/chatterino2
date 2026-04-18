@@ -17,7 +17,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/LoggerToFile.hpp"
+#include "singletons/FileLogger.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
@@ -319,7 +319,7 @@ QString relaunchWithConsole(const CommandContext &ctx)
 
 QString disableLogfile(const CommandContext &ctx)
 {
-    LoggerToFile::instance().disable();
+    FileLogger::instance().disable();
 
     return {};
 }
@@ -340,7 +340,7 @@ QString enableLogfile(const CommandContext &ctx)
     }
 
     QString logFilePath = ctx.words.mid(1).join(" ");
-    auto result = LoggerToFile::instance().enable(logFilePath);
+    auto result = FileLogger::instance().enable(logFilePath);
     if (!result.has_value())
     {
         auto error = result.error();

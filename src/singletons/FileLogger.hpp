@@ -16,7 +16,7 @@ namespace chatterino {
 constexpr const char *CHATTERINO_REDIRECT_LOG_TO_FILE_ENVVAR =
     "CHATTERINO_REDIRECT_LOG_TO_FILE";
 
-class LoggerToFile
+class FileLogger
 {
 public:
     struct Error {
@@ -24,9 +24,9 @@ public:
         QString errorDesc;
     };
 
-    LoggerToFile();
+    FileLogger();
 
-    static LoggerToFile &instance();
+    static FileLogger &instance();
 
     void disable();
     Expected<void, Error> enable(const QString &filePath);
@@ -34,7 +34,7 @@ public:
              const QString &msg);
 
 private:
-    static LoggerToFile *instance_;
+    static FileLogger *instance_;
     std::mutex logLock_;
 
     std::unique_ptr<QFile> logFile_;
