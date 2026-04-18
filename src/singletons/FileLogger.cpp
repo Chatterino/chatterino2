@@ -27,6 +27,8 @@ FileLogger *FileLogger::INSTANCE = nullptr;
 
 FileLogger::FileLogger()
 {
+    assert(FileLogger::INSTANCE == nullptr);
+
     FileLogger::INSTANCE = this;
 
     const auto &env = Env::get();
@@ -40,7 +42,7 @@ FileLogger::FileLogger()
                                            "reported by the system was: %2")
                                        .arg(error.absFilePath, error.errorDesc);
 
-            std::cerr << errorMessage.toLocal8Bit().constData() << '\n';
+            std::cerr << errorMessage.constData() << '\n';
         }
     }
 }
