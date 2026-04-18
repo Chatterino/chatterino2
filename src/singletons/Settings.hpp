@@ -805,11 +805,6 @@ public:
     };
 
     // Advanced
-    BoolSetting enableExperimentalEventSub = {
-        "/eventsub/enableExperimental",
-        true,
-    };
-
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
 
 #ifndef Q_OS_WIN

@@ -1621,11 +1621,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "clicked to send the message")
         ->addTo(layout);
 
-    SettingWidget::checkbox(
-        "Enable experimental Twitch EventSub support (requires restart)",
-        s.enableExperimentalEventSub)
-        ->addTo(layout);
-
     SettingWidget::checkbox("Disable renaming of tabs on double-click",
                             s.disableTabRenamingOnClick)
         ->setTooltip("Prevents the rename dialog from opening when a tab is "
