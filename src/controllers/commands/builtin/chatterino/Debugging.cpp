@@ -345,28 +345,10 @@ QString enableLogfile(const CommandContext &ctx)
     {
         auto error = result.error();
 
-        MessageBuilder builder;
-        QString text = QString("Unable to open log file %1 Error reported by "
-                               "the system was: %2")
-                           .arg(error.absFilePath, error.errorDesc);
-        builder.message().messageText = text;
-        builder.message().searchText = text;
-        builder.message().flags.set(MessageFlag::System);
-
-        builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>("Unable to open log file",
-                                     MessageElementFlag::Text,
-                                     MessageColor::System);
-        builder
-            .emplace<TextElement>(error.absFilePath, MessageElementFlag::Text,
-                                  MessageColor::Link)
-            ->setLink(Link(Link::Url, error.absFilePath));
-        builder.emplace<TextElement>(
-            QString("Error reported by the system was: %1")
-                .arg(error.errorDesc),
-            MessageElementFlag::Text, MessageColor::System);
-
-        ctx.channel->addMessage(builder.release(), MessageContext::Original);
+        ctx.channel->addSystemMessage(
+            QString("Unable to open log file '%1'. Error reported by "
+                    "the system was: %2")
+                .arg(error.absFilePath, error.errorDesc));
     }
 
     return {};
