@@ -83,13 +83,13 @@ TEST(NativeMessaging, parseCustomPath)
     ASSERT_EQ(parseCustomPath("$XDG_CONFIG_HOME/path/to/manifest.json"),
               std::optional{QStandardPaths::standardLocations(
                                 QStandardPaths::GenericConfigLocation)
-                                .first() %
+                                .constFirst() %
                             "/path/to/manifest.json"});
 
     ASSERT_EQ(parseCustomPath("$XDG_DATA_HOME/path/to/manifest.json"),
               std::optional{QStandardPaths::standardLocations(
                                 QStandardPaths::GenericDataLocation)
-                                .first() %
+                                .constFirst() %
                             "/path/to/manifest.json"});
 #    endif
 }
