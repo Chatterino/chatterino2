@@ -647,6 +647,11 @@ std::set<QString> WindowManager::getVisibleChannelNames() const
     return visible;
 }
 
+std::span<Window *const> WindowManager::windows() const
+{
+    return this->windows_;
+}
+
 void WindowManager::closeAll()
 {
     assertInGuiThread();
