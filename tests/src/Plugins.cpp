@@ -26,6 +26,7 @@
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
 #    include "singletons/Logging.hpp"
+#    include "singletons/WindowManager.hpp"
 #    include "Test.hpp"
 
 #    include <lauxlib.h>
@@ -96,6 +97,8 @@ public:
         : mock::BaseApplication(TEST_SETTINGS)
         , plugins(this->paths_)
         , commands(this->paths_)
+        , windows(this->args, this->paths_, this->settings, this->theme,
+                  this->fonts)
     {
     }
 
@@ -129,6 +132,11 @@ public:
         return &this->accounts;
     }
 
+    WindowManager *getWindows() override
+    {
+        return &this->windows;
+    }
+
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
@@ -136,6 +144,7 @@ public:
     MockTwitch twitch;
     AccountController accounts;
     mock::Helix helix;
+    WindowManager windows;
 };
 
 QDir luaTestBaseDir(const QString &category)
