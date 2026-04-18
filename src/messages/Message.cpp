@@ -102,44 +102,11 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
     if (this->flags.has(MessageFlag::Announcement) &&
         getSettings()->enableAnnouncementHighlight)
     {
-        if (getSettings()->enableColoredAnnouncementHighlight)
-        {
-            switch (this->announcementColor)
-            {
-                case HelixAnnouncementColor::Primary:
-                    return {
-                        ColorProvider::instance().color(
-                            ColorType::AnnouncementHighlight),
-                    };
-                case HelixAnnouncementColor::Blue:
-                    return {
-                        ColorProvider::instance().color(
-                            ColorType::AnnouncementBlue),
-                    };
-                case HelixAnnouncementColor::Green:
-                    return {
-                        ColorProvider::instance().color(
-                            ColorType::AnnouncementGreen),
-                    };
-                case HelixAnnouncementColor::Orange:
-                    return {
-                        ColorProvider::instance().color(
-                            ColorType::AnnouncementOrange),
-                    };
-                case HelixAnnouncementColor::Purple:
-                    return {
-                        ColorProvider::instance().color(
-                            ColorType::AnnouncementPurple),
-                    };
-            }
-        }
-        else
-        {
-            return {
-                ColorProvider::instance().color(
-                    ColorType::AnnouncementHighlight),
-            };
-        }
+        return {
+            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
+                this->announcementColor,
+                getSettings()->enableColoredAnnouncementHighlight)),
+        };
     }
 
     return {};

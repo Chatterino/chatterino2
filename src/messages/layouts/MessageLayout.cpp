@@ -12,7 +12,6 @@
 #include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
@@ -422,43 +421,11 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
     else if (this->message_->flags.has(MessageFlag::Announcement) &&
              ctx.preferences.enableAnnouncementHighlight)
     {
-        if (ctx.preferences.enableColoredAnnouncementHighlight)
-        {
-            switch (this->message_->announcementColor)
-            {
-                case HelixAnnouncementColor::Primary:
-                    backgroundColor = blendColors(
-                        backgroundColor, *ctx.colorProvider.color(
-                                             ColorType::AnnouncementHighlight));
-                    break;
-                case HelixAnnouncementColor::Blue:
-                    backgroundColor = blendColors(
-                        backgroundColor,
-                        *ctx.colorProvider.color(ColorType::AnnouncementBlue));
-                    break;
-                case HelixAnnouncementColor::Green:
-                    backgroundColor = blendColors(
-                        backgroundColor,
-                        *ctx.colorProvider.color(ColorType::AnnouncementGreen));
-                    break;
-                case HelixAnnouncementColor::Orange:
-                    backgroundColor = blendColors(
-                        backgroundColor, *ctx.colorProvider.color(
-                                             ColorType::AnnouncementOrange));
-                    break;
-                case HelixAnnouncementColor::Purple:
-                    backgroundColor = blendColors(
-                        backgroundColor, *ctx.colorProvider.color(
-                                             ColorType::AnnouncementPurple));
-                    break;
-            }
-        }
-        else
-        {
-            backgroundColor = blendColors(
-                backgroundColor,
-                *ctx.colorProvider.color(ColorType::AnnouncementHighlight));
-        }
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ctx.colorProvider.color(colorTypeFromHelixAnnouncementColor(
+                this->message_->announcementColor,
+                ctx.preferences.enableColoredAnnouncementHighlight)));
     }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
              ctx.preferences.enableSubHighlight)

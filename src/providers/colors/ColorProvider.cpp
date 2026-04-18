@@ -185,4 +185,26 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
 }
 
+ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
+                                              bool enableColoredAnnouncements)
+{
+    if (enableColoredAnnouncements)
+    {
+        switch (color)
+        {
+            case HelixAnnouncementColor::Primary:
+                return ColorType::AnnouncementHighlight;
+            case HelixAnnouncementColor::Blue:
+                return ColorType::AnnouncementBlue;
+            case HelixAnnouncementColor::Green:
+                return ColorType::AnnouncementGreen;
+            case HelixAnnouncementColor::Orange:
+                return ColorType::AnnouncementOrange;
+            case HelixAnnouncementColor::Purple:
+                return ColorType::AnnouncementPurple;
+        }
+    }
+    return ColorType::AnnouncementHighlight;
+}
+
 }  // namespace chatterino
