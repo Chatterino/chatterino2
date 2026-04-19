@@ -203,6 +203,7 @@ protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
+    /// Copy MessageElement private data from `source` to this MessageElement
     void cloneFrom(const MessageElement &source);
 
 private:
@@ -283,6 +284,7 @@ public:
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
 
+    /// This is intended only for cloning the element.
     TextElement(TextElement::CloneConstructorTag, QStringList words,
                 MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
@@ -328,6 +330,7 @@ public:
                           const MessageColor &color = MessageColor::Text,
                           FontStyle style = FontStyle::ChatMedium);
 
+    /// This is intended only for cloning the element.
     SingleLineTextElement(SingleLineTextElement::CloneConstructorTag,
                           QStringList words, MessageElementFlags flags,
                           const MessageColor &color = MessageColor::Text,
@@ -379,6 +382,7 @@ public:
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
 
+    /// This is intended only for cloning the element.
     LinkElement(TextElement::CloneConstructorTag, QStringList lowercase,
                 QStringList original, const QString &fullUrl,
                 MessageElementFlags flags,
@@ -439,6 +443,8 @@ public:
     explicit MentionElement(const QString &displayName, QString loginName_,
                             const MessageColor &fallbackColor_,
                             const MessageColor &userColor_);
+
+    /// This is intended only for cloning the element.
     explicit MentionElement(TextElement::CloneConstructorTag, QStringList words,
                             QString loginName_,
                             const MessageColor &fallbackColor_,

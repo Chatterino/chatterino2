@@ -643,6 +643,7 @@ c2.Message = {}
 function c2.Message:elements() end
 
 --- Add an element to this message.
+--- If given a MessageElement, it will be cloned before being added.
 ---
 ---@param elem (MessageElement|MessageElementInit) The element to add
 function c2.Message:append_element(elem) end

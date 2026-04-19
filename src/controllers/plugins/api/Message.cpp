@@ -791,6 +791,8 @@ void createUserType(sol::table &c2)
         },
         "append_element",
         sol::overload(
+            // Message:append_element(MessageElementInit)
+            // Create a new element
             [](Message *msg, const sol::table &tbl) {
                 checkWritable(msg);
                 auto el = elementFromTable(tbl);
@@ -799,6 +801,8 @@ void createUserType(sol::table &c2)
                     msg->elements.emplace_back(std::move(el));
                 }
             },
+            // Message:append_element(MessageElement)
+            // Create a clone of the given element and add it to the message
             [](Message *msg, ElementRef &element) {
                 checkWritable(msg);
                 msg->elements.emplace_back(element.constElement()->clone());
