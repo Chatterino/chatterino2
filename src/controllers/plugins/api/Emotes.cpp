@@ -28,7 +28,7 @@ EmotePtr newUncached(const sol::table &tbl)
     std::optional<EmoteName> baseName;
     if (baseNameStr)
     {
-        baseName.emplace(*std::move(baseNameStr));
+        baseName.emplace(EmoteName{*std::move(baseNameStr)});
     }
 
     return std::make_shared<const Emote>(Emote{
