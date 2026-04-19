@@ -140,8 +140,10 @@ std::unique_ptr<LayeredEmoteElement> layeredEmoteElementFromTable(
         {
             throw std::runtime_error("Expected item in `emotes` to be a table");
         }
-        emotes.emplace_back(requiredGet<EmotePtr>(*tbl, "emote"),
-                            requiredGet<MessageElementFlag>(*tbl, "flags"));
+        emotes.emplace_back(LayeredEmoteElement::Emote{
+            .ptr = requiredGet<EmotePtr>(*tbl, "emote"),
+            .flags = requiredGet<MessageElementFlag>(*tbl, "flags"),
+        });
     }
     if (emotes.empty())
     {
