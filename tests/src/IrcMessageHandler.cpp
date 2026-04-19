@@ -654,11 +654,11 @@ TEST(TestIrcMessageHandlerP, Integrity)
 
 TEST_P(TestIrcMessageHandlerP, CloneElements)
 {
-    auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
 
     VectorMessageSink sink;
 
-    for (auto prevInput : snapshot->param("prevMessages").toArray())
+    for (auto prevInput : this->snapshot->param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
             prevInput.toString().toUtf8(), nullptr);
@@ -668,7 +668,7 @@ TEST_P(TestIrcMessageHandlerP, CloneElements)
     }
 
     auto *ircMessage =
-        Communi::IrcMessage::fromData(snapshot->inputUtf8(), nullptr);
+        Communi::IrcMessage::fromData(this->snapshot->inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
     IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
     delete ircMessage;
