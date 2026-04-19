@@ -24,6 +24,12 @@ EmotePtr newUncached(const sol::table &tbl)
     {
         throw std::runtime_error("`home_page` must be an http(s) link");
     }
+    auto baseNameStr = tbl.get<std::optional<QString>>("base_name");
+    std::optional<EmoteName> baseName;
+    if (baseNameStr)
+    {
+        baseName.emplace(*std::move(baseNameStr));
+    }
 
     return std::make_shared<const Emote>(Emote{
         .name = {requiredGet<QString>(tbl, "name")},
@@ -33,10 +39,7 @@ EmotePtr newUncached(const sol::table &tbl)
         .zeroWidth = tbl.get_or("zero_width", false),
         .id = {tbl.get_or("id", QString{})},
         .author = {tbl.get_or("author", QString{})},
-        .baseName = tbl.get<std::optional<QString>>("base_name")
-                        .transform([](auto name) {
-                            return EmoteName{std::move(name)};
-                        }),
+        .baseName = std::move(baseName),
     });
 }
 
@@ -71,9 +74,11 @@ void createUserTypes(sol::table &c2)
             return emote.author.string;
         }),
         "base_name", sol::property([](const Emote &emote) {
-            return emote.baseName.transform([](const auto &it) {
-                return it.string;
-            });
+            if (emote.baseName)
+            {
+                return std::optional<QString>(emote.baseName->string);
+            }
+            return std::optional<QString>{};
         })  //
     );
 }
