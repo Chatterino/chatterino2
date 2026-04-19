@@ -14,6 +14,8 @@
 
 #    include <sol/sol.hpp>
 
+#    include <span>
+
 namespace {
 
 using namespace chatterino;
