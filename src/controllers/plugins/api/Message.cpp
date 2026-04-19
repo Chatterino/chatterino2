@@ -822,7 +822,7 @@ void createUserType(sol::table &c2)
                     return el.color().toLua();
                 },
                 [](const FfzBadgeElement &el) {
-                    return el.color().name(QColor::HexArgb);
+                    return el.getColor().name(QColor::HexArgb);
                 });
         }),
         "style", sol::property([](const ElementRef &el) {

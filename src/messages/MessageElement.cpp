@@ -625,7 +625,7 @@ std::string_view VipBadgeElement::type() const
 FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_, QColor color_)
     : BadgeElement(data, flags_)
-    , color_(color_)
+    , color(color_)
 {
 }
 
@@ -633,7 +633,7 @@ MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, QSizeF size)
 {
     auto *element =
-        new ImageWithBackgroundLayoutElement(*this, image, size, this->color_);
+        new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
 
     return element;
 }
@@ -642,7 +642,7 @@ QJsonObject FfzBadgeElement::toJson() const
 {
     auto base = BadgeElement::toJson();
     base["type"_L1] = u"FfzBadgeElement"_s;
-    base["color"_L1] = this->color_.name(QColor::HexArgb);
+    base["color"_L1] = this->color.name(QColor::HexArgb);
 
     return base;
 }
@@ -652,9 +652,9 @@ std::string_view FfzBadgeElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
-QColor FfzBadgeElement::color() const
+QColor FfzBadgeElement::getColor() const
 {
-    return this->color_;
+    return this->color;
 }
 
 // TEXT

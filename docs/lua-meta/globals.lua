@@ -346,7 +346,10 @@ function c2.ConnectionHandle:is_connected() end
 ---@field author string Username of the emote creator.
 ---@field base_name string|nil If this emote is aliased, this contains the original (base) name of the emote.
 
----Create a new emote. This emote is not cached anywhere.
+---Create a new emote. This emote is not cached anywhere (unlike images).
+---Plugins should call this once for an emote and save the result (e.g. in a
+---global table from emote-name => emote). Most importantly, plugins do not call
+---this every time a message is created.
 ---@param tbl {name: string, images: c2.ImageSet, tooltip: string, home_page?: string, zero_width?: boolean, id?: string, author?: string, base_name?: string}
 ---@return c2.Emote
 function c2.Emote.new_uncached(tbl) end

@@ -600,12 +600,12 @@ public:
     QJsonObject toJson() const override;
     std::string_view type() const override;
 
-    QColor color() const;
+    QColor getColor() const;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  QSizeF size) override;
-    const QColor color_;
+    const QColor color;
 };
 
 // contains a text, formated depending on the preferences

@@ -911,8 +911,14 @@ An emote has the following fields:
 ##### `Emote.new_uncached(init)`
 
 Creates a new emote. As the name suggests, this emote is not deduplicated
-(unlike images). `init` is a table with the desired fields (see above). `names`,
-`images`, and `tooltip` are required.
+(unlike images).
+
+Plugins should call this once for an emote and save the result
+(e.g. in a global table from emote-name => emote). Most importantly, do not call
+this every time a message is created.
+
+`init` is a table with the desired fields (see above). `names`, `images`, and
+`tooltip` are required.
 
 #### `Split`
 
