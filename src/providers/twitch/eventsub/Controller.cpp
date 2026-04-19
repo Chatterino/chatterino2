@@ -763,11 +763,4 @@ void Controller::clearConnections()
     });
 }
 
-void DummyController::reconnectConnection(
-    std::unique_ptr<lib::Listener> /* connection */,
-    const std::optional<std::string> & /* reconnectURL */,
-    const std::unordered_set<SubscriptionRequest> & /* subs */)
-{
-}
-
 }  // namespace chatterino::eventsub
