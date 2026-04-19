@@ -456,15 +456,6 @@ void TextLayoutElement::paint(QPainter &painter,
 
     painter.setFont(font);
 
-    // We only need the clip to cut off the top to prevent
-    // too tall glyphs from bleeding over to the line above them.
-    // We can safely "oversize" it to avoid odd clipping
-    // issues on the right and bottom.
-    QRect clipRect(this->getRect().x(), this->getRect().y(),
-                   std::ceil(this->getRect().width()),
-                   std::ceil(this->getRect().height()));
-    painter.setClipRegion(QRegion(clipRect));
-
     QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
     painter.drawText(pivot, text);
 }
