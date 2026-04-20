@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/HelixEnums.hpp"
 
 #include <QColor>
 
