@@ -40,7 +40,7 @@ jobs:
           echo "mem_mb=$MEM_MB" >> $GITHUB_OUTPUT
 
       - name: Build using FreeBSD
-        uses: vmactions/freebsd-vm@v1.4.4
+        uses: vmactions/freebsd-vm@v1.4.5
         with:
           envs: "C2_ENABLE_LTO"
           release: "14.4"
