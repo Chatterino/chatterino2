@@ -159,6 +159,9 @@ struct IsChatterinoSettingT<ChatterinoSetting<T>> : std::true_type {
 template <typename T>
 struct IsChatterinoSettingT<EnumStringSetting<T>> : std::true_type {
 };
+template <typename T>
+struct IsChatterinoSettingT<EnumSetting<T>> : std::true_type {
+};
 
 template <typename T>
 concept IsChatterinoSetting = IsChatterinoSettingT<T>::value;

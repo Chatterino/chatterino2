@@ -340,6 +340,8 @@ template SettingWidget *SettingWidget::dropdown<ThumbnailPreviewMode>(
     const QString &label, EnumSetting<ThumbnailPreviewMode> &setting);
 template SettingWidget *SettingWidget::dropdown<StreamerModeSetting>(
     const QString &label, EnumSetting<StreamerModeSetting> &setting);
+template SettingWidget *SettingWidget::dropdown<HideChatMessageTimestamp>(
+    const QString &label, EnumSetting<HideChatMessageTimestamp> &setting);
 
 SettingWidget *SettingWidget::dropdown(
     const QString &label, QStringSetting &setting,

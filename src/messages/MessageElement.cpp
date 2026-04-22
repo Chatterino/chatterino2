@@ -1144,14 +1144,16 @@ std::string_view MentionElement::type() const
 // TIMESTAMP
 TimestampElement::TimestampElement()
     : TimestampElement(getApp()->isTest() ? QTime::fromMSecsSinceStartOfDay(0)
-                                          : QTime::currentTime())
+                                          : QTime::currentTime(),
+                       false)
 {
 }
 
-TimestampElement::TimestampElement(QTime time)
+TimestampElement::TimestampElement(QTime time, bool isLiveChatMessage)
     : MessageElement(MessageElementFlag::Timestamp)
     , time_(time)
     , element_(this->formatTime(time))
+    , isLiveChatMessage_(isLiveChatMessage)
 {
     assert(this->element_ != nullptr);
 }
@@ -1161,11 +1163,30 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (ctx.flags.hasAny(this->getFlags()))
     {
-        this->setTooltip(this->getTooltip());
-        if (getSettings()->timestampFormat != this->format_)
+        auto hideMode = getSettings()->hideChatMessageTimestamp;
+        if (hideMode != HideChatMessageTimestamp::SentWhenChannelIsLive ||
+            !isLiveChatMessage_)
         {
-            this->format_ = getSettings()->timestampFormat.getValue();
-            this->element_.reset(this->formatTime(this->time_));
+            this->setTooltip(this->getTooltip());
+            if (getSettings()->timestampFormat != this->format_ ||
+                hideMode != this->hideMode_)
+            {
+                this->format_ = getSettings()->timestampFormat.getValue();
+                this->hideMode_ = hideMode.getValue();
+                this->element_.reset(this->formatTime(this->time_));
+            }
+        }
+        else
+        {
+            this->setTooltip("");
+            if (hideMode != this->hideMode_)
+            {
+                this->hideMode_ = hideMode.getValue();
+                auto empty = new TextElement("", MessageElementFlag::Timestamp,
+                                             MessageColor::System,
+                                             FontStyle::TimestampMedium);
+                this->element_.reset(empty);
+            }
         }
 
         this->element_->addToContainer(container, ctx);

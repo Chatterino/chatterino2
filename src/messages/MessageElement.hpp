@@ -606,7 +606,7 @@ public:
     static constexpr std::string_view TYPE = "timestamp";
 
     TimestampElement();
-    TimestampElement(QTime time_);
+    TimestampElement(QTime time_, bool isLiveChatMessage_);
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
@@ -627,6 +627,8 @@ private:
     QTime time_;
     std::unique_ptr<TextElement> element_;
     QString format_;
+    std::uint8_t hideMode_;
+    bool isLiveChatMessage_;
 };
 
 // adds all the custom moderation buttons, adds a variable amount of items

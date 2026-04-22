@@ -80,7 +80,7 @@ std::unique_ptr<TimestampElement> timestampElementFromTable(
     if (time)
     {
         return std::make_unique<TimestampElement>(
-            datetimeFromOffset(*time).time());
+            datetimeFromOffset(*time).time(), false);
     }
     return std::make_unique<TimestampElement>();
 }
