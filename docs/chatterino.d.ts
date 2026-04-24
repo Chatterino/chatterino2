@@ -274,9 +274,15 @@ declare namespace c2 {
         | TwitchModerationElementInit
         | LinebreakElementInit
         | ReplyCurveElementInit
+        | EmoteElementInit
+        | LayeredEmoteElementInit
         | ImageElementInit
         | CircularImageElementInit
-        | ScalingImageElementInit;
+        | ScalingImageElementInit
+        | BadgeElementInit
+        | ModBadgeElementInit
+        | VipBadgeElementInit
+        | FfzBadgeElementInit;
 
     interface TextElement extends MessageElementBase {
         type: "text";
@@ -367,10 +373,28 @@ declare namespace c2 {
 
     interface EmoteElement extends MessageElementBase {
         type: "emote";
+        emote: Emote;
+        text_element_color: MessageColor;
+    }
+
+    interface EmoteElementInit extends MessageElementInitBase {
+        type: "emote";
+        emote: Emote;
+        text_element_color?: MessageColor;
+        flags: MessageElementFlag;
     }
 
     interface LayeredEmoteElement extends MessageElementBase {
         type: "layered-emote";
+        emotes: { emote: Emote; flags: MessageElementFlag }[];
+        text_element_color: MessageColor;
+    }
+
+    interface LayeredEmoteElementInit extends MessageElementInitBase {
+        type: "layered-emote";
+        emotes: { emote: Emote; flags: MessageElementFlag }[];
+        text_element_color?: MessageColor;
+        flags: MessageElementFlag;
     }
 
     interface ImageElement extends MessageElementBase {
@@ -412,18 +436,45 @@ declare namespace c2 {
 
     interface BadgeElement extends MessageElementBase {
         type: "badge";
+        emote: Emote;
+    }
+
+    interface BadgeElementInit extends MessageElementInitBase {
+        type: "badge";
+        emote: Emote;
+        flags: MessageElementFlag;
     }
 
     interface ModBadgeElement extends Omit<BadgeElement, "type"> {
         type: "mod-badge";
     }
 
+    interface ModBadgeElementInit extends MessageElementInitBase {
+        type: "mod-badge";
+        emote: Emote;
+        flags: MessageElementFlag;
+    }
+
     interface VipBadgeElement extends Omit<BadgeElement, "type"> {
-        type: "ffz-badge";
+        type: "vip-badge";
+    }
+
+    interface VipBadgeElementInit extends MessageElementInitBase {
+        type: "vip-badge";
+        emote: Emote;
+        flags: MessageElementFlag;
     }
 
     interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
         type: "ffz-badge";
+        color: string;
+    }
+
+    interface FfzBadgeElementInit extends MessageElementInitBase {
+        type: "ffz-badge";
+        emote: Emote;
+        flags: MessageElementFlag;
+        color: string;
     }
 
     interface Link {
@@ -606,6 +657,34 @@ declare namespace c2 {
         ) => ImageSet;
     }
     var ImageSet: ImageSetConstructor;
+
+    interface Emote {
+        name: string;
+        images: ImageSet;
+        tooltip: string;
+        home_page: string;
+        zero_width: boolean;
+        id: string;
+        author: string;
+        base_name: string | null;
+    }
+
+    interface EmoteConstructor {
+        new_uncached: (
+            this: void,
+            tbl: {
+                name: string;
+                images: ImageSet;
+                tooltip: string;
+                home_page?: string;
+                zero_width?: boolean;
+                id?: string;
+                author?: string;
+                base_name?: string;
+            }
+        ) => Emote;
+    }
+    var Emote: EmoteConstructor;
 
     class Split implements IWeakResource {
         is_valid(): boolean;

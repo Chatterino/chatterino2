@@ -15,6 +15,7 @@
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/api/ConnectionHandle.hpp"
 #    include "controllers/plugins/api/DebugLibrary.hpp"
+#    include "controllers/plugins/api/Emotes.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/Images.hpp"
@@ -253,6 +254,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::ConnectionHandle::createUserType(c2);
     lua::api::message::createUserType(c2);
     lua::api::images::createUserTypes(c2);
+    lua::api::emotes::createUserTypes(c2);
     lua::api::createAccounts(c2);
     lua::api::windowmanager::createUserTypes(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
@@ -261,7 +263,9 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
     c2["MessageFlag"] =
         lua::createEnumTable<MessageFlag, MessageFlag::None>(lua);
-    c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
+    c2["MessageElementFlag"] =
+        lua::createEnumTable<MessageElementFlag, MessageElementFlag::Emote>(
+            lua);
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
     c2["LinkType"] =

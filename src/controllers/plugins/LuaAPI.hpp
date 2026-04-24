@@ -95,6 +95,7 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev);
  * @includefile controllers/plugins/api/Accounts.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
  * @includefile controllers/plugins/api/ConnectionHandle.hpp
+ * @includefile controllers/plugins/api/Emotes.hpp
  * @includefile controllers/plugins/api/HTTPResponse.hpp
  * @includefile controllers/plugins/api/HTTPRequest.hpp
  * @includefile controllers/plugins/api/Images.hpp

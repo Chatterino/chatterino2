@@ -8,14 +8,18 @@
 #    include "Application.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
+#    include "messages/Emote.hpp"
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
 
 #    include <sol/sol.hpp>
 
+#    include <span>
+
 namespace {
 
 using namespace chatterino;
+using namespace chatterino::lua;
 
 QDateTime datetimeFromOffset(qint64 offset)
 {
@@ -29,18 +33,6 @@ QDateTime datetimeFromOffset(qint64 offset)
 #    endif
 
     return dt;
-}
-
-template <typename T>
-T requiredGet(const sol::table &tbl, auto &&key)
-{
-    auto v = tbl.get<sol::optional<T>>(std::forward<decltype(key)>(key));
-    if (!v)
-    {
-        throw std::runtime_error(std::string{"Missing required property: "} +
-                                 key);
-    }
-    return *std::move(v);
 }
 
 std::unique_ptr<TextElement> textElementFromTable(const sol::table &tbl)
@@ -128,6 +120,70 @@ std::unique_ptr<ScalingImageElement> scalingImageElementFromTable(
         requiredGet<MessageElementFlag>(tbl, "flags"));
 }
 
+std::unique_ptr<EmoteElement> emoteElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<EmoteElement>(
+        requiredGet<EmotePtr>(tbl, "emote"),
+        requiredGet<MessageElementFlag>(tbl, "flags"),
+        MessageColor::fromLua(tbl.get_or("text_element_color", QString{})));
+}
+
+std::unique_ptr<LayeredEmoteElement> layeredEmoteElementFromTable(
+    const sol::table &tbl)
+{
+    std::vector<LayeredEmoteElement::Emote> emotes;
+    auto emotesTbl = requiredGet<sol::table>(tbl, "emotes");
+    for (const auto &[k, v] : emotesTbl)
+    {
+        auto tbl = v.as<sol::optional<sol::table>>();
+        if (!tbl)
+        {
+            throw std::runtime_error("Expected item in `emotes` to be a table");
+        }
+        emotes.emplace_back(LayeredEmoteElement::Emote{
+            .ptr = requiredGet<EmotePtr>(*tbl, "emote"),
+            .flags = requiredGet<MessageElementFlag>(*tbl, "flags"),
+        });
+    }
+    if (emotes.empty())
+    {
+        throw std::runtime_error("At least one emote must be added");
+    }
+
+    return std::make_unique<LayeredEmoteElement>(
+        std::move(emotes), requiredGet<MessageElementFlag>(tbl, "flags"),
+        MessageColor::fromLua(tbl.get_or("text_element_color", QString{})));
+}
+
+std::unique_ptr<BadgeElement> badgeElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<BadgeElement>(
+        requiredGet<EmotePtr>(tbl, "emote"),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
+std::unique_ptr<ModBadgeElement> modBadgeElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<ModBadgeElement>(
+        requiredGet<EmotePtr>(tbl, "emote"),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
+std::unique_ptr<VipBadgeElement> vipBadgeElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<VipBadgeElement>(
+        requiredGet<EmotePtr>(tbl, "emote"),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
+std::unique_ptr<FfzBadgeElement> ffzBadgeElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<FfzBadgeElement>(
+        requiredGet<EmotePtr>(tbl, "emote"),
+        requiredGet<MessageElementFlag>(tbl, "flags"),
+        QColor::fromString(requiredGet<std::string>(tbl, "color")));
+}
+
 void setLinkOn(MessageElement *el, const Link &link)
 {
     el->setLink(link);
@@ -213,6 +269,30 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     {
         el = scalingImageElementFromTable(tbl);
     }
+    else if (type == EmoteElement::TYPE)
+    {
+        el = emoteElementFromTable(tbl);
+    }
+    else if (type == LayeredEmoteElement::TYPE)
+    {
+        el = layeredEmoteElementFromTable(tbl);
+    }
+    else if (type == BadgeElement::TYPE)
+    {
+        el = badgeElementFromTable(tbl);
+    }
+    else if (type == ModBadgeElement::TYPE)
+    {
+        el = modBadgeElementFromTable(tbl);
+    }
+    else if (type == VipBadgeElement::TYPE)
+    {
+        el = vipBadgeElementFromTable(tbl);
+    }
+    else if (type == FfzBadgeElement::TYPE)
+    {
+        el = ffzBadgeElementFromTable(tbl);
+    }
     else
     {
         throw std::runtime_error("Invalid message type");
@@ -233,7 +313,11 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     }
     else
     {
-        el->setTooltip(tbl.get_or("tooltip", QString{}));
+        auto tooltip = tbl.get<std::optional<QString>>("tooltip");
+        if (tooltip)
+        {
+            el->setTooltip(*tooltip);
+        }
     }
 
     return el;
@@ -731,12 +815,16 @@ void createUserType(sol::table &c2)
                 &TextElement::words, &SingleLineTextElement::words);
         }),
         "color", sol::property([](const ElementRef &el) {
-            return el.visit<const TextElement, const SingleLineTextElement>(
+            return el.visit<const TextElement, const SingleLineTextElement,
+                            const FfzBadgeElement>(
                 [](const TextElement &el) {
                     return el.color().toLua();
                 },
                 [](const SingleLineTextElement &el) {
                     return el.color().toLua();
+                },
+                [](const FfzBadgeElement &el) {
+                    return el.getColor().name(QColor::HexArgb);
                 });
         }),
         "style", sol::property([](const ElementRef &el) {
@@ -770,6 +858,36 @@ void createUserType(sol::table &c2)
                 [](const TimestampElement &el) {
                     return QDateTime(QDate::currentDate(), el.time())
                         .toMSecsSinceEpoch();
+                });
+        }),
+        "emote", sol::property([](const ElementRef &el) {
+            return el.visit<const EmoteElement, const BadgeElement>(
+                &EmoteElement::emote, &BadgeElement::emote);
+        }),
+        "emotes",
+        sol::property([](const ElementRef &el, sol::this_state state) {
+            return el.asConst<LayeredEmoteElement>().map(
+                [state](const LayeredEmoteElement &el) {
+                    std::span emotes = el.getEmotes();
+                    auto tbl = sol::table::create(
+                        state.L, static_cast<int>(emotes.size()), 0);
+                    for (size_t i = 0; i < emotes.size(); i++)
+                    {
+                        const auto &emote = emotes[i];
+                        tbl[static_cast<int>(i) + 1] = sol::table::create_with(
+                            state.L, "emote", emote.ptr, "flags",
+                            emote.flags.value());
+                    }
+                    return tbl;
+                });
+        }),
+        "text_element_color", sol::property([](const ElementRef &el) {
+            return el.visit<const EmoteElement, const LayeredEmoteElement>(
+                [](const EmoteElement &el) {
+                    return el.textElementColor().toLua();
+                },
+                [](const LayeredEmoteElement &el) {
+                    return el.textElementColor().toLua();
                 });
         }));
 

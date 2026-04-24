@@ -264,6 +264,8 @@ set(SOURCE_FILES
         controllers/plugins/api/ConnectionHandle.hpp
         controllers/plugins/api/DebugLibrary.cpp
         controllers/plugins/api/DebugLibrary.hpp
+        controllers/plugins/api/Emotes.cpp
+        controllers/plugins/api/Emotes.hpp
         controllers/plugins/api/EventType.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
