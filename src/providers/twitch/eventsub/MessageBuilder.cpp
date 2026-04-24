@@ -172,7 +172,7 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
                                                const QDateTime &time)
     : channel(channel)
 {
-    this->emplace<TimestampElement>(time.time(), false);
+    this->emplace<TimestampElement>(time.time());
     this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
     this->message().serverReceivedTime = time;
 }
@@ -691,7 +691,7 @@ MessagePtr makeAutomodHoldMessageBody(
                               MessageElementFlag::ChannelName,
                               MessageColor::System)
         ->setLink({Link::JumpToChannel, event.broadcasterUserLogin.qt()});
-    builder.emplace<TimestampElement>(time.time(), false);
+    builder.emplace<TimestampElement>(time.time());
     builder.emplace<TwitchModerationElement>();
     builder->loginName = event.userLogin.qt();
 
@@ -800,7 +800,7 @@ MessagePtr makeSuspiciousUserMessageBody(
                               MessageElementFlag::ChannelName,
                               MessageColor::System)
         ->setLink({Link::JumpToChannel, event.broadcasterUserLogin.qt()});
-    builder.emplace<TimestampElement>(time.time(), false);
+    builder.emplace<TimestampElement>(time.time());
     builder.emplace<TwitchModerationElement>();
     builder->loginName = event.userLogin.qt();
     builder->flags.set(MessageFlag::PubSub, MessageFlag::LowTrustUsers);

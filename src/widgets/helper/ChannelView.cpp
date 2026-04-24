@@ -1428,6 +1428,12 @@ MessageElementFlags ChannelView::getFlags() const
         }
     }
 
+    if (getSettings()->hideChatMessageTimestamp
+	== HideChatMessageTimestamp::SentWhenChannelIsLive &&
+	this->underlyingChannel_->isLive()) {
+	flags.unset(MessageElementFlag::Timestamp);
+    }
+
     if (this->sourceChannel_ == getApp()->getTwitch()->getMentionsChannel() ||
         this->sourceChannel_ == getApp()->getTwitch()->getAutomodChannel())
     {

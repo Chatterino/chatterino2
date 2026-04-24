@@ -541,7 +541,7 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
                                const QTime &time)
     : MessageBuilder()
 {
-    this->emplace<TimestampElement>(time, false);
+    this->emplace<TimestampElement>(time);
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
@@ -569,7 +569,7 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     const MessageColor &userColor, const QTime &time)
 {
     MessageBuilder builder;
-    builder.emplace<TimestampElement>(time, false);
+    builder.emplace<TimestampElement>(time);
 
     const auto textFragments = text.split(SPACE_REGEX, Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
@@ -601,7 +601,7 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     assert(userDataController != nullptr);
 
     MessageBuilder builder;
-    builder.emplace<TimestampElement>(time, channel->isLive());
+    builder.emplace<TimestampElement>(time);
 
     auto gifterLogin = tags.value("login").toString();
     auto gifterDisplayName = tags.value("display-name").toString();
@@ -690,7 +690,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
         usernameText == "You" || timeoutUser == usernameText;
     QString messageText;
 
-    this->emplace<TimestampElement>(time.time(), false);
+    this->emplace<TimestampElement>(time.time());
     this->emplaceSystemTextAndUpdate(usernameText, messageText)
         ->setLink(
             {Link::UserInfo, timeoutUserIsFirst ? timeoutUser : sourceUser});
@@ -746,7 +746,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     QString fullText;
     QString text;
 
-    this->emplace<TimestampElement>(time.time(), false);
+    this->emplace<TimestampElement>(time.time());
     this->emplaceSystemTextAndUpdate(username, fullText)
         ->setLink({Link::UserInfo, username});
 
@@ -1517,7 +1517,7 @@ MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
                                                    uint32_t count)
 {
     MessageBuilder builder;
-    builder.emplace<TimestampElement>(now.time(), false);
+    builder.emplace<TimestampElement>(now.time());
     builder->count = count;
     builder->serverReceivedTime = now;
     builder.message().flags.set(
@@ -1648,8 +1648,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     // timestamp
     builder->serverReceivedTime = calculateMessageTime(ircMessage);
-    builder.emplace<TimestampElement>(builder->serverReceivedTime.time(),
-                                      twitchChannel->isLive());
+    builder.emplace<TimestampElement>(builder->serverReceivedTime.time());
 
     bool shouldAddModerationElements = [&] {
         if (senderIsBroadcaster)

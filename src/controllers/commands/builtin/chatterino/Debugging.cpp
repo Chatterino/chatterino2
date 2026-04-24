@@ -151,7 +151,7 @@ QString listEnvironmentVariables(const CommandContext &ctx)
     for (QString &str : debugMessages)
     {
         MessageBuilder builder;
-        builder.emplace<TimestampElement>(QTime::currentTime(), false);
+        builder.emplace<TimestampElement>(QTime::currentTime());
         builder.emplace<TextElement>(str, MessageElementFlag::Text,
                                      MessageColor::System);
         channel->addMessage(builder.release(), MessageContext::Original);
