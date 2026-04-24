@@ -1164,8 +1164,8 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
         this->setTooltip(this->getTooltip());
         if (getSettings()->timestampFormat != this->format_)
         {
-	    this->format_ = getSettings()->timestampFormat.getValue();
-	    this->element_.reset(this->formatTime(this->time_));
+            this->format_ = getSettings()->timestampFormat.getValue();
+            this->element_.reset(this->formatTime(this->time_));
         }
 
         this->element_->addToContainer(container, ctx);
