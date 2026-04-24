@@ -104,16 +104,6 @@ jobs:
             exit 1
           fi
 
-      - name: Install Python and libclang (24.04)
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt update
-          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
-            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
-          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
-
       - name: Build
         run: |
           mkdir build
@@ -128,16 +118,10 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
-            -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
-            -DCHATTERINO_PLUGINS=${{ matrix.plugins && 'On' || 'Off' }} \
+            -DFORCE_JSON_GENERATION=Off \
+            -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
             ..
           make -j"$(nproc)"
-
-      - name: Check generated sources
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
-          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
 
       - name: Package - .deb (Ubuntu)
         if: matrix.build-deb
@@ -153,7 +137,7 @@ jobs:
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -207,7 +191,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.3.0
+        uses: jurplel/install-qt-action@v4.3.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -221,7 +205,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.20
+        uses: hendrikmuhs/ccache-action@v1.2.22
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -278,7 +262,7 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
-              -DFORCE_JSON_GENERATION=On `
+              -DFORCE_JSON_GENERATION=Off `
               -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP

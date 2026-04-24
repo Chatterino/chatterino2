@@ -131,17 +131,13 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
     {
         // GetDpiForWindow and GetSystemMetricsForDpi are only supported on
         // Windows 10 and later. Qt 6 requires Windows 10.
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto dpi = GetDpiForWindow(hwnd);
-#    endif
 
         auto systemMetric = [&](auto index) {
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             if (dpi != 0)
             {
                 return GetSystemMetricsForDpi(index, dpi);
             }
-#    endif
             return GetSystemMetrics(index);
         };
 
@@ -804,13 +800,8 @@ void BaseWindow::showEvent(QShowEvent *)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              qintptr *result)
-#else
-bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
-                             long *result)
-#endif
 {
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -1134,11 +1125,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     if (!this->hasCustomWindowFrame())
@@ -1250,11 +1237,7 @@ bool BaseWindow::handleMOVE(MSG *msg)
     return false;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     const LONG borderWidth = 8;  // in device independent pixels

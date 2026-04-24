@@ -25,7 +25,8 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto prefix = boost::json::try_value_to<String>(*jvprefix);
+    auto prefix =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvprefix);
 
     if (prefix.has_error())
     {
@@ -87,7 +88,8 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto id = boost::json::try_value_to<String>(*jvid);
+    auto id =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvid);
 
     if (id.has_error())
     {
@@ -100,7 +102,9 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto emoteSetID = boost::json::try_value_to<String>(*jvemoteSetID);
+    auto emoteSetID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvemoteSetID);
 
     if (emoteSetID.has_error())
     {
@@ -129,7 +133,8 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -142,7 +147,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -155,7 +162,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -192,7 +201,8 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto text = boost::json::try_value_to<String>(*jvtext);
+    auto text =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvtext);
 
     if (text.has_error())
     {
@@ -286,7 +296,8 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto text = boost::json::try_value_to<String>(*jvtext);
+    auto text =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvtext);
 
     if (text.has_error())
     {

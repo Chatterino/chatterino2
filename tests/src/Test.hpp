@@ -14,6 +14,10 @@ class QString;
 class QStringView;
 class QByteArray;
 
+extern const QString PUBSUB_WSS_ADDR;
+extern const QString PUBSUB_WS_ADDR;
+extern const QString HTTPBIN_BASE_URL;
+
 // This file is included in all TUs in chatterino-test to avoid ODR violations.
 std::ostream &operator<<(std::ostream &os, QStringView str);
 std::ostream &operator<<(std::ostream &os, const QByteArray &bytes);

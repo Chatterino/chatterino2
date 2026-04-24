@@ -422,6 +422,41 @@ channel:add_message(c2.Message.new({
 }))
 ```
 
+##### `Channel:on_messages_cleared(cb)`
+
+Callback when the messages in this channel have been cleared.
+This is called synchronously. It's also called when plugins clear messages
+([`Channel:clear_messages`](#channelclear_messages))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
+
+##### `Channel:on_message_replaced(cb)`
+
+Callback when a message is replaced.
+This is called synchronously. It's also called when plugins replace messages
+([`Channel:replace_message`](#channelreplace_messagemessage-replacement-hint))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
+
+`cb` receives:
+
+- `idx` (`number`) A one-based index of the replaced message
+- `old` ([`c2.Message`](#message))
+- `replacement` ([`c2.Message`](#message))
+
+##### `Channel:on_message_appended(cb)`
+
+Callback when a message is added.
+This is called synchronously. It's also called when plugins add messages
+([`Channel:add_message`](#channeladd_messagemessage-context-override_flags))
+where this can lead to infinite recursion.
+See also: [`ConnectionHandle:block`](#connectionhandleblock).
+
+`cb` receives:
+
+- `msg` ([`c2.Message`](#message))
+- `override_flags` ([`c2.MessageFlag`](#message) or `nil`)
+
 ##### `Channel:is_twitch_channel()`
 
 Returns `true` if the channel is a Twitch channel, that is its type name has
@@ -811,6 +846,116 @@ Is this connection currently blocked?
 ##### `ConnectionHandle:is_connected()`
 
 Is this connection still connected?
+
+#### `Image`
+
+An image with some scale associated with it. Images are mainly used for emotes
+which often have different sizes (1x, 2x, 4x).
+
+Images have the following properties:
+
+- `url` (`string`): The url of this image.
+- `is_loaded` (`boolean`): Is this image currently loaded in RAM?
+- `is_empty` (`boolean`): Is this image empty?
+- `width` (`integer`): The scaled width of this image in pixels.
+- `height` (`integer`): The scaled height of this image in pixels.
+- `scale` (`number`): The scale factor applied to the image.
+- `size` (`[width, height]`): The scaled size of this image in pixels.
+- `animated` (`boolean`): Is this image animated? Note that this requires the image to be loaded.
+
+##### `Image.from_url(url[, scale[, expected_size]])`
+
+Create an image from a URL. Images are cached based on the URL.
+The other arguments are only used if the image is first created.
+
+Creating an image requires the [network permission](#permissions).
+
+- `scale` (`number`): The scale this image should have (e.g. `0.5`, `0.25`). Defaults to 1.
+- `expected_size` (`{width, height}`): The expected unscaled size of the image. This is only used as a hint when the image is not yet loaded to avoid layout shifts.
+
+##### `Image.empty()`
+
+Get the empty image.
+
+#### `ImageSet`
+
+A set of images. Each image should depict the same content at different sizes.
+
+Image sets have the following writable properties:
+
+- `image1` ([`Image`](#image)): The base image (1x).
+- `image2` ([`Image`](#image)): The first scaled image (often 2x, `scale=0.5`)
+- `image3` ([`Image`](#image)): The second scaled image (often 3x or 4x, `scale=0.25`)
+
+##### `ImageSet.new([image1[, image2[, image3]]])`
+
+Create a new image set.
+All arguments accept an [`Image`](#image) or a `string` (URL).
+
+Requires the [network permission](#permissions).
+
+#### `Split`
+
+A split. See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
+This holds a `channel` ([Channel](#channel)) that's open in this split.
+
+#### `SplitContainerNode`
+
+A node in a split container. It has the following fields:
+
+- `type` (`SplitContainerNodeType`) The type of this node
+- `split` ([`Split`](#split)?) The split contained in this code (if this is a split node)
+- `parent` ([`SplitContainerNode`](#splitcontainernode)?) The parent node
+- `horizontal_flex` (`number`) The amount of horizontal space this split takes
+- `vertical_flex` (`number`) The amount of vertical space this split takes
+
+##### `SplitContainerNode:children()`
+
+Get all children ([`SplitContainerNode`](#splitcontainernode)) of this node.
+
+#### `SplitContainer`
+
+A container with potentially multiple splits. It has the following fields:
+
+- `selected_split` ([`Split`](#split)) The currently selected split.
+- `base_node` ([`SplitContainerNode`](#splitcontainernode)) The top level node.
+
+##### `SplitContainer:splits()`
+
+Get all splits ([`Split`](#split)) contained in this container.
+
+#### `SplitNotebook`
+
+- `selected_page` ([`SplitContainer`](#splitcontainer)?) The currently selected page.
+- `page_count` (`integer`) The number of pages/tabs.
+
+##### `SplitNotebook:page_at(i)`
+
+Get the notebook page at a specific index.
+`i` is the zero based index of the page.
+Returns the page ([`SplitContainer`](#splitcontainer)) contained at the specified index.
+
+#### `Window`
+
+It has the following fields:
+
+- `notebook` ([`SplitNotebook`](#splitnotebook)) The notebook of this window.
+- `type` (`WindowType`) The type of this window.
+
+#### `WindowManager`
+
+It has the following fields:
+
+- `main_window` ([`Window`](#window)) The main window.
+- `last_selected_window` ([`Window`](#window)) The last selected window (or the main window if none were selected last).
+
+##### `WindowManager:all()`
+
+Get all open windows.
+
+#### `c2.windows`
+
+The global [`WindowManager`](#windowmanager).
 
 ### Input/Output API
 
