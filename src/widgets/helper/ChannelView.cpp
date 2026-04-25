@@ -1428,9 +1428,10 @@ MessageElementFlags ChannelView::getFlags() const
         }
     }
 
-    if (getSettings()->hideChatMessageTimestamp
-        == HideChatMessageTimestamp::SentWhenChannelIsLive &&
-        this->underlyingChannel_->isLive()) {
+    if (getSettings()->hideMessageTimestamp ==
+            HideMessageTimestamp::WhenChannelIsLive &&
+        this->underlyingChannel_->isLive())
+    {
         flags.unset(MessageElementFlag::Timestamp);
     }
 

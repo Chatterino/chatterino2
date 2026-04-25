@@ -515,9 +515,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "When enabled, messages deleted by moderators will be hidden.")
         ->addTo(layout);
 
-    SettingWidget::dropdown("Hide chat message timestamp",
-                            s.hideChatMessageTimestamp)
-        ->setTooltip("Specify a condition when a chat timestamp message will "
+    SettingWidget::dropdown("Hide message timestamp when",
+                            s.hideMessageTimestamp)
+        ->setTooltip("Specify a condition when a timestamp message will "
                      "not be shown.")
         ->addTo(layout);
 
