@@ -30,6 +30,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -922,6 +923,18 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         {
             msg->flags.set(MessageFlag::WatchStreak);
         }
+        else if (msgType == "announcement")
+        {
+            msg->flags.set(MessageFlag::Announcement);
+
+            if (auto cit = tags.find("msg-param-color"); cit != tags.end())
+            {
+                msg->announcementColor =
+                    qmagicenum::enumCast<HelixAnnouncementColor>(
+                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                        .value_or(HelixAnnouncementColor::Primary);
+            }
+        }
         else
         {
             msg->flags.set(MessageFlag::Subscription);
@@ -1122,7 +1135,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     MessageParseArgs args;
     if (isSub)
     {
-        args.isSubscriptionMessage = true;
+        args.isSubscriptionMessage = msgType != "announcement";
         args.trimSubscriberUsername = true;
     }
 
@@ -1243,6 +1256,18 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             {
                 msg->flags.set(MessageFlag::WatchStreak);
             }
+            else if (msgType == "announcement")
+            {
+                msg->flags.set(MessageFlag::Announcement);
+
+                if (auto cit = tags.find("msg-param-color"); cit != tags.end())
+                {
+                    msg->announcementColor =
+                        qmagicenum::enumCast<HelixAnnouncementColor>(
+                            cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                            .value_or(HelixAnnouncementColor::Primary);
+                }
+            }
             else
             {
                 msg->flags.set(MessageFlag::Subscription);
@@ -1250,8 +1275,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
             if (tags.value("msg-id") != "announcement")
             {
-                // Announcements are currently tagged as subscriptions,
-                // but we want them to be able to show up in mentions
+                // We want announcements to be able to show up in mentions
                 msg->flags.unset(MessageFlag::Highlighted);
             }
         }

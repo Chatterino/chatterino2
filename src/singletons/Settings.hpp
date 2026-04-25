@@ -481,6 +481,10 @@ public:
         "/streamerMode/hideBlockedTermText",
         true,
     };
+    BoolSetting streamerModeHideUserNotes = {
+        "/streamerMode/hideUserNotes",
+        true,
+    };
 
     /// Blocked Users
     BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
@@ -578,6 +582,19 @@ public:
         "/highlighting/watchStreak/enabled", true};
     QStringSetting watchStreakHighlightColor = {
         "/highlighting/watchStreak/color", ""};
+
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+    BoolSetting enableColoredAnnouncementHighlight = {
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
 
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",

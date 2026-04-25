@@ -77,6 +77,7 @@ enum class MessageFlag : std::int64_t {
     /// Note: If this message is inside a reply thread, the root must not have the flag either.
     InvalidReplyTarget = (1LL << 42),
     WatchStreak = (1LL << 43),
+    Announcement = (1LL << 44),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
