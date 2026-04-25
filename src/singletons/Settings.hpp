@@ -82,11 +82,6 @@ enum class ShowModerationState : int {
     Never = 1,
 };
 
-enum class HideMessageTimestamp : std::uint8_t {
-    Never,
-    WhenChannelIsLive,
-};
-
 enum class StreamLinkPreferredQuality : std::uint8_t {
     Choose,
     Source,
@@ -120,18 +115,6 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
         case EmoteTooltipScale::Large:
         case EmoteTooltipScale::Huge:
             return {};
-    }
-}
-
-constexpr std::optional<std::string_view> qmagicenumDisplayName(
-    HideMessageTimestamp value) noexcept
-{
-    switch (value)
-    {
-        case HideMessageTimestamp::Never:
-            return "Never";
-        case HideMessageTimestamp::WhenChannelIsLive:
-            return "When channel is live";
     }
 }
 
@@ -176,9 +159,9 @@ public:
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
-    EnumSetting<HideMessageTimestamp> hideMessageTimestamp = {
-        "/appearance/messages/hideMessageTimestamp",
-        HideMessageTimestamp::Never};
+    BoolSetting hideMessageTimestampsWhenLive = {
+        "/appearance/messages/hideMessageTimestampsWhenLive",
+        false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {

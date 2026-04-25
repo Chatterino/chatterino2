@@ -515,10 +515,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "When enabled, messages deleted by moderators will be hidden.")
         ->addTo(layout);
 
-    SettingWidget::dropdown("Hide message timestamp when",
-                            s.hideMessageTimestamp)
-        ->setTooltip("Specify a condition when a timestamp message will "
-                     "not be shown.")
+    SettingWidget::checkbox("Hide message timestamps when channel is live",
+                            s.hideMessageTimestampsWhenLive)
+        ->setTooltip("When enabled, timestamps of all messages will be hidden "
+                     "when the channel is live")
         ->addTo(layout);
 
     layout.addDropdown<QString>(
