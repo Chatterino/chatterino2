@@ -852,6 +852,11 @@ void Split::setChannel(IndirectChannel newChannel)
             tc->sendWaitUpdate, [this](const QString &text) {
                 this->getInput().setSendWaitStatus(text);
             });
+
+        this->channelSignalHolder_.managedConnect(
+            tc->sharedChatStatusChanged, [this](const QStringList &) {
+                this->header_->updateChannelText();
+            });
     }
 
     this->indirectChannelChangedConnection_ =

@@ -582,6 +582,21 @@ struct HelixPredictions {
     }
 };
 
+struct HelixSharedChatSession {
+    QStringList participantIds;
+
+    explicit HelixSharedChatSession(const QJsonObject &jsonObject)
+    {
+        const auto &participants = jsonObject.value("participants").toArray();
+        for (const auto p : participants)
+        {
+            const auto broadcasterId =
+                p.toObject().value("broadcaster_id").toString();
+            participantIds.push_back(broadcasterId);
+        }
+    }
+};
+
 struct HelixStartCommercialResponse {
     // Length of the triggered commercial
     int length;
@@ -1156,6 +1171,13 @@ public:
         const QString &messageID, ResultCallback<> successCallback,
         FailureCallback<HelixUnpinMessageError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    virtual void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1584,6 +1606,13 @@ public:
         const QString &broadcasterID, const QString &moderatorID,
         const QString &messageID, ResultCallback<> successCallback,
         FailureCallback<HelixUnpinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
