@@ -5,8 +5,8 @@
 #pragma once
 
 #include "messages/MessageFlag.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/api/HelixEnums.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "util/DebugCount.hpp"
 #include "util/QStringHash.hpp"
 

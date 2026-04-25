@@ -578,11 +578,17 @@ public:
         "/highlighting/watchStreak/color", ""};
 
     BoolSetting enableAnnouncementHighlight = {
-        "/highlighting/announcement/enabled", true};
+        "/highlighting/announcement/enabled",
+        true,
+    };
     QStringSetting announcementHighlightColor = {
-        "/highlighting/announcement/color", ""};
+        "/highlighting/announcement/color",
+        "",
+    };
     BoolSetting enableColoredAnnouncementHighlight = {
-        "/highlighting/announcement/coloredAnnouncement/enabled", true};
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
 
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
