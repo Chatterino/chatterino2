@@ -6,6 +6,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "providers/twitch/api/HelixEnums.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/Helpers.hpp"
@@ -572,16 +573,6 @@ struct HelixPredictions {
             this->predictions.push_back(prediction);
         }
     }
-};
-
-enum class HelixAnnouncementColor {
-    Blue,
-    Green,
-    Orange,
-    Purple,
-
-    // this is the executor's chat color
-    Primary,
 };
 
 enum class HelixClipError {
