@@ -55,6 +55,7 @@ public:
         TwitchEnd,
         /// Misc
         Misc,
+        Plugin,
     };
 
     explicit Channel(const QString &name, Type type);
@@ -223,6 +224,8 @@ constexpr magic_enum::customize::customize_t
             return "live";
         case Type::Misc:
             return "misc";
+        case Type::Plugin:
+            return "plugin";
 
         case Type::None:
         case Type::Direct:

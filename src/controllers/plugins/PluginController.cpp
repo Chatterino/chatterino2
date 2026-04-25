@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "api/ChannelProviders.hpp"
+#include "controllers/plugins/PluginChannel.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "controllers/plugins/PluginController.hpp"
-
 #    include "Application.hpp"
 #    include "common/Args.hpp"
 #    include "common/network/NetworkCommon.hpp"
@@ -25,6 +25,7 @@
 #    include "controllers/plugins/api/WindowManager.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "messages/MessageElement.hpp"
@@ -55,6 +56,8 @@ PluginController::PluginController(const Paths &paths_)
 {
     this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
 }
+
+PluginController::~PluginController() = default;
 
 void PluginController::initialize(Settings &settings)
 {
@@ -255,6 +258,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::images::createUserTypes(c2);
     lua::api::createAccounts(c2);
     lua::api::windowmanager::createUserTypes(c2);
+    lua::api::channelproviders::createUserTypes(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
@@ -488,6 +492,143 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 WebSocketPool &PluginController::webSocketPool()
 {
     return this->webSocketPool_;
+}
+
+std::shared_ptr<lua::api::ChannelProvider> PluginController::findProvider(
+    const QString &pluginID, const QString &providerID) const
+{
+    auto pluginIt = this->plugins_.find(pluginID);
+    if (pluginIt == this->plugins_.end())
+    {
+        return nullptr;
+    }
+    const auto &providers = pluginIt->second->channelProviders();
+    auto providerIt = providers.find(providerID);
+    if (providerIt == providers.end())
+    {
+        return nullptr;
+    }
+    return providerIt->second;
+}
+
+ChannelPtr PluginController::getOrCreatePluginChannelFromSave(
+    const PluginChannelDescriptor &descriptor)
+{
+    auto provider =
+        this->findProvider(descriptor.pluginID, descriptor.providerID);
+    // Check for existing channels first.
+    if (provider)
+    {
+        auto existing = provider->findExisting(descriptor.channelName);
+        if (existing)
+        {
+            return existing;
+        }
+    }
+    else
+    {
+        // Try to find an existing orphaned channel.
+        auto it = this->orphanedChannels_.find(
+            {descriptor.pluginID, descriptor.providerID});
+        if (it != this->orphanedChannels_.end())
+        {
+            auto channelIt = it->second.find(descriptor.channelName);
+            if (channelIt != it->second.end())
+            {
+                auto chan = channelIt->second.lock();
+                if (chan)
+                {
+                    return chan;
+                }
+
+                it->second.erase(channelIt);
+            }
+        }
+    }
+
+    auto chan = std::make_shared<PluginChannel>(
+        descriptor.channelName, descriptor.pluginID, descriptor.providerID,
+        descriptor.arguments);
+
+    if (!provider)
+    {
+        this->rememberOrphanedChannel(*chan);
+        return chan;
+    }
+
+    auto result = chan->adopt(provider);
+    if (!result)
+    {
+        qCWarning(chatterinoLua)
+            << *chan << "Failed to adopt:" << result.error();
+        this->rememberOrphanedChannel(*chan);
+    }
+    return chan;
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+ChannelPtr PluginController::getOrCreatePluginChannelFromDialog(
+    const std::shared_ptr<lua::api::ChannelProvider> &provider,
+    QJsonObject arguments)
+{
+    auto owner = provider->owner().strong();
+    if (!owner)
+    {
+        return Channel::getEmpty();
+    }
+
+    auto name = provider->callbacks().getName(arguments);
+    if (!name)
+    {
+        return Channel::getEmpty();
+    }
+    auto existing = provider->findExisting(*name);
+    if (existing)
+    {
+        return existing;
+    }
+
+    auto chan = std::make_shared<PluginChannel>(
+        *name, owner.plugin()->id, provider->id(), std::move(arguments));
+    auto result = chan->adopt(provider);
+    if (!result)
+    {
+        return Channel::getEmpty();
+    }
+    return chan;
+}
+
+void PluginController::adoptOrphanedChannels(
+    const std::shared_ptr<lua::api::ChannelProvider> &provider)
+{
+    auto owner = provider->owner().strong();
+    if (!owner)
+    {
+        return;
+    }
+    auto orphanedSetIt =
+        this->orphanedChannels_.find({owner.plugin()->id, provider->id()});
+    if (orphanedSetIt == this->orphanedChannels_.end())
+    {
+        return;
+    }
+
+    std::erase_if(orphanedSetIt->second, [&](const auto &pair) {
+        const auto &[name, chan] = pair;
+        auto strong = chan.lock();
+        if (!strong)
+        {
+            return true;  // Already expired, no need to track further.
+        }
+        auto result = strong->adopt(provider);
+        return result.has_value();
+    });
+}
+
+void PluginController::rememberOrphanedChannel(PluginChannel &chan)
+{
+    this->orphanedChannels_[{chan.pluginID(), chan.providerID()}].emplace(
+        chan.getName(), chan.weakFromThis());
 }
 
 }  // namespace chatterino

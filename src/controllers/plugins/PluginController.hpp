@@ -28,6 +28,11 @@ namespace chatterino {
 
 class Settings;
 class Paths;
+class PluginChannel;
+
+namespace lua::api {
+class ChannelProvider;
+}  // namespace lua::api
 
 class PluginController
 {
@@ -35,6 +40,7 @@ class PluginController
 
 public:
     explicit PluginController(const Paths &paths_);
+    ~PluginController();
 
     void initialize(Settings &settings);
 
@@ -68,6 +74,26 @@ public:
 
     WebSocketPool &webSocketPool();
 
+    std::shared_ptr<lua::api::ChannelProvider> findProvider(
+        const QString &pluginID, const QString &providerID) const;
+
+    struct PluginChannelDescriptor {
+        QString channelName;
+        QString pluginID;
+        QString providerID;
+        QJsonObject arguments;
+    };
+    ChannelPtr getOrCreatePluginChannelFromSave(
+        const PluginChannelDescriptor &descriptor);
+
+    ChannelPtr getOrCreatePluginChannelFromDialog(
+        const std::shared_ptr<lua::api::ChannelProvider> &provider,
+        QJsonObject arguments);
+
+    void adoptOrphanedChannels(
+        const std::shared_ptr<lua::api::ChannelProvider> &provider);
+    void rememberOrphanedChannel(PluginChannel &channel);
+
     boost::signals2::signal<void(Plugin *)> onPluginLoaded;
 
 private:
@@ -84,6 +110,11 @@ private:
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
     WebSocketPool webSocketPool_;
+
+    /// (pluginID, providerID) => [channelName => channel]
+    std::map<std::pair<QString, QString>,
+             std::map<QString, std::weak_ptr<PluginChannel>>>
+        orphanedChannels_;
 
     std::vector<
         std::pair<std::string, std::function<sol::object(sol::state_view)>>>

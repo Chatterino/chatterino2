@@ -8,6 +8,7 @@
 
 #include <pajlada/signals/signal.hpp>
 #include <QFocusEvent>
+#include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QRadioButton>
@@ -38,8 +39,13 @@ namespace chatterino {
 
 class EditableModelView;
 class IndirectChannel;
+class MicroNotebook;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+
+namespace lua::api::channelproviders {
+struct ArgumentSpec;
+}  // namespace lua::api::channelproviders
 
 class SelectChannelDialog final : public BaseWindow
 {
@@ -86,6 +92,13 @@ private:
 
         detail::AutoCheckedRadioButton *automod;
         QLabel *automodLabel;
+
+        MicroNotebook *notebook;
+        QWidget *twitchPage;
+        QWidget *pluginPage;
+
+        QComboBox *pluginProviderBox;
+        QFormLayout *pluginProviderArgumentsLayout;
     } ui_{};
 
     EventFilter tabFilter_;
@@ -93,10 +106,23 @@ private:
     ChannelPtr selectedChannel_;
     bool hasSelectedChannel_ = false;
 
+    struct PluginControlFunctions {
+        std::function<void(const QJsonObject &)> applyFromArguments;
+        std::function<void(QJsonObject &)> applyToArguments;
+    };
+    std::vector<PluginControlFunctions> pluginControlCallbacks;
+
     void ok();
     friend class EventFilter;
 
     void addShortcuts() override;
+
+    void refreshChannelProviderWidgets();
+    QJsonObject extractChannelProviderArguments() const;
+    void applyChannelProviderArguments(const QJsonObject &arguments);
+
+    QWidget *createChannelProviderArgumentWidget(
+        const lua::api::channelproviders::ArgumentSpec &arg);
 };
 
 }  // namespace chatterino

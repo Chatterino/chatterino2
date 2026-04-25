@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "api/ChannelProviders.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "controllers/plugins/Plugin.hpp"
-
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "controllers/plugins/SignalCallback.hpp"
 
@@ -54,6 +55,16 @@ lua::SignalCallback Plugin::createCallback(sol::main_protected_function pfn)
     return {this->selfRef_.weak(), std::move(pfn)};
 }
 
+Plugin::Plugin(QString id, lua_State *state, PluginMeta meta,
+               const QDir &loadDirectory)
+    : id(std::move(id))
+    , meta(std::move(meta))
+    , loadDirectory_(loadDirectory)
+    , state_(state)
+    , selfRef_(state ? this : nullptr)
+{
+}
+
 Plugin::~Plugin()
 {
     this->onUnloaded();
@@ -63,6 +74,7 @@ Plugin::~Plugin()
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
         timer->deleteLater();
     }
+    this->channelProviders_.clear();
     this->selfRef_.destroy();
     this->httpRequests.clear();
     qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
@@ -83,6 +95,12 @@ Plugin::~Plugin()
            "This must be empty or destructor of sol::protected_function would "
            "explode malloc structures later");
 }
+
+lua::PluginWeakRef Plugin::weakRef() const
+{
+    return this->selfRef_.weak();
+}
+
 int Plugin::addTimeout(QTimer *timer)
 {
     this->activeTimeouts.push_back(timer);
@@ -168,6 +186,25 @@ bool Plugin::hasNetworkPermission() const
     return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
         return p.type == PluginPermission::Type::Network;
     });
+}
+
+void Plugin::registerChannelProvider(
+    std::shared_ptr<lua::api::ChannelProvider> provider)
+{
+    if (!this->state_)
+    {
+        return;
+    }
+
+    assert(provider->owner() == this->weakRef());
+    auto [it, inserted] =
+        this->channelProviders_.emplace(provider->id(), std::move(provider));
+    getApp()->getPlugins()->adoptOrphanedChannels(it->second);
+}
+
+const Plugin::ChannelProviderMap &Plugin::channelProviders() const
+{
+    return this->channelProviders_;
 }
 
 }  // namespace chatterino

@@ -7,6 +7,9 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/plugins/api/ChannelProviders.hpp"
+#include "controllers/plugins/PluginChannel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/QMagicEnum.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -19,6 +22,8 @@
 #include <QJsonDocument>
 
 namespace chatterino {
+
+using namespace Qt::Literals;
 
 namespace {
 
@@ -122,6 +127,12 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     {
         descriptor.spellCheckOverride = spellOverride.toBool();
     }
+    if (descriptor.type_ == u"plugin")
+    {
+        descriptor.pluginID = data["pluginID"_L1].toString();
+        descriptor.providerID = data["providerID"_L1].toString();
+        descriptor.arguments = data["arguments"_L1].toObject();
+    }
     return descriptor;
 }
 
@@ -133,6 +144,12 @@ SplitDescriptor SplitDescriptor::fromSplit(const Split &split)
     descriptor.channelName_ = split.getChannel()->getName();
     descriptor.filters_ = split.getFilters();
     descriptor.moderationMode_ = split.getModerationMode();
+    if (auto *pc = dynamic_cast<PluginChannel *>(split.getChannel().get()))
+    {
+        descriptor.pluginID = pc->pluginID();
+        descriptor.providerID = pc->providerID();
+        descriptor.arguments = pc->arguments();
+    }
     return descriptor;
 }
 
@@ -146,6 +163,13 @@ void SplitDescriptor::appendJson(QJsonObject &root) const
     {
         data["name"] = this->channelName_;
     }
+    if (this->type_ == u"plugin")
+    {
+        data["pluginID"] = this->pluginID;
+        data["providerID"] = this->providerID;
+        data["arguments"] = this->arguments;
+    }
+
     root.insert("data", data);
 
     if (!this->filters_.empty())
@@ -183,6 +207,13 @@ IndirectChannel SplitDescriptor::decodeChannel() const
             return getApp()->getTwitch()->getAutomodChannel();
         case Channel::Type::Misc:
             return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
+        case Channel::Type::Plugin:
+            return getApp()->getPlugins()->getOrCreatePluginChannelFromSave({
+                .channelName = this->channelName_,
+                .pluginID = this->pluginID,
+                .providerID = this->providerID,
+                .arguments = this->arguments,
+            });
 
         case Channel::Type::None:
         case Channel::Type::Direct:

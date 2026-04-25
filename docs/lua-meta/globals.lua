@@ -7,17 +7,17 @@
 c2 = {}
 ---@enum c2.LogLevel
 c2.LogLevel = {
-    Debug = {}, ---@type c2.LogLevel.Debug
-    Info = {}, ---@type c2.LogLevel.Info
-    Warning = {}, ---@type c2.LogLevel.Warning
-    Critical = {}, ---@type c2.LogLevel.Critical
+	Debug = {}, ---@type c2.LogLevel.Debug
+	Info = {}, ---@type c2.LogLevel.Info
+	Warning = {}, ---@type c2.LogLevel.Warning
+	Critical = {}, ---@type c2.LogLevel.Critical
 }
 
 -- Begin src/controllers/plugins/api/EventType.hpp
 
 ---@enum c2.EventType
 c2.EventType = {
-    CompletionRequested = {}, ---@type c2.EventType.CompletionRequested
+	CompletionRequested = {}, ---@type c2.EventType.CompletionRequested
 }
 
 -- End src/controllers/plugins/api/EventType.hpp
@@ -36,30 +36,28 @@ c2.EventType = {
 ---@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
 ---@field is_first_word boolean True if this is the first word in the input
 
-
-
 ---@alias QSize [integer, integer] A pair of [width, height]
 ---@alias QSizeF [number, number] A pair of [width, height]
 -- Begin src/common/Channel.hpp
 
 ---@enum c2.ChannelType
 c2.ChannelType = {
-    None = {}, ---@type c2.ChannelType.None
-    Direct = {}, ---@type c2.ChannelType.Direct
-    Twitch = {}, ---@type c2.ChannelType.Twitch
-    TwitchWhispers = {}, ---@type c2.ChannelType.TwitchWhispers
-    TwitchWatching = {}, ---@type c2.ChannelType.TwitchWatching
-    TwitchMentions = {}, ---@type c2.ChannelType.TwitchMentions
-    TwitchLive = {}, ---@type c2.ChannelType.TwitchLive
-    TwitchAutomod = {}, ---@type c2.ChannelType.TwitchAutomod
-    TwitchEnd = {}, ---@type c2.ChannelType.TwitchEnd
-    Misc = {}, ---@type c2.ChannelType.Misc
+	None = {}, ---@type c2.ChannelType.None
+	Direct = {}, ---@type c2.ChannelType.Direct
+	Twitch = {}, ---@type c2.ChannelType.Twitch
+	TwitchWhispers = {}, ---@type c2.ChannelType.TwitchWhispers
+	TwitchWatching = {}, ---@type c2.ChannelType.TwitchWatching
+	TwitchMentions = {}, ---@type c2.ChannelType.TwitchMentions
+	TwitchLive = {}, ---@type c2.ChannelType.TwitchLive
+	TwitchAutomod = {}, ---@type c2.ChannelType.TwitchAutomod
+	TwitchEnd = {}, ---@type c2.ChannelType.TwitchEnd
+	Misc = {}, ---@type c2.ChannelType.Misc
+	Plugin = {}, ---@type c2.ChannelType.Plugin
 }
 
 -- End src/common/Channel.hpp
 
 -- Begin src/controllers/plugins/api/Accounts.hpp
-
 
 ---@class c2.TwitchAccount
 c2.TwitchAccount = {}
@@ -89,6 +87,75 @@ function c2.TwitchAccount:__tostring() end
 ---@return c2.TwitchAccount account
 function c2.current_account() end
 -- End src/controllers/plugins/api/Accounts.hpp
+
+-- Begin src/controllers/plugins/api/ChannelProviders.hpp
+
+---@class ChannelProviderArgumentSpecBase
+---@field id string
+---@field display_name string
+---@field tooltip? string
+
+---@class ChannelProviderArgumentSpecText : ChannelProviderArgumentSpecBase
+---@field kind "text"
+---@field placeholder? string
+---@field default? string
+
+---@alias ChannelProviderArgumentSpec ChannelProviderArgumentSpecText
+
+---The plugin local state for a custom/plugin channel.
+---This provides both state as well as callbacks for Chatterino to notify the plugin about events.
+---Callbacks are queried once when the channel is created. Any changes to the fields are not visible.
+---
+---When storing state, prefer names with underscores (e.g. `_name`) to avoid collisions in the future.
+---@class CustomChannel
+---@field on_send_message? fun(self, msg: string) Callback when a message is sent.
+---@field on_destroyed? fun(self) Callback when the channel is destroyed (e.g. because the user closed the split).
+
+---@alias ChannelProviderUserArgs table<string, any>
+
+---Arguments passed to `ChannelProviderCallbacks.create`.
+---@class ChannelProviderCreateArgs
+---@field arguments ChannelProviderUserArgs User provided arguments based on the specification given when registering the provider.
+
+---Callbacks for managing channels of a custom provider.
+---@class ChannelProviderCallbacks
+---@field get_name fun(arguments: ChannelProviderUserArgs): string Before creating a channel, this is called with the user provided arguments based on the specification given when the provider was registered. This should return the name of the channel to be created. Afterwards, `create` is called with the new channel.
+---@field create fun(channel: c2.Channel, args: ChannelProviderCreateArgs): CustomChannel Create a custom channel given the specification from the user. See `CustomChannel` for more info.
+
+---Table to initialize a channel provider.
+---
+---Chatterino mainly interacts with the provider via the callbacks.
+---
+---**General Notes**
+---
+---Channels must have a unique name per provider. Chatterino will deduplicate channels based on the name.
+---They are saved with {plugin, provider, name, arguments}.
+---`arguments` are the user provided inputs passed as a table to `get_name` and wrapped behind the `arguments` key to `create`.
+---Each `id` has a corresponding field.
+---
+---When the user requests to create a channel the following happens:
+---1. `get_name` is called with the user-provided arguments.
+---2. If a channel with this combination of {plugin, provider, name} exists. Use that.
+---3. A new channel is created. `create` is called with this channel.
+---
+---The first step is skipped if the channel is loaded from a save, as the channel name is already known.
+---
+---When a plugin unloads or when Chatterino starts, all created channels are orphaned.
+---Once the owning plugin calls `c2.register_channel_provider`, previously orphaned channels are adopted by calling `create`.
+---Note that before this, no plugin owns the orphaned channels.
+---
+---@class ChannelProviderInit
+---@field id string A per-plugin unique ID for this provider.
+---@field display_name string A name for this provider shown to users.
+---@field description? string Description for what this provider does.
+---@field arguments ChannelProviderArgumentSpec[] A list of arguments users must provide to create this channel. These are used to create a UI for users.
+---@field callbacks ChannelProviderCallbacks
+
+--- Register a channel provider. Channel providers are unique per plugin (through their ID).
+---
+---@param init ChannelProviderInit Table with arguments to create the provider. See type for more info.
+function c2.register_channel_provider(init) end
+-- End src/controllers/plugins/api/ChannelProviders.hpp
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
@@ -303,8 +370,6 @@ function c2.Channel.by_twitch_id(id) end
 
 -- Begin src/controllers/plugins/api/ConnectionHandle.hpp
 
-
-
 ---@class c2.ConnectionHandle
 ---This type represents a handle to a registration of a callback for an event handler.
 ---Conceptually, the event has a _connection_ to the callback/handler.
@@ -417,8 +482,6 @@ function c2.HTTPRequest.create(method, url) end
 
 -- Begin src/controllers/plugins/api/Images.hpp
 
-
-
 ---@class c2.Image
 ---@field url string The url of this image.
 ---@field is_loaded boolean Is this image currently loaded in RAM?
@@ -463,8 +526,6 @@ function c2.ImageSet.new(image1, image2, image3) end
 -- End src/controllers/plugins/api/Images.hpp
 
 -- Begin src/controllers/plugins/api/Message.hpp
-
-
 
 ---@class c2.MessageElementBase
 ---@field flags c2.MessageElementFlag The element's flags
@@ -674,34 +735,34 @@ function c2.Message.new(init) end
 ---@alias c2.Link { type: c2.LinkType, value: string } A link on a message element.
 ---@enum c2.LinkType
 c2.LinkType = {
-    Url = {}, ---@type c2.LinkType.Url
-    UserInfo = {}, ---@type c2.LinkType.UserInfo
-    UserAction = {}, ---@type c2.LinkType.UserAction
-    JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
-    CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
-    JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
-    InsertText = {}, ---@type c2.LinkType.InsertText
+	Url = {}, ---@type c2.LinkType.Url
+	UserInfo = {}, ---@type c2.LinkType.UserInfo
+	UserAction = {}, ---@type c2.LinkType.UserAction
+	JumpToChannel = {}, ---@type c2.LinkType.JumpToChannel
+	CopyToClipboard = {}, ---@type c2.LinkType.CopyToClipboard
+	JumpToMessage = {}, ---@type c2.LinkType.JumpToMessage
+	InsertText = {}, ---@type c2.LinkType.InsertText
 }
 
 -- Begin src/singletons/Fonts.hpp
 
 ---@enum c2.FontStyle
 c2.FontStyle = {
-    Tiny = {}, ---@type c2.FontStyle.Tiny
-    ChatSmall = {}, ---@type c2.FontStyle.ChatSmall
-    ChatMediumSmall = {}, ---@type c2.FontStyle.ChatMediumSmall
-    ChatMedium = {}, ---@type c2.FontStyle.ChatMedium
-    ChatMediumBold = {}, ---@type c2.FontStyle.ChatMediumBold
-    ChatMediumItalic = {}, ---@type c2.FontStyle.ChatMediumItalic
-    ChatLarge = {}, ---@type c2.FontStyle.ChatLarge
-    ChatVeryLarge = {}, ---@type c2.FontStyle.ChatVeryLarge
-    TimestampMedium = {}, ---@type c2.FontStyle.TimestampMedium
-    UiMedium = {}, ---@type c2.FontStyle.UiMedium
-    UiMediumBold = {}, ---@type c2.FontStyle.UiMediumBold
-    UiTabs = {}, ---@type c2.FontStyle.UiTabs
-    EndType = {}, ---@type c2.FontStyle.EndType
-    ChatStart = {}, ---@type c2.FontStyle.ChatStart
-    ChatEnd = {}, ---@type c2.FontStyle.ChatEnd
+	Tiny = {}, ---@type c2.FontStyle.Tiny
+	ChatSmall = {}, ---@type c2.FontStyle.ChatSmall
+	ChatMediumSmall = {}, ---@type c2.FontStyle.ChatMediumSmall
+	ChatMedium = {}, ---@type c2.FontStyle.ChatMedium
+	ChatMediumBold = {}, ---@type c2.FontStyle.ChatMediumBold
+	ChatMediumItalic = {}, ---@type c2.FontStyle.ChatMediumItalic
+	ChatLarge = {}, ---@type c2.FontStyle.ChatLarge
+	ChatVeryLarge = {}, ---@type c2.FontStyle.ChatVeryLarge
+	TimestampMedium = {}, ---@type c2.FontStyle.TimestampMedium
+	UiMedium = {}, ---@type c2.FontStyle.UiMedium
+	UiMediumBold = {}, ---@type c2.FontStyle.UiMediumBold
+	UiTabs = {}, ---@type c2.FontStyle.UiTabs
+	EndType = {}, ---@type c2.FontStyle.EndType
+	ChatStart = {}, ---@type c2.FontStyle.ChatStart
+	ChatEnd = {}, ---@type c2.FontStyle.ChatEnd
 }
 
 -- End src/singletons/Fonts.hpp
@@ -710,42 +771,42 @@ c2.FontStyle = {
 
 ---@enum c2.MessageElementFlag
 c2.MessageElementFlag = {
-    None = 0,
-    Misc = 0,
-    Text = 0,
-    Username = 0,
-    Timestamp = 0,
-    EmoteImage = 0,
-    EmoteText = 0,
-    Emote = 0,
-    ChannelPointReward = 0,
-    ChannelPointRewardImage = 0,
-    BitsStatic = 0,
-    BitsAnimated = 0,
-    BadgeSharedChannel = 0,
-    BadgeGlobalAuthority = 0,
-    BadgePredictions = 0,
-    BadgeChannelAuthority = 0,
-    BadgeSubscription = 0,
-    BadgeVanity = 0,
-    BadgeChatterino = 0,
-    BadgeSevenTV = 0,
-    BadgeBttv = 0,
-    BadgeFfz = 0,
-    Badges = 0,
-    ChannelName = 0,
-    BitsAmount = 0,
-    ModeratorTools = 0,
-    EmojiImage = 0,
-    EmojiText = 0,
-    EmojiAll = 0,
-    AlwaysShow = 0,
-    Collapsed = 0,
-    Mention = 0,
-    LowercaseLinks = 0,
-    RepliedMessage = 0,
-    ReplyButton = 0,
-    Default = 0,
+	None = 0,
+	Misc = 0,
+	Text = 0,
+	Username = 0,
+	Timestamp = 0,
+	EmoteImage = 0,
+	EmoteText = 0,
+	Emote = 0,
+	ChannelPointReward = 0,
+	ChannelPointRewardImage = 0,
+	BitsStatic = 0,
+	BitsAnimated = 0,
+	BadgeSharedChannel = 0,
+	BadgeGlobalAuthority = 0,
+	BadgePredictions = 0,
+	BadgeChannelAuthority = 0,
+	BadgeSubscription = 0,
+	BadgeVanity = 0,
+	BadgeChatterino = 0,
+	BadgeSevenTV = 0,
+	BadgeBttv = 0,
+	BadgeFfz = 0,
+	Badges = 0,
+	ChannelName = 0,
+	BitsAmount = 0,
+	ModeratorTools = 0,
+	EmojiImage = 0,
+	EmojiText = 0,
+	EmojiAll = 0,
+	AlwaysShow = 0,
+	Collapsed = 0,
+	Mention = 0,
+	LowercaseLinks = 0,
+	RepliedMessage = 0,
+	ReplyButton = 0,
+	Default = 0,
 }
 
 -- End src/messages/MessageElement.hpp
@@ -754,51 +815,51 @@ c2.MessageElementFlag = {
 
 ---@enum c2.MessageFlag
 c2.MessageFlag = {
-    None = 0,
-    System = 0,
-    Timeout = 0,
-    Highlighted = 0,
-    DoNotTriggerNotification = 0,
-    Centered = 0,
-    Disabled = 0,
-    DisableCompactEmotes = 0,
-    Collapsed = 0,
-    ConnectedMessage = 0,
-    DisconnectedMessage = 0,
-    Untimeout = 0,
-    PubSub = 0,
-    Subscription = 0,
-    DoNotLog = 0,
-    AutoMod = 0,
-    RecentMessage = 0,
-    Whisper = 0,
-    HighlightedWhisper = 0,
-    Debug = 0,
-    Similar = 0,
-    RedeemedHighlight = 0,
-    RedeemedChannelPointReward = 0,
-    ShowInMentions = 0,
-    FirstMessage = 0,
-    ReplyMessage = 0,
-    ElevatedMessage = 0,
-    SubscribedThread = 0,
-    CheerMessage = 0,
-    LiveUpdatesAdd = 0,
-    LiveUpdatesRemove = 0,
-    LiveUpdatesUpdate = 0,
-    AutoModOffendingMessageHeader = 0,
-    AutoModOffendingMessage = 0,
-    LowTrustUsers = 0,
-    RestrictedMessage = 0,
-    MonitoredMessage = 0,
-    Action = 0,
-    SharedMessage = 0,
-    AutoModBlockedTerm = 0,
-    ClearChat = 0,
-    EventSub = 0,
-    ModerationAction = 0,
-    InvalidReplyTarget = 0,
-    WatchStreak = 0,
+	None = 0,
+	System = 0,
+	Timeout = 0,
+	Highlighted = 0,
+	DoNotTriggerNotification = 0,
+	Centered = 0,
+	Disabled = 0,
+	DisableCompactEmotes = 0,
+	Collapsed = 0,
+	ConnectedMessage = 0,
+	DisconnectedMessage = 0,
+	Untimeout = 0,
+	PubSub = 0,
+	Subscription = 0,
+	DoNotLog = 0,
+	AutoMod = 0,
+	RecentMessage = 0,
+	Whisper = 0,
+	HighlightedWhisper = 0,
+	Debug = 0,
+	Similar = 0,
+	RedeemedHighlight = 0,
+	RedeemedChannelPointReward = 0,
+	ShowInMentions = 0,
+	FirstMessage = 0,
+	ReplyMessage = 0,
+	ElevatedMessage = 0,
+	SubscribedThread = 0,
+	CheerMessage = 0,
+	LiveUpdatesAdd = 0,
+	LiveUpdatesRemove = 0,
+	LiveUpdatesUpdate = 0,
+	AutoModOffendingMessageHeader = 0,
+	AutoModOffendingMessage = 0,
+	LowTrustUsers = 0,
+	RestrictedMessage = 0,
+	MonitoredMessage = 0,
+	Action = 0,
+	SharedMessage = 0,
+	AutoModBlockedTerm = 0,
+	ClearChat = 0,
+	EventSub = 0,
+	ModerationAction = 0,
+	InvalidReplyTarget = 0,
+	WatchStreak = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
@@ -807,8 +868,8 @@ c2.MessageFlag = {
 
 ---@enum c2.MessageContext
 c2.MessageContext = {
-    Original = {}, ---@type c2.MessageContext.Original
-    Repost = {}, ---@type c2.MessageContext.Repost
+	Original = {}, ---@type c2.MessageContext.Original
+	Repost = {}, ---@type c2.MessageContext.Repost
 }
 
 -- End src/common/enums/MessageContext.hpp
@@ -855,10 +916,10 @@ function c2.WebSocket:send_binary(data) end
 
 ---@enum c2.SplitContainerNodeType
 c2.SplitContainerNodeType = {
-    EmptyRoot = {}, ---@type c2.SplitContainerNodeType.EmptyRoot
-    Split = {}, ---@type c2.SplitContainerNodeType.Split
-    VerticalContainer = {}, ---@type c2.SplitContainerNodeType.VerticalContainer
-    HorizontalContainer = {}, ---@type c2.SplitContainerNodeType.HorizontalContainer
+	EmptyRoot = {}, ---@type c2.SplitContainerNodeType.EmptyRoot
+	Split = {}, ---@type c2.SplitContainerNodeType.Split
+	VerticalContainer = {}, ---@type c2.SplitContainerNodeType.VerticalContainer
+	HorizontalContainer = {}, ---@type c2.SplitContainerNodeType.HorizontalContainer
 }
 
 -- End src/widgets/splits/SplitContainer.hpp
@@ -867,14 +928,12 @@ c2.SplitContainerNodeType = {
 
 ---@enum c2.WindowType
 c2.WindowType = {
-    Main = {}, ---@type c2.WindowType.Main
-    Popup = {}, ---@type c2.WindowType.Popup
-    Attached = {}, ---@type c2.WindowType.Attached
+	Main = {}, ---@type c2.WindowType.Main
+	Popup = {}, ---@type c2.WindowType.Popup
+	Attached = {}, ---@type c2.WindowType.Attached
 }
 
 -- End src/widgets/Window.hpp
-
-
 
 ---@class c2.Split
 ---@field channel c2.Channel The channel open in this split (might be empty)
@@ -937,11 +996,11 @@ c2.windows = ...
 
 ---@enum c2.HTTPMethod
 c2.HTTPMethod = {
-    Get = {}, ---@type c2.HTTPMethod.Get
-    Post = {}, ---@type c2.HTTPMethod.Post
-    Put = {}, ---@type c2.HTTPMethod.Put
-    Delete = {}, ---@type c2.HTTPMethod.Delete
-    Patch = {}, ---@type c2.HTTPMethod.Patch
+	Get = {}, ---@type c2.HTTPMethod.Get
+	Post = {}, ---@type c2.HTTPMethod.Post
+	Put = {}, ---@type c2.HTTPMethod.Put
+	Delete = {}, ---@type c2.HTTPMethod.Delete
+	Patch = {}, ---@type c2.HTTPMethod.Patch
 }
 
 -- End src/common/network/NetworkCommon.hpp
@@ -970,4 +1029,3 @@ function c2.log(level, ...) end
 ---@param callback fun() The callback that will be called.
 ---@param msec number How long to wait.
 function c2.later(callback, msec) end
-

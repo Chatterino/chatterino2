@@ -234,6 +234,176 @@ int sol_lua_push(sol::types<QSizeF>, lua_State *L, const QSizeF &value)
     return sol::stack::push(L, tbl);
 }
 
+// QJsonObject
+bool sol_lua_check(sol::types<QJsonObject>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, handler, tracking);
+}
+
+QJsonObject sol_lua_get(sol::types<QJsonObject>, lua_State *L, int index,
+                        sol::stack::record &tracking)
+{
+    QJsonObject ret;
+    auto tbl = sol::stack::get<sol::table>(L, index, tracking);
+    for (const auto &[key, val] : tbl)
+    {
+        auto keyStr = key.as<std::optional<QString>>();
+        if (!keyStr)
+        {
+            continue;  // Ignore the array part.
+        }
+        auto pp = sol::stack::push_pop(val);
+        ret.insert(*keyStr,
+                   sol::stack::get<QJsonValue>(L, pp.m_index, tracking));
+    }
+    return ret;
+}
+
+int sol_lua_push(sol::types<QJsonObject>, lua_State *L,
+                 const QJsonObject &value)
+{
+    auto tbl =
+        sol::state_view(L).create_table(0, static_cast<int>(value.size()));
+    for (auto it = value.constBegin(); it != value.constEnd(); ++it)
+    {
+        auto key = it.key();
+        if (key.startsWith(u"__"))
+        {
+            // Ignore anything that looks like a special key.
+            continue;
+        }
+        tbl.raw_set(key, QJsonValue(it.value()));
+    }
+    return sol::stack::push(L, tbl);
+}
+
+// QJsonArray
+bool sol_lua_check(sol::types<QJsonArray>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<sol::table>(L, index, handler, tracking);
+}
+
+QJsonArray sol_lua_get(sol::types<QJsonArray>, lua_State *L, int index,
+                       sol::stack::record &tracking)
+{
+    QJsonArray ret;
+    auto tbl = sol::stack::get<sol::table>(L, index, tracking);
+    for (size_t i = 0, size = tbl.size(); i <= size; ++i)
+    {
+        auto val = tbl[i].tbl;
+        auto pp = sol::stack::push_pop(val);
+        ret.append(sol::stack::get<QJsonValue>(L, pp.m_index, tracking));
+    }
+    return ret;
+}
+
+int sol_lua_push(sol::types<QJsonArray>, lua_State *L, const QJsonArray &value)
+{
+    auto tbl =
+        sol::state_view(L).create_table(static_cast<int>(value.size()), 0);
+    int i = 1;
+    for (const auto item : value)
+    {
+        tbl.set(i, QJsonValue(item));
+        ++i;
+    }
+    return sol::stack::push(L, tbl);
+}
+
+// QJsonValue
+bool sol_lua_check(sol::types<QJsonValue>, lua_State *L, int index,
+                   chatterino::FunctionRef<sol::check_handler_type> /*handler*/,
+                   sol::stack::record & /*tracking*/)
+{
+    switch (sol::stack_reference(L, index).get_type())
+    {
+        case sol::type::lua_nil:
+        case sol::type::string:
+        case sol::type::number:
+        case sol::type::boolean:
+        case sol::type::table:
+            return true;
+
+        case sol::type::lightuserdata:
+            return lua_touserdata(L, index) == nullptr;
+
+        case sol::type::none:
+        case sol::type::thread:
+        case sol::type::function:
+        case sol::type::userdata:
+        case sol::type::poly:
+            return false;
+    }
+    return false;
+}
+
+QJsonValue sol_lua_get(sol::types<QJsonValue>, lua_State *L, int index,
+                       sol::stack::record &tracking)
+{
+    switch (sol::stack_reference(L, index).get_type())
+    {
+        case sol::type::lua_nil:
+            return {QJsonValue::Null};
+        case sol::type::string:
+            return sol::stack::get<QString>(L, index);
+        case sol::type::number: {
+            if (lua_isinteger(L, index) != 0)
+            {
+                return sol::stack::get<long long>(L, index, tracking);
+            }
+            return sol::stack::get<double>(L, index);
+        }
+
+        case sol::type::lightuserdata: {
+            auto *ptr = lua_touserdata(L, index);
+            if (!ptr)
+            {
+                return {QJsonValue::Null};  // JSON.null
+            }
+            return {QJsonValue::Undefined};
+        }
+        case sol::type::boolean:
+            return sol::stack::get<bool>(L, index);
+        case sol::type::table:
+            // FIXME: Check if this is an array or object. For now we don't use nested objects.
+            return sol::stack::get<QJsonObject>(L, index);
+
+        case sol::type::none:
+        case sol::type::thread:
+        case sol::type::function:
+        case sol::type::userdata:
+        case sol::type::poly:
+            return {QJsonValue::Undefined};
+    }
+    return {QJsonValue::Undefined};
+}
+
+int sol_lua_push(sol::types<QJsonValue>, lua_State *L, const QJsonValue &value)
+{
+    switch (value.type())
+    {
+        case QJsonValue::Null:
+            return sol::stack::push(L, sol::nil);
+        case QJsonValue::Bool:
+            return sol::stack::push(L, value.toBool());
+        case QJsonValue::Double:
+            return sol::stack::push(L, value.toDouble());
+        case QJsonValue::String:
+            return sol::stack::push(L, value.toString());
+        case QJsonValue::Array:
+            return sol::stack::push(L, value.toArray());
+        case QJsonValue::Object:
+            return sol::stack::push(L, value.toObject());
+        case QJsonValue::Undefined:
+            return sol::stack::push(L, sol::nil);
+    }
+    return sol::stack::push(L, sol::nil);
+}
+
 namespace chatterino::lua {
 
 // ThisPluginState

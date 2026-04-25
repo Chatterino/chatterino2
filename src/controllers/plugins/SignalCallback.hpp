@@ -9,11 +9,15 @@
 namespace chatterino::lua {
 
 struct SignalCallback {
+    SignalCallback() = default;
     SignalCallback(PluginWeakRef pluginRef, sol::main_protected_function pfn)
         : pluginRef(std::move(pluginRef))
         , pfn(std::move(pfn))
     {
-        assert(this->pfn.valid());
+        if (!this->pfn.valid())
+        {
+            this->reset();
+        }
     }
 
     SignalCallback(const SignalCallback &other) = default;
@@ -53,17 +57,73 @@ struct SignalCallback {
         }
     }
 
+    PluginWeakRef owner() const
+    {
+        return this->pluginRef;
+    }
+
+    bool isAlive() const
+    {
+        return this->pluginRef.isAlive();
+    }
+
+    void reset()
+    {
+        if (this->pluginRef.isAlive())
+        {
+            this->pfn = {};
+        }
+        else
+        {
+            this->pfn.abandon();
+        }
+        this->pluginRef = {};
+    }
+
     void operator()(auto &&...args) const
+    {
+        assert(this->pluginRef.isAlive() && "faulty signal handling");
+        this->tryCall<void>(u"SignalCallback::operator()",
+                            std::forward<decltype(args)>(args)...);
+    }
+
+    template <typename Ret>
+    std::optional<Ret> tryCall(QStringView context, auto &&...args) const
+    {
+        assertInGuiThread();
+        auto strong = this->pluginRef.strong();
+        std::optional<Ret> ret;
+        if (!strong)
+        {
+            return ret;
+        }
+
+        auto callResult =
+            lua::tryCall<Ret>(this->pfn, std::forward<decltype(args)>(args)...);
+        hasValueOrLog(callResult, context, strong.plugin());
+        if (callResult)
+        {
+            ret.emplace(*std::move(callResult));
+        }
+        return ret;
+    }
+
+    template <typename Ret>
+    bool tryCall(QStringView context, auto &&...args) const
+        requires std::is_void_v<Ret>
     {
         assertInGuiThread();
         auto strong = this->pluginRef.strong();
         if (!strong)
         {
-            assert(false && "faulty signal handling");
-            return;
+            return false;
         }
-        loggedVoidCall(this->pfn, u"SignalCallback::operator()",
-                       strong.plugin(), std::forward<decltype(args)>(args)...);
+
+        auto callResult =
+            lua::tryCall<Ret>(this->pfn, std::forward<decltype(args)>(args)...);
+        hasValueOrLog(callResult, context, strong.plugin());
+
+        return callResult.has_value();
     }
 
 private:

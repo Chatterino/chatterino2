@@ -53,6 +53,13 @@ struct SplitDescriptor {
 
     QList<QUuid> filters_;
 
+    /// \defgroup Custom channel providers
+    /// \{
+    QString pluginID;
+    QString providerID;
+    QJsonObject arguments;
+    /// \}
+
     static SplitDescriptor loadFromJSON(const QJsonObject &root);
 
     static SplitDescriptor fromSplit(const Split &split);
