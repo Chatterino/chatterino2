@@ -147,17 +147,18 @@ enum class HelixCancelRaidError : std::uint8_t {  // /unraid
     Forwarded,
 };  // /unraid
 
-enum class HelixUpdateChatSettingsError : std::uint8_t {  // update chat settings
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    Forbidden,
-    OutOfRange,
+enum class HelixUpdateChatSettingsError : std::
+    uint8_t {  // update chat settings
+        Unknown,
+        UserMissingScope,
+        UserNotAuthorized,
+        Ratelimited,
+        Forbidden,
+        OutOfRange,
 
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // update chat settings
+        // The error message is forwarded directly from the Twitch API
+        Forwarded,
+    };  // update chat settings
 
 /// Error type for Helix::updateChannel
 ///
