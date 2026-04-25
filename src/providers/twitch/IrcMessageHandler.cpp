@@ -1135,7 +1135,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     MessageParseArgs args;
     if (isSub)
     {
-        args.isSubscriptionMessage = msgType != "announcement";
+        args.isSubscriptionMessage =
+            msgType != "announcement" && msgType != "viewermilestone";
         args.trimSubscriberUsername = true;
     }
 
@@ -1271,11 +1272,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             else
             {
                 msg->flags.set(MessageFlag::Subscription);
-            }
-
-            if (tags.value("msg-id") != "announcement")
-            {
-                // We want announcements to be able to show up in mentions
                 msg->flags.unset(MessageFlag::Highlighted);
             }
         }
