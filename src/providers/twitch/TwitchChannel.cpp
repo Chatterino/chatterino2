@@ -86,7 +86,7 @@ bool isUnknownCommand(const QString &text)
 using detail::isUnknownCommand;
 
 namespace {
-const QString MAGIC_MESSAGE_SUFFIX = u" \u034f"_s;
+constexpr uint64_t MAX_VARIANT_COUNT = 8;
 constexpr int CLIP_CREATION_COOLDOWN = 5000;
 const QString CLIPS_LINK("https://clips.twitch.tv/%1");
 const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
@@ -765,6 +765,51 @@ void TwitchChannel::roomIdChanged()
         std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
 }
 
+QString TwitchChannel::getNextVariant(const QString &message) const
+{
+    using namespace helpers::duplicate_message;
+
+    QVector<int> spacePositions = getSpacePositions(message);
+    uint64_t numSpaces = spacePositions.size();
+    uint64_t fullCycle = 3 * (1ULL << numSpaces);
+
+    // limit number of variants to MAX_VARIANT_COUNT
+    uint64_t cappedCycle = std::min(fullCycle, MAX_VARIANT_COUNT);
+    if (this->variantIndex_ >= cappedCycle)
+    {
+        this->variantIndex_ = 0;
+        this->currentMask_ = 0ULL;
+    }
+
+    if (numSpaces == 0)
+    {
+        // message has no spaces, just cycle through magic char variants
+        this->currentMagic_ = this->variantIndex_ % 3;
+        this->variantIndex_++;
+        return buildVariant(message, spacePositions, 0, this->currentMagic_);
+    }
+
+    if (this->currentMask_ == 0)
+    {
+        // cycle has reset
+        this->currentMask_ = 1ULL;
+        this->variantIndex_ = 1;
+        // first variant is the original message
+        return message;
+    }
+
+    uint64_t spaceMask = this->currentMask_ & ((1ULL << numSpaces) - 1);
+    uint64_t magicGroup = (this->currentMask_ >> numSpaces) & 3;
+
+    QString result =
+        buildVariant(message, spacePositions, spaceMask, magicGroup);
+
+    this->currentMask_ = getNextMask(this->currentMask_, numSpaces);
+    this->variantIndex_++;
+
+    return result;
+}
+
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto *app = getApp();
@@ -778,35 +823,26 @@ QString TwitchChannel::prepareMessage(const QString &message) const
         return "";
     }
 
-    if (!this->hasHighRateLimit())
+    if (!this->hasHighRateLimit() && getSettings()->allowDuplicateMessages)
     {
-        if (getSettings()->allowDuplicateMessages)
-        {
-            if (parsedMessage == this->lastSentMessage_)
-            {
-                auto spaceIndex = parsedMessage.indexOf(' ');
-                // If the message starts with either '/' or '.' Twitch will treat it as a command, omitting
-                // first space and only rest of the arguments treated as actual message content
-                // In cases when user sends a message like ". .a b" first character and first space are omitted as well
-                bool ignoreFirstSpace =
-                    parsedMessage.at(0) == '/' || parsedMessage.at(0) == '.';
-                if (ignoreFirstSpace)
-                {
-                    spaceIndex = parsedMessage.indexOf(' ', spaceIndex + 1);
-                }
+        using namespace helpers::duplicate_message;
+        // Normalize messages for comparison by removing magic suffix and simplifying
+        // necessary because this->sendMessage() sets this->lastSentMessage_
+        // to the last non-normalized variant we generated, which won't match the user's input
+        QString normalizedParsedMessage = normalizeMessage(parsedMessage);
+        QString normalizedLastSentMessage =
+            normalizeMessage(this->lastSentMessage_);
 
-                if (spaceIndex == -1)
-                {
-                    // no spaces found, fall back to old magic character
-                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
-                }
-                else
-                {
-                    // replace the space we found in spaceIndex with two spaces
-                    parsedMessage.replace(spaceIndex, 1, "  ");
-                }
-            }
+        if (normalizedParsedMessage == normalizedLastSentMessage)
+        {
+            return this->getNextVariant(parsedMessage);
         }
+
+        // Message changed, reset
+        // next round starts with the second variant because the first variant
+        // is the original and will have already been sent
+        this->currentMask_ = 1ULL;
+        this->variantIndex_ = 1;
     }
 
     return parsedMessage;
