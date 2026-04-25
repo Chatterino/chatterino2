@@ -112,7 +112,6 @@ enum class HelixRemoveChannelVIPError : std::uint8_t {
     Forwarded,
 };
 
-// These changes are from the helix-command-migration/unban-untimeout branch
 enum class HelixUnbanUserError : std::uint8_t {
     Unknown,
     UserMissingScope,
@@ -123,9 +122,9 @@ enum class HelixUnbanUserError : std::uint8_t {
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // These changes are from the helix-command-migration/unban-untimeout branch
+};
 
-enum class HelixStartRaidError : std::uint8_t {  // /raid
+enum class HelixStartRaidError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -134,9 +133,9 @@ enum class HelixStartRaidError : std::uint8_t {  // /raid
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /raid
+};
 
-enum class HelixCancelRaidError : std::uint8_t {  // /unraid
+enum class HelixCancelRaidError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -145,20 +144,19 @@ enum class HelixCancelRaidError : std::uint8_t {  // /unraid
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /unraid
+};
 
-enum class HelixUpdateChatSettingsError : std::
-    uint8_t {  // update chat settings
-        Unknown,
-        UserMissingScope,
-        UserNotAuthorized,
-        Ratelimited,
-        Forbidden,
-        OutOfRange,
+enum class HelixUpdateChatSettingsError : std::uint8_t {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    Forbidden,
+    OutOfRange,
 
-        // The error message is forwarded directly from the Twitch API
-        Forwarded,
-    };  // update chat settings
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
 
 /// Error type for Helix::updateChannel
 ///
@@ -173,7 +171,7 @@ enum class HelixUpdateChannelError : std::uint8_t {
     Forwarded,
 };
 
-enum class HelixBanUserError : std::uint8_t {  // /timeout, /ban
+enum class HelixBanUserError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -184,9 +182,9 @@ enum class HelixBanUserError : std::uint8_t {  // /timeout, /ban
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /timeout, /ban
+};
 
-enum class HelixWarnUserError : std::uint8_t {  // /warn
+enum class HelixWarnUserError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -196,9 +194,9 @@ enum class HelixWarnUserError : std::uint8_t {  // /warn
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /warn
+};
 
-enum class HelixWhisperError : std::uint8_t {  // /w
+enum class HelixWhisperError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -209,7 +207,7 @@ enum class HelixWhisperError : std::uint8_t {  // /w
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /w
+};
 
 enum class HelixGetChattersError : std::uint8_t {
     Unknown,
@@ -229,7 +227,7 @@ enum class HelixGetModeratorsError : std::uint8_t {
     Forwarded,
 };
 
-enum class HelixListVIPsError : std::uint8_t {  // /vips
+enum class HelixListVIPsError : std::uint8_t {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -238,7 +236,7 @@ enum class HelixListVIPsError : std::uint8_t {  // /vips
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /vips
+};
 
 enum class HelixSendShoutoutError : std::uint8_t {
     Unknown,
