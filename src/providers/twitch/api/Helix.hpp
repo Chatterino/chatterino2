@@ -6,6 +6,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "providers/twitch/api/HelixEnums.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/Helpers.hpp"
@@ -110,7 +111,7 @@ struct HelixStream {
         , thumbnailUrl(jsonObject.value("thumbnail_url").toString())
     {
         const auto jsonTags = jsonObject.value("tags").toArray();
-        for (const auto &tag : jsonTags)
+        for (const auto tag : jsonTags)
         {
             this->tags.push_back(tag.toString());
         }
@@ -251,7 +252,7 @@ struct HelixCheermoteSet {
         : prefix(jsonObject.value("prefix").toString())
         , type(jsonObject.value("type").toString())
     {
-        for (const auto &tier : jsonObject.value("tiers").toArray())
+        for (const auto tier : jsonObject.value("tiers").toArray())
         {
             this->tiers.emplace_back(tier.toObject());
         }
@@ -359,7 +360,7 @@ struct HelixModerators {
                      .toString())
     {
         const auto &data = jsonObject.value("data").toArray();
-        for (const auto &mod : data)
+        for (const auto mod : data)
         {
             HelixModerator moderator(mod.toObject());
 
@@ -395,7 +396,7 @@ struct HelixBadgeSet {
         : setID(json.value("set_id").toString())
     {
         const auto jsonVersions = json.value("versions").toArray();
-        for (const auto &version : jsonVersions)
+        for (const auto version : jsonVersions)
         {
             this->versions.emplace_back(version.toObject());
         }
@@ -408,7 +409,7 @@ struct HelixGlobalBadges {
     explicit HelixGlobalBadges(const QJsonObject &jsonObject)
     {
         const auto &data = jsonObject.value("data").toArray();
-        for (const auto &set : data)
+        for (const auto set : data)
         {
             this->badgeSets.emplace_back(set.toObject());
         }
@@ -494,7 +495,7 @@ struct HelixPoll {
     {
         const auto &data = jsonObject.value("choices").toArray();
         this->choices.reserve(data.size());
-        for (const auto &c : data)
+        for (const auto c : data)
         {
             HelixPollChoice choice(c.toObject());
             this->choices.push_back(choice);
@@ -511,7 +512,7 @@ struct HelixPolls {
     {
         const auto &data = jsonObject.value("data").toArray();
         this->polls.reserve(data.size());
-        for (const auto &p : data)
+        for (const auto p : data)
         {
             HelixPoll poll(p.toObject());
             this->polls.push_back(poll);
@@ -549,7 +550,7 @@ struct HelixPrediction {
     {
         const auto &data = jsonObject.value("outcomes").toArray();
         this->outcomes.reserve(data.size());
-        for (const auto &o : data)
+        for (const auto o : data)
         {
             HelixPredictionOutcome outcome(o.toObject());
             this->outcomes.push_back(outcome);
@@ -566,22 +567,12 @@ struct HelixPredictions {
     {
         const auto &data = jsonObject.value("data").toArray();
         this->predictions.reserve(data.size());
-        for (const auto &p : data)
+        for (const auto p : data)
         {
             HelixPrediction prediction(p.toObject());
             this->predictions.push_back(prediction);
         }
     }
-};
-
-enum class HelixAnnouncementColor {
-    Blue,
-    Green,
-    Orange,
-    Purple,
-
-    // this is the executor's chat color
-    Primary,
 };
 
 enum class HelixClipError {

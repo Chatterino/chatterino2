@@ -30,6 +30,7 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -52,6 +53,7 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "ritual",           // new viewer ritual
     "announcement",     // new mod announcement thing
     "viewermilestone",  // watch streak, but other categories possible in future
+    "socialsharingbadge",  // social media badge from sharing clips
 };
 
 const QString ANONYMOUS_GIFTER_ID = "274598607";
@@ -881,6 +883,13 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 }
             }
         }
+        else if (msgType == "socialsharingbadge")
+        {
+            int level = tags.value("msg-param-current-badge-level").toInt();
+            messageText = QString("%1 earned a Level %2 Social Media Badge!")
+                              .arg(tags.value("display-name").toString(),
+                                   QString::number(level));
+        }
 
         auto displayName = [&] {
             if (msgType == u"raid")
@@ -913,6 +922,18 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         if (msgType == "viewermilestone")
         {
             msg->flags.set(MessageFlag::WatchStreak);
+        }
+        else if (msgType == "announcement")
+        {
+            msg->flags.set(MessageFlag::Announcement);
+
+            if (auto cit = tags.find("msg-param-color"); cit != tags.end())
+            {
+                msg->announcementColor =
+                    qmagicenum::enumCast<HelixAnnouncementColor>(
+                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                        .value_or(HelixAnnouncementColor::Primary);
+            }
         }
         else
         {
@@ -1114,7 +1135,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     MessageParseArgs args;
     if (isSub)
     {
-        args.isSubscriptionMessage = true;
+        args.isSubscriptionMessage = msgType != "announcement";
         args.trimSubscriberUsername = true;
     }
 
@@ -1235,6 +1256,18 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             {
                 msg->flags.set(MessageFlag::WatchStreak);
             }
+            else if (msgType == "announcement")
+            {
+                msg->flags.set(MessageFlag::Announcement);
+
+                if (auto cit = tags.find("msg-param-color"); cit != tags.end())
+                {
+                    msg->announcementColor =
+                        qmagicenum::enumCast<HelixAnnouncementColor>(
+                            cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                            .value_or(HelixAnnouncementColor::Primary);
+                }
+            }
             else
             {
                 msg->flags.set(MessageFlag::Subscription);
@@ -1242,8 +1275,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
             if (tags.value("msg-id") != "announcement")
             {
-                // Announcements are currently tagged as subscriptions,
-                // but we want them to be able to show up in mentions
+                // We want announcements to be able to show up in mentions
                 msg->flags.unset(MessageFlag::Highlighted);
             }
         }

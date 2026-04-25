@@ -140,7 +140,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
     stream.noquote();
     stream << "[" + this->id + ":" + this->meta.name + "]";
     QString fullMessage;
-    for (const auto &arg : args)
+    for (const auto arg : args)
     {
         auto s = lua::toString(L, arg.stack_index());
         stream << s;

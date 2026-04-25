@@ -40,6 +40,8 @@ public:
         ThreadMessageRow = 6,
         AutomodRow = 7,
         WatchStreakRow = 8,
+        AnnouncementRow = 9,
+        ColoredAnnouncementRow = 10,
     };
 
     enum UserHighlightRowIndexes {

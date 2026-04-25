@@ -1,11 +1,11 @@
 {
-    "input": "@badge-info=;badges=staff/1,raging-wolf-helm/1;color=#DAA520;display-name=lahoooo;emotes=;flags=;id=01cd601f-bc3f-49d5-ab4b-136fa9d6ec22;login=lahoooo;mod=0;msg-id=sharedchatnotice;msg-param-color=PRIMARY;room-id=11148817;source-badge-info=;source-badges=staff/1,moderator/1,bits-leader/1;source-id=4083dadc-9f20-40f9-ba92-949ebf6bc294;source-msg-id=announcement;source-room-id=1025594235;subscriber=0;system-msg=;tmi-sent-ts=1726118378465;user-id=612865661;user-type=staff;vip=0 :tmi.twitch.tv USERNOTICE #pajlada :hi this is an announcement from 1",
+    "input": "@tmi-sent-ts=1776510932382;subscriber=1;id=f00fe0c7-9e03-44a8-bf8e-b3e8eb6d4971;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/124;color=#CC44FF;flags=;user-type=;emotes=;system-msg=;msg-id=announcement;msg-param-color=PURPLE :tmi.twitch.tv USERNOTICE #pajlada :purple announcement",
     "output": [
         {
-            "announcementColor": "Primary",
+            "announcementColor": "Purple",
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "lahoooo",
+            "displayName": "pajlada",
             "elements": [
                 {
                     "color": "System",
@@ -35,7 +35,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "5:19"
+                            "11:15"
                         ]
                     },
                     "flags": "Timestamp",
@@ -44,112 +44,82 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "05:19:38",
+                    "time": "11:15:32",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
                 },
                 {
-                    "flags": "ModeratorTools",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TwitchModerationElement"
-                },
-                {
-                    "emote": {
-                        "homePage": "https://www.twitch.tv/forsen",
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-28x28.png",
-                            "2x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png",
-                            "3x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-150x150.png"
-                        },
-                        "name": "",
-                        "tooltip": "Shared Message from forsen"
-                    },
-                    "flags": "BadgeSharedChannel",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Shared Message from forsen",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
                         },
                         "name": "",
-                        "tooltip": "Moderator"
+                        "tooltip": "Broadcaster"
                     },
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Moderator (forsen)",
+                    "tooltip": "Broadcaster",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
                     "emote": {
-                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
+                            "1x": "https://chatterino.com/tb-1",
+                            "2x": "https://chatterino.com/tb-2",
+                            "3x": "https://chatterino.com/tb-3"
                         },
                         "name": "",
-                        "tooltip": "Staff"
+                        "tooltip": "Subscriber"
                     },
-                    "flags": "BadgeGlobalAuthority",
+                    "flags": "BadgeSubscription",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Staff",
+                    "tooltip": "Subscriber (Tier 3, 124 months)",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
                     "emote": {
+                        "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3ff668be-59a3-4e3e-96af-e6b2908b3171/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3ff668be-59a3-4e3e-96af-e6b2908b3171/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3ff668be-59a3-4e3e-96af-e6b2908b3171/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
                         },
                         "name": "",
-                        "tooltip": "Raging Wolf Helm"
+                        "tooltip": "Verified"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Raging Wolf Helm",
+                    "tooltip": "Verified",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffdaa520",
+                    "color": "#ffcc44ff",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "lahoooo"
+                        "value": "pajlada"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "lahoooo:"
+                        "pajlada:"
                     ]
                 },
                 {
@@ -164,51 +134,35 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "hi",
-                        "this",
-                        "is",
-                        "an",
-                        "announcement",
-                        "from",
-                        "1"
+                        "purple",
+                        "announcement"
                     ]
-                },
-                {
-                    "background": "#ffa0a0a4",
-                    "flags": "ReplyButton",
-                    "link": {
-                        "type": "ReplyToMessage",
-                        "value": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22"
-                    },
-                    "padding": 2,
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "CircularImageElement",
-                    "url": ""
                 }
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|SharedMessage|Announcement",
+            "flags": "Collapsed|Announcement",
             "frozen": false,
-            "id": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22",
+            "id": "f00fe0c7-9e03-44a8-bf8e-b3e8eb6d4971",
             "localizedName": "",
-            "loginName": "lahoooo",
-            "messageText": "hi this is an announcement from 1",
-            "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
-            "serverReceivedTime": "2024-09-12T05:19:38Z",
+            "loginName": "pajlada",
+            "messageText": "purple announcement",
+            "searchText": "pajlada  pajlada: purple announcement ",
+            "serverReceivedTime": "2026-04-18T11:15:32Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
+                "subscriber": "124"
             },
             "twitchBadges": [
-                "staff",
-                "raging-wolf-helm"
+                "broadcaster",
+                "subscriber",
+                "partner"
             ],
-            "userID": "612865661",
-            "usernameColor": "#ffdaa520"
+            "userID": "11148817",
+            "usernameColor": "#ffcc44ff"
         },
         {
-            "announcementColor": "Primary",
+            "announcementColor": "Purple",
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -226,7 +180,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "5:19"
+                            "11:15"
                         ]
                     },
                     "flags": "Timestamp",
@@ -235,7 +189,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "05:19:38",
+                    "time": "11:15:32",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -258,7 +212,7 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|SharedMessage|Announcement",
+            "flags": "System|DoNotTriggerNotification|Announcement",
             "frozen": false,
             "id": "",
             "localizedName": "",

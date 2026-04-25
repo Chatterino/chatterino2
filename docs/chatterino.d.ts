@@ -486,6 +486,8 @@ declare namespace c2 {
         EventSub = 0,
         ModerationAction = 0,
         InvalidReplyTarget = 0,
+        WatchStreak = 0,
+        Announcement = 0,
     }
 
     enum MessageElementFlag {
@@ -606,6 +608,62 @@ declare namespace c2 {
         ) => ImageSet;
     }
     var ImageSet: ImageSetConstructor;
+
+    class Split implements IWeakResource {
+        is_valid(): boolean;
+        channel: Channel;
+    }
+
+    enum SplitContainerNodeType {
+        EmptyRoot,
+        Split,
+        VerticalContainer,
+        HorizontalContainer,
+    }
+
+    class SplitContainerNode {
+        type: SplitContainerNodeType;
+        split?: Split;
+        parent?: SplitContainerNode;
+        horizontal_flex: number;
+        vertical_flex: number;
+
+        children(): SplitContainerNode[];
+    }
+
+    class SplitContainer {
+        selected_split: Split;
+        base_node: SplitContainerNode;
+
+        splits(): Split[];
+    }
+
+    class SplitNotebook {
+        selected_page?: SplitContainer;
+        page_count: number;
+
+        page_at(i: number): SplitContainer | null;
+    }
+
+    enum WindowType {
+        Main,
+        Popup,
+        Attached,
+    }
+
+    class Window {
+        notebook: SplitNotebook;
+        type: WindowType;
+    }
+
+    class WindowManager {
+        main_window: Window;
+        last_selected_window: Window;
+
+        all(): Window[];
+    }
+
+    var windows: WindowManager;
 }
 
 declare module "chatterino.json" {
