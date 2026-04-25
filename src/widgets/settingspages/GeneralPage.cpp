@@ -517,8 +517,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Hide message timestamps when channel is live",
                             s.hideMessageTimestampsWhenLive)
-        ->setTooltip("When enabled, timestamps of all messages will be hidden "
-                     "when the channel is live")
         ->addTo(layout);
 
     layout.addDropdown<QString>(
