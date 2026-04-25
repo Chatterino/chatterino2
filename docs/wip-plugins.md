@@ -752,6 +752,7 @@ end)
 ```
 
 The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
+Existing `MessageElement`s in `elements` field of the table will be cloned regardless if they can be created in Lua.
 
 ##### `Message:elements()`
 
