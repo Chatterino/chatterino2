@@ -591,6 +591,9 @@ set(SOURCE_FILES
         util/OnceFlag.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
+        util/RapidJsonSerializeQSize.hpp
+        util/RapidJsonSerializeQString.hpp
+        util/RapidJsonSerializeQStringView.hpp
         util/RatelimitBucket.cpp
         util/RatelimitBucket.hpp
         util/RenameThread.cpp
