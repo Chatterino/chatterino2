@@ -340,6 +340,8 @@ public:
 
     pajlada::Signals::Signal<const QString &> sendWaitUpdate;
 
+    pajlada::Signals::Signal<const QStringList &> sharedChatStatusChanged;
+
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
                              const QString &originalContent,
@@ -385,6 +387,8 @@ public:
 
     bool isLoadingRecentMessages() const;
 
+    const QStringList &getSharedChatSessionParticipants() const;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -418,6 +422,9 @@ private:
     /// roomIdChanged is called whenever this channel's ID has been changed
     /// This should only happen once per channel, whenever the ID goes from unset to set
     void roomIdChanged();
+
+    void probeSharedChatSession();
+    void refreshSharedChatSessionState();
 
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
@@ -571,6 +578,10 @@ private:
     std::weak_ptr<const Message> lastLiveUpdateMessage_;
     /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
+
+    QStringList sharedChatSessionParticipants_;
+
+    QTimer nextSharedChatSessionUpdate_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

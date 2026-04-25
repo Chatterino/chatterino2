@@ -184,6 +184,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->threadClearTimer_.start(5 * 60 * 1000);
 
+    QObject::connect(&this->nextSharedChatSessionUpdate_, &QTimer::timeout,
+                     [this] {
+                         this->refreshSharedChatSessionState();
+                     });
+
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.emotesReloaded,
         [this](auto *caller, const auto &result) {
@@ -2397,6 +2402,99 @@ void TwitchChannel::setSendWait(int seconds)
 bool TwitchChannel::isLoadingRecentMessages() const
 {
     return this->loadingRecentMessages_.test();
+}
+
+const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
+{
+    return this->sharedChatSessionParticipants_;
+}
+
+void TwitchChannel::probeSharedChatSession()
+{
+    if (this->nextSharedChatSessionUpdate_.isActive())
+    {
+        return;
+    };
+
+    this->refreshSharedChatSessionState();
+}
+
+void TwitchChannel::refreshSharedChatSessionState()
+{
+    getHelix()->getSharedChatSession(
+        this->roomId(),
+        [this](const HelixSharedChatSession &session) {
+            if (session.participantIds.empty())
+            {
+                this->nextSharedChatSessionUpdate_.stop();
+
+                this->sharedChatSessionParticipants_.clear();
+                this->sharedChatStatusChanged.invoke(
+                    this->sharedChatSessionParticipants_);
+            }
+            else
+            {
+                getHelix()->fetchUsers(
+                    session.participantIds, {},
+                    [this](const auto &users) {
+                        this->sharedChatSessionParticipants_.clear();
+
+                        for (const auto &user : users)
+                        {
+                            if (user.id != this->roomId())
+                            {
+                                this->sharedChatSessionParticipants_.push_back(
+                                    user.displayName);
+                            }
+                        }
+
+                        this->nextSharedChatSessionUpdate_.start(60 * 1000);
+
+                        this->sharedChatStatusChanged.invoke(
+                            this->sharedChatSessionParticipants_);
+                    },
+                    [] {
+                        qCWarning(chatterinoTwitch)
+                            << "Failed to get user info";
+                    });
+            }
+        },
+        [](HelixGetSharedChatSessionError error, const QString &message) {
+            QString errorMessage = "Failed to get shared chat session state: ";
+
+            switch (error)
+            {
+                case HelixGetSharedChatSessionError::InvalidBroadcasterId: {
+                    errorMessage += "Invalid broadcaster ID";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::UserMissingScope: {
+                    errorMessage +=
+                        "Missing required scope. Re-login with your "
+                        "account and try again.";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action.";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::Unknown: {
+                    errorMessage += "Unknown error";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+            }
+
+            qCWarning(chatterinoTwitch) << errorMessage;
+        });
 }
 
 }  // namespace chatterino
