@@ -151,7 +151,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 Settings *Settings::instance_ = nullptr;
 
 Settings::Settings(const Args &args, const QString &settingsDirectory,
-                   bool isTest)
+                   const SettingsArgs &settingsArgs)
     : prevInstance_(Settings::instance_)
     , disableSaving(args.dontSaveSettings)
 {
@@ -160,7 +160,7 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
     // get global instance of the settings library
     auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
 
-    if (isTest)
+    if (settingsArgs.isTest)
     {
         settingsInstance->load(qPrintable(settingsPath));
     }
