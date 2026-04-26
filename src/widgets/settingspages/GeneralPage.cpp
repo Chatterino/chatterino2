@@ -1635,6 +1635,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "double-clicked")
         ->addTo(layout);
 
+    SettingWidget::intInput(
+        "Shared chat session refresh interval",
+        s.sharedChatSessionRefreshInterval,
+        {.min = 1, .max = 999, .singleStep = 1, .suffix = "s"})
+        ->addTo(layout);
+
     layout.addStretch();
 
     // invisible element for width
