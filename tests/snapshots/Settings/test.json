@@ -1,0 +1,26 @@
+{
+    "input": {
+        "highlighting": {
+            "selfHighlight": {
+                "showInMentions": true
+            },
+            "selfHighlightColor": "#64c466ff"
+        }
+    },
+    "output": {
+        "highlighting": {
+            "selfHighlight": {
+                "showInMentions": true
+            },
+            "selfHighlightColor": "#64c466ff"
+        },
+        "misc": {
+            "settingsVersion": 1
+        },
+        "pajlada2": [
+            {
+                "id": "yourusername"
+            }
+        ]
+    }
+}

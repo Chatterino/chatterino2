@@ -5,6 +5,7 @@
 #pragma once
 
 #include "util/RapidJsonSerializeQString.hpp"
+#include "util/RapidJsonSerializeQStringView.hpp"  // IWYU pragma: keep
 
 #include <pajlada/serialize.hpp>
 #include <rapidjson/document.h>

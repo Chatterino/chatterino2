@@ -266,13 +266,13 @@ FetchContent_Declare(
     PajladaSerialize
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
     EXCLUDE_FROM_ALL
-    FIND_PACKAGE_ARGS CONFIG
+    FIND_PACKAGE_ARGS 0.3.0 CONFIG
 )
 FetchContent_Declare(
     PajladaSettings
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
     EXCLUDE_FROM_ALL
-    FIND_PACKAGE_ARGS CONFIG
+    FIND_PACKAGE_ARGS 0.5.1 CONFIG
 )
 
 FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)

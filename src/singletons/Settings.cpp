@@ -10,6 +10,8 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/SharedHighlight.hpp"
+#include "controllers/highlights/SharedHighlight2.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
@@ -52,6 +54,110 @@ void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting)
 {
     _settings.push_back(std::move(setting));
+}
+
+void Settings::migrate()
+{
+    auto currentVersion = this->settingsVersion.getValue();
+
+    if (currentVersion < 1)
+    {
+        this->migrateHighlights();
+        currentVersion = 1;
+    }
+
+    this->settingsVersion.setValue(currentVersion);
+}
+
+void Settings::migrateHighlights()
+{
+    qInfo() << "XXX: MIGRATE HIGHLIGHTS";
+    // TODO: Migrate
+    //  - /highlighting/subHighlight/subsHighlighted
+    //  - /highlighting/subHighlight/enableSound
+    //  - /highlighting/subHighlight/enableTaskbarFlashing
+    //  to /definedHighlights/subHighlight
+
+    auto n = this->sharedHighlightsSetting.getValue();
+
+    // TODO: Ensure the order is correct when a user first migrates
+
+    {
+        const QString id = "yourusername";
+        YourUsernameHighlight h;
+
+        if (!this->enableSelfHighlight.isDefaultValue())
+        {
+            h.setEnabled(this->enableSelfHighlight.getValue());
+        }
+
+        if (!this->showSelfHighlightInMentions.isDefaultValue())
+        {
+            h.setShowInMentions(this->showSelfHighlightInMentions.getValue());
+        }
+
+        // this->pajlada2.push_back(h);
+        this->pajlada2.push_back(YourUsernameHighlight{});
+    }
+
+    /*
+    {
+        const QString uuid = "subhighlight";
+        auto enabled = this->enableSubHighlight.getValue();
+        auto soundEnabled = this->enableSubHighlightSound.getValue();
+        auto taskbarEnabled = this->enableSubHighlightTaskbar.getValue();
+        auto soundUrl = this->subHighlightSoundUrl.getValue();
+        auto color = this->subHighlightColor.getValue();
+
+        auto newPhrase = QMap<QString, QJsonValue>{
+            {"enabled", enabled},
+            {"showInMentions", false},
+            {"flashTaskbar", taskbarEnabled},
+            {"enableRegex", false},
+            {"caseSensitive", false},
+            {"playSound", soundEnabled},
+            {"customSound", soundUrl},
+            {"color", color},
+        };
+
+        bool found = false;
+
+        for (auto &highlight : n)
+        {
+            if (highlight.id == uuid)
+            {
+                highlight.playSound = soundEnabled;
+                highlight.alert = taskbarEnabled;
+                highlight.customSoundURL = soundUrl;
+                *highlight.backgroundColor = QColor::fromString(color);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            n.push_back(SharedHighlight{
+                .id = uuid,
+                .name = "xd",
+                .enabled = true,
+                .pattern = "asdddddaaa",
+                .showInMentions = false,
+                .alert = taskbarEnabled,
+                .playSound = soundEnabled,
+                .customSoundURL = soundUrl,
+                .backgroundColor =
+                    std::make_shared<QColor>(QColor::fromString(color)),
+                .isRegex = false,
+                .isCaseSensitive = false,
+            });
+        }
+    }
+
+    this->sharedHighlightsSetting.setValue(n);
+    */
+
+    qInfo() << "XXX:" << n;
 }
 
 bool Settings::isHighlightedUser(const QString &username)
@@ -207,6 +313,14 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
         static_cast<uint64_t>(
             pajlada::Settings::SettingManager::SaveMethod::OnlySaveIfChanged));
 
+    // Run setting migrations
+    if (settingsArgs.runMigrations)
+    {
+        this->migrate();
+    }
+
+    initializeSignalVector(this->signalHolder, this->sharedHighlightsSetting,
+                           this->sharedHighlights);
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);
     initializeSignalVector(this->signalHolder, this->highlightedUsersSetting,

@@ -23,6 +23,7 @@ public:
         : settings(this->args_, this->settingsDir.path(),
                    {
                        .isTest = true,
+                       .runMigrations = false,
                    })
         , updates(this->paths_, this->settings)
         , theme(this->paths_)

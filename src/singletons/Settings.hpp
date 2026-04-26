@@ -16,6 +16,8 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/SharedHighlight.hpp"
+#include "controllers/highlights/SharedHighlight2.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -34,6 +36,7 @@
 
 #include <optional>
 #include <string_view>
+#include <vector>
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -120,6 +123,7 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
 
 struct SettingsArgs {
     bool isTest = false;
+    bool runMigrations = true;
 };
 
 /// Settings which are available for reading and writing on the gui thread.
@@ -580,6 +584,7 @@ public:
         "/highlighting/subHighlight/enableTaskbarFlashing", false};
     QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
                                            ""};
+
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
     BoolSetting enableWatchStreakHighlight = {
@@ -842,6 +847,13 @@ public:
     };
 #endif
 
+    ChatterinoSetting<SharedHighlight2> pajlada{"/pajlada"};
+
+    // ChatterinoSetting<std::vector<AllHighlights>> pajlada2{"/pajlada2"};
+    pajlada::Settings::Setting<std::vector<AllHighlights>> pajlada2{
+        "/pajlada2",
+    };
+
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
         {"/highlighting/highlights"};
@@ -849,6 +861,8 @@ private:
         "/highlighting/users"};
     ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
         "/highlighting/badges"};
+    ChatterinoSetting<std::vector<SharedHighlight>> sharedHighlightsSetting = {
+        "/highlighting/sharedHighlights"};
     ChatterinoSetting<std::vector<HighlightBlacklistUser>>
         blacklistedUsersSetting = {"/highlighting/blacklist"};
     ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
@@ -864,10 +878,24 @@ private:
         "/logging/channels"};
     SignalVector<QString> mutedChannels;
 
+    IntSetting settingsVersion = {
+        "/misc/settingsVersion",
+        0,
+    };
+
+    void migrate();
+
+    /// Migration 01
+    ///
+    /// This migration takes all of our custom highlight values & turns them into real highlight rows
+    /// It also merges messages, user, and badge highlights into a single vector.
+    void migrateHighlights();
+
 public:
     SignalVector<HighlightPhrase> highlightedMessages;
     SignalVector<HighlightPhrase> highlightedUsers;
     SignalVector<HighlightBadge> highlightedBadges;
+    SignalVector<SharedHighlight> sharedHighlights;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
     SignalVector<FilterRecordPtr> filterRecords;
