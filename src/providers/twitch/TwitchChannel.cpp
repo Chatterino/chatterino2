@@ -125,7 +125,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
-    , allowProbeOfSharedChatSession_(true)
+    , nextSharedChatSessionProbe_(QDateTime::currentDateTime())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -185,7 +185,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->threadClearTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->nextSharedChatSessionUpdate_, &QTimer::timeout,
+    QObject::connect(&this->nextSharedChatSessionUpdateTimer_, &QTimer::timeout,
                      [this] {
                          this->refreshSharedChatSessionState();
                      });
@@ -2412,9 +2412,12 @@ const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
 
 void TwitchChannel::probeSharedChatSession()
 {
-    if (this->allowProbeOfSharedChatSession_)
+    auto now = QDateTime::currentDateTime();
+
+    if (!this->nextSharedChatSessionUpdateTimer_.isActive() &&
+        now >= this->nextSharedChatSessionProbe_)
     {
-        this->allowProbeOfSharedChatSession_ = false;
+        this->nextSharedChatSessionProbe_ = now.addSecs(30);
         this->refreshSharedChatSessionState();
     }
 }
@@ -2427,8 +2430,10 @@ void TwitchChannel::refreshSharedChatSessionState()
          weak = weakOf<Channel>(this)](const HelixSharedChatSession &session) {
             if (session.participantIds.empty())
             {
-                this->allowProbeOfSharedChatSession_ = true;
-                this->nextSharedChatSessionUpdate_.stop();
+                // Allow immediate re-probe
+                this->nextSharedChatSessionProbe_ =
+                    QDateTime::currentDateTime();
+                this->nextSharedChatSessionUpdateTimer_.stop();
 
                 this->sharedChatSessionParticipants_.clear();
                 this->sharedChatSessionParticipantIds_.clear();
@@ -2481,20 +2486,16 @@ void TwitchChannel::refreshSharedChatSessionState()
                         }
                     }
 
-                    this->nextSharedChatSessionUpdate_.start(60 * 1000);
+                    this->nextSharedChatSessionUpdateTimer_.start(60 * 1000);
 
                     this->sharedChatStatusChanged.invoke(
                         this->sharedChatSessionParticipants_);
                 },
-                [this, weak = weakOf<Channel>(this)] {
+                [] {
                     qCWarning(chatterinoTwitch) << "Failed to get user info";
-
-                    // NO NO NO !!!
-                    this->allowProbeOfSharedChatSession_ = true;
                 });
         },
-        [this, weak = weakOf<Channel>(this)](
-            HelixGetSharedChatSessionError error, const QString &message) {
+        [](HelixGetSharedChatSessionError error, const QString &message) {
             QString errorMessage = "Failed to get shared chat session state: ";
 
             switch (error)
@@ -2529,9 +2530,6 @@ void TwitchChannel::refreshSharedChatSessionState()
             }
 
             qCWarning(chatterinoTwitch) << errorMessage;
-
-            // NO NO NO !!!
-            this->allowProbeOfSharedChatSession_ = true;
         });
 }
 

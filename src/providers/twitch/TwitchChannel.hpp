@@ -599,9 +599,14 @@ private:
     /**
      * Timer scheduling the next check of the shared chat session state.
      */
-    QTimer nextSharedChatSessionUpdate_;
+    QTimer nextSharedChatSessionUpdateTimer_;
 
-    bool allowProbeOfSharedChatSession_;
+    /**
+     * Time when the next probe of shared chat session state triggered
+     * by reception of a shared chat message is allowed.
+     * Used to rate-limit Twitch API queries.
+     */
+    QDateTime nextSharedChatSessionProbe_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
