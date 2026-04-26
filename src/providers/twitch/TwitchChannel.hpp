@@ -580,16 +580,28 @@ private:
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
     /**
-     * List of broadcasters participating in a shared chat session
-     * on this channel. The list does not include the broadcaster
-     * who owns the channel.
+     * List of display names of  broadcasters participating in a
+     * shared chat session on this channel. The list does not include
+     * the broadcaster who owns the channel.
+     * This list is passed to the UI for display.
      */
     QStringList sharedChatSessionParticipants_;
+
+    /**
+     * Set of broadcasterIDs of broadcasters participating in a
+     * shared chat session on this channel. The set does not include
+     * the broadcaster who owns the channel.
+     * This set is used to quickly determine if the participants have
+     * changed since the last query of the shared chat session state.
+     */
+    QSet<QString> sharedChatSessionParticipantIds_;
 
     /**
      * Timer scheduling the next check of the shared chat session state.
      */
     QTimer nextSharedChatSessionUpdate_;
+
+    bool allowProbeOfSharedChatSession_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

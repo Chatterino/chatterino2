@@ -125,6 +125,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
+    , allowProbeOfSharedChatSession_(true)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -2411,10 +2412,11 @@ const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
 
 void TwitchChannel::probeSharedChatSession()
 {
-    if (!this->nextSharedChatSessionUpdate_.isActive())
+    if (this->allowProbeOfSharedChatSession_)
     {
+        this->allowProbeOfSharedChatSession_ = false;
         this->refreshSharedChatSessionState();
-    };
+    }
 }
 
 void TwitchChannel::refreshSharedChatSessionState()
@@ -2425,24 +2427,55 @@ void TwitchChannel::refreshSharedChatSessionState()
          weak = weakOf<Channel>(this)](const HelixSharedChatSession &session) {
             if (session.participantIds.empty())
             {
+                this->allowProbeOfSharedChatSession_ = true;
                 this->nextSharedChatSessionUpdate_.stop();
 
                 this->sharedChatSessionParticipants_.clear();
-                this->sharedChatStatusChanged.invoke(
-                    this->sharedChatSessionParticipants_);
+                this->sharedChatSessionParticipantIds_.clear();
 
+                this->sharedChatStatusChanged.invoke({});
+
+                return;
+            }
+
+            bool participantsDiffer =
+                session.participantIds.size() - 1 !=
+                this->sharedChatSessionParticipantIds_.size();
+            if (!participantsDiffer)
+            {
+                for (const auto &broadcasterID : session.participantIds)
+                {
+                    if (this->roomId() == broadcasterID)
+                    {
+                        continue;
+                    }
+
+                    if (!this->sharedChatSessionParticipantIds_.contains(
+                            broadcasterID))
+                    {
+                        participantsDiffer = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!participantsDiffer)
+            {
                 return;
             }
 
             getHelix()->fetchUsers(
                 session.participantIds, {},
-                [this](const auto &users) {
+                [this, weak = weakOf<Channel>(this)](const auto &users) {
                     this->sharedChatSessionParticipants_.clear();
+                    this->sharedChatSessionParticipantIds_.clear();
 
                     for (const auto &user : users)
                     {
                         if (user.id != this->roomId())
                         {
+                            this->sharedChatSessionParticipantIds_.insert(
+                                user.id);
                             this->sharedChatSessionParticipants_.push_back(
                                 user.displayName);
                         }
@@ -2453,11 +2486,15 @@ void TwitchChannel::refreshSharedChatSessionState()
                     this->sharedChatStatusChanged.invoke(
                         this->sharedChatSessionParticipants_);
                 },
-                [] {
+                [this, weak = weakOf<Channel>(this)] {
                     qCWarning(chatterinoTwitch) << "Failed to get user info";
+
+                    // NO NO NO !!!
+                    this->allowProbeOfSharedChatSession_ = true;
                 });
         },
-        [](HelixGetSharedChatSessionError error, const QString &message) {
+        [this, weak = weakOf<Channel>(this)](
+            HelixGetSharedChatSessionError error, const QString &message) {
             QString errorMessage = "Failed to get shared chat session state: ";
 
             switch (error)
@@ -2492,6 +2529,9 @@ void TwitchChannel::refreshSharedChatSessionState()
             }
 
             qCWarning(chatterinoTwitch) << errorMessage;
+
+            // NO NO NO !!!
+            this->allowProbeOfSharedChatSession_ = true;
         });
 }
 
