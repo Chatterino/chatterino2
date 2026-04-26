@@ -1299,7 +1299,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                                     MessageContext::Original);
         }
 
-        if (msg->flags.has(MessageFlag::SharedMessage))
+        if (msg->flags.has(MessageFlag::SharedMessage) && !getApp()->isTest())
         {
             chan->probeSharedChatSession();
         }
