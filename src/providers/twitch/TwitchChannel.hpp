@@ -579,8 +579,16 @@ private:
     /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
+    /**
+     * List of broadcasters participating in a shared chat session
+     * on this channel. The list does not include the broadcaster
+     * who owns the channel.
+     */
     QStringList sharedChatSessionParticipants_;
 
+    /**
+     * Timer scheduling the next check of the shared chat session state.
+     */
     QTimer nextSharedChatSessionUpdate_;
 
     pajlada::Signals::SignalHolder signalHolder_;
