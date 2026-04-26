@@ -585,7 +585,7 @@ struct HelixSharedChatSession {
         {
             const auto broadcasterId =
                 p.toObject().value("broadcaster_id").toString();
-            participantIds.push_back(broadcasterId);
+            this->participantIds.push_back(broadcasterId);
         }
     }
 };

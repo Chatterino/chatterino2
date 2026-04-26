@@ -2421,7 +2421,8 @@ void TwitchChannel::refreshSharedChatSessionState()
 {
     getHelix()->getSharedChatSession(
         this->roomId(),
-        [this](const HelixSharedChatSession &session) {
+        [this,
+         weak = weakOf<Channel>(this)](const HelixSharedChatSession &session) {
             if (session.participantIds.empty())
             {
                 this->nextSharedChatSessionUpdate_.stop();
@@ -2429,33 +2430,32 @@ void TwitchChannel::refreshSharedChatSessionState()
                 this->sharedChatSessionParticipants_.clear();
                 this->sharedChatStatusChanged.invoke(
                     this->sharedChatSessionParticipants_);
-            }
-            else
-            {
-                getHelix()->fetchUsers(
-                    session.participantIds, {},
-                    [this](const auto &users) {
-                        this->sharedChatSessionParticipants_.clear();
 
-                        for (const auto &user : users)
+                return;
+            }
+
+            getHelix()->fetchUsers(
+                session.participantIds, {},
+                [this](const auto &users) {
+                    this->sharedChatSessionParticipants_.clear();
+
+                    for (const auto &user : users)
+                    {
+                        if (user.id != this->roomId())
                         {
-                            if (user.id != this->roomId())
-                            {
-                                this->sharedChatSessionParticipants_.push_back(
-                                    user.displayName);
-                            }
+                            this->sharedChatSessionParticipants_.push_back(
+                                user.displayName);
                         }
+                    }
 
-                        this->nextSharedChatSessionUpdate_.start(60 * 1000);
+                    this->nextSharedChatSessionUpdate_.start(60 * 1000);
 
-                        this->sharedChatStatusChanged.invoke(
-                            this->sharedChatSessionParticipants_);
-                    },
-                    [] {
-                        qCWarning(chatterinoTwitch)
-                            << "Failed to get user info";
-                    });
-            }
+                    this->sharedChatStatusChanged.invoke(
+                        this->sharedChatSessionParticipants_);
+                },
+                [] {
+                    qCWarning(chatterinoTwitch) << "Failed to get user info";
+                });
         },
         [](HelixGetSharedChatSessionError error, const QString &message) {
             QString errorMessage = "Failed to get shared chat session state: ";

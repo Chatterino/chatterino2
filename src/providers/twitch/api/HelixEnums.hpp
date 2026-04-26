@@ -303,7 +303,7 @@ enum class HelixCreateEventSubSubscriptionError : std::uint8_t {
     Forwarded,
 };
 
-enum class HelixGetSharedChatSessionError {
+enum class HelixGetSharedChatSessionError : std::uint8_t {
     Unknown,
     InvalidBroadcasterId,
     UserMissingScope,
