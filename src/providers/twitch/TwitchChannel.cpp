@@ -2486,7 +2486,12 @@ void TwitchChannel::refreshSharedChatSessionState()
                         }
                     }
 
-                    this->nextSharedChatSessionUpdateTimer_.start(60 * 1000);
+                    auto intervalSecs = std::clamp(
+                        getSettings()
+                            ->sharedChatSessionRefreshInterval.getValue(),
+                        1, 999);
+                    this->nextSharedChatSessionUpdateTimer_.start(intervalSecs *
+                                                                  1000);
 
                     this->sharedChatStatusChanged.invoke(
                         this->sharedChatSessionParticipants_);
