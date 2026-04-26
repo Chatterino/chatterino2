@@ -2411,12 +2411,10 @@ const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
 
 void TwitchChannel::probeSharedChatSession()
 {
-    if (this->nextSharedChatSessionUpdate_.isActive())
+    if (!this->nextSharedChatSessionUpdate_.isActive())
     {
-        return;
+        this->refreshSharedChatSessionState();
     };
-
-    this->refreshSharedChatSessionState();
 }
 
 void TwitchChannel::refreshSharedChatSessionState()
