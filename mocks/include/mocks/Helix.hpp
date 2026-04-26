@@ -504,6 +504,13 @@ public:
                  (FailureCallback<QString> failureCallback)),
                 (override));
 
+    MOCK_METHOD(void, getSharedChatSession,
+                (QString broadcasterID,
+                 ResultCallback<HelixSharedChatSession> successCallback,
+                 (FailureCallback<HelixGetSharedChatSessionError, QString>
+                      failureCallback)),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
