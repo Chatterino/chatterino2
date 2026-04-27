@@ -72,6 +72,10 @@ public:
     pajlada::Signals::NoArgSignal userListUpdated;
     pajlada::Signals::NoArgSignal currentUserNameChanged;
 
+    /// Fired when the IRC server sends a "Login authentication failed" notice,
+    /// indicating the current OAuth token has expired.
+    pajlada::Signals::NoArgSignal loginExpired;
+
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 
     /// The signal is invoked with (caller, error) where caller is the argument

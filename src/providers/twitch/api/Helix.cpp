@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -205,8 +206,13 @@ void Helix::fetchStreams(
 
             successCallback(streams);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([this, failureCallback](auto result) {
             // TODO: make better xd
+            if (!this->oauthToken.isEmpty() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .finally(finallyCallback)
@@ -480,7 +486,12 @@ void Helix::fetchChannels(
 
             successCallback(channels);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([this, failureCallback](auto result) {
+            if (!this->oauthToken.isEmpty() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .execute();
