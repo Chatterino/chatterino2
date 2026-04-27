@@ -12,9 +12,13 @@
 #include "util/FilesystemHelpers.hpp"
 #include "util/XDGDirectory.hpp"
 
+#include <QLocale>
+
 #ifdef CHATTERINO_WITH_SPELLCHECK
 #    include <hunspell/hunspell.hxx>
 #endif
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 
@@ -263,6 +267,89 @@ std::vector<DictionaryInfo> SpellChecker::getAvailableDictionaries() const
 #else
     return {};
 #endif
+}
+
+QString spellcheck::prettyLossyBcp47Description(const QString &bcp47Str)
+{
+    /// This is a subset of the possible bcp 47 codes. We only pretty print
+    /// codes that Qt can convert.
+    /// See https://datatracker.ietf.org/doc/html/rfc5646#section-2.1.
+    static QRegularExpression smallBcp47Re(
+        u"^"_s
+        "([a-z]{2,3})"                 // language
+        "(?:[-_]([A-Za-z]{4}))?"       // script
+        "(?:[-_]([A-Z]{2,3}))?"        // region
+        "(?:[-_]([a-zA-Z0-9]{5,8}))?"  // variant
+        "$");
+
+    auto match = smallBcp47Re.matchView(bcp47Str);
+    if (!match.hasMatch())
+    {
+        return bcp47Str;
+    }
+    auto langView = match.capturedView(1);
+    auto scriptView = match.capturedView(2);
+    auto regionView = match.capturedView(3);
+    auto variantView = match.capturedView(4);
+
+    QLocale::Language lang = QLocale::codeToLanguage(langView);
+    if (lang == QLocale::AnyLanguage)
+    {
+        return bcp47Str;
+    }
+    QString desc = QLocale::languageToString(lang);
+    bool needsBrace = true;
+    auto nextPart = [&] {
+        if (needsBrace)
+        {
+            desc.append(u" (");
+            needsBrace = false;
+        }
+        else
+        {
+            desc.append(u", ");
+        }
+    };
+
+    if (!scriptView.empty())
+    {
+        nextPart();
+
+        QLocale::Script script = QLocale::codeToScript(scriptView);
+        if (script == QLocale::AnyScript)
+        {
+            desc.append(scriptView);
+        }
+        else
+        {
+            desc.append(QLocale::scriptToString(script));
+        }
+    }
+    if (!regionView.empty())
+    {
+        nextPart();
+
+        QLocale::Territory territory = QLocale::codeToTerritory(regionView);
+        if (territory == QLocale::AnyTerritory)
+        {
+            desc.append(regionView);
+        }
+        else
+        {
+            desc.append(QLocale::territoryToString(territory));
+        }
+    }
+    if (!variantView.empty())
+    {
+        nextPart();
+        desc.append(variantView);
+    }
+
+    if (!needsBrace)
+    {
+        desc.append(')');
+    }
+    return desc;
 }
 
 }  // namespace chatterino
