@@ -400,12 +400,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             backgroundColor,
             *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
     }
-    else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
-             ctx.preferences.enableWatchStreakHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor, *ctx.colorProvider.color(ColorType::WatchStreak));
-    }
     else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
@@ -417,6 +411,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             backgroundColor =
                 blendColors(backgroundColor, *this->message_->highlightColor);
         }
+    }
+    else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
+             ctx.preferences.enableWatchStreakHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor, *ctx.colorProvider.color(ColorType::WatchStreak));
     }
     else if (this->message_->flags.has(MessageFlag::Announcement) &&
              ctx.preferences.enableAnnouncementHighlight)
