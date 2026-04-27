@@ -16,6 +16,7 @@
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/Helix.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -160,6 +161,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::EmoteController emotes;
+    mock::Helix helix;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
@@ -561,6 +563,8 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
+
+        Helix::initialize();
     }
 
     void TearDown() override
