@@ -122,10 +122,14 @@ TEST_P(TestSettingsP, Run)
 
     got = QJsonDocument::fromJson(content).object();
 
-    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
-        << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
-        << QJsonDocument(snapshot->output().toArray()).toJson() << "\nbut got\n"
-        << QJsonDocument(got).toJson() << "\ninstead.";
+    if (!snapshot->run(got, UPDATE_SNAPSHOTS))
+    {
+        // The snapshot failed - using ASSERT_EQ here to try to get some better output
+        EXPECT_EQ(QJsonDocument(snapshot->output().toObject()).toJson(),
+                  QJsonDocument(got).toJson())
+            << "Snapshot " << snapshot->name() << " comparison";
+        FAIL() << "Snapshot " << snapshot->name() << " failed";
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -270,7 +274,7 @@ TEST(Settings, Bing)
     /*
     ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
         << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
-        << QJsonDocument(snapshot->output().toArray()).toJson() << "\nbut got\n"
+        << QJsonDocument(snapshot->output().toObject()).toJson() << "\nbut got\n"
         << QJsonDocument(got).toJson() << "\ninstead.";
     */
 #endif

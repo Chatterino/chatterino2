@@ -2,24 +2,23 @@
     "input": {
         "highlighting": {
             "selfHighlight": {
-                "showInMentions": true
-            },
-            "selfHighlightColor": "#64c466ff"
+                "showSelfHighlightInMentions": true
+            }
         }
     },
     "output": {
         "highlighting": {
             "selfHighlight": {
-                "showInMentions": true
-            },
-            "selfHighlightColor": "#64c466ff"
+                "showSelfHighlightInMentions": true
+            }
         },
         "misc": {
             "settingsVersion": 1
         },
         "pajlada2": [
             {
-                "id": "yourusername"
+                "id": "yourusername",
+                "showInMentions": true
             }
         ]
     }

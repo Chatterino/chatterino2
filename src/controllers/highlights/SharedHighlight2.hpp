@@ -1,31 +1,29 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
-#include "pajlada/serialize/common.hpp"
-#include "pajlada/serialize/deserialize.hpp"
-#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <pajlada/serialize/common.hpp>
+#include <pajlada/serialize/deserialize.hpp>
+#include <pajlada/serialize/serialize.hpp>
 #include <QColor>
 #include <QDebug>
 #include <QPixmap>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringView>
 #include <QUrl>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
 #include <cassert>
 #include <memory>
-#include <variant>
-
-inline bool matchesId(const rapidjson::Value &value, QStringView expectedId)
-{
-    QString id;
-    chatterino::rj::getSafe(value, "id", id);
-    return id == expectedId;
-}
+#include <optional>
 
 namespace chatterino {
 
@@ -35,12 +33,34 @@ struct SharedHighlight2 {
     bool operator==(const SharedHighlight2 &other) const = default;
 
     SharedHighlight2() = default;
+    virtual ~SharedHighlight2() = default;
 
-    bool isEnabled() const;
+    /// Returns true if this highlight should be enabled.
+    ///
+    /// If unconfigured, returns true.
+    virtual bool isEnabled() const;
     void setEnabled(std::optional<bool> newValue);
 
-    bool shouldShowInMentions() const;
-    void setShowInMentions(std::optional<bool> newValue);
+    /// Returns true if this highlight should show the message in /mentions.
+    ///
+    /// If unconfigured, returns true.
+    virtual bool shouldShowInMentions() const;
+    virtual void setShowInMentions(std::optional<bool> newValue);
+
+    /// Returns true if this highlight should highlight the taskbar.
+    ///
+    /// If unconfigured, returns true.
+    virtual bool shouldHighlightTaskbar() const;
+    virtual void setHighlightTaskbar(std::optional<bool> newValue);
+
+    /// Returns true if this highlight should play a sound.
+    ///
+    /// If unconfigured, returns false.
+    virtual bool shouldPlaySound() const;
+    void setPlaySound(std::optional<bool> newValue);
+
+    QUrl getSoundUrl() const;
+    void setSoundUrl(const QUrl &newValue);
 
     /// Unique identifier for this highlight
     /// User-created highlights will get a random UUID,
@@ -54,6 +74,13 @@ struct SharedHighlight2 {
 
 protected:
     std::optional<bool> enabled;
+
+    static bool matchesID(const rapidjson::Value &value, QStringView expectedID)
+    {
+        QString id;
+        chatterino::rj::getSafe(value, "id", id);
+        return id == expectedID;
+    }
 
 public:
     /// Contains the highlight pattern.
@@ -72,7 +99,6 @@ protected:
     /// Whether to add the matching message to the /mentions channel
     std::optional<bool> showInMentions;
 
-public:
     /// Show an OS-specific alert.
     /// On Windows, this will flash Chatterino in the taskbar.
     /// On macOS, this will make Chatterino bounce in the taskbar.
@@ -86,6 +112,7 @@ public:
     /// The custom sound URL to play if playSound is enabled.
     QUrl customSoundURL;
 
+public:
     /// The background color to apply to the message.
     /// If the color is invalid/unset, don't apply a background color.
     std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
@@ -158,107 +185,9 @@ protected:
     friend struct pajlada::Deserialize;
 };
 
-struct YourUsernameHighlight : public SharedHighlight2 {
-    static constexpr QStringView ID = u"yourusername";
-
-    YourUsernameHighlight() = default;
-};
-
-struct WhispersHighlight : public SharedHighlight2 {
-    static constexpr QStringView ID = u"whispers";
-
-    WhispersHighlight() = default;
-};
-
-using AllHighlights =
-    std::variant<YourUsernameHighlight, WhispersHighlight, SharedHighlight2>;
-
 }  // namespace chatterino
 
 namespace pajlada {
-
-template <>
-struct Serialize<chatterino::YourUsernameHighlight> {
-    static rapidjson::Value get(const chatterino::YourUsernameHighlight &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
-        value.serialize(ret, a);
-        chatterino::rj::set(ret, "id", chatterino::YourUsernameHighlight::ID,
-                            a);
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::YourUsernameHighlight> {
-    static chatterino::YourUsernameHighlight get(const rapidjson::Value &value,
-                                                 bool *error = nullptr)
-    {
-        if (!value.IsObject())
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        if (!matchesId(value, u"yourusername"))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        chatterino::YourUsernameHighlight h;
-
-        if (!h.deserialize(value))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        return h;
-    }
-};
-
-template <>
-struct Serialize<chatterino::WhispersHighlight> {
-    static rapidjson::Value get(const chatterino::WhispersHighlight &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
-        value.serialize(ret, a);
-        chatterino::rj::set(ret, "id", chatterino::WhispersHighlight::ID, a);
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::WhispersHighlight> {
-    static chatterino::WhispersHighlight get(const rapidjson::Value &value,
-                                             bool *error = nullptr)
-    {
-        if (!value.IsObject())
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        if (!matchesId(value, u"whispers"))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        chatterino::WhispersHighlight h;
-
-        if (!h.deserialize(value))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
-
-        return h;
-    }
-};
 
 template <>
 struct Serialize<chatterino::SharedHighlight2> {
@@ -301,4 +230,3 @@ struct Deserialize<chatterino::SharedHighlight2> {
 Q_DECLARE_METATYPE(chatterino::SharedHighlight2);
 
 QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v);
-QDebug operator<<(QDebug dbg, const chatterino::YourUsernameHighlight &v);
