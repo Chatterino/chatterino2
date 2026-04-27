@@ -2,9 +2,22 @@
 
 This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), people who haven't used Qt, or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
-### General (non-code related) guidelines for contributing to Chatterino
+## General (non-code related) guidelines for contributing to Chatterino
 
 - Make a specific branch for your pull request instead of using the master, main, or mainline branch. This will prevent future problems with updating your branch after your PR is merged.
+
+## Use of AI
+
+You may use AI assistance for contributing to Chatterino, as long as you follow these points:
+
+- Test your changes locally on your computer and check that no other functionality was broken.
+- When making significant changes, add a note in the Pull Request description if a large portion of the code is generated.
+- Do not use AI tools for the following:
+  - Pull request and issue descriptions
+  - Writing documentation (except for grammar checking or wording improvements)
+  - Fixing issues with the [good first issue for humans](https://github.com/Chatterino/chatterino2/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%20for%20humans%22) label.
+    These issues are intended for humans to get familiar with the Chatterino codebase.
+  - Generating images (e.g. button icons)
 
 # Tooling
 
