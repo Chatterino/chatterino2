@@ -782,43 +782,6 @@ void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
     }
 }
 
-IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
-{
-    assertInGuiThread();
-
-    if (descriptor.type_ == "twitch")
-    {
-        return getApp()->getTwitch()->getOrAddChannel(descriptor.channelName_);
-    }
-    else if (descriptor.type_ == "mentions")
-    {
-        return getApp()->getTwitch()->getMentionsChannel();
-    }
-    else if (descriptor.type_ == "watching")
-    {
-        return getApp()->getTwitch()->getWatchingChannel();
-    }
-    else if (descriptor.type_ == "whispers")
-    {
-        return getApp()->getTwitch()->getWhispersChannel();
-    }
-    else if (descriptor.type_ == "live")
-    {
-        return getApp()->getTwitch()->getLiveChannel();
-    }
-    else if (descriptor.type_ == "automod")
-    {
-        return getApp()->getTwitch()->getAutomodChannel();
-    }
-    else if (descriptor.type_ == "misc")
-    {
-        return getApp()->getTwitch()->getChannelOrEmpty(
-            descriptor.channelName_);
-    }
-
-    return Channel::getEmpty();
-}
-
 void WindowManager::closeAll()
 {
     assertInGuiThread();
