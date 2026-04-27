@@ -13,7 +13,7 @@ namespace chatterino {
 class Paths
 {
 public:
-    Paths();
+    Paths(const QString &rootAppDataDirectory = {});
 
     // Root directory for the configuration files. %APPDATA%/chatterino or
     // ExecutablePath for portable mode
@@ -65,7 +65,7 @@ public:
 private:
     void initAppFilePathHash();
     void initCheckPortable();
-    void initRootDirectory();
+    void initRootDirectory(const QString &rootAppDataDirectory);
     void initSubDirectories();
 
     std::optional<bool> portable_;

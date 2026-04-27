@@ -1,0 +1,41 @@
+#pragma once
+
+#include <chatterino-embed/Config.hpp>
+#include <QWidget>
+
+class QByteArray;
+class QByteArrayView;
+class QString;
+class QJsonObject;
+
+namespace chatterino {
+
+class Split;
+
+namespace embed {
+
+class CHATTERINO_EMBED_EXPORT Split : public QWidget
+{
+    Q_OBJECT
+
+public:
+    Split(QWidget *parent = nullptr);
+
+    void deserializeData(QByteArrayView data);
+    QByteArray serializeData();
+
+    QString channelName() const;
+
+Q_SIGNALS:
+    void closeRequested();
+    void channelChanged();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
+private:
+    chatterino::Split *split_;
+};
+
+}  // namespace embed
+}  // namespace chatterino
