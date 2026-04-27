@@ -77,6 +77,16 @@ const Config CHROME{
 #endif
 };
 
+// Edge is Chromium-based and uses the same native messaging manifest format
+// as Chrome. The registration path below is Windows-specific.
+#ifdef Q_OS_WIN
+const Config EDGE{
+    .fileName = u"native-messaging-manifest-edge.json"_s,
+    .registryKey =
+        u"HKCU\\Software\\Microsoft\\Edge\\NativeMessagingHosts\\com.chatterino.chatterino"_s,
+};
+#endif
+
 void registerNmManifest([[maybe_unused]] const Paths &paths,
                         const Config &config, const QJsonDocument &document)
 {
@@ -254,6 +264,10 @@ void registerNmHost(const Paths &paths)
 
     registerNmManifest(paths, CHROME, chromeManifest);
     registerNmManifest(paths, FIREFOX, firefoxManifest);
+
+#ifdef Q_OS_WIN
+    registerNmManifest(paths, EDGE, chromeManifest);
+#endif
 
 #ifndef Q_OS_WIN
     switch (getSettings()->customNativeMessagingManifestFormat.getEnum())
