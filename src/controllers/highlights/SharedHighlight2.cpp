@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/highlights/SharedHighlight2.hpp"
 
 #include "controllers/highlights/HighlightCheck.hpp"
@@ -27,13 +31,42 @@ void SharedHighlight2::setEnabled(std::optional<bool> newValue)
 
 bool SharedHighlight2::shouldShowInMentions() const
 {
-    // TODO: is this the correct default value?
     return this->showInMentions.value_or(true);
 }
 
 void SharedHighlight2::setShowInMentions(std::optional<bool> newValue)
 {
     this->showInMentions = newValue;
+}
+
+bool SharedHighlight2::shouldHighlightTaskbar() const
+{
+    return this->alert.value_or(true);
+}
+
+void SharedHighlight2::setHighlightTaskbar(std::optional<bool> newValue)
+{
+    this->alert = newValue;
+}
+
+bool SharedHighlight2::shouldPlaySound() const
+{
+    return this->alert.value_or(false);
+}
+
+void SharedHighlight2::setPlaySound(std::optional<bool> newValue)
+{
+    this->alert = newValue;
+}
+
+QUrl SharedHighlight2::getSoundUrl() const
+{
+    return this->customSoundURL;
+}
+
+void SharedHighlight2::setSoundUrl(const QUrl &newValue)
+{
+    this->customSoundURL = newValue;
 }
 
 QPixmap SharedHighlight2::getType() const
@@ -116,18 +149,11 @@ QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v)
                   << "name:" << v.name << ',' << "pattern:" << v.pattern << ','
                   << "enabled:" << v.isEnabled() << ','
                   << "showInMentions:" << v.shouldShowInMentions() << ','
-                  << "alert:" << v.alert << ',' << "playSound:" << v.playSound
-                  << ',' << "isRegex:" << v.isRegex << ','
+                  << "alert:" << v.shouldHighlightTaskbar() << ','
+                  << "playSound:" << v.shouldPlaySound() << ','
+                  << "isRegex:" << v.isRegex << ','
                   << "isCaseSensitive:" << v.isCaseSensitive << ','
-                  << "customSoundURL:" << v.customSoundURL << ')';
-
-    return dbg;
-}
-
-QDebug operator<<(QDebug dbg, const chatterino::YourUsernameHighlight &v)
-{
-    dbg.nospace() << "YourUsernameHighlight("
-                  << static_cast<chatterino::SharedHighlight2>(v) << ')';
+                  << "customSoundURL:" << v.getSoundUrl() << ')';
 
     return dbg;
 }

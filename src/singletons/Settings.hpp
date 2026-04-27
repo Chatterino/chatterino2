@@ -18,6 +18,15 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/SharedHighlight.hpp"
 #include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/AutomodCaughtHighlight.hpp"
+#include "controllers/highlights/types/ChannelPointsHighlight.hpp"
+#include "controllers/highlights/types/FirstMessageHighlight.hpp"
+#include "controllers/highlights/types/HypeChatHighlight.hpp"
+#include "controllers/highlights/types/SubscribedThreadHighlight.hpp"
+#include "controllers/highlights/types/SubscriptionsHighlight.hpp"
+#include "controllers/highlights/types/WatchStreakHighlight.hpp"
+#include "controllers/highlights/types/WhispersHighlight.hpp"
+#include "controllers/highlights/types/YourUsernameHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -36,6 +45,7 @@
 
 #include <optional>
 #include <string_view>
+#include <variant>
 #include <vector>
 
 using TimeoutButton = std::pair<QString, int>;
@@ -849,7 +859,13 @@ public:
 
     ChatterinoSetting<SharedHighlight2> pajlada{"/pajlada"};
 
-    // ChatterinoSetting<std::vector<AllHighlights>> pajlada2{"/pajlada2"};
+    using AllHighlights =
+        std::variant<YourUsernameHighlight, WhispersHighlight,
+                     SubscriptionsHighlight, ChannelPointsHighlight,
+                     FirstMessageHighlight, HypeChatHighlight,
+                     SubscribedThreadHighlight, AutomodCaughtHighlight,
+                     WatchStreakHighlight, SharedHighlight2>;
+
     pajlada::Settings::Setting<std::vector<AllHighlights>> pajlada2{
         "/pajlada2",
     };
