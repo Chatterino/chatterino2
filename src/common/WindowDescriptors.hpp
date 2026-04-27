@@ -18,6 +18,8 @@
 
 namespace chatterino {
 
+class IndirectChannel;
+
 /**
  * A WindowLayout contains one or more windows.
  * Only one of those windows can be the main window
@@ -54,6 +56,8 @@ struct SplitDescriptor {
 
     static void loadFromJSON(SplitDescriptor &descriptor,
                              const QJsonObject &root, const QJsonObject &data);
+
+    IndirectChannel decodeChannel() const;
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {

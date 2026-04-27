@@ -4,7 +4,10 @@
 
 #include "common/WindowDescriptors.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "debug/AssertInGuiThread.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "widgets/Window.hpp"
 
 #include <QFile>
@@ -69,6 +72,42 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     {
         descriptor.spellCheckOverride = spellOverride.toBool();
     }
+}
+
+IndirectChannel SplitDescriptor::decodeChannel() const
+{
+    assertInGuiThread();
+
+    if (this->type_ == "twitch")
+    {
+        return getApp()->getTwitch()->getOrAddChannel(this->channelName_);
+    }
+    else if (this->type_ == "mentions")
+    {
+        return getApp()->getTwitch()->getMentionsChannel();
+    }
+    else if (this->type_ == "watching")
+    {
+        return getApp()->getTwitch()->getWatchingChannel();
+    }
+    else if (this->type_ == "whispers")
+    {
+        return getApp()->getTwitch()->getWhispersChannel();
+    }
+    else if (this->type_ == "live")
+    {
+        return getApp()->getTwitch()->getLiveChannel();
+    }
+    else if (this->type_ == "automod")
+    {
+        return getApp()->getTwitch()->getAutomodChannel();
+    }
+    else if (this->type_ == "misc")
+    {
+        return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
+    }
+
+    return Channel::getEmpty();
 }
 
 SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
