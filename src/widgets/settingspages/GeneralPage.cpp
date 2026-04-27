@@ -1636,7 +1636,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     SettingWidget::intInput(
-        "Shared chat session refresh interval",
+        "Shared chat session status refresh interval (requires restart)",
         s.sharedChatSessionRefreshInterval,
         {.min = 1, .max = 999, .singleStep = 1, .suffix = "s"})
         ->setTooltip("How often Chatterino polls the Twitch API for the "
