@@ -5,6 +5,7 @@
 #pragma once
 
 #include "util/RapidJsonSerializeQString.hpp"
+#include "util/RapidJsonSerializeQStringView.hpp"  // IWYU pragma: keep
 
 #include <pajlada/serialize.hpp>
 #include <rapidjson/document.h>
@@ -37,6 +38,32 @@ inline void set(rapidjson::Value &obj, const char *key,
     assert(obj.IsObject());
 
     addMember(obj, key, const_cast<rapidjson::Value &>(value), a);
+}
+
+/// Optionally set a QString as a member in an object
+///
+/// QString() = does not add a member
+/// QString("") = adds ""
+/// QString("forsen") = adds "forsen"
+void setOptionally(rapidjson::Value &obj, const char *key, const QString &value,
+                   rapidjson::Document::AllocatorType &a);
+
+/// Optionally set the contents of an std::optional as a member in an object
+///
+/// std::optional<std::string>() = does not add a member
+/// std::optional<std::string>("") = adds ""
+/// std::optional<std::string>("forsen") = adds "forsen"
+template <typename Type>
+void setOptionally(rapidjson::Value &obj, const char *key,
+                   const std::optional<Type> &value,
+                   rapidjson::Document::AllocatorType &a)
+{
+    assert(obj.IsObject());
+
+    if (value.has_value())
+    {
+        addMember(obj, key, pajlada::Serialize<Type>::get(value.value(), a), a);
+    }
 }
 
 template <typename Type>

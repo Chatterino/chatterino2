@@ -206,14 +206,29 @@ set(SOURCE_FILES
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
+        controllers/highlights/HighlightBetaModel.cpp
+        controllers/highlights/HighlightBetaModel.hpp
         controllers/highlights/HighlightModel.cpp
         controllers/highlights/HighlightModel.hpp
         controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
+        controllers/highlights/SharedHighlight.cpp
+        controllers/highlights/SharedHighlight.hpp
+        controllers/highlights/SharedHighlight2.cpp
+        controllers/highlights/SharedHighlight2.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.hpp
+        controllers/highlights/types/ChannelPointsHighlight.hpp
+        controllers/highlights/types/FirstMessageHighlight.hpp
+        controllers/highlights/types/HypeChatHighlight.hpp
+        controllers/highlights/types/SubscribedThreadHighlight.hpp
+        controllers/highlights/types/SubscriptionsHighlight.hpp
+        controllers/highlights/types/WatchStreakHighlight.hpp
+        controllers/highlights/types/WhispersHighlight.hpp
+        controllers/highlights/types/YourUsernameHighlight.hpp
 
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp
@@ -827,6 +842,12 @@ set(SOURCE_FILES
         widgets/settingspages/GeneralPageView.hpp
         widgets/settingspages/HighlightingPage.cpp
         widgets/settingspages/HighlightingPage.hpp
+        widgets/settingspages/HighlightsBetaConfigureDelegate.cpp
+        widgets/settingspages/HighlightsBetaConfigureDelegate.hpp
+        widgets/settingspages/HighlightsBetaConfigureDialog.cpp
+        widgets/settingspages/HighlightsBetaConfigureDialog.hpp
+        widgets/settingspages/HighlightsBetaWidget.cpp
+        widgets/settingspages/HighlightsBetaWidget.hpp
         widgets/settingspages/IgnoresPage.cpp
         widgets/settingspages/IgnoresPage.hpp
         widgets/settingspages/KeyboardSettingsPage.cpp
@@ -968,7 +989,7 @@ endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CHATTERINO_WITH_PRIVATE_QT_API)
 endif()
 
@@ -984,7 +1005,7 @@ else()
         )
 endif()
 
-# Set the output of TARGET to be 
+# Set the output of TARGET to be
 # - CMAKE_BIN_DIR/lib for libraries
 # - CMAKE_BIN_DIR/bin for BINARIES
 # an additional argument specifies the subdirectory.

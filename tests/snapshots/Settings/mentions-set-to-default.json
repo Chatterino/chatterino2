@@ -1,0 +1,25 @@
+{
+    "input": {
+        "highlighting": {
+            "selfHighlight": {
+                "showSelfHighlightInMentions": true
+            }
+        }
+    },
+    "output": {
+        "highlighting": {
+            "selfHighlight": {
+                "showSelfHighlightInMentions": true
+            }
+        },
+        "misc": {
+            "settingsVersion": 1
+        },
+        "pajlada2": [
+            {
+                "id": "yourusername",
+                "showInMentions": true
+            }
+        ]
+    }
+}

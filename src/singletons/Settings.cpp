@@ -10,6 +10,8 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/SharedHighlight.hpp"
+#include "controllers/highlights/SharedHighlight2.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
@@ -52,6 +54,325 @@ void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting)
 {
     _settings.push_back(std::move(setting));
+}
+
+void Settings::migrate()
+{
+    auto currentVersion = this->settingsVersion.getValue();
+
+    if (currentVersion < 1)
+    {
+        this->migrateHighlights();
+        currentVersion = 1;
+    }
+
+    this->settingsVersion.setValue(currentVersion);
+}
+
+void Settings::migrateHighlights()
+{
+    qInfo() << "XXX: MIGRATE HIGHLIGHTS";
+    // TODO: Migrate
+    //  - /highlighting/subHighlight/subsHighlighted
+    //  - /highlighting/subHighlight/enableSound
+    //  - /highlighting/subHighlight/enableTaskbarFlashing
+    //  to /definedHighlights/subHighlight
+
+    auto n = this->sharedHighlightsSetting.getValue();
+
+    // TODO: Ensure the order is correct when a user first migrates
+
+    {
+        YourUsernameHighlight h;
+
+        if (const auto &s = this->enableSelfHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        if (const auto &s = this->showSelfHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.setShowInMentions(s.getValue());
+        }
+
+        if (const auto &s = this->enableSelfHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.setHighlightTaskbar(s.getValue());
+        }
+
+        if (const auto &s = this->enableSelfHighlightSound; s.hasValueBeenSet())
+        {
+            h.setPlaySound(s.getValue());
+        }
+
+        if (const auto &s = this->selfHighlightSoundUrl; s.hasValueBeenSet())
+        {
+            h.setSoundUrl(s.getValue());
+        }
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        WhispersHighlight h;
+
+        if (const auto &s = this->enableWhisperHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // Whisper highlights do not support "show in mentions" - no setting to migrate
+
+        if (const auto &s = this->enableWhisperHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.setHighlightTaskbar(s.getValue());
+        }
+
+        if (const auto &s = this->enableWhisperHighlightSound;
+            s.hasValueBeenSet())
+        {
+            h.setPlaySound(s.getValue());
+        }
+
+        if (const auto &s = this->whisperHighlightSoundUrl; s.hasValueBeenSet())
+        {
+            h.setSoundUrl(s.getValue());
+        }
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: SubscriptionsHighlight
+        SubscriptionsHighlight h;
+
+        if (const auto &s = this->enableSubHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // Sub highlights do not support "show in mentions" - no setting to migrate
+
+        if (const auto &s = this->enableSubHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.setHighlightTaskbar(s.getValue());
+        }
+
+        if (const auto &s = this->enableSubHighlightSound; s.hasValueBeenSet())
+        {
+            h.setPlaySound(s.getValue());
+        }
+
+        if (const auto &s = this->subHighlightSoundUrl; s.hasValueBeenSet())
+        {
+            h.setSoundUrl(s.getValue());
+        }
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: ChannelPointsHighlight
+        ChannelPointsHighlight h;
+
+        if (const auto &s = this->enableRedeemedHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // This does not support "show in mentions" - no setting to migrate
+        // This does not support "flash taskbar" - no setting to migrate
+        // This does not support "play sound" - no setting to migrate
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: FirstMessageHighlight
+        FirstMessageHighlight h;
+
+        if (const auto &s = this->enableFirstMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // This does not support "show in mentions" - no setting to migrate
+        // This does not support "flash taskbar" - no setting to migrate
+        // This does not support "play sound" - no setting to migrate
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: HypeChatHighlight
+        HypeChatHighlight h;
+
+        if (const auto &s = this->enableElevatedMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // This does not support "show in mentions" - no setting to migrate
+        // This does not support "flash taskbar" - no setting to migrate
+        // This does not support "play sound" - no setting to migrate
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: SubscribedThreadHighlight
+        SubscribedThreadHighlight h;
+
+        if (const auto &s = this->enableThreadHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        if (const auto &s = this->showThreadHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.setShowInMentions(s.getValue());
+        }
+
+        if (const auto &s = this->enableThreadHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.setHighlightTaskbar(s.getValue());
+        }
+
+        if (const auto &s = this->enableThreadHighlightSound;
+            s.hasValueBeenSet())
+        {
+            h.setPlaySound(s.getValue());
+        }
+
+        if (const auto &s = this->threadHighlightSoundUrl; s.hasValueBeenSet())
+        {
+            h.setSoundUrl(s.getValue());
+        }
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: AutomodCaughtHighlight
+        AutomodCaughtHighlight h;
+
+        if (const auto &s = this->enableAutomodHighlight; s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        if (const auto &s = this->showAutomodInMentions; s.hasValueBeenSet())
+        {
+            h.setShowInMentions(s.getValue());
+        }
+
+        if (const auto &s = this->enableAutomodHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.setHighlightTaskbar(s.getValue());
+        }
+
+        if (const auto &s = this->enableAutomodHighlightSound;
+            s.hasValueBeenSet())
+        {
+            h.setPlaySound(s.getValue());
+        }
+
+        if (const auto &s = this->automodHighlightSoundUrl; s.hasValueBeenSet())
+        {
+            h.setSoundUrl(s.getValue());
+        }
+
+        this->pajlada2.push_back(h);
+    }
+
+    {
+        // TODO: WatchStreakHighlight
+        HypeChatHighlight h;
+
+        if (const auto &s = this->enableElevatedMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        // This does not support "show in mentions" - no setting to migrate
+        // This does not support "flash taskbar" - no setting to migrate
+        // This does not support "play sound" - no setting to migrate
+
+        this->pajlada2.push_back(h);
+    }
+
+    // TODO: If we implement a new built-in highlight that is enabled by default - where in the order does that get added?
+    // We should be able to control this somehow
+    // Maybe in this migration - find an "anchor" highlight (e.g. "yourusername" and always put it underneath that?)
+
+    /*
+    {
+        const QString uuid = "subhighlight";
+        auto enabled = this->enableSubHighlight.getValue();
+        auto soundEnabled = this->enableSubHighlightSound.getValue();
+        auto taskbarEnabled = this->enableSubHighlightTaskbar.getValue();
+        auto soundUrl = this->subHighlightSoundUrl.getValue();
+        auto color = this->subHighlightColor.getValue();
+
+        auto newPhrase = QMap<QString, QJsonValue>{
+            {"enabled", enabled},
+            {"showInMentions", false},
+            {"flashTaskbar", taskbarEnabled},
+            {"enableRegex", false},
+            {"caseSensitive", false},
+            {"playSound", soundEnabled},
+            {"customSound", soundUrl},
+            {"color", color},
+        };
+
+        bool found = false;
+
+        for (auto &highlight : n)
+        {
+            if (highlight.id == uuid)
+            {
+                highlight.playSound = soundEnabled;
+                highlight.alert = taskbarEnabled;
+                highlight.customSoundURL = soundUrl;
+                *highlight.backgroundColor = QColor::fromString(color);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            n.push_back(SharedHighlight{
+                .id = uuid,
+                .name = "xd",
+                .enabled = true,
+                .pattern = "asdddddaaa",
+                .showInMentions = false,
+                .alert = taskbarEnabled,
+                .playSound = soundEnabled,
+                .customSoundURL = soundUrl,
+                .backgroundColor =
+                    std::make_shared<QColor>(QColor::fromString(color)),
+                .isRegex = false,
+                .isCaseSensitive = false,
+            });
+        }
+    }
+
+    this->sharedHighlightsSetting.setValue(n);
+    */
+
+    qInfo() << "XXX:" << n;
 }
 
 bool Settings::isHighlightedUser(const QString &username)
@@ -151,7 +472,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 Settings *Settings::instance_ = nullptr;
 
 Settings::Settings(const Args &args, const QString &settingsDirectory,
-                   bool isTest)
+                   const SettingsArgs &settingsArgs)
     : prevInstance_(Settings::instance_)
     , disableSaving(args.dontSaveSettings)
 {
@@ -160,8 +481,9 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
     // get global instance of the settings library
     auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
 
-    if (isTest)
+    if (settingsArgs.isTest)
     {
+        qInfo() << "Loading settings from" << settingsPath;
         settingsInstance->load(qPrintable(settingsPath));
     }
     else
@@ -207,6 +529,14 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
         static_cast<uint64_t>(
             pajlada::Settings::SettingManager::SaveMethod::OnlySaveIfChanged));
 
+    // Run setting migrations
+    if (settingsArgs.runMigrations)
+    {
+        this->migrate();
+    }
+
+    initializeSignalVector(this->signalHolder, this->sharedHighlightsSetting,
+                           this->sharedHighlights);
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);
     initializeSignalVector(this->signalHolder, this->highlightedUsersSetting,
