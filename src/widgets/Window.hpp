@@ -13,12 +13,12 @@
 
 namespace chatterino {
 
-class PixmapButton;
 class LabelButton;
 class Theme;
 class UpdateDialog;
 class SplitNotebook;
 class Channel;
+class SvgButton;
 
 /**
  * @exposeenum c2.WindowType
@@ -62,7 +62,7 @@ private:
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
     // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
-    PixmapButton *streamerModeTitlebarIcon_ = nullptr;
+    SvgButton *streamerModeTitlebarIcon_ = nullptr;
     void updateStreamerModeIcon();
 
     friend class Notebook;
