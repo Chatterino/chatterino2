@@ -28,58 +28,6 @@ QJsonArray loadWindowArray(const QString &settingsPath)
     return windows_arr;
 }
 
-template <typename T>
-T loadNodes(const QJsonObject &obj)
-{
-    static_assert("loadNodes must be called with the SplitNodeDescriptor "
-                  "or ContainerNodeDescriptor type");
-}
-
-template <>
-SplitNodeDescriptor loadNodes(const QJsonObject &root)
-{
-    SplitNodeDescriptor descriptor;
-
-    descriptor.flexH_ = root.value("flexh").toDouble(1.0);
-    descriptor.flexV_ = root.value("flexv").toDouble(1.0);
-
-    auto data = root.value("data").toObject();
-
-    SplitDescriptor::loadFromJSON(descriptor, root, data);
-
-    return descriptor;
-}
-
-template <>
-ContainerNodeDescriptor loadNodes(const QJsonObject &root)
-{
-    ContainerNodeDescriptor descriptor;
-
-    descriptor.flexH_ = root.value("flexh").toDouble(1.0);
-    descriptor.flexV_ = root.value("flexv").toDouble(1.0);
-
-    descriptor.vertical_ = root.value("type").toString() == "vertical";
-
-    for (QJsonValue _val : root.value("items").toArray())
-    {
-        auto _obj = _val.toObject();
-
-        auto _type = _obj.value("type");
-        if (_type == "split")
-        {
-            descriptor.items_.emplace_back(
-                loadNodes<SplitNodeDescriptor>(_obj));
-        }
-        else
-        {
-            descriptor.items_.emplace_back(
-                loadNodes<ContainerNodeDescriptor>(_obj));
-        }
-    }
-
-    return descriptor;
-}
-
 const QList<QUuid> loadFilters(QJsonValue val)
 {
     QList<QUuid> filterIds;
@@ -123,6 +71,45 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     }
 }
 
+SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
+{
+    SplitNodeDescriptor descriptor;
+    SplitDescriptor::loadFromJSON(descriptor, root, root["data"].toObject());
+    descriptor.flexH_ = root["flexh"].toDouble(1.0);
+    descriptor.flexV_ = root["flexv"].toDouble(1.0);
+    return descriptor;
+}
+
+ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
+    const QJsonObject &root)
+{
+    ContainerNodeDescriptor descriptor;
+
+    descriptor.flexH_ = root.value("flexh").toDouble(1.0);
+    descriptor.flexV_ = root.value("flexv").toDouble(1.0);
+
+    descriptor.vertical_ = root.value("type").toString() == "vertical";
+
+    const auto items = root.value("items").toArray();
+    for (const auto val : items)
+    {
+        const auto obj = val.toObject();
+        auto type = obj.value("type");
+        if (type.toString() == "split")
+        {
+            descriptor.items_.emplace_back(
+                SplitNodeDescriptor::loadFromJSON(obj));
+        }
+        else
+        {
+            descriptor.items_.emplace_back(
+                ContainerNodeDescriptor::loadFromJSON(obj));
+        }
+    }
+
+    return descriptor;
+}
+
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
 {
     TabDescriptor tab;
@@ -148,11 +135,11 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
         auto nodeType = splitRoot.value("type").toString();
         if (nodeType == "split")
         {
-            tab.rootNode_ = loadNodes<SplitNodeDescriptor>(splitRoot);
+            tab.rootNode_ = SplitNodeDescriptor::loadFromJSON(splitRoot);
         }
         else if (nodeType == "horizontal" || nodeType == "vertical")
         {
-            tab.rootNode_ = loadNodes<ContainerNodeDescriptor>(splitRoot);
+            tab.rootNode_ = ContainerNodeDescriptor::loadFromJSON(splitRoot);
         }
     }
 

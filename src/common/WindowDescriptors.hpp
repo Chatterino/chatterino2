@@ -59,6 +59,8 @@ struct SplitDescriptor {
 struct SplitNodeDescriptor : SplitDescriptor {
     qreal flexH_ = 1;
     qreal flexV_ = 1;
+
+    static SplitNodeDescriptor loadFromJSON(const QJsonObject &root);
 };
 
 struct ContainerNodeDescriptor;
@@ -73,16 +75,18 @@ struct ContainerNodeDescriptor {
     bool vertical_ = false;
 
     std::vector<NodeDescriptor> items_;
+
+    static ContainerNodeDescriptor loadFromJSON(const QJsonObject &root);
 };
 
 struct TabDescriptor {
-    static TabDescriptor loadFromJSON(const QJsonObject &root);
-
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};
 
     std::optional<NodeDescriptor> rootNode_;
+
+    static TabDescriptor loadFromJSON(const QJsonObject &tabObj);
 };
 
 struct WindowDescriptor {
