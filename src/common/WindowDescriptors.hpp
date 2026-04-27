@@ -18,6 +18,10 @@
 
 namespace chatterino {
 
+class IndirectChannel;
+class SplitContainer;
+class Split;
+
 /**
  * A WindowLayout contains one or more windows.
  * Only one of those windows can be the main window
@@ -42,9 +46,6 @@ struct SplitDescriptor {
     // Twitch Channel name or IRC channel name
     QString channelName_;
 
-    // IRC server
-    int server_{-1};
-
     // Whether "Moderation Mode" (the sword icon) is enabled in this split or not
     bool moderationMode_{false};
 
@@ -52,13 +53,27 @@ struct SplitDescriptor {
 
     QList<QUuid> filters_;
 
-    static void loadFromJSON(SplitDescriptor &descriptor,
-                             const QJsonObject &root, const QJsonObject &data);
+    static SplitDescriptor loadFromJSON(const QJsonObject &root);
+
+    static SplitDescriptor fromSplit(const Split &split);
+
+    void appendJson(QJsonObject &root) const;
+
+    IndirectChannel decodeChannel() const;
+
+    void applyTo(Split &split) const;
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
+    SplitNodeDescriptor() = default;
+    SplitNodeDescriptor(SplitDescriptor descriptor);
+
     qreal flexH_ = 1;
     qreal flexV_ = 1;
+
+    static SplitNodeDescriptor loadFromJSON(const QJsonObject &root);
+
+    void appendJson(QJsonObject &root) const /* override */;
 };
 
 struct ContainerNodeDescriptor;
@@ -73,16 +88,25 @@ struct ContainerNodeDescriptor {
     bool vertical_ = false;
 
     std::vector<NodeDescriptor> items_;
+
+    static ContainerNodeDescriptor loadFromJSON(const QJsonObject &root);
+
+    void appendJson(QJsonObject &root) const;
 };
 
 struct TabDescriptor {
-    static TabDescriptor loadFromJSON(const QJsonObject &root);
-
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};
 
     std::optional<NodeDescriptor> rootNode_;
+
+    static TabDescriptor loadFromJSON(const QJsonObject &tabObj);
+
+    static TabDescriptor fromRootContainer(const SplitContainer &container,
+                                           bool isSelected);
+
+    void appendJson(QJsonObject &root) const;
 };
 
 struct WindowDescriptor {
