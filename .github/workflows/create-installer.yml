@@ -11,6 +11,10 @@ on:
       - "release/*"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   create-installer:
     runs-on: windows-latest
@@ -19,27 +23,22 @@ jobs:
     strategy:
       matrix:
         qt-version: ["6.7.1"]
+
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # allows for tags access
+          fetch-depth: 0 
 
-      - name: Download artifact from triggering Build workflow
-        if: ${{ github.event_name == 'workflow_run' }}
-        uses: actions/download-artifact@v8
-        with:
-          name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
-          github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
-          path: build/
-
-      - name: Find Build workflow run
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        id: find-build-run
+      - name: Resolve Build workflow run
+        id: resolve-build-run
         uses: actions/github-script@v9
         with:
           result-encoding: string
           script: |
+            if (context.eventName === "workflow_run") {
+              return String(context.payload.workflow_run.id);
+            }
+
             const { owner, repo } = context.repo;
 
             // Manual runs do not have a triggering workflow_run payload.
@@ -62,13 +61,13 @@ jobs:
 
             return String(run.id);
 
-      - name: Download artifact from resolved Build workflow
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Download artifact
         uses: actions/download-artifact@v8
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           github-token: ${{ github.token }}
-          run-id: ${{ steps.find-build-run.outputs.result }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.resolve-build-run.outputs.result }}
           path: build/
 
       - name: Unzip
