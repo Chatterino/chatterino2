@@ -1224,9 +1224,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                                     MessageContext::Original);
         }
 
-        // The isTest() check is needed to avoid calling potentially uninited
-        // Helix in unit tests
-        if (msg->flags.has(MessageFlag::SharedMessage) && !getApp()->isTest())
+        if (msg->flags.has(MessageFlag::SharedMessage))
         {
             chan->probeSharedChatSession();
         }
