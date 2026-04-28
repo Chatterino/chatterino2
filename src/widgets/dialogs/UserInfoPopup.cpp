@@ -48,6 +48,8 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QInputDialog>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QMetaEnum>
 #include <QNetworkAccessManager>
@@ -421,9 +423,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
         // visibility of this is updated in setData
-
         user.emplace<LabelButton>("Add notes", this)
             .assign(&this->ui_.notesAdd);
+        user.emplace<LabelButton>("Set alias", this)
+            .assign(&this->ui_.aliasSet);
+
         auto usercard = user.emplace<LabelButton>("Usercard", this)
                             .assign(&this->ui_.usercardLabel);
         auto mod = user.emplace<PixmapButton>(this);
@@ -796,6 +800,38 @@ void UserInfoPopup::installEvents()
             this->editUserNotesDialog_->updateWindowTitle(this->userName_);
             this->editUserNotesDialog_->show();
         });
+    // user alias
+    QObject::connect(this->ui_.aliasSet, &LabelButton::clicked, [this]() {
+        const auto userID = this->userId_;
+        const auto userName = this->userName_;
+
+        if (userID.isEmpty())
+        {
+            QMessageBox::warning(
+                nullptr, "Set user alias",
+                "Cannot set an alias because this user's Twitch "
+                "user ID is not available yet.");
+            return;
+        }
+
+        const auto userData = getApp()->getUserData()->getUser(userID);
+        const auto currentAlias =
+            userData.has_value() ? userData->alias : QString();
+
+        bool ok = false;
+        const auto alias = QInputDialog::getText(
+            nullptr, "Set user alias",
+            QString("Alias for %1:")
+                .arg(userName.isEmpty() ? userID : userName),
+            QLineEdit::Normal, currentAlias, &ok);
+
+        if (!ok)
+        {
+            return;
+        }
+
+        getApp()->getUserData()->setUserAlias(userID, alias);
+    });
 
     // user data updated
     this->userDataUpdatedConnection_ =

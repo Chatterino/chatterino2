@@ -232,6 +232,17 @@ QString stylizeUsername(const QString &username, const Message &message)
         break;
     }
 
+    // User ID aliases take precedence over username-based nicknames.
+    const auto *userDataController = getApp()->getUserData();
+    if (userDataController != nullptr && !message.userID.isEmpty())
+    {
+        const auto userData = userDataController->getUser(message.userID);
+        if (userData.has_value() && !userData->alias.isEmpty())
+        {
+            return userData->alias;
+        }
+    }
+
     if (auto nicknameText = getSettings()->matchNickname(usernameText))
     {
         usernameText = *nicknameText;
