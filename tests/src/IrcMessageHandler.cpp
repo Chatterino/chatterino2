@@ -578,12 +578,15 @@ public:
 };
 
 namespace {
-    bool makesGetSharedChatSessionCall(testlib::Snapshot &snapshot) {
-        return snapshot.name().startsWith("shared-chat-") &&
-            snapshot.name() != "shared-chat-raid.json" &&
-            snapshot.name() != "shared-chat-same-channel.json";
-    }
+
+bool makesGetSharedChatSessionCall(testlib::Snapshot &snapshot)
+{
+    return snapshot.name().startsWith("shared-chat-") &&
+           snapshot.name() != "shared-chat-raid.json" &&
+           snapshot.name() != "shared-chat-same-channel.json";
 }
+
+}  // namespace
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
 ///
