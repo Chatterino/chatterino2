@@ -125,6 +125,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
+    , nextSharedChatSessionProbe_(QDateTime::currentDateTime())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -183,6 +184,11 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->cleanUpReplyThreads();
     });
     this->threadClearTimer_.start(5 * 60 * 1000);
+
+    QObject::connect(&this->nextSharedChatSessionUpdateTimer_, &QTimer::timeout,
+                     [this] {
+                         this->refreshSharedChatSessionState();
+                     });
 
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.emotesReloaded,
@@ -2397,6 +2403,153 @@ void TwitchChannel::setSendWait(int seconds)
 bool TwitchChannel::isLoadingRecentMessages() const
 {
     return this->loadingRecentMessages_.test();
+}
+
+const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
+{
+    return this->sharedChatSessionParticipants_;
+}
+
+void TwitchChannel::probeSharedChatSession()
+{
+    auto now = QDateTime::currentDateTime();
+
+    if (!this->nextSharedChatSessionUpdateTimer_.isActive() &&
+        now >= this->nextSharedChatSessionProbe_)
+    {
+        this->nextSharedChatSessionProbe_ = now.addSecs(30);
+        this->refreshSharedChatSessionState();
+    }
+}
+
+void TwitchChannel::refreshSharedChatSessionState()
+{
+    getHelix()->getSharedChatSession(
+        this->roomId(),
+        [this,
+         weak = this->weak_from_this()](const HelixSharedChatSession &session) {
+            const auto self =
+                std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
+            if (!self)
+            {
+                return;
+            }
+
+            if (session.participantIds.empty())
+            {
+                // Allow immediate re-probe
+                this->nextSharedChatSessionProbe_ =
+                    QDateTime::currentDateTime();
+                this->nextSharedChatSessionUpdateTimer_.stop();
+
+                this->sharedChatSessionParticipants_.clear();
+                this->sharedChatSessionParticipantIds_.clear();
+
+                this->sharedChatStatusChanged.invoke({});
+
+                return;
+            }
+
+            bool participantsDiffer =
+                session.participantIds.size() - 1 !=
+                this->sharedChatSessionParticipantIds_.size();
+            if (!participantsDiffer)
+            {
+                for (const auto &broadcasterID : session.participantIds)
+                {
+                    if (this->roomId() == broadcasterID)
+                    {
+                        continue;
+                    }
+
+                    if (!this->sharedChatSessionParticipantIds_.contains(
+                            broadcasterID))
+                    {
+                        participantsDiffer = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!participantsDiffer)
+            {
+                return;
+            }
+
+            getHelix()->fetchUsers(
+                session.participantIds, {},
+                [this, weak = this->weak_from_this()](const auto &users) {
+                    const auto self =
+                        std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
+                    if (!self)
+                    {
+                        return;
+                    }
+
+                    this->sharedChatSessionParticipants_.clear();
+                    this->sharedChatSessionParticipantIds_.clear();
+
+                    for (const auto &user : users)
+                    {
+                        if (user.id != this->roomId())
+                        {
+                            this->sharedChatSessionParticipantIds_.insert(
+                                user.id);
+                            this->sharedChatSessionParticipants_.push_back(
+                                user.displayName);
+                        }
+                    }
+
+                    auto intervalSecs = std::clamp(
+                        getSettings()
+                            ->sharedChatSessionRefreshInterval.getValue(),
+                        1, 999);
+                    this->nextSharedChatSessionUpdateTimer_.start(intervalSecs *
+                                                                  1000);
+
+                    this->sharedChatStatusChanged.invoke(
+                        this->sharedChatSessionParticipants_);
+                },
+                [] {
+                    qCWarning(chatterinoTwitch) << "Failed to get user info";
+                });
+        },
+        [](HelixGetSharedChatSessionError error, const QString &message) {
+            QString errorMessage = "Failed to get shared chat session state: ";
+
+            switch (error)
+            {
+                case HelixGetSharedChatSessionError::InvalidBroadcasterId: {
+                    errorMessage += "Invalid broadcaster ID";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::UserMissingScope: {
+                    errorMessage +=
+                        "Missing required scope. Re-login with your "
+                        "account and try again.";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action.";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::Unknown: {
+                    errorMessage += "Unknown error";
+                }
+                break;
+
+                case HelixGetSharedChatSessionError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+            }
+
+            qCWarning(chatterinoTwitch) << errorMessage;
+        });
 }
 
 }  // namespace chatterino

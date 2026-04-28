@@ -16,6 +16,7 @@
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/Helix.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -160,6 +161,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::EmoteController emotes;
+    mock::Helix helix;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
@@ -561,6 +563,20 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
+
+        const auto helixExpectations =
+            this->snapshot->param("helixExpectations").toObject();
+        if (helixExpectations.size() > 0)
+        {
+            initializeHelix(&mockHelix);
+
+            int nCalls =
+                helixExpectations.value("getSharedChatSession").toInt();
+            if (nCalls > 0)
+            {
+                EXPECT_CALL(mockHelix, getSharedChatSession).Times(nCalls);
+            }
+        }
     }
 
     void TearDown() override
@@ -573,6 +589,7 @@ public:
     std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<testlib::Snapshot> snapshot;
+    testing::StrictMock<mock::Helix> mockHelix;
 };
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
@@ -593,6 +610,9 @@ public:
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
 /// - `nAdditional`: Include n additional built messages (from `prevMessages`)
+/// - `helixExpectations`: An object with names of Helix API methods that will
+///   be called during the test and the expected call count. Name of the method
+///   is the key and the number of calls its value.
 TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
