@@ -274,5 +274,10 @@
             "userID": "",
             "usernameColor": "#ff000000"
         }
-    ]
+    ],
+    "params": {
+        "helixExpectations": {
+            "getSharedChatSession": 1
+        }
+    }
 }
