@@ -14,6 +14,7 @@
 #include <QPainter>
 #include <QTimer>
 
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -101,6 +102,20 @@ void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
 void Scrollbar::clearHighlights()
 {
     this->highlights_.clear();
+}
+
+void Scrollbar::setLastMessageMarker(std::optional<qreal> position,
+                                     QColor color)
+{
+    if (this->lastMessageMarkerPosition_ == position &&
+        this->lastMessageMarkerColor_ == color)
+    {
+        return;
+    }
+
+    this->lastMessageMarkerPosition_ = position;
+    this->lastMessageMarkerColor_ = color;
+    this->update();
 }
 
 void Scrollbar::scrollToBottom(bool animate)
@@ -374,6 +389,28 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 
                 case ScrollbarHighlight::None:;
             }
+        }
+    }
+
+    if (this->lastMessageMarkerPosition_.has_value() &&
+        this->lastMessageMarkerColor_.isValid())
+    {
+        const auto range = this->maximum_ - this->minimum_;
+
+        if (range > 0 && *this->lastMessageMarkerPosition_ >= this->minimum_ &&
+            *this->lastMessageMarkerPosition_ <= this->maximum_)
+        {
+            const auto relativePosition =
+                (*this->lastMessageMarkerPosition_ - this->minimum_) / range;
+
+            const auto y = std::clamp(static_cast<int>(std::lround(
+                                          relativePosition * this->height())),
+                                      0, std::max(0, this->height() - 1));
+
+            QColor color = this->lastMessageMarkerColor_;
+            color.setAlpha(255);
+
+            painter.fillRect(0, y, this->width(), 1, color);
         }
     }
 }

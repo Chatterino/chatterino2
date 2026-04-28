@@ -420,6 +420,7 @@ void ChannelView::initializeSignals()
 
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) {
+            this->updateScrollbarLastMessageMarker(this->getMessagesSnapshot());
             this->update();
         },
         this->signalHolder_);
@@ -685,6 +686,7 @@ void ChannelView::performLayout(bool causedByScrollbar, bool causedByShow)
 
     /// Update scrollbar
     this->updateScrollbar(messages, causedByScrollbar, causedByShow);
+    this->updateScrollbarLastMessageMarker(messages);
 
     this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
                                   this->scrollBar_->isVisible() &&
@@ -794,11 +796,50 @@ void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
     }
 }
 
+void ChannelView::updateScrollbarLastMessageMarker(
+    const std::vector<MessageLayoutPtr> &messages)
+{
+    if (!getSettings()->showLastMessageIndicator ||
+        !this->scrollBar_->isVisible() || !this->lastReadMessage_)
+    {
+        this->scrollBar_->setLastMessageMarker(std::nullopt);
+        return;
+    }
+
+    const auto it =
+        std::find(messages.begin(), messages.end(), this->lastReadMessage_);
+
+    if (it == messages.end())
+    {
+        this->scrollBar_->setLastMessageMarker(std::nullopt);
+        return;
+    }
+
+    const auto index = std::distance(messages.begin(), it);
+
+    QColor color;
+    if (this->messagePreferences_.lastMessageColor.isValid())
+    {
+        color = this->messagePreferences_.lastMessageColor;
+    }
+    else
+    {
+        color = this->window() == QApplication::activeWindow()
+                    ? this->messageColors_.focusedLastMessageLine
+                    : this->messageColors_.unfocusedLastMessageLine;
+    }
+
+    this->scrollBar_->setLastMessageMarker(
+        this->scrollBar_->getMinimum() + qreal(index + 1), color);
+}
+
 void ChannelView::clearMessages()
 {
     // Clear all stored messages in this chat widget
     this->messages_.clear();
+    this->lastReadMessage_.reset();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->setLastMessageMarker(std::nullopt);
     this->scrollBar_->resetBounds();
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
@@ -1354,6 +1395,7 @@ void ChannelView::updateLastReadMessage()
         this->lastReadMessage_ = *lastMessage;
     }
 
+    this->updateScrollbarLastMessageMarker(this->getMessagesSnapshot());
     this->update();
 }
 
