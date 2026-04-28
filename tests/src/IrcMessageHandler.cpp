@@ -563,8 +563,6 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
-
-        Helix::initialize();
     }
 
     void TearDown() override
@@ -578,6 +576,14 @@ public:
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<testlib::Snapshot> snapshot;
 };
+
+namespace {
+    bool makesGetSharedChatSessionCall(testlib::Snapshot &snapshot) {
+        return snapshot.name().startsWith("shared-chat-") &&
+            snapshot.name() != "shared-chat-raid.json" &&
+            snapshot.name() != "shared-chat-same-channel.json";
+    }
+}
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
 ///
@@ -602,6 +608,18 @@ TEST_P(TestIrcMessageHandlerP, Run)
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
     VectorMessageSink sink;
+
+    // Some tests cause IrcMessageHandler to call getSharedChatSession()
+    // from the Helix API. We need to make sure that mock Helix is initialized
+    // and that we expect the method call to be made. Luckily we can identify
+    // the tests that need this special handling by the name of the snapshot.
+    // Not great, not terrible...
+    testing::StrictMock<mock::Helix> mockHelix;
+    if (makesGetSharedChatSessionCall(*snapshot))
+    {
+        initializeHelix(&mockHelix);
+        EXPECT_CALL(mockHelix, getSharedChatSession).Times(1);
+    }
 
     const auto &userData = snapshot->param("userData").toObject();
     for (auto it = userData.begin(); it != userData.end(); ++it)
@@ -661,6 +679,18 @@ TEST_P(TestIrcMessageHandlerP, CloneElements)
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
 
     VectorMessageSink sink;
+
+    // Some tests cause IrcMessageHandler to call getSharedChatSession()
+    // from the Helix API. We need to make sure that mock Helix is initialized
+    // and that we expect the method call to be made. Luckily we can identify
+    // the tests that need this special handling by the name of the snapshot.
+    // Not great, not terrible...
+    testing::StrictMock<mock::Helix> mockHelix;
+    if (makesGetSharedChatSessionCall(*snapshot))
+    {
+        initializeHelix(&mockHelix);
+        EXPECT_CALL(mockHelix, getSharedChatSession).Times(1);
+    }
 
     for (auto prevInput : this->snapshot->param("prevMessages").toArray())
     {
