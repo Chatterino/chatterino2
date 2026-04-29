@@ -977,9 +977,57 @@ GraphViz output:
 
 Get all open windows.
 
+##### `WindowManager:on_channelview_context_menu_requested(cb)`
+
+Registers an event handler for context menus in ChannelViews.
+
+When a context menu is requested, `cb` is passed a table with the following
+fields:
+
+- `split?` ([`Split`](#split)) The split holding the channel view. This is `nil`
+  if the view is not inside a split.
+- `message` ([`Message`](#message)) The clicked message.
+- `message_element?` (`MessageElement`) The clicked message element.
+- `channel?` ([`Channel`](#channel)) The channel shown in the view. Note that
+  this might be a virtual channel (e.g. in a search popup or usercard).
+- `menu` ([`QMenu`](#qmenu)) The context menu. Add your actions here.
+
 #### `c2.windows`
 
 The global [`WindowManager`](#windowmanager).
+
+#### `QMenu`
+
+A generic menu used for context menus.
+
+##### `QMenu:add_action(text, cb)`
+
+Appends a new action to the menu.
+
+##### `QMenu:insert_action(before, text, cb)`
+
+Inserts an action named `text` after `before`. If `before` is not found, the
+action is inserted at the end. `before` can either be a name or a one-based
+index.
+
+##### `QMenu:add_menu(title)`
+
+Appends a new QMenu with `title` to the menu. Returns the new menu.
+
+##### `QMenu:insert_menu(before, text)`
+
+Inserts a new QMenu named `title` after `before`. If `before` is not found,
+the menu is inserted at the end. `before` can either be a name or a one-based
+index. Returns the new menu.
+
+##### `QMenu:add_separator()`
+
+Appends a new separator.
+
+##### `QMenu:insert_separator(before)`
+
+Inserts a new separator after `before`. If `before` is not found, the separator
+is inserted at the end. `before` can either be a name or a one-based index.
 
 ### Input/Output API
 

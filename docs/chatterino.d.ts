@@ -656,14 +656,39 @@ declare namespace c2 {
         type: WindowType;
     }
 
+    interface ChannelViewContextMenuRequestedArgs {
+        split?: Split;
+        message: Message;
+        message_element: MessageElement;
+        channel?: Channel;
+        menu: QMenu;
+    }
+
     class WindowManager {
         main_window: Window;
         last_selected_window: Window;
 
         all(): Window[];
+
+        on_channelview_context_menu_requested(
+            cb: (args: ChannelViewContextMenuRequestedArgs) => void
+        ): ConnectionHandle;
     }
 
     var windows: WindowManager;
+
+    class QMenu {
+        add_action(text: string, cb: () => void): void;
+        insert_action(
+            before: string | number,
+            text: string,
+            cb: () => void
+        ): void;
+        add_menu(text: string): QMenu;
+        insert_menu(before: string | number, text: string): QMenu;
+        add_separator(): void;
+        insert_separator(before: string | number): void;
+    }
 }
 
 declare module "chatterino.json" {

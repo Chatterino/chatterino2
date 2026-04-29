@@ -281,6 +281,8 @@ set(SOURCE_FILES
         controllers/plugins/api/JSONStringify.hpp
         controllers/plugins/api/Message.cpp
         controllers/plugins/api/Message.hpp
+        controllers/plugins/api/QMenuWrap.cpp
+        controllers/plugins/api/QMenuWrap.hpp
         controllers/plugins/api/WebSocket.cpp
         controllers/plugins/api/WebSocket.hpp
         controllers/plugins/api/WindowManager.cpp

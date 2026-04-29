@@ -31,6 +31,8 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+class MessageLayout;
+class MessageLayoutElement;
 class WindowLayout;
 class Theme;
 class Fonts;
@@ -161,6 +163,10 @@ public:
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
+
+    pajlada::Signals::Signal<const ChannelView &, const MessageLayout &,
+                             const MessageLayoutElement *, QMenu &>
+        channelViewContextMenuRequested;
 
 private:
     static void encodeNodeRecursively(SplitContainer::Node *node,
