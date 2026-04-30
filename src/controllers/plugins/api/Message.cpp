@@ -275,158 +275,134 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl);
 
 namespace chatterino::lua::api::message {
 
-struct ElementRef {
-    ElementRef() = default;
-    ElementRef(std::shared_ptr<Message> msg, size_t index)
-        : msg(std::move(msg))
-        , index(index)
+MessageElement *ElementRef::element() const
+{
+    if (!this->msg || this->index >= this->msg->elements.size())
     {
+        return nullptr;
     }
+    checkWritable(this->msg.get());
+    return this->msg->elements[this->index].get();
+}
 
-    MessageElement *element() const
+const MessageElement *ElementRef::constElement() const
+{
+    if (!this->msg || this->index >= this->msg->elements.size())
     {
-        if (!this->msg || this->index >= this->msg->elements.size())
+        return nullptr;
+    }
+    return this->msg->elements[this->index].get();
+}
+
+MessageElement &ElementRef::ref() const
+{
+    auto *el = this->element();
+    if (!el)
+    {
+        throw std::runtime_error("Element does not exist or expired");
+    }
+    return *el;
+}
+
+const MessageElement &ElementRef::cref() const
+{
+    const auto *el = this->constElement();
+    if (!el)
+    {
+        throw std::runtime_error("Element does not exist or expired");
+    }
+    return *el;
+}
+
+template <typename T>
+sol::optional<T &> ElementRef::as() const
+{
+    // using ref() to error if the reference is invalid
+    auto *el = dynamic_cast<T *>(&this->ref());
+    if (!el)
+    {
+        return sol::nullopt;
+    }
+    return *el;
+}
+
+template <typename T>
+sol::optional<const T &> ElementRef::asConst() const
+{
+    // using cref() to error if the reference is invalid
+    const auto *el = dynamic_cast<const T *>(&this->cref());
+    if (!el)
+    {
+        return sol::nullopt;
+    }
+    return *el;
+}
+
+template <typename T>
+bool ElementRef::is() const
+{
+    return dynamic_cast<const T *>(&this->cref()) != nullptr;
+}
+
+/// Visit this element by dynamic casting
+template <typename... T>
+auto ElementRef::visit(auto &&...cb) const
+{
+    static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
+
+    // infer the returned type inside the optional
+    using Cb0 = std::tuple_element_t<0, std::tuple<decltype(cb)...>>;
+    using T0 = std::tuple_element_t<0, std::tuple<T...>>;
+    using TReturn = std::invoke_result_t<Cb0, T0 &>;
+
+    return this->visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
+}
+
+bool ElementRef::operator==(const ElementRef &rhs) const
+{
+    return this->msg.get() == rhs.msg.get() && this->index == rhs.index;
+}
+
+template <bool Const>
+decltype(auto) ElementRef::maybeConstElement() const
+{
+    if constexpr (Const)
+    {
+        return this->constElement();
+    }
+    else
+    {
+        return this->element();
+    }
+}
+
+template <typename TReturn, typename T, typename... Rest>
+auto ElementRef::visitOne(auto &&cb, auto &&...rest) const
+    -> std::conditional_t<std::is_void_v<TReturn>, void, sol::optional<TReturn>>
+{
+    auto *el = dynamic_cast<T *>(this->maybeConstElement<std::is_const_v<T>>());
+    if (!el)
+    {
+        if constexpr (sizeof...(rest) == 0)
         {
-            return nullptr;
-        }
-        checkWritable(this->msg.get());
-        return this->msg->elements[this->index].get();
-    }
-
-    const MessageElement *constElement() const
-    {
-        if (!this->msg || this->index >= this->msg->elements.size())
-        {
-            return nullptr;
-        }
-        return this->msg->elements[this->index].get();
-    }
-
-    MessageElement &ref() const
-    {
-        auto *el = this->element();
-        if (!el)
-        {
-            throw std::runtime_error("Element does not exist or expired");
-        }
-        return *el;
-    }
-
-    const MessageElement &cref() const
-    {
-        const auto *el = this->constElement();
-        if (!el)
-        {
-            throw std::runtime_error("Element does not exist or expired");
-        }
-        return *el;
-    }
-
-    /// Cast this element to `T`. Otherwise nullopt is returned.
-    /// Use `.map()` to access the content.
-    template <typename T>
-    sol::optional<T &> as() const
-    {
-        // using ref() to error if the reference is invalid
-        auto *el = dynamic_cast<T *>(&this->ref());
-        if (!el)
-        {
-            return sol::nullopt;
-        }
-        return *el;
-    }
-
-    /// Cast this element to `const T`. Otherwise nullopt is returned.
-    /// Use `.map()` to access the content.
-    template <typename T>
-    sol::optional<const T &> asConst() const
-    {
-        // using cref() to error if the reference is invalid
-        const auto *el = dynamic_cast<const T *>(&this->cref());
-        if (!el)
-        {
-            return sol::nullopt;
-        }
-        return *el;
-    }
-
-    template <typename T>
-    bool is() const
-    {
-        return dynamic_cast<const T *>(&this->cref()) != nullptr;
-    }
-
-    /// Visit this element by dynamic casting
-    template <typename... T>
-    auto visit(auto &&...cb) const
-    {
-        static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
-
-        // infer the returned type inside the optional
-        using Cb0 = std::tuple_element_t<0, std::tuple<decltype(cb)...>>;
-        using T0 = std::tuple_element_t<0, std::tuple<T...>>;
-        using TReturn = std::invoke_result_t<Cb0, T0 &>;
-
-        return this->visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
-    }
-
-    bool operator==(const ElementRef &rhs) const
-    {
-        return this->msg.get() == rhs.msg.get() && this->index == rhs.index;
-    }
-
-    std::shared_ptr<Message> msg;
-    size_t index = 0;
-
-private:
-    template <bool Const>
-    decltype(auto) maybeConstElement() const
-    {
-        if constexpr (Const)
-        {
-            return this->constElement();
-        }
-        else
-        {
-            return this->element();
-        }
-    }
-
-    /// Run one callback
-    ///
-    /// This is called recursively.
-    /// If the callback returns something, we return an `optional<T>` otherwise
-    /// we return `void`.
-    template <typename TReturn, typename T, typename... Rest>
-    auto visitOne(auto &&cb, auto &&...rest) const
-        -> std::conditional_t<std::is_void_v<TReturn>, void,
-                              sol::optional<TReturn>>
-    {
-        auto *el =
-            dynamic_cast<T *>(this->maybeConstElement<std::is_const_v<T>>());
-        if (!el)
-        {
-            if constexpr (sizeof...(rest) == 0)
+            if constexpr (std::is_void_v<
+                              std::invoke_result_t<decltype(cb), T &>>)
             {
-                if constexpr (std::is_void_v<
-                                  std::invoke_result_t<decltype(cb), T &>>)
-                {
-                    return;
-                }
-                else
-                {
-                    return sol::nullopt;
-                }
+                return;
             }
             else
             {
-                return this->visitOne<TReturn, Rest...>(
-                    std::forward<decltype(rest)>(rest)...);
+                return sol::nullopt;
             }
         }
-        return std::invoke(cb, *el);
+        else
+        {
+            return this->visitOne<TReturn, Rest...>(
+                std::forward<decltype(rest)>(rest)...);
+        }
     }
-};
+    return std::invoke(cb, *el);
+}
 
 struct ElementIterator {
     using difference_type = std::ptrdiff_t;

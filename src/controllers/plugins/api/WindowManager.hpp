@@ -64,6 +64,18 @@ c2.WindowManager = {}
 ---@return c2.Window[] windows
 function c2.WindowManager:all() end
 
+---@class ChannelViewContextMenuRequestedArgs
+---@field split? c2.Split The split holding the channel view. This is `nil` if the view is not inside a split.
+---@field message c2.Message The clicked message.
+---@field message_element? MessageElement The clicked message element.
+---@field channel? c2.Channel The channel shown in the view. Note that this might be a virtual channel (e.g. in a search popup or usercard).
+---@field menu c2.QMenu The context menu. Add your actions here.
+
+---Registers an event handler for context menus in ChannelViews.
+---@param cb fun(args: ChannelViewContextMenuRequestedArgs)
+---@return c2.ConnectionHandle
+function c2.WindowManager:on_channelview_context_menu_requested(cb) end
+
 ---@type c2.WindowManager
 c2.windows = ...
 */

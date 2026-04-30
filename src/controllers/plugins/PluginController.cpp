@@ -21,6 +21,7 @@
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
+#    include "controllers/plugins/api/QMenuWrap.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/api/WindowManager.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
@@ -255,6 +256,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::images::createUserTypes(c2);
     lua::api::createAccounts(c2);
     lua::api::windowmanager::createUserTypes(c2);
+    lua::api::qmenu::createUserType(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);

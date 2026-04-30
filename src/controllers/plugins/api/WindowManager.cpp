@@ -3,9 +3,15 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/Message.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/SignalCallback.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "messages/layouts/MessageLayout.hpp"
+#    include "messages/layouts/MessageLayoutElement.hpp"
 #    include "singletons/WindowManager.hpp"
 #    include "util/WeakPtrHelpers.hpp"
+#    include "widgets/helper/ChannelView.hpp"
 #    include "widgets/Notebook.hpp"
 #    include "widgets/splits/Split.hpp"
 #    include "widgets/Window.hpp"
@@ -174,8 +180,54 @@ void createUserTypes(sol::table &c2)
         sol::readonly_property([](const WindowManager &self) {
             return QPointer(self.getLastSelectedWindow());
         }),
-        "all", [](const WindowManager &self, sol::this_state state) {
+        "all",
+        [](const WindowManager &self, sol::this_state state) {
             return qPointerWrapped(self.windows(), state);
+        },
+        "on_channelview_context_menu_requested",
+        [](WindowManager &self, ThisPluginState state,
+           sol::main_protected_function cb) {
+            return state.plugin()->connections.managedConnect(
+                self.channelViewContextMenuRequested,
+                [cb = SignalCallback(state.plugin()->weakRef(), std::move(cb))](
+                    const ChannelView &view, const MessageLayout &layout,
+                    const MessageLayoutElement *element, QMenu &menu) {
+                    auto pluginRef = cb.owner().strong();
+                    if (!pluginRef)
+                    {
+                        return;
+                    }
+
+                    std::optional<message::ElementRef> ref;
+                    auto msg = std::const_pointer_cast<Message>(
+                        layout.getMessagePtr());
+                    if (element)
+                    {
+                        auto *el = &element->getCreator();
+                        for (size_t i = 0; i < msg->elements.size(); ++i)
+                        {
+                            if (msg->elements[i].get() == el)
+                            {
+                                ref.emplace(msg, i);
+                                break;
+                            }
+                        }
+                    }
+                    std::optional<ChannelRef> maybeChan;
+                    if (auto underlyingChan = view.underlyingChannel())
+                    {
+                        maybeChan.emplace(std::move(underlyingChan));
+                    }
+
+                    auto tbl = pluginRef.plugin()->state().create_table_with(
+                        "split", QPointer(view.findParentSplit()),  //
+                        "channel", std::move(maybeChan),            //
+                        "menu", QPointer(&menu),                    //
+                        "message", std::move(msg),                  //
+                        "message_element", std::move(ref)           //
+                    );
+                    cb(std::move(tbl));
+                });
         });
 }
 
