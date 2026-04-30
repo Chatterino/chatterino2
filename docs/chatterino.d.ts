@@ -661,7 +661,7 @@ declare namespace c2 {
         message: Message;
         message_element: MessageElement;
         channel?: Channel;
-        menu: QMenu;
+        menu: Menu;
     }
 
     class WindowManager {
@@ -677,15 +677,15 @@ declare namespace c2 {
 
     var windows: WindowManager;
 
-    class QMenu {
+    class Menu {
         add_action(text: string, cb: () => void): void;
         insert_action(
             before: string | number,
             text: string,
             cb: () => void
         ): void;
-        add_menu(text: string): QMenu;
-        insert_menu(before: string | number, text: string): QMenu;
+        add_menu(text: string): Menu;
+        insert_menu(before: string | number, text: string): Menu;
         add_separator(): void;
         insert_separator(before: string | number): void;
     }

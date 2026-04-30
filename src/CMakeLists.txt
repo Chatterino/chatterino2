@@ -279,10 +279,10 @@ set(SOURCE_FILES
         controllers/plugins/api/JSONParse.hpp
         controllers/plugins/api/JSONStringify.cpp
         controllers/plugins/api/JSONStringify.hpp
+        controllers/plugins/api/Menu.cpp
+        controllers/plugins/api/Menu.hpp
         controllers/plugins/api/Message.cpp
         controllers/plugins/api/Message.hpp
-        controllers/plugins/api/QMenuWrap.cpp
-        controllers/plugins/api/QMenuWrap.hpp
         controllers/plugins/api/WebSocket.cpp
         controllers/plugins/api/WebSocket.hpp
         controllers/plugins/api/WindowManager.cpp

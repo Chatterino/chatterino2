@@ -462,6 +462,48 @@ c2.ImageSet = {}
 function c2.ImageSet.new(image1, image2, image3) end
 -- End src/controllers/plugins/api/Images.hpp
 
+-- Begin src/controllers/plugins/api/Menu.hpp
+
+
+---A generic menu used for context menus.
+---@class c2.Menu
+c2.Menu = {}
+
+---Appends a new action to the menu.
+---@param text string
+---@param cb fun()
+function c2.Menu:add_action(text, cb) end
+
+---Inserts an action named `text` after `before`. If `before` is not found,
+---the action is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+---@param text string
+---@param cb fun()
+function c2.Menu:insert_action(before, text, cb) end
+
+---Appends a new Menu with `title` to the menu.
+---@param title string
+---@return c2.Menu
+function c2.Menu:add_menu(title) end
+
+---Inserts a new Menu named `title` after `before`. If `before` is not found,
+---the menu is inserted at the end. `before` can either be a name or a one-based
+---index.
+---@param before string|integer A name or index of an action.
+---@param title string
+function c2.Menu:insert_menu(before, title) end
+
+---Appends a new separator.
+function c2.Menu:add_separator() end
+
+---Inserts a new separator after `before`. If `before` is not found,
+---the separator is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+function c2.Menu:insert_separator(before) end
+-- End src/controllers/plugins/api/Menu.hpp
+
 -- Begin src/controllers/plugins/api/Message.hpp
 
 
@@ -817,48 +859,6 @@ c2.MessageContext = {
 
 -- End src/controllers/plugins/api/Message.hpp
 
--- Begin src/controllers/plugins/api/QMenuWrap.hpp
-
-
----A generic menu used for context menus.
----@class c2.QMenu
-c2.QMenu = {}
-
----Appends a new action to the menu.
----@param text string
----@param cb fun()
-function c2.QMenu:add_action(text, cb) end
-
----Inserts an action named `text` after `before`. If `before` is not found,
----the action is inserted at the end. `before` can either be a name or a
----one-based index.
----@param before string|integer A name or index of an action.
----@param text string
----@param cb fun()
-function c2.QMenu:insert_action(before, text, cb) end
-
----Appends a new QMenu with `title` to the menu.
----@param title string
----@return c2.QMenu
-function c2.QMenu:add_menu(title) end
-
----Inserts a new QMenu named `title` after `before`. If `before` is not found,
----the menu is inserted at the end. `before` can either be a name or a one-based
----index.
----@param before string|integer A name or index of an action.
----@param title string
-function c2.QMenu:insert_menu(before, title) end
-
----Appends a new separator.
-function c2.QMenu:add_separator() end
-
----Inserts a new separator after `before`. If `before` is not found,
----the separator is inserted at the end. `before` can either be a name or a
----one-based index.
----@param before string|integer A name or index of an action.
-function c2.QMenu:insert_separator(before) end
--- End src/controllers/plugins/api/QMenuWrap.hpp
-
 -- Begin src/controllers/plugins/api/WebSocket.hpp
 
 ---@class c2.WebSocket
@@ -978,7 +978,7 @@ function c2.WindowManager:all() end
 ---@field message c2.Message The clicked message.
 ---@field message_element? MessageElement The clicked message element.
 ---@field channel? c2.Channel The channel shown in the view. Note that this might be a virtual channel (e.g. in a search popup or usercard).
----@field menu c2.QMenu The context menu. Add your actions here.
+---@field menu c2.Menu The context menu. Add your actions here.
 
 ---Registers an event handler for context menus in ChannelViews.
 ---@param cb fun(args: ChannelViewContextMenuRequestedArgs)

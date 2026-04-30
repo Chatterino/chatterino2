@@ -69,7 +69,7 @@ function c2.WindowManager:all() end
 ---@field message c2.Message The clicked message.
 ---@field message_element? MessageElement The clicked message element.
 ---@field channel? c2.Channel The channel shown in the view. Note that this might be a virtual channel (e.g. in a search popup or usercard).
----@field menu c2.QMenu The context menu. Add your actions here.
+---@field menu c2.Menu The context menu. Add your actions here.
 
 ---Registers an event handler for context menus in ChannelViews.
 ---@param cb fun(args: ChannelViewContextMenuRequestedArgs)

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "controllers/plugins/api/QMenuWrap.hpp"
+#include "controllers/plugins/api/Menu.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
@@ -17,7 +17,7 @@ namespace {
 QAction *findAction(const QMenu &menu, const QString &name)
 {
     const auto actions = menu.actions();
-    for (QAction *action : actions)
+    for (QAction *action : actions)  // NOLINT(misc-const-correctness)
     {
         if (action->text() == name)
         {
@@ -50,16 +50,17 @@ QAction *findAction(const QMenu &menu, const std::variant<QString, int> &spec)
 
 }  // namespace
 
-namespace chatterino::lua::api::qmenu {
+namespace chatterino::lua::api::menu {
 
 void createUserType(sol::table &c2)
 {
     c2.new_usertype<QMenu>(
-        "QMenu", sol::no_constructor,  //
+        "Menu", sol::no_constructor,  //
 
         "add_action",
         [](QMenu &menu, const QString &name, ThisPluginState state,
            sol::main_protected_function cb) {
+            // NOLINTNEXTLINE(clazy-connect-3arg-lambda)
             menu.addAction(
                 name, SignalCallback(state.plugin()->weakRef(), std::move(cb)));
         },
@@ -96,6 +97,6 @@ void createUserType(sol::table &c2)
     );
 }
 
-}  // namespace chatterino::lua::api::qmenu
+}  // namespace chatterino::lua::api::menu
 
 #endif
