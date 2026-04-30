@@ -164,6 +164,8 @@ public:
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
+    /// This is invoked when a context menu for a message is requested in any
+    /// ChannelView. It's primarily used by plugins to add items.
     pajlada::Signals::Signal<const ChannelView &, const MessageLayout &,
                              const MessageLayoutElement *, QMenu &>
         channelViewContextMenuRequested;
