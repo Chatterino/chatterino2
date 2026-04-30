@@ -566,15 +566,16 @@ public:
 
         const auto helixExpectations =
             this->snapshot->param("helixExpectations").toObject();
-        if (helixExpectations.size() > 0)
+        if (!helixExpectations.isEmpty())
         {
-            initializeHelix(&mockHelix);
+            initializeHelix(&this->mockHelix);
 
             int nCalls =
                 helixExpectations.value("getSharedChatSession").toInt();
             if (nCalls > 0)
             {
-                EXPECT_CALL(mockHelix, getSharedChatSession).Times(nCalls);
+                EXPECT_CALL(this->mockHelix, getSharedChatSession)
+                    .Times(nCalls);
             }
         }
     }
