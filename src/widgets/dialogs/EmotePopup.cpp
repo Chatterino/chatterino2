@@ -48,6 +48,37 @@ auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
     return it == emoteMap.cend() ? nullptr : it->second;
 }
 
+auto loadFavouriteEmoteNames()
+{
+    auto emoteStrNames =
+        Settings::instance().favouriteEmotes.getValue().split(";");
+
+    std::vector<EmoteName> names;
+    for (auto &&strName : emoteStrNames)
+    {
+        names.emplace_back(std::move(strName));
+    }
+    return names;
+}
+
+auto saveFavouriteEmotes(const std::vector<EmotePtr> &emotes)
+{
+    QString serialized;
+
+    if (!emotes.empty())
+    {
+        for (size_t idx = 0; idx < emotes.size() - 1; idx++)
+        {
+            const auto &emote = emotes[idx];
+            serialized += emote->name.string + ";";
+        }
+
+        serialized += emotes.back()->name.string;
+    }
+
+    Settings::instance().favouriteEmotes = serialized;
+}
+
 auto makeTitleMessage(const QString &title)
 {
     MessageBuilder builder;
@@ -516,6 +547,8 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
 
     this->favEmotes_.push_back(std::move(emote));
     this->updateFavouriteEmotes();
+
+    saveFavouriteEmotes(this->favEmotes_);
 }
 
 void EmotePopup::removeFavouriteEmote(const EmoteName &name)
@@ -531,6 +564,8 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
     }
 
     this->updateFavouriteEmotes();
+
+    saveFavouriteEmotes(this->favEmotes_);
 }
 
 void EmotePopup::updateFavouriteEmotes()
@@ -593,6 +628,17 @@ void EmotePopup::reloadEmotes()
         addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
                   "7TV");
     }
+
+    this->favEmotes_.clear();
+    for (const auto &emoteName : loadFavouriteEmoteNames())
+    {
+        auto emote = this->findEmote(emoteName);
+        if (emote)
+        {
+            this->favEmotes_.push_back(emote);
+        }
+    }
+    this->updateFavouriteEmotes();
 
     if (!subChannel->hasMessages())
     {
