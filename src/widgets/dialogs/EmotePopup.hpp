@@ -63,7 +63,10 @@ private:
     bool eventFilter(QObject *object, QEvent *event) override;
 
     void reloadEmotes();
-    void updateFavouriteEmotes(EmotePtr emote);
+
+    void addFavouriteEmote(const EmoteName &name);
+    void removeFavouriteEmote(const EmoteName &name);
+    void updateFavouriteEmotes();
 
     void saveBounds() const;
 };

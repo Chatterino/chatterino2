@@ -313,10 +313,13 @@ EmotePopup::EmotePopup(QWidget *parent)
         {
             EmoteName emoteName{link.value};
 
-            auto emote = this->findEmote(emoteName);
-            if (emote)
+            if (this->favEmotesView_ == this->notebook_->getSelectedPage())
             {
-                updateFavouriteEmotes(std::move(emote));
+                removeFavouriteEmote(emoteName);
+            }
+            else
+            {
+                addFavouriteEmote(emoteName);
             }
 
             return;
@@ -500,18 +503,38 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     this->reloadEmotes();
 }
 
-void EmotePopup::updateFavouriteEmotes(EmotePtr emote)
+void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
+    auto emote = this->findEmote(name);
     for (const auto &emotePresent : this->favEmotes_)
     {
-        if (emotePresent->name == emote->name)
+        if (emotePresent->name == name)
         {
             return;
         }
     }
 
     this->favEmotes_.push_back(std::move(emote));
+    this->updateFavouriteEmotes();
+}
 
+void EmotePopup::removeFavouriteEmote(const EmoteName &name)
+{
+    auto emote =
+        std::ranges::find_if(this->favEmotes_, [name](const auto &emote) {
+            return emote->name == name;
+        });
+
+    if (emote != this->favEmotes_.end())
+    {
+        this->favEmotes_.erase(emote);
+    }
+
+    this->updateFavouriteEmotes();
+}
+
+void EmotePopup::updateFavouriteEmotes()
+{
     auto chan = this->favEmotesView_->underlyingChannel();
     chan->clearMessages();
     chan->addMessage(makeEmoteMessage(this->favEmotes_, false),
