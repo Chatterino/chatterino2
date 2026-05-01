@@ -349,11 +349,11 @@ EmotePopup::EmotePopup(QWidget *parent)
 
             if (this->favEmotesView_ == this->notebook_->getSelectedPage())
             {
-                removeFavouriteEmote(emoteName);
+                this->removeFavouriteEmote(emoteName);
             }
             else
             {
-                addFavouriteEmote(emoteName);
+                this->addFavouriteEmote(emoteName);
             }
 
             if (!(modifiers & Qt::KeyboardModifier::ShiftModifier))
