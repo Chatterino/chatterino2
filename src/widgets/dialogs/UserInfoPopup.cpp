@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
@@ -36,6 +40,7 @@
 #include "widgets/helper/LiveIndicator.hpp"
 #include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/MarkdownLabel.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
@@ -496,7 +501,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         });
     }
 
-    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    auto notesPreview = layout.emplace<MarkdownLabel>(this, QString())
+                            .assign(&this->ui_.notesPreview);
     notesPreview->setVisible(false);
     notesPreview->setShouldElide(true);
 
@@ -624,7 +630,7 @@ void UserInfoPopup::themeChangedEvent()
 
 void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 {
-    themeChangedEvent();
+    this->themeChangedEvent();
 
     QTimer::singleShot(20, this, [this] {
         auto geo = this->geometry();
@@ -797,6 +803,11 @@ void UserInfoPopup::installEvents()
             getApp()->getUserData()->userDataUpdated().connect([this]() {
                 this->updateNotes();
             }));
+
+    QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
+                     [this]() {
+                         this->updateNotes();
+                     });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -813,7 +824,7 @@ void UserInfoPopup::setData(const QString &name,
     if (isId)
     {
         this->userId_ = name.mid(idPrefix.size());
-        updateNotes();
+        this->updateNotes();
         this->userName_ = "";
     }
     else
@@ -1187,12 +1198,14 @@ void UserInfoPopup::updateNotes()
         this->ui_.notesPreview->setVisible(false);
         return;
     }
-
-    static QRegularExpression spaceRegex{"\\s+"};
-
-    auto previewText = "Notes: " + userData->notes.replace(spaceRegex, " ");
-
-    this->ui_.notesPreview->setText(previewText);
+    if (getApp()->getStreamerMode()->isEnabled() &&
+        getSettings()->streamerModeHideUserNotes)
+    {
+        this->ui_.notesPreview->setText("Notes hidden in streamer mode.");
+        this->ui_.notesPreview->setVisible(true);
+        return;
+    }
+    this->ui_.notesPreview->setText(userData->notes);
     this->ui_.notesPreview->setVisible(true);
 }
 

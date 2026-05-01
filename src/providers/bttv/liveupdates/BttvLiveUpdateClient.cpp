@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/bttv/liveupdates/BttvLiveUpdateClient.hpp"
 
 #include "Application.hpp"
@@ -13,7 +17,7 @@
 namespace chatterino {
 
 BttvLiveUpdateClient::BttvLiveUpdateClient(BttvLiveUpdates &manager)
-    : BasicPubSubClient<BttvLiveUpdateSubscription>(100)
+    : BasicPubSubClient(100)
     , manager(manager)
 {
 }

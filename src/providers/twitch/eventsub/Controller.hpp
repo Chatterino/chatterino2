@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
@@ -156,38 +160,6 @@ private:
 
     std::atomic<bool> quitting = false;
     OnceFlag stoppedFlag;
-};
-
-class DummyController : public IController
-{
-public:
-    ~DummyController() override = default;
-
-    void removeRef(const SubscriptionRequest &request) override
-    {
-        (void)request;
-    }
-
-    void setQuitting() override
-    {
-        //
-    }
-
-    [[nodiscard]] SubscriptionHandle subscribe(
-        const SubscriptionRequest &request) override
-    {
-        (void)request;
-        return {};
-    }
-
-    void reconnectConnection(
-        std::unique_ptr<lib::Listener> connection,
-        const std::optional<std::string> &reconnectURL,
-        const std::unordered_set<SubscriptionRequest> &subs) override;
-
-    void debug() override
-    {
-    }
 };
 
 }  // namespace chatterino::eventsub

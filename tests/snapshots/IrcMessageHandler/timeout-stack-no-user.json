@@ -2,10 +2,6 @@
     "input": "@target-user-id=141981764;ban-duration=600;historical=1;room-id=111448817;rm-received-ts=1736968967915;tmi-sent-ts=1736968967813 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -73,6 +69,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -82,14 +80,14 @@
             "searchText": "twitchdev has been timed out for 10m. ",
             "serverReceivedTime": "2025-01-15T19:22:44Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "TwitchDev",
@@ -190,6 +188,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "aa1baade-c9c7-4932-b518-07c6b0226914",
@@ -199,14 +199,14 @@
             "searchText": "twitchdev  twitchdev: 1 ",
             "serverReceivedTime": "2025-01-15T19:22:45Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "141981764",
             "usernameColor": "#ffff0000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 2,
             "displayName": "",
@@ -276,6 +276,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "frozen": false,
             "id": "",
@@ -285,6 +287,10 @@
             "searchText": "twitchdev has been timed out for 10m. (2 times) ",
             "serverReceivedTime": "2025-01-15T19:22:47Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

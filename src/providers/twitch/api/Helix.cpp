@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/api/Helix.hpp"
 
 #include "Application.hpp"
@@ -35,7 +39,7 @@ HelixChatters::HelixChatters(const QJsonObject &jsonObject)
           jsonObject.value("pagination").toObject().value("cursor").toString())
 {
     const auto &data = jsonObject.value("data").toArray();
-    for (const auto &chatter : data)
+    for (const auto chatter : data)
     {
         auto userLogin = chatter.toObject().value("user_login").toString();
         this->chatters.insert(userLogin);
@@ -354,12 +358,23 @@ void Helix::getGameById(QString gameId,
 }
 
 void Helix::createClip(
-    QString channelId, ResultCallback<HelixClip> successCallback,
+    QString channelId, QString title, std::optional<int> duration,
+    ResultCallback<HelixClip> successCallback,
     std::function<void(HelixClipError, QString)> failureCallback,
     std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    if (!title.isEmpty())
+    {
+        urlQuery.addQueryItem("title", title);
+    }
+
+    if (duration.has_value())
+    {
+        urlQuery.addQueryItem("duration", QString::number(*duration));
+    }
 
     this->makePost("clips", urlQuery)
         .header("Content-Type", "application/json")
@@ -583,7 +598,7 @@ void Helix::loadBlocks(QString userId,
             std::vector<HelixBlock> ignores;
             ignores.reserve(data.count());
 
-            for (const auto &ignore : data)
+            for (const auto ignore : data)
             {
                 ignores.emplace_back(ignore.toObject());
             }
@@ -886,7 +901,7 @@ void Helix::getChannelEmotes(
 
             std::vector<HelixChannelEmote> channelEmotes;
 
-            for (const auto &jsonStream : data.toArray())
+            for (const auto jsonStream : data.toArray())
             {
                 channelEmotes.emplace_back(jsonStream.toObject());
             }
@@ -2378,6 +2393,98 @@ void Helix::warnUser(
         .execute();
 }
 
+void Helix::addSuspiciousUser(const QString broadcasterID,
+                              const QString moderatorID, const QString userID,
+                              const bool restricted,
+                              ResultCallback<> successCallback,
+                              FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject payload;
+    payload["user_id"] = userID;
+    payload["status"] = restricted ? "RESTRICTED" : "ACTIVE_MONITORING";
+
+    this->makePost("moderation/suspicious_users", urlQuery)
+        .json(payload)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for treating a suspicious user was"
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
+void Helix::removeSuspiciousUser(const QString broadcasterID,
+                                 const QString moderatorID,
+                                 const QString userID,
+                                 ResultCallback<> successCallback,
+                                 FailureCallback<QString> failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+    urlQuery.addQueryItem("user_id", userID);
+
+    this->makeDelete("moderation/suspicious_users", urlQuery)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for un-treating a suspicious user was"
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 // https://dev.twitch.tv/docs/api/reference#send-whisper
 void Helix::sendWhisper(
     QString fromUserID, QString toUserID, QString message,
@@ -3117,15 +3224,10 @@ void Helix::getUserEmotes(
         [pageCallback](const QJsonObject &json, const auto &state) mutable {
             const auto data = json["data"_L1].toArray();
 
-            if (data.isEmpty())
-            {
-                return false;
-            }
-
             std::vector<HelixChannelEmote> emotes;
             emotes.reserve(data.count());
 
-            for (const auto &emote : data)
+            for (const auto emote : data)
             {
                 emotes.emplace_back(emote.toObject());
             }
@@ -3807,6 +3909,8 @@ void Helix::paginate(
         if (!onPage(json, state))
         {
             // The consumer doesn't want any more pages
+            qCDebug(chatterinoTwitch)
+                << "paginate onPage returned false for" << url;
             return;
         }
 

@@ -75,7 +75,7 @@ def main():
 
     log.debug(f"{header_path}: definition={def_path}, implementation={source_path}")
 
-    (definition, implementation) = generate(header_path, args.includes)
+    (definition, implementation) = generate(header_path, source_path, args.includes)
 
     # ensure directories are created
     Path(def_path).parent.mkdir(parents=True, exist_ok=True)

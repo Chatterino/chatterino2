@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/WebSocketPool.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -61,7 +65,7 @@ TEST(WebSocketPool, tcpEcho)
 
     auto handle = pool.createSocket(
         {
-            .url = QUrl("ws://127.0.0.1:9052/echo?query=123&xd=wow"),
+            .url = QUrl("ws://" + PUBSUB_WS_ADDR + "/echo?query=123&xd=wow"),
             .headers =
                 {
                     {"My-Header", "my-header-VALUE"},
@@ -127,7 +131,7 @@ TEST(WebSocketPool, tlsEcho)
 
     auto handle = pool.createSocket(
         {
-            .url = QUrl("wss://127.0.0.1:9050/echo"),
+            .url = QUrl("wss://" + PUBSUB_WSS_ADDR + "/echo"),
             .headers{
                 {"My-Header", "my-header-VALUE"},
                 {"Another-Header", "other-header"},

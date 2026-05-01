@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/expressions/ListExpression.hpp"
 
 namespace chatterino::filters {
@@ -5,7 +9,7 @@ namespace chatterino::filters {
 ListExpression::ListExpression(ExpressionList &&list)
     : list_(std::move(list)) {};
 
-QVariant ListExpression::execute(const ContextMap &context) const
+QVariant ListExpression::execute(RunContext context) const
 {
     QList<QVariant> results;
     bool allStrings = true;
@@ -34,14 +38,14 @@ QVariant ListExpression::execute(const ContextMap &context) const
     return results;
 }
 
-PossibleType ListExpression::synthesizeType(const TypingContext &context) const
+PossibleType ListExpression::synthesizeType() const
 {
     std::vector<TypeClass> types;
     types.reserve(this->list_.size());
     bool allStrings = true;
     for (const auto &exp : this->list_)
     {
-        auto typSyn = exp->synthesizeType(context);
+        auto typSyn = exp->synthesizeType();
         if (isIllTyped(typSyn))
         {
             return typSyn;  // Ill-typed
@@ -67,15 +71,14 @@ PossibleType ListExpression::synthesizeType(const TypingContext &context) const
     return allStrings ? TypeClass{Type::StringList} : TypeClass{Type::List};
 }
 
-QString ListExpression::debug(const TypingContext &context) const
+QString ListExpression::debug() const
 {
     QStringList debugs;
     for (const auto &exp : this->list_)
     {
-        debugs.append(
-            QString("%1 : %2")
-                .arg(exp->debug(context))
-                .arg(possibleTypeToString(exp->synthesizeType(context))));
+        debugs.append(QStringView(u"%1 : %2")
+                          .arg(exp->debug(),
+                               possibleTypeToString(exp->synthesizeType())));
     }
 
     return QString("List(%1)").arg(debugs.join(", "));

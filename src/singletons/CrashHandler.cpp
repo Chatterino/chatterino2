@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/CrashHandler.hpp"
 
 #include "common/Args.hpp"
@@ -132,7 +136,7 @@ using namespace std::string_literals;
 CrashHandler::CrashHandler(const Paths &paths_)
     : paths(paths_)
 {
-    auto optSettings = readRecoverySettings(paths);
+    auto optSettings = readRecoverySettings(this->paths);
     if (optSettings)
     {
         this->shouldRecover_ = *optSettings;

@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726916057144;subscriber=1;id=3ad26770-7299-4261-ab9b-24f410944517;room-id=11148817;user-id=117166826;display-name=testaccount_420;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=mod;emotes= :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :username",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "testaccount_420",
@@ -98,6 +92,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "3ad26770-7299-4261-ab9b-24f410944517",
@@ -107,6 +103,12 @@
             "searchText": "testaccount_420  testaccount_420: username ",
             "serverReceivedTime": "2024-09-21T10:54:17Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "117166826",
             "usernameColor": "#ffff0000"
         }

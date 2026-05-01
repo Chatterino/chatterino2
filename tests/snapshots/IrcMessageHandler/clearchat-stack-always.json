@@ -2,10 +2,6 @@
     "input": "@tmi-sent-ts=1736678514028;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 4,
             "displayName": "",
@@ -61,6 +57,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
             "frozen": false,
             "id": "",
@@ -70,18 +68,14 @@
             "searchText": "Chat has been cleared by a moderator. (4 times) ",
             "serverReceivedTime": "2025-01-12T10:41:54Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-                "subscriber": "108"
-            },
-            "badges": [
-                "broadcaster",
-                "subscriber",
-                "partner"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "pajlada",
@@ -230,6 +224,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3",
@@ -239,6 +235,14 @@
             "searchText": "pajlada  pajlada: asd ",
             "serverReceivedTime": "2025-01-12T10:41:52Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "108"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber",
+                "partner"
+            ],
             "userID": "11148817",
             "usernameColor": "#ffcc44ff"
         }

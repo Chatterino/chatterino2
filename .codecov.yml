@@ -17,7 +17,6 @@ ignore:
   - "**/lib/settings/*"
   - "**/lib/signals/*"
   - "**/lib/sol2/*"
-  - "**/lib/websocketpp/*"
   - "**/lib/WinToast/*"
   - "**/build*/"
   - "**/ui_*.h"

@@ -2,12 +2,6 @@
     "input": "@id=3dc39240-0798-4103-8c3c-51e1a9a567a3;first-msg=0;historical=1;rm-received-ts=1726600627161;color=#FF0000;badges=subscriber/24;turbo=0;room-id=11148817;flags=;mod=0;returning-chatter=0;rm-deleted=1;emotes=25:9-13;tmi-sent-ts=1726600626982;subscriber=1;user-id=129546453;display-name=nerixyz;badge-info=subscriber/27;user-type= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :7TVEmote Kappa my7TVEmote hi 7TVEmote❤",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -185,6 +179,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Disabled|Collapsed",
             "frozen": false,
             "id": "3dc39240-0798-4103-8c3c-51e1a9a567a3",
@@ -194,6 +190,12 @@
             "searchText": "nerixyz  nerixyz: 7TVEmote Kappa my7TVEmote hi 7TVEmote❤ ",
             "serverReceivedTime": "2024-09-17T19:17:07Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

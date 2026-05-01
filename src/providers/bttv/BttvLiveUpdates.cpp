@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
 #include "liveupdates/BttvLiveUpdateClient.hpp"

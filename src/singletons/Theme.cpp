@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Theme.hpp"
 
 #include "Application.hpp"
@@ -7,6 +11,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
 
+#include <QApplication>
 #include <QColor>
 #include <QDir>
 #include <QElapsedTimer>
@@ -14,10 +19,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSet>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-#    include <QStyleHints>
-#endif
-#include <QApplication>
+#include <QStyleHints>
 
 #include <cmath>
 #include <numbers>
@@ -330,7 +332,6 @@ Theme::Theme(const Paths &paths)
 
     this->loadAvailableThemes(paths);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     QObject::connect(QApplication::styleHints(),
                      &QStyleHints::colorSchemeChanged, &this->lifetime_,
                      [this] {
@@ -340,7 +341,6 @@ Theme::Theme(const Paths &paths)
                              getApp()->getWindows()->forceLayoutChannelViews();
                          }
                      });
-#endif
 
     this->update();
 }
@@ -348,7 +348,6 @@ Theme::Theme(const Paths &paths)
 void Theme::update()
 {
     auto currentTheme = [&]() -> QString {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         if (this->isSystemTheme())
         {
             switch (QApplication::styleHints()->colorScheme())
@@ -360,7 +359,6 @@ void Theme::update()
                     return this->darkSystemThemeName;
             }
         }
-#endif
         return this->themeName;
     };
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Env.hpp"
 
 #include "common/QLogging.hpp"
@@ -81,6 +85,7 @@ Env::Env()
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
     , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
     , proxyUrl(readOptionalStringEnv("CHATTERINO2_PROXY_URL"))
+    , logToFile(qEnvironmentVariable(env::LOG_TO_FILE, ""))
 {
 }
 

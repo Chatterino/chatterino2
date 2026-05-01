@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/seventv/eventapi/Dispatch.hpp"
 
 #include "util/QMagicEnum.hpp"
@@ -116,7 +120,7 @@ EntitlementCreateDeleteDispatch::EntitlementCreateDeleteDispatch(
                      .value_or(CosmeticKind::INVALID);
 
     const auto userConnections = obj["user"]["connections"].toArray();
-    for (const auto &connectionJson : userConnections)
+    for (const auto connectionJson : userConnections)
     {
         const auto connection = connectionJson.toObject();
         if (connection["platform"].toString() == "TWITCH")

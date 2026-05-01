@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/filters/lang/Filter.hpp"
@@ -28,7 +32,7 @@ public:
 
     bool valid() const;
 
-    bool filter(const filters::ContextMap &context) const;
+    bool filter(filters::RunContext context) const;
 
     bool operator==(const FilterRecord &other) const;
 

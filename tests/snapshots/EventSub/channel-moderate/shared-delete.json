@@ -40,10 +40,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -192,6 +188,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -201,6 +199,10 @@
             "searchText": "testaccount_420 deleted message from testaccount_420 in bajlada saying: dfg",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "testaccount_420",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

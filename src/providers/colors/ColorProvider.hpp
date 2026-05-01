@@ -1,4 +1,10 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
+
+#include "providers/twitch/api/HelixEnums.hpp"
 
 #include <QColor>
 
@@ -20,7 +26,15 @@ enum class ColorType {
     // Used in automatic highlights of your own messages
     SelfMessageHighlight,
     AutomodHighlight,
+    AnnouncementHighlight,
+    AnnouncementBlue,
+    AnnouncementGreen,
+    AnnouncementOrange,
+    AnnouncementPurple,
 };
+
+ColorType colorTypeFromHelixAnnouncementColor(
+    HelixAnnouncementColor announcementColor, bool enableColoredAnnouncements);
 
 class ColorProvider
 {

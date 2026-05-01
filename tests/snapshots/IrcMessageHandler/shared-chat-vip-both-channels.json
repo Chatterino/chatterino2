@@ -1,0 +1,193 @@
+{
+    "input": "@vip=1;badges=vip/1;tmi-sent-ts=1729627237027;id=3e0750f7-541e-4f7c-8fec-4f943bfd84a3;room-id=11148817;user-id=100229878;display-name=nuuls;badges=bits/100;badge-info=;color=#00FF7F;flags=5-8:P.3;user-type=;emotes=;source-only=0;source-badge-info=subscriber/52;source-id=0dd9957e-6140-498f-a6e8-e62d1b43dfe7;source-room-id=22484632;source-badges=vip/1,subscriber/48 :nuuls!nuuls@nuuls.tmi.twitch.tv PRIVMSG #pajlada :I'm a vip in the current & shared channel",
+    "output": [
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nuuls",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "20:00"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "20:00:37",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://www.twitch.tv/forsen",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-28x28.png",
+                            "2x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-70x70.png",
+                            "3x": "https://static-cdn.jtvnw.net/jtv_user_pictures/forsen-profile_image-48b43e1e4f54b5c8-150x150.png"
+                        },
+                        "name": "",
+                        "tooltip": "Shared Message from forsen"
+                    },
+                    "flags": "BadgeSharedChannel",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Shared Message from forsen",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://help.twitch.tv/customer/en/portal/articles/659115-twitch-chat-badges-guide",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/3"
+                        },
+                        "name": "",
+                        "tooltip": "VIP"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "VIP (forsen)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://bits.twitch.tv",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/09d93036-e7ce-431c-9a9e-7044297133f2/3"
+                        },
+                        "name": "",
+                        "tooltip": "cheer 100"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Twitch cheer 100",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff00ff7f",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nuuls"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nuuls:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "I'm",
+                        "a",
+                        "vip",
+                        "in",
+                        "the",
+                        "current",
+                        "&",
+                        "shared",
+                        "channel"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "3e0750f7-541e-4f7c-8fec-4f943bfd84a3"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "Collapsed|SharedMessage",
+            "frozen": false,
+            "id": "3e0750f7-541e-4f7c-8fec-4f943bfd84a3",
+            "localizedName": "",
+            "loginName": "nuuls",
+            "messageText": "I'm a vip in the current & shared channel",
+            "searchText": "nuuls  nuuls: I'm a vip in the current & shared channel ",
+            "serverReceivedTime": "2024-10-22T20:00:37Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "bits"
+            ],
+            "userID": "100229878",
+            "usernameColor": "#ff00ff7f"
+        }
+    ]
+}

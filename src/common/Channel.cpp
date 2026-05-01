@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Channel.hpp"
 
 #include "Application.hpp"
@@ -7,6 +11,31 @@
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/ChannelHelpers.hpp"
+
+namespace {
+
+constexpr uint8_t MAX_RECURSION = 64;
+
+struct RecursionGuard {
+    constexpr RecursionGuard(uint8_t *count) noexcept
+        : count(count)
+    {
+        assert(*count < MAX_RECURSION);
+        *this->count += 1;
+    }
+    RecursionGuard(const RecursionGuard &) = delete;
+    RecursionGuard(RecursionGuard &&) = delete;
+    RecursionGuard &operator=(const RecursionGuard &) = delete;
+    RecursionGuard &operator=(RecursionGuard &&) = delete;
+    constexpr ~RecursionGuard()
+    {
+        *this->count -= 1;
+    }
+
+    uint8_t *count;
+};
+
+}  // namespace
 
 namespace chatterino {
 
@@ -29,11 +58,10 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app && this->anythingLogged_)
+    if (app && !isAppAboutToQuit() && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
-    this->destroyed.invoke();
 }
 
 Channel::Type Channel::getType() const
@@ -71,6 +99,11 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
+size_t Channel::countMessages() const
+{
+    return this->messages_.size();
+}
+
 std::vector<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
@@ -79,6 +112,13 @@ std::vector<MessagePtr> Channel::getMessageSnapshot() const
 std::vector<MessagePtr> Channel::getMessageSnapshot(size_t nItems) const
 {
     return this->messages_.lastN(nItems);
+}
+
+std::vector<MessagePtrMut> Channel::getMessageSnapshotMut(size_t nItems) const
+{
+    return this->messages_.lastNBy<MessagePtrMut>(nItems, [](const auto &msg) {
+        return std::const_pointer_cast<Message>(msg);
+    });
 }
 
 MessagePtr Channel::getLastMessage() const
@@ -94,6 +134,12 @@ MessagePtr Channel::getLastMessage() const
 void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     message->freeze();
 
     MessagePtr deleted;
@@ -132,7 +178,7 @@ void Channel::addSystemMessage(const QString &contents)
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(20), std::move(message), now,
+        this->getMessageSnapshot(), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -170,6 +216,12 @@ void Channel::disableAllMessages()
 
 void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : _messages)
     {
         msg->freeze();
@@ -190,6 +242,13 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     {
         return;
     }
+
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : messages)
     {
         msg->freeze();
@@ -278,6 +337,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 void Channel::replaceMessage(const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
     int index = this->messages_.replaceItem(message, replacement);
 
@@ -289,6 +354,12 @@ void Channel::replaceMessage(const MessagePtr &message,
 
 void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     MessagePtr prev;
@@ -301,6 +372,12 @@ void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 void Channel::replaceMessage(size_t hint, const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     auto index = this->messages_.replaceItem(hint, message, replacement);
@@ -321,6 +398,12 @@ void Channel::disableMessage(const QString &messageID)
 
 void Channel::clearMessages()
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     this->messages_.clear();
     this->messagesCleared.invoke();
 }
@@ -435,6 +518,11 @@ void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
 }
 
+bool Channel::canRecurse() const noexcept
+{
+    return this->recursionCount_ < MAX_RECURSION;
+}
+
 //
 // Indirect channel
 //
@@ -451,7 +539,7 @@ IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
 
 ChannelPtr IndirectChannel::get() const
 {
-    return data_->channel;
+    return this->data_->channel;
 }
 
 void IndirectChannel::reset(ChannelPtr channel)

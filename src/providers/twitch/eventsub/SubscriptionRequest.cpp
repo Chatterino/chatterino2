@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 
 #include <QDebug>
@@ -36,11 +40,6 @@ bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs)
                     lhs.conditions) == std::tie(rhs.subscriptionType,
                                                 rhs.subscriptionVersion,
                                                 rhs.conditions);
-}
-
-bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs)
-{
-    return !(lhs == rhs);
 }
 
 }  // namespace chatterino::eventsub

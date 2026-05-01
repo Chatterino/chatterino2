@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <QSet>
@@ -8,10 +12,11 @@ namespace chatterino {
 // vanity flag is left out on purpose as it is our default flag
 const QSet<QString> globalAuthority{"staff", "admin", "global_mod"};
 const QSet<QString> predictions{"predictions"};
-const QSet<QString> channelAuthority{"moderator", "vip", "broadcaster"};
+const QSet<QString> channelAuthority{"lead_moderator", "moderator", "vip",
+                                     "broadcaster"};
 const QSet<QString> subBadges{"subscriber", "founder"};
 
-Badge::Badge(QString key, QString value)
+TwitchBadge::TwitchBadge(QString key, QString value)
     : key_(std::move(key))
     , value_(std::move(value))
 {
@@ -33,7 +38,7 @@ Badge::Badge(QString key, QString value)
     }
 }
 
-bool Badge::operator==(const Badge &other) const
+bool TwitchBadge::operator==(const TwitchBadge &other) const
 {
     return this->key_ == other.key_ && this->value_ == other.value_;
 }

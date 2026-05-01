@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QStringList>
@@ -13,8 +17,8 @@ const QStringList &getSampleEmoteTestMessages();
 
 /// Channel point reward tests
 
-const QString &getSampleChannelRewardMessage();
-const QString &getSampleChannelRewardMessage2();
+QByteArray getSampleChannelRewardMessage();
+QByteArray getSampleChannelRewardMessage2();
 const QString &getSampleChannelRewardIRCMessage();
 
 /// Links

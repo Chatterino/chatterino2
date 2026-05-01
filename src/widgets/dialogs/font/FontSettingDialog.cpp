@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep

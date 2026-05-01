@@ -3,6 +3,11 @@
 #include <boost/json.hpp>
 
 #include <chrono>
+#include <version>
+
+#if __cpp_lib_chrono < 201907L
+#    define CHATTERINO_USING_HOWARD_HINNANTS_DATE
+#endif
 
 namespace chatterino::eventsub::lib {
 

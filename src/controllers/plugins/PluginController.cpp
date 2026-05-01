@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 
@@ -9,12 +13,16 @@
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/ConnectionHandle.hpp"
+#    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
+#    include "controllers/plugins/api/Images.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
+#    include "controllers/plugins/api/WindowManager.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -22,6 +30,9 @@
 #    include "messages/MessageElement.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
+#    include "singletons/WindowManager.hpp"
+#    include "widgets/splits/SplitContainer.hpp"
+#    include "widgets/Window.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -207,6 +218,13 @@ void PluginController::openLibrariesFor(Plugin *plugin)
         r["_IO_input"] = sol::nil;
         r["_IO_output"] = sol::nil;
     }
+    // set up debug lib
+    {
+        auto debuglib = lua.create_table();
+        g["debug"] = debuglib;
+
+        debuglib.set_function("traceback", lua::api::debugTraceback);
+    }
     PluginController::initSol(lua, plugin);
 }
 
@@ -232,8 +250,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(c2);
     lua::api::WebSocket::createUserType(c2, plugin);
+    lua::api::ConnectionHandle::createUserType(c2);
     lua::api::message::createUserType(c2);
+    lua::api::images::createUserTypes(c2);
     lua::api::createAccounts(c2);
+    lua::api::windowmanager::createUserTypes(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
@@ -245,6 +266,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
     c2["LinkType"] =
         lua::createEnumTable<lua::api::message::ExposedLinkType>(lua);
+    c2["SplitContainerNodeType"] =
+        lua::createEnumTable<SplitContainer::Node::Type>(lua);
+    c2["WindowType"] = lua::createEnumTable<WindowType>(lua);
+
+    c2["windows"] = getApp()->getWindows();
 
     sol::table io = g["io"];
     io.set_function(
@@ -442,7 +468,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
                 qCDebug(chatterinoLua)
                     << "Got error from plugin " << pl->meta.name
                     << " while refreshing tab completion: "
-                    << errOrList.get_unexpected().error();
+                    << errOrList.error();
                 continue;
             }
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
@@ -18,8 +22,8 @@ struct Dispatch;
 struct CosmeticCreateDispatch;
 struct EntitlementCreateDeleteDispatch;
 
-class Client : public BasicPubSubClient<Subscription>,
-               std::enable_shared_from_this<Client>
+class Client : public BasicPubSubClient<Subscription, Client>,
+               public std::enable_shared_from_this<Client>
 {
 public:
     Client(SeventvEventAPI &manager,

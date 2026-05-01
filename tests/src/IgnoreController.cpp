@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/ignores/IgnoreController.hpp"
 
 #include "controllers/accounts/AccountController.hpp"

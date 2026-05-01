@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/Message.hpp"
 
 #include "Application.hpp"
@@ -21,12 +25,12 @@ using namespace literals;
 Message::Message()
     : parseTime(QTime::currentTime())
 {
-    DebugCount::increase("messages");
+    DebugCount::increase(DebugObject::Message);
 }
 
 Message::~Message()
 {
-    DebugCount::decrease("messages");
+    DebugCount::decrease(DebugObject::Message);
 }
 
 ScrollbarHighlight Message::getScrollBarHighlight() const
@@ -95,6 +99,16 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
+    if (this->flags.has(MessageFlag::Announcement) &&
+        getSettings()->enableAnnouncementHighlight)
+    {
+        return {
+            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
+                this->announcementColor,
+                getSettings()->enableColoredAnnouncementHighlight)),
+        };
+    }
+
     return {};
 }
 
@@ -118,19 +132,21 @@ QJsonObject Message::toJson() const
         {"frozen"_L1, this->frozen},
     };
 
-    QJsonArray badges;
-    for (const auto &badge : this->badges)
+    QJsonArray twitchBadges;
+    for (const auto &badge : this->twitchBadges)
     {
-        badges.append(badge.key_);
+        twitchBadges.append(badge.key_);
     }
-    msg["badges"_L1] = badges;
+    msg["twitchBadges"_L1] = twitchBadges;
 
-    QJsonObject badgeInfos;
-    for (const auto &[key, value] : this->badgeInfos)
+    QJsonObject twitchBadgeInfos;
+    for (const auto &[key, value] : this->twitchBadgeInfos)
     {
-        badgeInfos.insert(key, value);
+        twitchBadgeInfos.insert(key, value);
     }
-    msg["badgeInfos"_L1] = badgeInfos;
+    msg["twitchBadgeInfos"_L1] = twitchBadgeInfos;
+
+    msg["externalBadges"_L1] = QJsonArray::fromStringList(this->externalBadges);
 
     if (this->highlightColor)
     {
@@ -150,6 +166,17 @@ QJsonObject Message::toJson() const
     if (this->reward)
     {
         msg["reward"_L1] = this->reward->toJson();
+    }
+
+    if (this->bits > 0)
+    {
+        msg["bits"_L1] = static_cast<qint64>(this->bits);
+    }
+
+    if (this->flags.has(MessageFlag::Announcement))
+    {
+        msg["announcementColor"_L1] =
+            qmagicenum::enumNameString(this->announcementColor);
     }
 
     // XXX: figure out if we can add this in tests

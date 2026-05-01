@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726925714864;subscriber=1;id=2199102c-31ae-49b1-9d2c-a33bb3a02021;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=305954156:0-7/25:16-20,92-96/1902:31-35 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :PogChamp ignore Kappa &fooo123 Keepo &boo1 &baa1 &bi1 &biii1 &biiiiiiiiii420 &foo123&fo2 &[ Kappa ]& summon-emote",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -256,6 +250,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "2199102c-31ae-49b1-9d2c-a33bb3a02021",
@@ -265,6 +261,12 @@
             "searchText": "nerixyz  nerixyz: PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote ",
             "serverReceivedTime": "2024-09-21T13:35:14Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

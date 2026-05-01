@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/RapidjsonHelpers.hpp"
@@ -88,6 +92,11 @@ public:
     static QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_THREAD_HIGHLIGHT_COLOR;
     static QColor FALLBACK_AUTOMOD_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR;
+    static QColor ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR;
+    static QColor ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR;
+    static QColor ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR;
+    static QColor ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR;
 
 private:
     QString pattern_;

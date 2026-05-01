@@ -2,10 +2,6 @@
     "input": "@tmi-sent-ts=1662201102276;emotes=84608:9-10 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -107,6 +103,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "",
@@ -116,6 +114,10 @@
             "searchText": "test  test: foo bar ",
             "serverReceivedTime": "2022-09-03T10:31:42Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

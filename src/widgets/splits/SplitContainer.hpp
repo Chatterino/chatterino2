@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/WindowDescriptors.hpp"
@@ -82,6 +86,9 @@ public:
         Node();
         Node(Split *_split, Node *_parent);
 
+        /**
+         * @exposeenum c2.SplitContainerNodeType
+         */
         enum class Type {
             EmptyRoot,
             Split,

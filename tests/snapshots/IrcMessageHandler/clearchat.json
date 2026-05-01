@@ -2,10 +2,6 @@
     "input": "@room-id=11148817;rm-received-ts=1729627607652;tmi-sent-ts=1729627607545;historical=1 :tmi.twitch.tv CLEARCHAT #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -59,6 +55,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
             "frozen": false,
             "id": "",
@@ -68,6 +66,10 @@
             "searchText": "Chat has been cleared by a moderator. ",
             "serverReceivedTime": "2024-10-22T20:06:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

@@ -2,12 +2,6 @@
     "input": "@badge-info=;flags=;room-id=11148817;color=;client-nonce=0d1632f37b6baee51576859d5dbaf325;emotes=;subscriber=0;tmi-sent-ts=1727395701680;id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;turbo=1;badges=staff/1,turbo/1;source-badges=staff/1,moderator/1,bits-leader/1;source-badge-info=;display-name=creativewind;source-room-id=11148817;source-id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;user-type=staff;user-id=106940612;mod=0 :creativewind!creativewind@creativewind.tmi.twitch.tv PRIVMSG #pajlada :Guys",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-                "staff",
-                "turbo"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "creativewind",
@@ -147,6 +141,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a",
@@ -156,6 +152,12 @@
             "searchText": "creativewind  creativewind: Guys ",
             "serverReceivedTime": "2024-09-27T00:08:21Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+                "staff",
+                "turbo"
+            ],
             "userID": "106940612",
             "usernameColor": "#ff00ff00"
         }

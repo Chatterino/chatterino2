@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -18,6 +22,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/emoji/EmojiStyle.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
@@ -42,7 +47,7 @@ class Args;
 #else
 #    ifdef Q_OS_MACOS
 #        define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#        define DEFAULT_FONT_SIZE 12
+#        define DEFAULT_FONT_SIZE 16
 #    else
 #        define DEFAULT_FONT_FAMILY "Arial"
 #        define DEFAULT_FONT_SIZE 11
@@ -123,7 +128,8 @@ class Settings
     bool disableSaving;
 
 public:
-    Settings(const Args &args, const QString &settingsDirectory);
+    Settings(const Args &args, const QString &settingsDirectory,
+             bool isTest = false);
     ~Settings();
 
     static Settings &instance();
@@ -153,6 +159,8 @@ public:
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
+    BoolSetting hideMessageTimestampsWhenLive = {
+        "/appearance/messages/hideMessageTimestampsWhenLive", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
@@ -165,6 +173,8 @@ public:
                                        "#7f2026"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
+                                     false};
+    BoolSetting showSendWaitTimer = {"/appearance/messages/showSendWaitTimer",
                                      false};
     EnumSetting<MessageOverflow> messageOverflow = {
         "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
@@ -306,6 +316,26 @@ public:
     BoolSetting autoCloseThreadPopup = {"/behaviour/autoCloseThreadPopup",
                                         false};
 
+    /// Specifies whether the search functionality should be enabled
+    BoolSetting searchEnabled = {
+        "/behaviour/search/enabled",
+        false,
+    };
+    /// The URL of the search engine
+    QStringSetting searchEngineUrl = {
+        "/behaviour/search/engineUrl",
+        "",
+    };
+    /// The name of the search engine
+    QStringSetting searchEngineName = {
+        "/behaviour/search/engineName",
+        "",
+    };
+    BoolSetting searchIncognito = {
+        "/behaviour/search/incognito",
+        false,
+    };
+
     EnumSetting<UsernameRightClickBehavior> usernameRightClickBehavior = {
         "/behaviour/usernameRightClickBehavior",
         UsernameRightClickBehavior::Mention,
@@ -351,6 +381,19 @@ public:
     BoolSetting useSmartEmoteCompletion = {
         "/experiments/useSmartEmoteCompletion",
         false,
+    };
+
+    BoolSetting enableSpellChecking = {
+        "/behaviour/spellChecking/enabled",
+        false,
+    };
+    QStringSetting spellCheckingDefaultDictionary = {
+        "/behaviour/spellChecking/defaultDictionary",
+        "",
+    };
+    IntSetting nSpellCheckingSuggestions = {
+        "/behaviour/spellChecking/suggestions/count",
+        -1,
     };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
@@ -436,6 +479,10 @@ public:
         "/streamerMode/suppressInlineWhispers", true};
     BoolSetting streamerModeHideBlockedTermText = {
         "/streamerMode/hideBlockedTermText",
+        true,
+    };
+    BoolSetting streamerModeHideUserNotes = {
+        "/streamerMode/hideUserNotes",
         true,
     };
 
@@ -535,6 +582,19 @@ public:
         "/highlighting/watchStreak/enabled", true};
     QStringSetting watchStreakHighlightColor = {
         "/highlighting/watchStreak/color", ""};
+
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+    BoolSetting enableColoredAnnouncementHighlight = {
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
 
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
@@ -752,17 +812,31 @@ public:
     ChatterinoSetting<std::vector<QString>> enabledPlugins = {
         "/plugins/enabledPlugins", {}};
 
-    // Advanced
+    // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
-    BoolSetting enableExperimentalEventSub = {
-        "/eventsub/enableExperimental",
-        true,
+
+    BoolSetting soundMiniaudioKeepEngineAlive = {
+        "/sound/miniaudio/keepEngineAlive",
+        false,
     };
 
+    // Advanced
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
+
+#ifndef Q_OS_WIN
+    QStringSetting customNativeMessagingManifestPath{
+        "/misc/extension/customManifestPath",
+        "",
+    };
+    EnumStringSetting<BrowserManifestFormat>
+        customNativeMessagingManifestFormat = {
+            "/misc/extension/customManifestFormat",
+            BrowserManifestFormat::Chrome,
+    };
+#endif
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =

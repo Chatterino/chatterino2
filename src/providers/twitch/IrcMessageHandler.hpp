@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <IrcMessage>
@@ -19,6 +23,7 @@ class MessageSink;
 struct ClearChatMessage {
     MessagePtr message;
     bool disableAllMessages;
+    std::optional<QString> username;
 };
 
 class IrcMessageHandler

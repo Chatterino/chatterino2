@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726678491958;subscriber=1;id=84b6f44a-c8eb-4abe-8a78-cf736642f695;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :https://chatterino.com (chatterino.com chatterino.com) (chatterino.com)",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -225,6 +219,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "84b6f44a-c8eb-4abe-8a78-cf736642f695",
@@ -234,6 +230,12 @@
             "searchText": "nerixyz  nerixyz: https://chatterino.com (chatterino.com chatterino.com) (chatterino.com) ",
             "serverReceivedTime": "2024-09-18T16:54:51Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

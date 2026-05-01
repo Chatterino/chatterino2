@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/Controller.hpp"
 
 #include "Application.hpp"
@@ -53,16 +57,12 @@ public:
 
     void debug(std::string_view msg) override
     {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         qCDebug(this->loggingCategory).noquote() << msg;
-#endif
     }
 
     void warn(std::string_view msg) override
     {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         qCWarning(this->loggingCategory).noquote() << msg;
-#endif
     }
 
 private:
@@ -761,13 +761,6 @@ void Controller::clearConnections()
         auto conn = it.lock();
         return !conn || !conn->getListener();
     });
-}
-
-void DummyController::reconnectConnection(
-    std::unique_ptr<lib::Listener> /* connection */,
-    const std::optional<std::string> & /* reconnectURL */,
-    const std::unordered_set<SubscriptionRequest> & /* subs */)
-{
 }
 
 }  // namespace chatterino::eventsub

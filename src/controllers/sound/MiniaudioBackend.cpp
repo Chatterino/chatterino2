@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/sound/MiniaudioBackend.hpp"
 
 #include "common/QLogging.hpp"
@@ -65,11 +69,12 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-MiniaudioBackend::MiniaudioBackend()
+MiniaudioBackend::MiniaudioBackend(bool keepEngineAlive_)
     : context(std::make_unique<ma_context>())
     , engine(std::make_unique<ma_engine>())
     , workGuard(boost::asio::make_work_guard(this->ioContext))
     , sleepTimer(this->ioContext)
+    , keepEngineAlive(keepEngineAlive_)
 {
     qCInfo(chatterinoSound) << "Initializing miniaudio sound backend";
 
@@ -134,6 +139,18 @@ MiniaudioBackend::MiniaudioBackend()
                 << "Error initializing engine:" << result;
             this->state = State::Failed;
             return;
+        }
+
+        if (this->keepEngineAlive)
+        {
+            // User has configured the "keep engine alive option"
+            // We pre-start the engine to ensure it's available to play sounds as soon as possible.
+            result = ma_engine_start(this->engine.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Error pre-starting engine " << result;
+            }
         }
 
         /// Initialize default ping sounds
@@ -290,22 +307,25 @@ void MiniaudioBackend::play(const QUrl &sound)
                 << "Failed to play default ping" << result;
         }
 
-        this->sleepTimer.expires_after(STOP_AFTER_DURATION);
-        this->sleepTimer.async_wait([this](const auto &ec) {
-            if (ec)
-            {
-                // Timer was most likely cancelled
-                return;
-            }
+        if (!this->keepEngineAlive)
+        {
+            this->sleepTimer.expires_after(STOP_AFTER_DURATION);
+            this->sleepTimer.async_wait([this](const auto &ec) {
+                if (ec)
+                {
+                    // Timer was most likely cancelled
+                    return;
+                }
 
-            auto result = ma_engine_stop(this->engine.get());
-            if (result != MA_SUCCESS)
-            {
-                qCWarning(chatterinoSound)
-                    << "Error stopping miniaudio engine " << result;
-                return;
-            }
-        });
+                auto result = ma_engine_stop(this->engine.get());
+                if (result != MA_SUCCESS)
+                {
+                    qCWarning(chatterinoSound)
+                        << "Error stopping miniaudio engine " << result;
+                    return;
+                }
+            });
+        }
     });
 }
 

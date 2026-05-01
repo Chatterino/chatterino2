@@ -28,7 +28,7 @@ jobs:
       - name: Check formatting
         uses: DoozyX/clang-format-lint-action@v0.20
         with:
-          source: "./src ./tests/src ./benchmarks/src ./mocks/include"
+          source: "./src ./tests/src ./benchmarks/src ./mocks/include ./lib/twitch-eventsub-ws/include ./lib/twitch-eventsub-ws/src"
           extensions: "hpp,cpp"
           clangFormatVersion: 19
 

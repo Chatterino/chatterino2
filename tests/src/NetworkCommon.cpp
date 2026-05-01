@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/network/NetworkCommon.hpp"
 
 #include "Test.hpp"

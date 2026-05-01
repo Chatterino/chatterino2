@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/QMagicEnum.hpp"
@@ -49,7 +53,6 @@ public:
     }
 
     using pajlada::Settings::Setting<Type>::operator==;
-    using pajlada::Settings::Setting<Type>::operator!=;
 
     using pajlada::Settings::Setting<Type>::operator Type;
 };
@@ -143,7 +146,6 @@ public:
     Enum defaultValue;
 
     using pajlada::Settings::Setting<QString>::operator==;
-    using pajlada::Settings::Setting<QString>::operator!=;
 
     using pajlada::Settings::Setting<QString>::operator QString;
 };

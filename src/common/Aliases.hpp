@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <boost/container_hash/hash_fwd.hpp>
@@ -15,10 +19,6 @@
         bool operator==(const name &other) const                \
         {                                                       \
             return this->string == other.string;                \
-        }                                                       \
-        bool operator!=(const name &other) const                \
-        {                                                       \
-            return this->string != other.string;                \
         }                                                       \
     };                                                          \
     } /* namespace chatterino */                                \

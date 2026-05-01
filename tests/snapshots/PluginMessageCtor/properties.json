@@ -24,10 +24,6 @@
         "}"
     ],
     "output": {
-        "badgeInfos": {
-        },
-        "badges": [
-        ],
         "channelName": "channel",
         "count": 1,
         "displayName": "display",
@@ -49,6 +45,8 @@
                 ]
             }
         ],
+        "externalBadges": [
+        ],
         "flags": "System|Disabled",
         "frozen": false,
         "highlightColor": "#12345678",
@@ -59,6 +57,10 @@
         "searchText": "search",
         "serverReceivedTime": "1970-01-01T00:20:30Z",
         "timeoutUser": "",
+        "twitchBadgeInfos": {
+        },
+        "twitchBadges": [
+        ],
         "userID": "user-id",
         "usernameColor": "#ff0000ff"
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/chatterino/ChatterinoBadges.hpp"
 
 #include "common/network/NetworkRequest.hpp"
@@ -21,10 +25,10 @@ std::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
 {
     std::shared_lock lock(this->mutex_);
 
-    auto it = badgeMap.find(id.string);
-    if (it != badgeMap.end())
+    auto it = this->badgeMap.find(id.string);
+    if (it != this->badgeMap.end())
     {
-        return emotes[it->second];
+        return this->emotes[it->second];
     }
     return std::nullopt;
 }
@@ -48,8 +52,9 @@ void ChatterinoBadges::loadChatterinoBadges()
                 // The sizes for the images are only an estimation, there might
                 // be badges with different sizes.
                 constexpr QSize baseSize(18, 18);
+                auto tooltip = jsonBadge.value("tooltip").toString();
                 auto emote = Emote{
-                    .name = EmoteName{},
+                    .name = EmoteName{u"chatterino:" % tooltip},
                     .images =
                         ImageSet{
                             Image::fromUrl(
@@ -62,16 +67,16 @@ void ChatterinoBadges::loadChatterinoBadges()
                                 Url{jsonBadge.value("image3").toString()}, 0.25,
                                 baseSize * 4),
                         },
-                    .tooltip = Tooltip{jsonBadge.value("tooltip").toString()},
+                    .tooltip = Tooltip{tooltip},
                     .homePage = Url{},
                 };
 
-                emotes.push_back(
+                this->emotes.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
 
                 for (const auto &user : jsonBadge.value("users").toArray())
                 {
-                    badgeMap[user.toString()] = index;
+                    this->badgeMap[user.toString()] = index;
                 }
                 ++index;
             }

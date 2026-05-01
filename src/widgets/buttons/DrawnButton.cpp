@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/buttons/DrawnButton.hpp"
 
 #include "singletons/Theme.hpp"
@@ -144,7 +148,7 @@ void DrawnButton::paintContent(QPainter &painter)
 
             QRect centerBox;
             centerBox.setSize({thickness, thickness});
-            centerBox.moveCenter(rect().center());
+            centerBox.moveCenter(this->rect().center());
 
             painter.fillRect(centerBox, fg);
 

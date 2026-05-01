@@ -249,6 +249,7 @@ Session::Session(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
     , resolver(boost::asio::make_strand(ioc))
     , ws(boost::asio::make_strand(ioc), ctx)
     , listener(std::move(listener))
+    , closeTimeout(this->ws.get_executor())
 {
 }
 
@@ -272,10 +273,30 @@ void Session::close()
 {
     boost::beast::websocket::close_reason closeReason("Shutting down");
 
+    // cancel all pending operations
+    this->keepaliveTimer.reset();
+    this->resolver.cancel();
+    beast::get_lowest_layer(this->ws).cancel();
+
+    // set a timeout on the async_close() call
+    this->closeTimeout.expires_after(std::chrono::milliseconds(200));
+    this->closeTimeout.async_wait(
+        [self = this->shared_from_this()](boost::system::error_code ec) {
+            if (ec == boost::asio::error::operation_aborted)
+            {
+                return;  // we're aborted by onClose()
+            }
+
+            self->log->warn("Close timed out.");
+            self->closeSignal.emit(boost::asio::cancellation_type::total);
+        });
+
     // TODO: Test this with a misbehaving eventsub server that doesn't respond to our close
     this->ws.async_close(
         closeReason,
-        beast::bind_front_handler(&Session::onClose, shared_from_this()));
+        boost::asio::bind_cancellation_slot(
+            this->closeSignal.slot(),
+            beast::bind_front_handler(&Session::onClose, shared_from_this())));
 }
 
 Listener *Session::getListener()
@@ -381,7 +402,7 @@ void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
 {
     boost::ignore_unused(bytes_transferred);
 
-    if (!this->listener)
+    if (!this->listener || ec == boost::asio::error::operation_aborted)
     {
         return;
     }
@@ -418,7 +439,7 @@ void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
         */
 void Session::onClose(beast::error_code ec)
 {
-    if (ec)
+    if (ec && ec != boost::asio::error::operation_aborted)
     {
         this->fail(ec, "close");
         return;
@@ -427,6 +448,7 @@ void Session::onClose(beast::error_code ec)
     // If we get here then the connection is closed gracefully
     if (this->listener)
     {
+        this->closeTimeout.cancel();
         this->listener->onClose(std::move(this->listener), {});
     }
 }
@@ -441,6 +463,7 @@ void Session::fail(beast::error_code ec, std::string_view op)
         {
             this->keepaliveTimer.reset();
         }
+        this->closeTimeout.cancel();
 
         this->listener->onClose(std::move(this->listener), {});
     }
@@ -589,7 +612,7 @@ void Session::checkKeepalive()
     this->keepaliveTimer->async_wait(
         [weak{this->weak_from_this()}](boost::system::error_code ec) {
             auto strong = weak.lock();
-            if (!strong)
+            if (!strong || ec == boost::asio::error::operation_aborted)
             {
                 // Session was destroyed
                 return;

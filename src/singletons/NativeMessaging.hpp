@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Atomic.hpp"
@@ -16,9 +20,17 @@ enum class WriteManifestError : std::uint8_t {
     FailedToCreateFile,
 };
 
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json);
+Expected<void, WriteManifestError> writeManifestTo(QString directory,
+                                                   const QString &nmDirectory,
+                                                   const QString &filename,
+                                                   const QJsonDocument &json);
+
+#ifndef Q_OS_WIN
+/// Parse `path` by replacing '~', '$XDG_CONFIG_HOME' and '$XDG_DATA_HOME'
+/// with their respective values.
+/// Returns nullopt if the path is empty or relative.
+std::optional<QString> parseCustomPath(QString path);
+#endif
 
 }  // namespace chatterino::nm::detail
 
@@ -80,6 +92,11 @@ private:
     std::vector<ChannelPtr> channelWarmer_;
 
     friend ReceiverThread;
+};
+
+enum class BrowserManifestFormat {
+    Chrome,
+    Firefox,
 };
 
 }  // namespace chatterino

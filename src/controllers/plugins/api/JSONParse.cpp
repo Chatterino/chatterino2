@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/plugins/api/JSONParse.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -5,6 +9,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <boost/json/basic_parser.hpp>
+#    include <boost/json/basic_parser_impl.hpp>
 #    include <boost/json/serialize.hpp>
 #    include <QVarLengthArray>
 #    include <sol/sol.hpp>
@@ -410,7 +415,5 @@ int jsonParse(lua_State *L)
 }
 
 }  // namespace chatterino::lua::api
-
-#    include <boost/json/src.hpp>
 
 #endif  // CHATTERINO_HAVE_PLUGINS

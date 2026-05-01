@@ -2,14 +2,7 @@
     "input": "@badge-info=subscriber/47;badges=broadcaster/1,subscriber/3012,twitchconAmsterdam2020/1;color=#FF0000;display-name=Supinic;emotes=;flags=;id=8c26e1ab-b50c-4d9d-bc11-3fd57a941d90;login=supinic;mod=0;msg-id=announcement;msg-param-color=PRIMARY;room-id=11148817;subscriber=1;system-msg=;tmi-sent-ts=1648762219962;user-id=31400525;user-type= :tmi.twitch.tv USERNOTICE #pajlada :mm test lol",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "47"
-            },
-            "badges": [
-                "broadcaster",
-                "subscriber",
-                "twitchconAmsterdam2020"
-            ],
+            "announcementColor": "Primary",
             "channelName": "pajlada",
             "count": 1,
             "displayName": "Supinic",
@@ -138,9 +131,10 @@
                     ]
                 }
             ],
-            "flags": "Highlighted|Collapsed|Subscription",
+            "externalBadges": [
+            ],
+            "flags": "Collapsed|Announcement",
             "frozen": false,
-            "highlightColor": "#64c466ff",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
@@ -148,14 +142,19 @@
             "searchText": "supinic  supinic: mm test lol ",
             "serverReceivedTime": "2022-03-31T21:30:19Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "47"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber",
+                "twitchconAmsterdam2020"
+            ],
             "userID": "31400525",
             "usernameColor": "#ffff0000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
+            "announcementColor": "Primary",
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -203,7 +202,9 @@
                     ]
                 }
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|Announcement",
             "frozen": false,
             "id": "",
             "localizedName": "",
@@ -212,6 +213,10 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

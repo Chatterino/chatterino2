@@ -2,13 +2,6 @@
     "input": "@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,16-23;flags=;id=97c28382-e8d2-45a0-bb5d-2305fc4ef139;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922036771;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm, Kreygasm",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "34"
-            },
-            "badges": [
-                "moderator",
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "testaccount_420",
@@ -171,6 +164,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed",
             "frozen": false,
             "id": "97c28382-e8d2-45a0-bb5d-2305fc4ef139",
@@ -180,6 +175,13 @@
             "searchText": "testaccount_420(테스트계정420) 테스트계정420 testaccount_420: -tags Kreygasm, Kreygasm ",
             "serverReceivedTime": "2020-05-31T10:47:16Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "34"
+            },
+            "twitchBadges": [
+                "moderator",
+                "subscriber"
+            ],
             "userID": "117166826",
             "usernameColor": "#ffff0000"
         }

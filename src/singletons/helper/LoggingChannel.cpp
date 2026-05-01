@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/helper/LoggingChannel.hpp"
 
 #include "Application.hpp"
@@ -64,27 +68,28 @@ LoggingChannel::LoggingChannel(QString _channelName, QString _platform)
     {
         this->subDirectory = "Whispers";
     }
-    else if (channelName.startsWith("/mentions"))
+    else if (this->channelName.startsWith("/mentions"))
     {
         this->subDirectory = "Mentions";
     }
-    else if (channelName.startsWith("/live"))
+    else if (this->channelName.startsWith("/live"))
     {
         this->subDirectory = "Live";
     }
-    else if (channelName.startsWith("/automod"))
+    else if (this->channelName.startsWith("/automod"))
     {
         this->subDirectory = "AutoMod";
     }
     else
     {
         this->subDirectory =
-            QStringLiteral("Channels") + QDir::separator() + channelName;
+            QStringLiteral("Channels") + QDir::separator() + this->channelName;
     }
 
     // enforce capitalized platform names
-    this->subDirectory = platform[0].toUpper() + platform.mid(1).toLower() +
-                         QDir::separator() + this->subDirectory;
+    this->subDirectory = this->platform[0].toUpper() +
+                         this->platform.mid(1).toLower() + QDir::separator() +
+                         this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         this->baseDirectory = logPath.isEmpty()
@@ -196,8 +201,8 @@ void LoggingChannel::addMessage(const MessagePtr &message,
     }
 
     QString str;
-    if (channelName.startsWith("/mentions") ||
-        channelName.startsWith("/automod"))
+    if (this->channelName.startsWith("/mentions") ||
+        this->channelName.startsWith("/automod"))
     {
         str.append("#" + message->channelName + " ");
     }

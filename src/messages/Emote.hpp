@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -30,14 +34,13 @@ struct Emote {
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const
     {
-        return name.string;
+        return this->name.string;
     }
 
     QJsonObject toJson() const;
 };
 
 bool operator==(const Emote &a, const Emote &b);
-bool operator!=(const Emote &a, const Emote &b);
 
 using EmotePtr = std::shared_ptr<const Emote>;
 

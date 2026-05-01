@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/network/NetworkTask.hpp"
 
 #include "Application.hpp"
@@ -40,7 +44,6 @@ void NetworkTask::run()
     const auto &timeout = this->data_->timeout;
     if (timeout.has_value())
     {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
         QObject::connect(this->reply_, &QNetworkReply::requestSent, this,
                          [this]() {
                              const auto &timeout = this->data_->timeout;
@@ -50,13 +53,6 @@ void NetworkTask::run()
                              QObject::connect(this->timer_, &QTimer::timeout,
                                               this, &NetworkTask::timeout);
                          });
-#else
-        this->timer_ = new QTimer(this);
-        this->timer_->setSingleShot(true);
-        this->timer_->start(timeout.value());
-        QObject::connect(this->timer_, &QTimer::timeout, this,
-                         &NetworkTask::timeout);
-#endif
     }
 
     QObject::connect(this->reply_, &QNetworkReply::finished, this,
@@ -83,11 +79,23 @@ QNetworkReply *NetworkTask::createReply()
         case NetworkRequestType::Get:
             return accessManager->get(request);
 
-        case NetworkRequestType::Put:
-            return accessManager->put(request, data->payload);
-
         case NetworkRequestType::Delete:
             return accessManager->deleteResource(data->request);
+
+        case NetworkRequestType::Put:
+            if (data->multiPartPayload)
+            {
+                assert(data->payload.isNull());
+
+                return accessManager->put(request,
+                                          data->multiPartPayload.get());
+            }
+            else
+            {
+                assert(data->multiPartPayload == nullptr);
+
+                return accessManager->put(request, data->payload);
+            }
 
         case NetworkRequestType::Post:
             if (data->multiPartPayload)
@@ -99,8 +107,11 @@ QNetworkReply *NetworkTask::createReply()
             }
             else
             {
+                assert(data->multiPartPayload == nullptr);
+
                 return accessManager->post(request, data->payload);
             }
+
         case NetworkRequestType::Patch:
             if (data->multiPartPayload)
             {
@@ -111,6 +122,8 @@ QNetworkReply *NetworkTask::createReply()
             }
             else
             {
+                assert(data->multiPartPayload == nullptr);
+
                 return NetworkManager::accessManager->sendCustomRequest(
                     request, "PATCH", data->payload);
             }
@@ -141,7 +154,24 @@ void NetworkTask::logReply()
 void NetworkTask::writeToCache(const QByteArray &bytes) const
 {
     std::ignore = QtConcurrent::run([data = this->data_, bytes] {
-        QFile cachedFile(getApp()->getPaths().cacheDirectory() + "/" +
+        if (isAppAboutToQuit())
+        {
+            qCDebug(chatterinoHTTP)
+                << "Skipping cache write for" << data->request.url()
+                << "because app is about to quit";
+            return;
+        }
+
+        auto *app = tryGetApp();
+        if (!app)
+        {
+            qCDebug(chatterinoHTTP)
+                << "Skipping cache write for" << data->request.url()
+                << "because app is null";
+            return;
+        }
+
+        QFile cachedFile(app->getPaths().cacheDirectory() + "/" +
                          data->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly))
@@ -205,7 +235,7 @@ void NetworkTask::finished()
         this->writeToCache(bytes);
     }
 
-    DebugCount::increase("http request success");
+    DebugCount::increase(DebugObject::HTTPRequestSuccess);
     this->logReply();
     this->data_->emitSuccess({reply->error(), status, bytes});
     this->data_->emitFinally();
