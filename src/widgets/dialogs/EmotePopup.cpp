@@ -48,36 +48,17 @@ auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
     return it == emoteMap.cend() ? nullptr : it->second;
 }
 
-auto loadFavouriteEmoteNames()
-{
-    auto emoteStrNames =
-        Settings::instance().favouriteEmotes.getValue().split(";");
-
-    std::vector<EmoteName> names;
-    for (auto &&strName : emoteStrNames)
-    {
-        EmoteName emoteName{std::move(strName)};
-        names.push_back(std::move(emoteName));
-    }
-    return names;
-}
-
 auto saveFavouriteEmotes(const std::vector<EmotePtr> &emotes)
 {
-    QString serialized;
+    std::vector<QString> emoteNames;
+    emoteNames.reserve(emotes.size());
 
-    if (!emotes.empty())
-    {
-        for (size_t idx = 0; idx < emotes.size() - 1; idx++)
-        {
-            const auto &emote = emotes[idx];
-            serialized += emote->name.string + ";";
-        }
+    std::ranges::transform(emotes, std::back_inserter(emoteNames),
+                           [](const auto &emote) {
+                               return emote->name.string;
+                           });
 
-        serialized += emotes.back()->name.string;
-    }
-
-    Settings::instance().favouriteEmotes = serialized;
+    Settings::instance().favouriteEmotes = emoteNames;
 }
 
 auto makeTitleMessage(const QString &title)
@@ -623,9 +604,10 @@ void EmotePopup::reloadEmotes()
     }
 
     this->favEmotes_.clear();
-    for (const auto &emoteName : loadFavouriteEmoteNames())
+    auto emoteNames = Settings::instance().favouriteEmotes;
+    for (const auto &emoteName : emoteNames.getValue())
     {
-        auto emote = this->findEmote(emoteName);
+        auto emote = this->findEmote(EmoteName{emoteName});
         if (emote)
         {
             this->favEmotes_.push_back(emote);
