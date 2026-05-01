@@ -87,7 +87,7 @@ auto makeTitleMessage(const QString &title)
     return builder.release();
 }
 
-auto makeEmoteMessage(std::vector<EmotePtr> emotes, bool sortEmotes = true)
+auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -101,13 +101,6 @@ auto makeEmoteMessage(std::vector<EmotePtr> emotes, bool sortEmotes = true)
         return builder.release();
     }
 
-    if (sortEmotes)
-    {
-        std::sort(
-            emotes.begin(), emotes.end(), [](const auto &l, const auto &r) {
-                return compareEmoteStrings(l->name.string, r->name.string);
-            });
-    }
     for (const auto &emote : emotes)
     {
         builder
@@ -118,6 +111,15 @@ auto makeEmoteMessage(std::vector<EmotePtr> emotes, bool sortEmotes = true)
     }
 
     return builder.release();
+}
+
+auto makeEmoteMessage(std::vector<EmotePtr> emotes)
+{
+    std::sort(emotes.begin(), emotes.end(), [](const auto &l, const auto &r) {
+        return compareEmoteStrings(l->name.string, r->name.string);
+    });
+
+    return makeEmoteMessageSorted(emotes);
 }
 
 auto makeEmoteMessage(const EmoteMap &map)
@@ -579,7 +581,7 @@ void EmotePopup::updateFavouriteEmotes()
 {
     auto chan = this->favEmotesView_->underlyingChannel();
     chan->clearMessages();
-    chan->addMessage(makeEmoteMessage(this->favEmotes_, false),
+    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
                      MessageContext::Original);
 }
 
