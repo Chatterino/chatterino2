@@ -266,12 +266,11 @@ void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
 }
 
 // Create an emote
-EmoteMap filterEmoteMap(const QString &text,
-                        const std::shared_ptr<const EmoteMap> &emotes)
+EmoteMap filterEmoteMap(const QString &text, const EmoteMap &emotes)
 {
     EmoteMap filteredMap;
 
-    for (const auto &emote : *emotes)
+    for (const auto &emote : emotes)
     {
         if (emote.first.string.contains(text, Qt::CaseInsensitive))
         {
@@ -280,22 +279,6 @@ EmoteMap filterEmoteMap(const QString &text,
     }
 
     return filteredMap;
-}
-
-std::vector<EmotePtr> filterEmoteVec(const QString &text,
-                                     const std::vector<EmotePtr> &emotes)
-{
-    std::vector<EmotePtr> filtered;
-
-    for (const auto &emote : emotes)
-    {
-        if (emote->name.string.contains(text, Qt::CaseInsensitive))
-        {
-            filtered.emplace_back(emote);
-        }
-    }
-
-    return filtered;
 }
 
 }  // namespace
@@ -683,7 +666,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     if (this->twitchChannel_)
     {
         auto local = filterEmoteMap(searchText,
-                                    this->twitchChannel_->localTwitchEmotes());
+                                    *this->twitchChannel_->localTwitchEmotes());
         if (!local.empty())
         {
             addEmotes(*searchChannel, local,
@@ -693,7 +676,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         for (const auto &[_id, set] :
              **getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets())
         {
-            auto filtered = filterEmoteVec(searchText, set.emotes);
+            auto filtered = filterEmoteMap(searchText, set.emotes);
             if (!filtered.empty())
             {
                 addEmotes(*searchChannel, std::move(filtered), set.title());
@@ -702,11 +685,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getBttvEmotes()->emotes());
+        filterEmoteMap(searchText, *getApp()->getBttvEmotes()->emotes());
     auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getFfzEmotes()->emotes());
+        filterEmoteMap(searchText, *getApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->getSeventvEmotes()->globalEmotes());
+        searchText, *getApp()->getSeventvEmotes()->globalEmotes());
 
     // global
     if (!bttvGlobalEmotes.empty())
@@ -728,11 +711,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
+        filterEmoteMap(searchText, *this->twitchChannel_->bttvEmotes());
     auto ffzChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
+        filterEmoteMap(searchText, *this->twitchChannel_->ffzEmotes());
     auto seventvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
+        filterEmoteMap(searchText, *this->twitchChannel_->seventvEmotes());
 
     // channel
     if (!bttvChannelEmotes.empty())
@@ -801,16 +784,14 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
             return emote;
         }
 
-        const std::shared_ptr<const TwitchEmoteSetMap> twitchEmotes =
+        auto twitchEmotes =
             *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets();
         for (const auto &[setId, emoteSet] : *twitchEmotes)
         {
-            for (const auto &emote : emoteSet.emotes)
+            auto emote = findEmoteByName(name, emoteSet.emotes);
+            if (emote)
             {
-                if (emote->name == name)
-                {
-                    return emote;
-                }
+                return emote;
             }
         }
 
