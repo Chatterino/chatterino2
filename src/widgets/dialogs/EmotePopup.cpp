@@ -56,7 +56,8 @@ auto loadFavouriteEmoteNames()
     std::vector<EmoteName> names;
     for (auto &&strName : emoteStrNames)
     {
-        names.emplace_back(std::move(strName));
+        EmoteName emoteName{std::move(strName)};
+        names.push_back(std::move(emoteName));
     }
     return names;
 }
