@@ -353,7 +353,10 @@ EmotePopup::EmotePopup(QWidget *parent)
                 addFavouriteEmote(emoteName);
             }
 
-            return;
+            if (!(modifiers & Qt::KeyboardModifier::ShiftModifier))
+            {
+                return;
+            }
         }
 
         this->linkClicked.invoke(link);
@@ -537,6 +540,11 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
     auto emote = this->findEmote(name);
+    if (!emote)
+    {
+        return;
+    }
+
     for (const auto &emotePresent : this->favEmotes_)
     {
         if (emotePresent->name == name)
