@@ -774,6 +774,16 @@ void SplitInput::installTextEditEvents()
                 }
             }
 
+            // Prevent QTextEdit default undo/redo
+            // undo/redo should only be handled by the assigned hotkeys
+            if (event->key() == Qt::Key_Z &&
+                (event->modifiers() == Qt::ControlModifier ||
+                event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)))
+            {
+                event->accept();
+                return;
+            }
+
             // One of the last remaining of it's kind, the copy shortcut.
             // For some bizarre reason Qt doesn't want this key be rebound.
             // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
