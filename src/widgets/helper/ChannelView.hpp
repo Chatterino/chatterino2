@@ -228,7 +228,7 @@ public:
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
-    pajlada::Signals::Signal<const Link &> linkClicked;
+    pajlada::Signals::Signal<const Link &, Qt::KeyboardModifiers> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
 

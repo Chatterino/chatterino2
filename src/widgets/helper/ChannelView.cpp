@@ -2441,7 +2441,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             // Invoke to signal from EmotePopup.
             if (link.type == Link::InsertText)
             {
-                this->linkClicked.invoke(link);
+                this->linkClicked.invoke(link, event->modifiers());
 
                 if (this->context_ == Context::None)
                 {

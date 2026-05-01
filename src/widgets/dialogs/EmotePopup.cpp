@@ -42,6 +42,12 @@ namespace {
 
 using namespace chatterino;
 
+auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
+{
+    auto it = emoteMap.find(name);
+    return it == emoteMap.cend() ? nullptr : it->second;
+}
+
 auto makeTitleMessage(const QString &title)
 {
     MessageBuilder builder;
@@ -50,7 +56,7 @@ auto makeTitleMessage(const QString &title)
     return builder.release();
 }
 
-auto makeEmoteMessage(std::vector<EmotePtr> emotes)
+auto makeEmoteMessage(std::vector<EmotePtr> emotes, bool sortEmotes = true)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -64,9 +70,13 @@ auto makeEmoteMessage(std::vector<EmotePtr> emotes)
         return builder.release();
     }
 
-    std::sort(emotes.begin(), emotes.end(), [](const auto &l, const auto &r) {
-        return compareEmoteStrings(l->name.string, r->name.string);
-    });
+    if (sortEmotes)
+    {
+        std::sort(
+            emotes.begin(), emotes.end(), [](const auto &l, const auto &r) {
+                return compareEmoteStrings(l->name.string, r->name.string);
+            });
+    }
     for (const auto &emote : emotes)
     {
         builder
@@ -298,7 +308,20 @@ EmotePopup::EmotePopup(QWidget *parent)
     QObject::connect(this->search_, &QLineEdit::textChanged, this,
                      &EmotePopup::filterEmotes);
 
-    auto clicked = [this](const Link &link) {
+    auto clicked = [this](const Link &link, Qt::KeyboardModifiers modifiers) {
+        if (modifiers & Qt::KeyboardModifier::ControlModifier)
+        {
+            EmoteName emoteName{link.value};
+
+            auto emote = this->findEmote(emoteName);
+            if (emote)
+            {
+                updateFavouriteEmotes(std::move(emote));
+            }
+
+            return;
+        }
+
         this->linkClicked.invoke(link);
     };
 
@@ -328,10 +351,13 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(this->notebook_);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    this->favEmotesView_ = makeView("Favourite");
     this->subEmotesView_ = makeView("Subs");
     this->channelEmotesView_ = makeView("Channel");
     this->globalEmotesView_ = makeView("Global");
     this->viewEmojis_ = makeView("Emojis");
+
+    this->notebook_->select(this->subEmotesView_);
 
     loadEmojis(*this->viewEmojis_,
                getApp()->getEmotes()->getEmojis()->getEmojis());
@@ -468,8 +494,28 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         std::make_shared<Channel>("", Channel::Type::None));
     this->searchView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
+    this->favEmotesView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
+}
+
+void EmotePopup::updateFavouriteEmotes(EmotePtr emote)
+{
+    for (const auto &emotePresent : this->favEmotes_)
+    {
+        if (emotePresent->name == emote->name)
+        {
+            return;
+        }
+    }
+
+    this->favEmotes_.push_back(std::move(emote));
+
+    auto chan = this->favEmotesView_->underlyingChannel();
+    chan->clearMessages();
+    chan->addMessage(makeEmoteMessage(this->favEmotes_, false),
+                     MessageContext::Original);
 }
 
 void EmotePopup::reloadEmotes()
@@ -662,6 +708,95 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
     this->notebook_->hide();
     this->searchView_->show();
+}
+
+EmotePtr EmotePopup::findEmote(const EmoteName &name)
+{
+    if (this->twitchChannel_)
+    {
+        auto emotesToTry = this->twitchChannel_->localTwitchEmotes();
+
+        auto emote = findEmoteByName(name, *emotesToTry);
+        if (emote)
+        {
+            return emote;
+        }
+
+        const std::shared_ptr<const TwitchEmoteSetMap> twitchEmotes =
+            *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets();
+        for (const auto &[setId, emoteSet] : *twitchEmotes)
+        {
+            for (const auto &emote : emoteSet.emotes)
+            {
+                if (emote->name == name)
+                {
+                    return emote;
+                }
+            }
+        }
+
+        if (Settings::instance().enableBTTVChannelEmotes)
+        {
+            auto emote =
+                findEmoteByName(name, *this->twitchChannel_->bttvEmotes());
+            if (emote)
+            {
+                return emote;
+            }
+        }
+
+        if (Settings::instance().enableFFZChannelEmotes)
+        {
+            auto emote =
+                findEmoteByName(name, *this->twitchChannel_->ffzEmotes());
+            if (emote)
+            {
+                return emote;
+            }
+        }
+
+        if (Settings::instance().enableSevenTVChannelEmotes)
+        {
+            auto emote =
+                findEmoteByName(name, *this->twitchChannel_->seventvEmotes());
+            if (emote)
+            {
+                return emote;
+            }
+        }
+    }
+
+    // Global
+    if (Settings::instance().enableBTTVGlobalEmotes)
+    {
+        auto emote =
+            findEmoteByName(name, *getApp()->getBttvEmotes()->emotes());
+        if (emote)
+        {
+            return emote;
+        }
+    }
+
+    if (Settings::instance().enableFFZGlobalEmotes)
+    {
+        auto emote = findEmoteByName(name, *getApp()->getFfzEmotes()->emotes());
+        if (emote)
+        {
+            return emote;
+        }
+    }
+
+    if (Settings::instance().enableSevenTVGlobalEmotes)
+    {
+        auto emote = findEmoteByName(
+            name, *getApp()->getSeventvEmotes()->globalEmotes());
+        if (emote)
+        {
+            return emote;
+        }
+    }
+
+    return nullptr;
 }
 
 void EmotePopup::saveBounds() const

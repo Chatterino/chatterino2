@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "messages/Emote.hpp"
 #include "widgets/BasePopup.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -39,6 +40,7 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
+    ChannelView *favEmotesView_{};
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.
@@ -51,13 +53,17 @@ private:
     QLineEdit *search_;
     Notebook *notebook_;
 
+    std::vector<EmotePtr> favEmotes_;
+
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                             const QString &searchText);
     void filterEmotes(const QString &text);
+    EmotePtr findEmote(const EmoteName &name);
     void addShortcuts() override;
     bool eventFilter(QObject *object, QEvent *event) override;
 
     void reloadEmotes();
+    void updateFavouriteEmotes(EmotePtr emote);
 
     void saveBounds() const;
 };
