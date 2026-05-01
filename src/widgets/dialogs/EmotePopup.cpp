@@ -539,18 +539,17 @@ void EmotePopup::loadChannel(ChannelPtr channel)
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
-    auto emote = this->findEmote(name);
-    if (!emote)
-    {
-        return;
-    }
-
     for (const auto &emotePresent : this->favEmotes_)
     {
         if (emotePresent->name == name)
         {
             return;
         }
+    }
+    auto emote = this->findEmote(name);
+    if (!emote)
+    {
+        return;
     }
 
     this->favEmotes_.push_back(std::move(emote));
