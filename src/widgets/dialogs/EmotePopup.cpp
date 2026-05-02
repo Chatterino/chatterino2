@@ -574,8 +574,16 @@ void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
+    /*
+     * Note that we are checking the persistent list of favourite emote names
+     * rather than the internal vector of favEmotes_. We do this because
+     * in order to populate the favEmotes_ list, we first need to download
+     * all Emotes we have access to from Twitch. This can take considerable
+     * time during which the persistent list and the internal list are
+     * effectively out of sync. If there is a connection issue, these two lists
+     * may not sync up at all. Using the persistent list is the safe choice.
+     */
     auto emoteNames = Settings::instance().favouriteEmotes.getValue();
-
     for (const auto &emotePresentName : emoteNames)
     {
         if (emotePresentName == name.string)
@@ -593,7 +601,6 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     this->updateFavouriteEmotesAndEmojis();
 
     emoteNames.push_back(name.string);
-
     Settings::instance().favouriteEmotes = emoteNames;
 }
 
@@ -615,11 +622,9 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
     this->updateFavouriteEmotesAndEmojis();
 
     auto emoteNames = Settings::instance().favouriteEmotes.getValue();
-    std::erase_if(
-        emoteNames,
-        [name](const auto &emoteName) {
-            return emoteName == name.string;
-        });
+    std::erase_if(emoteNames, [name](const auto &emoteName) {
+        return emoteName == name.string;
+    });
     Settings::instance().favouriteEmotes = emoteNames;
 }
 
