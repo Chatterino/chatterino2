@@ -721,8 +721,9 @@ void EmotePopup::reloadEmotes()
             }
         }
     }
-
     this->updateFavouriteEmotesAndEmojis();
+    saveFavouriteEmotes(this->favEmotes_);
+    saveFavouriteEmojis(this->favEmojis_);
 
     if (!subChannel->hasMessages())
     {
