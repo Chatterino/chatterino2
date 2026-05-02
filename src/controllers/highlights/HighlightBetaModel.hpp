@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/types/AllForward.hpp"
 
 #include <qnamespace.h>
 #include <QObject>
@@ -9,7 +10,7 @@ namespace chatterino {
 
 struct SharedHighlight;
 
-class HighlightBetaModel : public SignalVectorModel<SharedHighlight>
+class HighlightBetaModel : public SignalVectorModel<AllHighlights>
 {
 public:
     static constexpr int DATA_ROLE = Qt::UserRole + 110;
@@ -27,11 +28,11 @@ public:
 
 protected:
     // turn a vector item into a model row
-    SharedHighlight getItemFromRow(std::vector<QStandardItem *> &row,
-                                   const SharedHighlight &original) override;
+    AllHighlights getItemFromRow(std::vector<QStandardItem *> &row,
+                                 const AllHighlights &original) override;
 
     // turns a row in the model into a vector item
-    void getRowFromItem(const SharedHighlight &item,
+    void getRowFromItem(const AllHighlights &item,
                         std::vector<QStandardItem *> &row) override;
 
     void afterInit() override;

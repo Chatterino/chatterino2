@@ -1,0 +1,174 @@
+{
+    "input": {
+        "highlighting": {
+            "automod": {
+                "color": "#88888888",
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "enabled": true,
+                "showInMentions": false
+            },
+            "elevatedMessageHighlight": {
+                "color": "#66666666",
+                "highlighted": true
+            },
+            "firstMessageHighlight": {
+                "highlighted": true
+            },
+            "firstMessageHighlightColor": "#55555555",
+            "redeemedHighlight": {
+                "highlighted": true
+            },
+            "redeemedHighlightColor": "#44444444",
+            "selfHighlight": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "nameIsHighlightKeyword": true,
+                "showSelfHighlightInMentions": true
+            },
+            "selfHighlightColor": "#11111111",
+            "subHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "subsHighlighted": true
+            },
+            "subHighlightColor": "#33333333",
+            "thread": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "nameIsHighlightKeyword": true,
+                "showSelfHighlightInMentions": true
+            },
+            "threadHighlightColor": "#77777777",
+            "watchStreak": {
+                "color": "#99999999",
+                "enabled": true
+            },
+            "whisperHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "whispersHighlighted": true
+            },
+            "whisperHighlightColor": "#22222222"
+        }
+    },
+    "output": {
+        "highlighting": {
+            "automod": {
+                "color": "#88888888",
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "enabled": true,
+                "showInMentions": false
+            },
+            "elevatedMessageHighlight": {
+                "color": "#66666666",
+                "highlighted": true
+            },
+            "firstMessageHighlight": {
+                "highlighted": true
+            },
+            "firstMessageHighlightColor": "#55555555",
+            "highlights2": [
+                {
+                    "alert": true,
+                    "backgroundColor": "#11111111",
+                    "enabled": true,
+                    "id": "yourusername",
+                    "playSound": true,
+                    "showInMentions": true
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#22222222",
+                    "enabled": true,
+                    "id": "whispers",
+                    "playSound": false
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#33333333",
+                    "enabled": true,
+                    "id": "subscriptions",
+                    "playSound": false
+                },
+                {
+                    "backgroundColor": "#44444444",
+                    "enabled": true,
+                    "id": "channelpoints"
+                },
+                {
+                    "backgroundColor": "#55555555",
+                    "enabled": true,
+                    "id": "firstmessage"
+                },
+                {
+                    "backgroundColor": "#66666666",
+                    "enabled": true,
+                    "id": "hypechat"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#77777777",
+                    "enabled": true,
+                    "id": "subscribedthread",
+                    "playSound": true,
+                    "showInMentions": true
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#88888888",
+                    "enabled": true,
+                    "id": "automodcaught",
+                    "playSound": false,
+                    "showInMentions": false
+                },
+                {
+                    "backgroundColor": "#99999999",
+                    "enabled": true,
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                }
+            ],
+            "redeemedHighlight": {
+                "highlighted": true
+            },
+            "redeemedHighlightColor": "#44444444",
+            "selfHighlight": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "nameIsHighlightKeyword": true,
+                "showSelfHighlightInMentions": true
+            },
+            "selfHighlightColor": "#11111111",
+            "subHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "subsHighlighted": true
+            },
+            "subHighlightColor": "#33333333",
+            "thread": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "nameIsHighlightKeyword": true,
+                "showSelfHighlightInMentions": true
+            },
+            "threadHighlightColor": "#77777777",
+            "watchStreak": {
+                "color": "#99999999",
+                "enabled": true
+            },
+            "whisperHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "whispersHighlighted": true
+            },
+            "whisperHighlightColor": "#22222222"
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

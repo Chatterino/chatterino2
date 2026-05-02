@@ -62,6 +62,9 @@ struct SharedHighlight2 {
     QUrl getSoundUrl() const;
     void setSoundUrl(const QUrl &newValue);
 
+    std::shared_ptr<QColor> getBackgroundColor() const;
+    void setBackgroundColor(const QColor &newValue);
+
     /// Unique identifier for this highlight
     /// User-created highlights will get a random UUID,
     /// while app-created highlights get a descriptive string (i.e. "subhighlight")
@@ -112,11 +115,11 @@ protected:
     /// The custom sound URL to play if playSound is enabled.
     QUrl customSoundURL;
 
-public:
     /// The background color to apply to the message.
     /// If the color is invalid/unset, don't apply a background color.
     std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
 
+public:
     std::optional<bool> isRegex;
     std::optional<bool> isCaseSensitive;
 

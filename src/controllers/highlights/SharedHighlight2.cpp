@@ -56,7 +56,7 @@ bool SharedHighlight2::shouldPlaySound() const
 
 void SharedHighlight2::setPlaySound(std::optional<bool> newValue)
 {
-    this->alert = newValue;
+    this->playSound = newValue;
 }
 
 QUrl SharedHighlight2::getSoundUrl() const
@@ -67,6 +67,16 @@ QUrl SharedHighlight2::getSoundUrl() const
 void SharedHighlight2::setSoundUrl(const QUrl &newValue)
 {
     this->customSoundURL = newValue;
+}
+
+std::shared_ptr<QColor> SharedHighlight2::getBackgroundColor() const
+{
+    return this->backgroundColor;
+}
+
+void SharedHighlight2::setBackgroundColor(const QColor &newValue)
+{
+    this->backgroundColor = std::make_shared<QColor>(newValue);
 }
 
 QPixmap SharedHighlight2::getType() const
@@ -145,6 +155,12 @@ HighlightCheck SharedHighlight2::buildCheck() const
 
 QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v)
 {
+    const auto &backgroundColorPtr = v.getBackgroundColor();
+    QColor backgroundColor;
+    if (backgroundColorPtr)
+    {
+        backgroundColor = *backgroundColorPtr;
+    }
     dbg.nospace() << "SharedHighlight2("
                   << "name:" << v.name << ',' << "pattern:" << v.pattern << ','
                   << "enabled:" << v.isEnabled() << ','
@@ -153,7 +169,8 @@ QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v)
                   << "playSound:" << v.shouldPlaySound() << ','
                   << "isRegex:" << v.isRegex << ','
                   << "isCaseSensitive:" << v.isCaseSensitive << ','
-                  << "customSoundURL:" << v.getSoundUrl() << ')';
+                  << "customSoundURL:" << v.getSoundUrl() << ','
+                  << "backgroundColor:" << backgroundColor << ')';
 
     return dbg;
 }

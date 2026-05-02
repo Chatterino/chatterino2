@@ -2,13 +2,42 @@
     "input": {
     },
     "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                }
+            ]
+        },
         "misc": {
             "settingsVersion": 1
-        },
-        "pajlada2": [
-            {
-                "id": "yourusername"
-            }
-        ]
+        }
     }
 }

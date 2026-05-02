@@ -8,18 +8,45 @@
     },
     "output": {
         "highlighting": {
+            "highlights2": [
+                {
+                    "id": "yourusername",
+                    "showInMentions": true
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                }
+            ],
             "selfHighlight": {
                 "showSelfHighlightInMentions": true
             }
         },
         "misc": {
             "settingsVersion": 1
-        },
-        "pajlada2": [
-            {
-                "id": "yourusername",
-                "showInMentions": true
-            }
-        ]
+        }
     }
 }

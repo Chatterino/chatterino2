@@ -10,8 +10,8 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/highlights/SharedHighlight.hpp"
-#include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
@@ -71,17 +71,6 @@ void Settings::migrate()
 
 void Settings::migrateHighlights()
 {
-    qInfo() << "XXX: MIGRATE HIGHLIGHTS";
-    // TODO: Migrate
-    //  - /highlighting/subHighlight/subsHighlighted
-    //  - /highlighting/subHighlight/enableSound
-    //  - /highlighting/subHighlight/enableTaskbarFlashing
-    //  to /definedHighlights/subHighlight
-
-    auto n = this->sharedHighlightsSetting.getValue();
-
-    // TODO: Ensure the order is correct when a user first migrates
-
     {
         YourUsernameHighlight h;
 
@@ -112,7 +101,12 @@ void Settings::migrateHighlights()
             h.setSoundUrl(s.getValue());
         }
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->selfHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -142,11 +136,15 @@ void Settings::migrateHighlights()
             h.setSoundUrl(s.getValue());
         }
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->whisperHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: SubscriptionsHighlight
         SubscriptionsHighlight h;
 
         if (const auto &s = this->enableSubHighlight; s.hasValueBeenSet())
@@ -172,11 +170,15 @@ void Settings::migrateHighlights()
             h.setSoundUrl(s.getValue());
         }
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->subHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: ChannelPointsHighlight
         ChannelPointsHighlight h;
 
         if (const auto &s = this->enableRedeemedHighlight; s.hasValueBeenSet())
@@ -188,11 +190,15 @@ void Settings::migrateHighlights()
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->redeemedHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: FirstMessageHighlight
         FirstMessageHighlight h;
 
         if (const auto &s = this->enableFirstMessageHighlight;
@@ -205,11 +211,16 @@ void Settings::migrateHighlights()
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->firstMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: HypeChatHighlight
         HypeChatHighlight h;
 
         if (const auto &s = this->enableElevatedMessageHighlight;
@@ -222,11 +233,16 @@ void Settings::migrateHighlights()
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->elevatedMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: SubscribedThreadHighlight
         SubscribedThreadHighlight h;
 
         if (const auto &s = this->enableThreadHighlight; s.hasValueBeenSet())
@@ -257,11 +273,15 @@ void Settings::migrateHighlights()
             h.setSoundUrl(s.getValue());
         }
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->threadHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: AutomodCaughtHighlight
         AutomodCaughtHighlight h;
 
         if (const auto &s = this->enableAutomodHighlight; s.hasValueBeenSet())
@@ -291,14 +311,18 @@ void Settings::migrateHighlights()
             h.setSoundUrl(s.getValue());
         }
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->automodHighlightColor; s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     {
-        // TODO: WatchStreakHighlight
-        HypeChatHighlight h;
+        WatchStreakHighlight h;
 
-        if (const auto &s = this->enableElevatedMessageHighlight;
+        if (const auto &s = this->enableWatchStreakHighlight;
             s.hasValueBeenSet())
         {
             h.setEnabled(s.getValue());
@@ -308,71 +332,49 @@ void Settings::migrateHighlights()
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        this->pajlada2.push_back(h);
+        if (const auto &s = this->watchStreakHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        YourMessagesHighlight h;
+
+        if (const auto &s = this->enableSelfMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.setEnabled(s.getValue());
+        }
+
+        if (const auto &s = this->showSelfMessageHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.setShowInMentions(s.getValue());
+        }
+
+        // This does not support "flash taskbar" - no setting to migrate
+        // This does not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->selfMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.setBackgroundColor(s.getValue());
+        }
+
+        this->sharedHighlightsSetting.push_back(h);
     }
 
     // TODO: If we implement a new built-in highlight that is enabled by default - where in the order does that get added?
     // We should be able to control this somehow
     // Maybe in this migration - find an "anchor" highlight (e.g. "yourusername" and always put it underneath that?)
 
-    /*
-    {
-        const QString uuid = "subhighlight";
-        auto enabled = this->enableSubHighlight.getValue();
-        auto soundEnabled = this->enableSubHighlightSound.getValue();
-        auto taskbarEnabled = this->enableSubHighlightTaskbar.getValue();
-        auto soundUrl = this->subHighlightSoundUrl.getValue();
-        auto color = this->subHighlightColor.getValue();
-
-        auto newPhrase = QMap<QString, QJsonValue>{
-            {"enabled", enabled},
-            {"showInMentions", false},
-            {"flashTaskbar", taskbarEnabled},
-            {"enableRegex", false},
-            {"caseSensitive", false},
-            {"playSound", soundEnabled},
-            {"customSound", soundUrl},
-            {"color", color},
-        };
-
-        bool found = false;
-
-        for (auto &highlight : n)
-        {
-            if (highlight.id == uuid)
-            {
-                highlight.playSound = soundEnabled;
-                highlight.alert = taskbarEnabled;
-                highlight.customSoundURL = soundUrl;
-                *highlight.backgroundColor = QColor::fromString(color);
-                found = true;
-                break;
-            }
-        }
-
-        if (!found)
-        {
-            n.push_back(SharedHighlight{
-                .id = uuid,
-                .name = "xd",
-                .enabled = true,
-                .pattern = "asdddddaaa",
-                .showInMentions = false,
-                .alert = taskbarEnabled,
-                .playSound = soundEnabled,
-                .customSoundURL = soundUrl,
-                .backgroundColor =
-                    std::make_shared<QColor>(QColor::fromString(color)),
-                .isRegex = false,
-                .isCaseSensitive = false,
-            });
-        }
-    }
-
-    this->sharedHighlightsSetting.setValue(n);
-    */
-
-    qInfo() << "XXX:" << n;
+    // TODO: Migrate user-created "Message" highlights
+    // TODO: Migrate user-created "Users" highlights
+    // TODO: Migrate user-created "Badges" highlights
 }
 
 bool Settings::isHighlightedUser(const QString &username)

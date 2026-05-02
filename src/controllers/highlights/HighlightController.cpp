@@ -11,7 +11,7 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/SharedHighlight.hpp"
+#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -371,12 +371,16 @@ void rebuildSharedHighlights(Settings &settings,
 
     for (const auto &highlight : *highlights)
     {
-        if (!highlight.enabled)
-        {
-            continue;
-        }
+        std::visit(
+            [&checks](auto &&highlightV) {
+                if (!highlightV.isEnabled())
+                {
+                    return;
+                }
 
-        checks.emplace_back(highlight.buildCheck());
+                checks.emplace_back(highlightV.buildCheck());
+            },
+            highlight);
     }
 }
 

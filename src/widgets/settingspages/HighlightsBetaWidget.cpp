@@ -1,6 +1,7 @@
 #include "widgets/settingspages/HighlightsBetaWidget.hpp"
 
 #include "controllers/highlights/HighlightBetaModel.hpp"
+#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
 #include "widgets/settingspages/HighlightsBetaConfigureDelegate.hpp"
 #include "widgets/settingspages/HighlightsBetaConfigureDialog.hpp"
