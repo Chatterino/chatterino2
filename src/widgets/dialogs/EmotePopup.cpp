@@ -83,19 +83,6 @@ auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
     Settings::instance().favouriteEmojis = emojiNames;
 }
 
-auto saveFavouriteEmotes(const std::vector<EmotePtr> &emotes)
-{
-    std::vector<QString> emoteNames;
-    emoteNames.reserve(emotes.size());
-
-    std::ranges::transform(emotes, std::back_inserter(emoteNames),
-                           [](const auto &emote) {
-                               return emote->name.string;
-                           });
-
-    Settings::instance().favouriteEmotes = emoteNames;
-}
-
 auto makeTitleMessage(const QString &title)
 {
     MessageBuilder builder;
@@ -587,9 +574,11 @@ void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
-    for (const auto &emotePresent : this->favEmotes_)
+    auto emoteNames = Settings::instance().favouriteEmotes.getValue();
+
+    for (const auto &emotePresentName : emoteNames)
     {
-        if (emotePresent->name == name)
+        if (emotePresentName == name.string)
         {
             return;
         }
@@ -603,7 +592,9 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     this->favEmotes_.push_back(std::move(emote));
     this->updateFavouriteEmotesAndEmojis();
 
-    saveFavouriteEmotes(this->favEmotes_);
+    emoteNames.push_back(name.string);
+
+    Settings::instance().favouriteEmotes = emoteNames;
 }
 
 void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
@@ -617,19 +608,19 @@ void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
 
 void EmotePopup::removeFavouriteEmote(const EmoteName &name)
 {
-    auto emote =
-        std::ranges::find_if(this->favEmotes_, [name](const auto &emote) {
-            return emote->name == name;
-        });
-
-    if (emote != this->favEmotes_.end())
-    {
-        this->favEmotes_.erase(emote);
-    }
+    std::erase_if(this->favEmotes_, [name](const auto &emote) {
+        return emote->name == name;
+    });
 
     this->updateFavouriteEmotesAndEmojis();
 
-    saveFavouriteEmotes(this->favEmotes_);
+    auto emoteNames = Settings::instance().favouriteEmotes.getValue();
+    std::erase_if(
+        emoteNames,
+        [name](const auto &emoteName) {
+            return emoteName == name.string;
+        });
+    Settings::instance().favouriteEmotes = emoteNames;
 }
 
 void EmotePopup::removeFavouriteEmoteOrEmoji(const QString &identifier)
@@ -742,8 +733,6 @@ void EmotePopup::reloadEmotes()
         }
     }
     this->updateFavouriteEmotesAndEmojis();
-    saveFavouriteEmotes(this->favEmotes_);
-    saveFavouriteEmojis(this->favEmojis_);
 
     if (!subChannel->hasMessages())
     {
