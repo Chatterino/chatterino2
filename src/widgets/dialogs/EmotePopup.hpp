@@ -5,6 +5,7 @@
 #pragma once
 
 #include "messages/Emote.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "widgets/BasePopup.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -40,7 +41,7 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
-    ChannelView *favEmotesView_{};
+    ChannelView *favEmotesAndEmojisView_{};
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.
@@ -54,6 +55,7 @@ private:
     Notebook *notebook_;
 
     std::vector<EmotePtr> favEmotes_;
+    std::unordered_map<QString, EmojiPtr> favEmojis_;
 
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                             const QString &searchText);
@@ -64,9 +66,12 @@ private:
 
     void reloadEmotes();
 
+    void addFavouriteEmoji(const QString &emojiIdentifier);
     void addFavouriteEmote(const EmoteName &name);
+    void removeFavouriteEmoji(const QString &emojiIdentifier);
     void removeFavouriteEmote(const EmoteName &name);
-    void updateFavouriteEmotes();
+    void removeFavouriteEmoteOrEmoji(const QString &identifier);
+    void updateFavouriteEmotesAndEmojis();
 
     void saveBounds() const;
 };

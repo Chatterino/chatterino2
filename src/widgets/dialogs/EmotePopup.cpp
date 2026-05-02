@@ -42,10 +42,45 @@ namespace {
 
 using namespace chatterino;
 
+bool emojiHasShortCode(const EmojiPtr &emoji, const QString &shortCode)
+{
+    auto it = std::ranges::find(emoji->shortCodes, shortCode);
+    return it != emoji->shortCodes.end();
+}
+
+bool isEmojiIdentifier(const QString &identifier)
+{
+    return identifier.startsWith(':') && identifier.endsWith(':') &&
+           identifier.length() >= 3;
+}
+
+QString emojiIdentifierToShortCode(const QString &identifier)
+{
+    if (!isEmojiIdentifier(identifier))
+    {
+        return {};
+    }
+
+    return identifier.mid(1, identifier.length() - 2);
+}
+
 auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
 {
     auto it = emoteMap.find(name);
     return it == emoteMap.cend() ? nullptr : it->second;
+}
+
+auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
+{
+    std::vector<QString> emojiNames;
+    emojiNames.reserve(emojis.size());
+
+    std::ranges::transform(emojis, std::back_inserter(emojiNames),
+                           [](const auto &it) {
+                               return it.first;
+                           });
+
+    Settings::instance().favouriteEmojis = emojiNames;
 }
 
 auto saveFavouriteEmotes(const std::vector<EmotePtr> &emotes)
@@ -309,15 +344,19 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto clicked = [this](const Link &link, Qt::KeyboardModifiers modifiers) {
         if (modifiers & Qt::KeyboardModifier::ControlModifier)
         {
-            EmoteName emoteName{link.value};
+            const auto *page = this->notebook_->getSelectedPage();
 
-            if (this->favEmotesView_ == this->notebook_->getSelectedPage())
+            if (this->favEmotesAndEmojisView_ == page)
             {
-                this->removeFavouriteEmote(emoteName);
+                this->removeFavouriteEmoteOrEmoji(link.value);
+            }
+            else if (this->viewEmojis_ == page)
+            {
+                this->addFavouriteEmoji(link.value);
             }
             else
             {
-                this->addFavouriteEmote(emoteName);
+                this->addFavouriteEmote(EmoteName{link.value});
             }
 
             if (!(modifiers & Qt::KeyboardModifier::ShiftModifier))
@@ -355,7 +394,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(this->notebook_);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    this->favEmotesView_ = makeView("Favourite");
+    this->favEmotesAndEmojisView_ = makeView("Favourite");
     this->subEmotesView_ = makeView("Subs");
     this->channelEmotesView_ = makeView("Channel");
     this->globalEmotesView_ = makeView("Global");
@@ -498,10 +537,35 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         std::make_shared<Channel>("", Channel::Type::None));
     this->searchView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
-    this->favEmotesView_->setChannel(
+    this->favEmotesAndEmojisView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
+}
+
+void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
+{
+    auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
+    if (shortCode.isEmpty())
+    {
+        return;
+    }
+    if (this->favEmojis_.contains(shortCode))
+    {
+        return;
+    }
+
+    for (const auto &emoji : getApp()->getEmotes()->getEmojis()->getEmojis())
+    {
+        if (emojiHasShortCode(emoji, shortCode))
+        {
+            this->favEmojis_.emplace(shortCode, emoji);
+            break;
+        }
+    }
+
+    this->updateFavouriteEmotesAndEmojis();
+    saveFavouriteEmojis(this->favEmojis_);
 }
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
@@ -520,9 +584,18 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     }
 
     this->favEmotes_.push_back(std::move(emote));
-    this->updateFavouriteEmotes();
+    this->updateFavouriteEmotesAndEmojis();
 
     saveFavouriteEmotes(this->favEmotes_);
+}
+
+void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
+{
+    auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
+    this->favEmojis_.erase(shortCode);
+
+    this->updateFavouriteEmotesAndEmojis();
+    saveFavouriteEmojis(this->favEmojis_);
 }
 
 void EmotePopup::removeFavouriteEmote(const EmoteName &name)
@@ -537,17 +610,39 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
         this->favEmotes_.erase(emote);
     }
 
-    this->updateFavouriteEmotes();
+    this->updateFavouriteEmotesAndEmojis();
 
     saveFavouriteEmotes(this->favEmotes_);
 }
 
-void EmotePopup::updateFavouriteEmotes()
+void EmotePopup::removeFavouriteEmoteOrEmoji(const QString &identifier)
 {
-    auto chan = this->favEmotesView_->underlyingChannel();
+    if (isEmojiIdentifier(identifier))
+    {
+        this->removeFavouriteEmoji(identifier);
+    }
+    else
+    {
+        this->removeFavouriteEmote(EmoteName{identifier});
+    }
+}
+
+void EmotePopup::updateFavouriteEmotesAndEmojis()
+{
+    auto chan = this->favEmotesAndEmojisView_->underlyingChannel();
     chan->clearMessages();
     chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
                      MessageContext::Original);
+
+    std::vector<EmojiPtr> emojis;
+    emojis.reserve(this->favEmotes_.size());
+
+    std::ranges::transform(this->favEmojis_, std::back_inserter(emojis),
+                           [](const auto &v) {
+                               return v.second;
+                           });
+
+    chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
 }
 
 void EmotePopup::reloadEmotes()
@@ -604,7 +699,7 @@ void EmotePopup::reloadEmotes()
     }
 
     this->favEmotes_.clear();
-    auto emoteNames = Settings::instance().favouriteEmotes;
+    const auto &emoteNames = Settings::instance().favouriteEmotes;
     for (const auto &emoteName : emoteNames.getValue())
     {
         auto emote = this->findEmote(EmoteName{emoteName});
@@ -613,7 +708,22 @@ void EmotePopup::reloadEmotes()
             this->favEmotes_.push_back(emote);
         }
     }
-    this->updateFavouriteEmotes();
+    this->favEmojis_.clear();
+    const auto &emojiShortCodes = Settings::instance().favouriteEmojis;
+    for (const auto &shortCode : emojiShortCodes.getValue())
+    {
+        for (const auto &emoji :
+             getApp()->getEmotes()->getEmojis()->getEmojis())
+        {
+            if (emojiHasShortCode(emoji, shortCode))
+            {
+                this->favEmojis_.emplace(shortCode, emoji);
+                break;
+            }
+        }
+    }
+
+    this->updateFavouriteEmotesAndEmojis();
 
     if (!subChannel->hasMessages())
     {
