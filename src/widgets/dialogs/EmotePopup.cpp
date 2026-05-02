@@ -104,7 +104,8 @@ auto makeTitleMessage(const QString &title)
     return builder.release();
 }
 
-auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes)
+auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes,
+                            const QString &emptyText)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -112,8 +113,7 @@ auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes)
 
     if (emotes.empty())
     {
-        builder.emplace<TextElement>("no emotes available",
-                                     MessageElementFlag::Text,
+        builder.emplace<TextElement>(emptyText, MessageElementFlag::Text,
                                      MessageColor::System);
         return builder.release();
     }
@@ -130,42 +130,39 @@ auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes)
     return builder.release();
 }
 
-auto makeEmoteMessage(std::vector<EmotePtr> emotes)
+auto makeEmoteMessage(std::vector<EmotePtr> emotes, const QString &emptyText)
 {
     std::sort(emotes.begin(), emotes.end(), [](const auto &l, const auto &r) {
         return compareEmoteStrings(l->name.string, r->name.string);
     });
 
-    return makeEmoteMessageSorted(emotes);
+    return makeEmoteMessageSorted(emotes, emptyText);
 }
 
 auto makeEmoteMessage(const EmoteMap &map)
 {
-    if (map.empty())
-    {
-        MessageBuilder builder;
-        builder->flags.set(MessageFlag::Centered);
-        builder->flags.set(MessageFlag::DisableCompactEmotes);
-        builder.emplace<TextElement>("no emotes available",
-                                     MessageElementFlag::Text,
-                                     MessageColor::System);
-        return builder.release();
-    }
-
     std::vector<EmotePtr> vec;
     vec.reserve(map.size());
     for (const auto &[_name, ptr] : map)
     {
         vec.emplace_back(ptr);
     }
-    return makeEmoteMessage(std::move(vec));
+    return makeEmoteMessage(std::move(vec), "No emotes available");
 }
 
-auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
+auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap,
+                      const QString &emptyText = {})
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
     builder->flags.set(MessageFlag::DisableCompactEmotes);
+
+    if (emojiMap.empty() && !emptyText.isEmpty())
+    {
+        builder.emplace<TextElement>(emptyText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        return builder.release();
+    }
 
     for (const auto &value : emojiMap)
     {
@@ -631,7 +628,8 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
 {
     auto chan = this->favEmotesAndEmojisView_->underlyingChannel();
     chan->clearMessages();
-    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
+    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_,
+                                            "No favourite emotes, add some"),
                      MessageContext::Original);
 
     std::vector<EmojiPtr> emojis;
@@ -642,7 +640,8 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
                                return v.second;
                            });
 
-    chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
+    chan->addMessage(makeEmojiMessage(emojis, "No favourite emojis, add some"),
+                     MessageContext::Original);
 }
 
 void EmotePopup::reloadEmotes()
