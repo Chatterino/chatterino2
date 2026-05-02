@@ -25,7 +25,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/EmoteChannelView.hpp"
 #include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -366,7 +366,8 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view = new ChannelView(nullptr);
+        auto *view =
+            new EmoteChannelView(this->favEmotes_, this->favEmojis_, nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
@@ -380,6 +381,25 @@ EmotePopup::EmotePopup(QWidget *parent)
         {
             this->notebook_->addPage(view, std::move(tabTitle));
         }
+
+        std::ignore = view->favouriteStateChanged.connect(
+            [this](const QString &identifier, bool isFavourite) {
+                if (!isFavourite)
+                {
+                    this->removeFavouriteEmoteOrEmoji(identifier);
+                }
+                else
+                {
+                    if (isEmojiIdentifier(identifier))
+                    {
+                        this->addFavouriteEmoji(identifier);
+                    }
+                    else
+                    {
+                        this->addFavouriteEmote(EmoteName{identifier});
+                    }
+                }
+            });
 
         return view;
     };

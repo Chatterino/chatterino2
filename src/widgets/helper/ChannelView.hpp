@@ -69,7 +69,7 @@ enum class FromTwitchLinkOpenChannelIn {
 
 using SteadyClock = std::chrono::steady_clock;
 
-class ChannelView final : public BaseWidget
+class ChannelView : public BaseWidget
 {
     Q_OBJECT
 
@@ -264,6 +264,9 @@ protected:
     bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
                          QPointF &relativePos, int &index);
 
+    static void addImageContextMenuItems(
+        QMenu *menu, const MessageLayoutElement *hoveredElement);
+
 private:
     struct InternalCtor {
     };
@@ -297,8 +300,9 @@ private:
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
-    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr layout, QMouseEvent *event);
+    virtual void addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                     MessageLayoutPtr layout,
+                                     QMouseEvent *event);
     void addMessageContextMenuItems(QMenu *menu,
                                     const MessageLayoutPtr &layout);
     void addTwitchLinkContextMenuItems(

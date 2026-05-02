@@ -14,9 +14,9 @@
 namespace chatterino {
 
 struct Link;
-class ChannelView;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
+class EmoteChannelView;
 class Notebook;
 class TwitchChannel;
 
@@ -37,16 +37,16 @@ protected:
     void themeChangedEvent() override;
 
 private:
-    ChannelView *globalEmotesView_{};
-    ChannelView *channelEmotesView_{};
-    ChannelView *subEmotesView_{};
-    ChannelView *viewEmojis_{};
-    ChannelView *favEmotesAndEmojisView_{};
+    EmoteChannelView *globalEmotesView_{};
+    EmoteChannelView *channelEmotesView_{};
+    EmoteChannelView *subEmotesView_{};
+    EmoteChannelView *viewEmojis_{};
+    EmoteChannelView *favEmotesAndEmojisView_{};
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.
      */
-    ChannelView *searchView_{};
+    EmoteChannelView *searchView_{};
 
     ChannelPtr channel_;
     TwitchChannel *twitchChannel_{};

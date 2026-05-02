@@ -772,6 +772,8 @@ set(SOURCE_FILES
         widgets/helper/DebugPopup.hpp
         widgets/helper/EditableModelView.cpp
         widgets/helper/EditableModelView.hpp
+        widgets/helper/EmoteChannelView.cpp
+        widgets/helper/EmoteChannelView.hpp
         widgets/helper/FontSettingWidget.cpp
         widgets/helper/FontSettingWidget.hpp
         widgets/helper/IconDelegate.cpp
