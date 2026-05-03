@@ -757,17 +757,23 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     }
 
     // Add Emotes
-    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
-                     MessageContext::Original);
+    if (!this->favEmotes_.empty())
+    {
+        chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
+                         MessageContext::Original);
+    }
 
     // Add Emojis
-    std::vector<EmojiPtr> emojis;
-    emojis.reserve(this->favEmotes_.size());
-    std::ranges::transform(this->favEmojis_, std::back_inserter(emojis),
-                           [](const auto &v) {
-                               return v.second;
-                           });
-    chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
+    if (!this->favEmojis_.empty())
+    {
+        std::vector<EmojiPtr> emojis;
+        emojis.reserve(this->favEmotes_.size());
+        std::ranges::transform(this->favEmojis_, std::back_inserter(emojis),
+                               [](const auto &v) {
+                                   return v.second;
+                               });
+        chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
+    }
 
     // Show favourited Emotes that are currently not available
     std::vector<QString> unavailableEmotes;
