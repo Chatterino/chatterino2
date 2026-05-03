@@ -174,11 +174,9 @@ auto makeUnavailableEmoteMessage(const std::vector<QString> &emoteNames)
     {
         builder
             .emplace<TextElement>(
-                emoteName,
-                MessageElementFlags{
-                    MessageElementFlag::Text, MessageElementFlag::AlwaysShow})
-            ->setLink(
-                Link(Link::Type::InsertText, ":" + emoteName + ":"));
+                emoteName, MessageElementFlags{MessageElementFlag::Text,
+                                               MessageElementFlag::AlwaysShow})
+            ->setLink(Link(Link::Type::InsertText, emoteName));
     }
 
     return builder.release();
@@ -372,8 +370,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view =
-            new EmoteChannelView(this->favEmotes_, this->favEmojis_, nullptr);
+        auto *view = new EmoteChannelView(nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
@@ -617,19 +614,20 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     }
 
     this->favEmotes_.push_back(std::move(emote));
-    this->updateFavouriteEmotesAndEmojis();
 
     emoteNames.push_back(name.string);
     Settings::instance().favouriteEmotes = emoteNames;
+
+    this->updateFavouriteEmotesAndEmojis();
 }
 
 void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
 {
     auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
     this->favEmojis_.erase(shortCode);
+    saveFavouriteEmojis(this->favEmojis_);
 
     this->updateFavouriteEmotesAndEmojis();
-    saveFavouriteEmojis(this->favEmojis_);
 }
 
 void EmotePopup::removeFavouriteEmote(const EmoteName &name)
@@ -638,13 +636,13 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
         return emote->name == name;
     });
 
-    this->updateFavouriteEmotesAndEmojis();
-
     auto emoteNames = Settings::instance().favouriteEmotes.getValue();
     std::erase_if(emoteNames, [name](const auto &emoteName) {
         return emoteName == name.string;
     });
     Settings::instance().favouriteEmotes = emoteNames;
+
+    this->updateFavouriteEmotesAndEmojis();
 }
 
 void EmotePopup::removeFavouriteEmoteOrEmoji(const QString &identifier)
@@ -680,10 +678,10 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
 
     std::vector<QString> unavailableEmotes;
     for (const auto &emoteName :
-        Settings::instance().favouriteEmotes.getValue())
+         Settings::instance().favouriteEmotes.getValue())
     {
-        auto it = std::ranges::find_if(this->favEmotes_,
-            [emoteName](const auto &emote) {
+        auto it = std::ranges::find_if(
+            this->favEmotes_, [emoteName](const auto &emote) {
                 return emoteName == emote->name.string;
             });
         if (it == this->favEmotes_.end())
@@ -695,13 +693,13 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
-        builder.emplace<TextElement>(
-            "Unavailable emotes", MessageElementFlag::Text,
-            MessageColor::System);
+        builder.emplace<TextElement>("Unavailable emotes",
+                                     MessageElementFlag::Text,
+                                     MessageColor::System);
         chan->addMessage(builder.release(), MessageContext::Original);
 
-        chan->addMessage(makeUnavailableEmoteMessage(
-            unavailableEmotes), MessageContext::Original);
+        chan->addMessage(makeUnavailableEmoteMessage(unavailableEmotes),
+                         MessageContext::Original);
     }
 }
 

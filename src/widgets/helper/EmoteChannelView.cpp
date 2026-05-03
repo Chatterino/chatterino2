@@ -1,14 +1,15 @@
-// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
 //
 // SPDX-License-Identifier: MIT
 
 #include "widgets/helper/EmoteChannelView.hpp"
 
-#include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "providers/emoji/Emojis.hpp"
+#include "singletons/Settings.hpp"
 
 namespace {
+
+using namespace chatterino;
 
 bool isEmojiIdentifier(const QString &identifier)
 {
@@ -26,16 +27,37 @@ QString emojiIdentifierToShortCode(const QString &identifier)
     return identifier.mid(1, identifier.length() - 2);
 }
 
+bool isFavouriteEmoteOrEmoji(const MessageElement *element)
+{
+    const auto &identifier = element->getLink().value;
+
+    if (isEmojiIdentifier(identifier))
+    {
+        const auto &emojiNames =
+            Settings::instance().favouriteEmojis.getValue();
+        auto shortCode = emojiIdentifierToShortCode(identifier);
+
+        auto it =
+            std::ranges::find_if(emojiNames, [&shortCode](const auto &sc) {
+                return shortCode == sc;
+            });
+        return it != emojiNames.end();
+    }
+
+    const auto &emoteNames = Settings::instance().favouriteEmotes.getValue();
+    auto it =
+        std::ranges::find_if(emoteNames, [identifier](const auto &emoteName) {
+            return emoteName == identifier;
+        });
+    return it != emoteNames.end();
+}
+
 }  // namespace
 
 namespace chatterino {
 
-EmoteChannelView::EmoteChannelView(
-    const std::vector<EmotePtr> &favEmotes,
-    const std::unordered_map<QString, EmojiPtr> &favEmojis, QWidget *parent)
+EmoteChannelView::EmoteChannelView(QWidget *parent)
     : ChannelView(parent)
-    , favEmotes_(favEmotes)
-    , favEmojis_(favEmojis)
 {
 }
 
@@ -50,46 +72,35 @@ void EmoteChannelView::addContextMenuItems(
     auto *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    const auto *emoteElement =
-        dynamic_cast<const EmoteElement *>(&hoveredElement->getCreator());
-
-    if (emoteElement)
+    if (const auto *emoteElement =
+            dynamic_cast<const EmoteElement *>(&hoveredElement->getCreator()))
     {
-        auto *favouriteAction = menu->addAction("Favourite");
-        favouriteAction->setCheckable(true);
-        favouriteAction->setChecked(isFavouriteEmoteOrEmoji(emoteElement));
-
-        QObject::connect(
-            favouriteAction, &QAction::triggered,
-            [this, emoteElement](bool checked) {
-                const auto &identifier = emoteElement->getLink().value;
-                this->favouriteStateChanged.invoke(identifier, checked);
-            });
-
-        menu->addSeparator();
+        this->addFavouriteContextMenuItems(menu, emoteElement);
+        addImageContextMenuItems(menu, hoveredElement);
     }
-
-    addImageContextMenuItems(menu, hoveredElement);
+    else if (const auto *textElement = dynamic_cast<const TextElement *>(
+                 &hoveredElement->getCreator()))
+    {
+        this->addFavouriteContextMenuItems(menu, textElement);
+    }
 
     menu->popup(QCursor::pos());
     menu->raise();
 }
 
-bool EmoteChannelView::isFavouriteEmoteOrEmoji(const EmoteElement *element)
+void EmoteChannelView::addFavouriteContextMenuItems(
+    QMenu *menu, const MessageElement *element)
 {
-    const auto &identifier = element->getLink().value;
+    auto *favouriteAction = menu->addAction("Favourite");
+    favouriteAction->setCheckable(true);
+    favouriteAction->setChecked(isFavouriteEmoteOrEmoji(element));
+    menu->addSeparator();
 
-    if (isEmojiIdentifier(identifier))
-    {
-        return this->favEmojis_.contains(
-            emojiIdentifierToShortCode(identifier));
-    }
-
-    auto it =
-        std::ranges::find_if(this->favEmotes_, [identifier](const auto &emote) {
-            return emote->name.string == identifier;
+    QObject::connect(
+        favouriteAction, &QAction::triggered, [this, element](bool checked) {
+            const auto &identifier = element->getLink().value;
+            this->favouriteStateChanged.invoke(identifier, checked);
         });
-    return it != this->favEmotes_.end();
 }
 
 }  // namespace chatterino
