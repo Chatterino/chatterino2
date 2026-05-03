@@ -373,6 +373,12 @@ void Settings::migrateHighlights()
     // Maybe in this migration - find an "anchor" highlight (e.g. "yourusername" and always put it underneath that?)
 
     // TODO: Migrate user-created "Message" highlights
+    for (const auto &from : this->highlightedMessagesSetting.getValue())
+    {
+        SharedHighlight2 to;
+        // TODO
+    }
+
     // TODO: Migrate user-created "Users" highlights
     // TODO: Migrate user-created "Badges" highlights
 }
