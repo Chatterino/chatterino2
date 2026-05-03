@@ -71,8 +71,7 @@ bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
 
     if (isEmojiIdentifier(identifier))
     {
-        const auto &emojiNames =
-            Settings::instance().favouriteEmojis.getValue();
+        const auto &emojiNames = getSettings()->favouriteEmojis.getValue();
         auto shortCode = emojiIdentifierToShortCode(identifier);
 
         auto it =
@@ -82,7 +81,7 @@ bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
         return it != emojiNames.end();
     }
 
-    const auto &emoteNames = Settings::instance().favouriteEmotes.getValue();
+    const auto &emoteNames = getSettings()->favouriteEmotes.getValue();
     auto it =
         std::ranges::find_if(emoteNames, [identifier](const auto &emoteName) {
             return emoteName == identifier;
@@ -106,7 +105,7 @@ auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
                                return it.first;
                            });
 
-    Settings::instance().favouriteEmojis = emojiNames;
+    getSettings()->favouriteEmojis = emojiNames;
 }
 
 auto makeTitleMessage(const QString &title)
@@ -653,7 +652,7 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
      * effectively out of sync. If there is a connection issue, these two lists
      * may not sync up at all. Using the persistent list is the safe choice.
      */
-    auto emoteNames = Settings::instance().favouriteEmotes.getValue();
+    auto emoteNames = getSettings()->favouriteEmotes.getValue();
     for (const auto &emotePresentName : emoteNames)
     {
         if (emotePresentName == name.string)
@@ -670,7 +669,7 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     this->favEmotes_.push_back(std::move(emote));
 
     emoteNames.push_back(name.string);
-    Settings::instance().favouriteEmotes = emoteNames;
+    getSettings()->favouriteEmotes = emoteNames;
 
     this->updateFavouriteEmotesAndEmojis();
 }
@@ -690,11 +689,11 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
         return emote->name == name;
     });
 
-    auto emoteNames = Settings::instance().favouriteEmotes.getValue();
+    auto emoteNames = getSettings()->favouriteEmotes.getValue();
     std::erase_if(emoteNames, [name](const auto &emoteName) {
         return emoteName == name.string;
     });
-    Settings::instance().favouriteEmotes = emoteNames;
+    getSettings()->favouriteEmotes = emoteNames;
 
     this->updateFavouriteEmotesAndEmojis();
 }
@@ -731,8 +730,7 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
                      MessageContext::Original);
 
     std::vector<QString> unavailableEmotes;
-    for (const auto &emoteName :
-         Settings::instance().favouriteEmotes.getValue())
+    for (const auto &emoteName : getSettings()->favouriteEmotes.getValue())
     {
         auto it = std::ranges::find_if(
             this->favEmotes_, [emoteName](const auto &emote) {
@@ -777,41 +775,41 @@ void EmotePopup::reloadEmotes()
             twitchChannel_->getName());
 
         // channel
-        if (Settings::instance().enableBTTVChannelEmotes)
+        if (getSettings()->enableBTTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(),
                       "BetterTTV");
         }
-        if (Settings::instance().enableFFZChannelEmotes)
+        if (getSettings()->enableFFZChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->ffzEmotes(),
                       "FrankerFaceZ");
         }
-        if (Settings::instance().enableSevenTVChannelEmotes)
+        if (getSettings()->enableSevenTVChannelEmotes)
         {
             addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
                       "7TV");
         }
     }
     // global
-    if (Settings::instance().enableBTTVGlobalEmotes)
+    if (getSettings()->enableBTTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
                   "BetterTTV");
     }
-    if (Settings::instance().enableFFZGlobalEmotes)
+    if (getSettings()->enableFFZGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
                   "FrankerFaceZ");
     }
-    if (Settings::instance().enableSevenTVGlobalEmotes)
+    if (getSettings()->enableSevenTVGlobalEmotes)
     {
         addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
                   "7TV");
     }
 
     this->favEmotes_.clear();
-    const auto &emoteNames = Settings::instance().favouriteEmotes;
+    const auto &emoteNames = getSettings()->favouriteEmotes;
     for (const auto &emoteName : emoteNames.getValue())
     {
         auto emote = this->findEmote(EmoteName{emoteName});
@@ -821,7 +819,7 @@ void EmotePopup::reloadEmotes()
         }
     }
     this->favEmojis_.clear();
-    const auto &emojiShortCodes = Settings::instance().favouriteEmojis;
+    const auto &emojiShortCodes = getSettings()->favouriteEmojis;
     for (const auto &shortCode : emojiShortCodes.getValue())
     {
         for (const auto &emoji :
@@ -1020,7 +1018,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
             }
         }
 
-        if (Settings::instance().enableBTTVChannelEmotes)
+        if (getSettings()->enableBTTVChannelEmotes)
         {
             auto emote =
                 findEmoteByName(name, *this->twitchChannel_->bttvEmotes());
@@ -1030,7 +1028,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
             }
         }
 
-        if (Settings::instance().enableFFZChannelEmotes)
+        if (getSettings()->enableFFZChannelEmotes)
         {
             auto emote =
                 findEmoteByName(name, *this->twitchChannel_->ffzEmotes());
@@ -1040,7 +1038,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
             }
         }
 
-        if (Settings::instance().enableSevenTVChannelEmotes)
+        if (getSettings()->enableSevenTVChannelEmotes)
         {
             auto emote =
                 findEmoteByName(name, *this->twitchChannel_->seventvEmotes());
@@ -1052,7 +1050,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
     }
 
     // Global
-    if (Settings::instance().enableBTTVGlobalEmotes)
+    if (getSettings()->enableBTTVGlobalEmotes)
     {
         auto emote =
             findEmoteByName(name, *getApp()->getBttvEmotes()->emotes());
@@ -1062,7 +1060,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
         }
     }
 
-    if (Settings::instance().enableFFZGlobalEmotes)
+    if (getSettings()->enableFFZGlobalEmotes)
     {
         auto emote = findEmoteByName(name, *getApp()->getFfzEmotes()->emotes());
         if (emote)
@@ -1071,7 +1069,7 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
         }
     }
 
-    if (Settings::instance().enableSevenTVGlobalEmotes)
+    if (getSettings()->enableSevenTVGlobalEmotes)
     {
         auto emote = findEmoteByName(
             name, *getApp()->getSeventvEmotes()->globalEmotes());
