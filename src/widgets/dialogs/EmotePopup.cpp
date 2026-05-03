@@ -37,11 +37,24 @@
 #include <QStringBuilder>
 #include <QTabWidget>
 
+#include <set>
 #include <utility>
 
 namespace {
 
 using namespace chatterino;
+
+constexpr auto makeShortCodesSet(const std::vector<QString> &shortCodes)
+{
+    std::set<QString> shortCodesSet;
+    std::ranges::transform(shortCodes,
+                           std::inserter(shortCodesSet, shortCodesSet.begin()),
+                           [](const auto &shortCode) {
+                               return ":" + shortCode + ":";
+                           });
+
+    return shortCodesSet;
+}
 
 bool emojiHasShortCode(const EmojiPtr &emoji, const QString &shortCode)
 {
@@ -51,8 +64,20 @@ bool emojiHasShortCode(const EmojiPtr &emoji, const QString &shortCode)
 
 bool isEmojiIdentifier(const QString &identifier)
 {
-    return identifier.startsWith(':') && identifier.endsWith(':') &&
-           identifier.length() >= 3;
+    /*
+     * Some Emotes can have a name that looks like this:
+     *
+     *  :<name>:
+     *
+     * This makes them look like Emoji short codes. To better tell Emotes and
+     * Emojis apart, we check the identifier against a list of known Emoji
+     * short codes and we have a match, we trust that the idenfifier is
+     * an Emoji.
+     */
+    static const auto knownShortCodes =
+        makeShortCodesSet(getApp()->getEmotes()->getEmojis()->getShortCodes());
+
+    return knownShortCodes.contains(identifier);
 }
 
 QString emojiIdentifierToShortCode(const QString &identifier)
