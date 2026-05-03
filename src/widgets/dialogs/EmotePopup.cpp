@@ -445,7 +445,7 @@ EmotePopup::EmotePopup(QWidget *parent)
                 else
                 {
                     favouriteAction = new QAction("Favourite");
-                    menu->insertAction(menu->actions().first(),
+                    menu->insertAction(menu->actions().constFirst(),
                                        favouriteAction);
                 }
 
