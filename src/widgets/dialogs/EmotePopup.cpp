@@ -935,6 +935,28 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
 
         auto twitchEmotes =
             *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets();
+        /*
+         * Check the Emote set for the currently active channel first.
+         * If multiple channels share an Emote name, it probably makes sense
+         * to use the Emote for the channel that is active - the channel we
+         * would send the Emote to. This gives the user a chance to see what
+         * Emote would the other chatters see in their own chats.
+         */
+        auto currentChannelID = this->twitchChannel_->roomId();
+        auto currentChannelIt = std::ranges::find_if(
+            *twitchEmotes, [currentChannelID](const auto &it) {
+                return it.second.owner->id == currentChannelID;
+            });
+        if (currentChannelIt != twitchEmotes->end())
+        {
+            const auto &emoteSet = currentChannelIt->second;
+            auto emote = findEmoteByName(name, emoteSet.emotes);
+            if (emote)
+            {
+                return emote;
+            }
+        }
+
         for (const auto &[setId, emoteSet] : *twitchEmotes)
         {
             auto emote = findEmoteByName(name, emoteSet.emotes);
