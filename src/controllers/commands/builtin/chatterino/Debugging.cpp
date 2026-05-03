@@ -351,11 +351,16 @@ QString enableLogfile(const CommandContext &ctx)
     {
         auto error = result.error();
 
-        ctx.channel->addSystemMessage(
+        MessageBuilder builder;
+        builder.emplace<TextElement>(
             QString("Unable to open log file '%1'. Error reported by "
                     "the system was: %2 (Hint: Do not quote the file path "
                     "even if it contains spaces)")
-                .arg(error.absFilePath, error.errorDesc));
+                .arg(error.absFilePath, error.errorDesc),
+            MessageElementFlags{MessageElementFlag::Text,
+                                MessageElementFlag::AlwaysShow},
+            MessageColor{QColor(230, 30, 30)});
+        ctx.channel->addMessage(builder.release(), MessageContext::Original);
     }
 
     return {};
