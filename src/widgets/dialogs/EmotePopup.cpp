@@ -165,6 +165,25 @@ auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap,
     return builder.release();
 }
 
+auto makeUnavailableEmoteMessage(const std::vector<QString> &emoteNames)
+{
+    MessageBuilder builder;
+    builder->flags.set(MessageFlag::Centered);
+
+    for (const auto &emoteName : emoteNames)
+    {
+        builder
+            .emplace<TextElement>(
+                emoteName,
+                MessageElementFlags{
+                    MessageElementFlag::Text, MessageElementFlag::AlwaysShow})
+            ->setLink(
+                Link(Link::Type::InsertText, ":" + emoteName + ":"));
+    }
+
+    return builder.release();
+}
+
 void addEmotes(Channel &channel, auto &&emotes, const QString &title)
 {
     channel.addMessage(makeTitleMessage(title), MessageContext::Original);
@@ -658,6 +677,32 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
 
     chan->addMessage(makeEmojiMessage(emojis, "No favourite emojis, add some"),
                      MessageContext::Original);
+
+    std::vector<QString> unavailableEmotes;
+    for (const auto &emoteName :
+        Settings::instance().favouriteEmotes.getValue())
+    {
+        auto it = std::ranges::find_if(this->favEmotes_,
+            [emoteName](const auto &emote) {
+                return emoteName == emote->name.string;
+            });
+        if (it == this->favEmotes_.end())
+        {
+            unavailableEmotes.push_back(emoteName);
+        }
+    }
+    if (!unavailableEmotes.empty())
+    {
+        MessageBuilder builder;
+        builder->flags.set(MessageFlag::Centered);
+        builder.emplace<TextElement>(
+            "Unavailable emotes", MessageElementFlag::Text,
+            MessageColor::System);
+        chan->addMessage(builder.release(), MessageContext::Original);
+
+        chan->addMessage(makeUnavailableEmoteMessage(
+            unavailableEmotes), MessageContext::Original);
+    }
 }
 
 void EmotePopup::reloadEmotes()
