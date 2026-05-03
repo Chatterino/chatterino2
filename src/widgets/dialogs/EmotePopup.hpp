@@ -16,7 +16,7 @@ namespace chatterino {
 struct Link;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
-class EmoteChannelView;
+class ChannelView;
 class Notebook;
 class TwitchChannel;
 
@@ -37,16 +37,16 @@ protected:
     void themeChangedEvent() override;
 
 private:
-    EmoteChannelView *globalEmotesView_{};
-    EmoteChannelView *channelEmotesView_{};
-    EmoteChannelView *subEmotesView_{};
-    EmoteChannelView *viewEmojis_{};
-    EmoteChannelView *favEmotesAndEmojisView_{};
+    ChannelView *globalEmotesView_{};
+    ChannelView *channelEmotesView_{};
+    ChannelView *subEmotesView_{};
+    ChannelView *viewEmojis_{};
+    ChannelView *favEmotesAndEmojisView_{};
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.
      */
-    EmoteChannelView *searchView_{};
+    ChannelView *searchView_{};
 
     ChannelPtr channel_;
     TwitchChannel *twitchChannel_{};
@@ -65,6 +65,8 @@ private:
     bool eventFilter(QObject *object, QEvent *event) override;
 
     void reloadEmotes();
+
+    void favouriteStateChanged(const QString &identifier, bool isFavourite);
 
     void addFavouriteEmoji(const QString &emojiIdentifier);
     void addFavouriteEmote(const EmoteName &name);

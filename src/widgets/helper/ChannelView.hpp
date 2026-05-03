@@ -69,7 +69,7 @@ enum class FromTwitchLinkOpenChannelIn {
 
 using SteadyClock = std::chrono::steady_clock;
 
-class ChannelView : public BaseWidget
+class ChannelView final : public BaseWidget
 {
     Q_OBJECT
 
@@ -231,6 +231,8 @@ public:
     pajlada::Signals::Signal<const Link &, Qt::KeyboardModifiers> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
+    pajlada::Signals::Signal<QMenu *, const MessageLayoutElement *>
+        messageMenuCreated;
 
     /// This signal fires when a message passed filters and was added to the channel view
     Q_SIGNAL void messageAddedToChannel(MessagePtr &message);
@@ -263,9 +265,6 @@ protected:
 
     bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
                          QPointF &relativePos, int &index);
-
-    static void addImageContextMenuItems(
-        QMenu *menu, const MessageLayoutElement *hoveredElement);
 
 private:
     struct InternalCtor {
@@ -300,9 +299,8 @@ private:
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoveredElement,
                           MessageLayoutPtr layout);
-    virtual void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                                     MessageLayoutPtr layout,
-                                     QMouseEvent *event);
+    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                             MessageLayoutPtr layout, QMouseEvent *event);
     void addMessageContextMenuItems(QMenu *menu,
                                     const MessageLayoutPtr &layout);
     void addTwitchLinkContextMenuItems(

@@ -12,6 +12,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
@@ -25,7 +26,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "widgets/helper/EmoteChannelView.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -62,6 +63,31 @@ QString emojiIdentifierToShortCode(const QString &identifier)
     }
 
     return identifier.mid(1, identifier.length() - 2);
+}
+
+bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
+{
+    const auto &identifier = element->getCreator().getLink().value;
+
+    if (isEmojiIdentifier(identifier))
+    {
+        const auto &emojiNames =
+            Settings::instance().favouriteEmojis.getValue();
+        auto shortCode = emojiIdentifierToShortCode(identifier);
+
+        auto it =
+            std::ranges::find_if(emojiNames, [&shortCode](const auto &sc) {
+                return shortCode == sc;
+            });
+        return it != emojiNames.end();
+    }
+
+    const auto &emoteNames = Settings::instance().favouriteEmotes.getValue();
+    auto it =
+        std::ranges::find_if(emoteNames, [identifier](const auto &emoteName) {
+            return emoteName == identifier;
+        });
+    return it != emoteNames.end();
 }
 
 auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
@@ -370,7 +396,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view = new EmoteChannelView(nullptr);
+        auto *view = new ChannelView(nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
@@ -385,23 +411,31 @@ EmotePopup::EmotePopup(QWidget *parent)
             this->notebook_->addPage(view, std::move(tabTitle));
         }
 
-        std::ignore = view->favouriteStateChanged.connect(
-            [this](const QString &identifier, bool isFavourite) {
-                if (!isFavourite)
+        std::ignore = view->messageMenuCreated.connect(
+            [this](QMenu *menu, const MessageLayoutElement *hoveredElement) {
+                QAction *favouriteAction;
+                if (menu->actions().isEmpty())
                 {
-                    this->removeFavouriteEmoteOrEmoji(identifier);
+                    favouriteAction = menu->addAction("Favourite");
                 }
                 else
                 {
-                    if (isEmojiIdentifier(identifier))
-                    {
-                        this->addFavouriteEmoji(identifier);
-                    }
-                    else
-                    {
-                        this->addFavouriteEmote(EmoteName{identifier});
-                    }
+                    favouriteAction = new QAction("Favourite");
+                    menu->insertAction(menu->actions().first(),
+                                       favouriteAction);
                 }
+
+                favouriteAction->setCheckable(true);
+                favouriteAction->setChecked(
+                    isFavouriteEmoteOrEmoji(hoveredElement));
+
+                QObject::connect(favouriteAction, &QAction::triggered,
+                                 [this, hoveredElement](bool checked) {
+                                     const auto &identifier =
+                                         hoveredElement->getLink().value;
+                                     this->favouriteStateChanged(identifier,
+                                                                 checked);
+                                 });
             });
 
         return view;
@@ -561,6 +595,26 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
+}
+
+void EmotePopup::favouriteStateChanged(const QString &identifier,
+                                       bool isFavourite)
+{
+    if (!isFavourite)
+    {
+        this->removeFavouriteEmoteOrEmoji(identifier);
+    }
+    else
+    {
+        if (isEmojiIdentifier(identifier))
+        {
+            this->addFavouriteEmoji(identifier);
+        }
+        else
+        {
+            this->addFavouriteEmote(EmoteName{identifier});
+        }
+    }
 }
 
 void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)

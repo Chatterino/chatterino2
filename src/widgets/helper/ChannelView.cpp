@@ -136,6 +136,57 @@ void addEmoteContextMenuItems(QMenu *menu, const Emote &emote, QStringView kind)
     }
 }
 
+void addImageContextMenuItems(QMenu *menu,
+                              const MessageLayoutElement *hoveredElement)
+{
+    if (hoveredElement == nullptr)
+    {
+        return;
+    }
+
+    const auto &creator = hoveredElement->getCreator();
+    auto creatorFlags = creator.getFlags();
+
+    // Badge actions
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        if (const auto *badgeElement =
+                dynamic_cast<const BadgeElement *>(&creator))
+        {
+            addEmoteContextMenuItems(menu, *badgeElement->getEmote(), u"badge");
+        }
+    }
+
+    // Emote actions
+    if (creatorFlags.hasAny(
+            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}))
+    {
+        if (const auto *emoteElement =
+                dynamic_cast<const EmoteElement *>(&creator))
+        {
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
+        }
+        else if (const auto *layeredElement =
+                     dynamic_cast<const LayeredEmoteElement *>(&creator))
+        {
+            // Give each emote its own submenu
+            for (auto &emote : layeredElement->getUniqueEmotes())
+            {
+                auto *emoteAction = menu->addAction(emote.ptr->name.string);
+                auto *emoteMenu = new QMenu(menu);
+                emoteAction->setMenu(emoteMenu);
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
+            }
+        }
+    }
+
+    // add seperator
+    if (!menu->actions().empty())
+    {
+        menu->addSeparator();
+    }
+}
+
 void addLinkContextMenuItems(QMenu *menu,
                              const MessageLayoutElement *hoveredElement)
 {
@@ -2554,6 +2605,8 @@ void ChannelView::addContextMenuItems(
     // Add executable command options
     this->addCommandExecutionContextMenuItems(menu, layout);
 
+    this->messageMenuCreated.invoke(menu, hoveredElement);
+
     menu->popup(QCursor::pos());
     menu->raise();
 }
@@ -3209,57 +3262,6 @@ bool ChannelView::tryGetMessageAt(QPointF p,
     }
 
     return false;
-}
-
-void ChannelView::addImageContextMenuItems(
-    QMenu *menu, const MessageLayoutElement *hoveredElement)
-{
-    if (hoveredElement == nullptr)
-    {
-        return;
-    }
-
-    const auto &creator = hoveredElement->getCreator();
-    auto creatorFlags = creator.getFlags();
-
-    // Badge actions
-    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
-    {
-        if (const auto *badgeElement =
-                dynamic_cast<const BadgeElement *>(&creator))
-        {
-            addEmoteContextMenuItems(menu, *badgeElement->getEmote(), u"badge");
-        }
-    }
-
-    // Emote actions
-    if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}))
-    {
-        if (const auto *emoteElement =
-                dynamic_cast<const EmoteElement *>(&creator))
-        {
-            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
-        }
-        else if (const auto *layeredElement =
-                     dynamic_cast<const LayeredEmoteElement *>(&creator))
-        {
-            // Give each emote its own submenu
-            for (auto &emote : layeredElement->getUniqueEmotes())
-            {
-                auto *emoteAction = menu->addAction(emote.ptr->name.string);
-                auto *emoteMenu = new QMenu(menu);
-                emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
-            }
-        }
-    }
-
-    // add seperator
-    if (!menu->actions().empty())
-    {
-        menu->addSeparator();
-    }
 }
 
 int ChannelView::getLayoutWidth() const
