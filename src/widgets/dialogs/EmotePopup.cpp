@@ -142,7 +142,7 @@ auto makeTitleMessage(const QString &title)
 }
 
 auto makeEmoteMessageSorted(const std::vector<EmotePtr> &emotes,
-                            const QString &emptyText)
+                            const QString &emptyText = {})
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
@@ -739,21 +739,37 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
 {
     auto chan = this->favEmotesAndEmojisView_->underlyingChannel();
     chan->clearMessages();
-    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_,
-                                            "No favourite emotes, add some"),
+
+    if (this->favEmotes_.empty() && this->favEmojis_.empty())
+    {
+        MessageBuilder builder;
+        builder->flags.set(MessageFlag::Centered);
+        builder.emplace<TextElement>(
+            "No favourites. You can add them by Ctrl+clicking on an Emote or "
+            "marking it as favourite in the context menu",
+            MessageElementFlags{MessageElementFlag::Text,
+                                MessageElementFlag::AlwaysShow},
+            MessageColor::System);
+
+        chan->addMessage(builder.release(), MessageContext::Original);
+
+        return;
+    }
+
+    // Add Emotes
+    chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
                      MessageContext::Original);
 
+    // Add Emojis
     std::vector<EmojiPtr> emojis;
     emojis.reserve(this->favEmotes_.size());
-
     std::ranges::transform(this->favEmojis_, std::back_inserter(emojis),
                            [](const auto &v) {
                                return v.second;
                            });
+    chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
 
-    chan->addMessage(makeEmojiMessage(emojis, "No favourite emojis, add some"),
-                     MessageContext::Original);
-
+    // Show favourited Emotes that are currently not available
     std::vector<QString> unavailableEmotes;
     for (const auto &emoteName : getSettings()->favouriteEmotes.getValue())
     {
@@ -768,11 +784,21 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     }
     if (!unavailableEmotes.empty())
     {
+        static const QString explainUnavailability =
+            "Emotes can be unavailable because they are specific for a "
+            "particular channel, you are no longer subscribed to a channel "
+            "that provides the emotes or we were unable to verify that you "
+            "have access to an emote due to network issues.";
+
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
-        builder.emplace<TextElement>("Unavailable emotes",
-                                     MessageElementFlag::Text,
-                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(
+                "Currently unavailable favourite emotes",
+                MessageElementFlags{MessageElementFlag::Text,
+                                    MessageElementFlag::AlwaysShow},
+                MessageColor::System)
+            ->setTooltip(explainUnavailability);
         chan->addMessage(builder.release(), MessageContext::Original);
 
         chan->addMessage(makeUnavailableEmoteMessage(unavailableEmotes),
