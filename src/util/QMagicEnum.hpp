@@ -10,6 +10,15 @@
 
 #include <concepts>
 
+/// MAGIC_ENUM_VERSION_AT_LEAST(0, 9, 8) equivalent to magic enum version >= 0.9.8
+#define MAGIC_ENUM_VERSION_AT_LEAST(major, minor, patch) \
+    ((MAGIC_ENUM_VERSION_MAJOR > (major)) ||             \
+     (MAGIC_ENUM_VERSION_MAJOR == (major) &&             \
+      MAGIC_ENUM_VERSION_MINOR > (minor)) ||             \
+     (MAGIC_ENUM_VERSION_MAJOR == (major) &&             \
+      MAGIC_ENUM_VERSION_MINOR == (minor) &&             \
+      MAGIC_ENUM_VERSION_PATCH >= (patch)))
+
 namespace chatterino::qmagicenum::detail {
 
 template <typename T, typename U>
@@ -54,10 +63,14 @@ consteval bool isLatin1(std::string_view maybe)
 }
 
 template <typename BinaryPredicate>
-constexpr bool eq(
-    QStringView a, QStringView b,
-    [[maybe_unused]] BinaryPredicate &&
-        p) noexcept(magic_enum::detail::is_nothrow_invocable_v<BinaryPredicate>)
+constexpr bool
+    eq(QStringView a, QStringView b, [[maybe_unused]] BinaryPredicate &&p) noexcept(
+#if MAGIC_ENUM_VERSION_AT_LEAST(0, 9, 8)
+        magic_enum::detail::is_nothrow_invocable_v<BinaryPredicate>
+#else
+        magic_enum::detail::is_nothrow_invocable<BinaryPredicate>()
+#endif
+    )
 {
     // Note: QStringView::operator== isn't constexpr
     if (a.size() != b.size())
