@@ -201,7 +201,7 @@ jobs:
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: Chatterino/msvc-dev-cmd@v2.0.4
+        uses: Chatterino/msvc-dev-cmd@v2.0.5
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
