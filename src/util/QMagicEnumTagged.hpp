@@ -71,7 +71,8 @@ inline constexpr auto TAGGED_DATA_STORAGE =
 template <typename C, typename E, typename Tag, E V>
 consteval auto enumTaggedDataStorage()
 {
-    constexpr std::string_view utf8 = TAGGED_DATA_STORAGE<decltype(V), Tag, V>;
+    constexpr std::string_view utf8 =
+        TAGGED_DATA_STORAGE<decltype(V), Tag, V>.str();
 
     static_assert(isLatin1<utf8.size()>(utf8),
                   "Can't convert non-latin1 UTF8 to UTF16");
