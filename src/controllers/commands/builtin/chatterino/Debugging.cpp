@@ -59,6 +59,70 @@ bool restartChatterino(const QProcessEnvironment &env)
     return false;
 }
 
+QString dequoteAndUnescapeFilePath(QString filePath, bool &ok)
+{
+    ok = false;
+
+    filePath = filePath.trimmed();
+    if (filePath.startsWith("\""))
+    {
+        QString dequotedFilePath;
+        bool escaped = false;
+
+        int idx = 1;
+        for (; idx < filePath.length(); idx++)
+        {
+            QChar ch = filePath[idx];
+
+            if (escaped)
+            {
+                /*
+                 * Some file systems allow the double quote character (") as
+                 * part of path so we need to allow it too. We do the usual
+                 * and treat escaped (\") double quote not as the end of
+                 * the string but just like an ordinary character.
+                 *
+                 * Since the backslash is also used as a path separator on
+                 * Windows we need to make sure that we do not eat and
+                 * drop it.
+                 */
+                escaped = false;
+
+                if (ch != '"' && ch != '\\')
+                {
+                    dequotedFilePath += filePath[idx - 1];
+                }
+                dequotedFilePath += ch;
+
+                continue;
+            }
+
+            if (ch == '\\')
+            {
+                escaped = true;
+                continue;
+            }
+            if (ch == '"')
+            {
+                break;
+            }
+
+            dequotedFilePath += ch;
+        }
+
+        if (idx == filePath.length() - 1)
+        {
+            ok = true;
+            return dequotedFilePath;
+        }
+
+        return {};
+    }
+
+    ok = true;
+    return filePath;
+}
+
 QProcessEnvironment setUpEnvironmentForLogging(const QStringList &loggingRules)
 {
     static constexpr QLatin1String loggingRulesEnv("QT_LOGGING_RULES");
@@ -341,7 +405,23 @@ QString enableLogfile(const CommandContext &ctx)
         return {};
     }
 
-    QString logFilePath = ctx.words.mid(1).join(" ");
+    bool ok = false;
+    QString logFilePath =
+        dequoteAndUnescapeFilePath(ctx.words.mid(1).join(" "), ok);
+    if (!ok)
+    {
+        MessageBuilder builder;
+        builder.emplace<TextElement>(
+            QString(
+                "Unable to open log file because the file path is invalid."),
+            MessageElementFlags{MessageElementFlag::Text,
+                                MessageElementFlag::AlwaysShow},
+            MessageColor{QColor(230, 30, 30)});
+        ctx.channel->addMessage(builder.release(), MessageContext::Original);
+
+        return {};
+    }
+
     auto result = FileLogger::instance().enable(logFilePath);
     if (result.has_value())
     {
