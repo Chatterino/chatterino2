@@ -57,7 +57,7 @@ template <typename BinaryPredicate>
 constexpr bool eq(
     QStringView a, QStringView b,
     [[maybe_unused]] BinaryPredicate &&
-        p) noexcept(magic_enum::detail::is_nothrow_invocable<BinaryPredicate>())
+        p) noexcept(magic_enum::detail::is_nothrow_invocable_v<BinaryPredicate>)
 {
     // Note: QStringView::operator== isn't constexpr
     if (a.size() != b.size())
