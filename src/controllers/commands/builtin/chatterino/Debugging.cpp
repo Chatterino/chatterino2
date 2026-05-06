@@ -434,8 +434,7 @@ QString enableLogfile(const CommandContext &ctx)
         MessageBuilder builder;
         builder.emplace<TextElement>(
             QString("Unable to open log file '%1'. Error reported by "
-                    "the system was: %2 (Hint: Do not quote the file path "
-                    "even if it contains spaces)")
+                    "the system was: %2")
                 .arg(error.absFilePath, error.errorDesc),
             MessageElementFlags{MessageElementFlag::Text,
                                 MessageElementFlag::AlwaysShow},
