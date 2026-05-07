@@ -98,6 +98,7 @@ void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
             Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
                     .arg(id.string)
                     .arg(name.string)};
+        emote.id = id;
 
         map[name] = cachedOrMake(std::move(emote), id);
     }

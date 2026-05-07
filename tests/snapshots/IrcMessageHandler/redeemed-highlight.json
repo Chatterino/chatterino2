@@ -115,7 +115,8 @@
                             "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1/default/dark/3.0"
                         },
                         "name": ":)",
-                        "tooltip": ":)<br>Twitch Emote"
+                        "tooltip": ":)<br>Twitch Emote",
+                        "id": "1"
                     },
                     "flags": "EmoteImage|EmoteText",
                     "link": {
