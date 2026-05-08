@@ -79,6 +79,11 @@ void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
 
         // margins
         auto id = EmoteId{QString::number(emoteJson["id"].toInt())};
+        if (id.string == "0")
+        {
+            // FFZ seems to be using both variants to store Emote Id
+            id = EmoteId{emoteJson["id"].toString()};
+        }
         auto name = EmoteName{emoteJson["name"].toString()};
         auto author =
             EmoteAuthor{emoteJson["owner"]["display_name"].toString()};
