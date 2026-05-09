@@ -44,6 +44,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace Qt::Literals;
 
 auto makeShortCodesSet(const std::vector<QString> &shortCodes)
 {
@@ -684,15 +685,15 @@ void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
-    /*
-     * Note that we are checking the persistent list of favourite emote names
-     * rather than the internal vector of favouriteEmotes_. We do this because
-     * in order to populate the favouriteEmotes_ list, we first need to download
-     * all Emotes we have access to from Twitch. This can take considerable
-     * time during which the persistent list and the internal list are
-     * effectively out of sync. If there is a connection issue, these two lists
-     * may not sync up at all. Using the persistent list is the safe choice.
-     */
+    //
+    // Note that we are checking the persistent list of favourite emote names
+    // rather than the internal vector of favouriteEmotes_. We do this because
+    // in order to populate the favouriteEmotes_ list, we first need to download
+    // all Emotes we have access to from Twitch. This can take considerable
+    // time during which the persistent list and the internal list are
+    // effectively out of sync. If there is a connection issue, these two lists
+    // may not sync up at all. Using the persistent list is the safe choice.
+    //
     auto emoteNames = getSettings()->favouriteEmotes.getValue();
     for (const auto &emotePresentName : emoteNames)
     {
@@ -806,11 +807,11 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     }
     if (!unavailableEmotes.empty())
     {
-        static const QString explainUnavailability =
-            "Emotes can be unavailable because they are specific for a "
-            "particular channel, you are no longer subscribed to a channel "
-            "that provides the emotes or we were unable to verify that you "
-            "have access to an emote due to network issues.";
+        static const auto explainUnavailability =
+            u"Emotes can be unavailable because they are specific for a "
+            u"particular channel, you are no longer subscribed to a channel "
+            u"that provides the emotes or we were unable to verify that you "
+            u"have access to an emote due to network issues."_s;
 
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
@@ -1060,13 +1061,13 @@ std::optional<EmotePtr> EmotePopup::findEmote(const EmoteName &name)
 
         auto twitchEmotes =
             *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets();
-        /*
-         * Check the Emote set for the currently active channel first.
-         * If multiple channels share an Emote name, it probably makes sense
-         * to use the Emote for the channel that is active - the channel we
-         * would send the Emote to. This gives the user a chance to see what
-         * Emote would the other chatters see in their own chats.
-         */
+        //
+        // Check the Emote set for the currently active channel first.
+        // If multiple channels share an Emote name, it probably makes sense
+        // to use the Emote for the channel that is active - the channel we
+        // would send the Emote to. This gives the user a chance to see what
+        // Emote would the other chatters see in their own chats.
+        //
         auto currentChannelID = this->twitchChannel_->roomId();
         auto currentChannelIt = std::ranges::find_if(
             *twitchEmotes, [currentChannelID](const auto &it) {
