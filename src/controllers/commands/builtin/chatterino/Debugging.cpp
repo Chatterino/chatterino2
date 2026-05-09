@@ -59,67 +59,13 @@ bool restartChatterino(const QProcessEnvironment &env)
     return false;
 }
 
-QString dequoteAndUnescapeFilePath(QString filePath, bool &ok)
+QString dequoteFilePath(QString filePath)
 {
-    ok = false;
-
-    filePath = filePath.trimmed();
-    if (filePath.startsWith("\""))
+    if (filePath.startsWith('"') && filePath.endsWith('"') &&
+        filePath.length() > 2)
     {
-        QString dequotedFilePath;
-        bool escaped = false;
-
-        int idx = 1;
-        for (; idx < filePath.length(); idx++)
-        {
-            QChar ch = filePath[idx];
-
-            if (escaped)
-            {
-                /*
-                 * Some file systems allow the double quote character (") as
-                 * part of path so we need to allow it too. We do the usual
-                 * and treat escaped (\") double quote not as the end of
-                 * the string but just like an ordinary character.
-                 *
-                 * Since the backslash is also used as a path separator on
-                 * Windows we need to make sure that we do not eat and
-                 * drop it.
-                 */
-                escaped = false;
-
-                if (ch != '"' && ch != '\\')
-                {
-                    dequotedFilePath += filePath[idx - 1];
-                }
-                dequotedFilePath += ch;
-
-                continue;
-            }
-
-            if (ch == '\\')
-            {
-                escaped = true;
-                continue;
-            }
-            if (ch == '"')
-            {
-                break;
-            }
-
-            dequotedFilePath += ch;
-        }
-
-        if (idx == filePath.length() - 1)
-        {
-            ok = true;
-            return dequotedFilePath;
-        }
-
-        return {};
+        return filePath.mid(1, filePath.length() - 2);
     }
-
-    ok = true;
     return filePath;
 }
 
@@ -405,23 +351,7 @@ QString enableLogfile(const CommandContext &ctx)
         return {};
     }
 
-    bool ok = false;
-    QString logFilePath =
-        dequoteAndUnescapeFilePath(ctx.words.mid(1).join(" "), ok);
-    if (!ok)
-    {
-        MessageBuilder builder;
-        builder.emplace<TextElement>(
-            QString(
-                "Unable to open log file because the file path is invalid."),
-            MessageElementFlags{MessageElementFlag::Text,
-                                MessageElementFlag::AlwaysShow},
-            MessageColor{QColor(230, 30, 30)});
-        ctx.channel->addMessage(builder.release(), MessageContext::Original);
-
-        return {};
-    }
-
+    QString logFilePath = dequoteFilePath(ctx.words.mid(1).join(" "));
     auto result = FileLogger::instance().enable(logFilePath);
     if (result.has_value())
     {
@@ -434,7 +364,8 @@ QString enableLogfile(const CommandContext &ctx)
         MessageBuilder builder;
         builder.emplace<TextElement>(
             QString("Unable to open log file '%1'. Error reported by "
-                    "the system was: %2")
+                    "the system was: %2 (Hint: Do not quote the file path "
+                    "even if it contains spaces)")
                 .arg(error.absFilePath, error.errorDesc),
             MessageElementFlags{MessageElementFlag::Text,
                                 MessageElementFlag::AlwaysShow},
