@@ -66,13 +66,13 @@ private:
 
     void reloadEmotes();
 
-    void favouriteStateChanged(const QString &identifier, bool isFavourite);
+    void favouriteStateChanged(const QString &emoteName, bool isFavourite);
 
     void addFavouriteEmoji(const QString &emojiIdentifier);
     void addFavouriteEmote(const EmoteName &name);
     void removeFavouriteEmoji(const QString &emojiIdentifier);
     void removeFavouriteEmote(const EmoteName &name);
-    void removeFavouriteEmoteOrEmoji(const QString &identifier);
+    void removeFavouriteEmoteOrEmoji(const QString &emoteName);
     void updateFavouriteEmotesAndEmojis();
 
     void saveBounds() const;
