@@ -45,7 +45,7 @@ namespace {
 
 using namespace chatterino;
 
-constexpr auto makeShortCodesSet(const std::vector<QString> &shortCodes)
+auto makeShortCodesSet(const std::vector<QString> &shortCodes)
 {
     std::set<QString> shortCodesSet;
     std::ranges::transform(shortCodes,
