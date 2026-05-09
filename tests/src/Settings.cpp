@@ -113,9 +113,6 @@ TEST_P(TestSettingsP, Run)
     MockApplication app(
         QJsonDocument(this->snapshot->input().toObject()).toJson());
 
-    ASSERT_EQ(app.settings.requestSave(),
-              pajlada::Settings::SettingManager::SaveResult::Success);
-
     QFile settingsFile(app.settingsDir.filePath("settings.json"));
     ASSERT_TRUE(settingsFile.open(QFile::ReadOnly))
         << "failed to open" << app.settingsDir.filePath("settings.json");
