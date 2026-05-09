@@ -115,12 +115,12 @@ bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
     return it != emoteNames.end();
 }
 
-std::optional<EmotePtr> findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
+std::optional<EmotePtr> findEmoteByName(const EmoteName &name,
+                                        const EmoteMap &emoteMap)
 {
     auto it = emoteMap.find(name);
-    return it == emoteMap.cend()
-        ? std::nullopt
-        : std::optional<EmotePtr>(it->second);
+    return it == emoteMap.cend() ? std::nullopt
+                                 : std::optional<EmotePtr>(it->second);
 }
 
 auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
@@ -456,13 +456,27 @@ EmotePopup::EmotePopup(QWidget *parent)
                 favouriteAction->setChecked(
                     isFavouriteEmoteOrEmoji(hoveredElement));
 
-                QObject::connect(favouriteAction, &QAction::triggered,
-                                 [this, hoveredElement](bool checked) {
-                                     const auto &identifier =
-                                         hoveredElement->getLink().value;
-                                     this->favouriteStateChanged(identifier,
-                                                                 checked);
-                                 });
+                QObject::connect(
+                    favouriteAction, &QAction::triggered,
+                    [this, hoveredElement](bool checked) {
+                        const auto &identifier =
+                            hoveredElement->getLink().value;
+                        if (!checked)
+                        {
+                            this->removeFavouriteEmoteOrEmoji(identifier);
+                        }
+                        else
+                        {
+                            if (isEmojiIdentifier(identifier))
+                            {
+                                this->addFavouriteEmoji(identifier);
+                            }
+                            else
+                            {
+                                this->addFavouriteEmote(EmoteName{identifier});
+                            }
+                        }
+                    });
             });
 
         return view;
@@ -771,8 +785,8 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     {
         std::vector<EmojiPtr> emojis;
         emojis.reserve(this->favouriteEmotes_.size());
-        std::ranges::transform(this->favouriteEmojis_, std::back_inserter(emojis),
-                               [](const auto &v) {
+        std::ranges::transform(this->favouriteEmojis_,
+                               std::back_inserter(emojis), [](const auto &v) {
                                    return v.second;
                                });
         chan->addMessage(makeEmojiMessage(emojis), MessageContext::Original);
