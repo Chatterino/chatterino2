@@ -26,6 +26,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
@@ -114,10 +115,12 @@ bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
     return it != emoteNames.end();
 }
 
-auto findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
+std::optional<EmotePtr> findEmoteByName(const EmoteName &name, const EmoteMap &emoteMap)
 {
     auto it = emoteMap.find(name);
-    return it == emoteMap.cend() ? nullptr : it->second;
+    return it == emoteMap.cend()
+        ? std::nullopt
+        : std::optional<EmotePtr>(it->second);
 }
 
 auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
@@ -397,7 +400,7 @@ EmotePopup::EmotePopup(QWidget *parent)
         {
             const auto *page = this->notebook_->getSelectedPage();
 
-            if (this->favEmotesAndEmojisView_ == page)
+            if (this->favouritesView_ == page)
             {
                 this->removeFavouriteEmoteOrEmoji(link.value);
             }
@@ -472,7 +475,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(this->notebook_);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    this->favEmotesAndEmojisView_ = makeView("Favourite");
+    this->favouritesView_ = makeView("Favourite");
     this->subEmotesView_ = makeView("Subs");
     this->channelEmotesView_ = makeView("Channel");
     this->globalEmotesView_ = makeView("Global");
@@ -615,7 +618,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         std::make_shared<Channel>("", Channel::Type::None));
     this->searchView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
-    this->favEmotesAndEmojisView_->setChannel(
+    this->favouritesView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
@@ -648,7 +651,7 @@ void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
     {
         return;
     }
-    if (this->favEmojis_.contains(shortCode))
+    if (this->favouriteEmojis_.contains(shortCode))
     {
         return;
     }
@@ -657,21 +660,21 @@ void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
     {
         if (emojiHasShortCode(emoji, shortCode))
         {
-            this->favEmojis_.emplace(shortCode, emoji);
+            this->favouriteEmojis_.emplace(shortCode, emoji);
             break;
         }
     }
 
     this->updateFavouriteEmotesAndEmojis();
-    saveFavouriteEmojis(this->favEmojis_);
+    saveFavouriteEmojis(this->favouriteEmojis_);
 }
 
 void EmotePopup::addFavouriteEmote(const EmoteName &name)
 {
     /*
      * Note that we are checking the persistent list of favourite emote names
-     * rather than the internal vector of favEmotes_. We do this because
-     * in order to populate the favEmotes_ list, we first need to download
+     * rather than the internal vector of favouriteEmotes_. We do this because
+     * in order to populate the favouriteEmotes_ list, we first need to download
      * all Emotes we have access to from Twitch. This can take considerable
      * time during which the persistent list and the internal list are
      * effectively out of sync. If there is a connection issue, these two lists
@@ -691,7 +694,7 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
         return;
     }
 
-    this->favEmotes_.push_back(std::move(emote));
+    this->favouriteEmotes_.push_back(std::move(*emote));
 
     emoteNames.push_back(name.string);
     getSettings()->favouriteEmotes = emoteNames;
@@ -702,15 +705,15 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
 void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
 {
     auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
-    this->favEmojis_.erase(shortCode);
-    saveFavouriteEmojis(this->favEmojis_);
+    this->favouriteEmojis_.erase(shortCode);
+    saveFavouriteEmojis(this->favouriteEmojis_);
 
     this->updateFavouriteEmotesAndEmojis();
 }
 
 void EmotePopup::removeFavouriteEmote(const EmoteName &name)
 {
-    std::erase_if(this->favEmotes_, [name](const auto &emote) {
+    std::erase_if(this->favouriteEmotes_, [name](const auto &emote) {
         return emote->name == name;
     });
 
@@ -737,10 +740,10 @@ void EmotePopup::removeFavouriteEmoteOrEmoji(const QString &identifier)
 
 void EmotePopup::updateFavouriteEmotesAndEmojis()
 {
-    auto chan = this->favEmotesAndEmojisView_->underlyingChannel();
+    auto chan = this->favouritesView_->underlyingChannel();
     chan->clearMessages();
 
-    if (this->favEmotes_.empty() && this->favEmojis_.empty())
+    if (this->favouriteEmotes_.empty() && this->favouriteEmojis_.empty())
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
@@ -757,18 +760,18 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     }
 
     // Add Emotes
-    if (!this->favEmotes_.empty())
+    if (!this->favouriteEmotes_.empty())
     {
-        chan->addMessage(makeEmoteMessageSorted(this->favEmotes_),
+        chan->addMessage(makeEmoteMessageSorted(this->favouriteEmotes_),
                          MessageContext::Original);
     }
 
     // Add Emojis
-    if (!this->favEmojis_.empty())
+    if (!this->favouriteEmojis_.empty())
     {
         std::vector<EmojiPtr> emojis;
-        emojis.reserve(this->favEmotes_.size());
-        std::ranges::transform(this->favEmojis_, std::back_inserter(emojis),
+        emojis.reserve(this->favouriteEmotes_.size());
+        std::ranges::transform(this->favouriteEmojis_, std::back_inserter(emojis),
                                [](const auto &v) {
                                    return v.second;
                                });
@@ -780,10 +783,10 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
     for (const auto &emoteName : getSettings()->favouriteEmotes.getValue())
     {
         auto it = std::ranges::find_if(
-            this->favEmotes_, [emoteName](const auto &emote) {
+            this->favouriteEmotes_, [emoteName](const auto &emote) {
                 return emoteName == emote->name.string;
             });
-        if (it == this->favEmotes_.end())
+        if (it == this->favouriteEmotes_.end())
         {
             unavailableEmotes.push_back(emoteName);
         }
@@ -865,17 +868,17 @@ void EmotePopup::reloadEmotes()
                   "7TV");
     }
 
-    this->favEmotes_.clear();
+    this->favouriteEmotes_.clear();
     const auto &emoteNames = getSettings()->favouriteEmotes;
     for (const auto &emoteName : emoteNames.getValue())
     {
         auto emote = this->findEmote(EmoteName{emoteName});
         if (emote)
         {
-            this->favEmotes_.push_back(emote);
+            this->favouriteEmotes_.push_back(*emote);
         }
     }
-    this->favEmojis_.clear();
+    this->favouriteEmojis_.clear();
     const auto &emojiShortCodes = getSettings()->favouriteEmojis;
     for (const auto &shortCode : emojiShortCodes.getValue())
     {
@@ -884,7 +887,7 @@ void EmotePopup::reloadEmotes()
         {
             if (emojiHasShortCode(emoji, shortCode))
             {
-                this->favEmojis_.emplace(shortCode, emoji);
+                this->favouriteEmojis_.emplace(shortCode, emoji);
                 break;
             }
         }
@@ -1030,7 +1033,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
     this->searchView_->show();
 }
 
-EmotePtr EmotePopup::findEmote(const EmoteName &name)
+std::optional<EmotePtr> EmotePopup::findEmote(const EmoteName &name)
 {
     if (this->twitchChannel_)
     {
@@ -1075,68 +1078,44 @@ EmotePtr EmotePopup::findEmote(const EmoteName &name)
             }
         }
 
-        if (getSettings()->enableBTTVChannelEmotes)
+        emote = this->twitchChannel_->bttvEmote(name);
+        if (emote)
         {
-            auto emote =
-                findEmoteByName(name, *this->twitchChannel_->bttvEmotes());
-            if (emote)
-            {
-                return emote;
-            }
+            return emote;
         }
 
-        if (getSettings()->enableFFZChannelEmotes)
+        emote = this->twitchChannel_->ffzEmote(name);
+        if (emote)
         {
-            auto emote =
-                findEmoteByName(name, *this->twitchChannel_->ffzEmotes());
-            if (emote)
-            {
-                return emote;
-            }
+            return emote;
         }
 
-        if (getSettings()->enableSevenTVChannelEmotes)
-        {
-            auto emote =
-                findEmoteByName(name, *this->twitchChannel_->seventvEmotes());
-            if (emote)
-            {
-                return emote;
-            }
-        }
-    }
-
-    // Global
-    if (getSettings()->enableBTTVGlobalEmotes)
-    {
-        auto emote =
-            findEmoteByName(name, *getApp()->getBttvEmotes()->emotes());
+        emote = this->twitchChannel_->seventvEmote(name);
         if (emote)
         {
             return emote;
         }
     }
 
-    if (getSettings()->enableFFZGlobalEmotes)
+    auto emote = getApp()->getBttvEmotes()->emote(name);
+    if (emote)
     {
-        auto emote = findEmoteByName(name, *getApp()->getFfzEmotes()->emotes());
-        if (emote)
-        {
-            return emote;
-        }
+        return emote;
     }
 
-    if (getSettings()->enableSevenTVGlobalEmotes)
+    emote = getApp()->getFfzEmotes()->emote(name);
+    if (emote)
     {
-        auto emote = findEmoteByName(
-            name, *getApp()->getSeventvEmotes()->globalEmotes());
-        if (emote)
-        {
-            return emote;
-        }
+        return emote;
     }
 
-    return nullptr;
+    emote = getApp()->getSeventvEmotes()->globalEmote(name);
+    if (emote)
+    {
+        return emote;
+    }
+
+    return std::nullopt;
 }
 
 void EmotePopup::saveBounds() const

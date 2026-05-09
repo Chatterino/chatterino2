@@ -41,7 +41,7 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
-    ChannelView *favEmotesAndEmojisView_{};
+    ChannelView *favouritesView_{};
     /**
      * @brief Visible only when the user has specified a search query into the `search_` input.
      * Otherwise the `notebook_` and all other views are visible.
@@ -54,13 +54,13 @@ private:
     QLineEdit *search_;
     Notebook *notebook_;
 
-    std::vector<EmotePtr> favEmotes_;
-    std::unordered_map<QString, EmojiPtr> favEmojis_;
+    std::vector<EmotePtr> favouriteEmotes_;
+    std::unordered_map<QString, EmojiPtr> favouriteEmojis_;
 
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                             const QString &searchText);
     void filterEmotes(const QString &text);
-    EmotePtr findEmote(const EmoteName &name);
+    std::optional<EmotePtr> findEmote(const EmoteName &name);
     void addShortcuts() override;
     bool eventFilter(QObject *object, QEvent *event) override;
 
