@@ -5,6 +5,7 @@
 #pragma once
 
 #include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -15,16 +16,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct WhispersHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"whispers";
 
     WhispersHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "Whispers";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -46,17 +61,19 @@ struct WhispersHighlight : public SharedHighlight2 {
 
     bool shouldHighlightTaskbar() const override
     {
-        return this->alert.value_or(false);
+        return this->outcome.alert.value_or(false);
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::WhispersHighlight> {
-    using H = chatterino::WhispersHighlight;
+struct Serialize<chatterino::highlights::WhispersHighlight> {
+    using H = chatterino::highlights::WhispersHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -69,8 +86,8 @@ struct Serialize<chatterino::WhispersHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::WhispersHighlight> {
-    using H = chatterino::WhispersHighlight;
+struct Deserialize<chatterino::highlights::WhispersHighlight> {
+    using H = chatterino::highlights::WhispersHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {
@@ -80,13 +97,13 @@ struct Deserialize<chatterino::WhispersHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, chatterino::WhispersHighlight::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};
         }
 
-        chatterino::WhispersHighlight h;
+        H h;
 
         if (!h.deserialize(value))
         {

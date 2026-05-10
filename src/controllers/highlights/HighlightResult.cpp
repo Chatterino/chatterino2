@@ -4,6 +4,8 @@
 
 #include "controllers/highlights/HighlightResult.hpp"
 
+#include <qdebug.h>
+
 namespace chatterino {
 
 HighlightResult::HighlightResult(bool _alert, bool _playSound,
@@ -29,14 +31,19 @@ bool HighlightResult::operator==(const HighlightResult &other) const
 {
     if (this->alert != other.alert)
     {
+        qInfo() << "did not match alert";
         return false;
     }
     if (this->playSound != other.playSound)
     {
+        qInfo() << "did not match playSound";
         return false;
     }
-    if (this->customSoundUrl != other.customSoundUrl)
+    if (auto ourUrl = this->customSoundUrl.value_or({}),
+        theirUrl = other.customSoundUrl.value_or({});
+        ourUrl != theirUrl)
     {
+        qInfo() << "did not match customSoundUrl";
         return false;
     }
 
@@ -44,12 +51,14 @@ bool HighlightResult::operator==(const HighlightResult &other) const
     {
         if (*this->color != *other.color)
         {
+            qInfo() << "did not match color";
             return false;
         }
     }
 
     if (this->showInMentions != other.showInMentions)
     {
+        qInfo() << "did not match show in mentions";
         return false;
     }
 
@@ -83,7 +92,10 @@ std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
                : "")
        << ")"
        << ", "
-       << "Color: " << (result.color ? result.color->name().toStdString() : "")
+       << "Color: "
+       << (result.color
+               ? result.color->name(QColor::NameFormat::HexArgb).toStdString()
+               : "")
        << ", "
        << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
     return os;

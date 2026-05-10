@@ -15,16 +15,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct AutomodCaughtHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"automodcaught";
 
     AutomodCaughtHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "AutoMod Caught Messages";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -35,22 +49,24 @@ struct AutomodCaughtHighlight : public SharedHighlight2 {
 
     bool shouldShowInMentions() const override
     {
-        return this->showInMentions.value_or(false);
+        return this->outcome.showInMentions.value_or(false);
     }
 
     bool shouldHighlightTaskbar() const override
     {
-        return this->alert.value_or(false);
+        return this->outcome.alert.value_or(false);
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::AutomodCaughtHighlight> {
-    using H = chatterino::AutomodCaughtHighlight;
+struct Serialize<chatterino::highlights::AutomodCaughtHighlight> {
+    using H = chatterino::highlights::AutomodCaughtHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -63,8 +79,8 @@ struct Serialize<chatterino::AutomodCaughtHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::AutomodCaughtHighlight> {
-    using H = chatterino::AutomodCaughtHighlight;
+struct Deserialize<chatterino::highlights::AutomodCaughtHighlight> {
+    using H = chatterino::highlights::AutomodCaughtHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {

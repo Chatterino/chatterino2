@@ -1,0 +1,47 @@
+#pragma once
+
+#include <QColor>
+#include <QDebug>
+#include <QString>
+#include <QUrl>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
+
+#include <cassert>
+#include <memory>
+#include <optional>
+
+namespace chatterino::highlights {
+
+struct Outcome {
+    /// Whether to add the matching message to the /mentions channel
+    std::optional<bool> showInMentions;
+
+    /// Show an OS-specific alert.
+    /// On Windows, this will flash Chatterino in the taskbar.
+    /// On macOS, this will make Chatterino bounce in the taskbar.
+    std::optional<bool> alert;
+
+    /// Play a sound.
+    /// If the highlight specifies a "customSoundURL", it will play that, otherwise it will
+    /// play the default highlight sound.
+    std::optional<bool> playSound;
+
+    /// The custom sound URL to play if playSound is enabled.
+    QUrl customSoundURL;
+
+    /// The background color to apply to the message.
+    /// If the color is invalid/unset, don't apply a background color.
+    std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
+
+    bool operator==(const Outcome &other) const = default;
+
+    void serialize(rapidjson::Value &ret,
+                   rapidjson::Document::AllocatorType &a) const;
+
+    bool deserialize(const rapidjson::Value &value);
+
+    friend QDebug operator<<(QDebug dbg, const Outcome &v);
+};
+
+}  // namespace chatterino::highlights

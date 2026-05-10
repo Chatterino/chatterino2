@@ -5,6 +5,7 @@
 #pragma once
 
 #include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -15,16 +16,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct WatchStreakHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"watchstreak";
 
     WatchStreakHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "Watch Streaks";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -54,15 +69,17 @@ struct WatchStreakHighlight : public SharedHighlight2 {
         (void)newValue;
         assert(false && "WatchStreak do not support 'flash taskbar'");
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::WatchStreakHighlight> {
-    using H = chatterino::WatchStreakHighlight;
+struct Serialize<chatterino::highlights::WatchStreakHighlight> {
+    using H = chatterino::highlights::WatchStreakHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -75,8 +92,8 @@ struct Serialize<chatterino::WatchStreakHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::WatchStreakHighlight> {
-    using H = chatterino::WatchStreakHighlight;
+struct Deserialize<chatterino::highlights::WatchStreakHighlight> {
+    using H = chatterino::highlights::WatchStreakHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {
@@ -86,7 +103,7 @@ struct Deserialize<chatterino::WatchStreakHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, H::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};

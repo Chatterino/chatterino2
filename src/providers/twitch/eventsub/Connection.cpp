@@ -240,9 +240,14 @@ void Connection::onAutomodMessageHold(
     auto messageText = payload.event.message.text.qt();
     auto userLogin = payload.event.userLogin.qt();
 
-    runInGuiThread([channel, messageText, userLogin, header, body] {
+    filters::RunContext runContext{
+        .message = *body,
+        .channel = channel,
+    };
+
+    runInGuiThread([channel, messageText, userLogin, header, body, runContext] {
         auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags);
+            {}, {}, userLogin, messageText, body->flags, runContext);
         if (highlighted)
         {
             MessageBuilder::triggerHighlights(

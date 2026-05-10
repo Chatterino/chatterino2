@@ -16,8 +16,6 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/highlights/SharedHighlight.hpp"
-#include "controllers/highlights/SharedHighlight2.hpp"
 #include "controllers/highlights/types/AllForward.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
@@ -852,12 +850,6 @@ public:
     };
 #endif
 
-    ChatterinoSetting<SharedHighlight2> pajlada{"/pajlada"};
-
-    ChatterinoSetting<std::vector<AllHighlights>> pajlada2{
-        "/pajlada2",
-    };
-
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
         {"/highlighting/highlights"};
@@ -865,8 +857,10 @@ private:
         "/highlighting/users"};
     ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
         "/highlighting/badges"};
-    ChatterinoSetting<std::vector<AllHighlights>> sharedHighlightsSetting = {
-        "/highlighting/highlights2",
+    // TODO: is this the correct name? should i name it differently?
+    ChatterinoSetting<std::vector<highlights::AllHighlights>>
+        sharedHighlightsSetting = {
+            "/highlighting/highlights2",
     };
     ChatterinoSetting<std::vector<HighlightBlacklistUser>>
         blacklistedUsersSetting = {"/highlighting/blacklist"};
@@ -900,7 +894,7 @@ public:
     SignalVector<HighlightPhrase> highlightedMessages;
     SignalVector<HighlightPhrase> highlightedUsers;
     SignalVector<HighlightBadge> highlightedBadges;
-    SignalVector<AllHighlights> sharedHighlights;
+    SignalVector<highlights::AllHighlights> sharedHighlights;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
     SignalVector<FilterRecordPtr> filterRecords;

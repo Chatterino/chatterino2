@@ -142,6 +142,8 @@ TEST(TestSettingsP, Integrity)
 
 TEST(Settings, Bing)
 {
+    using namespace chatterino::highlights;
+
 #if 0
     {
         MockApplication app(R"({
@@ -302,9 +304,9 @@ TEST(Settings, Bing)
     }
 
     {
-        AllHighlights highlight = UserDefinedHighlight(u"test");
+        AllHighlights highlight = MessageHighlight(u"test");
         auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
-        ASSERT_EQ(R"({"id":"test"})", rj::stringify(v));
+        ASSERT_EQ(R"({"id":"test","type":"basic"})", rj::stringify(v));
 
         bool error = false;
         AllHighlights out = pajlada::Deserialize<AllHighlights>::get(v, &error);

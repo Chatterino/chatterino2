@@ -6,18 +6,11 @@
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "singletons/Resources.hpp"
 
+#include <QIcon>
 #include <QStringBuilder>
 
-namespace chatterino {
-
-namespace {
-
-constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
-constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
-
-}  // namespace
+namespace chatterino::highlights {
 
 bool SharedHighlight2::isEnabled() const
 {
@@ -31,130 +24,91 @@ void SharedHighlight2::setEnabled(std::optional<bool> newValue)
 
 bool SharedHighlight2::shouldShowInMentions() const
 {
-    return this->showInMentions.value_or(true);
+    return this->outcome.showInMentions.value_or(true);
 }
 
 void SharedHighlight2::setShowInMentions(std::optional<bool> newValue)
 {
-    this->showInMentions = newValue;
+    this->outcome.showInMentions = newValue;
 }
 
 bool SharedHighlight2::shouldHighlightTaskbar() const
 {
-    return this->alert.value_or(true);
+    return this->outcome.alert.value_or(true);
 }
 
 void SharedHighlight2::setHighlightTaskbar(std::optional<bool> newValue)
 {
-    this->alert = newValue;
+    this->outcome.alert = newValue;
+}
+
+bool SharedHighlight2::isRegex() const
+{
+    return this->regex.value_or(false);
+}
+
+void SharedHighlight2::setRegex(std::optional<bool> newValue)
+{
+    this->regex = newValue;
+}
+
+bool SharedHighlight2::isCaseSensitive() const
+{
+    return this->caseSensitive.value_or(false);
+}
+
+void SharedHighlight2::setCaseSensitive(std::optional<bool> newValue)
+{
+    this->caseSensitive = newValue;
 }
 
 bool SharedHighlight2::shouldPlaySound() const
 {
-    return this->alert.value_or(false);
+    return this->outcome.playSound.value_or(false);
 }
 
 void SharedHighlight2::setPlaySound(std::optional<bool> newValue)
 {
     qInfo() << "XXX:" << this->pattern << "setPlaySound" << newValue;
-    this->playSound = newValue;
+    this->outcome.playSound = newValue;
 }
 
 QUrl SharedHighlight2::getSoundUrl() const
 {
-    return this->customSoundURL;
+    return this->outcome.customSoundURL;
 }
 
 void SharedHighlight2::setSoundUrl(const QUrl &newValue)
 {
-    this->customSoundURL = newValue;
+    this->outcome.customSoundURL = newValue;
 }
 
 std::shared_ptr<QColor> SharedHighlight2::getBackgroundColor() const
 {
-    return this->backgroundColor;
+    return this->outcome.backgroundColor;
 }
 
 void SharedHighlight2::setBackgroundColor(const QColor &newValue)
 {
-    this->backgroundColor = std::make_shared<QColor>(newValue);
+    this->outcome.backgroundColor = std::make_shared<QColor>(newValue);
 }
 
-QPixmap SharedHighlight2::getType() const
+QIcon SharedHighlight2::getType() const
 {
-    if (this->pattern == "my phrase")
-    {
-        return getResources().buttons.settings_darkMode.scaled(24, 24);
-    }
-
-    if (this->pattern == "user")
-    {
-        return getResources().buttons.account_darkMode.scaled(24, 24);
-    }
-
-    if (this->pattern == "badge")
-    {
-        return getResources().buttons.vip.scaled(24, 24);
-    }
-
-    return getResources().buttons.text;
+    return QIcon{":/buttons/settings-darkMode.svg"};
 }
 
 bool SharedHighlight2::willPlayAnySound() const
 {
-    return this->playSound.value_or(false);
+    return this->outcome.playSound.value_or(false);
 }
 
 bool SharedHighlight2::willPlayCustomSound() const
 {
-    return this->willPlayAnySound() && !this->customSoundURL.isEmpty();
+    return this->willPlayAnySound() && !this->outcome.customSoundURL.isEmpty();
 }
 
-HighlightCheck SharedHighlight2::buildCheck() const
-{
-    return {
-        [highlight = *this](const auto &args, const auto &badges,
-                            const auto &senderName, const auto &originalMessage,
-                            const auto &flags,
-                            const auto self) -> std::optional<HighlightResult> {
-            (void)args;        // unused
-            (void)senderName;  // unused
-            (void)flags;       // unused
-            (void)self;        // unused
-            (void)badges;      // unused
-
-            if (originalMessage == highlight.pattern)
-            {
-                // return HighlightResult{
-                //     .alert = highlight.alert,
-                //     .playSound = highlight.playSound,
-                //     .customSoundUrl = highlight.customSoundURL,
-                //     .color = highlight.backgroundColor,
-                //     .showInMentions = highlight.showInMentions,
-                // };
-                return HighlightResult{
-                    highlight.alert.value_or(false),
-                    highlight.playSound.value_or(false),
-                    highlight.customSoundURL,
-                    highlight.backgroundColor,
-                    highlight.showInMentions.value_or(false),
-                };
-            }
-
-            return std::nullopt;
-        },
-    };
-}
-
-// TODO: reimplement?
-// bool SharedHighlight2::isMatch(const QString &subject) const
-// {
-//     return this->isValid() && this->regex_.match(subject).hasMatch();
-// }
-
-}  // namespace chatterino
-
-QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v)
+QDebug operator<<(QDebug dbg, const SharedHighlight2 &v)
 {
     const auto &backgroundColorPtr = v.getBackgroundColor();
     QColor backgroundColor;
@@ -168,10 +122,12 @@ QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v)
                   << "showInMentions:" << v.shouldShowInMentions() << ','
                   << "alert:" << v.shouldHighlightTaskbar() << ','
                   << "playSound:" << v.shouldPlaySound() << ','
-                  << "isRegex:" << v.isRegex << ','
-                  << "isCaseSensitive:" << v.isCaseSensitive << ','
+                  << "isRegex:" << v.isRegex() << ','
+                  << "isCaseSensitive:" << v.isCaseSensitive() << ','
                   << "customSoundURL:" << v.getSoundUrl() << ','
                   << "backgroundColor:" << backgroundColor << ')';
 
     return dbg;
 }
+
+}  // namespace chatterino::highlights

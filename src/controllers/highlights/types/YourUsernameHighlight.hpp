@@ -5,6 +5,7 @@
 #pragma once
 
 #include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -12,16 +13,31 @@
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct YourUsernameHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"yourusername";
 
     YourUsernameHighlight() = default;
 
+    QString getDefaultName() const
+    {
+        // TODO: remove automatic portion of name?
+        return "Your Username (automatic)";
+    }
+
     QString getName() const
     {
-        return "Your Username (automatic)";
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -32,17 +48,19 @@ struct YourUsernameHighlight : public SharedHighlight2 {
 
     bool shouldPlaySound() const override
     {
-        return this->playSound.value_or(true);
+        return this->outcome.playSound.value_or(true);
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::YourUsernameHighlight> {
-    using H = chatterino::YourUsernameHighlight;
+struct Serialize<chatterino::highlights::YourUsernameHighlight> {
+    using H = chatterino::highlights::YourUsernameHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -55,8 +73,8 @@ struct Serialize<chatterino::YourUsernameHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::YourUsernameHighlight> {
-    using H = chatterino::YourUsernameHighlight;
+struct Deserialize<chatterino::highlights::YourUsernameHighlight> {
+    using H = chatterino::highlights::YourUsernameHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {
@@ -66,7 +84,7 @@ struct Deserialize<chatterino::YourUsernameHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, H::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};

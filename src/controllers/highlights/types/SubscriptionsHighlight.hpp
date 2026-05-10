@@ -15,16 +15,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct SubscriptionsHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"subscriptions";
 
     SubscriptionsHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "Subscriptions";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -46,17 +60,19 @@ struct SubscriptionsHighlight : public SharedHighlight2 {
 
     bool shouldHighlightTaskbar() const override
     {
-        return this->alert.value_or(false);
+        return this->outcome.alert.value_or(false);
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::SubscriptionsHighlight> {
-    using H = chatterino::SubscriptionsHighlight;
+struct Serialize<chatterino::highlights::SubscriptionsHighlight> {
+    using H = chatterino::highlights::SubscriptionsHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -69,8 +85,8 @@ struct Serialize<chatterino::SubscriptionsHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::SubscriptionsHighlight> {
-    using H = chatterino::SubscriptionsHighlight;
+struct Deserialize<chatterino::highlights::SubscriptionsHighlight> {
+    using H = chatterino::highlights::SubscriptionsHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {
@@ -80,13 +96,13 @@ struct Deserialize<chatterino::SubscriptionsHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, chatterino::SubscriptionsHighlight::ID))
+        if (!H::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};
         }
 
-        chatterino::SubscriptionsHighlight h;
+        H h;
 
         if (!h.deserialize(value))
         {

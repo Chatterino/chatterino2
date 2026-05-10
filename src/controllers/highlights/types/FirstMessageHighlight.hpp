@@ -15,16 +15,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct FirstMessageHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"firstmessage";
 
     FirstMessageHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "First Messages";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -54,15 +68,17 @@ struct FirstMessageHighlight : public SharedHighlight2 {
         (void)newValue;
         assert(false && "FirstMessage do not support 'flash taskbar'");
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::FirstMessageHighlight> {
-    using H = chatterino::FirstMessageHighlight;
+struct Serialize<chatterino::highlights::FirstMessageHighlight> {
+    using H = chatterino::highlights::FirstMessageHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -75,8 +91,8 @@ struct Serialize<chatterino::FirstMessageHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::FirstMessageHighlight> {
-    using H = chatterino::FirstMessageHighlight;
+struct Deserialize<chatterino::highlights::FirstMessageHighlight> {
+    using H = chatterino::highlights::FirstMessageHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {

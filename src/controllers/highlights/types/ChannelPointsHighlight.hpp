@@ -15,16 +15,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct ChannelPointsHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"channelpoints";
 
     ChannelPointsHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "Highlights redeemed with Channel Points";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -54,15 +68,17 @@ struct ChannelPointsHighlight : public SharedHighlight2 {
         (void)newValue;
         assert(false && "ChannelPoints do not support 'flash taskbar'");
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::ChannelPointsHighlight> {
-    using H = chatterino::ChannelPointsHighlight;
+struct Serialize<chatterino::highlights::ChannelPointsHighlight> {
+    using H = chatterino::highlights::ChannelPointsHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -75,8 +91,8 @@ struct Serialize<chatterino::ChannelPointsHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::ChannelPointsHighlight> {
-    using H = chatterino::ChannelPointsHighlight;
+struct Deserialize<chatterino::highlights::ChannelPointsHighlight> {
+    using H = chatterino::highlights::ChannelPointsHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {

@@ -15,16 +15,30 @@
 #include <cassert>
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 struct SubscribedThreadHighlight : public SharedHighlight2 {
     static constexpr QStringView ID = u"subscribedthread";
 
     SubscribedThreadHighlight() = default;
 
-    QString getName() const
+    QString getDefaultName() const
     {
         return "Subscribed Reply Threads";
+    }
+
+    QString getName() const
+    {
+        if (this->name.isEmpty())
+        {
+            return this->getDefaultName();
+        }
+        return this->name;
+    }
+
+    QStringView getID() const
+    {
+        return ID;
     }
 
     // Default state:
@@ -35,17 +49,19 @@ struct SubscribedThreadHighlight : public SharedHighlight2 {
 
     bool shouldPlaySound() const override
     {
-        return this->playSound.value_or(true);
+        return this->outcome.playSound.value_or(true);
     }
+
+    HighlightCheck buildCheck() const;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::SubscribedThreadHighlight> {
-    using H = chatterino::SubscribedThreadHighlight;
+struct Serialize<chatterino::highlights::SubscribedThreadHighlight> {
+    using H = chatterino::highlights::SubscribedThreadHighlight;
 
     static rapidjson::Value get(const H &value,
                                 rapidjson::Document::AllocatorType &a)
@@ -58,8 +74,8 @@ struct Serialize<chatterino::SubscribedThreadHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::SubscribedThreadHighlight> {
-    using H = chatterino::SubscribedThreadHighlight;
+struct Deserialize<chatterino::highlights::SubscribedThreadHighlight> {
+    using H = chatterino::highlights::SubscribedThreadHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {

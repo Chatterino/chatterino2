@@ -8,7 +8,7 @@
 #include "controllers/highlights/HighlightResult.hpp"
 #include "providers/colors/ColorProvider.hpp"
 
-namespace chatterino {
+namespace chatterino::highlights {
 
 HighlightCheck YourMessagesHighlight::buildCheck() const
 {
@@ -16,8 +16,8 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
 
     return {
         [=](const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags,
-            const auto self) -> std::optional<HighlightResult> {
+            const auto &originalMessage, const auto &flags, const auto self,
+            const auto runContext) -> std::optional<HighlightResult> {
             (void)originalMessage;  // unused
             (void)args;             // unused
             (void)senderName;       // unused
@@ -40,4 +40,4 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
     };
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights

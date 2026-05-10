@@ -10,7 +10,6 @@
 #include "singletons/Settings.hpp"
 
 #include <pajlada/settings.hpp>
-#include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QUrl>
@@ -27,6 +26,12 @@ class AccountController;
 enum class MessageFlag : std::int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
+namespace filters {
+
+struct RunContext;
+
+}  // namespace filters
+
 class HighlightController final
 {
 public:
@@ -38,7 +43,8 @@ public:
     [[nodiscard]] std::pair<bool, HighlightResult> check(
         const MessageParseArgs &args,
         const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags) const;
+        const QString &originalMessage, const MessageFlags &messageFlags,
+        filters::RunContext runContext) const;
 
 private:
     /**
@@ -50,7 +56,6 @@ private:
 
     UniqueAccess<std::vector<HighlightCheck>> checks_;
 
-    pajlada::SettingListener rebuildListener_;
     pajlada::Signals::SignalHolder signalHolder_;
 };
 

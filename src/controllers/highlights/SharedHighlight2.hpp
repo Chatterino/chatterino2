@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Outcome.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -29,11 +31,20 @@ namespace chatterino {
 
 struct HighlightCheck;
 
+}  // namespace chatterino
+
+namespace chatterino::highlights {
+
 struct SharedHighlight2 {
     bool operator==(const SharedHighlight2 &other) const = default;
 
     SharedHighlight2() = default;
     virtual ~SharedHighlight2() = default;
+
+    QString getPattern() const
+    {
+        return "no pattern";
+    }
 
     /// Returns true if this highlight should be enabled.
     ///
@@ -52,6 +63,18 @@ struct SharedHighlight2 {
     /// If unconfigured, returns true.
     virtual bool shouldHighlightTaskbar() const;
     virtual void setHighlightTaskbar(std::optional<bool> newValue);
+
+    /// Returns true if this highlight should be matched with a regex.
+    ///
+    /// If unconfigured, returns false.
+    virtual bool isRegex() const;
+    virtual void setRegex(std::optional<bool> newValue);
+
+    /// Returns true if this highlight should be matched with case sensitivity.
+    ///
+    /// If unconfigured, returns false.
+    virtual bool isCaseSensitive() const;
+    virtual void setCaseSensitive(std::optional<bool> newValue);
 
     /// Returns true if this highlight should play a sound.
     ///
@@ -72,11 +95,10 @@ struct SharedHighlight2 {
 protected:
     std::optional<bool> enabled;
 
+    [[deprecated]]
     static bool matchesID(const rapidjson::Value &value, QStringView expectedID)
     {
-        QString id;
-        chatterino::rj::getSafe(value, "id", id);
-        return id == expectedID;
+        return chatterino::highlights::matchesID(value, expectedID);
     }
 
 public:
@@ -93,31 +115,13 @@ public:
     QString pattern;
 
 protected:
-    /// Whether to add the matching message to the /mentions channel
-    std::optional<bool> showInMentions;
+    Outcome outcome;
 
-    /// Show an OS-specific alert.
-    /// On Windows, this will flash Chatterino in the taskbar.
-    /// On macOS, this will make Chatterino bounce in the taskbar.
-    std::optional<bool> alert;
-
-    /// Play a sound.
-    /// If the highlight specifies a "customSoundURL", it will play that, otherwise it will
-    /// play the default highlight sound.
-    std::optional<bool> playSound;
-
-    /// The custom sound URL to play if playSound is enabled.
-    QUrl customSoundURL;
-
-    /// The background color to apply to the message.
-    /// If the color is invalid/unset, don't apply a background color.
-    std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
+    std::optional<bool> regex;
+    std::optional<bool> caseSensitive;
 
 public:
-    std::optional<bool> isRegex;
-    std::optional<bool> isCaseSensitive;
-
-    QPixmap getType() const;
+    QIcon getType() const;
 
     bool willPlayAnySound() const;
     bool willPlayCustomSound() const;
@@ -135,42 +139,25 @@ protected:
         rj::setOptionally(ret, "name", this->name, a);
         rj::setOptionally(ret, "enabled", this->enabled, a);
         rj::setOptionally(ret, "pattern", this->pattern, a);
-        rj::setOptionally(ret, "showInMentions", this->showInMentions, a);
-        rj::setOptionally(ret, "alert", this->alert, a);
-        rj::setOptionally(ret, "playSound", this->playSound, a);
-        if (!this->customSoundURL.isEmpty())
-        {
-            rj::set(ret, "customSoundURL", this->customSoundURL.toString(), a);
-        }
 
-        if (this->backgroundColor->isValid())
-        {
-            rj::set(ret, "backgroundColor",
-                    this->backgroundColor->name(QColor::HexArgb), a);
-        }
+        this->outcome.serialize(ret, a);
 
-        rj::setOptionally(ret, "regex", this->isRegex, a);
-        rj::setOptionally(ret, "caseSensitive", this->isCaseSensitive, a);
+        rj::setOptionally(ret, "regex", this->regex, a);
+        rj::setOptionally(ret, "caseSensitive", this->caseSensitive, a);
     }
 
     bool deserialize(const rapidjson::Value &value)
     {
         assert(value.IsObject());
 
-        QString tmpBackgroundColor;
-
         chatterino::rj::getSafe(value, "name", this->name);
         chatterino::rj::getSafe(value, "enabled", this->enabled);
         chatterino::rj::getSafe(value, "pattern", this->pattern);
-        chatterino::rj::getSafe(value, "showInMentions", this->showInMentions);
-        chatterino::rj::getSafe(value, "alert", this->alert);
-        chatterino::rj::getSafe(value, "playSound", this->playSound);
-        chatterino::rj::getSafe(value, "customSoundURL", this->customSoundURL);
-        chatterino::rj::getSafe(value, "backgroundColor", tmpBackgroundColor);
-        chatterino::rj::getSafe(value, "regex", this->isRegex);
-        chatterino::rj::getSafe(value, "caseSensitive", this->isCaseSensitive);
 
-        this->backgroundColor = std::make_shared<QColor>(tmpBackgroundColor);
+        chatterino::rj::getSafe(value, "regex", this->regex);
+        chatterino::rj::getSafe(value, "caseSensitive", this->caseSensitive);
+
+        this->outcome.deserialize(value);
 
         return true;
     }
@@ -180,16 +167,21 @@ protected:
 
     template <typename Type, typename RJValue, typename Enable>
     friend struct pajlada::Deserialize;
+
+    friend class ConfigureDialog;
+
+    friend QDebug operator<<(QDebug dbg, const SharedHighlight2 &v);
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::highlights
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::SharedHighlight2> {
-    static rapidjson::Value get(const chatterino::SharedHighlight2 &value,
-                                rapidjson::Document::AllocatorType &a)
+struct Serialize<chatterino::highlights::SharedHighlight2> {
+    static rapidjson::Value get(
+        const chatterino::highlights::SharedHighlight2 &value,
+        rapidjson::Document::AllocatorType &a)
     {
         using namespace chatterino;
         rapidjson::Value ret(rapidjson::kObjectType);
@@ -199,9 +191,9 @@ struct Serialize<chatterino::SharedHighlight2> {
 };
 
 template <>
-struct Deserialize<chatterino::SharedHighlight2> {
-    static chatterino::SharedHighlight2 get(const rapidjson::Value &value,
-                                            bool *error = nullptr)
+struct Deserialize<chatterino::highlights::SharedHighlight2> {
+    static chatterino::highlights::SharedHighlight2 get(
+        const rapidjson::Value &value, bool *error = nullptr)
     {
         if (!value.IsObject())
         {
@@ -209,7 +201,7 @@ struct Deserialize<chatterino::SharedHighlight2> {
             return {};
         }
 
-        chatterino::SharedHighlight2 h;
+        chatterino::highlights::SharedHighlight2 h;
 
         if (!h.deserialize(value))
         {
@@ -222,8 +214,3 @@ struct Deserialize<chatterino::SharedHighlight2> {
 };
 
 }  // namespace pajlada
-
-// TODO: Confirm this is necessary for a stupid type
-Q_DECLARE_METATYPE(chatterino::SharedHighlight2);
-
-QDebug operator<<(QDebug dbg, const chatterino::SharedHighlight2 &v);
