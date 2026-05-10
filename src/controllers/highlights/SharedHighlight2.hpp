@@ -157,7 +157,7 @@ protected:
     {
         assert(value.IsObject());
 
-        QColor tmpBackgroundColor;
+        QString tmpBackgroundColor;
 
         chatterino::rj::getSafe(value, "name", this->name);
         chatterino::rj::getSafe(value, "enabled", this->enabled);

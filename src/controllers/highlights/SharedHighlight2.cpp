@@ -56,6 +56,7 @@ bool SharedHighlight2::shouldPlaySound() const
 
 void SharedHighlight2::setPlaySound(std::optional<bool> newValue)
 {
+    qInfo() << "XXX:" << this->pattern << "setPlaySound" << newValue;
     this->playSound = newValue;
 }
 

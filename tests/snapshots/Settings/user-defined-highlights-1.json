@@ -5,7 +5,7 @@
                 {
                     "alert": true,
                     "case": false,
-                    "color": "#7f7f3f49",
+                    "color": "#11111111",
                     "pattern": "my phrase",
                     "regex": false,
                     "showInMentions": true,
@@ -15,8 +15,18 @@
                 {
                     "alert": true,
                     "case": false,
-                    "color": "#7f7f3f49",
-                    "pattern": "my phrase",
+                    "color": "#22222222",
+                    "pattern": "my phrase 2",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#33333333",
+                    "pattern": "my phrase 3",
                     "regex": false,
                     "showInMentions": true,
                     "sound": false,
@@ -31,7 +41,7 @@
                 {
                     "alert": true,
                     "case": false,
-                    "color": "#7f7f3f49",
+                    "color": "#11111111",
                     "pattern": "my phrase",
                     "regex": false,
                     "showInMentions": true,
@@ -41,8 +51,18 @@
                 {
                     "alert": true,
                     "case": false,
-                    "color": "#7f7f3f49",
-                    "pattern": "my phrase",
+                    "color": "#22222222",
+                    "pattern": "my phrase 2",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#33333333",
+                    "pattern": "my phrase 3",
                     "regex": false,
                     "showInMentions": true,
                     "sound": false,
@@ -82,7 +102,7 @@
                 },
                 {
                     "alert": true,
-                    "backgroundColor": "#7f7f3f49",
+                    "backgroundColor": "#11111111",
                     "caseSensitive": false,
                     "id": "test-1",
                     "pattern": "my phrase",
@@ -92,10 +112,20 @@
                 },
                 {
                     "alert": true,
-                    "backgroundColor": "#7f7f3f49",
+                    "backgroundColor": "#22222222",
                     "caseSensitive": false,
                     "id": "test-2",
-                    "pattern": "my phrase",
+                    "pattern": "my phrase 2",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#33333333",
+                    "caseSensitive": false,
+                    "id": "test-3",
+                    "pattern": "my phrase 3",
                     "playSound": false,
                     "regex": false,
                     "showInMentions": true

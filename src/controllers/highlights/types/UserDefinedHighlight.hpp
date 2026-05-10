@@ -51,6 +51,8 @@ struct Serialize<chatterino::UserDefinedHighlight> {
         rapidjson::Value ret(rapidjson::kObjectType);
         value.serialize(ret, a);
         chatterino::rj::set(ret, "id", value.id, a);
+        qInfo() << "XXX: UserDefinedHighlight serialized:"
+                << chatterino::rj::pp(ret) << value.playSound;
         return ret;
     }
 };
@@ -83,6 +85,9 @@ struct Deserialize<chatterino::UserDefinedHighlight> {
             PAJLADA_REPORT_ERROR(error)
             return {u"invalid"};
         }
+
+        qInfo() << "XXX: UserDefinedHighlight deserialized:"
+                << chatterino::rj::pp(value) << h.playSound;
 
         return h;
     }
