@@ -29,7 +29,7 @@ env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   CHATTERINO_BUILD_TYPE: ${{ case(inputs.buildType != '', inputs.buildType, 'auto') }}
-  CONAN_VERSION: 2.11.0
+  CONAN_VERSION: 2.28.1
 
 jobs:
   build-ubuntu-docker:
