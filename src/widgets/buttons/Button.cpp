@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/buttons/Button.hpp"
 
 #include "singletons/Theme.hpp"
@@ -165,11 +169,7 @@ void Button::setOpaqueContent(bool opaqueContent)
     this->opaqueContent_ = opaqueContent;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void Button::enterEvent(QEnterEvent * /*event*/)
-#else
-void Button::enterEvent(QEvent * /*event*/)
-#endif
 {
     if (!this->mouseOver_)
     {

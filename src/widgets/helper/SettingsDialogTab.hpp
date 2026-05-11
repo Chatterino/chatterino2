@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
@@ -17,6 +21,7 @@ enum class SettingsTabId {
     None,
     General,
     Accounts,
+    Highlights,
     Moderation,
     About,
 };

@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726866916736;subscriber=1;id=7b5d2152-8eec-41ce-83eb-999ce5c21d28;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :something my-highlight *",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -110,6 +104,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Highlighted|Collapsed|ShowInMentions",
             "frozen": false,
             "highlightColor": "#7f7f3f49",
@@ -120,6 +116,12 @@
             "searchText": "nerixyz  nerixyz: something my-highlight * ",
             "serverReceivedTime": "2024-09-20T21:15:16Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

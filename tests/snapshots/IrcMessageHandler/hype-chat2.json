@@ -2,13 +2,6 @@
     "input": "@room-id=36340781;tmi-sent-ts=1687970634371;flags=;id=39a80a3d-c16e-420f-9bbb-faba4976a3bb;badges=subscriber/6,premium/1;emotes=;display-name=rickharrisoncoc;pinned-chat-paid-level=TWO;turbo=0;pinned-chat-paid-amount=500;pinned-chat-paid-is-system-message=0;color=#FF69B4;subscriber=1;user-type=;first-msg=0;pinned-chat-paid-currency=USD;pinned-chat-paid-canonical-amount=500;user-id=518404689;badge-info=subscriber/10;pinned-chat-paid-exponent=2;returning-chatter=0;mod=0 :rickharrisoncoc!rickharrisoncoc@rickharrisoncoc.tmi.twitch.tv PRIVMSG #pajlada :forsen please read my super chat. Please.",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "10"
-            },
-            "badges": [
-                "subscriber",
-                "premium"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "rickharrisoncoc",
@@ -154,6 +147,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|ElevatedMessage",
             "frozen": false,
             "id": "39a80a3d-c16e-420f-9bbb-faba4976a3bb",
@@ -163,14 +158,17 @@
             "searchText": "rickharrisoncoc  rickharrisoncoc: forsen please read my super chat. Please. ",
             "serverReceivedTime": "2023-06-28T16:43:54Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "10"
+            },
+            "twitchBadges": [
+                "subscriber",
+                "premium"
+            ],
             "userID": "518404689",
             "usernameColor": "#ffff69b4"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -224,6 +222,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|ElevatedMessage",
             "frozen": false,
             "id": "",
@@ -233,6 +233,10 @@
             "searchText": "Level 2 Hype Chat (2m 30s) USD5.00",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

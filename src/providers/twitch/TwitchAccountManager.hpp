@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -66,6 +70,7 @@ public:
 
     boost::signals2::signal<void()> currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
+    pajlada::Signals::NoArgSignal currentUserNameChanged;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/recentmessages/Impl.hpp"
 
 #include "common/Env.hpp"
@@ -24,7 +28,7 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
         return messages;
     }
 
-    for (const auto &jsonMessage : jsonMessages)
+    for (const auto jsonMessage : jsonMessages)
     {
         auto content = unescapeZeroWidthJoiner(jsonMessage.toString());
 

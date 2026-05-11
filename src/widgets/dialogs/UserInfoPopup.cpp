@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
@@ -799,6 +803,11 @@ void UserInfoPopup::installEvents()
             getApp()->getUserData()->userDataUpdated().connect([this]() {
                 this->updateNotes();
             }));
+
+    QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
+                     [this]() {
+                         this->updateNotes();
+                     });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -1189,7 +1198,13 @@ void UserInfoPopup::updateNotes()
         this->ui_.notesPreview->setVisible(false);
         return;
     }
-
+    if (getApp()->getStreamerMode()->isEnabled() &&
+        getSettings()->streamerModeHideUserNotes)
+    {
+        this->ui_.notesPreview->setText("Notes hidden in streamer mode.");
+        this->ui_.notesPreview->setVisible(true);
+        return;
+    }
     this->ui_.notesPreview->setText(userData->notes);
     this->ui_.notesPreview->setVisible(true);
 }

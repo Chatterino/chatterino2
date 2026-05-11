@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 namespace chatterino {
@@ -37,11 +41,6 @@ public:
     bool operator==(const Outcome &other) const
     {
         return this->success_ == other.success_;
-    }
-
-    bool operator!=(const Outcome &other) const
-    {
-        return !this->operator==(other);
     }
 
 private:

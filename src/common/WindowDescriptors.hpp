@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ProviderId.hpp"
@@ -43,6 +47,8 @@ struct SplitDescriptor {
 
     // Whether "Moderation Mode" (the sword icon) is enabled in this split or not
     bool moderationMode_{false};
+
+    std::optional<bool> spellCheckOverride;
 
     QList<QUuid> filters_;
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
@@ -5,6 +9,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QMenu>
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QObject>
@@ -176,6 +181,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
                 QSignalBlocker dontTriggerCursorMovement(this);
                 this->completer_->complete();
             }
+            this->textChanged();
             return;
         }
 
@@ -205,6 +211,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             QSignalBlocker dontTriggerCursorMovement(this);
             this->completer_->complete();
         }
+        this->textChanged();
         return;
     }
 
@@ -286,8 +293,8 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
     }
 
     QTextCursor tc = this->textCursor();
-    tc.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor,
-                    prefixSize);
+    int completionStart = tc.position() - prefixSize;
+    tc.setPosition(completionStart, QTextCursor::KeepAnchor);
     tc.insertText(completion);
     this->setTextCursor(tc);
     this->updateGeometry();
@@ -335,6 +342,13 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     }
 
     insertPlainText(source->text());
+}
+
+void ResizingTextEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    QObjectPtr<QMenu> menu{this->createStandardContextMenu(event->pos())};
+    this->contextMenuRequested.invoke(menu.get(), event->pos());
+    menu->exec(event->globalPos());
 }
 
 }  // namespace chatterino

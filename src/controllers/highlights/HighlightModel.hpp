@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
@@ -36,6 +40,8 @@ public:
         ThreadMessageRow = 6,
         AutomodRow = 7,
         WatchStreakRow = 8,
+        AnnouncementRow = 9,
+        ColoredAnnouncementRow = 10,
     };
 
     enum UserHighlightRowIndexes {

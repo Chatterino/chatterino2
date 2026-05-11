@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 
 #include "Application.hpp"
@@ -14,7 +18,7 @@ RawSubscriptionHandle::RawSubscriptionHandle(SubscriptionRequest request_)
 RawSubscriptionHandle::~RawSubscriptionHandle()
 {
     auto *app = tryGetApp();
-    if (app == nullptr)
+    if (app == nullptr || isAppAboutToQuit())
     {
         // We're shutting down, assume the unsubscription has been taken care of
         return;

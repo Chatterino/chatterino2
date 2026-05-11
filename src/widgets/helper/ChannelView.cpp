@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/ChannelView.hpp"
 
 #include "Application.hpp"
@@ -62,6 +66,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QStringBuilder>
+#include <QUrl>
 #include <QVariantAnimation>
 
 #include <algorithm>
@@ -620,11 +625,6 @@ void ChannelView::scaleChangedEvent(float scale)
     if (this->goToBottom_)
     {
         auto factor = this->scale();
-#ifdef Q_OS_MACOS
-        factor = scale * 80.F /
-                 std::max<float>(
-                     0.01, this->logicalDpiX() * this->devicePixelRatioF());
-#endif
         this->goToBottom_->setFont(
             getApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
     }
@@ -1428,6 +1428,13 @@ MessageElementFlags ChannelView::getFlags() const
         }
     }
 
+    if (getSettings()->hideMessageTimestampsWhenLive &&
+        this->underlyingChannel_ != nullptr &&
+        this->underlyingChannel_->isLive())
+    {
+        flags.unset(MessageElementFlag::Timestamp);
+    }
+
     if (this->sourceChannel_ == getApp()->getTwitch()->getMentionsChannel() ||
         this->sourceChannel_ == getApp()->getTwitch()->getAutomodChannel())
     {
@@ -1864,11 +1871,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     }
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void ChannelView::enterEvent(QEnterEvent * /*event*/)
-#else
-void ChannelView::enterEvent(QEvent * /*event*/)
-#endif
 {
 }
 
@@ -2702,6 +2705,39 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         {
             menu->addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
+            });
+        }
+    }
+
+    // Add search action when text is selected and search feature is enabled
+    if (!this->selection_.isEmpty() && getSettings()->searchEnabled.getValue())
+    {
+        QString searchURL = getSettings()->searchEngineUrl.getValue();
+        QString searchName = getSettings()->searchEngineName.getValue();
+
+        if (!searchURL.isEmpty())
+        {
+            QString actionText =
+                searchName.isEmpty() ? "&Search" : "&Search with " + searchName;
+
+            if (getSettings()->searchIncognito && supportsIncognitoLinks())
+            {
+                actionText += " in private mode";
+            }
+
+            menu->addAction(actionText, [this, searchURL] {
+                QString query = this->getSelectedText().trimmed();
+                QString encodedQuery = QUrl::toPercentEncoding(query);
+                QString url = searchURL + encodedQuery;
+
+                if (getSettings()->searchIncognito && supportsIncognitoLinks())
+                {
+                    openLinkIncognito(url);
+                }
+                else
+                {
+                    QDesktopServices::openUrl(QUrl(url));
+                }
             });
         }
     }

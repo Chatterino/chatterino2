@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/SplitInput.hpp"
 
 #include "common/Literals.hpp"
@@ -28,7 +32,7 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : windowManager(this->args, this->paths_, this->settings, this->theme,
+        : windowManager(this->args_, this->paths_, this->settings, this->theme,
                         this->fonts)
         , commands(this->paths_)
     {

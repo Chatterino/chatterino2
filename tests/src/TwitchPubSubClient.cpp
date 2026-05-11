@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "mocks/BaseApplication.hpp"
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"
@@ -80,7 +84,8 @@ class FTest : public PubSub
 {
 public:
     explicit FTest(const char *path, std::chrono::seconds pingInterval)
-        : PubSub(QString("wss://127.0.0.1:9050%1").arg(path), pingInterval)
+        : PubSub(QString("wss://%1%2").arg(PUBSUB_WSS_ADDR).arg(path),
+                 pingInterval)
     {
     }
 };

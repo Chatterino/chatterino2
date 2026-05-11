@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
@@ -28,12 +32,6 @@ TldSet &tlds()
             qCWarning(chatterinoApp) << "Resources not available";
         }
         QTextStream stream(&file);
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        // Default encoding of QTextStream is already UTF-8, at least in Qt6
-#else
-        stream.setCodec("UTF-8");
-#endif
 
         TldSet set;
 
@@ -170,7 +168,7 @@ Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
 
 namespace chatterino::linkparser {
 
-std::optional<Parsed> parse(const QString &source) noexcept
+std::optional<Parsed> parse(QStringView source) noexcept
 {
     using SizeType = QString::size_type;
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
@@ -21,7 +25,7 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : windowManager(this->args, this->paths_, this->settings, this->theme,
+        : windowManager(this->args_, this->paths_, this->settings, this->theme,
                         this->fonts)
     {
     }

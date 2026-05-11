@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QMap>
@@ -21,7 +25,6 @@ enum class Type {
     List,
     StringList,         // List of only strings
     MatchingSpecifier,  // 2-element list in {RegularExpression, Int} form
-    Map
 };
 
 using ContextMap = QMap<QString, QVariant>;
@@ -39,9 +42,6 @@ struct TypeClass {
     bool operator==(Type t) const;
     bool operator==(const TypeClass &t) const;
     bool operator==(const IllTyped &t) const;
-    bool operator!=(Type t) const;
-    bool operator!=(const TypeClass &t) const;
-    bool operator!=(const IllTyped &t) const;
 };
 
 struct IllTyped {
@@ -74,30 +74,18 @@ bool isList(const PossibleType &possibleType);
 
 inline bool variantIs(const QVariant &a, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     return a.typeId() == type;
-#else
-    return a.type() == type;
-#endif
 }
 
 inline bool variantIsNot(const QVariant &a, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     return a.typeId() != type;
-#else
-    return a.type() != type;
-#endif
 }
 
 inline bool convertVariantTypes(QVariant &a, QVariant &b, int type)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QMetaType ty(type);
     return a.convert(ty) && b.convert(ty);
-#else
-    return a.convert(type) && b.convert(type);
-#endif
 }
 
 inline bool variantTypesMatch(QVariant &a, QVariant &b, int type)

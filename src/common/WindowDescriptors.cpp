@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/WindowDescriptors.hpp"
 
 #include "common/QLogging.hpp"
@@ -84,7 +88,7 @@ const QList<QUuid> loadFilters(QJsonValue val)
     {
         const auto array = val.toArray();
         filterIds.reserve(array.size());
-        for (const auto &id : array)
+        for (const auto id : array)
         {
             filterIds.append(QUuid::fromString(id.toString()));
         }
@@ -111,6 +115,12 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
         descriptor.channelName_ = data.value("name").toString();
     }
     descriptor.filters_ = loadFilters(root.value("filters"));
+
+    auto spellOverride = root["checkSpelling"];
+    if (spellOverride.isBool())
+    {
+        descriptor.spellCheckOverride = spellOverride.toBool();
+    }
 }
 
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
@@ -156,7 +166,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     bool hasSetAMainWindow = false;
 
     // "deserialize"
-    for (const QJsonValue &windowVal : loadWindowArray(path))
+    for (const auto windowVal : loadWindowArray(path))
     {
         QJsonObject windowObj = windowVal.toObject();
 

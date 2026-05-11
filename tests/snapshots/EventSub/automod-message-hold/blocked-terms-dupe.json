@@ -1,0 +1,296 @@
+{
+    "input": {
+        "automod": null,
+        "blocked_term": {
+            "terms_found": [
+                {
+                    "boundary": {
+                        "end_pos": 11,
+                        "start_pos": 4
+                    },
+                    "owner_broadcaster_user_id": "117166826",
+                    "owner_broadcaster_user_login": "testaccount_420",
+                    "owner_broadcaster_user_name": "테스트계정420",
+                    "term_id": "e77e672e-a5c3-4d0a-89a3-ee2d940fd9c6"
+                },
+                {
+                    "boundary": {
+                        "end_pos": 24,
+                        "start_pos": 17
+                    },
+                    "owner_broadcaster_user_id": "117166826",
+                    "owner_broadcaster_user_login": "testaccount_420",
+                    "owner_broadcaster_user_name": "테스트계정420",
+                    "term_id": "e77e672e-a5c3-4d0a-89a3-ee2d940fd9c6"
+                }
+            ]
+        },
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "held_at": "2026-04-04T12:08:51.413482599Z",
+        "message": {
+            "fragments": [
+                {
+                    "cheermote": null,
+                    "emote": null,
+                    "text": "foo ",
+                    "type": "text"
+                },
+                {
+                    "cheermote": null,
+                    "emote": {
+                        "emote_set_id": "0",
+                        "id": "84608"
+                    },
+                    "text": "cmonBruh",
+                    "type": "emote"
+                },
+                {
+                    "cheermote": null,
+                    "emote": null,
+                    "text": " bar",
+                    "type": "text"
+                }
+            ],
+            "text": "foo cmonBruh bar"
+        },
+        "message_id": "af40eeff-3b0d-4099-81ad-bca76c9bc214",
+        "reason": "blocked_term",
+        "user_id": "11148817",
+        "user_login": "pajlada",
+        "user_name": "pajlada"
+    },
+    "output": [
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "emote": {
+                        "homePage": "https://dashboard.twitch.tv/settings/moderation/automod",
+                        "images": {
+                            "1x": ""
+                        },
+                        "name": "",
+                        "tooltip": "AutoMod"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "AutoMod",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff0000ff",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "AutoMod:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Held",
+                        "a",
+                        "message",
+                        "for",
+                        "reason:",
+                        "matches",
+                        "1",
+                        "blocked",
+                        "term",
+                        "\"cmonBruh\".",
+                        "Allow",
+                        "will",
+                        "post",
+                        "it",
+                        "in",
+                        "chat.",
+                        ""
+                    ]
+                },
+                {
+                    "color": "#ff00ff00",
+                    "flags": "Text",
+                    "link": {
+                        "type": "AutoModAllow",
+                        "value": "af40eeff-3b0d-4099-81ad-bca76c9bc214"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Allow"
+                    ]
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Text",
+                    "link": {
+                        "type": "AutoModDeny",
+                        "value": "af40eeff-3b0d-4099-81ad-bca76c9bc214"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "",
+                        "Deny"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
+            "frozen": true,
+            "id": "automod_af40eeff-3b0d-4099-81ad-bca76c9bc214",
+            "localizedName": "",
+            "loginName": "automod",
+            "messageText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny",
+            "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        },
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "12:31"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "12:31:47",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "Text",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "Text",
+                    "userLoginName": "pajlada",
+                    "words": [
+                        "pajlada:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "foo",
+                        "cmonBruh",
+                        "bar"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "frozen": true,
+            "id": "",
+            "localizedName": "",
+            "loginName": "pajlada",
+            "messageText": "pajlada: foo cmonBruh bar",
+            "searchText": "pajlada: foo cmonBruh bar",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

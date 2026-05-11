@@ -36,6 +36,10 @@ c2.EventType = {
 ---@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
 ---@field is_first_word boolean True if this is the first word in the input
 
+
+
+---@alias QSize [integer, integer] A pair of [width, height]
+---@alias QSizeF [number, number] A pair of [width, height]
 -- Begin src/common/Channel.hpp
 
 ---@enum c2.ChannelType
@@ -151,6 +155,57 @@ function c2.Channel:add_system_message(message) end
 ---@param override_flags? c2.MessageFlag|nil Flags to override the message's flags (some splits might filter for this)
 function c2.Channel:add_message(message, context, override_flags) end
 
+--- Get a list of messages in this channel (starting from the most recent messages).
+--- The snapshot is returned as a usertype that wraps a C++ object.
+---
+---@param n_items number Number of messages to retrieve. This is an upper bound, the actual number of messages returned might be lower.
+---@return c2.Message[]
+function c2.Channel:message_snapshot(n_items) end
+
+--- Get the most recent message. If this channel doesn't have any message, this returns `nil`.
+---
+---@return c2.Message?
+function c2.Channel:last_message() end
+
+--- Replace a specific message with a different one.
+---
+---@param message c2.Message The message to replace.
+---@param replacement c2.Message The replacement.
+function c2.Channel:replace_message(message, replacement) end
+
+--- Replace a specific message with a different one.
+---
+---@param message c2.Message The message to replace.
+---@param replacement c2.Message The replacement.
+---@param hint number A one-based index (from the start) where the message is probably located. This is checked first. Otherwise the behavior is identical to the overload without this parameter.
+function c2.Channel:replace_message(message, replacement, hint) end
+
+--- Replace a message at an index with a different one.
+---
+---@param index number A one-based index (from the start) of the message to replace.
+---@param replacement c2.Message The replacement.
+function c2.Channel:replace_message_at(index, replacement) end
+
+--- Remove all messages in this channel.
+---
+function c2.Channel:clear_messages() end
+
+--- Find a message by its ID.
+---
+---@param id string
+---@return c2.Message?
+function c2.Channel:find_message_by_id(id) end
+
+--- Check if the channel has any messages.
+---
+---@return boolean
+function c2.Channel:has_messages() end
+
+--- Count the number of messages in this channel.
+---
+---@return number
+function c2.Channel:count_messages() end
+
 --- Returns true for twitch channels.
 --- Compares the channel Type. Note that enum values aren't guaranteed, just
 --- that they are equal to the exposed enum.
@@ -193,6 +248,39 @@ function c2.Channel:is_vip() end
 ---@return string
 function c2.Channel:__tostring() end
 
+--- Callback when the channel display name changes.
+---
+---@param cb fun()
+---@return c2.ConnectionHandle hdl
+function c2.Channel:on_display_name_changed(cb) end
+
+--- Callback when the messages in this channel have been cleared.
+--- This is called synchronously. It's also called when plugins clear messages
+--- (`Channel:clear_messages`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
+---
+---@param cb fun()
+---@return c2.ConnectionHandle hdl
+function c2.Channel:on_messages_cleared(cb) end
+
+--- Callback when a message is replaced.
+--- This is called synchronously. It's also called when plugins replace messages
+--- (`Channel:replace_message`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
+---
+---@param cb fun(idx: number, old: c2.Message, replacement: c2.Message) `idx` is a one-based index (from the start)
+---@return c2.ConnectionHandle hdl
+function c2.Channel:on_message_replaced(cb) end
+
+--- Callback when a message is added.
+--- This is called synchronously. It's also called when plugins add messages
+--- (`Channel:add_message`) where this can lead to infinite recursion.
+--- See also: `ConnectionHandle:block`.
+---
+---@param cb fun(msg: c2.Message, override_flags?: c2.MessageFlag)
+---@return c2.ConnectionHandle hdl
+function c2.Channel:on_message_appended(cb) end
+
 --- Finds a channel by name.
 --- Misc channels are marked as Twitch:
 --- - /whispers
@@ -212,6 +300,37 @@ function c2.Channel.by_name(name) end
 function c2.Channel.by_twitch_id(id) end
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
+
+-- Begin src/controllers/plugins/api/ConnectionHandle.hpp
+
+
+
+---@class c2.ConnectionHandle
+---This type represents a handle to a registration of a callback for an event handler.
+---Conceptually, the event has a _connection_ to the callback/handler.
+---This handle can be used to modify that connection.
+---It does not automatically disconnect the connection when it's destroyed (in `__gc`) -
+---`disconnect()` has to be called manually.
+c2.ConnectionHandle = {}
+
+---Disconnect the signal
+function c2.ConnectionHandle:disconnect() end
+
+---Block events on this connection
+function c2.ConnectionHandle:block() end
+
+---Unblock events on this connection
+function c2.ConnectionHandle:unblock() end
+
+---Is this connection currently blocked?
+---@return boolean is_blocked
+function c2.ConnectionHandle:is_blocked() end
+
+---Is this connection still connected?
+---@return boolean is_connected
+function c2.ConnectionHandle:is_connected() end
+
+-- End src/controllers/plugins/api/ConnectionHandle.hpp
 
 -- Begin src/controllers/plugins/api/HTTPResponse.hpp
 
@@ -295,6 +414,53 @@ function c2.HTTPRequest:__tostring() end
 function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
+
+-- Begin src/controllers/plugins/api/Images.hpp
+
+
+
+---@class c2.Image
+---@field url string The url of this image.
+---@field is_loaded boolean Is this image currently loaded in RAM?
+---@field is_empty boolean Is this image empty?
+---@field width integer The scaled width of this image in pixels.
+---@field height integer The scaled height of this image in pixels.
+---@field scale number The scale factor applied to the image.
+---@field size QSizeF The scaled size of this image in pixels.
+---@field animated boolean Is this image animated? Note that this requires the image to be loaded.
+c2.Image = {}
+
+---Create an image from a URL. Images are cached based on the URL.
+---The other arguments are only used if the image is first created.
+---
+---Creating an image requires the network permission.
+---@param url string The URL to create the image with.
+---@param scale? number The scale this image should have (e.g. `0.5`, `0.25`). Defaults to 1.
+---@param expected_size? QSize The expected unscaled size of the image. This is only used as a hint when the image is not yet loaded to avoid layout shifts.
+---@return c2.Image
+function c2.Image.from_url(url, scale, expected_size) end
+
+---Get the empty image
+---@return c2.Image
+function c2.Image.empty() end
+
+---A set of images. Each image should depict the same content at different sizes.
+---@class c2.ImageSet
+---@field image1 c2.Image The base image (1x).
+---@field image2 c2.Image The first scaled image (often 2x, `scale=0.5`)
+---@field image3 c2.Image The second scaled image (often 3x or 4x, `scale=0.25`)
+c2.ImageSet = {}
+
+---Create a new image set.
+---All arguments accept a `c2.Image` or a `string` (URL).
+---
+---Requires the network permission.
+---@param image1? c2.Image|string
+---@param image2? c2.Image|string
+---@param image3? c2.Image|string
+---@return c2.ImageSet
+function c2.ImageSet.new(image1, image2, image3) end
+-- End src/controllers/plugins/api/Images.hpp
 
 -- Begin src/controllers/plugins/api/Message.hpp
 
@@ -401,14 +567,42 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@class c2.LayeredEmoteElement : c2.MessageElementBase
 ---@field type "layered-emote"
 
+---An element showing a single image.
 ---@class c2.ImageElement : c2.MessageElementBase
 ---@field type "image"
+---@field image c2.Image The image of this element.
 
+---A table to initialize a new image element
+---@class ImageElementInit : MessageElementInitBase
+---@field type "image"
+---@field image c2.Image The image to show.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+
+---An element showing an image with a circular background color.
 ---@class c2.CircularImageElement : c2.MessageElementBase
 ---@field type "circular-image"
+---@field image c2.Image The image of this element.
+---@field padding integer The padding around the image.
+---@field background string The background color.
 
+---A table to initialize a new image element
+---@class CircularImageElementInit : MessageElementInitBase
+---@field type "circular-image"
+---@field image c2.Image The image to show.
+---@field padding integer The padding around the image.
+---@field background string The color of the background.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
+
+---An element that automatically picks the quality of the image based on the UI scale.
 ---@class c2.ScalingImageElement : c2.MessageElementBase
 ---@field type "scaling-image"
+---@field images c2.ImageSet The available images.
+
+---A table to initialize a new image element
+---@class ScalingImageElementInit : MessageElementInitBase
+---@field type "scaling-image"
+---@field images c2.ImageSet The images to show.
+---@field flags c2.MessageElementFlag Message element flags (see `c2.MessageElementFlags`). These should be non-zero.
 
 ---@class c2.BadgeElement : c2.MessageElementBase
 ---@field type "badge"
@@ -423,7 +617,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field type "ffz-badge"
 
 ---@alias MessageElement c2.TextElement|c2.SingleLineTextElement|c2.MentionElement|c2.TimestampElement|c2.TwitchModerationElement|c2.LinebreakElement|c2.ReplyCurveElement|c2.LinkElement|c2.EmoteElement|c2.LayeredEmoteElement|c2.ImageElement|c2.CircularImageElement|c2.ScalingImageElement|c2.BadgeElement|c2.ModBadgeElement|c2.VipBadgeElement|c2.FfzBadgeElement
----@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit
+---@alias MessageElementInit TextElementInit|SingleLineTextElementInit|MentionElementInit|TimestampElementInit|TwitchModerationElementInit|LinebreakElementInit|ReplyCurveElementInit|ImageElementInit|CircularImageElementInit|ScalingImageElementInit
 
 ---A chat message
 ---@class c2.Message
@@ -449,9 +643,10 @@ c2.Message = {}
 function c2.Message:elements() end
 
 --- Add an element to this message.
+--- If given a MessageElement, it will be cloned before being added.
 ---
----@param init MessageElementInit The element to add
-function c2.Message:append_element(init) end
+---@param elem (MessageElement|MessageElementInit) The element to add
+function c2.Message:append_element(elem) end
 
 ---A table to initialize a new message
 ---@class MessageInit
@@ -468,7 +663,7 @@ function c2.Message:append_element(init) end
 ---@field username_color? string The color of the username
 ---@field server_received_time? number The time the server received the message (in milliseconds since epoch)
 ---@field highlight_color? string|nil The color of the highlight (if any)
----@field elements? MessageElementInit[] The elements of the message
+---@field elements? (MessageElementInit|MessageElement)[] The elements of the message
 
 ---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
 
@@ -605,6 +800,7 @@ c2.MessageFlag = {
     ModerationAction = 0,
     InvalidReplyTarget = 0,
     WatchStreak = 0,
+    Announcement = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
@@ -654,6 +850,90 @@ function c2.WebSocket:send_text(data) end
 function c2.WebSocket:send_binary(data) end
 
 -- End src/controllers/plugins/api/WebSocket.hpp
+
+-- Begin src/controllers/plugins/api/WindowManager.hpp
+
+-- Begin src/widgets/splits/SplitContainer.hpp
+
+---@enum c2.SplitContainerNodeType
+c2.SplitContainerNodeType = {
+    EmptyRoot = {}, ---@type c2.SplitContainerNodeType.EmptyRoot
+    Split = {}, ---@type c2.SplitContainerNodeType.Split
+    VerticalContainer = {}, ---@type c2.SplitContainerNodeType.VerticalContainer
+    HorizontalContainer = {}, ---@type c2.SplitContainerNodeType.HorizontalContainer
+}
+
+-- End src/widgets/splits/SplitContainer.hpp
+
+-- Begin src/widgets/Window.hpp
+
+---@enum c2.WindowType
+c2.WindowType = {
+    Main = {}, ---@type c2.WindowType.Main
+    Popup = {}, ---@type c2.WindowType.Popup
+    Attached = {}, ---@type c2.WindowType.Attached
+}
+
+-- End src/widgets/Window.hpp
+
+
+
+---@class c2.Split
+---@field channel c2.Channel The channel open in this split (might be empty)
+c2.Split = {}
+
+---@class c2.SplitContainerNode A node in a split container
+---@field type c2.SplitContainerNodeType The type of this node
+---@field split c2.Split|nil The split contained in this code (if this is a split node)
+---@field parent c2.SplitContainerNode|nil The parent node
+---@field horizontal_flex number The amount of horizontal space this split takes
+---@field vertical_flex number The amount of vertical space this split takes
+c2.SplitContainerNode = {}
+
+---Get all children of this node.
+---@return c2.SplitContainerNode[] children
+function c2.SplitContainerNode:children() end
+
+---Is this handle still valid?
+---@return boolean
+function c2.SplitContainerNode:is_valid() end
+
+---@class c2.SplitContainer A container with potentially multiple splits
+---@field selected_split c2.Split The currently selected split.
+---@field base_node c2.SplitContainerNode The top level node.
+c2.SplitContainer = {}
+
+---Get all splits contained in this container
+---@return c2.Split[] splits
+function c2.SplitContainer:splits() end
+
+---@class c2.SplitNotebook
+---@field selected_page c2.SplitContainer|nil The currently selected page.
+---@field page_count integer The number of pages/tabs.
+c2.SplitNotebook = {}
+
+---Get the notebook page at a specific index.
+---@param i integer The zero based index of the page.
+---@return c2.SplitContainer|nil page The page contained at the specified index (zero based).
+function c2.SplitNotebook:page_at(i) end
+
+---@class c2.Window
+---@field notebook c2.SplitNotebook The notebook of this window.
+---@field type c2.WindowType The type of this window.
+c2.Window = {}
+
+---@class c2.WindowManager
+---@field main_window c2.Window The main window.
+---@field last_selected_window c2.Window The last selected window (or the main window if none were selected last).
+c2.WindowManager = {}
+
+---Get all open windows.
+---@return c2.Window[] windows
+function c2.WindowManager:all() end
+
+---@type c2.WindowManager
+c2.windows = ...
+-- End src/controllers/plugins/api/WindowManager.hpp
 
 -- Begin src/common/network/NetworkCommon.hpp
 

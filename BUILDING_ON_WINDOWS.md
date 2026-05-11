@@ -61,7 +61,6 @@ These dependencies are only required if you are not using a package manager
 <summary>Boost</summary>
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
-
    - Visit the downloads list on [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
    - Select the latest version from the list.
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).

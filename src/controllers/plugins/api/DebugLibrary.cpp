@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/plugins/api/DebugLibrary.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS

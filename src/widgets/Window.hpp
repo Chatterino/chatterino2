@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
@@ -16,6 +20,9 @@ class UpdateDialog;
 class SplitNotebook;
 class Channel;
 
+/**
+ * @exposeenum c2.WindowType
+ */
 enum class WindowType { Main, Popup, Attached };
 
 class Window : public BaseWindow

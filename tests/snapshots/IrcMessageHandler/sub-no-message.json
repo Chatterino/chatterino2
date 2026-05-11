@@ -2,10 +2,6 @@
     "input": "@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\\sSubscription\\s(forsenlol):\\s$9.99\\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\\sjust\\ssubscribed\\swith\\sa\\sTier\\s2\\ssub.\\scspice\\ssubscribed\\sfor\\s12\\smonths\\sin\\sa\\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -116,6 +112,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|Subscription",
             "frozen": false,
             "id": "",
@@ -125,6 +123,10 @@
             "searchText": "cspice just subscribed with a Tier 2 sub. cspice subscribed for 12 months in a row!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

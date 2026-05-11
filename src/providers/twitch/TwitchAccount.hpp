@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -8,6 +12,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
+#include "util/ExponentialBackoff.hpp"
 
 #include <pajlada/signals.hpp>
 #include <QColor>
@@ -60,6 +65,10 @@ public:
     // Attempts to update the users OAuth Token
     // Returns true if the value has changed, otherwise false
     bool setOAuthToken(const QString &newOAuthToken);
+
+    // Attempts to update the users username
+    // Returns true if the value has changed, otherwise false
+    bool setUserName(const QString &newUserName);
 
     bool isAnon() const;
 
@@ -119,6 +128,7 @@ private:
     QStringList userstateEmoteSets_;
 
     ScopedCancellationToken blockToken_;
+    ExponentialBackoff<5> blocksRetryBackoff_{std::chrono::seconds(5)};
     std::unordered_set<TwitchUser> ignores_;
     std::unordered_set<QString> ignoresUserIds_;
     std::unordered_set<QString> ignoresUserLogins_;
@@ -128,6 +138,8 @@ private:
     UniqueAccess<std::shared_ptr<const EmoteMap>> emotes_;
 
     QString seventvUserID_;
+
+    void tryLoadBlocks();
 };
 
 }  // namespace chatterino

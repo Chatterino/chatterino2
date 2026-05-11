@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/TableStyles.hpp"
 
 #include <QAbstractItemView>
@@ -15,11 +19,7 @@ TableRowDragStyle::TableRowDragStyle(const QString &name)
 
 void TableRowDragStyle::applyTo(QTableView *view)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
     auto styleName = view->style()->name();
-#else
-    QString styleName = "fusion";
-#endif
     auto *proxyStyle = new TableRowDragStyle(styleName);
     proxyStyle->setParent(view);
     view->setStyle(proxyStyle);

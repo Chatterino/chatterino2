@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ProviderId.hpp"
@@ -63,6 +67,8 @@ public:
     std::optional<QString> initialLogin;
     bool verbose{};
     bool safeMode{};
+
+    bool useOldScaling = false;
 
 #ifndef NDEBUG
     // twitch event websocket start-server --ssl --port 3012

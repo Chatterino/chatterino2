@@ -120,10 +120,6 @@
     ],
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "testaccount_420",
             "count": 2,
             "displayName": "",
@@ -248,6 +244,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -257,14 +255,14 @@
             "searchText": "nerixyz banned twitchdev in testaccount_420. (2 times) ",
             "serverReceivedTime": "2025-02-22T17:54:05Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "forsen",
             "count": 1,
             "displayName": "",
@@ -396,6 +394,8 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "frozen": true,
             "id": "",
@@ -405,6 +405,10 @@
             "searchText": "nerixyz banned twitchdev in forsen. ",
             "serverReceivedTime": "2025-02-22T17:54:06Z",
             "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

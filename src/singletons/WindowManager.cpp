@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/WindowManager.hpp"
 
 #include "Application.hpp"
@@ -135,6 +139,7 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->updateWordTypeMaskListener.add(settings.showBadgesVanity);
     this->updateWordTypeMaskListener.add(settings.showBadgesChatterino);
     this->updateWordTypeMaskListener.add(settings.showBadgesFfz);
+    this->updateWordTypeMaskListener.add(settings.showBadgesBttv);
     this->updateWordTypeMaskListener.add(settings.showBadgesSevenTV);
     this->updateWordTypeMaskListener.add(settings.enableEmoteImages);
     this->updateWordTypeMaskListener.add(settings.lowercaseDomains);
@@ -151,6 +156,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->forceLayoutChannelViewsListener.add(
         settings.removeSpacesBetweenEmotes);
     this->forceLayoutChannelViewsListener.add(settings.emoteScale);
+    this->forceLayoutChannelViewsListener.add(
+        settings.hideMessageTimestampsWhenLive);
     this->forceLayoutChannelViewsListener.add(settings.timestampFormat);
     this->forceLayoutChannelViewsListener.add(settings.collpseMessagesMinLines);
     this->forceLayoutChannelViewsListener.add(settings.enableRedeemedHighlight);
@@ -165,6 +172,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.streamerModeHideRestrictedUsers);
     this->forceLayoutChannelViewsListener.add(fonts.fontChanged);
 
+    this->layoutChannelViewsListener.add(
+        settings.hideMessageTimestampsWhenLive);
     this->layoutChannelViewsListener.add(settings.timestampFormat);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
@@ -639,6 +648,11 @@ std::set<QString> WindowManager::getVisibleChannelNames() const
     return visible;
 }
 
+std::span<Window *const> WindowManager::windows() const
+{
+    return this->windows_;
+}
+
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
                               QJsonObject &obj)
 {
@@ -681,6 +695,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             WindowManager::encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
+
+            auto spellOverride = node->getSplit()->checkSpellingOverride();
+            if (spellOverride)
+            {
+                obj["checkSpelling"] = *spellOverride;
+            }
         }
         break;
         case SplitNode::Type::HorizontalContainer:

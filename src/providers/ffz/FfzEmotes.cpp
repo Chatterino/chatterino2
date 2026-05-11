@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/ffz/FfzEmotes.hpp"
 
 #include "common/network/NetworkRequest.hpp"
@@ -185,7 +189,7 @@ FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
     {
         const auto badgeID = it.key().toInt();
         const auto &jsonUserIDs = it.value().toArray();
-        for (const auto &jsonUserID : jsonUserIDs)
+        for (const auto jsonUserID : jsonUserIDs)
         {
             // NOTE: The Twitch User IDs come through as ints right now, the code below
             // tries to parse them as strings first since that's how we treat them anyway.

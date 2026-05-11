@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -21,7 +25,8 @@ TEST(BttvLiveUpdates, AllEvents)
 {
     mock::BaseApplication app;
 
-    const QString host("wss://127.0.0.1:9050/liveupdates/bttv/all-events");
+    const QString host("wss://" + PUBSUB_WSS_ADDR +
+                       "/liveupdates/bttv/all-events");
     chatterino::BttvLiveUpdates liveUpdates(host);
 
     std::optional<BttvLiveUpdateEmoteUpdateAddMessage> addMessage;

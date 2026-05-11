@@ -2,12 +2,6 @@
     "input": "@tmi-sent-ts=1726662938032;subscriber=1;id=87af876f-5591-4a63-924f-46f465ecd3c4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;custom-reward-id=CELEBRATION :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :reward 1",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "27"
-            },
-            "badges": [
-                "subscriber"
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "nerixyz",
@@ -242,6 +236,8 @@
                     "url": ""
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "Collapsed|RedeemedChannelPointReward",
             "frozen": false,
             "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
@@ -271,6 +267,12 @@
             "searchText": "nerixyz  nerixyz: reward 1  redeemed On-Screen Celebration 1",
             "serverReceivedTime": "2024-09-18T12:35:38Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "27"
+            },
+            "twitchBadges": [
+                "subscriber"
+            ],
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }

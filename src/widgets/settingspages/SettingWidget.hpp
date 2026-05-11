@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -21,6 +25,7 @@
 
 class QFormLayout;
 class QLayout;
+class QSvgWidget;
 
 namespace chatterino {
 
@@ -131,6 +136,7 @@ private:
 
     QWidget *label = nullptr;
     QWidget *actionWidget = nullptr;
+    QSvgWidget *tooltipIcon;
 
     QVBoxLayout *vLayout;
     QHBoxLayout *hLayout;

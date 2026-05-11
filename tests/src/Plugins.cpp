@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "mocks/Helix.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
@@ -22,6 +26,7 @@
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
 #    include "singletons/Logging.hpp"
+#    include "singletons/WindowManager.hpp"
 #    include "Test.hpp"
 
 #    include <lauxlib.h>
@@ -34,6 +39,7 @@
 
 using namespace chatterino;
 using chatterino::mock::MockChannel;
+using namespace std::chrono_literals;
 
 namespace {
 
@@ -91,6 +97,8 @@ public:
         : mock::BaseApplication(TEST_SETTINGS)
         , plugins(this->paths_)
         , commands(this->paths_)
+        , windows(this->args_, this->paths_, this->settings, this->theme,
+                  this->fonts)
     {
     }
 
@@ -124,6 +132,11 @@ public:
         return &this->accounts;
     }
 
+    WindowManager *getWindows() override
+    {
+        return &this->windows;
+    }
+
     PluginController plugins;
     mock::Logging logging;
     CommandController commands;
@@ -131,6 +144,7 @@ public:
     MockTwitch twitch;
     AccountController accounts;
     mock::Helix helix;
+    WindowManager windows;
 };
 
 QDir luaTestBaseDir(const QString &category)
@@ -472,7 +486,7 @@ TEST_F(PluginTest, testHttp)
             waiter.requestDone();
         };
 
-        (*lua)["DoReq"](HTTPBIN_BASE_URL + c.url, c.data);
+        (*lua)["DoReq"](HTTPBIN_BASE_URL.toStdString().c_str() + c.url, c.data);
         waiter.waitForRequest();
 
         EXPECT_EQ(lua->get<bool>("success"), c.success);
@@ -626,7 +640,7 @@ TEST_F(PluginTest, testTimerRec)
         end
         c2.later(f, 1)
     )lua");
-    waiter.waitForRequest();
+    waiter.waitForRequest(1ms);
 }
 
 TEST_F(PluginTest, tryCallTest)
@@ -735,8 +749,10 @@ TEST_F(PluginTest, testTcpWebSocket)
         open = true;
     });
 
+    lua->set("url", "ws://" + PUBSUB_WS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_text = function(data)
             add(true, data)
         end
@@ -811,8 +827,10 @@ TEST_F(PluginTest, testTlsWebSocket)
         open = true;
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             headers = {
                 ["User-Agent"] = "Lua",
                 ["A-Header"] = "A value",
@@ -888,8 +906,10 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     )lua");
     ASSERT_TRUE(res);
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     const char *shouldThrow = R"lua(
-        return c2.WebSocket.new('wss://127.0.0.1:9050/echo')
+        return c2.WebSocket.new(url)
     )lua";
     EXPECT_ANY_THROW(lua->script(shouldThrow));
 }
@@ -897,12 +917,13 @@ TEST_F(PluginTest, testWebSocketNoPerms)
 TEST_F(PluginTest, testWebSocketApi)
 {
     configure({PluginPermission{{{"type", "Network"}}}});
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
 
     bool ok = lua->script(R"lua(
         local t = function () end
         local b = function () end
         local c = function () end
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             on_text = t,
             on_binary = b,
             on_close = c,
@@ -923,8 +944,10 @@ TEST_F(PluginTest, testWebSocketUnsetFns)
         waiter.requestDone();
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_close = function()
             done()
         end
@@ -1501,6 +1524,56 @@ TEST_F(PluginTest, LuaVersion)
     static_assert(LUA_VERSION_NUM >= 504);
 }
 
+TEST_F(PluginTest, ChannelOnDisplayNameChanged)
+{
+    this->configure();
+
+    bool gotEvent = false;
+    this->lua->set_function("on_test_event", [&] {
+        gotEvent = true;
+    });
+
+    auto chan = std::make_shared<MockChannel>("mock");
+    this->lua->set("chan", lua::api::ChannelRef(chan));
+    sol::protected_function init = this->lua->script(R"lua(
+        hdl = nil
+        return function(chan)
+            hdl = chan:on_display_name_changed(on_test_event)
+        end
+    )lua");
+
+    ASSERT_TRUE(init(lua::api::ChannelRef(chan)).valid());
+
+    ASSERT_TRUE(this->lua->script("assert(hdl ~= nil)").valid());
+
+    // regular delivery
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // blocked connection
+    ASSERT_TRUE(this->lua->script("hdl:block()").valid());
+    ASSERT_TRUE(this->lua->script("assert(hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_FALSE(gotEvent);
+
+    // unblocked connection
+    ASSERT_TRUE(this->lua->script("hdl:unblock()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_blocked())").valid());
+
+    gotEvent = false;
+    chan->displayNameChanged.invoke();
+    ASSERT_TRUE(gotEvent);
+
+    // disconnect
+    ASSERT_TRUE(this->lua->script("hdl:disconnect()").valid());
+    ASSERT_TRUE(this->lua->script("assert(not hdl:is_connected())").valid());
+
+    gotEvent = false;
+    ASSERT_FALSE(gotEvent);
+}
+
 class PluginMessageConstructionTest
     : public PluginTest,
       public ::testing::WithParamInterface<QString>
@@ -1573,6 +1646,57 @@ TEST_P(PluginMessageTest, Run)
 
 INSTANTIATE_TEST_SUITE_P(PluginMessage, PluginMessageTest,
                          testing::ValuesIn(discoverLuaTests("message")));
+
+class PluginChannelTest : public PluginTest,
+                          public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginChannelTest, Run)
+{
+    this->configure();
+    runLuaTest("channel", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
+                         testing::ValuesIn(discoverLuaTests("channel")));
+
+class PluginImageTest : public PluginTest,
+                        public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginImageTest, Run)
+{
+    this->configure({PluginPermission({{"type", "network"}})});
+    runLuaTest("images", GetParam(), *this->lua);
+}
+
+TEST_F(PluginImageTest, NoPerms)
+{
+    this->configure();
+    auto res = this->lua->safe_script(R"lua(
+        local ok, err = pcall(c2.Image.from_url, "https://foo.bar")
+        assert(not ok and err == "Missing network permission to create images")
+        ok, err = pcall(c2.ImageSet.new)
+        assert(not ok and err == "Missing network permission to create images")
+        ok, err = pcall(c2.ImageSet.new, c2.Image.empty(), "https://foo.bar")
+        assert(not ok and err == "Missing network permission to create images")
+        -- should still be able to query images
+        local img = c2.Image.empty()
+        assert(img.url == "")
+        assert(not img.animated)
+        assert(not img.is_loaded)
+        assert(img.is_empty)
+        assert(img.width == 0)
+        assert(img.height == 0)
+        assert(img.scale == 1)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
+    )lua");
+    ASSERT_TRUE(res.valid());
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginImage, PluginImageTest,
+                         testing::ValuesIn(discoverLuaTests("images")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
