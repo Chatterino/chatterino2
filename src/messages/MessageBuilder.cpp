@@ -53,7 +53,6 @@
 #include "util/Variant.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/variant.hpp>
 #include <QApplication>
 #include <QColor>
 #include <QDateTime>
