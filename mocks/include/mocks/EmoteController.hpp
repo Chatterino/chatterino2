@@ -13,6 +13,12 @@ public:
         this->getEmojis()->load();
     }
 
+    void addProvider(EmoteProviderPtr provider)
+    {
+        this->providers_.emplace_back(std::move(provider));
+        this->sort();
+    }
+
     void initialize() override
     {
     }

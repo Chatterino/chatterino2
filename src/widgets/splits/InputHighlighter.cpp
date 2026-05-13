@@ -9,6 +9,7 @@
 #include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Emote.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -29,8 +30,8 @@ bool isEmote(TwitchChannel *twitch, const QString &word)
     EmoteName name{word};
     if (twitch)
     {
-        if (twitch->bttvEmote(name) || twitch->ffzEmote(name) ||
-            twitch->seventvEmote(name))
+        if (twitch->channelEmotes().resolve(name) || twitch->bttvEmote(name) ||
+            twitch->ffzEmote(name) || twitch->seventvEmote(name))
         {
             return true;
         }
@@ -40,7 +41,8 @@ bool isEmote(TwitchChannel *twitch, const QString &word)
             return true;
         }
     }
-    if (getApp()->getBttvEmotes()->emote(name) ||
+    if (getApp()->getEmotes()->resolveGlobal(name) ||
+        getApp()->getBttvEmotes()->emote(name) ||
         getApp()->getFfzEmotes()->emote(name) ||
         getApp()->getSeventvEmotes()->globalEmote(name))
     {
