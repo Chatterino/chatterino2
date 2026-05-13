@@ -394,7 +394,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDropdown<std::underlying_type_t<MessageOverflow>>(
         "Message overflow", {"Highlight", "Prevent", "Allow"},
         s.messageOverflow,
-        [](auto index) {
+        [](auto index) -> std::variant<int, QString> {
             return index;
         },
         [](auto args) {
