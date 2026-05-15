@@ -233,7 +233,7 @@ void OverlayWindow::wheelEvent(QWheelEvent *event)
         return;
     }
 
-    if (event->modifiers() & Qt::ControlModifier)
+    if (event->modifiers().testFlag(Qt::ControlModifier))
     {
         if (event->angleDelta().y() > 0)
         {
