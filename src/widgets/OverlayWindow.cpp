@@ -541,7 +541,7 @@ void OverlayWindow::addShortcuts()
              const auto &direction = arguments.at(0);
              if (direction == "reset")
              {
-                 getSettings()->uiScale.setValue(1);
+                 getSettings()->setClampedOverlayScale(1);
                  return "";
              }
 
