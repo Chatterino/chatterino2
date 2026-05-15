@@ -225,6 +225,29 @@ void OverlayWindow::applyTheme()
     this->update();
 }
 
+void OverlayWindow::wheelEvent(QWheelEvent *event)
+{
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
+    {
+        return;
+    }
+
+    if (event->modifiers() & Qt::ControlModifier)
+    {
+        if (event->angleDelta().y() > 0)
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() + 0.1F);
+        }
+        else
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() - 0.1F);
+        }
+    }
+}
+
 float OverlayWindow::desiredScale() const
 {
     return getSettings()->getClampedUiScale() *
