@@ -69,7 +69,10 @@ const QList<QUuid> FilterSet::filterIds() const
 void FilterSet::reloadFilters()
 {
     auto filters = getSettings()->filterRecords.readOnly();
-    for (const auto &key : this->filters_.keys())
+    QSet<QUuid> currentKeys = this->filters_.keys().toSet();
+
+    // Step 1: Update existing filters
+    for (const auto &key : currentKeys)
     {
         bool found = false;
         for (const auto &f : *filters)
@@ -78,11 +81,21 @@ void FilterSet::reloadFilters()
             {
                 found = true;
                 this->filters_.insert(key, f);
+                break;
             }
         }
         if (!found)
         {
             this->filters_.remove(key);
+        }
+    }
+
+    // Step 2: Fix: Add new filters (missing in original code)
+    for (const auto &f : *filters)
+    {
+        if (!this->filters_.contains(f->getId()))
+        {
+            this->filters_.insert(f->getId(), f);
         }
     }
 }
