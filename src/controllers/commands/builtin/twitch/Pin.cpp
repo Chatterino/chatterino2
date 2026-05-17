@@ -269,8 +269,8 @@ QString pin(const CommandContext &ctx)
     {
         ctx.channel->addSystemMessage(
             u"Pin a chat message or show the currently pinned one."
-            "Usage: /pin --duration <seconds|until-end|none> [message]... OR "
-            "/pin --id <message-id> --duration <seconds|until-end|none>"_s);
+            "Usage: /pin [--duration <seconds|until-end|none>] [message]... OR "
+            "/pin --id <message-id> [--duration <seconds|until-end|none>]"_s);
         return {};
     }
 
