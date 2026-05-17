@@ -2203,13 +2203,9 @@ void TwitchChannel::pinMessageAs(const QString &messageID,
                 return;
             }
 
-            QString text = textHint;
-            if (text.isEmpty())
-            {
-                text = id;
-            }
-            self->addMessage(MessageBuilder::makePinSuccessMessage(text, id),
-                             MessageContext::Original);
+            self->addMessage(
+                MessageBuilder::makePinSuccessMessage(textHint, id),
+                MessageContext::Original);
         },
         [weak = this->weakFromThis(), id = messageID](
             HelixPinMessageError error, auto message) {

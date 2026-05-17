@@ -1559,21 +1559,27 @@ MessagePtrMut MessageBuilder::makePinSuccessMessage(const QString &textOrID,
     builder->flags.set(MessageFlag::System,
                        MessageFlag::DoNotTriggerNotification,
                        MessageFlag::ModerationAction);
-    builder.emplace<TextElement>("Pinned", MessageElementFlag::Text,
-                                 MessageColor::System);
+    QString searchText;
+    builder.emplaceSystemTextAndUpdate("Pinned", searchText);
 
     auto text = textOrID;
+    if (text.isEmpty())
+    {
+        text = id;
+        builder.emplaceSystemTextAndUpdate("message with ID", searchText);
+    }
+
     if (text.length() > 50)
     {
         text = std::move(text).left(50) + "…";
     }
+    searchText += text;
 
     builder
         .emplace<TextElement>(text, MessageElementFlag::Text,
                               MessageColor::Text)
         ->setLink({Link::JumpToMessage, id});
 
-    QStringBuilder searchText = u"Pinned "_s % text;
     builder->messageText = searchText;
     builder->searchText = searchText;
     return builder.release();
