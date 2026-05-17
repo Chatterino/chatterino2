@@ -2190,18 +2190,25 @@ void TwitchChannel::deleteMessagesAs(const QString &messageID,
 
 void TwitchChannel::pinMessageAs(const QString &messageID,
                                  std::optional<std::chrono::seconds> duration,
-                                 const TwitchAccount &moderator)
+                                 const TwitchAccount &moderator,
+                                 QString textHint)
 {
     getHelix()->pinChatMessage(
         this->roomId(), moderator.getUserId(), messageID, duration,
-        [weak = this->weakFromThis(), id = messageID]() {
+        [weak = this->weakFromThis(), id = messageID,
+         textHint = std::move(textHint)]() {
             auto self = weak.lock();
             if (!self)
             {
                 return;
             }
 
-            self->addMessage(MessageBuilder::makePinSuccessMessage(id, id),
+            QString text = textHint;
+            if (text.isEmpty())
+            {
+                text = id;
+            }
+            self->addMessage(MessageBuilder::makePinSuccessMessage(text, id),
                              MessageContext::Original);
         },
         [weak = this->weakFromThis(), id = messageID](

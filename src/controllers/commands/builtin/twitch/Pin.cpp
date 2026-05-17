@@ -13,7 +13,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Expected.hpp"
-#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 
 #include <controllers/commands/builtin/twitch/Pin.hpp>
@@ -25,35 +24,29 @@ namespace {
 using namespace Qt::Literals;
 using namespace chatterino;
 
-struct SendPinnedAction {
+struct Action {
     QString text;
-
-    void run(const std::shared_ptr<TwitchChannel> &chan,
-             const TwitchAccount &moderator) const;
-};
-
-struct PinAction {
     QString messageID;
     std::optional<std::chrono::seconds> duration;
-
-    void run(const std::shared_ptr<TwitchChannel> &chan,
-             const TwitchAccount &moderator) const;
 };
 
-using Action = std::variant<SendPinnedAction, PinAction>;
+// Duration of pin when sending message with "Send Chat Message".
+// See https://dev.twitch.tv/docs/api/reference#send-chat-message.
+constexpr std::chrono::minutes SEND_CHAT_MESSAGE_PIN_DURATION(20);
 
-void SendPinnedAction::run(const std::shared_ptr<TwitchChannel> &chan,
-                           const TwitchAccount &moderator) const
+void sendPinnedMessageDefaultDuration(
+    const std::shared_ptr<TwitchChannel> &chan, const TwitchAccount &moderator,
+    const QString &text)
 {
     getHelix()->sendChatMessage(
         {
             .broadcasterID = chan->roomId(),
             .senderID = moderator.getUserId(),
-            .message = this->text,
+            .message = text,
             .pin = true,
         },
         [weak = std::weak_ptr(chan),
-         origText = this->text](const HelixSentMessage &res) {
+         origText = text](const HelixSentMessage &res) {
             auto chan = weak.lock();
             if (!chan)
             {
@@ -117,10 +110,35 @@ void SendPinnedAction::run(const std::shared_ptr<TwitchChannel> &chan,
         });
 }
 
-void PinAction::run(const std::shared_ptr<TwitchChannel> &chan,
-                    const TwitchAccount &moderator) const
+void sendAndPin(const std::shared_ptr<TwitchChannel> &chan,
+                const std::shared_ptr<TwitchAccount> &moderator,
+                const QString &text,
+                std::optional<std::chrono::seconds> duration)
 {
-    chan->pinMessageAs(this->messageID, this->duration, moderator);
+    getHelix()->sendChatMessage(
+        {
+            .broadcasterID = chan->roomId(),
+            .senderID = moderator->getUserId(),
+            .message = text,
+            .pin = false,  // we'll pin the message later
+        },
+        [weak = chan->weakFromThis(), moderator, duration,
+         text](const auto &result) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+            chan->pinMessageAs(result.id, duration, *moderator, text);
+        },
+        [weak = chan->weakFromThis()](auto /* err */, const auto &message) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+            chan->addSystemMessage("Failed to send message: " + message);
+        });
 }
 
 ExpectedStr<Action> parseAction(const CommandContext &ctx)
@@ -136,9 +154,12 @@ ExpectedStr<Action> parseAction(const CommandContext &ctx)
     parser.parse(QProcess::splitCommand(ctx.words.join(" ")));
 
     std::optional<std::chrono::seconds> duration;
-    if (parser.isSet(durationOption))
+    auto durationText = parser.value(durationOption);
+    bool isExplicitUntilEnd =
+        durationText == u"until-end" || durationText == u"none";
+    if (!durationText.isEmpty() && !isExplicitUntilEnd)
     {
-        const auto dur = parseDurationToSeconds(parser.value(durationOption));
+        const auto dur = parseDurationToSeconds(durationText);
         if (dur <= 0)
         {
             return makeUnexpected(u"Duration must be positive."_s);
@@ -152,31 +173,30 @@ ExpectedStr<Action> parseAction(const CommandContext &ctx)
         id.emplace(parser.value(idOption));
     }
 
-    auto positionals = parser.positionalArguments();
+    auto positionals = parser.positionalArguments().join(' ');
 
     if (id)
     {
-        if (!positionals.empty())
+        if (!positionals.isEmpty())
         {
             return makeUnexpected(
                 u"No positional arguments can be specified when using --id."_s);
         }
 
-        return PinAction{
+        return Action{
             .messageID = *std::move(id),
             .duration = duration,
         };
     }
 
-    if (duration)
+    if (!duration && !isExplicitUntilEnd)
     {
-        return makeUnexpected(
-            u"No duration can be specified when sending and pinning a message. "
-            "Send the message first, and pin it afterward."_s);
+        duration = SEND_CHAT_MESSAGE_PIN_DURATION;
     }
 
-    return SendPinnedAction{
-        .text = positionals.join(' '),
+    return Action{
+        .text = positionals,
+        .duration = duration,
     };
 }
 
@@ -199,61 +219,9 @@ void showCurrentlyPinnedMessage(const std::shared_ptr<TwitchChannel> &chan,
                 return;
             }
 
-            MessageBuilder builder;
-            builder->channelName = chan->getName();
-            builder.emplace<TimestampElement>();
-            builder->flags.set(MessageFlag::System,
-                               MessageFlag::DoNotTriggerNotification);
-
-            QString text = result->pinnedBy.login + ' ';
-            builder.emplace<MentionElement>(
-                result->pinnedBy.displayName, result->pinnedBy.login,
-                MessageColor::System,
-                chan->getUserColor(result->pinnedBy.login));
-            builder.emplaceSystemTextAndUpdate("pinned a message", text);
-
-            auto now = QDateTime::currentDateTimeUtc();
-            builder.appendOrEmplaceSystemTextAndUpdate(
-                formatTime(std::chrono::duration_cast<std::chrono::seconds>(
-                    now - result->startsAt)),
-                text);
-            builder.appendOrEmplaceSystemTextAndUpdate("ago", text);
-            if (result->endsAt)
-            {
-                auto remaining =
-                    std::chrono::duration_cast<std::chrono::seconds>(
-                        *result->endsAt - now);
-                builder.appendOrEmplaceSystemTextAndUpdate(
-                    '(' % formatTime(remaining) % " remaining)", text);
-            }
-            else
-            {
-                builder.appendOrEmplaceSystemTextAndUpdate(
-                    "until the stream ends", text);
-            }
-            builder.appendOrEmplaceSystemTextAndUpdate("from", text);
-            builder
-                .emplace<MentionElement>(
-                    result->sender.displayName, result->sender.login,
-                    MessageColor::System,
-                    chan->getUserColor(result->sender.login))
-                ->setTrailingSpace(false);
-            text += result->sender.login;
-            builder.appendOrEmplaceSystemTextAndUpdate(u":"_s, text);
-
-            auto pinMessageText = result->messageText;
-            if (pinMessageText.length() > 50)
-            {
-                pinMessageText = pinMessageText.left(50) + "…";
-            }
-
-            builder
-                .emplace<TextElement>(pinMessageText, MessageElementFlag::Text,
-                                      MessageColor::Text)
-                ->setLink({Link::JumpToMessage, result->messageID});
-            builder->messageText = pinMessageText;
-            builder->searchText = pinMessageText;
-            chan->addMessage(builder.release(), MessageContext::Original);
+            chan->addMessage(
+                MessageBuilder::makeCurrentPinnedMessage(*chan, *result),
+                MessageContext::Original);
         },
         [weak = std::weak_ptr(chan)](const auto &result) {
             auto chan = weak.lock();
@@ -300,7 +268,9 @@ QString pin(const CommandContext &ctx)
         (ctx.words.at(1) == u"-h" || ctx.words.at(1) == u"--help"))
     {
         ctx.channel->addSystemMessage(
-            u"Pin a chat message or show the currently pinned one. Usage: /pin --duration <seconds> --id <id> [message]..."_s);
+            u"Pin a chat message or show the currently pinned one."
+            "Usage: /pin --duration <seconds|until-end|none> [message]... OR "
+            "/pin --id <message-id> --duration <seconds|until-end|none>"_s);
         return {};
     }
 
@@ -319,12 +289,29 @@ QString pin(const CommandContext &ctx)
         return {};
     }
 
-    std::visit(
-        [&](const auto &action) {
-            action.run(chan, *currentUser);
-        },
-        *action);
+    if (!action->messageID.isEmpty())
+    {
+        chan->pinMessageAs(action->messageID, action->duration, *currentUser);
+        return {};
+    }
 
+    if (action->duration == SEND_CHAT_MESSAGE_PIN_DURATION)
+    {
+        sendPinnedMessageDefaultDuration(chan, *currentUser, action->text);
+        return {};
+    }
+
+    // Make sure we will be able to pin the message. Otherwise we'd send a
+    // message without pinning it. The "Send Chat Message" endpoint (used above)
+    // won't sent the message if the user can't pin.
+    if (!chan->hasModRights())
+    {
+        ctx.channel->addSystemMessage(
+            "You must be a moderator to pin messages.");
+        return {};
+    }
+
+    sendAndPin(chan, currentUser, action->text, action->duration);
     return {};
 }
 

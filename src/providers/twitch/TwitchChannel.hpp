@@ -199,7 +199,7 @@ public:
 
     void pinMessageAs(const QString &messageID,
                       std::optional<std::chrono::seconds> duration,
-                      const TwitchAccount &moderator);
+                      const TwitchAccount &moderator, QString textHint = {});
 
     void unpinMessageAs(const QString &messageID,
                         const TwitchAccount &moderator);
