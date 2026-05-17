@@ -3823,7 +3823,8 @@ void Helix::pinChatMessage(
     };
     if (duration)
     {
-        payload.insert("duration_seconds"_L1, duration->count());
+        payload.insert("duration_seconds"_L1,
+                       static_cast<qint64>(duration->count()));
     }
 
     this->makePut("chat/pins", {})
