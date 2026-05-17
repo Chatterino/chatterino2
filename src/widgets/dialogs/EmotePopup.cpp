@@ -203,6 +203,19 @@ auto makeUnavailableEmoteMessage(const std::vector<QString> &emoteNames)
     return builder.release();
 }
 
+auto makeInfoTextMessage(const QString &text)
+{
+    MessageBuilder builder;
+    builder->flags.set(MessageFlag::Centered);
+    builder.emplace<TextElement>(
+        text,
+        MessageElementFlags{MessageElementFlag::Text,
+                            MessageElementFlag::AlwaysShow},
+        MessageColor::System);
+
+    return builder.release();
+}
+
 void addEmotes(Channel &channel, auto &&emotes, const QString &title)
 {
     channel.addMessage(makeTitleMessage(title), MessageContext::Original);
@@ -739,16 +752,10 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
 
     if (this->favouriteEmotes_.empty() && this->favouriteEmojis_.empty())
     {
-        MessageBuilder builder;
-        builder->flags.set(MessageFlag::Centered);
-        builder.emplace<TextElement>(
+        auto msg = makeInfoTextMessage(
             "No favourites. You can add them by Ctrl+clicking on an Emote or "
-            "marking it as favourite in the context menu",
-            MessageElementFlags{MessageElementFlag::Text,
-                                MessageElementFlag::AlwaysShow},
-            MessageColor::System);
-
-        chan->addMessage(builder.release(), MessageContext::Original);
+            "marking it as favourite in the context menu");
+        chan->addMessage(msg, MessageContext::Original);
 
         return;
     }
@@ -793,16 +800,12 @@ void EmotePopup::updateFavouriteEmotesAndEmojis()
             u"that provides the emotes or we were unable to verify that you "
             u"have access to an emote due to network issues."_s;
 
-        MessageBuilder builder;
-        builder->flags.set(MessageFlag::Centered);
-        builder
-            .emplace<TextElement>(
-                "Currently unavailable favourite emotes",
-                MessageElementFlags{MessageElementFlag::Text,
-                                    MessageElementFlag::AlwaysShow},
-                MessageColor::System)
-            ->setTooltip(explainUnavailability);
-        chan->addMessage(builder.release(), MessageContext::Original);
+        auto msg =
+            makeInfoTextMessage("Currently unavailable favourite emotes");
+        chan->addMessage(msg, MessageContext::Original);
+
+        msg = makeInfoTextMessage(explainUnavailability);
+        chan->addMessage(msg, MessageContext::Original);
 
         chan->addMessage(makeUnavailableEmoteMessage(unavailableEmotes),
                          MessageContext::Original);
