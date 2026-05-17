@@ -171,6 +171,9 @@ public:
     TwitchChannel &operator=(const TwitchChannel &) = delete;
     TwitchChannel &operator=(TwitchChannel &&) = delete;
 
+    std::shared_ptr<TwitchChannel> sharedFromThis();
+    std::weak_ptr<TwitchChannel> weakFromThis();
+
     void initialize();
 
     // Channel methods
@@ -193,6 +196,13 @@ public:
     /// If the ID is empty, all messages will be deleted, effectively clearing
     /// the chat.
     void deleteMessagesAs(const QString &messageID, TwitchAccount *moderator);
+
+    void pinMessageAs(const QString &messageID,
+                      std::optional<std::chrono::seconds> duration,
+                      const TwitchAccount &moderator);
+
+    void unpinMessageAs(const QString &messageID,
+                        const TwitchAccount &moderator);
 
     // Data
     const QString &subscriptionUrl();

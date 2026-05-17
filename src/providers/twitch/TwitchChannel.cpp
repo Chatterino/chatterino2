@@ -251,6 +251,16 @@ TwitchChannel::~TwitchChannel()
     this->destroyed.invoke();
 }
 
+std::shared_ptr<TwitchChannel> TwitchChannel::sharedFromThis()
+{
+    return std::static_pointer_cast<TwitchChannel>(this->shared_from_this());
+}
+
+std::weak_ptr<TwitchChannel> TwitchChannel::weakFromThis()
+{
+    return this->sharedFromThis();
+}
+
 void TwitchChannel::initialize()
 {
     this->refreshChatters();
@@ -2175,6 +2185,117 @@ void TwitchChannel::deleteMessagesAs(const QString &messageID,
             }
 
             self->addSystemMessage(errorMessage);
+        });
+}
+
+void TwitchChannel::pinMessageAs(const QString &messageID,
+                                 std::optional<std::chrono::seconds> duration,
+                                 const TwitchAccount &moderator)
+{
+    getHelix()->pinChatMessage(
+        this->roomId(), moderator.getUserId(), messageID, duration,
+        [weak = this->weakFromThis(), id = messageID]() {
+            auto self = weak.lock();
+            if (!self)
+            {
+                return;
+            }
+
+            self->addMessage(MessageBuilder::makePinSuccessMessage(id, id),
+                             MessageContext::Original);
+        },
+        [weak = this->weakFromThis(), id = messageID](
+            HelixPinMessageError error, auto message) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+
+            if (message.isEmpty())
+            {
+                message = "(empty message)";
+            }
+
+            using Error = HelixPinMessageError;
+
+            auto errorMessage = [&]() -> QString {
+                switch (error)
+                {
+                    case Error::InvalidParameter:
+                        return "Failed to pin message: " + message;
+                    case Error::MissingScope:
+                        return "Missing required scope. Re-login with your "
+                               "account and try again.";
+                    case Error::Forbidden:
+                        return "You are not allowed to pin messages in this "
+                               "channel.";
+                    case Error::NotFound:
+                        return "Failed to find message with id \"" % id % "\".";
+                    case Error::AlreadyPinned:
+                        return "The message is already pinned.";
+
+                    case Error::Forwarded:
+                        return message;
+                    case Error::Unknown:
+                    default:
+                        return "Unknown error: " + message;
+                }
+            }();
+            chan->addSystemMessage(errorMessage);
+        });
+}
+
+void TwitchChannel::unpinMessageAs(const QString &messageID,
+                                   const TwitchAccount &moderator)
+{
+    getHelix()->unpinChatMessage(
+        this->roomId(), moderator.getUserId(), messageID,
+        [weak = this->weakFromThis()] {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+
+            chan->addSystemMessage("Unpinned message.");
+        },
+        [weak = this->weakFromThis(), messageID](HelixUnpinMessageError error,
+                                                 auto message) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+
+            if (message.isEmpty())
+            {
+                message = "(empty message)";
+            }
+
+            using Error = HelixUnpinMessageError;
+
+            auto errorMessage = [&]() -> QString {
+                switch (error)
+                {
+                    case Error::MissingScope:
+                        return "Missing required scope. Re-login with your "
+                               "account and try again.";
+                    case Error::Forbidden:
+                        return "You are not allowed to unpin messages in this "
+                               "channel.";
+                    case Error::NotFound:
+                        return "Failed to find message with id \"" % messageID %
+                               "\".";
+
+                    case Error::Forwarded:
+                        return message;
+                    case Error::Unknown:
+                    default:
+                        return "Unknown error: " + message;
+                }
+            }();
+            chan->addSystemMessage(errorMessage);
         });
 }
 

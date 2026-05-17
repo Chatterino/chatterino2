@@ -257,6 +257,9 @@ public:
                                               const QString &actor,
                                               uint32_t count = 1);
 
+    static MessagePtrMut makePinSuccessMessage(const QString &textOrID,
+                                               const QString &id);
+
 private:
     struct TextState {
         TwitchChannel *twitchChannel = nullptr;

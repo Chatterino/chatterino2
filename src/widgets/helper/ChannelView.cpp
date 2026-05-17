@@ -2756,6 +2756,26 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                 twitchChannel->deleteMessagesAs(
                     id, getApp()->getAccounts()->twitch.getCurrent().get());
             });
+
+        auto *pinAction = moderateMenu->addAction("&Pin");
+        auto *pinMenu = new QMenu(moderateMenu);
+        pinAction->setMenu(pinMenu);
+        auto pinFor = [&](std::optional<std::chrono::seconds> dur) {
+            return [twitchChannel, id = layout->getMessage()->id, dur] {
+                twitchChannel->pinMessageAs(
+                    id, dur, *getApp()->getAccounts()->twitch.getCurrent());
+            };
+        };
+        pinMenu->addAction("&Until stream ends", pinFor(std::nullopt));
+        pinMenu->addAction("&1 minute", pinFor(std::chrono::minutes(1)));
+        pinMenu->addAction("10 minutes", pinFor(std::chrono::minutes(10)));
+        pinMenu->addAction("&30 minutes", pinFor(std::chrono::minutes(30)));
+
+        moderateMenu->addAction(
+            "&Unpin", [twitchChannel, id = layout->getMessage()->id] {
+                twitchChannel->unpinMessageAs(
+                    id, *getApp()->getAccounts()->twitch.getCurrent());
+            });
     }
 
     bool isSearch = this->context_ == Context::Search;

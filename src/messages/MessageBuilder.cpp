@@ -1551,6 +1551,34 @@ MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
     return builder.release();
 }
 
+MessagePtrMut MessageBuilder::makePinSuccessMessage(const QString &textOrID,
+                                                    const QString &id)
+{
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>();
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification,
+                       MessageFlag::ModerationAction);
+    builder.emplace<TextElement>("Pinned", MessageElementFlag::Text,
+                                 MessageColor::System);
+
+    auto text = textOrID;
+    if (text.length() > 50)
+    {
+        text = std::move(text).left(50) + "…";
+    }
+
+    builder
+        .emplace<TextElement>(text, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, id});
+
+    auto searchText = u"Pinned "_s % text;
+    builder->messageText = searchText;
+    builder->searchText = searchText;
+    return builder.release();
+}
+
 std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     /* mutable */ Channel *channel, const Communi::IrcMessage *ircMessage,
     const MessageParseArgs &args, /* mutable */ QString content,
