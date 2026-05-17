@@ -290,15 +290,14 @@ QString pin(const CommandContext &ctx)
         return "";
     }
 
-    std::span<const QString> args = ctx.words;
-    if (args.empty())
+    if (ctx.words.empty())
     {
         assert(false && "should have /pin");
         return {};
     }
-    args = args.subspan(1);
 
-    if (args.size() == 1 && (args[0] == u"-h" || args[0] == u"--help"))
+    if (ctx.words.size() == 2 &&
+        (ctx.words.at(1) == u"-h" || ctx.words.at(1) == u"--help"))
     {
         ctx.channel->addSystemMessage(
             u"Pin a chat message or show the currently pinned one. Usage: /pin --duration <seconds> --id <id> [message]..."_s);
@@ -307,7 +306,7 @@ QString pin(const CommandContext &ctx)
 
     auto chan = std::static_pointer_cast<TwitchChannel>(
         ctx.twitchChannel->shared_from_this());
-    if (args.empty())
+    if (ctx.words.size() == 1)
     {
         showCurrentlyPinnedMessage(chan, *currentUser);
         return {};
