@@ -38,7 +38,6 @@
 #include <QStringBuilder>
 #include <QTabWidget>
 
-#include <set>
 #include <utility>
 
 namespace {
@@ -46,74 +45,10 @@ namespace {
 using namespace chatterino;
 using namespace Qt::Literals;
 
-auto makeShortCodesSet(const std::vector<QString> &shortCodes)
-{
-    std::set<QString> shortCodesSet;
-    std::ranges::transform(shortCodes,
-                           std::inserter(shortCodesSet, shortCodesSet.begin()),
-                           [](const auto &shortCode) {
-                               return ":" + shortCode + ":";
-                           });
-
-    return shortCodesSet;
-}
-
 bool emojiHasShortCode(const EmojiPtr &emoji, const QString &shortCode)
 {
     auto it = std::ranges::find(emoji->shortCodes, shortCode);
     return it != emoji->shortCodes.end();
-}
-
-bool isEmojiIdentifier(const QString &emoteName)
-{
-    /*
-     * Some Emotes can have a name that looks like this:
-     *
-     *  :<name>:
-     *
-     * This makes them look like Emoji short codes. To better tell Emotes and
-     * Emojis apart, we check the emoteName against a list of known Emoji
-     * short codes and we have a match, we trust that the idenfifier is
-     * an Emoji.
-     */
-    static const auto knownShortCodes =
-        makeShortCodesSet(getApp()->getEmotes()->getEmojis()->getShortCodes());
-
-    return knownShortCodes.contains(emoteName);
-}
-
-QString emojiIdentifierToShortCode(const QString &emoteName)
-{
-    if (!isEmojiIdentifier(emoteName))
-    {
-        return {};
-    }
-
-    return emoteName.mid(1, emoteName.length() - 2);
-}
-
-bool isFavouriteEmoteOrEmoji(const MessageLayoutElement *element)
-{
-    const auto &emoteName = element->getCreator().getLink().value;
-
-    if (isEmojiIdentifier(emoteName))
-    {
-        const auto &emojiNames = getSettings()->favouriteEmojis.getValue();
-        auto shortCode = emojiIdentifierToShortCode(emoteName);
-
-        auto it =
-            std::ranges::find_if(emojiNames, [&shortCode](const auto &sc) {
-                return shortCode == sc;
-            });
-        return it != emojiNames.end();
-    }
-
-    const auto &emoteNames = getSettings()->favouriteEmotes.getValue();
-    auto it = std::ranges::find_if(emoteNames,
-                                   [emoteName](const auto &otherEmoteName) {
-                                       return emoteName == otherEmoteName;
-                                   });
-    return it != emoteNames.end();
 }
 
 std::optional<EmotePtr> findEmoteByName(const EmoteName &name,
@@ -122,6 +57,38 @@ std::optional<EmotePtr> findEmoteByName(const EmoteName &name,
     auto it = emoteMap.find(name);
     return it == emoteMap.cend() ? std::nullopt
                                  : std::optional<EmotePtr>(it->second);
+}
+
+QString toEmojiShortCode(const QString &shortCodeWithColons)
+{
+    if (shortCodeWithColons.length() > 2)
+    {
+        return shortCodeWithColons.mid(1, shortCodeWithColons.length() - 2);
+    }
+
+    return shortCodeWithColons;
+}
+
+bool isFavouriteEmoteOrEmoji(const QString &identifier, bool isEmoji)
+{
+    if (isEmoji)
+    {
+        const auto &shortCodes = getSettings()->favouriteEmojis.getValue();
+        auto shortCode = toEmojiShortCode(identifier);
+
+        auto it = std::ranges::find_if(
+            shortCodes, [&shortCode](const auto &otherShortCode) {
+                return shortCode == otherShortCode;
+            });
+        return it != shortCodes.end();
+    }
+
+    const auto &emoteNames = getSettings()->favouriteEmotes.getValue();
+    auto it = std::ranges::find_if(emoteNames,
+                                   [identifier](const auto &otherEmoteName) {
+                                       return identifier == otherEmoteName;
+                                   });
+    return it != emoteNames.end();
 }
 
 auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
@@ -228,7 +195,7 @@ auto makeUnavailableEmoteMessage(const std::vector<QString> &emoteNames)
     {
         builder
             .emplace<TextElement>(
-                emoteName, MessageElementFlags{MessageElementFlag::Text,
+                emoteName, MessageElementFlags{MessageElementFlag::EmoteText,
                                                MessageElementFlag::AlwaysShow})
             ->setLink(Link(Link::Type::InsertText, emoteName));
     }
@@ -396,22 +363,44 @@ EmotePopup::EmotePopup(QWidget *parent)
     QObject::connect(this->search_, &QLineEdit::textChanged, this,
                      &EmotePopup::filterEmotes);
 
-    auto clicked = [this](const Link &link, Qt::KeyboardModifiers modifiers) {
+    auto clicked = [this](const MessageLayoutElement *hoveredElement,
+                          Qt::KeyboardModifiers modifiers) {
         if (modifiers & Qt::KeyboardModifier::ControlModifier)
         {
+            if (hoveredElement == nullptr)
+            {
+                return;
+            }
+
             const auto *page = this->notebook_->getSelectedPage();
+
+            auto identifier = hoveredElement->getLink().value;
+            if (identifier.isEmpty())
+            {
+                return;
+            }
 
             if (this->favouritesView_ == page)
             {
-                this->removeFavouriteEmoteOrEmoji(link.value);
+                auto isEmoji = hoveredElement->getCreator().getFlags().hasAny(
+                    MessageElementFlag::EmojiAll);
+
+                if (isEmoji)
+                {
+                    this->removeFavouriteEmoji(toEmojiShortCode(identifier));
+                }
+                else
+                {
+                    this->removeFavouriteEmote(EmoteName{identifier});
+                }
             }
             else if (this->viewEmojis_ == page)
             {
-                this->addFavouriteEmoji(link.value);
+                this->addFavouriteEmoji(toEmojiShortCode(identifier));
             }
             else
             {
-                this->addFavouriteEmote(EmoteName{link.value});
+                this->addFavouriteEmote(EmoteName{identifier});
             }
 
             if (!(modifiers & Qt::KeyboardModifier::ShiftModifier))
@@ -420,7 +409,7 @@ EmotePopup::EmotePopup(QWidget *parent)
             }
         }
 
-        this->linkClicked.invoke(link);
+        this->linkClicked.invoke(hoveredElement->getLink());
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
@@ -432,7 +421,7 @@ EmotePopup::EmotePopup(QWidget *parent)
         view->setEnableScrollingToBottom(false);
         // We can safely ignore this signal connection since the ChannelView is deleted
         // either when the notebook is deleted, or when our main layout is deleted.
-        std::ignore = view->linkClicked.connect(clicked);
+        std::ignore = view->elementClicked.connect(clicked);
 
         if (addToNotebook)
         {
@@ -441,6 +430,19 @@ EmotePopup::EmotePopup(QWidget *parent)
 
         std::ignore = view->messageMenuCreated.connect(
             [this](QMenu *menu, const MessageLayoutElement *hoveredElement) {
+                if (hoveredElement == nullptr)
+                {
+                    return;
+                }
+
+                auto flags = hoveredElement->getCreator().getFlags();
+
+                if (!flags.hasAny(MessageElementFlag::EmojiAll,
+                                  MessageElementFlag::Emote))
+                {
+                    return;
+                }
+
                 QAction *favouriteAction;
                 if (menu->actions().isEmpty())
                 {
@@ -453,27 +455,39 @@ EmotePopup::EmotePopup(QWidget *parent)
                                        favouriteAction);
                 }
 
+                auto isEmoji = flags.hasAny(MessageElementFlag::EmojiAll);
+                const auto &identifier = hoveredElement->getLink().value;
+
                 favouriteAction->setCheckable(true);
                 favouriteAction->setChecked(
-                    isFavouriteEmoteOrEmoji(hoveredElement));
+                    isFavouriteEmoteOrEmoji(identifier, isEmoji));
 
                 QObject::connect(
                     favouriteAction, &QAction::triggered,
-                    [this, hoveredElement](bool checked) {
-                        const auto &emoteName = hoveredElement->getLink().value;
+                    [this, identifier, isEmoji](bool checked) {
                         if (!checked)
                         {
-                            this->removeFavouriteEmoteOrEmoji(emoteName);
-                        }
-                        else
-                        {
-                            if (isEmojiIdentifier(emoteName))
+                            if (isEmoji)
                             {
-                                this->addFavouriteEmoji(emoteName);
+                                this->removeFavouriteEmoji(
+                                    toEmojiShortCode(identifier));
                             }
                             else
                             {
-                                this->addFavouriteEmote(EmoteName{emoteName});
+                                this->removeFavouriteEmote(
+                                    EmoteName{identifier});
+                            }
+                        }
+                        else
+                        {
+                            if (isEmoji)
+                            {
+                                this->addFavouriteEmoji(
+                                    toEmojiShortCode(identifier));
+                            }
+                            else
+                            {
+                                this->addFavouriteEmote(EmoteName{identifier});
                             }
                         }
                     });
@@ -638,29 +652,8 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     this->reloadEmotes();
 }
 
-void EmotePopup::favouriteStateChanged(const QString &emoteName,
-                                       bool isFavourite)
+void EmotePopup::addFavouriteEmoji(const QString &shortCode)
 {
-    if (!isFavourite)
-    {
-        this->removeFavouriteEmoteOrEmoji(emoteName);
-    }
-    else
-    {
-        if (isEmojiIdentifier(emoteName))
-        {
-            this->addFavouriteEmoji(emoteName);
-        }
-        else
-        {
-            this->addFavouriteEmote(EmoteName{emoteName});
-        }
-    }
-}
-
-void EmotePopup::addFavouriteEmoji(const QString &emojiIdentifier)
-{
-    auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
     if (shortCode.isEmpty())
     {
         return;
@@ -716,9 +709,8 @@ void EmotePopup::addFavouriteEmote(const EmoteName &name)
     this->updateFavouriteEmotesAndEmojis();
 }
 
-void EmotePopup::removeFavouriteEmoji(const QString &emojiIdentifier)
+void EmotePopup::removeFavouriteEmoji(const QString &shortCode)
 {
-    auto shortCode = emojiIdentifierToShortCode(emojiIdentifier);
     this->favouriteEmojis_.erase(shortCode);
     saveFavouriteEmojis(this->favouriteEmojis_);
 
@@ -738,18 +730,6 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
     getSettings()->favouriteEmotes = emoteNames;
 
     this->updateFavouriteEmotesAndEmojis();
-}
-
-void EmotePopup::removeFavouriteEmoteOrEmoji(const QString &emoteName)
-{
-    if (isEmojiIdentifier(emoteName))
-    {
-        this->removeFavouriteEmoji(emoteName);
-    }
-    else
-    {
-        this->removeFavouriteEmote(EmoteName{emoteName});
-    }
 }
 
 void EmotePopup::updateFavouriteEmotesAndEmojis()

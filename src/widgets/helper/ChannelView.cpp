@@ -2432,6 +2432,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 return;
             }
 
+            this->elementClicked.invoke(hoveredElement, event->modifiers());
+
             const auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
