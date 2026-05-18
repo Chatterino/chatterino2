@@ -1137,11 +1137,20 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    virtual void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
     virtual void getPinnedChatMessage(
         const QString &broadcasterID, const QString &moderatorID,
         ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
     virtual void unpinChatMessage(
         const QString &broadcasterID, const QString &moderatorID,
         const QString &messageID, ResultCallback<> successCallback,
@@ -1550,17 +1559,27 @@ public:
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference/#pin-chat-message
     void pinChatMessage(
         const QString &broadcasterID, const QString &moderatorID,
         const QString &messageID, std::optional<std::chrono::seconds> duration,
         ResultCallback<> successCallback,
         FailureCallback<HelixPinMessageError, QString> failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
     void getPinnedChatMessage(
         const QString &broadcasterID, const QString &moderatorID,
         ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
         FailureCallback<QString> failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
     void unpinChatMessage(
         const QString &broadcasterID, const QString &moderatorID,
         const QString &messageID, ResultCallback<> successCallback,

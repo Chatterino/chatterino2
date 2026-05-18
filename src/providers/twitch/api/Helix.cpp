@@ -3873,6 +3873,68 @@ void Helix::pinChatMessage(
         .execute();
 }
 
+void Helix::updatePinnedChatMessage(
+    const QString &broadcasterID, const QString &moderatorID,
+    const QString &messageID, std::optional<std::chrono::seconds> duration,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixPinMessageError, QString> failureCallback)
+{
+    QJsonObject payload{
+        {"broadcaster_id"_L1, broadcasterID},
+        {"moderator_id"_L1, moderatorID},
+        {"message_id"_L1, messageID},
+    };
+    if (duration)
+    {
+        payload.insert("duration_seconds"_L1,
+                       static_cast<qint64>(duration->count()));
+    }
+
+    this->makePatch("chat/pins", {})
+        .json(payload)
+        .onSuccess([successCallback](const NetworkResult & /*result*/) {
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            using Error = HelixPinMessageError;
+
+            auto status = result.status();
+            if (!status)
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            Error errorForStatus = [&] {
+                switch (*status)
+                {
+                    case 400:
+                        return Error::InvalidParameter;
+                    case 401:
+                        return Error::MissingScope;
+                    case 403:
+                        return Error::Forbidden;
+                    case 404:
+                        return Error::NotFound;
+                    // No "409: AlreadyPinned" here, but reusing the same error.
+                    default:
+                        return Error::Forwarded;
+                }
+            }();
+
+            const auto message = result.parseJson().value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(errorForStatus, message);
+            }
+            else
+            {
+                failureCallback(errorForStatus, result.formatError());
+            }
+        })
+        .execute();
+}
+
 void Helix::getPinnedChatMessage(
     const QString &broadcasterID, const QString &moderatorID,
     ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,

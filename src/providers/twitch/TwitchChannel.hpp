@@ -201,6 +201,11 @@ public:
                       std::optional<std::chrono::seconds> duration,
                       const TwitchAccount &moderator, QString textHint = {});
 
+    void updatePinnedMessageAs(const QString &messageID,
+                               std::optional<std::chrono::seconds> duration,
+                               const TwitchAccount &moderator,
+                               QString textHint = {});
+
     void unpinMessageAs(const QString &messageID,
                         const TwitchAccount &moderator);
 
@@ -498,6 +503,10 @@ private:
                                              const QString &platform,
                                              const QString &actor,
                                              const QString &emoteName);
+
+    void pinOrUpdateMessage(bool update, const QString &messageID,
+                            std::optional<std::chrono::seconds> duration,
+                            const TwitchAccount &moderator, QString textHint);
 
     // Data
     const QString subscriptionUrl_;

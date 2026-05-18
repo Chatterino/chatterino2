@@ -2193,7 +2193,30 @@ void TwitchChannel::pinMessageAs(const QString &messageID,
                                  const TwitchAccount &moderator,
                                  QString textHint)
 {
-    getHelix()->pinChatMessage(
+    this->pinOrUpdateMessage(false, messageID, duration, moderator,
+                             std::move(textHint));
+}
+
+void TwitchChannel::updatePinnedMessageAs(
+    const QString &messageID, std::optional<std::chrono::seconds> duration,
+    const TwitchAccount &moderator, QString textHint)
+{
+    this->pinOrUpdateMessage(true, messageID, duration, moderator,
+                             std::move(textHint));
+}
+
+void TwitchChannel::pinOrUpdateMessage(
+    bool update, const QString &messageID,
+    std::optional<std::chrono::seconds> duration,
+    const TwitchAccount &moderator, QString textHint)
+{
+    auto fn = &IHelix::pinChatMessage;
+    if (update)
+    {
+        fn = &IHelix::updatePinnedChatMessage;
+    }
+
+    (getHelix()->*fn)(
         this->roomId(), moderator.getUserId(), messageID, duration,
         [weak = this->weakFromThis(), id = messageID,
          textHint = std::move(textHint)]() {

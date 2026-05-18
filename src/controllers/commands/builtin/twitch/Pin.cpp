@@ -34,26 +34,41 @@ struct Action {
 // See https://dev.twitch.tv/docs/api/reference#send-chat-message.
 constexpr std::chrono::minutes SEND_CHAT_MESSAGE_PIN_DURATION(20);
 
-void sendPinnedMessageDefaultDuration(
-    const std::shared_ptr<TwitchChannel> &chan, const TwitchAccount &moderator,
-    const QString &text)
+void sendPinnedMessage(const std::shared_ptr<TwitchChannel> &chan,
+                       const std::shared_ptr<TwitchAccount> &moderator,
+                       const QString &text,
+                       std::optional<std::chrono::seconds> duration)
 {
     getHelix()->sendChatMessage(
         {
             .broadcasterID = chan->roomId(),
-            .senderID = moderator.getUserId(),
+            .senderID = moderator->getUserId(),
             .message = text,
             .pin = true,
         },
-        [weak = std::weak_ptr(chan),
-         origText = text](const HelixSentMessage &res) {
+        [weak = std::weak_ptr(chan), origText = text, duration,
+         moderator](const HelixSentMessage &res) {
             auto chan = weak.lock();
             if (!chan)
             {
                 return;
             }
 
-            if (res.isSent)
+            if (!res.isSent)
+            {
+                if (res.dropReason)
+                {
+                    chan->addSystemMessage(res.dropReason->message);
+                }
+                else
+                {
+                    chan->addSystemMessage("Your message was not pinned.");
+                }
+                return;
+            }
+
+            // Default duration, no need to update it once more.
+            if (duration == SEND_CHAT_MESSAGE_PIN_DURATION)
             {
                 chan->addMessage(
                     MessageBuilder::makePinSuccessMessage(origText, res.id),
@@ -61,14 +76,7 @@ void sendPinnedMessageDefaultDuration(
                 return;
             }
 
-            if (res.dropReason)
-            {
-                chan->addSystemMessage(res.dropReason->message);
-            }
-            else
-            {
-                chan->addSystemMessage("Your message was not pinned.");
-            }
+            chan->updatePinnedMessageAs(res.id, duration, *moderator, origText);
         },
         [weak = std::weak_ptr(chan)](auto error, auto message) {
             auto chan = weak.lock();
@@ -107,37 +115,6 @@ void sendPinnedMessageDefaultDuration(
                 }
             }();
             chan->addSystemMessage(errorMessage);
-        });
-}
-
-void sendAndPin(const std::shared_ptr<TwitchChannel> &chan,
-                const std::shared_ptr<TwitchAccount> &moderator,
-                const QString &text,
-                std::optional<std::chrono::seconds> duration)
-{
-    getHelix()->sendChatMessage(
-        {
-            .broadcasterID = chan->roomId(),
-            .senderID = moderator->getUserId(),
-            .message = text,
-            .pin = false,  // we'll pin the message later
-        },
-        [weak = chan->weakFromThis(), moderator, duration,
-         text](const auto &result) {
-            auto chan = weak.lock();
-            if (!chan)
-            {
-                return;
-            }
-            chan->pinMessageAs(result.id, duration, *moderator, text);
-        },
-        [weak = chan->weakFromThis()](auto /* err */, const auto &message) {
-            auto chan = weak.lock();
-            if (!chan)
-            {
-                return;
-            }
-            chan->addSystemMessage("Failed to send message: " + message);
         });
 }
 
@@ -295,23 +272,7 @@ QString pin(const CommandContext &ctx)
         return {};
     }
 
-    if (action->duration == SEND_CHAT_MESSAGE_PIN_DURATION)
-    {
-        sendPinnedMessageDefaultDuration(chan, *currentUser, action->text);
-        return {};
-    }
-
-    // Make sure we will be able to pin the message. Otherwise we'd send a
-    // message without pinning it. The "Send Chat Message" endpoint (used above)
-    // won't sent the message if the user can't pin.
-    if (!chan->hasModRights())
-    {
-        ctx.channel->addSystemMessage(
-            "You must be a moderator to pin messages.");
-        return {};
-    }
-
-    sendAndPin(chan, currentUser, action->text, action->duration);
+    sendPinnedMessage(chan, currentUser, action->text, action->duration);
     return {};
 }
 
