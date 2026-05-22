@@ -231,8 +231,9 @@ QString pin(const CommandContext &ctx)
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addSystemMessage("You must be logged in to pin messages!");
-        return "";
+        ctx.channel->addSystemMessage(
+            u"You must be logged in to pin messages!"_s);
+        return {};
     }
 
     if (ctx.words.empty())
@@ -293,8 +294,9 @@ QString unpin(const CommandContext &ctx)
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addSystemMessage("You must be logged in to pin messages!");
-        return "";
+        ctx.channel->addSystemMessage(
+            u"You must be logged in to unpin messages!"_s);
+        return {};
     }
 
     if (ctx.words.empty())

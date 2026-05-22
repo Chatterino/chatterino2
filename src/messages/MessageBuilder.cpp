@@ -1551,7 +1551,7 @@ MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
     return builder.release();
 }
 
-MessagePtrMut MessageBuilder::makePinSuccessMessage(const QString &textOrID,
+MessagePtrMut MessageBuilder::makePinSuccessMessage(QString text,
                                                     const QString &id)
 {
     MessageBuilder builder;
@@ -1562,7 +1562,6 @@ MessagePtrMut MessageBuilder::makePinSuccessMessage(const QString &textOrID,
     QString searchText;
     builder.emplaceSystemTextAndUpdate("Pinned", searchText);
 
-    auto text = textOrID;
     if (text.isEmpty())
     {
         text = id;

@@ -2210,66 +2210,70 @@ void TwitchChannel::pinOrUpdateMessage(
     std::optional<std::chrono::seconds> duration,
     const TwitchAccount &moderator, QString textHint)
 {
-    auto fn = &IHelix::pinChatMessage;
+    auto onSuccess = [weak = this->weakFromThis(), id = messageID,
+                      textHint = std::move(textHint)]() {
+        auto self = weak.lock();
+        if (!self)
+        {
+            return;
+        }
+
+        self->addMessage(MessageBuilder::makePinSuccessMessage(textHint, id),
+                         MessageContext::Original);
+    };
+    auto onError = [weak = this->weakFromThis(), id = messageID](
+                       HelixPinMessageError error, auto message) {
+        auto chan = weak.lock();
+        if (!chan)
+        {
+            return;
+        }
+
+        if (message.isEmpty())
+        {
+            message = "(empty message)";
+        }
+
+        using Error = HelixPinMessageError;
+
+        auto errorMessage = [&]() -> QString {
+            switch (error)
+            {
+                case Error::InvalidParameter:
+                    return "Failed to pin message: " + message;
+                case Error::MissingScope:
+                    return "Missing required scope. Re-login with your "
+                           "account and try again.";
+                case Error::Forbidden:
+                    return "You are not allowed to pin messages in this "
+                           "channel.";
+                case Error::NotFound:
+                    return "Failed to find message with id \"" % id % "\".";
+                case Error::AlreadyPinned:
+                    return "The message is already pinned.";
+
+                case Error::Forwarded:
+                    return message;
+                case Error::Unknown:
+                default:
+                    return "Unknown error: " + message;
+            }
+        }();
+        chan->addSystemMessage(errorMessage);
+    };
+
     if (update)
     {
-        fn = &IHelix::updatePinnedChatMessage;
+        getHelix()->updatePinnedChatMessage(
+            this->roomId(), moderator.getUserId(), messageID, duration,
+            std::move(onSuccess), std::move(onError));
     }
-
-    (getHelix()->*fn)(
-        this->roomId(), moderator.getUserId(), messageID, duration,
-        [weak = this->weakFromThis(), id = messageID,
-         textHint = std::move(textHint)]() {
-            auto self = weak.lock();
-            if (!self)
-            {
-                return;
-            }
-
-            self->addMessage(
-                MessageBuilder::makePinSuccessMessage(textHint, id),
-                MessageContext::Original);
-        },
-        [weak = this->weakFromThis(), id = messageID](
-            HelixPinMessageError error, auto message) {
-            auto chan = weak.lock();
-            if (!chan)
-            {
-                return;
-            }
-
-            if (message.isEmpty())
-            {
-                message = "(empty message)";
-            }
-
-            using Error = HelixPinMessageError;
-
-            auto errorMessage = [&]() -> QString {
-                switch (error)
-                {
-                    case Error::InvalidParameter:
-                        return "Failed to pin message: " + message;
-                    case Error::MissingScope:
-                        return "Missing required scope. Re-login with your "
-                               "account and try again.";
-                    case Error::Forbidden:
-                        return "You are not allowed to pin messages in this "
-                               "channel.";
-                    case Error::NotFound:
-                        return "Failed to find message with id \"" % id % "\".";
-                    case Error::AlreadyPinned:
-                        return "The message is already pinned.";
-
-                    case Error::Forwarded:
-                        return message;
-                    case Error::Unknown:
-                    default:
-                        return "Unknown error: " + message;
-                }
-            }();
-            chan->addSystemMessage(errorMessage);
-        });
+    else
+    {
+        getHelix()->pinChatMessage(this->roomId(), moderator.getUserId(),
+                                   messageID, duration, std::move(onSuccess),
+                                   std::move(onError));
+    }
 }
 
 void TwitchChannel::unpinMessageAs(const QString &messageID,

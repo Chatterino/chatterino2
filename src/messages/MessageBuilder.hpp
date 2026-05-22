@@ -258,8 +258,7 @@ public:
                                               const QString &actor,
                                               uint32_t count = 1);
 
-    static MessagePtrMut makePinSuccessMessage(const QString &textOrID,
-                                               const QString &id);
+    static MessagePtrMut makePinSuccessMessage(QString text, const QString &id);
 
     static MessagePtrMut makeCurrentPinnedMessage(
         const TwitchChannel &channel, const HelixPinnedChatMessage &pin);
