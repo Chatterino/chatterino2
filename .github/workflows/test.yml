@@ -27,9 +27,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: "ubuntu-22.04"
-            container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.1
+          - os: "ubuntu-24.04"
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            qt-version: 6.11.1
       fail-fast: false
 
     steps:
