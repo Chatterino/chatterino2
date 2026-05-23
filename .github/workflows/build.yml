@@ -150,7 +150,7 @@ jobs:
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.11.1
+            qt-version: 6.8.3
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
