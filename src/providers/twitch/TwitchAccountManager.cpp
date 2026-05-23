@@ -166,7 +166,7 @@ const std::vector<QStringView> AUTH_SCOPES{
 
     // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
     // https://dev.twitch.tv/docs/api/reference#pin-chat-message
-    u"moderator:manage:chat_messages",  // for delete message api (/delete, /clear, /pin) & channel.moderate eventsub topic
+    u"moderator:manage:chat_messages",  // for message moderation api (/delete, /clear, /pin) & channel.moderate eventsub topic
 
     // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
     u"user:manage:chat_color",  // for update user color api (/color coral)
