@@ -45,7 +45,7 @@ jobs:
         include:
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.2
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -53,7 +53,7 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -61,7 +61,7 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -144,13 +144,13 @@ jobs:
         include:
           # macOS
           - os: macos-14
-            qt-version: 6.7.1
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -370,28 +370,28 @@ jobs:
 
       # Windows
       - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1
+        name: Windows Qt6.11.1
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
+          name: chatterino-windows-x86-64-Qt-6.11.1.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1 symbols
+        name: Windows Qt6.11.1 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.11.1-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
       - uses: actions/download-artifact@v8
         name: Ubuntu 22.04 deb
         with:
-          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
+          name: Chatterino-ubuntu-22.04-Qt-6.11.1.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v8
         name: Ubuntu 24.04 deb
         with:
-          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
+          name: Chatterino-ubuntu-24.04-Qt-6.11.1.deb
           path: release-artifacts/
 
       - name: Copy flatpakref
