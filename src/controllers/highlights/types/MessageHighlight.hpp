@@ -27,6 +27,12 @@ namespace chatterino::highlights {
 
 struct MessageHighlight {
     static constexpr QStringView TYPE = u"message";
+    static constexpr QStringView ICON_RESOURCE = u":/buttons/text.svg";
+
+    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
+    static constexpr bool ALERT_DEFAULT = true;
+    static constexpr bool PLAY_SOUND_DEFAULT = false;
 
     MessageHighlight(QStringView _id);
 
@@ -35,39 +41,12 @@ struct MessageHighlight {
         return this->pattern;
     }
 
-    QString getName() const
-    {
-        if (this->name.isEmpty())
-        {
-            return this->getDefaultName();
-        }
-        return this->name;
-    }
-
     QStringView getID() const
     {
         return this->id;
     }
 
     bool operator==(const MessageHighlight &other) const = default;
-
-    /// Returns true if this highlight should be enabled.
-    ///
-    /// If unconfigured, returns true.
-    bool isEnabled() const;
-    void setEnabled(std::optional<bool> newValue);
-
-    /// Returns true if this highlight should show the message in /mentions.
-    ///
-    /// If unconfigured, returns true.
-    bool shouldShowInMentions() const;
-    void setShowInMentions(std::optional<bool> newValue);
-
-    /// Returns true if this highlight should highlight the taskbar.
-    ///
-    /// If unconfigured, returns true.
-    bool shouldHighlightTaskbar() const;
-    void setHighlightTaskbar(std::optional<bool> newValue);
 
     /// Returns true if this highlight should be matched with a regex.
     ///
@@ -92,23 +71,10 @@ struct MessageHighlight {
         this->rebuildInternalRegularExpression();
     }
 
-    /// Returns true if this highlight should play a sound.
-    ///
-    /// If unconfigured, returns false.
-    bool shouldPlaySound() const;
-    void setPlaySound(std::optional<bool> newValue);
-
-    QUrl getSoundUrl() const;
-    void setSoundUrl(const QUrl &newValue);
-
-    std::shared_ptr<QColor> getBackgroundColor() const;
-    void setBackgroundColor(const QColor &newValue);
-
     /// The display name/pretty name of this highlight.
     /// If empty, we will try to auto-generate something that makes sense (e.g. "Text contains 'foo'")
     QString name;
 
-protected:
     std::optional<bool> enabled;
 
     /// Contains the highlight pattern.
@@ -129,11 +95,6 @@ protected:
     Outcome outcome;
 
 public:
-    QIcon getType() const;
-
-    bool willPlayAnySound() const;
-    bool willPlayCustomSound() const;
-
     HighlightCheck buildCheck() const;
 
 protected:
@@ -184,6 +145,7 @@ struct Serialize<chatterino::highlights::MessageHighlight> {
         rj::set(ret, "type", H::TYPE, a);
         rj::setOptionally(ret, "name", value.name, a);
         rj::setOptionally(ret, "enabled", value.enabled, a);
+
         rj::setOptionally(ret, "pattern", value.pattern, a);
 
         rj::setOptionally(ret, "regex", value.regex, a);
@@ -224,6 +186,7 @@ struct Deserialize<chatterino::highlights::MessageHighlight> {
 
         chatterino::rj::getSafe(value, "name", h.name);
         chatterino::rj::getSafe(value, "enabled", h.enabled);
+
         chatterino::rj::getSafe(value, "pattern", h.pattern);
 
         chatterino::rj::getSafe(value, "regex", h.regex);

@@ -18,46 +18,12 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoHighlights;
 
-// TODO: should this be shared somewhere
-constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
-constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
-
 }  // namespace
 
 MessageHighlight::MessageHighlight(QStringView _id)
     : id(_id)
 {
     this->rebuildInternalRegularExpression();
-}
-
-bool MessageHighlight::isEnabled() const
-{
-    return this->enabled.value_or(true);
-}
-
-void MessageHighlight::setEnabled(std::optional<bool> newValue)
-{
-    this->enabled = newValue;
-}
-
-bool MessageHighlight::shouldShowInMentions() const
-{
-    return this->outcome.showInMentions.value_or(true);
-}
-
-void MessageHighlight::setShowInMentions(std::optional<bool> newValue)
-{
-    this->outcome.showInMentions = newValue;
-}
-
-bool MessageHighlight::shouldHighlightTaskbar() const
-{
-    return this->outcome.alert.value_or(true);
-}
-
-void MessageHighlight::setHighlightTaskbar(std::optional<bool> newValue)
-{
-    this->outcome.alert = newValue;
 }
 
 bool MessageHighlight::isRegex() const
@@ -81,53 +47,13 @@ void MessageHighlight::setCaseSensitive(std::optional<bool> newValue)
     this->rebuildInternalRegularExpression();
 }
 
-bool MessageHighlight::shouldPlaySound() const
-{
-    return this->outcome.playSound.value_or(false);
-}
-
-void MessageHighlight::setPlaySound(std::optional<bool> newValue)
-{
-    this->outcome.playSound = newValue;
-}
-
-QUrl MessageHighlight::getSoundUrl() const
-{
-    return this->outcome.customSoundURL;
-}
-
-void MessageHighlight::setSoundUrl(const QUrl &newValue)
-{
-    this->outcome.customSoundURL = newValue;
-}
-
-std::shared_ptr<QColor> MessageHighlight::getBackgroundColor() const
-{
-    return this->outcome.backgroundColor;
-}
-
-void MessageHighlight::setBackgroundColor(const QColor &newValue)
-{
-    this->outcome.backgroundColor = std::make_shared<QColor>(newValue);
-}
-
-QIcon MessageHighlight::getType() const
-{
-    return QIcon{":/buttons/text.svg"};
-}
-
-bool MessageHighlight::willPlayAnySound() const
-{
-    return this->outcome.playSound.value_or(false);
-}
-
-bool MessageHighlight::willPlayCustomSound() const
-{
-    return this->willPlayAnySound() && !this->outcome.customSoundURL.isEmpty();
-}
-
 HighlightCheck MessageHighlight::buildCheck() const
 {
+    if (!this->isValid())
+    {
+        return {};
+    }
+
     qCDebug(LOG) << "Rebuilding check" << this;
 
     return {
@@ -150,11 +76,14 @@ HighlightCheck MessageHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.shouldHighlightTaskbar(),
-                highlight.shouldPlaySound(),
+                highlight.outcome.alert.value_or(
+                    MessageHighlight::ALERT_DEFAULT),
+                highlight.outcome.playSound.value_or(
+                    MessageHighlight::PLAY_SOUND_DEFAULT),
                 highlight.outcome.customSoundURL,
                 highlight.outcome.backgroundColor,
-                highlight.shouldShowInMentions(),
+                highlight.outcome.showInMentions.value_or(
+                    MessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };
@@ -190,23 +119,13 @@ void MessageHighlight::rebuildInternalRegularExpression()
 
 QDebug operator<<(QDebug dbg, const MessageHighlight &v)
 {
-    const auto &backgroundColorPtr = v.getBackgroundColor();
-    QColor backgroundColor;
-    if (backgroundColorPtr)
-    {
-        backgroundColor = *backgroundColorPtr;
-    }
     dbg.nospace() << "MessageHighlight("
                   << "name:" << v.name << ',' << "pattern:" << v.pattern << ','
                   << "patternRegex:" << v.regexPattern << ','
                   << "enabled:" << v.enabled << ','
-                  << "showInMentions:" << v.shouldShowInMentions() << ','
-                  << "alert:" << v.shouldHighlightTaskbar() << ','
                   << "playSound:" << v.outcome.playSound << ','
                   << "isRegex:" << v.regex << ','
                   << "isCaseSensitive:" << v.caseSensitive << ','
-                  << "customSoundURL:" << v.getSoundUrl() << ','
-                  << "backgroundColor:" << backgroundColor << ','
                   << "outcome:" << v.outcome << ')';
 
     return dbg;

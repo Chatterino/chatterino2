@@ -10,6 +10,7 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/Common.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
@@ -31,15 +32,7 @@ void rebuildSharedHighlights(Settings &settings,
 
     for (const auto &highlight : *highlights)
     {
-        auto enabled = std::visit(variant::Overloaded{
-                                      [](SupportsValidityCheck auto &&h) {
-                                          return h.isValid() && h.isEnabled();
-                                      },
-                                      [](auto &&h) {
-                                          return h.isEnabled();
-                                      },
-                                  },
-                                  highlight);
+        auto enabled = highlights::isEnabled(highlight);
 
         if (!enabled)
         {

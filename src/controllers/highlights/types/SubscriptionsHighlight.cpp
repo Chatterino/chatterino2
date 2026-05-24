@@ -26,11 +26,14 @@ HighlightCheck SubscriptionsHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.shouldHighlightTaskbar(),
-                highlight.shouldPlaySound(),
+                highlight.outcome.alert.value_or(
+                    SubscriptionsHighlight::ALERT_DEFAULT),
+                highlight.outcome.playSound.value_or(
+                    SubscriptionsHighlight::PLAY_SOUND_DEFAULT),
                 highlight.outcome.customSoundURL,
                 highlight.outcome.backgroundColor,
-                highlight.shouldShowInMentions(),
+                highlight.outcome.showInMentions.value_or(
+                    SubscriptionsHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

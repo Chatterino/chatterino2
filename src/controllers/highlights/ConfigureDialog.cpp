@@ -1,6 +1,7 @@
 #include "controllers/highlights/ConfigureDialog.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/types/Common.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/DisplayBadge.hpp"
 #include "util/Variant.hpp"
@@ -38,6 +39,11 @@ concept SupportsRegex = requires(T a) {
 template <typename T>
 concept SupportsDefaultName = requires(T a) {
     { a.getDefaultName() } -> std::same_as<QString>;
+};
+
+template <typename T>
+concept SupportsGetID = requires(T a) {
+    { a.getID() } -> std::same_as<QStringView>;
 };
 
 using namespace Qt::StringLiterals;
@@ -119,11 +125,18 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
 #ifndef NDEBUG
     {
-        auto value = std::visit(
-            [](auto &&h) {
-                return h.getID();
-            },
-            this->data);
+        auto value = std::visit(variant::Overloaded{
+                                    [](SupportsGetID auto &h) {
+                                        return h.getID();
+                                    },
+                                    [](auto &&h) {
+                                        using ActualType =
+                                            std::decay_t<decltype(h)>;
+                                        return ActualType::ID;
+                                        // return h.getID();
+                                    },
+                                },
+                                this->data);
         auto *w = new QLabel(value.toString());
         w->setTextInteractionFlags(Qt::TextSelectableByMouse);
         formLayout->addRow("ID", w);
@@ -139,27 +152,19 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         auto *w = new QLineEdit();
         formLayout->addRow("Name", w);
 
-        std::visit(variant::Overloaded{
-                       [w](SupportsDefaultName auto &h) {
-                           w->setPlaceholderText(h.getDefaultName());
-                           w->setText(h.name);
+        auto defaultName = getDefaultName(this->data);
 
-                           QObject::connect(w, &QLineEdit::textChanged,
-                                            [&](const auto &newText) {
-                                                h.name = newText;
-                                            });
-                       },
-                       [w](auto &&h) {
-                           w->setPlaceholderText("b");
-                           w->setText(h.name);
+        std::visit(
+            [w, defaultName](auto &&h) {
+                w->setPlaceholderText(defaultName);
+                w->setText(h.name);
 
-                           QObject::connect(w, &QLineEdit::textChanged,
-                                            [&](const auto &newText) {
-                                                h.name = newText;
-                                            });
-                       },
-                   },
-                   this->data);
+                QObject::connect(w, &QLineEdit::textChanged,
+                                 [&](const auto &newText) {
+                                     h.name = newText;
+                                 });
+            },
+            this->data);
     }
 
     std::visit(
@@ -235,13 +240,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         this->data);
 
     {
-        auto value = std::visit(
-            [](auto &&h) {
-                return h.isEnabled();
-            },
-            this->data);
         auto *w = new QCheckBox;
-        w->setChecked(value);
+        w->setChecked(highlights::isEnabled(this->data));
 
         QObject::connect(w, &QCheckBox::checkStateChanged,
                          [&](auto checkstate) {
@@ -270,19 +270,14 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
         auto *l = new QFormLayout;
         {
-            auto value = std::visit(
-                [](auto &&h) {
-                    return h.shouldShowInMentions();
-                },
-                this->data);
             auto *w = new QCheckBox;
-            w->setChecked(value);
+            w->setChecked(shouldShowInMentions(this->data));
 
             QObject::connect(w, &QCheckBox::checkStateChanged,
                              [&](auto checkstate) {
                                  std::visit(
                                      [checkstate](auto &&h) {
-                                         h.setShowInMentions(checkstate);
+                                         h.outcome.showInMentions = checkstate;
                                      },
                                      this->data);
                              });
@@ -318,19 +313,14 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                    this->data);
 
         {
-            auto value = std::visit(
-                [](auto &&h) {
-                    return h.shouldHighlightTaskbar();
-                },
-                this->data);
             auto *w = new QCheckBox;
-            w->setChecked(value);
+            w->setChecked(shouldAlert(this->data));
 
             QObject::connect(w, &QCheckBox::checkStateChanged,
                              [&](auto checkstate) {
                                  std::visit(
                                      [checkstate](auto &&h) {
-                                         h.setHighlightTaskbar(checkstate);
+                                         h.outcome.alert = checkstate;
                                      },
                                      this->data);
                              });
@@ -338,35 +328,35 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         }
 
         {
-            auto value = std::visit(
-                [](auto &&h) {
-                    return *h.getBackgroundColor();
-                },
-                this->data);
-            auto *w = new ColorButton(value);
+            auto *w = new ColorButton(*getBackgroundColor(this->data));
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
             QObject::connect(w, &ColorButton::clicked, [this, w]() {
-                auto value = std::visit(
-                    [](auto &&h) {
-                        return *h.getBackgroundColor();
-                    },
-                    this->data);
-                auto *dialog = new ColorPickerDialog(value, w);
+                auto *dialog =
+                    new ColorPickerDialog(*getBackgroundColor(this->data), w);
                 // TODO: confirm colorButton & setting are never deleted and the signal is deleted
                 // once the dialog is closed
-                QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, w,
-                                 [this, w](auto selected) {
-                                     if (selected.isValid())
-                                     {
-                                         w->setColor(selected);
-                                         std::visit(
-                                             [selected](auto &&h) {
-                                                 h.setBackgroundColor(selected);
-                                             },
-                                             this->data);
-                                     }
-                                 });
+                QObject::connect(
+                    dialog, &ColorPickerDialog::colorConfirmed, w,
+                    [this, w](auto selected) {
+                        if (selected.isValid())
+                        {
+                            w->setColor(selected);
+                            std::visit(
+                                [selected](auto &&h) {
+                                    if (h.outcome.backgroundColor)
+                                    {
+                                        *h.outcome.backgroundColor = selected;
+                                    }
+                                    else
+                                    {
+                                        h.outcome.backgroundColor =
+                                            std::make_shared<QColor>(selected);
+                                    }
+                                },
+                                this->data);
+                        }
+                    });
                 // dialog->setWindowModality(Qt::WindowModality::ApplicationModal);
                 dialog->show();
             });
@@ -374,19 +364,14 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         }
 
         {
-            auto value = std::visit(
-                [](auto &&h) {
-                    return h.shouldPlaySound();
-                },
-                this->data);
             auto *w = new QCheckBox;
-            w->setChecked(value);
+            w->setChecked(shouldPlaySound(this->data));
 
             QObject::connect(w, &QCheckBox::checkStateChanged,
                              [&](auto checkstate) {
                                  std::visit(
                                      [checkstate](auto &&h) {
-                                         h.setPlaySound(checkstate);
+                                         h.outcome.playSound = checkstate;
                                      },
                                      this->data);
                              });
@@ -398,7 +383,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
             auto value = std::visit(
                 [](auto &&h) {
-                    return h.getSoundUrl();
+                    return h.outcome.customSoundURL;
                 },
                 this->data);
 
@@ -417,11 +402,10 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 label->setText(fileUrl.toLocalFile());
                 std::visit(
                     [fileUrl](auto &&h) {
-                        h.setSoundUrl(fileUrl);
+                        h.outcome.customSoundURL = fileUrl;
                     },
                     this->data);
             });
-            // TODO: Implement Edit
 
             auto *clear = new QToolButton;
             clear->setIcon(QIcon(":/buttons/cancel.svg"));
@@ -430,12 +414,10 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 label->setText({});
                 std::visit(
                     [](auto &&h) {
-                        h.setSoundUrl({});
+                        h.outcome.customSoundURL = QUrl{};
                     },
                     this->data);
             });
-
-            // TODO: Implement clear
 
             l->addRow(new QLabel("Custom sound URL"));
             l->addRow(ll);

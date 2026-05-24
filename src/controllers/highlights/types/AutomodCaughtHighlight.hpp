@@ -4,7 +4,10 @@
 
 #pragma once
 
-#include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Outcome.hpp"
+#include "pajlada/serialize/deserialize.hpp"
+#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -15,31 +18,26 @@
 #include <cassert>
 #include <optional>
 
+namespace chatterino {
+
+struct HighlightCheck;
+
+}  // namespace chatterino
+
 namespace chatterino::highlights {
 
-struct AutomodCaughtHighlight : public SharedHighlight2 {
+struct AutomodCaughtHighlight {
     static constexpr QStringView ID = u"automodcaught";
+    static constexpr QStringView ICON_RESOURCE =
+        u":/buttons/settings-darkMode.svg";
 
-    AutomodCaughtHighlight() = default;
+    static constexpr QStringView DEFAULT_NAME = u"AutoMod Caught Messages";
 
-    QString getDefaultName() const
-    {
-        return "AutoMod Caught Messages";
-    }
-
-    QString getName() const
-    {
-        if (this->name.isEmpty())
-        {
-            return this->getDefaultName();
-        }
-        return this->name;
-    }
-
-    QStringView getID() const
-    {
-        return ID;
-    }
+    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
+    static constexpr bool ALERT_DEFAULT = false;
+    static constexpr bool PLAY_SOUND_DEFAULT = false;
+    static constexpr bool SUPPORT_PLAY_SOUND = false;
 
     // Default state:
     // Enabled = true
@@ -47,15 +45,10 @@ struct AutomodCaughtHighlight : public SharedHighlight2 {
     // Flash taskbar = false
     // Play sound = false
 
-    bool shouldShowInMentions() const override
-    {
-        return this->outcome.showInMentions.value_or(false);
-    }
+    QString name;
+    std::optional<bool> enabled;
 
-    bool shouldHighlightTaskbar() const override
-    {
-        return this->outcome.alert.value_or(false);
-    }
+    Outcome outcome;
 
     HighlightCheck buildCheck() const;
 };
@@ -68,12 +61,17 @@ template <>
 struct Serialize<chatterino::highlights::AutomodCaughtHighlight> {
     using H = chatterino::highlights::AutomodCaughtHighlight;
 
-    static rapidjson::Value get(const H &value,
+    static rapidjson::Value get(const H &h,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
-        value.serialize(ret, a);
         chatterino::rj::set(ret, "id", H::ID, a);
+
+        chatterino::rj::setOptionally(ret, "name", h.name, a);
+        chatterino::rj::setOptionally(ret, "enabled", h.enabled, a);
+
+        h.outcome.serialize(ret, a);
+
         return ret;
     }
 };
@@ -90,7 +88,7 @@ struct Deserialize<chatterino::highlights::AutomodCaughtHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, H::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};
@@ -98,11 +96,10 @@ struct Deserialize<chatterino::highlights::AutomodCaughtHighlight> {
 
         H h;
 
-        if (!h.deserialize(value))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
+        chatterino::rj::getSafe(value, "name", h.name);
+        chatterino::rj::getSafe(value, "enabled", h.enabled);
+
+        h.outcome.deserialize(value);
 
         return h;
     }

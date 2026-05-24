@@ -4,7 +4,10 @@
 
 #pragma once
 
-#include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Outcome.hpp"
+#include "pajlada/serialize/deserialize.hpp"
+#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -15,31 +18,29 @@
 #include <cassert>
 #include <optional>
 
+namespace chatterino {
+
+struct HighlightCheck;
+
+}  // namespace chatterino
+
 namespace chatterino::highlights {
 
-struct SubscriptionsHighlight : public SharedHighlight2 {
+struct SubscriptionsHighlight {
     static constexpr QStringView ID = u"subscriptions";
+    static constexpr QStringView ICON_RESOURCE =
+        u":/buttons/settings-darkMode.svg";
+
+    static constexpr QStringView DEFAULT_NAME = u"Subscriptions";
+
+    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
+    // TODO: Should we disable setting of the "show in mentions" somehow cuz it's not supported?
+    static constexpr bool SUPPORT_SHOW_IN_MENTIONS = false;
+    static constexpr bool ALERT_DEFAULT = false;
+    static constexpr bool PLAY_SOUND_DEFAULT = false;
 
     SubscriptionsHighlight() = default;
-
-    QString getDefaultName() const
-    {
-        return "Subscriptions";
-    }
-
-    QString getName() const
-    {
-        if (this->name.isEmpty())
-        {
-            return this->getDefaultName();
-        }
-        return this->name;
-    }
-
-    QStringView getID() const
-    {
-        return ID;
-    }
 
     // Default state:
     // Enabled = true
@@ -47,21 +48,10 @@ struct SubscriptionsHighlight : public SharedHighlight2 {
     // Flash taskbar = false
     // Play sound = false
 
-    bool shouldShowInMentions() const override
-    {
-        return false;
-    }
+    QString name;
+    std::optional<bool> enabled;
 
-    void setShowInMentions(std::optional<bool> newValue) override
-    {
-        (void)newValue;
-        assert(false && "Subscriptions do not support 'show in mentions'");
-    }
-
-    bool shouldHighlightTaskbar() const override
-    {
-        return this->outcome.alert.value_or(false);
-    }
+    Outcome outcome;
 
     HighlightCheck buildCheck() const;
 };
@@ -74,12 +64,17 @@ template <>
 struct Serialize<chatterino::highlights::SubscriptionsHighlight> {
     using H = chatterino::highlights::SubscriptionsHighlight;
 
-    static rapidjson::Value get(const H &value,
+    static rapidjson::Value get(const H &h,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
-        value.serialize(ret, a);
         chatterino::rj::set(ret, "id", H::ID, a);
+
+        chatterino::rj::setOptionally(ret, "name", h.name, a);
+        chatterino::rj::setOptionally(ret, "enabled", h.enabled, a);
+
+        h.outcome.serialize(ret, a);
+
         return ret;
     }
 };
@@ -96,7 +91,7 @@ struct Deserialize<chatterino::highlights::SubscriptionsHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, H::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};
@@ -104,11 +99,10 @@ struct Deserialize<chatterino::highlights::SubscriptionsHighlight> {
 
         H h;
 
-        if (!h.deserialize(value))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
+        chatterino::rj::getSafe(value, "name", h.name);
+        chatterino::rj::getSafe(value, "enabled", h.enabled);
+
+        h.outcome.deserialize(value);
 
         return h;
     }

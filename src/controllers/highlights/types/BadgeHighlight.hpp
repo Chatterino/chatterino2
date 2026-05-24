@@ -6,6 +6,7 @@
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Outcome.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -26,6 +27,12 @@ namespace chatterino::highlights {
 
 struct BadgeHighlight {
     static constexpr QStringView TYPE = u"badge";
+    static constexpr QStringView ICON_RESOURCE = u":/buttons/reloadDark.svg";
+
+    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
+    static constexpr bool ALERT_DEFAULT = true;
+    static constexpr bool PLAY_SOUND_DEFAULT = false;
 
     BadgeHighlight(QStringView _id);
 
@@ -33,15 +40,6 @@ struct BadgeHighlight {
     {
         // TODO: This should have some cool icon too
         return this->displayName;
-    }
-
-    QString getName() const
-    {
-        if (this->name.isEmpty())
-        {
-            return this->getDefaultName();
-        }
-        return this->name;
     }
 
     void setDisplayName(const QString &newValue)
@@ -58,23 +56,6 @@ struct BadgeHighlight {
 
     bool operator==(const BadgeHighlight &other) const = default;
 
-    /// Returns true if this highlight should be enabled.
-    ///
-    /// If unconfigured, returns true.
-    bool isEnabled() const;
-
-    /// Returns true if this highlight should show the message in /mentions.
-    ///
-    /// If unconfigured, returns true.
-    bool shouldShowInMentions() const;
-    void setShowInMentions(std::optional<bool> newValue);
-
-    /// Returns true if this highlight should highlight the taskbar.
-    ///
-    /// If unconfigured, returns true.
-    bool shouldHighlightTaskbar() const;
-    void setHighlightTaskbar(std::optional<bool> newValue);
-
     QString getBadgeName() const
     {
         return this->badgeName;
@@ -87,54 +68,19 @@ struct BadgeHighlight {
         this->rebuildBadgeCheck();
     }
 
-    /// Returns true if this highlight should play a sound.
-    ///
-    /// If unconfigured, returns false.
-    bool shouldPlaySound() const;
-    void setPlaySound(std::optional<bool> newValue);
-
-    QUrl getSoundUrl() const;
-    void setSoundUrl(const QUrl &newValue);
-
-    std::shared_ptr<QColor> getBackgroundColor() const;
-    void setBackgroundColor(const QColor &newValue);
-
     /// The display name/pretty name of this highlight.
     /// If empty, we will try to auto-generate something that makes sense (e.g. "Text contains 'foo'")
     QString name;
 
-    void debug() const;
-
-protected:
     std::optional<bool> enabled;
 
+    Outcome outcome;
+
+protected:
     /// Contains the raw badge name
     QString badgeName;
 
-    /// Whether to add the matching message to the /mentions channel
-    std::optional<bool> showInMentions;
-
-    /// Show an OS-specific alert.
-    /// On Windows, this will flash Chatterino in the taskbar.
-    /// On macOS, this will make Chatterino bounce in the taskbar.
-    std::optional<bool> alert;
-
-    /// Play a sound.
-    /// If the highlight specifies a "customSoundURL", it will play that, otherwise it will
-    /// play the default highlight sound.
-    std::optional<bool> playSound;
-
-    /// The custom sound URL to play if playSound is enabled.
-    QUrl customSoundURL;
-
-    /// The background color to apply to the message.
-    /// If the color is invalid/unset, don't apply a background color.
-    std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
-
 public:
-    bool willPlayAnySound() const;
-    bool willPlayCustomSound() const;
-
     HighlightCheck buildCheck() const;
 
 protected:
@@ -186,22 +132,11 @@ struct Serialize<chatterino::highlights::BadgeHighlight> {
         rj::set(ret, "type", H::TYPE, a);
         rj::setOptionally(ret, "name", value.name, a);
         rj::setOptionally(ret, "enabled", value.enabled, a);
+
         rj::setOptionally(ret, "badgeName", value.badgeName, a);
         rj::setOptionally(ret, "displayName", value.displayName, a);
-        rj::setOptionally(ret, "showInMentions", value.showInMentions, a);
-        rj::setOptionally(ret, "alert", value.alert, a);
-        rj::setOptionally(ret, "playSound", value.playSound, a);
 
-        if (!value.customSoundURL.isEmpty())
-        {
-            rj::set(ret, "customSoundURL", value.customSoundURL.toString(), a);
-        }
-
-        if (value.backgroundColor->isValid())
-        {
-            rj::set(ret, "backgroundColor",
-                    value.backgroundColor->name(QColor::HexArgb), a);
-        }
+        value.outcome.serialize(ret, a);
 
         return ret;
     }
@@ -236,22 +171,11 @@ struct Deserialize<chatterino::highlights::BadgeHighlight> {
 
         chatterino::rj::getSafe(value, "name", h.name);
         chatterino::rj::getSafe(value, "enabled", h.enabled);
+
         chatterino::rj::getSafe(value, "badgeName", h.badgeName);
         chatterino::rj::getSafe(value, "displayName", h.displayName);
-        chatterino::rj::getSafe(value, "showInMentions", h.showInMentions);
-        chatterino::rj::getSafe(value, "alert", h.alert);
-        chatterino::rj::getSafe(value, "playSound", h.playSound);
 
-        QString tmpCustomSoundURL;
-        chatterino::rj::getSafe(value, "customSoundURL", tmpCustomSoundURL);
-        if (!tmpCustomSoundURL.isEmpty())
-        {
-            h.customSoundURL.setUrl(tmpCustomSoundURL);
-        }
-
-        QString tmpBackgroundColor;
-        chatterino::rj::getSafe(value, "backgroundColor", tmpBackgroundColor);
-        h.backgroundColor = std::make_shared<QColor>(tmpBackgroundColor);
+        h.outcome.deserialize(value);
 
         h.rebuildBadgeCheck();
 

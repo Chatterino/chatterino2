@@ -214,8 +214,6 @@ set(SOURCE_FILES
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
-        controllers/highlights/SharedHighlight2.cpp
-        controllers/highlights/SharedHighlight2.hpp
         controllers/highlights/types/AllForward.hpp
         controllers/highlights/types/All.hpp
         controllers/highlights/types/AutomodCaughtHighlight.hpp

@@ -8,13 +8,6 @@
 
 namespace chatterino::highlights {
 
-namespace {
-
-constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
-constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
-
-}  // namespace
-
 HighlightCheck YourUsernameHighlight::buildCheck() const
 {
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
@@ -42,12 +35,11 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
             const auto &args, const auto &badges, const auto &senderName,
             const auto &originalMessage, const auto &flags, const auto self,
             const auto runContext) -> std::optional<HighlightResult> {
-            (void)badges;           // unused
-            (void)senderName;       // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-            (void)runContext;       // unused
+            (void)args;        // unused
+            (void)badges;      // unused
+            (void)senderName;  // unused
+            (void)flags;       // unused
+            (void)runContext;  // unused
 
             if (self)
             {
@@ -60,11 +52,14 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.shouldHighlightTaskbar(),
-                highlight.shouldPlaySound(),
+                highlight.outcome.alert.value_or(
+                    YourUsernameHighlight::ALERT_DEFAULT),
+                highlight.outcome.playSound.value_or(
+                    YourUsernameHighlight::PLAY_SOUND_DEFAULT),
                 highlight.outcome.customSoundURL,
                 highlight.outcome.backgroundColor,
-                highlight.shouldShowInMentions(),
+                highlight.outcome.showInMentions.value_or(
+                    YourUsernameHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

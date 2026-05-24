@@ -28,11 +28,14 @@ HighlightCheck HypeChatHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.shouldHighlightTaskbar(),
-                highlight.shouldPlaySound(),
+                highlight.outcome.alert.value_or(
+                    HypeChatHighlight::ALERT_DEFAULT),
+                highlight.outcome.playSound.value_or(
+                    HypeChatHighlight::PLAY_SOUND_DEFAULT),
                 highlight.outcome.customSoundURL,
                 highlight.outcome.backgroundColor,
-                highlight.shouldShowInMentions(),
+                highlight.outcome.showInMentions.value_or(
+                    HypeChatHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

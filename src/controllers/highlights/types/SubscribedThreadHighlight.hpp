@@ -4,7 +4,10 @@
 
 #pragma once
 
-#include "controllers/highlights/SharedHighlight2.hpp"
+#include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Outcome.hpp"
+#include "pajlada/serialize/deserialize.hpp"
+#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -15,31 +18,25 @@
 #include <cassert>
 #include <optional>
 
+namespace chatterino {
+
+struct HighlightCheck;
+
+}  // namespace chatterino
+
 namespace chatterino::highlights {
 
-struct SubscribedThreadHighlight : public SharedHighlight2 {
+struct SubscribedThreadHighlight {
     static constexpr QStringView ID = u"subscribedthread";
+    static constexpr QStringView ICON_RESOURCE =
+        u":/buttons/settings-darkMode.svg";
 
-    SubscribedThreadHighlight() = default;
+    static constexpr QStringView DEFAULT_NAME = u"Subscribed Reply Threads";
 
-    QString getDefaultName() const
-    {
-        return "Subscribed Reply Threads";
-    }
-
-    QString getName() const
-    {
-        if (this->name.isEmpty())
-        {
-            return this->getDefaultName();
-        }
-        return this->name;
-    }
-
-    QStringView getID() const
-    {
-        return ID;
-    }
+    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
+    static constexpr bool ALERT_DEFAULT = true;
+    static constexpr bool PLAY_SOUND_DEFAULT = true;
 
     // Default state:
     // Enabled = true
@@ -47,10 +44,10 @@ struct SubscribedThreadHighlight : public SharedHighlight2 {
     // Flash taskbar = true
     // Play sound = true
 
-    bool shouldPlaySound() const override
-    {
-        return this->outcome.playSound.value_or(true);
-    }
+    QString name;
+    std::optional<bool> enabled;
+
+    Outcome outcome;
 
     HighlightCheck buildCheck() const;
 };
@@ -63,12 +60,17 @@ template <>
 struct Serialize<chatterino::highlights::SubscribedThreadHighlight> {
     using H = chatterino::highlights::SubscribedThreadHighlight;
 
-    static rapidjson::Value get(const H &value,
+    static rapidjson::Value get(const H &h,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
-        value.serialize(ret, a);
         chatterino::rj::set(ret, "id", H::ID, a);
+
+        chatterino::rj::setOptionally(ret, "name", h.name, a);
+        chatterino::rj::setOptionally(ret, "enabled", h.enabled, a);
+
+        h.outcome.serialize(ret, a);
+
         return ret;
     }
 };
@@ -85,7 +87,7 @@ struct Deserialize<chatterino::highlights::SubscribedThreadHighlight> {
             return {};
         }
 
-        if (!H::matchesID(value, H::ID))
+        if (!chatterino::highlights::matchesID(value, H::ID))
         {
             PAJLADA_REPORT_ERROR(error)
             return {};
@@ -93,11 +95,10 @@ struct Deserialize<chatterino::highlights::SubscribedThreadHighlight> {
 
         H h;
 
-        if (!h.deserialize(value))
-        {
-            PAJLADA_REPORT_ERROR(error)
-            return {};
-        }
+        chatterino::rj::getSafe(value, "name", h.name);
+        chatterino::rj::getSafe(value, "enabled", h.enabled);
+
+        h.outcome.deserialize(value);
 
         return h;
     }

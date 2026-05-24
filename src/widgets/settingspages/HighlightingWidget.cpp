@@ -309,11 +309,7 @@ void HighlightingWidget::openConfigureDialog(
                     .data(highlights::Model::DATA_ROLE)
                     .value<highlights::AllHighlights>();
 
-    auto id = std::visit(
-        [](auto &&h) {
-            return h.getID();
-        },
-        data);
+    auto id = highlights::getID(data);
 
     this->configureDialog = new highlights::ConfigureDialog(data, this);
     QObject::connect(
@@ -326,11 +322,7 @@ void HighlightingWidget::openConfigureDialog(
                 case ConfigureCloseBehaviour::Remove:
                     getSettings()->sharedHighlights.removeFirstMatching(
                         [id](const auto &h) -> bool {
-                            auto incomingId = std::visit(
-                                [](auto &&h) {
-                                    return h.getID();
-                                },
-                                h);
+                            auto incomingId = highlights::getID(h);
                             return incomingId == id;
                         },
                         this);

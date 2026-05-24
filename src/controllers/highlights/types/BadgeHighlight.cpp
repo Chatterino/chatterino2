@@ -19,76 +19,6 @@ BadgeHighlight::BadgeHighlight(QStringView _id)
     this->rebuildBadgeCheck();
 }
 
-bool BadgeHighlight::isEnabled() const
-{
-    return this->enabled.value_or(true);
-}
-
-bool BadgeHighlight::shouldShowInMentions() const
-{
-    return this->showInMentions.value_or(true);
-}
-
-void BadgeHighlight::setShowInMentions(std::optional<bool> newValue)
-{
-    this->showInMentions = newValue;
-}
-
-bool BadgeHighlight::shouldHighlightTaskbar() const
-{
-    return this->alert.value_or(true);
-}
-
-void BadgeHighlight::setHighlightTaskbar(std::optional<bool> newValue)
-{
-    this->alert = newValue;
-}
-
-bool BadgeHighlight::shouldPlaySound() const
-{
-    return this->playSound.value_or(false);
-}
-
-void BadgeHighlight::setPlaySound(std::optional<bool> newValue)
-{
-    this->playSound = newValue;
-}
-
-QUrl BadgeHighlight::getSoundUrl() const
-{
-    return this->customSoundURL;
-}
-
-void BadgeHighlight::setSoundUrl(const QUrl &newValue)
-{
-    this->customSoundURL = newValue;
-}
-
-std::shared_ptr<QColor> BadgeHighlight::getBackgroundColor() const
-{
-    return this->backgroundColor;
-}
-
-void BadgeHighlight::setBackgroundColor(const QColor &newValue)
-{
-    this->backgroundColor = std::make_shared<QColor>(newValue);
-}
-
-void BadgeHighlight::debug() const
-{
-    qInfo() << "XXX: DEBUG UDH" << *this;
-}
-
-bool BadgeHighlight::willPlayAnySound() const
-{
-    return this->playSound.value_or(false);
-}
-
-bool BadgeHighlight::willPlayCustomSound() const
-{
-    return this->willPlayAnySound() && !this->customSoundURL.isEmpty();
-}
-
 HighlightCheck BadgeHighlight::buildCheck() const
 {
     return {
@@ -108,11 +38,14 @@ HighlightCheck BadgeHighlight::buildCheck() const
                 if (highlight.isMatch(badge))
                 {
                     return HighlightResult{
-                        highlight.shouldHighlightTaskbar(),
-                        highlight.shouldPlaySound(),
-                        highlight.customSoundURL,
-                        highlight.backgroundColor,
-                        highlight.shouldShowInMentions(),
+                        highlight.outcome.alert.value_or(
+                            BadgeHighlight::ALERT_DEFAULT),
+                        highlight.outcome.playSound.value_or(
+                            BadgeHighlight::PLAY_SOUND_DEFAULT),
+                        highlight.outcome.customSoundURL,
+                        highlight.outcome.backgroundColor,
+                        highlight.outcome.showInMentions.value_or(
+                            BadgeHighlight::SHOW_IN_MENTIONS_DEFAULT),
                     };
                 }
             }
@@ -160,21 +93,11 @@ bool BadgeHighlight::compare(const QString &id, const TwitchBadge &badge) const
 
 QDebug operator<<(QDebug dbg, const BadgeHighlight &v)
 {
-    const auto &backgroundColorPtr = v.getBackgroundColor();
-    QColor backgroundColor;
-    if (backgroundColorPtr)
-    {
-        backgroundColor = *backgroundColorPtr;
-    }
     dbg.nospace() << "BadgeHighlight("
                   << "name:" << v.name << ',' << "badgeName:" << v.badgeName
                   << ',' << "displayName:" << v.displayName << ','
                   << "enabled:" << v.enabled << ','
-                  << "showInMentions:" << v.shouldShowInMentions() << ','
-                  << "alert:" << v.shouldHighlightTaskbar() << ','
-                  << "playSound:" << v.playSound << ','
-                  << "customSoundURL:" << v.getSoundUrl() << ','
-                  << "backgroundColor:" << backgroundColor << ')';
+                  << "playSound:" << v.outcome.playSound << ')';
 
     return dbg;
 }

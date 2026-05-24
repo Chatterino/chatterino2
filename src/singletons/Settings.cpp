@@ -90,34 +90,34 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableSelfHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         if (const auto &s = this->showSelfHighlightInMentions;
             s.hasValueBeenSet())
         {
-            h.setShowInMentions(s.getValue());
+            h.outcome.showInMentions = s.getValue();
         }
 
         if (const auto &s = this->enableSelfHighlightTaskbar;
             s.hasValueBeenSet())
         {
-            h.setHighlightTaskbar(s.getValue());
+            h.outcome.alert = s.getValue();
         }
 
         if (const auto &s = this->enableSelfHighlightSound; s.hasValueBeenSet())
         {
-            h.setPlaySound(s.getValue());
+            h.outcome.playSound = s.getValue();
         }
 
         if (const auto &s = this->selfHighlightSoundUrl; s.hasValueBeenSet())
         {
-            h.setSoundUrl(s.getValue());
+            h.outcome.customSoundURL = s.getValue();
         }
 
         if (const auto &s = this->selfHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -128,7 +128,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableWhisperHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // Whisper highlights do not support "show in mentions" - no setting to migrate
@@ -136,23 +136,23 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableWhisperHighlightTaskbar;
             s.hasValueBeenSet())
         {
-            h.setHighlightTaskbar(s.getValue());
+            h.outcome.alert = s.getValue();
         }
 
         if (const auto &s = this->enableWhisperHighlightSound;
             s.hasValueBeenSet())
         {
-            h.setPlaySound(s.getValue());
+            h.outcome.playSound = s.getValue();
         }
 
         if (const auto &s = this->whisperHighlightSoundUrl; s.hasValueBeenSet())
         {
-            h.setSoundUrl(s.getValue());
+            h.outcome.customSoundURL = s.getValue();
         }
 
         if (const auto &s = this->whisperHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -163,7 +163,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableSubHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // Sub highlights do not support "show in mentions" - no setting to migrate
@@ -171,22 +171,22 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableSubHighlightTaskbar;
             s.hasValueBeenSet())
         {
-            h.setHighlightTaskbar(s.getValue());
+            h.outcome.alert = s.getValue();
         }
 
         if (const auto &s = this->enableSubHighlightSound; s.hasValueBeenSet())
         {
-            h.setPlaySound(s.getValue());
+            h.outcome.playSound = s.getValue();
         }
 
         if (const auto &s = this->subHighlightSoundUrl; s.hasValueBeenSet())
         {
-            h.setSoundUrl(s.getValue());
+            h.outcome.customSoundURL = s.getValue();
         }
 
         if (const auto &s = this->subHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -197,7 +197,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableRedeemedHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // This does not support "show in mentions" - no setting to migrate
@@ -206,7 +206,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->redeemedHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -218,7 +218,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableFirstMessageHighlight;
             s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // This does not support "show in mentions" - no setting to migrate
@@ -228,7 +228,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->firstMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -240,7 +240,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableElevatedMessageHighlight;
             s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // This does not support "show in mentions" - no setting to migrate
@@ -250,7 +250,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->elevatedMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -262,35 +262,35 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableThreadHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         if (const auto &s = this->showThreadHighlightInMentions;
             s.hasValueBeenSet())
         {
-            h.setShowInMentions(s.getValue());
+            h.outcome.showInMentions = s.getValue();
         }
 
         if (const auto &s = this->enableThreadHighlightTaskbar;
             s.hasValueBeenSet())
         {
-            h.setHighlightTaskbar(s.getValue());
+            h.outcome.alert = s.getValue();
         }
 
         if (const auto &s = this->enableThreadHighlightSound;
             s.hasValueBeenSet())
         {
-            h.setPlaySound(s.getValue());
+            h.outcome.playSound = s.getValue();
         }
 
         if (const auto &s = this->threadHighlightSoundUrl; s.hasValueBeenSet())
         {
-            h.setSoundUrl(s.getValue());
+            h.outcome.customSoundURL = s.getValue();
         }
 
         if (const auto &s = this->threadHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -302,34 +302,34 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->enableAutomodHighlight; s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         if (const auto &s = this->showAutomodInMentions; s.hasValueBeenSet())
         {
-            h.setShowInMentions(s.getValue());
+            h.outcome.showInMentions = s.getValue();
         }
 
         if (const auto &s = this->enableAutomodHighlightTaskbar;
             s.hasValueBeenSet())
         {
-            h.setHighlightTaskbar(s.getValue());
+            h.outcome.alert = s.getValue();
         }
 
         if (const auto &s = this->enableAutomodHighlightSound;
             s.hasValueBeenSet())
         {
-            h.setPlaySound(s.getValue());
+            h.outcome.playSound = s.getValue();
         }
 
         if (const auto &s = this->automodHighlightSoundUrl; s.hasValueBeenSet())
         {
-            h.setSoundUrl(s.getValue());
+            h.outcome.customSoundURL = s.getValue();
         }
 
         if (const auto &s = this->automodHighlightColor; s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -341,7 +341,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableWatchStreakHighlight;
             s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         // This does not support "show in mentions" - no setting to migrate
@@ -351,7 +351,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->watchStreakHighlightColor;
             s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -363,13 +363,13 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->enableSelfMessageHighlight;
             s.hasValueBeenSet())
         {
-            h.setEnabled(s.getValue());
+            h.enabled = s.getValue();
         }
 
         if (const auto &s = this->showSelfMessageHighlightInMentions;
             s.hasValueBeenSet())
         {
-            h.setShowInMentions(s.getValue());
+            h.outcome.showInMentions = s.getValue();
         }
 
         // This does not support "flash taskbar" - no setting to migrate
@@ -378,7 +378,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->selfMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.setBackgroundColor(s.getValue());
+            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -405,18 +405,18 @@ void Settings::migrateHighlights(bool isTest)
         MessageHighlight to{generatedId};
 
         to.setPattern(from.getPattern());
-        to.setShowInMentions(from.showInMentions());
-        to.setHighlightTaskbar(from.hasAlert());
+        to.outcome.showInMentions = from.showInMentions();
+        to.outcome.alert = from.hasAlert();
         to.setRegex(from.isRegex());
         to.setCaseSensitive(from.isCaseSensitive());
-        to.setPlaySound(from.hasSound());
+        to.outcome.playSound = from.hasSound();
         if (from.hasCustomSound())
         {
-            to.setSoundUrl(from.getSoundUrl());
+            to.outcome.customSoundURL = from.getSoundUrl();
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.setBackgroundColor(*fromColor);
+            to.outcome.backgroundColor = fromColor;
         }
 
         this->sharedHighlightsSetting.push_back(to);
@@ -439,16 +439,16 @@ void Settings::migrateHighlights(bool isTest)
         UserHighlight to{generatedId};
 
         to.setUsername(from.getPattern());
-        to.setShowInMentions(from.showInMentions());
-        to.setHighlightTaskbar(from.hasAlert());
-        to.setPlaySound(from.hasSound());
+        to.outcome.showInMentions = from.showInMentions();
+        to.outcome.alert = from.hasAlert();
+        to.outcome.playSound = from.hasSound();
         if (from.hasCustomSound())
         {
-            to.setSoundUrl(from.getSoundUrl());
+            to.outcome.customSoundURL = from.getSoundUrl();
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.setBackgroundColor(*fromColor);
+            to.outcome.backgroundColor = fromColor;
         }
 
         this->sharedHighlightsSetting.push_back(to);
@@ -472,16 +472,16 @@ void Settings::migrateHighlights(bool isTest)
 
         to.setBadgeName(from.badgeName());
         to.setDisplayName(from.displayName());
-        to.setShowInMentions(from.showInMentions());
-        to.setHighlightTaskbar(from.hasAlert());
-        to.setPlaySound(from.hasSound());
+        to.outcome.showInMentions = from.showInMentions();
+        to.outcome.alert = from.hasAlert();
+        to.outcome.playSound = from.hasSound();
         if (from.hasCustomSound())
         {
-            to.setSoundUrl(from.getSoundUrl());
+            to.outcome.customSoundURL = from.getSoundUrl();
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.setBackgroundColor(*fromColor);
+            to.outcome.backgroundColor = fromColor;
         }
 
         this->sharedHighlightsSetting.push_back(to);

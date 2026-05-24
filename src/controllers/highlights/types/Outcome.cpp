@@ -39,7 +39,14 @@ bool Outcome::deserialize(const rapidjson::Value &value)
 
     QString tmpBackgroundColor;
     chatterino::rj::getSafe(value, "backgroundColor", tmpBackgroundColor);
-    this->backgroundColor = std::make_shared<QColor>(tmpBackgroundColor);
+    if (this->backgroundColor)
+    {
+        *this->backgroundColor = QColor{tmpBackgroundColor};
+    }
+    else
+    {
+        this->backgroundColor = std::make_shared<QColor>(tmpBackgroundColor);
+    }
 
     return true;
 }
