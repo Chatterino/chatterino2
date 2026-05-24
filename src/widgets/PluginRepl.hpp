@@ -74,8 +74,8 @@ private:
             .light = ":/buttons/pinDisabled-lightMode.svg",
         };
         SvgButton::Src pinEnabledSource_{
-            .dark = ":/buttons/pinEnabled.svg",
-            .light = ":/buttons/pinEnabled.svg",
+            .dark = ":/buttons/pinnedMessage-chat.svg",
+            .light = ":/buttons/pinnedMessage-chat.svg",
         };
     } ui;
 

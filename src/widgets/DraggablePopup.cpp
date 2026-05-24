@@ -5,6 +5,7 @@
 #include "widgets/DraggablePopup.hpp"
 
 #include "buttons/SvgButton.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QMouseEvent>
 #include <QWindow>
@@ -113,11 +114,22 @@ void DraggablePopup::togglePinned()
         this->pinButton_->setSource(this->pinDisabledSource_);
     }
 }
+void DraggablePopup::themeChangedEvent()
+{
+    BaseWindow::themeChangedEvent();
+
+    if (this->pinButton_)
+    {
+        this->pinButton_->setColor(this->theme->isLightTheme() ? QColor(0x4d, 0x4d, 0x4d) : QColor(0xb7, 0xb7, 0xb7));
+    }
+}
+
 Button *DraggablePopup::createPinButton()
 {
     this->pinButton_ = new SvgButton(this->pinDisabledSource_, this, {3, 3});
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
+    this->pinButton_->setColor(this->theme->isLightTheme() ? QColor(0x4d, 0x4d, 0x4d) : QColor(0xb7, 0xb7, 0xb7));
 
     QObject::connect(this->pinButton_, &Button::leftClicked, this,
                      &DraggablePopup::togglePinned);

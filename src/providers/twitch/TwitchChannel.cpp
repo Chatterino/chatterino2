@@ -773,6 +773,7 @@ void TwitchChannel::roomIdChanged()
     this->listenSevenTVCosmetics();
     getApp()->getTwitchLiveController()->add(
         std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
+    this->refreshPinnedMessage();
 }
 
 QString TwitchChannel::prepareMessage(const QString &message) const
@@ -926,6 +927,12 @@ void TwitchChannel::setMod(bool value)
         this->mod_ = value;
 
         this->userStateChanged.invoke();
+
+        if (value)
+        {
+            // Gained mod privileges — fetch the current pin
+            this->refreshPinnedMessage();
+        }
     }
 }
 
@@ -1587,6 +1594,7 @@ void TwitchChannel::refreshPubSub()
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
+    getApp()->getTwitchPubSub()->listenToPinnedChatUpdates(roomId);
 
     if (currentAccount->isAnon())
     {
@@ -2548,6 +2556,131 @@ void TwitchChannel::setSendWait(int seconds)
 bool TwitchChannel::isLoadingRecentMessages() const
 {
     return this->loadingRecentMessages_.test();
+}
+
+void TwitchChannel::refreshPinnedMessage()
+{
+    if (!this->hasModRights())
+    {
+        return;
+    }
+
+    auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
+    if (!currentAccount || currentAccount->isAnon())
+    {
+        return;
+    }
+
+    getHelix()->getPinnedChatMessage(
+        this->roomId(), currentAccount->getUserId(),
+        [this](std::optional<HelixPinnedChatMessage> msg) {
+            // Preserve a client-side endsAt if the API doesn't return one
+            if (msg && this->pinnedMessage_ && !msg->endsAt &&
+                this->pinnedMessage_->endsAt &&
+                *this->pinnedMessage_->endsAt >
+                    QDateTime::currentDateTimeUtc())
+            {
+                msg->endsAt = this->pinnedMessage_->endsAt;
+            }
+            this->pinnedMessage_ = std::move(msg);
+            this->pinnedMessageChanged.invoke();
+        },
+        [](const QString &error) {
+            qCWarning(chatterinoTwitch)
+                << "Failed to fetch pinned message:" << error;
+        });
+}
+
+std::optional<HelixPinnedChatMessage> TwitchChannel::getPinnedMessage() const
+{
+    return this->pinnedMessage_;
+}
+
+void TwitchChannel::clearPinnedMessage()
+{
+    if (!this->pinnedMessage_)
+    {
+        return;
+    }
+    this->pinnedMessage_ = std::nullopt;
+    this->pinnedMessageChanged.invoke();
+}
+
+void TwitchChannel::pinMessage(const QString &messageId,
+                               std::optional<int> durationSeconds)
+{
+    auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
+    if (!currentAccount || currentAccount->isAnon())
+    {
+        return;
+    }
+
+    const bool alreadyPinned = this->pinnedMessage_ &&
+                               this->pinnedMessage_->messageID == messageId;
+
+    // optimistic local update
+    if (this->pinnedMessage_)
+    {
+        this->pinnedMessage_->endsAt =
+            durationSeconds
+                ? std::make_optional(
+                      QDateTime::currentDateTimeUtc().addSecs(*durationSeconds))
+                : std::nullopt;
+        this->pinnedMessageChanged.invoke();
+    }
+
+    std::function<void()> onSuccess = [this] {
+        this->refreshPinnedMessage();
+    };
+
+    auto onFailure = [](HelixPinMessageError /*error*/,
+                        const QString &message) {
+        qCWarning(chatterinoTwitch) << "Failed to pin message:" << message;
+    };
+
+    std::optional<std::chrono::seconds> duration =
+        durationSeconds ? std::make_optional(std::chrono::seconds(*durationSeconds))
+                        : std::nullopt;
+
+    if (alreadyPinned)
+    {
+        // Use PATCH to update an already pinned message (including removing the duration)
+        getHelix()->updatePinnedChatMessage(
+            this->roomId(), currentAccount->getUserId(), messageId,
+            duration, onSuccess, onFailure);
+    }
+    else
+    {
+        getHelix()->pinChatMessage(
+            this->roomId(), currentAccount->getUserId(), messageId,
+            duration, onSuccess, onFailure);
+    }
+}
+
+void TwitchChannel::unpinCurrentMessage()
+{
+    if (!this->pinnedMessage_)
+    {
+        return;
+    }
+
+    auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
+    if (!currentAccount || currentAccount->isAnon())
+    {
+        return;
+    }
+
+    const auto msgId = this->pinnedMessage_->messageID;
+    getHelix()->unpinChatMessage(
+        this->roomId(), currentAccount->getUserId(), msgId,
+        [this] {
+            this->pinnedMessage_ = std::nullopt;
+            this->pinnedMessageChanged.invoke();
+        },
+        [](HelixUnpinMessageError /*error*/, const QString &message) {
+            qCWarning(chatterinoTwitch)
+                << "Failed to unpin message:" << message;
+        });
 }
 
 }  // namespace chatterino

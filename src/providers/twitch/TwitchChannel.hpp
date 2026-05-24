@@ -12,6 +12,7 @@
 #include "common/UniqueAccess.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
@@ -400,6 +401,35 @@ public:
 
     bool isLoadingRecentMessages() const;
 
+    // Pinned message
+    /**
+     * Fetches the currently pinned message for this channel via the Helix API.
+     * Only has effect when the local user has moderator privileges.
+     */
+    void refreshPinnedMessage();
+
+    /**
+     * Clears the pinned message for this channel immediately (e.g. on unpin
+     * PubSub event).
+     */
+    void clearPinnedMessage();
+
+    std::optional<HelixPinnedChatMessage> getPinnedMessage() const;
+
+    /**
+     * Pin the given message. Only valid for moderators.
+     * durationSeconds is the pin duration in seconds (nullopt = until stream ends).
+     */
+    void pinMessage(const QString &messageId, std::optional<int> durationSeconds);
+
+    /**
+     * Unpin the currently pinned message. Only valid for moderators.
+     */
+    void unpinCurrentMessage();
+
+    /// Fires when the pinned message changes (set, cleared, or updated).
+    pajlada::Signals::NoArgSignal pinnedMessageChanged;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -601,6 +631,8 @@ private:
     eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
+    std::optional<HelixPinnedChatMessage> pinnedMessage_;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;
