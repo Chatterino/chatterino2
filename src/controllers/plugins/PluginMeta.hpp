@@ -41,6 +41,17 @@ struct PluginMeta {
 
     std::vector<PluginPermission> permissions;
 
+    /// Extra fields ignored by Chatterino but preserved when re-exporting.
+    ///
+    /// Key: "private"
+    QJsonObject privateFields;
+
+    /// The URL to the meta.json. For local plugins this is empty. If this URL
+    /// is added in the settings, the plugin can be updated through the UI.
+    ///
+    /// Key: "remote"
+    QString remoteBaseURL;
+
     // errors that occurred while parsing info.json
     std::vector<QString> errors;
 
@@ -49,9 +60,18 @@ struct PluginMeta {
         return this->errors.empty();
     }
 
+    /// Is this meta from the same source as `remote`?
+    ///
+    /// Plugins are considered from the same source if they are installed from
+    /// the same base URL.
+    bool isRelatedTo(const PluginMeta &otherMeta,
+                     QString *conflicts = nullptr) const;
+
     explicit PluginMeta(const QJsonObject &obj);
     // This is for tests
     PluginMeta() = default;
+
+    QJsonObject toJson() const;
 };
 
 }  // namespace chatterino
