@@ -22,6 +22,7 @@
 #    include <QVBoxLayout>
 
 #    include <algorithm>
+#    include <span>
 
 namespace {
 
