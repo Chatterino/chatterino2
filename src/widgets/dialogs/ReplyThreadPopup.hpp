@@ -55,7 +55,7 @@ private:
     } ui_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
+    pajlada::Signals::ScopedConnection currentUserConnection_;
     pajlada::Signals::ScopedConnection replySubscriptionSignal_;
 };
 

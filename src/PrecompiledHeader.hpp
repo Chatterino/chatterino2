@@ -4,7 +4,6 @@
 
 #ifdef __cplusplus
 #    include <boost/circular_buffer.hpp>
-#    include <boost/signals2.hpp>
 #    include <IrcCommand>
 #    include <IrcConnection>
 #    include <IrcMessage>

@@ -10,7 +10,6 @@
     "boost-date-time",
     "boost-interprocess",
     "boost-json",
-    "boost-signals2",
     "hunspell",
     "pkgconf",
     {
