@@ -49,5 +49,12 @@ QString PluginPermission::toHtml() const
     }
 }
 
+QJsonObject PluginPermission::toJson() const
+{
+    return QJsonObject{
+        {"type", qmagicenum::enumNameString(this->type)},
+    };
+}
+
 }  // namespace chatterino
 #endif

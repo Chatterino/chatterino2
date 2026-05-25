@@ -31,6 +31,8 @@
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 #    include "singletons/WindowManager.hpp"
+#    include "util/files/ZipArchive.hpp"
+#    include "util/FilesystemHelpers.hpp"
 #    include "widgets/splits/SplitContainer.hpp"
 #    include "widgets/Window.hpp"
 
@@ -49,6 +51,8 @@
 #    include <variant>
 
 namespace chatterino {
+
+using namespace Qt::Literals;
 
 PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
@@ -312,6 +316,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
+    this->queueChangeNotification();
 
     if (getApp()->getArgs().safeMode)
     {
@@ -363,6 +368,136 @@ bool PluginController::reload(const QString &id)
     this->plugins_.erase(id);
     this->tryLoadFromDir(loadDir);
     return true;
+}
+
+ExpectedStr<void> PluginController::removePlugin(const QString &id,
+                                                 bool eraseData)
+{
+    auto it = this->plugins_.find(id);
+    if (it == this->plugins_.end())
+    {
+        return makeUnexpected("Plugin not found");
+    }
+
+    QDir loadDirectory = it->second->loadDirectory();
+    this->plugins_.erase(it);
+    this->queueChangeNotification();
+
+    if (eraseData)
+    {
+        qCDebug(chatterinoLua)
+            << "Recursively removing" << loadDirectory.absolutePath();
+        if (!loadDirectory.removeRecursively())
+        {
+            return makeUnexpected(u"Failed to remove directory"_s);
+        }
+    }
+    else
+    {
+        const auto items = loadDirectory.entryInfoList(QDir::AllEntries |
+                                                       QDir::NoDotAndDotDot);
+        for (const auto &entry : items)
+        {
+            if (entry.fileName() == "data")
+            {
+                continue;
+            }
+
+            qCDebug(chatterinoLua) << "Removing" << entry.absoluteFilePath();
+
+            bool ok = false;
+            if (entry.isDir())
+            {
+                ok = QDir(entry.absoluteFilePath()).removeRecursively();
+            }
+            else
+            {
+                ok = loadDirectory.remove(entry.fileName());
+            }
+
+            if (!ok)
+            {
+                return makeUnexpected(u"Failed to remove '" % entry.fileName() %
+                                      "'");
+            }
+        }
+    }
+
+    auto vec = getSettings()->enabledPlugins.getValue();
+    std::erase(vec, id);
+    getSettings()->enabledPlugins.setValue(vec);
+
+    return {};
+}
+
+ExpectedStr<void> PluginController::loadFromZip(const QString &id,
+                                                const LoadFromZipArgs &args)
+{
+    auto existingIt = this->plugins_.find(id);
+    if (existingIt != this->plugins_.end())
+    {
+        if (args.update)
+        {
+            QString conflicts;
+            if (!existingIt->second->meta.isRelatedTo(args.newMetadata,
+                                                      &conflicts))
+            {
+                return makeUnexpected(
+                    u"Plugin was installed from a different source: " %
+                    conflicts);
+            }
+        }
+        else if (args.onExistingOverwrite)
+        {
+            if (!args.onExistingOverwrite())
+            {
+                // The user should know about it - don't show a new error.
+                return {};
+            }
+        }
+        else
+        {
+            return makeUnexpected(u"Plugin already exists"_s);
+        }
+
+        auto err = this->removePlugin(id, /*eraseData=*/false);
+        if (!err)
+        {
+            return err;
+        }
+    }
+
+    auto pluginDir =
+        qStringToStdPath(this->paths.pluginsDirectory) / qStringToStdPath(id);
+    std::error_code ec;
+    std::filesystem::create_directories(pluginDir, ec);
+    if (ec)
+    {
+        return makeUnexpected(u"Failed to create plugin directory: " %
+                              QString::fromStdString(ec.message()));
+    }
+    auto res = args.zip.extractTo(pluginDir);
+    if (!res)
+    {
+        return makeUnexpected(u"Failed to extract archive: " % res.error());
+    }
+
+    {
+        QFile metaFile(stdPathToQString(pluginDir / "info.json"));
+        if (!metaFile.open(QFile::WriteOnly))
+        {
+            return makeUnexpected(u"Failed to open info.json for writing: " %
+                                  metaFile.errorString());
+        }
+        metaFile.write(QJsonDocument(args.newMetadata.toJson()).toJson());
+    }
+
+    bool ok = this->tryLoadFromDir(pluginDir);
+    if (!ok)
+    {
+        return makeUnexpected("Failed to load plugin from directory");
+    }
+    return {};
 }
 
 QString PluginController::tryExecPluginCommand(const QString &commandName,
@@ -429,6 +564,16 @@ Plugin *PluginController::getPluginByStatePtr(lua_State *L)
     return nullptr;
 }
 
+Plugin *PluginController::getPluginByID(const QString &id)
+{
+    auto it = this->plugins_.find(id);
+    if (it != this->plugins_.end())
+    {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
 const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
     const
 {
@@ -488,6 +633,22 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 WebSocketPool &PluginController::webSocketPool()
 {
     return this->webSocketPool_;
+}
+
+void PluginController::queueChangeNotification()
+{
+    if (this->changeNotificationQueued)
+    {
+        return;
+    }
+    this->changeNotificationQueued = true;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this] {
+            this->changeNotificationQueued = false;
+            this->pluginsUpdated.invoke();
+        },
+        Qt::QueuedConnection);
 }
 
 }  // namespace chatterino

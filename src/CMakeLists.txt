@@ -303,6 +303,10 @@ set(SOURCE_FILES
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/PluginRef.cpp
         controllers/plugins/PluginRef.hpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/RemotePlugin.cpp
+        controllers/plugins/RemotePlugin.hpp
         controllers/plugins/SolTypes.cpp
         controllers/plugins/SolTypes.hpp
 
@@ -623,6 +627,9 @@ set(SOURCE_FILES
         util/XDGHelper.cpp
         util/XDGHelper.hpp
 
+        util/files/ZipArchive.cpp
+        util/files/ZipArchive.hpp
+
         util/serialize/Container.hpp
 
         widgets/AccountSwitchPopup.cpp
@@ -717,6 +724,8 @@ set(SOURCE_FILES
         widgets/dialogs/LoginDialog.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
+        widgets/dialogs/RemotePluginDialog.cpp
+        widgets/dialogs/RemotePluginDialog.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
         widgets/dialogs/RestoreBackupsDialog.cpp
@@ -960,7 +969,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         BoostCertify
         )
 if (CHATTERINO_PLUGINS)
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2 zip::zip)
 endif()
 
 if (CHATTERINO_SPELLCHECK)
