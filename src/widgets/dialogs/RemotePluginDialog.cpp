@@ -197,7 +197,7 @@ void RemotePluginDialog::refreshButtons()
 {
     // Clear layout
     {
-        QLayoutItem *child = nullptr;
+        const QLayoutItem *child = nullptr;
         while ((child = this->buttonLayout.takeAt(0)) != nullptr)
         {
             delete child->widget();

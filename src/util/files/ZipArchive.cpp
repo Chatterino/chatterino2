@@ -2,9 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "util/files/ZipArchive.hpp"
-
 #ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include "util/files/ZipArchive.hpp"
+
+#    include "util/FilesystemHelpers.hpp"
 
 #    include <QByteArray>
 #    include <QString>
@@ -50,10 +52,11 @@ public:
     ExpectedStr<void> openEntry(size_t n);
 
     std::string_view entryName();
-    ExpectedStr<bool> entryIsSymlink();
     size_t entryUncompressedSize();
+    ExpectedStr<bool> entryIsDirectory();
 
     ExpectedStr<QByteArray> extractEntry();
+    ExpectedStr<void> extractEntry(QFile &file);
 
     void destroy();
 
@@ -65,7 +68,7 @@ private:
 
 auto stringifyError(int err)
 {
-    return makeUnexpected(QLatin1StringView(zip_strerror(err)));
+    return makeUnexpected(QString(zip_strerror(err)));
 }
 
 KubaZip::~KubaZip()
@@ -130,19 +133,19 @@ std::string_view KubaZip::entryName()
     return ptr;
 }
 
-ExpectedStr<bool> KubaZip::entryIsSymlink()
+size_t KubaZip::entryUncompressedSize()
 {
-    int ret = zip_entry_issymlink(this->zip);
+    return zip_entry_uncomp_size(this->zip);
+}
+
+ExpectedStr<bool> KubaZip::entryIsDirectory()
+{
+    auto ret = zip_entry_isdir(this->zip);
     if (ret < 0)
     {
         return stringifyError(ret);
     }
     return ret != 0;
-}
-
-size_t KubaZip::entryUncompressedSize()
-{
-    return zip_entry_uncomp_size(this->zip);
 }
 
 ExpectedStr<QByteArray> KubaZip::extractEntry()
@@ -162,6 +165,29 @@ ExpectedStr<QByteArray> KubaZip::extractEntry()
         return stringifyError(ret);
     }
     return ba;
+}
+
+ExpectedStr<void> KubaZip::extractEntry(QFile &file)
+{
+    int ret = zip_entry_extract(
+        this->zip,
+        +[](void *arg, uint64_t /*offset*/, const void *data,
+            size_t size) -> size_t {
+            auto *f = static_cast<QFile *>(arg);
+            auto written = f->write(static_cast<const char *>(data),
+                                    static_cast<qint64>(size));
+            if (written < 0)
+            {
+                return 0;
+            }
+            return static_cast<size_t>(written);
+        },
+        std::addressof(file));
+    if (ret < 0)
+    {
+        return stringifyError(ret);
+    }
+    return {};
 }
 
 void KubaZip::destroy()
@@ -187,15 +213,11 @@ constexpr qsizetype MAX_ZIP_SIZE = 20LL * (1 << 20);  // 20 MiB
 
 bool isAcceptedEntry(KubaZip &zip)
 {
-    if (zip.entryIsSymlink().value_or(true))
-    {
-        return false;
-    }
-
     // Check for weird names that reference parent directories.
     std::string_view nameView = zip.entryName();
-    if (nameView.starts_with("..") || nameView.ends_with("/..") ||
-        nameView.contains("\\") || nameView.contains("/../") ||
+    if (nameView.empty() || nameView.starts_with("..") ||
+        nameView.ends_with("/..") || nameView.contains("\\") ||
+        nameView.contains("/../") ||
         nameView.starts_with('/') ||                  // Absolute paths
         (nameView.size() >= 2 && nameView[1] == ':')  // C:
     )
@@ -302,21 +324,91 @@ ExpectedStr<QByteArray> ZipArchive::readEntry(const char *name)
     return this->private_->zip.extractEntry();
 }
 
-ExpectedStr<void> ZipArchive::extractTo(const std::filesystem::path &directory)
+ExpectedStr<void> ZipArchive::extractTo(
+    const std::filesystem::path &baseDirectory)
 {
-    if (!this->private_ || this->private_->backingMemory.isEmpty())
+    if (!this->private_)
     {
         return makeUnexpected(u"No file"_s);
     }
 
-    QByteArrayView buf(this->private_->backingMemory);
-    int ret =
-        zip_stream_extract(buf.constData(), static_cast<size_t>(buf.size()),
-                           directory.string().c_str(), nullptr, nullptr);
-    if (ret < 0)
+    auto &zip = this->private_->zip;
+    auto nEntries = zip.size();
+    if (!nEntries)
     {
-        return stringifyError(ret);
+        return makeUnexpected(std::move(nEntries).error());
     }
+
+    std::error_code ec;
+    auto makePathEcError = [&](auto &&str, const auto &path) {
+        QString err(std::forward<decltype(str)>(str));
+        err += stdPathToQString(path);
+        err += u"': ";
+        err += QUtf8StringView(ec.message());
+        return makeUnexpected(std::move(err));
+    };
+
+    auto directory = std::filesystem::weakly_canonical(baseDirectory, ec);
+    if (ec)
+    {
+        return makePathEcError(u"Failed to canonicalize '"_s, baseDirectory);
+    }
+
+    for (size_t i = 0; i < *nEntries; ++i)
+    {
+        auto res = zip.openEntry(i);
+        if (!res)
+        {
+            return res;
+        }
+        if (zip.entryIsDirectory().value_or(true))
+        {
+            continue;  // Ignore it
+        }
+
+        auto name = zip.entryName();
+        if (name.empty())
+        {
+            continue;
+        }
+
+        auto entryPath =
+            std::filesystem::weakly_canonical(directory / name, ec);
+        if (ec)
+        {
+            return makePathEcError(u"Failed to canonicalize '"_s,
+                                   baseDirectory);
+        }
+        auto qEntryPath = stdPathToQString(entryPath);
+        if (!entryPath.native().starts_with(directory.native()))
+        {
+            return makeUnexpected('\'' % qEntryPath %
+                                  u"' lies outside of extaction directory '" %
+                                  stdPathToQString(directory) % '\'');
+        }
+
+        auto entryDir = entryPath.parent_path();
+        std::filesystem::create_directories(entryDir, ec);
+        if (ec)
+        {
+            return makePathEcError(u"Failed to create directories '"_s,
+                                   baseDirectory);
+        }
+
+        QFile f(qEntryPath);
+        if (!f.open(QFile::WriteOnly | QFile::Truncate))
+        {
+            return makeUnexpected(u"Failed to open '" % qEntryPath %
+                                  u"' for writing: " % f.errorString());
+        }
+        res = zip.extractEntry(f);
+        if (!res)
+        {
+            return makeUnexpected(u"Failed to extract to '" % qEntryPath %
+                                  u"': " % res.error());
+        }
+    }
+
     return {};
 }
 

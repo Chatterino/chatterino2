@@ -26,7 +26,7 @@ public:
 
     ExpectedStr<QByteArray> readEntry(const char *name);
 
-    ExpectedStr<void> extractTo(const std::filesystem::path &directory);
+    ExpectedStr<void> extractTo(const std::filesystem::path &baseDirectory);
 
 private:
     std::unique_ptr<ZipArchivePrivate> private_;

@@ -13,6 +13,7 @@
 #    include <QString>
 
 #    include <memory>
+#    include <span>
 #    include <vector>
 
 namespace chatterino {

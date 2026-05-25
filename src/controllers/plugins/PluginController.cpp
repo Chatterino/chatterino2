@@ -394,8 +394,9 @@ ExpectedStr<void> PluginController::removePlugin(const QString &id,
     }
     else
     {
-        for (const auto &entry : loadDirectory.entryInfoList(
-                 QDir::AllEntries | QDir::NoDotAndDotDot))
+        const auto items = loadDirectory.entryInfoList(QDir::AllEntries |
+                                                       QDir::NoDotAndDotDot);
+        for (const auto &entry : items)
         {
             if (entry.fileName() == "data")
             {
