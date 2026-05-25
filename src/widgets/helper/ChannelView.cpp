@@ -2756,6 +2756,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                 twitchChannel->deleteMessagesAs(
                     id, getApp()->getAccounts()->twitch.getCurrent().get());
             });
+
         auto *pinAction = moderateMenu->addAction("&Pin");
         auto *pinMenu = new QMenu(moderateMenu);
         pinAction->setMenu(pinMenu);

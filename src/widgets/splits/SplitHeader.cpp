@@ -859,10 +859,10 @@ void SplitHeader::handleChannelChanged()
                 auto ch = this->split_->getChannel();
                 auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
                 this->updatePinButton(tc &&
-                                      tc->getPinnedMessage().has_value());
+                                      tc->getPinnedMessage() != nullptr);
             });
 
-        this->updatePinButton(twitchChannel->getPinnedMessage().has_value());
+        this->updatePinButton(twitchChannel->getPinnedMessage() != nullptr);
     }
     else
     {

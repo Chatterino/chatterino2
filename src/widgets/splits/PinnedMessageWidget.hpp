@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+﻿// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -33,6 +33,7 @@ public:
     [[nodiscard]] bool hasPinnedMessage() const;
 
 private:
+    void paintEvent(QPaintEvent *event) override;
     void refresh();
     void showModMenu();
     void tickProgress();
@@ -43,7 +44,7 @@ private:
     // Header row
     class QLabel *pinnedByLabel_;
     class QLabel *countdownLabel_;
-    class QPushButton *menuButton_;  // ⋮ mod menu
+    class LabelButton *menuButton_;  // ⁝ mod menu
 
     // Body
     class QTextEdit *messageLabel_;

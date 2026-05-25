@@ -930,7 +930,7 @@ void TwitchChannel::setMod(bool value)
 
         if (value)
         {
-            // Gained mod privileges — fetch the current pin
+            // Gained mod privileges - fetch the current pin
             this->refreshPinnedMessage();
         }
     }
@@ -2560,11 +2560,6 @@ bool TwitchChannel::isLoadingRecentMessages() const
 
 void TwitchChannel::refreshPinnedMessage()
 {
-    if (!this->hasModRights())
-    {
-        return;
-    }
-
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
     if (!currentAccount || currentAccount->isAnon())
     {
@@ -2574,15 +2569,9 @@ void TwitchChannel::refreshPinnedMessage()
     getHelix()->getPinnedChatMessage(
         this->roomId(), currentAccount->getUserId(),
         [this](std::optional<HelixPinnedChatMessage> msg) {
-            // Preserve a client-side endsAt if the API doesn't return one
-            if (msg && this->pinnedMessage_ && !msg->endsAt &&
-                this->pinnedMessage_->endsAt &&
-                *this->pinnedMessage_->endsAt >
-                    QDateTime::currentDateTimeUtc())
-            {
-                msg->endsAt = this->pinnedMessage_->endsAt;
-            }
-            this->pinnedMessage_ = std::move(msg);
+            this->pinnedMessage_ =
+                msg ? std::make_unique<HelixPinnedChatMessage>(std::move(*msg))
+                    : nullptr;
             this->pinnedMessageChanged.invoke();
         },
         [](const QString &error) {
@@ -2591,9 +2580,9 @@ void TwitchChannel::refreshPinnedMessage()
         });
 }
 
-std::optional<HelixPinnedChatMessage> TwitchChannel::getPinnedMessage() const
+const HelixPinnedChatMessage *TwitchChannel::getPinnedMessage() const
 {
-    return this->pinnedMessage_;
+    return this->pinnedMessage_.get();
 }
 
 void TwitchChannel::clearPinnedMessage()
@@ -2602,59 +2591,8 @@ void TwitchChannel::clearPinnedMessage()
     {
         return;
     }
-    this->pinnedMessage_ = std::nullopt;
+    this->pinnedMessage_.reset();
     this->pinnedMessageChanged.invoke();
-}
-
-void TwitchChannel::pinMessage(const QString &messageId,
-                               std::optional<int> durationSeconds)
-{
-    auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
-    if (!currentAccount || currentAccount->isAnon())
-    {
-        return;
-    }
-
-    const bool alreadyPinned = this->pinnedMessage_ &&
-                               this->pinnedMessage_->messageID == messageId;
-
-    // optimistic local update
-    if (this->pinnedMessage_)
-    {
-        this->pinnedMessage_->endsAt =
-            durationSeconds
-                ? std::make_optional(
-                      QDateTime::currentDateTimeUtc().addSecs(*durationSeconds))
-                : std::nullopt;
-        this->pinnedMessageChanged.invoke();
-    }
-
-    std::function<void()> onSuccess = [this] {
-        this->refreshPinnedMessage();
-    };
-
-    auto onFailure = [](HelixPinMessageError /*error*/,
-                        const QString &message) {
-        qCWarning(chatterinoTwitch) << "Failed to pin message:" << message;
-    };
-
-    std::optional<std::chrono::seconds> duration =
-        durationSeconds ? std::make_optional(std::chrono::seconds(*durationSeconds))
-                        : std::nullopt;
-
-    if (alreadyPinned)
-    {
-        // Use PATCH to update an already pinned message (including removing the duration)
-        getHelix()->updatePinnedChatMessage(
-            this->roomId(), currentAccount->getUserId(), messageId,
-            duration, onSuccess, onFailure);
-    }
-    else
-    {
-        getHelix()->pinChatMessage(
-            this->roomId(), currentAccount->getUserId(), messageId,
-            duration, onSuccess, onFailure);
-    }
 }
 
 void TwitchChannel::unpinCurrentMessage()
@@ -2674,7 +2612,7 @@ void TwitchChannel::unpinCurrentMessage()
     getHelix()->unpinChatMessage(
         this->roomId(), currentAccount->getUserId(), msgId,
         [this] {
-            this->pinnedMessage_ = std::nullopt;
+            this->pinnedMessage_.reset();
             this->pinnedMessageChanged.invoke();
         },
         [](HelixUnpinMessageError /*error*/, const QString &message) {

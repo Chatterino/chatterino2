@@ -12,7 +12,6 @@
 #include "common/UniqueAccess.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
@@ -27,6 +26,7 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
@@ -63,6 +63,7 @@ struct HelixStream;
 struct HelixCheermoteSet;
 struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
+struct HelixPinnedChatMessage;
 
 class TwitchIrcServer;
 class TwitchAccount;
@@ -414,13 +415,8 @@ public:
      */
     void clearPinnedMessage();
 
-    std::optional<HelixPinnedChatMessage> getPinnedMessage() const;
-
-    /**
-     * Pin the given message. Only valid for moderators.
-     * durationSeconds is the pin duration in seconds (nullopt = until stream ends).
-     */
-    void pinMessage(const QString &messageId, std::optional<int> durationSeconds);
+    /// Returns the currently pinned message, or null if none is pinned.
+    const HelixPinnedChatMessage *getPinnedMessage() const;
 
     /**
      * Unpin the currently pinned message. Only valid for moderators.
@@ -632,7 +628,8 @@ private:
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
 
-    std::optional<HelixPinnedChatMessage> pinnedMessage_;
+    /// May be null if no message is currently pinned.
+    std::unique_ptr<HelixPinnedChatMessage> pinnedMessage_;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

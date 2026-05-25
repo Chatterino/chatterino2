@@ -1,22 +1,32 @@
-﻿// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+﻿// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
 //
 // SPDX-License-Identifier: MIT
 
 #include "widgets/splits/PinnedMessageWidget.hpp"
 
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
+
+#include "widgets/buttons/LabelButton.hpp"
+
+#include "singletons/Theme.hpp"
 
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QPushButton>
-#include <QRegularExpression>
+#include <QAbstractTextDocumentLayout>
+#include <QPainter>
+#include <QPaintEvent>
 #include <QTextEdit>
 #include <QTimer>
-#include <QPalette>
 #include <QVBoxLayout>
+
+#include <chrono>
+#include <optional>
 
 namespace chatterino {
 
@@ -24,52 +34,17 @@ namespace {
 
 constexpr auto MUTED_STYLE = "color: #adadb8;";
 
-// Small flat icon button helper
-QPushButton *makeIconButton(const QString &text, const QString &tooltip,
-                            QWidget *parent, double fontSize = 12)
-{
-    auto *btn = new QPushButton(text, parent);
-    btn->setFlat(true);
-    btn->setFixedSize(30, 22);
-    btn->setCursor(Qt::PointingHandCursor);
-    btn->setStyleSheet(
-        "QPushButton { background: rgba(255,255,255,0.05); "
-        "border: 1px solid rgba(255,255,255,0.18); "
-        "border-radius: 4px; color: #dedee3; padding: 0; }"
-        "QPushButton:hover { background: rgba(255,255,255,0.18); "
-        "border-color: rgba(255,255,255,0.35); }"
-        "QPushButton:pressed { background: rgba(255,255,255,0.28); }");
-    QFont f = btn->font();
-    f.setPointSizeF(fontSize);
-    btn->setFont(f);
-    if (!tooltip.isEmpty())
-    {
-        btn->setToolTip(tooltip);
-    }
-    return btn;
-}
-
 }  // namespace
 
 PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     : QFrame(parent)
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    this->setAutoFillBackground(true);
-    this->setBackgroundRole(QPalette::Button);
+    this->setAttribute(Qt::WA_OpaquePaintEvent);
 
     auto *outerBox = new QVBoxLayout(this);
     outerBox->setContentsMargins(0, 0, 0, 0);
     outerBox->setSpacing(0);
-
-    // 1px top border — separates from the split header above
-    auto *topBorder = new QWidget(this);
-    topBorder->setFixedHeight(1);
-    topBorder->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    topBorder->setStyleSheet(
-        QStringLiteral("background-color: palette(shadow);"));
-    outerBox->addWidget(topBorder);
 
     auto *contentBox = new QVBoxLayout();
     contentBox->setContentsMargins(8, 6, 8, 6);
@@ -87,9 +62,9 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     }
     headerRow->addWidget(this->pinnedByLabel_);
     headerRow->addStretch(1);
-    this->menuButton_ =
-        makeIconButton(QStringLiteral("\u205D"),  // ⁝ tricolon
-                       QStringLiteral("Mod options"), this, 10);
+    this->menuButton_ = new LabelButton(QStringLiteral("\u205D"));
+    this->menuButton_->setToolTip(QStringLiteral("Mod options"));
+    this->menuButton_->setFixedSize(30, 22);
     this->menuButton_->hide();
     headerRow->addWidget(this->menuButton_);
 
@@ -98,6 +73,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     // Message body
     this->messageLabel_ = new QTextEdit(this);
     this->messageLabel_->setReadOnly(true);
+    this->messageLabel_->setFocusPolicy(Qt::NoFocus);
     this->messageLabel_->setFrameShape(QFrame::NoFrame);
     this->messageLabel_->setStyleSheet("QTextEdit { background: transparent; }");
     this->messageLabel_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -105,7 +81,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     this->messageLabel_->setMaximumHeight(110);
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
-                                       QSizePolicy::Preferred);
+                                       QSizePolicy::Fixed);
     this->messageLabel_->document()->setDocumentMargin(0);
     this->messageLabel_->setContentsMargins(0, 0, 0, 0);
     {
@@ -113,6 +89,15 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
         f.setPointSize(13);
         this->messageLabel_->setFont(f);
     }
+    QObject::connect(
+        this->messageLabel_->document()->documentLayout(),
+        &QAbstractTextDocumentLayout::documentSizeChanged,
+        this->messageLabel_,
+        [label = this->messageLabel_](const QSizeF &newSize) {
+            const int h =
+                qBound(1, (int)std::ceil(newSize.height()), 110);
+            label->setFixedHeight(h);
+        });
     contentBox->addWidget(this->messageLabel_);
 
     // Footer: [sender · time] ... [countdown]
@@ -143,7 +128,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
 
     outerBox->addLayout(contentBox);
 
-    // 1px bottom border — separates pin widget from the chat view below
+    // 1px bottom border - separates pin widget from the chat view below
     auto *bottomBorder = new QWidget(this);
     bottomBorder->setFixedHeight(1);
     bottomBorder->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -173,7 +158,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
         }
     });
 
-    QObject::connect(this->menuButton_, &QPushButton::clicked, this,
+    QObject::connect(this->menuButton_, &Button::leftClicked, this,
                      [this] {
                          this->showModMenu();
                      });
@@ -216,6 +201,19 @@ void PinnedMessageWidget::tickProgress()
 
     this->countdownLabel_->setText(timeStr);
     this->countdownLabel_->show();
+}
+
+void PinnedMessageWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    auto *theme = getTheme();
+
+    // Fill background (same color as the split header above)
+    painter.fillRect(event->rect(), theme->splits.header.background);
+
+    // Draw 1px top border
+    painter.setPen(theme->splits.header.border);
+    painter.drawLine(0, 0, this->width() - 1, 0);
 }
 
 void PinnedMessageWidget::setChannel(TwitchChannel *channel)
@@ -263,10 +261,22 @@ void PinnedMessageWidget::showModMenu()
                 return;
             }
             const auto pin = this->channel_->getPinnedMessage();
-            if (pin)
+            if (!pin)
             {
-                this->channel_->pinMessage(pin->messageID, seconds);
+                return;
             }
+            auto currentAccount =
+                getApp()->getAccounts()->twitch.getCurrent();
+            if (!currentAccount || currentAccount->isAnon())
+            {
+                return;
+            }
+            std::optional<std::chrono::seconds> duration =
+                seconds ? std::make_optional(std::chrono::seconds(*seconds))
+                        : std::nullopt;
+            this->channel_->updatePinnedMessageAs(pin->messageID, duration,
+                                                  *currentAccount,
+                                                  pin->messageText);
         });
     };
 
@@ -314,19 +324,7 @@ void PinnedMessageWidget::refresh()
         QStringLiteral("Pinned by <b>%1</b>")
             .arg(pin->pinnedBy.displayName.toHtmlEscaped()));
 
-    // deduplicate double @mention that appears when pinning a reply
-    QString displayText = pin->messageText;
-    {
-        static const QRegularExpression doubleAt(
-            QStringLiteral("^(@[^\\s]+) \\1(?=\\s|$)"),
-            QRegularExpression::CaseInsensitiveOption);
-        const auto m = doubleAt.match(displayText);
-        if (m.hasMatch())
-        {
-            displayText.remove(0, m.capturedLength(0) - m.capturedLength(1));
-        }
-    }
-    this->messageLabel_->setPlainText(displayText);
+    this->messageLabel_->setPlainText(pin->messageText);
 
     {
         const QString sentAt =
@@ -375,7 +373,7 @@ void PinnedMessageWidget::toggleUserPinned()
 
 bool PinnedMessageWidget::hasPinnedMessage() const
 {
-    return this->channel_ && this->channel_->getPinnedMessage().has_value();
+    return this->channel_ && this->channel_->getPinnedMessage() != nullptr;
 }
 
 }  // namespace chatterino

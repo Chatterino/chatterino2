@@ -51,8 +51,10 @@ public:
 
     struct {
         /// Emitted when a message is pinned or its pin is updated.
+        /// The argument is the channel name.
         Signal<const QString &> pinned;
         /// Emitted when the pinned message is removed.
+        /// The argument is the channel name.
         Signal<const QString &> unpinned;
     } pinnedChatUpdates;
 
