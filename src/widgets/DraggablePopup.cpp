@@ -114,15 +114,6 @@ void DraggablePopup::togglePinned()
         this->pinButton_->setSource(this->pinDisabledSource_);
     }
 }
-void DraggablePopup::themeChangedEvent()
-{
-    BaseWindow::themeChangedEvent();
-
-    if (this->pinButton_)
-    {
-        this->pinButton_->setColor(this->theme->isLightTheme() ? QColor(0x4d, 0x4d, 0x4d) : QColor(0xb7, 0xb7, 0xb7));
-    }
-}
 
 Button *DraggablePopup::createPinButton()
 {

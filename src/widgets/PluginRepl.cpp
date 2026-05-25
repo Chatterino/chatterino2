@@ -520,8 +520,6 @@ void PluginRepl::themeChangedEvent()
 
     pal.setColor(QPalette::Base, getTheme()->splits.input.background);
     this->ui.input->setPalette(pal);
-
-    this->ui.pin->setColor(getTheme()->isLightTheme() ? QColor(0x4d, 0x4d, 0x4d) : QColor(0xb7, 0xb7, 0xb7));
 }
 
 void PluginRepl::tryRun(QString code)

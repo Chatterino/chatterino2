@@ -6,15 +6,15 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
-#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/DrawnButton.hpp"
 
 #include "singletons/Theme.hpp"
 
-#include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
@@ -37,7 +37,7 @@ constexpr auto MUTED_STYLE = "color: #adadb8;";
 }  // namespace
 
 PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
-    : QFrame(parent)
+    : BaseWidget(parent)
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -62,9 +62,9 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     }
     headerRow->addWidget(this->pinnedByLabel_);
     headerRow->addStretch(1);
-    this->menuButton_ = new LabelButton(QStringLiteral("\u205D"));
+    this->menuButton_ = new DrawnButton(DrawnButton::Symbol::Kebab, {}, this);
+    this->menuButton_->setScaleIndependentSize(28, 28);
     this->menuButton_->setToolTip(QStringLiteral("Mod options"));
-    this->menuButton_->setFixedSize(30, 22);
     this->menuButton_->hide();
     headerRow->addWidget(this->menuButton_);
 
@@ -78,6 +78,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setStyleSheet("QTextEdit { background: transparent; }");
     this->messageLabel_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->messageLabel_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    this->messageLabel_->setContextMenuPolicy(Qt::NoContextMenu);
     this->messageLabel_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     this->messageLabel_->setMaximumHeight(110);
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
@@ -230,6 +231,10 @@ void PinnedMessageWidget::setChannel(TwitchChannel *channel)
                                                this->userToggled_ = false;
                                                this->refresh();
                                            });
+        this->signalHolder_.managedConnect(channel->userStateChanged,
+                                           [this] {
+                                               this->refresh();
+                                           });
     }
 
     this->refresh();
@@ -286,7 +291,7 @@ void PinnedMessageWidget::showModMenu()
     addDuration(QStringLiteral("20 minutes"), 1200);
     addDuration(QStringLiteral("30 minutes"), 1800);
     unpinAfterMenu->addSeparator();
-    addDuration(QStringLiteral("Manually unpinned or end of stream"),
+    addDuration(QStringLiteral("End of stream"),
                 std::nullopt);
 
     menu.addSeparator();
@@ -327,8 +332,8 @@ void PinnedMessageWidget::refresh()
     this->messageLabel_->setPlainText(pin->messageText);
 
     {
-        const QString sentAt =
-            pin->startsAt.toLocalTime().toString(QStringLiteral("h:mm AP"));
+        const QString sentAt = pin->startsAt.toLocalTime().toString(
+            getSettings()->timestampFormat);
         this->footerLabel_->setText(
             QStringLiteral("Sent by %1 \u00B7 %2")
                 .arg(pin->sender.displayName.toHtmlEscaped(), sentAt));

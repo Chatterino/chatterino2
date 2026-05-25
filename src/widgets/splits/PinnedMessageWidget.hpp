@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include "widgets/BaseWidget.hpp"
+
 #include <pajlada/signals/signalholder.hpp>
 #include <QDateTime>
-#include <QFrame>
 #include <QTimer>
 
 namespace chatterino {
@@ -17,7 +18,7 @@ class TwitchChannel;
  * Banner shown between the split header and the chat view that
  * displays the channel's currently pinned message.
  */
-class PinnedMessageWidget final : public QFrame
+class PinnedMessageWidget final : public BaseWidget
 {
     Q_OBJECT
 
@@ -44,7 +45,7 @@ private:
     // Header row
     class QLabel *pinnedByLabel_;
     class QLabel *countdownLabel_;
-    class LabelButton *menuButton_;  // ⁝ mod menu
+    class DrawnButton *menuButton_;  // mod menu
 
     // Body
     class QTextEdit *messageLabel_;
