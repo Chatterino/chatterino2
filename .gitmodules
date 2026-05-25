@@ -51,3 +51,6 @@
 [submodule "lib/twitch-eventsub-ws/lib/fmt"]
 	path = lib/twitch-eventsub-ws/lib/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "lib/kuba-zip"]
+	path = lib/kuba-zip
+	url = https://github.com/kuba--/zip.git

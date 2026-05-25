@@ -244,8 +244,15 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS 0.5.1 CONFIG
 )
+FetchContent_Declare(
+    zip
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/kuba-zip
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS
+)
+set(ZIP_ENABLE_DEFLATE Off CACHE INTERNAL "")
 
-FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)
+FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings zip)
 
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
@@ -257,6 +264,7 @@ if (CHATTERINO_PLUGINS)
     add_subdirectory(lib/lua)
 
     find_package(Sol2 REQUIRED)
+    find_package(zip REQUIRED)
 endif()
 
 if (BUILD_WITH_CRASHPAD)

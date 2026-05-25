@@ -9,6 +9,8 @@
 #    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "util/Expected.hpp"
+#    include "util/FunctionRef.hpp"
 
 #    include <pajlada/signals/signal.hpp>
 #    include <QDir>
@@ -28,6 +30,7 @@ namespace chatterino {
 
 class Settings;
 class Paths;
+class ZipArchive;
 
 class PluginController
 {
@@ -45,6 +48,8 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
+    Plugin *getPluginByID(const QString &id);
+
     // TODO: make a function that iterates plugins that aren't errored/enabled
     const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
 
@@ -54,6 +59,18 @@ public:
      * @param id This is the unique identifier of the plugin, the name of the directory it is in
      */
     bool reload(const QString &id);
+
+    ExpectedStr<void> removePlugin(const QString &id, bool eraseData);
+
+    struct LoadFromZipArgs {
+        ZipArchive &zip;
+        const PluginMeta &newMetadata;
+        FunctionRef<bool()> onExistingOverwrite;
+        bool update = false;
+    };
+
+    ExpectedStr<void> loadFromZip(const QString &id,
+                                  const LoadFromZipArgs &args);
 
     /**
      * @brief Checks settings to tell if a plugin named by id is enabled.
@@ -70,6 +87,8 @@ public:
 
     pajlada::Signals::Signal<Plugin *> onPluginLoaded;
     pajlada::Signals::NoArgSignal onPluginsUpdated;
+
+    pajlada::Signals::NoArgSignal pluginsUpdated;
 
 private:
     void loadPlugins();
