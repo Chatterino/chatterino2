@@ -2568,11 +2568,17 @@ void TwitchChannel::refreshPinnedMessage()
 
     getHelix()->getPinnedChatMessage(
         this->roomId(), currentAccount->getUserId(),
-        [this](std::optional<HelixPinnedChatMessage> msg) {
-            this->pinnedMessage_ =
-                msg ? std::make_unique<HelixPinnedChatMessage>(std::move(*msg))
+        [weak = this->weakFromThis()](std::optional<HelixPinnedChatMessage> msg) {
+            auto self = weak.lock();
+            if (!self)
+            {
+                return;
+            }
+            self->pinnedMessage_ =
+                msg ? std::make_unique<const HelixPinnedChatMessage>(
+                          std::move(*msg))
                     : nullptr;
-            this->pinnedMessageChanged.invoke();
+            self->pinnedMessageChanged.invoke();
         },
         [](const QString &error) {
             qCWarning(chatterinoTwitch)
@@ -2611,9 +2617,14 @@ void TwitchChannel::unpinCurrentMessage()
     const auto msgId = this->pinnedMessage_->messageID;
     getHelix()->unpinChatMessage(
         this->roomId(), currentAccount->getUserId(), msgId,
-        [this] {
-            this->pinnedMessage_.reset();
-            this->pinnedMessageChanged.invoke();
+        [weak = this->weakFromThis()] {
+            auto self = weak.lock();
+            if (!self)
+            {
+                return;
+            }
+            self->pinnedMessage_.reset();
+            self->pinnedMessageChanged.invoke();
         },
         [](HelixUnpinMessageError /*error*/, const QString &message) {
             qCWarning(chatterinoTwitch)

@@ -629,7 +629,7 @@ private:
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
 
     /// May be null if no message is currently pinned.
-    std::unique_ptr<HelixPinnedChatMessage> pinnedMessage_;
+    std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;
