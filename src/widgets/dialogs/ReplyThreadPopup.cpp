@@ -201,7 +201,7 @@ void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 
     if (!this->thread_) [[unlikely]]
     {
-        this->replySubscriptionSignal_ = boost::signals2::scoped_connection{};
+        this->replySubscriptionSignal_ = pajlada::Signals::ScopedConnection{};
         return;
     }
 
