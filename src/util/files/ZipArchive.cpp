@@ -9,6 +9,8 @@
 #    include "util/FilesystemHelpers.hpp"
 
 #    include <QByteArray>
+#    include <QDir>
+#    include <QFile>
 #    include <QString>
 #    include <zip.h>
 
