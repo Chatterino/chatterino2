@@ -10,7 +10,7 @@ env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
-  CONAN_VERSION: 2.11.0
+  CONAN_VERSION: 2.28.1
 
 concurrency:
   group: test-windows-${{ github.ref }}
@@ -52,7 +52,7 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: Chatterino/msvc-dev-cmd@v2.0.5
 
       - name: Setup sccache
         # sccache v0.7.4
