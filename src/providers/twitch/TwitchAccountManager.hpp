@@ -10,7 +10,7 @@
 #include "util/QStringHash.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QString>
 
 #include <memory>
@@ -68,7 +68,7 @@ public:
                              std::shared_ptr<TwitchAccount>>
         currentUserAboutToChange;
 
-    boost::signals2::signal<void()> currentUserChanged;
+    pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
     pajlada::Signals::NoArgSignal currentUserNameChanged;
 

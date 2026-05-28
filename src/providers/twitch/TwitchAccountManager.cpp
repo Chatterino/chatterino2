@@ -231,7 +231,8 @@ TwitchAccountManager::TwitchAccountManager()
     : accounts(SharedPtrElementLess<TwitchAccount>{})
     , anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
-    this->currentUserChanged.connect([this] {
+    // This is our own signal.
+    std::ignore = this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
         currentUser->loadBlocks();
         currentUser->loadSeventvUserID();
@@ -345,7 +346,7 @@ void TwitchAccountManager::reloadUsers()
                     qCDebug(chatterinoTwitch)
                         << "It was the current user, so we need to "
                            "reconnect stuff!";
-                    this->currentUserChanged();
+                    this->currentUserChanged.invoke();
                 }
             }
             break;
@@ -390,7 +391,7 @@ void TwitchAccountManager::load()
             this->currentUser_ = this->anonymousUser_;
         }
 
-        this->currentUserChanged();
+        this->currentUserChanged.invoke();
         this->currentUser_->reloadEmotes();
     });
 }
