@@ -71,10 +71,10 @@ Window::Window(WindowType type, QWidget *parent)
     this->addMenuBar();
 #endif
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->onAccountSelected();
-        }));
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)

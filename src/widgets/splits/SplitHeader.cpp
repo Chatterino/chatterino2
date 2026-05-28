@@ -260,10 +260,10 @@ SplitHeader::SplitHeader(Split *split)
         this->handleChannelChanged();
     });
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->managedConnections_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->updateIcons();
-        }));
+        });
 
     auto _ = [this](const auto &, const auto &) {
         this->updateChannelText();
