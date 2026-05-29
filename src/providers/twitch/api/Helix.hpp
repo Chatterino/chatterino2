@@ -54,6 +54,12 @@ struct HelixUser {
     }
 };
 
+struct HelixMinimalUser {
+    QString id;
+    QString login;
+    QString displayName;
+};
+
 struct HelixGetChannelFollowersResponse {
     int total;
 
@@ -467,6 +473,7 @@ struct HelixSendMessageArgs {
     QString message;
     /// Optional
     QString replyParentMessageID;
+    bool pin = false;
 };
 
 struct HelixPollChoice {
@@ -684,6 +691,38 @@ struct HelixCreateEventSubSubscriptionResponse {
 
     friend QDebug &operator<<(
         QDebug &dbg, const HelixCreateEventSubSubscriptionResponse &data);
+};
+
+struct HelixPinnedChatMessage {
+    HelixMinimalUser sender;
+    HelixMinimalUser pinnedBy;
+    QString messageID;
+    QString messageText;
+    QDateTime startsAt;
+    std::optional<QDateTime> endsAt;
+
+    explicit HelixPinnedChatMessage(const QJsonObject &data)
+        : sender({
+              .id = data["sender_user_id"].toString(),
+              .login = data["sender_user_login"].toString(),
+              .displayName = data["sender_user_name"].toString(),
+          })
+        , pinnedBy({
+              .id = data["pinned_by_user_id"].toString(),
+              .login = data["pinned_by_user_login"].toString(),
+              .displayName = data["pinned_by_user_name"].toString(),
+          })
+        , messageID(data["message_id"].toString())
+        , messageText(data["message"].toObject().value("text").toString())
+        , startsAt(
+              QDateTime::fromString(data["starts_at"].toString(), Qt::ISODate))
+    {
+        auto endsAt = data["ends_at"].toString();
+        if (!endsAt.isEmpty())
+        {
+            this->endsAt = QDateTime::fromString(endsAt, Qt::ISODate);
+        }
+    }
 };
 
 class IHelix
@@ -1091,6 +1130,32 @@ public:
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#pin-chat-message
+    virtual void pinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    virtual void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
+    virtual void getPinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
+    virtual void unpinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, ResultCallback<> successCallback,
+        FailureCallback<HelixUnpinMessageError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1493,6 +1558,32 @@ public:
     void deleteEventSubSubscription(
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#pin-chat-message
+    void pinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
+    void getPinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+        FailureCallback<QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
+    void unpinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, ResultCallback<> successCallback,
+        FailureCallback<HelixUnpinMessageError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

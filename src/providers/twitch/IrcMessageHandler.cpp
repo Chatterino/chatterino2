@@ -106,7 +106,7 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
     if (const auto it = tags.find("reply-parent-display-name");
         it != tags.end())
     {
-        auto displayName = it.value().toString();
+        auto displayName = parseTagString(it.value().toString());
 
         if (content.length() <= 1 + displayName.length())
         {
@@ -118,7 +118,8 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
             content.at(1 + displayName.length()) == ' ' &&
             content.indexOf(displayName, 1) == 1)
         {
-            int messageOffset = 1 + displayName.length() + 1;
+            // Reply prefix's "@" + displayName + " "
+            qsizetype messageOffset = 1 + displayName.length() + 1;
             content.remove(0, messageOffset);
             return messageOffset;
         }
