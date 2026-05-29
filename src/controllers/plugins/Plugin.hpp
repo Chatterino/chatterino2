@@ -11,7 +11,7 @@
 #    include "controllers/plugins/PluginMeta.hpp"
 #    include "controllers/plugins/PluginRef.hpp"
 
-#    include <boost/signals2/signal.hpp>
+#    include <pajlada/signals/signal.hpp>
 #    include <QDir>
 #    include <QString>
 #    include <QUrl>
@@ -128,8 +128,8 @@ public:
     // This is a lifetime hack to ensure they get deleted with the plugin. This relies on the Plugin getting deleted on reload!
     std::vector<std::shared_ptr<lua::api::HTTPRequest>> httpRequests;
 
-    boost::signals2::signal<void()> onUnloaded;
-    boost::signals2::signal<void(lua::api::LogLevel, const QString &)> onLog;
+    pajlada::Signals::NoArgSignal onUnloaded;
+    pajlada::Signals::Signal<lua::api::LogLevel, const QString &> onLog;
     lua::ConnectionManager connections;
 
 private:

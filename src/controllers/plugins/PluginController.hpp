@@ -10,7 +10,7 @@
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
-#    include <boost/signals2/signal.hpp>
+#    include <pajlada/signals/signal.hpp>
 #    include <QDir>
 #    include <QFileInfo>
 #    include <QJsonArray>
@@ -68,7 +68,7 @@ public:
 
     WebSocketPool &webSocketPool();
 
-    boost::signals2::signal<void(Plugin *)> onPluginLoaded;
+    pajlada::Signals::Signal<Plugin *> onPluginLoaded;
 
 private:
     void loadPlugins();
