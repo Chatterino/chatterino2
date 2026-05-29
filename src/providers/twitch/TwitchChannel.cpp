@@ -140,12 +140,12 @@ TwitchChannel::TwitchChannel(const QString &name)
             this->eventSubSuspiciousUserUpdateHandle.reset();
         });
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->setMod(false);
             this->refreshPubSub();
             this->refreshTwitchChannelEmotes(false);
-        }));
+        });
 
     this->refreshPubSub();
     // We can safely ignore this signal connection since it's a private signal, meaning
