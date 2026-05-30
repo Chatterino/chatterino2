@@ -355,7 +355,8 @@ std::vector<TwitchBadge> appendSharedChatBadges(
     auto appendedBadges = std::vector<TwitchBadge>{};
     for (const auto &badge : sharedBadges)
     {
-        if (badge.key_ != "moderator" && badge.key_ != "vip")
+        if (badge.key_ != "moderator" && badge.key_ != "vip" &&
+            badge.key_ != "lead_moderator")
         {
             continue;
         }
