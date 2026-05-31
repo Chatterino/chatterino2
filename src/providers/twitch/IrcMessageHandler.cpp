@@ -1147,8 +1147,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     MessageParseArgs args;
     if (isSub)
     {
-        args.isSubscriptionMessage =
-            msgType != "announcement" && msgType != "viewermilestone";
+        args.isSubscriptionMessage = msgType != "announcement" &&
+                                     msgType != "viewermilestone" &&
+                                     msgType != "modiversary";
         args.trimSubscriberUsername = true;
     }
 
