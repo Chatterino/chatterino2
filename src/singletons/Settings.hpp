@@ -118,6 +118,10 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
     }
 }
 
+struct SettingsArgs {
+    bool isTest = false;
+};
+
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -129,7 +133,7 @@ class Settings
 
 public:
     Settings(const Args &args, const QString &settingsDirectory,
-             bool isTest = false);
+             const SettingsArgs &settingsArgs = {});
     ~Settings();
 
     static Settings &instance();

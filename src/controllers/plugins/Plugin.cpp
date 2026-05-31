@@ -56,7 +56,7 @@ lua::SignalCallback Plugin::createCallback(sol::main_protected_function pfn)
 
 Plugin::~Plugin()
 {
-    this->onUnloaded();
+    this->onUnloaded.invoke();
 
     for (auto *timer : this->activeTimeouts)
     {
@@ -155,7 +155,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
         lua_pop(L, 1);
     }
 
-    this->onLog(level, fullMessage);
+    this->onLog.invoke(level, fullMessage);
 }
 
 sol::state_view Plugin::state()
