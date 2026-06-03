@@ -87,7 +87,7 @@ QString setLoggingRules(const CommandContext &ctx)
     {
         ctx.channel->addSystemMessage(
             "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
-            "for all categories from chatterino, use "
+            "for all categories from Chatterino, use "
             "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
             "qloggingcategory.html#configuring-categories");
@@ -321,6 +321,8 @@ QString disableLogfile(const CommandContext &ctx)
 {
     FileLogger::instance().disable();
 
+    ctx.channel->addSystemMessage("Logging to file disabled");
+
     return {};
 }
 
@@ -341,14 +343,24 @@ QString enableLogfile(const CommandContext &ctx)
 
     QString logFilePath = ctx.words.mid(1).join(" ");
     auto result = FileLogger::instance().enable(logFilePath);
-    if (!result.has_value())
+    if (result.has_value())
+    {
+        ctx.channel->addSystemMessage("Logging to file enabled");
+    }
+    else
     {
         auto error = result.error();
 
-        ctx.channel->addSystemMessage(
+        MessageBuilder builder;
+        builder.emplace<TextElement>(
             QString("Unable to open log file '%1'. Error reported by "
-                    "the system was: %2")
-                .arg(error.absFilePath, error.errorDesc));
+                    "the system was: %2 (Hint: Do not quote the file path "
+                    "even if it contains spaces)")
+                .arg(error.absFilePath, error.errorDesc),
+            MessageElementFlags{MessageElementFlag::Text,
+                                MessageElementFlag::AlwaysShow},
+            MessageColor{QColor(230, 30, 30)});
+        ctx.channel->addMessage(builder.release(), MessageContext::Original);
     }
 
     return {};
