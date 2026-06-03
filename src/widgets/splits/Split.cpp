@@ -1106,6 +1106,43 @@ OverlayWindow *Split::overlayWindow()
     return this->overlayWindow_.data();
 }
 
+void Split::appendJsonDescriptor(QJsonObject &obj)
+{
+    obj.insert("moderationMode", this->getModerationMode());
+
+    QJsonObject split;
+    WindowManager::encodeChannel(this->getIndirectChannel(), split);
+    obj.insert("data", split);
+
+    QJsonArray filters;
+    WindowManager::encodeFilters(this, filters);
+    obj.insert("filters", filters);
+
+    auto spellOverride = this->checkSpellingOverride();
+    if (spellOverride)
+    {
+        obj["checkSpelling"] = *spellOverride;
+    }
+}
+
+SplitDescriptor Split::buildDescriptor()
+{
+    SplitDescriptor result;
+    result.type_ =
+        qmagicenum::enumNameString(this->getIndirectChannel().getType());
+    result.channelName_ = this->getChannel()->getName();
+    result.filters_ = this->getFilters();
+    return result;
+}
+
+void Split::applyDescriptor(const SplitDescriptor &descriptor)
+{
+    this->setChannel(WindowManager::decodeChannel(descriptor));
+    this->setModerationMode(descriptor.moderationMode_);
+    this->setFilters(descriptor.filters_);
+    this->setCheckSpellingOverride(descriptor.spellCheckOverride);
+}
+
 void Split::showOverlayWindow()
 {
     if (!this->overlayWindow_)
