@@ -126,6 +126,40 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     return descriptor;
 }
 
+IndirectChannel SplitDescriptor::decodeChannel() const
+{
+    auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
+    if (!type)
+    {
+        return Channel::getEmpty();
+    }
+
+    switch (*type)
+    {
+        case Channel::Type::Twitch:
+            return getApp()->getTwitch()->getOrAddChannel(this->channelName_);
+        case Channel::Type::TwitchMentions:
+            return getApp()->getTwitch()->getMentionsChannel();
+        case Channel::Type::TwitchWatching:
+            return getApp()->getTwitch()->getWatchingChannel();
+        case Channel::Type::TwitchWhispers:
+            return getApp()->getTwitch()->getWhispersChannel();
+        case Channel::Type::TwitchLive:
+            return getApp()->getTwitch()->getLiveChannel();
+        case Channel::Type::TwitchAutomod:
+            return getApp()->getTwitch()->getAutomodChannel();
+        case Channel::Type::Misc:
+            return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
+
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;  // FIXME: Remove these (#5703)
+    }
+
+    return Channel::getEmpty();
+}
+
 SplitDescriptor SplitDescriptor::fromSplit(const Split &split)
 {
     SplitDescriptor descriptor;
@@ -206,40 +240,6 @@ void ContainerNodeDescriptor::appendJson(QJsonObject &root) const
         items.append(obj);
     }
     root.insert("items", items);
-}
-
-IndirectChannel SplitDescriptor::decodeChannel() const
-{
-    auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
-    if (!type)
-    {
-        return Channel::getEmpty();
-    }
-
-    switch (*type)
-    {
-        case Channel::Type::Twitch:
-            return getApp()->getTwitch()->getOrAddChannel(this->channelName_);
-        case Channel::Type::TwitchMentions:
-            return getApp()->getTwitch()->getMentionsChannel();
-        case Channel::Type::TwitchWatching:
-            return getApp()->getTwitch()->getWatchingChannel();
-        case Channel::Type::TwitchWhispers:
-            return getApp()->getTwitch()->getWhispersChannel();
-        case Channel::Type::TwitchLive:
-            return getApp()->getTwitch()->getLiveChannel();
-        case Channel::Type::TwitchAutomod:
-            return getApp()->getTwitch()->getAutomodChannel();
-        case Channel::Type::Misc:
-            return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
-
-        case Channel::Type::None:
-        case Channel::Type::Direct:
-        case Channel::Type::TwitchEnd:
-            break;  // FIXME: Remove these (#5703)
-    }
-
-    return Channel::getEmpty();
 }
 
 SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
