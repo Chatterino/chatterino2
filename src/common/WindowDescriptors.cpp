@@ -63,42 +63,6 @@ QJsonArray encodeFilters(std::span<const QUuid> filters)
     return array;
 }
 
-NodeDescriptor buildDescriptorRecursively(const SplitContainer::Node &node)
-{
-    using Type = SplitContainer::Node::Type;
-    switch (node.getType())
-    {
-        case Type::Split: {
-            SplitNodeDescriptor descriptor(
-                SplitDescriptor::fromSplit(*node.getSplit()));
-            descriptor.flexH_ = node.getHorizontalFlex();
-            descriptor.flexV_ = node.getVerticalFlex();
-            return descriptor;
-        }
-        case Type::HorizontalContainer:
-        case Type::VerticalContainer: {
-            ContainerNodeDescriptor descriptor{
-                .flexH_ = node.getHorizontalFlex(),
-                .flexV_ = node.getVerticalFlex(),
-                .vertical_ = node.getType() == Type::VerticalContainer,
-            };
-
-            for (const auto &n : node.getChildren())
-            {
-                descriptor.items_.emplace_back(buildDescriptorRecursively(*n));
-            }
-            return descriptor;
-        }
-        case Type::EmptyRoot:
-            return ContainerNodeDescriptor{
-                .flexH_ = node.getHorizontalFlex(),
-                .flexV_ = node.getVerticalFlex(),
-            };
-    }
-
-    return ContainerNodeDescriptor{};
-}
-
 }  // namespace
 
 SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
@@ -331,8 +295,7 @@ TabDescriptor TabDescriptor::fromRootContainer(const SplitContainer &container,
     if (container.getBaseNode()->getType() !=
         SplitContainer::Node::Type::EmptyRoot)
     {
-        descriptor.rootNode_ =
-            buildDescriptorRecursively(*container.getBaseNode());
+        descriptor.rootNode_ = container.buildDescriptor();
     }
     return descriptor;
 }

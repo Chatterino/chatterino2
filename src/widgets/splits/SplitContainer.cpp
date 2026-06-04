@@ -806,7 +806,7 @@ const SplitContainer::Node *SplitContainer::getBaseNode() const
 
 NodeDescriptor SplitContainer::buildDescriptor() const
 {
-    return this->buildDescriptorRecursively(this->baseNode_.get());
+    return SplitContainer::buildDescriptorRecursively(*this->baseNode_);
 }
 
 void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
@@ -844,28 +844,40 @@ void SplitContainer::popup()
     window.show();
 }
 
-NodeDescriptor SplitContainer::buildDescriptorRecursively(
-    const Node *currentNode) const
+NodeDescriptor SplitContainer::buildDescriptorRecursively(const Node &node)
 {
-    if (currentNode->children_.empty())
+    switch (node.getType())
     {
-        SplitNodeDescriptor descriptor(
-            SplitDescriptor::fromSplit(*currentNode->split_));
-        descriptor.flexH_ = currentNode->flexH_;
-        descriptor.flexV_ = currentNode->flexV_;
-        return descriptor;
+        case Node::Type::Split: {
+            SplitNodeDescriptor descriptor(
+                SplitDescriptor::fromSplit(*node.getSplit()));
+            descriptor.flexH_ = node.getHorizontalFlex();
+            descriptor.flexV_ = node.getVerticalFlex();
+            return descriptor;
+        }
+        case Node::Type::HorizontalContainer:
+        case Node::Type::VerticalContainer: {
+            ContainerNodeDescriptor descriptor{
+                .flexH_ = node.getHorizontalFlex(),
+                .flexV_ = node.getVerticalFlex(),
+                .vertical_ = node.getType() == Node::Type::VerticalContainer,
+            };
+
+            for (const auto &n : node.getChildren())
+            {
+                descriptor.items_.emplace_back(buildDescriptorRecursively(*n));
+            }
+            return descriptor;
+        }
+        case Node::Type::EmptyRoot:
+            return ContainerNodeDescriptor{
+                .flexH_ = node.getHorizontalFlex(),
+                .flexV_ = node.getVerticalFlex(),
+            };
     }
 
-    ContainerNodeDescriptor descriptor;
-    for (const auto &child : currentNode->children_)
-    {
-        descriptor.vertical_ =
-            currentNode->type_ == Node::Type::VerticalContainer;
-        descriptor.items_.push_back(
-            this->buildDescriptorRecursively(child.get()));
-    }
-
-    return descriptor;
+    assert(false && "Invalid type");
+    return ContainerNodeDescriptor{};
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
