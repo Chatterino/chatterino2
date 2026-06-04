@@ -504,6 +504,36 @@ public:
                  (FailureCallback<QString> failureCallback)),
                 (override));
 
+    MOCK_METHOD(
+        void, pinChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixPinMessageError, QString>)failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, updatePinnedChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixPinMessageError, QString>)failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, getPinnedChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+         FailureCallback<QString> failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, unpinChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, ResultCallback<> successCallback,
+         (FailureCallback<HelixUnpinMessageError, QString>)failureCallback),
+        (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

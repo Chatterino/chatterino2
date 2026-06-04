@@ -86,6 +86,17 @@ void MessagePreferences::connectSettings(Settings *settings,
         },
         holder);
 
+    settings->enableAnnouncementHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableAnnouncementHighlight = newValue;
+        },
+        holder);
+    settings->enableColoredAnnouncementHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableColoredAnnouncementHighlight = newValue;
+        },
+        holder);
+
     settings->alternateMessages.connect(
         [this](const auto &newValue) {
             this->alternateMessages = newValue;

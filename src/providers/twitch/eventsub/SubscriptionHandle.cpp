@@ -18,7 +18,7 @@ RawSubscriptionHandle::RawSubscriptionHandle(SubscriptionRequest request_)
 RawSubscriptionHandle::~RawSubscriptionHandle()
 {
     auto *app = tryGetApp();
-    if (app == nullptr)
+    if (app == nullptr || isAppAboutToQuit())
     {
         // We're shutting down, assume the unsubscription has been taken care of
         return;

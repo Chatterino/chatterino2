@@ -118,6 +118,10 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
     }
 }
 
+struct SettingsArgs {
+    bool isTest = false;
+};
+
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -129,7 +133,7 @@ class Settings
 
 public:
     Settings(const Args &args, const QString &settingsDirectory,
-             bool isTest = false);
+             const SettingsArgs &settingsArgs = {});
     ~Settings();
 
     static Settings &instance();
@@ -159,6 +163,8 @@ public:
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
+    BoolSetting hideMessageTimestampsWhenLive = {
+        "/appearance/messages/hideMessageTimestampsWhenLive", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
@@ -479,6 +485,10 @@ public:
         "/streamerMode/hideBlockedTermText",
         true,
     };
+    BoolSetting streamerModeHideUserNotes = {
+        "/streamerMode/hideUserNotes",
+        true,
+    };
 
     /// Blocked Users
     BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
@@ -576,6 +586,19 @@ public:
         "/highlighting/watchStreak/enabled", true};
     QStringSetting watchStreakHighlightColor = {
         "/highlighting/watchStreak/color", ""};
+
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+    BoolSetting enableColoredAnnouncementHighlight = {
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
 
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
@@ -805,11 +828,6 @@ public:
     };
 
     // Advanced
-    BoolSetting enableExperimentalEventSub = {
-        "/eventsub/enableExperimental",
-        true,
-    };
-
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
 
 #ifndef Q_OS_WIN

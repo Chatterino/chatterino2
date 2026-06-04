@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QStringBuilder>
 
+#include <iostream>
+
 #ifdef Q_OS_WIN
 #    include "widgets/AttachedWindow.hpp"
 #endif
