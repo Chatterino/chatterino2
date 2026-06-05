@@ -7,7 +7,6 @@
 #include "ForwardDecl.hpp"
 #include "widgets/DraggablePopup.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
@@ -56,8 +55,8 @@ private:
     } ui_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> messageConnection_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
-    boost::signals2::scoped_connection replySubscriptionSignal_;
+    pajlada::Signals::ScopedConnection currentUserConnection_;
+    pajlada::Signals::ScopedConnection replySubscriptionSignal_;
 };
 
 }  // namespace chatterino

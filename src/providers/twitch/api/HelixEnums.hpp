@@ -303,4 +303,28 @@ enum class HelixCreateEventSubSubscriptionError : std::uint8_t {
     Forwarded,
 };
 
+enum class HelixPinMessageError : std::uint8_t {
+    Unknown,
+
+    InvalidParameter,
+    MissingScope,
+    Forbidden,
+    NotFound,
+    AlreadyPinned,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixUnpinMessageError : std::uint8_t {
+    Unknown,
+
+    MissingScope,
+    Forbidden,
+    NotFound,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 }  // namespace chatterino
