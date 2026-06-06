@@ -403,6 +403,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
+        // NOTE: As we move more things into Highlighted, and less things to use custom flags for their color,
+        // they will start respecting the IgnoreHighlights flag. Keep this in mind.
         assert(this->message_->highlightColor);
         if (this->message_->highlightColor)
         {
