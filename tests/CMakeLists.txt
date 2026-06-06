@@ -126,4 +126,6 @@ if (CHATTERINO_STATIC_QT_BUILD)
     )
 endif ()
 
-gtest_discover_tests(${PROJECT_NAME})
+gtest_discover_tests(${PROJECT_NAME}
+    DISCOVERY_MODE PRE_TEST
+)
