@@ -402,6 +402,12 @@ jobs:
           name: Chatterino-ubuntu-24.04-Qt-6.11.1.deb
           path: release-artifacts/
 
+      - uses: actions/download-artifact@v8
+        name: Ubuntu 26.04 deb
+        with:
+          name: Chatterino-ubuntu-26.04-Qt-6.11.1.deb
+          path: release-artifacts/
+
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
