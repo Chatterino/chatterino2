@@ -2,7 +2,26 @@
 
 #include "util/RapidjsonHelpers.hpp"
 
+#include <cassert>
+
 namespace chatterino::highlights {
+
+namespace {
+
+constexpr const QStringView NOCOLOR = u"none";
+
+}  // namespace
+
+std::shared_ptr<QColor> Outcome::getBackgroundColorWithDefault(
+    const QColor &defaultColor) const
+{
+    if (!this->backgroundColor)
+    {
+        return std::make_shared<QColor>(defaultColor);
+    }
+
+    return this->backgroundColor;
+}
 
 void Outcome::serialize(rapidjson::Value &ret,
                         rapidjson::Document::AllocatorType &a) const
@@ -15,10 +34,19 @@ void Outcome::serialize(rapidjson::Value &ret,
         rj::set(ret, "customSoundURL", this->customSoundURL.toString(), a);
     }
 
-    if (this->backgroundColor->isValid())
+    if (this->backgroundColor)
     {
-        rj::set(ret, "backgroundColor",
-                this->backgroundColor->name(QColor::HexArgb), a);
+        if (this->backgroundColor->isValid())
+        {
+            // Background color is set
+            rj::set(ret, "backgroundColor",
+                    this->backgroundColor->name(QColor::HexArgb), a);
+        }
+        else
+        {
+            // User has explicitly unset the color
+            rj::set(ret, "backgroundColor", NOCOLOR, a);
+        }
     }
 }
 
@@ -37,15 +65,24 @@ bool Outcome::deserialize(const rapidjson::Value &value)
         this->customSoundURL.setUrl(tmpCustomSoundURL);
     }
 
-    QString tmpBackgroundColor;
-    chatterino::rj::getSafe(value, "backgroundColor", tmpBackgroundColor);
-    if (this->backgroundColor)
+    auto backgroundColorIt = value.FindMember("backgroundColor");
+    if (backgroundColorIt != value.MemberEnd())
     {
-        *this->backgroundColor = QColor{tmpBackgroundColor};
-    }
-    else
-    {
-        this->backgroundColor = std::make_shared<QColor>(tmpBackgroundColor);
+        QString tmpBackgroundColor;
+        chatterino::rj::getSafe(value, "backgroundColor", tmpBackgroundColor);
+
+        assert(!this->backgroundColor);
+
+        // TODO: If this is set to NOCOLOR, do we need to do anything special with it?
+        if (this->backgroundColor)
+        {
+            *this->backgroundColor = QColor{tmpBackgroundColor};
+        }
+        else
+        {
+            this->backgroundColor =
+                std::make_shared<QColor>(tmpBackgroundColor);
+        }
     }
 
     return true;

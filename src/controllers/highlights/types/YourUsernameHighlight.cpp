@@ -10,6 +10,8 @@ namespace chatterino::highlights {
 
 HighlightCheck YourUsernameHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
 
     if (currentUser->isAnon())
@@ -52,14 +54,14 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.outcome.alert.value_or(
-                    YourUsernameHighlight::ALERT_DEFAULT),
-                highlight.outcome.playSound.value_or(
-                    YourUsernameHighlight::PLAY_SOUND_DEFAULT),
-                highlight.outcome.customSoundURL,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
-                    YourUsernameHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                .ids = {H::ID.toString()},
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
+                .playSound =
+                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

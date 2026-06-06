@@ -8,22 +8,15 @@
 
 namespace chatterino {
 
-HighlightResult::HighlightResult(bool _alert, bool _playSound,
-                                 std::optional<QUrl> _customSoundUrl,
-                                 std::shared_ptr<QColor> _color,
-                                 bool _showInMentions)
-    : alert(_alert)
-    , playSound(_playSound)
-    , customSoundUrl(std::move(_customSoundUrl))
-    , color(std::move(_color))
-    , showInMentions(_showInMentions)
-{
-}
-
 HighlightResult HighlightResult::emptyResult()
 {
     return {
-        false, false, std::nullopt, nullptr, false,
+        .ids = {},
+        .alert = false,
+        .playSound = false,
+        .customSoundUrl = std::nullopt,
+        .color = nullptr,
+        .showInMentions = false,
     };
 }
 
@@ -85,7 +78,8 @@ bool HighlightResult::full() const
 
 std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
 {
-    os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
+    os << "IDs: " << result.ids.join(',').toStdString()
+       << ", Alert: " << (result.alert ? "Yes" : "No") << ", "
        << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
        << (result.customSoundUrl
                ? result.customSoundUrl->toString().toStdString()

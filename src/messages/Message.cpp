@@ -81,16 +81,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::FirstMessage))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            true,
-        };
-    }
-
     if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
         this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
     {

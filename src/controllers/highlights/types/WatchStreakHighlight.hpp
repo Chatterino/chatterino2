@@ -41,6 +41,8 @@ struct WatchStreakHighlight {
     // TODO: does not support flash taskbar
     static constexpr bool SUPPORT_ALERT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
+    // TODO
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     // Default state:
     // Enabled = true

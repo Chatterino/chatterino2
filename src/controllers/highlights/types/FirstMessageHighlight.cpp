@@ -1,13 +1,24 @@
 #include "controllers/highlights/types/FirstMessageHighlight.hpp"
 
+#include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
 
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoHighlights;
+
+}  // namespace
+
 HighlightCheck FirstMessageHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,
@@ -21,21 +32,23 @@ HighlightCheck FirstMessageHighlight::buildCheck() const
             (void)self;             // unused
             (void)runContext;       // unused
 
-            if (true)
+            if (!flags.has(MessageFlag::FirstMessage))
             {
-                // TODO: Implement
                 return std::nullopt;
             }
 
+            qCInfo(LOG) << "First message highlight triggered:"
+                        << highlight.outcome;
+
             return HighlightResult{
-                highlight.outcome.alert.value_or(
-                    FirstMessageHighlight::ALERT_DEFAULT),
-                highlight.outcome.playSound.value_or(
-                    FirstMessageHighlight::PLAY_SOUND_DEFAULT),
-                highlight.outcome.customSoundURL,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
-                    FirstMessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                .ids = {H::ID.toString()},
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
+                .playSound =
+                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

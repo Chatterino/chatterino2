@@ -67,12 +67,13 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : highlights(this->settings, &this->accounts)
+        : mock::BaseApplication(/*runMigrations*/ false)
+        , highlights(this->settings, &this->accounts)
     {
     }
 
     MockApplication(const QString &settingsData)
-        : mock::BaseApplication(settingsData)
+        : mock::BaseApplication(settingsData, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)
     {
     }

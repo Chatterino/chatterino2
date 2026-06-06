@@ -306,7 +306,7 @@ TEST(Settings, Bing)
     {
         AllHighlights highlight = MessageHighlight(u"test");
         auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
-        ASSERT_EQ(R"({"id":"test","type":"basic"})", rj::stringify(v));
+        ASSERT_EQ(R"({"id":"test","type":"message"})", rj::stringify(v));
 
         bool error = false;
         AllHighlights out = pajlada::Deserialize<AllHighlights>::get(v, &error);

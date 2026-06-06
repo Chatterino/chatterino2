@@ -10,17 +10,15 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
-#include <qcolor.h>
-#include <qdebug.h>
-#include <qpixmap.h>
-#include <qregularexpression.h>
+#include <QColor>
+#include <QDebug>
+#include <QRegularExpression>
 #include <QStringView>
-#include <qurl.h>
+#include <QUrl>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
 #include <cassert>
-#include <memory>
 #include <optional>
 
 namespace chatterino::highlights {
@@ -33,6 +31,7 @@ struct MessageHighlight {
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
     static constexpr bool ALERT_DEFAULT = true;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     MessageHighlight(QStringView _id);
 
@@ -78,15 +77,6 @@ struct MessageHighlight {
     std::optional<bool> enabled;
 
     /// Contains the highlight pattern.
-    /// This can be a simple text match:
-    ///  - "foo" would match if the message text contains "foo"
-    ///  - "regex:^foo$" would match if the message text is exactly "foo"
-    ///  - "cs:FoO" would match if the message text contains "FoO" (case sensitive)
-    /// meta matchers
-    ///  - "badge:sub" would match if the author has any sub badge
-    ///  - "name:forsen" would match if the author's name is forsen
-    /// or any combination of the above
-    ///  - "badge:sub foo" would match if the user has any sub badge and their message text contains "foo"
     QString pattern;
 
     std::optional<bool> regex;

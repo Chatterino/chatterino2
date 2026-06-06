@@ -25,6 +25,9 @@ concept SupportsValidityCheck = requires(T a) {
 
 namespace {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoHighlights;
+
 void rebuildSharedHighlights(Settings &settings,
                              std::vector<HighlightCheck> &checks)
 {
@@ -113,6 +116,9 @@ std::pair<bool, HighlightResult> HighlightController::check(
             checkResult)
         {
             highlighted = true;
+
+            // TODO TEMP XD
+            result.ids.append(checkResult->ids);
 
             if (checkResult->alert)
             {

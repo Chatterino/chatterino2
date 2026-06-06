@@ -133,7 +133,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                         using ActualType =
                                             std::decay_t<decltype(h)>;
                                         return ActualType::ID;
-                                        // return h.getID();
                                     },
                                 },
                                 this->data);
@@ -229,7 +228,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 w->setText(h.pattern);
                 QObject::connect(w, &QLineEdit::textChanged,
                                  [&](const auto &newText) {
-                                     h.pattern = newText;
+                                     h.setPattern(newText);
                                  });
                 formLayout->addRow("Pattern", w);
             },

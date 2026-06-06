@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -48,6 +49,13 @@ void initializeSignalVector(pajlada::Signals::SignalHolder &signalHolder,
 
 namespace chatterino {
 
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoSettings;
+
+}  // namespace
+
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
 
 void _actuallyRegisterSetting(
@@ -64,6 +72,7 @@ void Settings::migrate(bool isTest)
 
     if (currentVersion < 1)
     {
+        qCInfo(LOG) << "Migrating highlights";
         this->migrateHighlights(isTest);
         currentVersion = 1;
         ranMigration = true;
@@ -74,6 +83,7 @@ void Settings::migrate(bool isTest)
     if (ranMigration)
     {
         // TODO: IS THIS LEGAL?
+        qCInfo(LOG) << "Saving settings after migrations";
         this->requestSave();
     }
 }
@@ -486,13 +496,6 @@ void Settings::migrateHighlights(bool isTest)
 
         this->sharedHighlightsSetting.push_back(to);
     }
-
-    qInfo() << "XXX Migrated" << migrationID << "user-defined highlights";
-
-    for (const auto &h : this->sharedHighlightsSetting.getValue())
-    {
-        qInfo() << "XXX - " << h.index();
-    }
 }
 
 bool Settings::isHighlightedUser(const QString &username)
@@ -603,7 +606,7 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
 
     if (settingsArgs.isTest)
     {
-        qInfo() << "Loading settings from" << settingsPath;
+        qCInfo(LOG) << "Loading settings from" << settingsPath;
         settingsInstance->load(qPrintable(settingsPath));
     }
     else
@@ -652,7 +655,6 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
     // Run setting migrations
     if (settingsArgs.runMigrations)
     {
-        qInfo() << "XXX: Running migrations" << settingsPath;
         this->migrate(settingsArgs.isTest);
     }
 

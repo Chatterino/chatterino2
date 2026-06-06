@@ -46,6 +46,7 @@ bool willPlayCustomSound(const AllHighlights &h);
 
 QIcon getIcon(const AllHighlights &h);
 
+/// Get the background color defined for the highlight, or its default value
 std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h);
 
 }  // namespace chatterino::highlights

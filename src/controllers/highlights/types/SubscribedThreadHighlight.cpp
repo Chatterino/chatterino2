@@ -8,6 +8,8 @@ namespace chatterino::highlights {
 
 HighlightCheck SubscribedThreadHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,
@@ -32,14 +34,14 @@ HighlightCheck SubscribedThreadHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.outcome.alert.value_or(
-                    SubscribedThreadHighlight::ALERT_DEFAULT),
-                highlight.outcome.playSound.value_or(
-                    SubscribedThreadHighlight::PLAY_SOUND_DEFAULT),
-                highlight.outcome.customSoundURL,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
-                    SubscribedThreadHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                .ids = {H::ID.toString()},
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
+                .playSound =
+                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

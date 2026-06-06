@@ -126,10 +126,6 @@ void ColorProvider::initTypeColorMap()
               getSettings()->redeemedHighlightColor,
               HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::FirstMessageHighlight,
-              getSettings()->firstMessageHighlightColor,
-              HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR);
-
     initColor(ColorType::ElevatedMessageHighlight,
               getSettings()->elevatedMessageHighlightColor,
               HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);

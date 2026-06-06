@@ -39,6 +39,8 @@ struct SubscriptionsHighlight {
     static constexpr bool SUPPORT_SHOW_IN_MENTIONS = false;
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
+    // TODO
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     SubscriptionsHighlight() = default;
 

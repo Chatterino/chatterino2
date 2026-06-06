@@ -109,7 +109,7 @@
                     "playSound": false,
                     "regex": false,
                     "showInMentions": true,
-                    "type": "basic"
+                    "type": "message"
                 },
                 {
                     "alert": true,
@@ -121,7 +121,7 @@
                     "playSound": false,
                     "regex": false,
                     "showInMentions": true,
-                    "type": "basic"
+                    "type": "message"
                 },
                 {
                     "alert": true,
@@ -133,7 +133,7 @@
                     "playSound": false,
                     "regex": false,
                     "showInMentions": true,
-                    "type": "basic"
+                    "type": "message"
                 }
             ]
         },

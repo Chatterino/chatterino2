@@ -33,6 +33,8 @@ struct BadgeHighlight {
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
     static constexpr bool ALERT_DEFAULT = true;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
+    // TODO
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     BadgeHighlight(QStringView _id);
 

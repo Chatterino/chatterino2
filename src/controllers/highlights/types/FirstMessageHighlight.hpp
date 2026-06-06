@@ -41,8 +41,7 @@ struct FirstMessageHighlight {
     // TODO: Should we disable setting of the "highlight taskbar" somehow cuz it's not supported?
     static constexpr bool SUPPORT_ALERT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
-
-    FirstMessageHighlight() = default;
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(72, 127, 63, 60);
 
     // Default state:
     // Enabled = true

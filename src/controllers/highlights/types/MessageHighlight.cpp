@@ -62,27 +62,35 @@ HighlightCheck MessageHighlight::buildCheck() const
             const auto &originalMessage, const auto &flags, const auto self,
             const auto runContext) -> std::optional<HighlightResult> {
             (void)args;        // unused
+            (void)badges;      // unused
             (void)senderName;  // unused
             (void)flags;       // unused
-            (void)self;        // unused
-            (void)badges;      // unused
             (void)runContext;  // unused
 
-            qCDebug(LOG) << "Comparing with highlight" << highlight;
-
-            if (!highlight.isMatch(originalMessage))
+            if (self)
             {
+                // Phrase checks should ignore highlights from the user
                 return std::nullopt;
             }
 
+            if (!highlight.isMatch(originalMessage))
+            {
+                qCDebug(LOG)
+                    << "NO MATCH - compared with highlight" << highlight;
+                return std::nullopt;
+            }
+
+            qCDebug(LOG) << "MATCH - compared with highlight" << highlight;
+
             return HighlightResult{
-                highlight.outcome.alert.value_or(
+                .ids = {highlight.getID().toString()},
+                .alert = highlight.outcome.alert.value_or(
                     MessageHighlight::ALERT_DEFAULT),
-                highlight.outcome.playSound.value_or(
+                .playSound = highlight.outcome.playSound.value_or(
                     MessageHighlight::PLAY_SOUND_DEFAULT),
-                highlight.outcome.customSoundURL,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
                     MessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };
         },

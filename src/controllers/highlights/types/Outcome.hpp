@@ -7,7 +7,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
-#include <cassert>
 #include <memory>
 #include <optional>
 
@@ -31,8 +30,12 @@ struct Outcome {
     QUrl customSoundURL;
 
     /// The background color to apply to the message.
-    /// If the color is invalid/unset, don't apply a background color.
-    std::shared_ptr<QColor> backgroundColor = std::make_shared<QColor>();
+    /// If the pointer is unset, use the highlight's default color
+    /// If the pointer is valid, but the QColor is invalid: Don't apply a background color
+    std::shared_ptr<QColor> backgroundColor;
+
+    std::shared_ptr<QColor> getBackgroundColorWithDefault(
+        const QColor &defaultColor) const;
 
     bool operator==(const Outcome &other) const = default;
 

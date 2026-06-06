@@ -20,6 +20,8 @@ FilterHighlight::FilterHighlight(QStringView _id)
 
 HighlightCheck FilterHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,
@@ -41,14 +43,14 @@ HighlightCheck FilterHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                highlight.outcome.alert.value_or(
-                    FilterHighlight::ALERT_DEFAULT),
-                highlight.outcome.playSound.value_or(
-                    FilterHighlight::PLAY_SOUND_DEFAULT),
-                highlight.outcome.customSoundURL,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
-                    FilterHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                .ids = {highlight.getID().toString()},
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
+                .playSound =
+                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

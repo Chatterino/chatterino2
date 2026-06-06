@@ -11,6 +11,8 @@ namespace chatterino::highlights {
 
 HighlightCheck YourMessagesHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,
@@ -28,13 +30,19 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
                 return std::nullopt;
             }
 
+            // User has defined a color: std::shared_ptr<QColor>("#ff00ff")
+            // User has not defined a color, should use default: std::shared_ptr<QColor> = {}; // unset shared ptr
+            // User wants NO color, should fall through: std::shared_ptr<QColor> = std::shared_ptr<QColor>({}) // invalid QColor
+
             return HighlightResult{
-                false,
-                false,
-                (QUrl) nullptr,
-                highlight.outcome.backgroundColor,
-                highlight.outcome.showInMentions.value_or(
-                    YourMessagesHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                .ids = {H::ID.toString()},
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
+                .playSound =
+                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
+                .customSoundUrl = highlight.outcome.customSoundURL,
+                .color = highlight.outcome.backgroundColor,
+                .showInMentions = highlight.outcome.showInMentions.value_or(
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

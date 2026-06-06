@@ -393,13 +393,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
     }
 
-    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             ctx.preferences.enableFirstMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
-    }
     else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
              ctx.preferences.enableWatchStreakHighlight)
     {
