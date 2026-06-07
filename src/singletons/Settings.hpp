@@ -25,6 +25,7 @@
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+#include "util/serialize/StringList.hpp"       // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -813,8 +814,8 @@ public:
          {"w", 1}}};
 
     BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
-    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
-        "/plugins/enabledPlugins", {}};
+    ChatterinoSetting<QStringList> enabledPlugins = {"/plugins/enabledPlugins",
+                                                     {}};
 
     // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
