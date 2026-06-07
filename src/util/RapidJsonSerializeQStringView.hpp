@@ -11,7 +11,7 @@ namespace pajlada {
 
 template <>
 struct Serialize<QStringView> {
-    static rapidjson::Value get(const QStringView &value,
+    static rapidjson::Value get(QStringView value,
                                 rapidjson::Document::AllocatorType &a)
     {
         return {value.toUtf8().constData(), a};
