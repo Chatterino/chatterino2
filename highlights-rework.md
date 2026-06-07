@@ -61,3 +61,7 @@ Issues to keep in mind:
     }
 }
 ```
+
+BREAKING(?) changes!!:
+ - FirstMessage now also has the Highlighted flag
+ - Subscription messages now also have the Highlighted flag
