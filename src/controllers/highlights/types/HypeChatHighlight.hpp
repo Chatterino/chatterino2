@@ -22,6 +22,11 @@ struct HypeChatHighlight : public SharedHighlight2 {
 
     HypeChatHighlight() = default;
 
+    QString getName() const
+    {
+        return "Hype Chats";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

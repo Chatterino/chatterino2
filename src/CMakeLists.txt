@@ -222,15 +222,30 @@ set(SOURCE_FILES
         controllers/highlights/SharedHighlight2.hpp
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
+        controllers/highlights/types/AllForward.hpp
+        controllers/highlights/types/All.hpp
         controllers/highlights/types/AutomodCaughtHighlight.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.cpp
         controllers/highlights/types/ChannelPointsHighlight.hpp
+        controllers/highlights/types/ChannelPointsHighlight.cpp
         controllers/highlights/types/FirstMessageHighlight.hpp
+        controllers/highlights/types/FirstMessageHighlight.cpp
         controllers/highlights/types/HypeChatHighlight.hpp
+        controllers/highlights/types/HypeChatHighlight.cpp
         controllers/highlights/types/SubscribedThreadHighlight.hpp
+        controllers/highlights/types/SubscribedThreadHighlight.cpp
         controllers/highlights/types/SubscriptionsHighlight.hpp
+        controllers/highlights/types/SubscriptionsHighlight.cpp
+        controllers/highlights/types/UserDefinedHighlight.hpp
+        controllers/highlights/types/UserDefinedHighlight.cpp
         controllers/highlights/types/WatchStreakHighlight.hpp
+        controllers/highlights/types/WatchStreakHighlight.cpp
         controllers/highlights/types/WhispersHighlight.hpp
+        controllers/highlights/types/WhispersHighlight.cpp
+        controllers/highlights/types/YourMessagesHighlight.hpp
+        controllers/highlights/types/YourMessagesHighlight.cpp
         controllers/highlights/types/YourUsernameHighlight.hpp
+        controllers/highlights/types/YourUsernameHighlight.cpp
 
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp

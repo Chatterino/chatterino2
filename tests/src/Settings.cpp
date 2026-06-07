@@ -4,6 +4,8 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/sound/NullBackend.hpp"
 #include "lib/Snapshot.hpp"
@@ -278,4 +280,38 @@ TEST(Settings, Bing)
         << QJsonDocument(got).toJson() << "\ninstead.";
     */
 #endif
+
+    rapidjson::Document d;
+    auto &a = d.GetAllocator();
+
+    {
+        // A default-initialized variant will contain the first
+        AllHighlights highlight;
+        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        ASSERT_EQ(R"({"id":"yourusername"})", rj::stringify(v));
+    }
+
+    {
+        // Should be the same as a default-initialized variant
+        AllHighlights highlight = YourUsernameHighlight();
+        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        ASSERT_EQ(R"({"id":"yourusername"})", rj::stringify(v));
+    }
+
+    {
+        AllHighlights highlight = AutomodCaughtHighlight();
+        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        ASSERT_EQ(R"({"id":"automodcaught"})", rj::stringify(v));
+    }
+
+    {
+        AllHighlights highlight = UserDefinedHighlight(u"test");
+        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        ASSERT_EQ(R"({"id":"test"})", rj::stringify(v));
+
+        bool error = false;
+        AllHighlights out = pajlada::Deserialize<AllHighlights>::get(v, &error);
+        ASSERT_FALSE(error);
+        ASSERT_EQ(highlight.index(), out.index());
+    }
 }

@@ -56,21 +56,33 @@ void _actuallyRegisterSetting(
     _settings.push_back(std::move(setting));
 }
 
-void Settings::migrate()
+void Settings::migrate(bool isTest)
 {
+    bool ranMigration = false;
+
     auto currentVersion = this->settingsVersion.getValue();
 
     if (currentVersion < 1)
     {
-        this->migrateHighlights();
+        this->migrateHighlights(isTest);
         currentVersion = 1;
+        ranMigration = true;
     }
 
     this->settingsVersion.setValue(currentVersion);
+
+    if (ranMigration)
+    {
+        // TODO: IS THIS LEGAL?
+        this->requestSave();
+    }
 }
 
-void Settings::migrateHighlights()
+void Settings::migrateHighlights(bool isTest)
 {
+    // TODO: This is not necessary in release - remove this
+    this->sharedHighlightsSetting.setValue({});
+
     {
         YourUsernameHighlight h;
 
@@ -372,15 +384,70 @@ void Settings::migrateHighlights()
     // We should be able to control this somehow
     // Maybe in this migration - find an "anchor" highlight (e.g. "yourusername" and always put it underneath that?)
 
+    // this migration ID is used for tests to provide a stable "uuid" replacement for created user defined highlights,
+    // and also to provide some output to the user in their logs for how many highlights were migrated
+    int migrationID = 0;
+
     // TODO: Migrate user-created "Message" highlights
     for (const auto &from : this->highlightedMessagesSetting.getValue())
     {
-        SharedHighlight2 to;
-        // TODO
+        auto generatedId = [&] {
+            migrationID += 1;
+
+            if (isTest)
+            {
+                return QString("test-%1").arg(migrationID);
+            }
+
+            auto v4Uuid = QUuid::createUuid();
+            return v4Uuid.toString(QUuid::StringFormat::WithoutBraces);
+        }();
+
+        UserDefinedHighlight to{generatedId};
+
+        to.pattern = from.getPattern();
+        to.setShowInMentions(from.showInMentions());
+        to.setHighlightTaskbar(from.hasAlert());
+        to.isRegex = from.isRegex();
+        to.isCaseSensitive = from.isCaseSensitive();
+        to.setPlaySound(from.hasSound());
+        if (from.hasCustomSound())
+        {
+            to.setSoundUrl(from.getSoundUrl());
+        }
+        if (auto fromColor = from.getColor(); fromColor)
+        {
+            to.setBackgroundColor(*fromColor);
+        }
+
+        AllHighlights xd = to;
+        qInfo() << "XXX XD: " << xd.index();
+
+        auto xd2 = this->sharedHighlightsSetting.getValue();
+        xd2.push_back(xd);
+
+        for (const auto &h : xd2)
+        {
+            qInfo() << "XXX inner xd2!! " << h.index();
+        }
+
+        this->sharedHighlightsSetting = xd2;
+
+        for (const auto &h : this->sharedHighlightsSetting.getValue())
+        {
+            qInfo() << "XXX inner!! " << h.index();
+        }
     }
 
     // TODO: Migrate user-created "Users" highlights
     // TODO: Migrate user-created "Badges" highlights
+
+    qInfo() << "XXX Migrated" << migrationID << "user-defined highlights";
+
+    for (const auto &h : this->sharedHighlightsSetting.getValue())
+    {
+        qInfo() << "XXX - " << h.index();
+    }
 }
 
 bool Settings::isHighlightedUser(const QString &username)
@@ -540,7 +607,7 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
     // Run setting migrations
     if (settingsArgs.runMigrations)
     {
-        this->migrate();
+        this->migrate(settingsArgs.isTest);
     }
 
     initializeSignalVector(this->signalHolder, this->sharedHighlightsSetting,

@@ -888,13 +888,13 @@ private:
         0,
     };
 
-    void migrate();
+    void migrate(bool isTest);
 
-    /// Migration 01
+    /// Migration 0 -> 1
     ///
     /// This migration takes all of our custom highlight values & turns them into real highlight rows
     /// It also merges messages, user, and badge highlights into a single vector.
-    void migrateHighlights();
+    void migrateHighlights(bool isTest);
 
 public:
     SignalVector<HighlightPhrase> highlightedMessages;

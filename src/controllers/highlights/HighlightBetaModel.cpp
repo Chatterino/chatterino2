@@ -65,7 +65,7 @@ AllHighlights HighlightBetaModel::getItemFromRow(
     setStringItem(row[Column::Name],
                   std::visit(
                       [](auto &&v) {
-                          return v.pattern;
+                          return v.pattern % v.getName();
                       },
                       item),
                   false, false);
@@ -125,7 +125,7 @@ void HighlightBetaModel::getRowFromItem(const AllHighlights &item,
     setStringItem(row[Column::Name],
                   std::visit(
                       [](auto &&v) {
-                          return v.pattern;
+                          return v.pattern % v.getName();
                       },
                       item),
                   false, false);

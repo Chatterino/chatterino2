@@ -22,6 +22,11 @@ struct WatchStreakHighlight : public SharedHighlight2 {
 
     WatchStreakHighlight() = default;
 
+    QString getName() const
+    {
+        return "Watch Streaks";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

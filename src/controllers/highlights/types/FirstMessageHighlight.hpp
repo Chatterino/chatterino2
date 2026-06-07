@@ -22,6 +22,11 @@ struct FirstMessageHighlight : public SharedHighlight2 {
 
     FirstMessageHighlight() = default;
 
+    QString getName() const
+    {
+        return "First Messages";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

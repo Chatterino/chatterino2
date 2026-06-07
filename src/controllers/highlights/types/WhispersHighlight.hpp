@@ -22,6 +22,11 @@ struct WhispersHighlight : public SharedHighlight2 {
 
     WhispersHighlight() = default;
 
+    QString getName() const
+    {
+        return "Whispers";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

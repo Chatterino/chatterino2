@@ -19,6 +19,11 @@ struct YourMessagesHighlight : public SharedHighlight2 {
 
     YourMessagesHighlight() = default;
 
+    QString getName() const
+    {
+        return "Your messages (automatic)";
+    }
+
     // Default state:
     // Enabled = false
     // Show in mentions = false
@@ -44,6 +49,8 @@ struct YourMessagesHighlight : public SharedHighlight2 {
     {
         return false;
     }
+
+    HighlightCheck buildCheck() const;
 };
 
 }  // namespace chatterino

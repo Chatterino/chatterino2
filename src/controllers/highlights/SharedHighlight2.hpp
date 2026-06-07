@@ -65,12 +65,6 @@ struct SharedHighlight2 {
     std::shared_ptr<QColor> getBackgroundColor() const;
     void setBackgroundColor(const QColor &newValue);
 
-    /// Unique identifier for this highlight
-    /// User-created highlights will get a random UUID,
-    /// while app-created highlights get a descriptive string (i.e. "subhighlight")
-    // TODO: Move to custom highlight or something
-    // QString id;
-
     /// The display name/pretty name of this highlight.
     /// If empty, we will try to auto-generate something that makes sense (e.g. "Text contains 'foo'")
     QString name;

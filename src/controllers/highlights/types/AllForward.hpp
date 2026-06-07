@@ -18,13 +18,12 @@ struct SubscribedThreadHighlight;
 struct AutomodCaughtHighlight;
 struct WatchStreakHighlight;
 struct YourMessagesHighlight;
-struct SharedHighlight2;
+struct UserDefinedHighlight;
 
-using AllHighlights =
-    std::variant<YourUsernameHighlight, WhispersHighlight,
-                 SubscriptionsHighlight, ChannelPointsHighlight,
-                 FirstMessageHighlight, HypeChatHighlight,
-                 SubscribedThreadHighlight, AutomodCaughtHighlight,
-                 WatchStreakHighlight, YourMessagesHighlight, SharedHighlight2>;
+using AllHighlights = std::variant<
+    YourUsernameHighlight, WhispersHighlight, SubscriptionsHighlight,
+    ChannelPointsHighlight, FirstMessageHighlight, HypeChatHighlight,
+    SubscribedThreadHighlight, AutomodCaughtHighlight, WatchStreakHighlight,
+    YourMessagesHighlight, UserDefinedHighlight>;
 
 }  // namespace chatterino

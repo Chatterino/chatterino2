@@ -19,6 +19,11 @@ struct YourUsernameHighlight : public SharedHighlight2 {
 
     YourUsernameHighlight() = default;
 
+    QString getName() const
+    {
+        return "Your Username (automatic)";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = true

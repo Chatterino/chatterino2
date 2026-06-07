@@ -22,6 +22,11 @@ struct AutomodCaughtHighlight : public SharedHighlight2 {
 
     AutomodCaughtHighlight() = default;
 
+    QString getName() const
+    {
+        return "AutoMod Caught Messages";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = false

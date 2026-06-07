@@ -22,6 +22,11 @@ struct SubscribedThreadHighlight : public SharedHighlight2 {
 
     SubscribedThreadHighlight() = default;
 
+    QString getName() const
+    {
+        return "Subscribed Reply Threads";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = true

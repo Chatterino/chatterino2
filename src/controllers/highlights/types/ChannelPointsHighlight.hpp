@@ -22,6 +22,11 @@ struct ChannelPointsHighlight : public SharedHighlight2 {
 
     ChannelPointsHighlight() = default;
 
+    QString getName() const
+    {
+        return "Highlights redeemed with Channel Points";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

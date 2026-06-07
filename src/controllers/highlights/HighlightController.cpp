@@ -256,6 +256,7 @@ void rebuildUserHighlights(Settings &settings,
 {
     auto userHighlights = settings.highlightedUsers.readOnly();
 
+    /*
     if (settings.enableSelfMessageHighlight)
     {
         bool showInMentions = settings.showSelfMessageHighlightInMentions;
@@ -285,6 +286,7 @@ void rebuildUserHighlights(Settings &settings,
                                        highlightColor, showInMentions};
             }});
     }
+    */
 
     for (const auto &highlight : *userHighlights)
     {

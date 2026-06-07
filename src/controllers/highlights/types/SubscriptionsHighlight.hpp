@@ -22,6 +22,11 @@ struct SubscriptionsHighlight : public SharedHighlight2 {
 
     SubscriptionsHighlight() = default;
 
+    QString getName() const
+    {
+        return "Subscriptions";
+    }
+
     // Default state:
     // Enabled = true
     // Show in mentions = unavailable (always false)

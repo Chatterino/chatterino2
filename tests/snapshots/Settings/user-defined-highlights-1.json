@@ -1,0 +1,109 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ]
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ],
+            "highlights2": [
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-1",
+                    "pattern": "my phrase",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-2",
+                    "pattern": "my phrase",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

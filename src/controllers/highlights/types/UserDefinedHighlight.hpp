@@ -15,18 +15,26 @@
 namespace chatterino {
 
 struct UserDefinedHighlight : public SharedHighlight2 {
-    UserDefinedHighlight() = default;
-
-    // Default state:
-    // Enabled = true
-    // Show in mentions = true
-    // Flash taskbar = true
-    // Play sound = true
-
-    bool shouldPlaySound() const override
+    UserDefinedHighlight(QStringView _id)
+        : id(_id)
     {
-        return this->playSound.value_or(true);
     }
+
+    QString getName() const
+    {
+        return "User Defined: " % this->id;
+    }
+
+private:
+    /// Unique identifier for this highlight.
+    /// This should be a random UUID
+    QString id;
+
+    template <typename Type, typename RJValue>
+    friend struct pajlada::Serialize;
+
+    template <typename Type, typename RJValue, typename Enable>
+    friend struct pajlada::Deserialize;
 };
 
 }  // namespace chatterino
@@ -42,7 +50,7 @@ struct Serialize<chatterino::UserDefinedHighlight> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
         value.serialize(ret, a);
-        chatterino::rj::set(ret, "id", H::ID, a);
+        chatterino::rj::set(ret, "id", value.id, a);
         return ret;
     }
 };
@@ -56,21 +64,24 @@ struct Deserialize<chatterino::UserDefinedHighlight> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return {};
+            return {u"invalid"};
         }
 
-        if (!H::matchesID(value, H::ID))
+        // Because UserDefinedHighlight matches any highlight with an "id" field, it means this highlight must always attempt to be deserialized last
+
+        QString id;
+        if (!chatterino::rj::getSafe(value, "id", id))
         {
             PAJLADA_REPORT_ERROR(error)
-            return {};
+            return {u"invalid"};
         }
 
-        H h;
+        H h(id);
 
         if (!h.deserialize(value))
         {
             PAJLADA_REPORT_ERROR(error)
-            return {};
+            return {u"invalid"};
         }
 
         return h;
