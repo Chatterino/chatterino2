@@ -57,6 +57,20 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
+/// Message types that we know and should explicitly not set as uncategorized because their message flag
+/// gets set to a reasonable value elsewhere
+const QSet<QString> KNOWN_MESSAGE_TYPES{
+    "viewermilestone",  // watch streak, but other categories possible in future
+    "modiversary",      // Mod anniversary.
+    "sub",              //
+    "subgift",          //
+    "resub",            // resub messages
+    "bitsbadgetier",    // bits badge upgrade
+    "ritual",           // new viewer ritual
+    "announcement",     // new mod announcement thing
+};
+
+/// MessageFlag::Subscription message types
 const QSet<QString> SUB_MESSAGE_TYPES{
     "sub",      //
     "subgift",  //
@@ -960,9 +974,13 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                         .value_or(HelixAnnouncementColor::Primary);
             }
         }
-        else
+        else if (SUB_MESSAGE_TYPES.contains(msgType))
         {
             msg->flags.set(MessageFlag::Subscription);
+        }
+        else
+        {
+            msg->flags.set(MessageFlag::UncategorizedNotification);
         }
 
         if (mirrored)
@@ -1297,7 +1315,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                             .value_or(HelixAnnouncementColor::Primary);
                 }
             }
-            else
+            else if (!KNOWN_MESSAGE_TYPES.contains(msgType))
             {
                 msg->flags.set(MessageFlag::UncategorizedNotification);
             }
