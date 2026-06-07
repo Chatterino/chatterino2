@@ -2356,6 +2356,19 @@ HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
 
     this->message().flags.set(MessageFlag::Highlighted);
 
+    qInfo() << "XXX: Highlighted by" << highlightResult.ids;
+
+    if (highlightResult.color)
+    {
+        auto color = *highlightResult.color;
+        qInfo() << "XXX: SET HIGHLIGHT COLOR"
+                << color.name(QColor::NameFormat::HexArgb);
+    }
+    else
+    {
+        qInfo() << "XXX: SET HIGHLIGHT COLOR NULL";
+    }
+
     this->message().highlightColor = highlightResult.color;
 
     if (highlightResult.showInMentions)
