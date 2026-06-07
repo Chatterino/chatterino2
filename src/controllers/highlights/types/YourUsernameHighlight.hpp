@@ -49,7 +49,7 @@ struct YourUsernameHighlight {
     QString name;
     std::optional<bool> enabled;
 
-    Outcome outcome;
+    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
 };

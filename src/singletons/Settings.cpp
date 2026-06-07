@@ -127,7 +127,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->selfHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -162,7 +162,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->whisperHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -196,7 +196,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->subHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -216,7 +216,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->redeemedHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -238,7 +238,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->firstMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -260,7 +260,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->elevatedMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -300,7 +300,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->threadHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -339,7 +339,7 @@ void Settings::migrateHighlights(bool isTest)
 
         if (const auto &s = this->automodHighlightColor; s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -361,7 +361,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->watchStreakHighlightColor;
             s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -388,7 +388,7 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->selfMessageHighlightColor;
             s.hasValueBeenSet())
         {
-            h.outcome.backgroundColor = std::make_shared<QColor>(s.getValue());
+            h.outcome.setBackgroundColor(s.getValue());
         }
 
         this->sharedHighlightsSetting.push_back(h);
@@ -426,7 +426,7 @@ void Settings::migrateHighlights(bool isTest)
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.outcome.backgroundColor = fromColor;
+            to.outcome.setBackgroundColor(*fromColor);
         }
 
         this->sharedHighlightsSetting.push_back(to);
@@ -458,7 +458,7 @@ void Settings::migrateHighlights(bool isTest)
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.outcome.backgroundColor = fromColor;
+            to.outcome.setBackgroundColor(*fromColor);
         }
 
         this->sharedHighlightsSetting.push_back(to);
@@ -491,7 +491,7 @@ void Settings::migrateHighlights(bool isTest)
         }
         if (auto fromColor = from.getColor(); fromColor)
         {
-            to.outcome.backgroundColor = fromColor;
+            to.outcome.setBackgroundColor(*fromColor);
         }
 
         this->sharedHighlightsSetting.push_back(to);

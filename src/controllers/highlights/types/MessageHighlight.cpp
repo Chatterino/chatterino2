@@ -89,7 +89,7 @@ HighlightCheck MessageHighlight::buildCheck() const
                 .playSound = highlight.outcome.playSound.value_or(
                     MessageHighlight::PLAY_SOUND_DEFAULT),
                 .customSoundUrl = highlight.outcome.customSoundURL,
-                .color = highlight.outcome.backgroundColor,
+                .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     MessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
             };

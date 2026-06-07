@@ -70,7 +70,7 @@ struct FilterHighlight {
 
     std::shared_ptr<filters::Filter> filter;
 
-    Outcome outcome;
+    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
 

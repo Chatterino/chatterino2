@@ -66,12 +66,6 @@ const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication()
-        : mock::BaseApplication(/*runMigrations*/ false)
-        , highlights(this->settings, &this->accounts)
-    {
-    }
-
     MockApplication(const QString &settingsData)
         : mock::BaseApplication(settingsData, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)

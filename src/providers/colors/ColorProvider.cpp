@@ -6,6 +6,7 @@
 
 #include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QSet>
@@ -49,10 +50,10 @@ QSet<QColor> ColorProvider::recentColors() const
 
     // Insert preset highlight colors
     retVal.insert(*this->color(ColorType::SelfHighlight));
-    retVal.insert(*this->color(ColorType::Subscription));
-    retVal.insert(*this->color(ColorType::WatchStreak));
     retVal.insert(*this->color(ColorType::Whisper));
     retVal.insert(*this->color(ColorType::AnnouncementHighlight));
+
+    // TODO: I';m removing some stuff here - I should fix that
 
     return retVal;
 }
@@ -113,12 +114,6 @@ void ColorProvider::initTypeColorMap()
               getSettings()->selfMessageHighlightColor,
               HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::Subscription, getSettings()->subHighlightColor,
-              HighlightPhrase::FALLBACK_SUB_COLOR);
-
-    initColor(ColorType::WatchStreak, getSettings()->watchStreakHighlightColor,
-              HighlightPhrase::FALLBACK_WATCH_STREAK_COLOR);
-
     initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
               HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
@@ -178,7 +173,8 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.emplace_back(28, 141, 117, 90);  // Cyan
 
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
+    this->defaultColors_.push_back(
+        highlights::SubscriptionsHighlight::BACKGROUND_COLOR_DEFAULT);
 }
 
 ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,

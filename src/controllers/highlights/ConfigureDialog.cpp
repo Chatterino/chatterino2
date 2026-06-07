@@ -18,6 +18,7 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qnamespace.h>
+#include <qpushbutton.h>
 #include <qsizepolicy.h>
 #include <qtextedit.h>
 #include <QToolButton>
@@ -343,15 +344,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             w->setColor(selected);
                             std::visit(
                                 [selected](auto &&h) {
-                                    if (h.outcome.backgroundColor)
-                                    {
-                                        *h.outcome.backgroundColor = selected;
-                                    }
-                                    else
-                                    {
-                                        h.outcome.backgroundColor =
-                                            std::make_shared<QColor>(selected);
-                                    }
+                                    h.outcome.setBackgroundColor(selected);
                                 },
                                 this->data);
                         }
@@ -360,6 +353,34 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 dialog->show();
             });
             l->addRow("Background color", w);
+        }
+
+        {
+            auto *w = new QPushButton("RESET BACKGROUND COLOR");
+            w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+            QObject::connect(w, &QPushButton::clicked, [this]() {
+                std::visit(
+                    [](auto &&h) {
+                        h.outcome.setBackgroundColor(std::nullopt);
+                    },
+                    this->data);
+            });
+            l->addRow("Background color 2", w);
+        }
+
+        {
+            auto *w = new QPushButton("NO BACKGROUND COLOR");
+            w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+            QObject::connect(w, &QPushButton::clicked, [this]() {
+                std::visit(
+                    [](auto &&h) {
+                        h.outcome.setBackgroundColor(QColor{});
+                    },
+                    this->data);
+            });
+            l->addRow("Background color 3", w);
         }
 
         {

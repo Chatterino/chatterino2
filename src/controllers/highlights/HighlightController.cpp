@@ -146,9 +146,12 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
             if (checkResult->color)
             {
-                if (!result.color)
+                if (checkResult->color->isValid())
                 {
-                    result.color = checkResult->color;
+                    if (!result.color)
+                    {
+                        result.color = checkResult->color;
+                    }
                 }
             }
 

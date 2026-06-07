@@ -39,8 +39,8 @@ struct SubscriptionsHighlight {
     static constexpr bool SUPPORT_SHOW_IN_MENTIONS = false;
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
-    // TODO
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT =
+        QColor(196, 102, 255, 100);
 
     SubscriptionsHighlight() = default;
 
@@ -53,7 +53,7 @@ struct SubscriptionsHighlight {
     QString name;
     std::optional<bool> enabled;
 
-    Outcome outcome;
+    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
 };

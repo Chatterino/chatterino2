@@ -36,8 +36,7 @@ HighlightCheck WhispersHighlight::buildCheck() const
                 .playSound =
                     highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
                 .customSoundUrl = highlight.outcome.customSoundURL,
-                .color = highlight.outcome.getBackgroundColorWithDefault(
-                    H::BACKGROUND_COLOR_DEFAULT),
+                .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),
             };

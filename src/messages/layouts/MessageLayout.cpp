@@ -392,21 +392,15 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             backgroundColor,
             *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
     }
-
-    else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
-             ctx.preferences.enableWatchStreakHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor, *ctx.colorProvider.color(ColorType::WatchStreak));
-    }
     else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         // NOTE: As we move more things into Highlighted, and less things to use custom flags for their color,
         // they will start respecting the IgnoreHighlights flag. Keep this in mind.
-        assert(this->message_->highlightColor);
-        if (this->message_->highlightColor)
+        // assert(this->message_->highlightColor);
+        if (this->message_->highlightColor &&
+            this->message_->highlightColor->isValid())
         {
             // Blend highlight color with usual background color
             backgroundColor =
@@ -421,13 +415,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             *ctx.colorProvider.color(colorTypeFromHelixAnnouncementColor(
                 this->message_->announcementColor,
                 ctx.preferences.enableColoredAnnouncementHighlight)));
-    }
-    else if (this->message_->flags.has(MessageFlag::Subscription) &&
-             ctx.preferences.enableSubHighlight)
-    {
-        // Blend highlight color with usual background color
-        backgroundColor = blendColors(
-            backgroundColor, *ctx.colorProvider.color(ColorType::Subscription));
     }
     else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
               this->message_->flags.has(

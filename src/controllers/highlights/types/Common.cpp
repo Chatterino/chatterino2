@@ -206,13 +206,7 @@ std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h)
 {
     auto c = std::visit(
         [](auto &&h) {
-            using ActualType = std::decay_t<decltype(h)>;
-            if (h.outcome.backgroundColor)
-            {
-                return h.outcome.backgroundColor;
-            }
-            return std::make_shared<QColor>(
-                ActualType::BACKGROUND_COLOR_DEFAULT);
+            return h.outcome.getBackgroundColor();
         },
         h);
 

@@ -76,7 +76,7 @@ struct BadgeHighlight {
 
     std::optional<bool> enabled;
 
-    Outcome outcome;
+    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
 protected:
     /// Contains the raw badge name

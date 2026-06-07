@@ -11,6 +11,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
+#include <QColor>
 #include <QStringView>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -41,8 +42,7 @@ struct WatchStreakHighlight {
     // TODO: does not support flash taskbar
     static constexpr bool SUPPORT_ALERT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
-    // TODO
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(0, 130, 255, 70);
 
     // Default state:
     // Enabled = true
@@ -53,7 +53,7 @@ struct WatchStreakHighlight {
     QString name;
     std::optional<bool> enabled;
 
-    Outcome outcome;
+    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
 };

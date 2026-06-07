@@ -15,12 +15,12 @@ constexpr const QStringView NOCOLOR = u"none";
 std::shared_ptr<QColor> Outcome::getBackgroundColorWithDefault(
     const QColor &defaultColor) const
 {
-    if (!this->backgroundColor)
+    if (!this->resolvedBackgroundColor)
     {
         return std::make_shared<QColor>(defaultColor);
     }
 
-    return this->backgroundColor;
+    return this->resolvedBackgroundColor;
 }
 
 void Outcome::serialize(rapidjson::Value &ret,
@@ -48,6 +48,10 @@ void Outcome::serialize(rapidjson::Value &ret,
             rj::set(ret, "backgroundColor", NOCOLOR, a);
         }
     }
+    else
+    {
+        // User has not configured this background color, it should resolve to the default color
+    }
 }
 
 bool Outcome::deserialize(const rapidjson::Value &value)
@@ -74,15 +78,7 @@ bool Outcome::deserialize(const rapidjson::Value &value)
         assert(!this->backgroundColor);
 
         // TODO: If this is set to NOCOLOR, do we need to do anything special with it?
-        if (this->backgroundColor)
-        {
-            *this->backgroundColor = QColor{tmpBackgroundColor};
-        }
-        else
-        {
-            this->backgroundColor =
-                std::make_shared<QColor>(tmpBackgroundColor);
-        }
+        this->setBackgroundColor(tmpBackgroundColor);
     }
 
     return true;
