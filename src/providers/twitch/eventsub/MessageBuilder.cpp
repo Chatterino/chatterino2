@@ -668,6 +668,8 @@ MessagePtr makeAutomodHoldMessageHeader(
         u"AutoMod: Held a message for reason: " % reason %
         u". Allow will post it in chat. Allow Deny");
 
+    builder.parseHighlights({}, {}, {}, channel);
+
     return builder.release();
 }
 
@@ -707,6 +709,8 @@ MessagePtr makeAutomodHoldMessageBody(
 
     builder.setMessageAndSearchText(displayName % u": " %
                                     event.message.text.qt());
+
+    builder.parseHighlights({}, {}, {}, channel);
 
     return builder.release();
 }

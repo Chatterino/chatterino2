@@ -297,11 +297,10 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     QPainter painter(this);
     painter.fillRect(this->rect(), this->theme->scrollbars.background);
 
-    bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
-    bool enableFirstMessageHighlights =
-        getSettings()->enableFirstMessageHighlight;
-    bool enableElevatedMessageHighlights =
-        getSettings()->enableElevatedMessageHighlight;
+    // TODO: these should just be using highlights
+    bool enableRedeemedHighlights = true;
+    bool enableFirstMessageHighlights = true;
+    bool enableElevatedMessageHighlights = true;
 
     if (this->shouldShowThumb())
     {

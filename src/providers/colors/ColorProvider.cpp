@@ -6,6 +6,7 @@
 
 #include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QSet>
@@ -33,26 +34,12 @@ QSet<QColor> ColorProvider::recentColors() const
 {
     QSet<QColor> retVal;
 
-    /*
-     * Currently, only colors used in highlight phrases are considered. This
-     * may change at any point in the future.
-     */
-    for (const auto &phrase : getSettings()->highlightedMessages)
-    {
-        retVal.insert(*phrase.getColor());
-    }
-
-    for (const auto &userHl : getSettings()->highlightedUsers)
-    {
-        retVal.insert(*userHl.getColor());
-    }
+    // TODO: Grab user's custom highlight colors and add them here
 
     // Insert preset highlight colors
-    retVal.insert(*this->color(ColorType::SelfHighlight));
-    retVal.insert(*this->color(ColorType::Subscription));
-    retVal.insert(*this->color(ColorType::WatchStreak));
-    retVal.insert(*this->color(ColorType::Whisper));
-    retVal.insert(*this->color(ColorType::AnnouncementHighlight));
+    // retVal.insert(*this->color(ColorType::SelfHighlight));
+    // retVal.insert(*this->color(ColorType::Whisper));
+    // retVal.insert(*this->color(ColorType::AnnouncementHighlight));
 
     return retVal;
 }
@@ -106,40 +93,23 @@ void ColorProvider::initTypeColorMap()
             false);
     };
 
-    initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
+    //initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
+    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::SelfMessageHighlight,
-              getSettings()->selfMessageHighlightColor,
-              HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
+    // initColor(ColorType::SelfMessageHighlight,
+    //           getSettings()->selfMessageHighlightColor,
+    //           HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::Subscription, getSettings()->subHighlightColor,
-              HighlightPhrase::FALLBACK_SUB_COLOR);
+    //initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
+    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::WatchStreak, getSettings()->watchStreakHighlightColor,
-              HighlightPhrase::FALLBACK_WATCH_STREAK_COLOR);
+    // initColor(ColorType::ElevatedMessageHighlight,
+    //           getSettings()->elevatedMessageHighlightColor,
+    //           HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::RedeemedHighlight,
-              getSettings()->redeemedHighlightColor,
-              HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::FirstMessageHighlight,
-              getSettings()->firstMessageHighlightColor,
-              HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::ElevatedMessageHighlight,
-              getSettings()->elevatedMessageHighlightColor,
-              HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::ThreadMessageHighlight,
-              getSettings()->threadHighlightColor,
-              HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
-              HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
+    // initColor(ColorType::ThreadMessageHighlight,
+    //           getSettings()->threadHighlightColor,
+    //           HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
 
     initColor(ColorType::AnnouncementHighlight,
               getSettings()->announcementHighlightColor,
@@ -182,7 +152,8 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.emplace_back(28, 141, 117, 90);  // Cyan
 
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
+    this->defaultColors_.push_back(
+        highlights::SubscriptionsHighlight::BACKGROUND_COLOR_DEFAULT);
 }
 
 ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,

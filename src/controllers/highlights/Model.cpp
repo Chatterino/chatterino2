@@ -1,0 +1,129 @@
+#include "controllers/highlights/Model.hpp"
+
+#include "Application.hpp"
+#include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "providers/twitch/TwitchBadges.hpp"
+#include "util/StandardItemHelper.hpp"
+
+#include <QPalette>
+
+namespace chatterino::highlights {
+
+namespace {
+
+void updateRow(const AllHighlights &highlight,
+               std::vector<QStandardItem *> &row)
+{
+    using Column = Model::Column;
+
+    QIcon enabledIcon{":/buttons/checkmark-square.svg"};
+    QIcon disabledIcon{":/buttons/dismiss-square.svg"};
+
+    auto soundIcon = [highlight] {
+        if (willPlayCustomSound(highlight))
+        {
+            return QIcon{":/buttons/music-note.svg"};
+        }
+
+        if (shouldPlaySound(highlight))
+        {
+            return QIcon{":/buttons/music-note-2.svg"};
+        }
+
+        return QIcon{":/buttons/speaker-mute.svg"};
+    }();
+
+    auto enabled = isEnabled(highlight);
+
+    QPalette palette;
+
+    if (auto error = getError(highlight); !error.isEmpty())
+    {
+        // Highlight has an error
+        row[Column::Name]->setData(error, Qt::ToolTipRole);
+        row[Column::Enabled]->setData(error, Qt::ToolTipRole);
+
+        QFont f;
+        f.setStrikeOut(true);
+        row[Column::Name]->setData(f, Qt::FontRole);
+
+        row[Column::Enabled]->setData("Error", Qt::EditRole);
+        row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
+    }
+    else
+    {
+        row[Column::Name]->setData(QString{}, Qt::ToolTipRole);
+        row[Column::Enabled]->setData(QString{}, Qt::ToolTipRole);
+
+        QFont f;
+        row[Column::Name]->setData(f, Qt::FontRole);
+
+        if (enabled)
+        {
+            // Highlight is enabled
+            row[Column::Enabled]->setData("Enabled", Qt::EditRole);
+
+            // Undim name
+            const auto &b = palette.text();
+            row[Column::Name]->setData(b, Qt::ForegroundRole);
+            row[Column::Enabled]->setData(enabledIcon, Qt::DecorationRole);
+        }
+        else
+        {
+            // Highlight is disabled
+            row[Column::Enabled]->setData("Disabled", Qt::EditRole);
+
+            // Dim name
+            const auto &b = palette.placeholderText();
+            row[Column::Name]->setData(b, Qt::ForegroundRole);
+            row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
+        }
+    }
+
+    row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
+
+    if (const auto *h = std::get_if<BadgeHighlight>(&highlight))
+    {
+        getApp()->getTwitchBadges()->getBadgeIcon(
+            h->getBadgeName(),
+            [row](const QString &name, const std::shared_ptr<QIcon> &icon) {
+                (void)name;  // unused
+                row[Column::Name]->setData(*icon, Qt::DecorationRole);
+            });
+    }
+
+    setStringItem(row[Column::Name], getName(highlight), false);
+    setStringItem(row[Column::Sound], "");  // TODO: include full URL?
+    row[Column::Sound]->setData(soundIcon, Qt::DecorationRole);
+}
+
+}  // namespace
+
+Model::Model(QObject *parent)
+    : SignalVectorModel<AllHighlights>(Column::COUNT, parent)
+{
+}
+
+AllHighlights Model::getItemFromRow(std::vector<QStandardItem *> &row,
+                                    const AllHighlights &original)
+{
+    (void)original;  // unused
+
+    auto item = get<AllHighlights>(row[Column::Enabled]->data(DATA_ROLE));
+
+    updateRow(item, row);
+
+    return item;
+}
+
+void Model::getRowFromItem(const AllHighlights &item,
+                           std::vector<QStandardItem *> &row)
+{
+    row[Column::Enabled]->setData(QVariant::fromValue(item), DATA_ROLE);
+    row[Column::Enabled]->setData(QVariant::fromValue(getID(item)), ID_ROLE);
+
+    updateRow(item, row);
+}
+
+}  // namespace chatterino::highlights
