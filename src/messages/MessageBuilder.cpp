@@ -333,12 +333,8 @@ void appendBadges(MessageBuilder *builder,
             {
                 auto infoValue = badgeInfoIt->second;
                 auto predictionText =
-                    infoValue
-                        .replace(R"(\s)", " ")  // standard IRC escapes
-                        .replace(R"(\:)", ";")
-                        .replace(R"(\\)", R"(\)")
-                        .replace("⸝", ",");  // twitch's comma escape
-                // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
+                    parseTagString(infoValue).replace("⸝", ",");
+                // Twitch's comma escape. Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 
                 tooltip = QString("Predicted %1").arg(predictionText);
             }
@@ -359,7 +355,8 @@ std::vector<TwitchBadge> appendSharedChatBadges(
     auto appendedBadges = std::vector<TwitchBadge>{};
     for (const auto &badge : sharedBadges)
     {
-        if (badge.key_ != "moderator" && badge.key_ != "vip")
+        if (badge.key_ != "moderator" && badge.key_ != "vip" &&
+            badge.key_ != "lead_moderator")
         {
             continue;
         }
