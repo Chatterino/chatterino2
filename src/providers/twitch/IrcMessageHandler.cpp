@@ -57,6 +57,12 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
+const QSet<QString> SUB_MESSAGE_TYPES{
+    "sub",      //
+    "subgift",  //
+    "resub",    // resub messages
+};
+
 const QString ANONYMOUS_GIFTER_ID = "274598607";
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -427,9 +433,12 @@ void IrcMessageHandler::parsePrivMessageInto(
         }
     }
 
-    IrcMessageHandler::addMessage(
-        message, sink, channel, unescapeZeroWidthJoiner(message->content()),
-        *getApp()->getTwitch(), false, message->isAction());
+    IrcMessageHandler::addMessage(message, sink, channel,
+                                  unescapeZeroWidthJoiner(message->content()),
+                                  *getApp()->getTwitch(),
+                                  {
+                                      .isAction = message->isAction(),
+                                  });
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -781,7 +790,11 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         if (!content.isEmpty())
         {
             addMessage(message, sink, channel, content, *getApp()->getTwitch(),
-                       true, false, msgType);
+                       {
+                           .isSub = SUB_MESSAGE_TYPES.contains(msgType),
+                           .isSpecial = true,
+                       },
+                       msgType);
         }
     }
 
@@ -1139,15 +1152,19 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
-                                   ITwitchIrcServer &twitch, bool isSub,
-                                   bool isAction, const QString &msgType)
+                                   ITwitchIrcServer &twitch,
+                                   AddMessageArgs addArgs,
+                                   const QString &msgType)
 {
     assert(chan);
 
+    auto isSub = addArgs.isSub;
+    auto isAction = addArgs.isAction;
+
     MessageParseArgs args;
-    if (isSub)
+    args.isSubscriptionMessage = isSub;
+    if (addArgs.isSpecial)
     {
-        args.isSubscriptionMessage = msgType != "announcement";
         args.trimSubscriberUsername = true;
     }
 
@@ -1264,11 +1281,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     {
         if (isSub)
         {
-            if (msgType == "viewermilestone" || msgType == "modiversary")
-            {
-                msg->flags.set(MessageFlag::WatchStreak);
-            }
-            else if (msgType == "announcement")
+            msg->flags.set(MessageFlag::Subscription);
+        }
+        else if (addArgs.isSpecial)
+        {
+            if (msgType == "announcement")
             {
                 msg->flags.set(MessageFlag::Announcement);
 
@@ -1282,13 +1299,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             }
             else
             {
-                msg->flags.set(MessageFlag::Subscription);
-            }
-
-            if (tags.value("msg-id") != "announcement")
-            {
-                // We want announcements to be able to show up in mentions
-                msg->flags.unset(MessageFlag::Highlighted);
+                msg->flags.set(MessageFlag::UncategorizedNotification);
             }
         }
 
