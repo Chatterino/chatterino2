@@ -9,9 +9,11 @@
 
 #include <pajlada/serialize.hpp>
 #include <QColor>
+#include <QDebug>
 #include <QRegularExpression>
 #include <QString>
 #include <QUrl>
+#include <qvariant.h>
 
 #include <memory>
 
@@ -40,6 +42,9 @@ public:
                     bool hasSound, bool isRegex, bool isCaseSensitive,
                     const QString &soundUrl, std::shared_ptr<QColor> color);
 
+    bool isEnabled() const;
+    QString getName() const;
+    QPixmap getType() const;
     const QString &getPattern() const;
     bool showInMentions() const;
     bool hasAlert() const;

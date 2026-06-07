@@ -1,0 +1,14 @@
+{
+    "input": {
+    },
+    "output": {
+        "misc": {
+            "settingsVersion": 1
+        },
+        "pajlada2": [
+            {
+                "id": "yourusername"
+            }
+        ]
+    }
+}
