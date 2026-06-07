@@ -10,27 +10,26 @@
 
 namespace pajlada {
 
-template <>
-struct Serialize<QStringList> {
-    static rapidjson::Value get(const QStringList &value,
+template <typename T>
+struct Serialize<QList<T>> {
+    static rapidjson::Value get(const QList<T> &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value v(rapidjson::kArrayType);
         v.Reserve(value.size(), a);
         for (const auto &s : value)
         {
-            const auto utf8 = s.toUtf8();
-            v.PushBack(rapidjson::Value(utf8.data(), utf8.size(), a), a);
+            v.PushBack(Serialize<T>::get(s, a), a);
         }
         return v;
     }
 };
 
-template <>
-struct Deserialize<QStringList> {
-    static QStringList get(const rapidjson::Value &value, bool *error = nullptr)
+template <typename T>
+struct Deserialize<QList<T>> {
+    static QList<T> get(const rapidjson::Value &value, bool *error = nullptr)
     {
-        QStringList list;
+        QList<T> list;
 
         if (!value.IsArray())
         {
@@ -39,6 +38,7 @@ struct Deserialize<QStringList> {
         }
 
         auto cArray = value.GetArray();
+        list.reserve(cArray.Size());
         for (const auto &v : cArray)
         {
             if (!v.IsString())
@@ -46,7 +46,7 @@ struct Deserialize<QStringList> {
                 PAJLADA_REPORT_ERROR(error);
                 return list;
             }
-            list.append(QString::fromUtf8(v.GetString(), v.GetStringLength()));
+            list.append(Deserialize<QList<T>>::get(v, error));
         }
         return list;
     }
