@@ -2568,7 +2568,8 @@ void TwitchChannel::refreshPinnedMessage()
 
     getHelix()->getPinnedChatMessage(
         this->roomId(), currentAccount->getUserId(),
-        [weak = this->weakFromThis()](std::optional<HelixPinnedChatMessage> msg) {
+        [weak =
+             this->weakFromThis()](std::optional<HelixPinnedChatMessage> msg) {
             auto self = weak.lock();
             if (!self)
             {

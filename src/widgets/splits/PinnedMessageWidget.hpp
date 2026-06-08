@@ -10,9 +10,13 @@
 #include <QDateTime>
 #include <QTimer>
 
+class QLabel;
+class QTextEdit;
+
 namespace chatterino {
 
 class TwitchChannel;
+class DrawnButton;
 
 /**
  * Banner shown between the split header and the chat view that
@@ -43,18 +47,18 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Header row
-    class QLabel *pinnedByLabel_;
-    class QLabel *countdownLabel_;
-    class DrawnButton *menuButton_;  // mod menu
+    QLabel *pinnedByLabel_;
+    QLabel *countdownLabel_;
+    DrawnButton *menuButton_{};  // mod menu
 
     // Body
-    class QTextEdit *messageLabel_;
-    class QLabel *footerLabel_;
+    QTextEdit *messageLabel_;
+    QLabel *footerLabel_;
 
     QTimer *progressTimer_ = nullptr;
     QTimer *autoHideTimer_ = nullptr;
     bool userToggled_ = false;  // true while user manually pinned the widget
-    QDateTime pinEndsAt_;  // invalid when no end time
+    QDateTime pinEndsAt_;       // invalid when no end time
 };
 
 }  // namespace chatterino

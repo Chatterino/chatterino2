@@ -10,15 +10,13 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
-
+#include "singletons/Theme.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
 
-#include "singletons/Theme.hpp"
-
+#include <QAbstractTextDocumentLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QAbstractTextDocumentLayout>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QTextEdit>
@@ -75,11 +73,13 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setReadOnly(true);
     this->messageLabel_->setFocusPolicy(Qt::NoFocus);
     this->messageLabel_->setFrameShape(QFrame::NoFrame);
-    this->messageLabel_->setStyleSheet("QTextEdit { background: transparent; }");
+    this->messageLabel_->setStyleSheet(
+        "QTextEdit { background: transparent; }");
     this->messageLabel_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->messageLabel_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     this->messageLabel_->setContextMenuPolicy(Qt::NoContextMenu);
-    this->messageLabel_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    this->messageLabel_->setWordWrapMode(
+        QTextOption::WrapAtWordBoundaryOrAnywhere);
     this->messageLabel_->setMaximumHeight(110);
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
                                        QSizePolicy::Fixed);
@@ -92,11 +92,9 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     }
     QObject::connect(
         this->messageLabel_->document()->documentLayout(),
-        &QAbstractTextDocumentLayout::documentSizeChanged,
-        this->messageLabel_,
+        &QAbstractTextDocumentLayout::documentSizeChanged, this->messageLabel_,
         [label = this->messageLabel_](const QSizeF &newSize) {
-            const int h =
-                qBound(1, (int)std::ceil(newSize.height()), 110);
+            const int h = qBound(1, (int)std::ceil(newSize.height()), 110);
             label->setFixedHeight(h);
         });
     contentBox->addWidget(this->messageLabel_);
@@ -144,10 +142,9 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     // Countdown timer (fires every second)
     this->progressTimer_ = new QTimer(this);
     this->progressTimer_->setInterval(1000);
-    QObject::connect(this->progressTimer_, &QTimer::timeout, this,
-                     [this] {
-                         this->tickProgress();
-                     });
+    QObject::connect(this->progressTimer_, &QTimer::timeout, this, [this] {
+        this->tickProgress();
+    });
 
     // auto-hide timer
     this->autoHideTimer_ = new QTimer(this);
@@ -159,10 +156,9 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
         }
     });
 
-    QObject::connect(this->menuButton_, &Button::leftClicked, this,
-                     [this] {
-                         this->showModMenu();
-                     });
+    QObject::connect(this->menuButton_, &Button::leftClicked, this, [this] {
+        this->showModMenu();
+    });
 
     this->hide();
 }
@@ -231,10 +227,9 @@ void PinnedMessageWidget::setChannel(TwitchChannel *channel)
                                                this->userToggled_ = false;
                                                this->refresh();
                                            });
-        this->signalHolder_.managedConnect(channel->userStateChanged,
-                                           [this] {
-                                               this->refresh();
-                                           });
+        this->signalHolder_.managedConnect(channel->userStateChanged, [this] {
+            this->refresh();
+        });
     }
 
     this->refresh();
@@ -270,8 +265,7 @@ void PinnedMessageWidget::showModMenu()
             {
                 return;
             }
-            auto currentAccount =
-                getApp()->getAccounts()->twitch.getCurrent();
+            auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
             if (!currentAccount || currentAccount->isAnon())
             {
                 return;
@@ -279,9 +273,8 @@ void PinnedMessageWidget::showModMenu()
             std::optional<std::chrono::seconds> duration =
                 seconds ? std::make_optional(std::chrono::seconds(*seconds))
                         : std::nullopt;
-            this->channel_->updatePinnedMessageAs(pin->messageID, duration,
-                                                  *currentAccount,
-                                                  pin->messageText);
+            this->channel_->updatePinnedMessageAs(
+                pin->messageID, duration, *currentAccount, pin->messageText);
         });
     };
 
@@ -291,8 +284,7 @@ void PinnedMessageWidget::showModMenu()
     addDuration(QStringLiteral("20 minutes"), 1200);
     addDuration(QStringLiteral("30 minutes"), 1800);
     unpinAfterMenu->addSeparator();
-    addDuration(QStringLiteral("End of stream"),
-                std::nullopt);
+    addDuration(QStringLiteral("End of stream"), std::nullopt);
 
     menu.addSeparator();
 
@@ -300,8 +292,8 @@ void PinnedMessageWidget::showModMenu()
         this->hide();
     });
 
-    menu.exec(this->menuButton_->mapToGlobal(
-        QPoint(0, this->menuButton_->height())));
+    menu.exec(
+        this->menuButton_->mapToGlobal(QPoint(0, this->menuButton_->height())));
 }
 
 void PinnedMessageWidget::refresh()

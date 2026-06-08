@@ -175,8 +175,8 @@ void PubSubClient::handleMessageResponse(const PubSubMessageMessage &message)
 
         const auto &innerMessage = *oInnerMessage;
         // strip the "pinned-chat-updates-v1." prefix
-        const auto channelId =
-            message.topic.sliced(static_cast<qsizetype>(sizeof("pinned-chat-updates-v1.") - 1));
+        const auto channelId = message.topic.sliced(
+            static_cast<qsizetype>(sizeof("pinned-chat-updates-v1.") - 1));
 
         switch (innerMessage.type)
         {

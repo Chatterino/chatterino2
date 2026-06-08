@@ -514,8 +514,7 @@ public:
     MOCK_METHOD(
         void, pinChatMessage,
         (const QString &broadcasterID, const QString &moderatorID,
-         const QString &messageID,
-         std::optional<std::chrono::seconds> duration,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
          ResultCallback<> successCallback,
          (FailureCallback<HelixPinMessageError, QString> failureCallback)),
         (override));
@@ -523,8 +522,7 @@ public:
     MOCK_METHOD(
         void, updatePinnedChatMessage,
         (const QString &broadcasterID, const QString &moderatorID,
-         const QString &messageID,
-         std::optional<std::chrono::seconds> duration,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
          ResultCallback<> successCallback,
          (FailureCallback<HelixPinMessageError, QString> failureCallback)),
         (override));
