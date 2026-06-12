@@ -68,7 +68,8 @@ AboutPage::AboutPage()
                 string += "<br>" % version.extraString();
             }
 
-            string += "<br><br>The settings directory is located at <a href=\"";
+            string +=
+                "<br><br>Your settings directory is located at <a href=\"";
             string +=
                 QUrl::fromLocalFile(getApp()->getPaths().settingsDirectory)
                     .toString(QUrl::FullyEncoded);
