@@ -21,15 +21,13 @@ concurrency:
 
 jobs:
   test:
-    name: "Test ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
+    name: "Test Ubuntu"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
       matrix:
         include:
-          - os: "ubuntu-22.04"
-            container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.1
+          - container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
       fail-fast: false
 
     steps:
