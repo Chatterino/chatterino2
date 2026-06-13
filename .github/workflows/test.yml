@@ -16,19 +16,14 @@ env:
   QT_QPA_PLATFORM: minimal
 
 concurrency:
-  group: test-${{ github.ref }}
+  group: test-ubuntu-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
     name: "Test Ubuntu"
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      matrix:
-        include:
-          - container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
-      fail-fast: false
+    container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
 
     steps:
       - uses: actions/checkout@v6
