@@ -1707,10 +1707,22 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         builder->flags.set(MessageFlag::Disabled);
     }
 
-    if (tags.contains("msg-id") &&
-        tags["msg-id"].toString().split(';').contains("highlighted-message"))
+    auto msgIdIt = tags.constFind("msg-id");
+    if (msgIdIt != tags.constEnd())
     {
-        builder->flags.set(MessageFlag::RedeemedHighlight);
+        // TODO: Why do we have to split this into a list?
+        auto msgIdTypes = msgIdIt->toString().split(';');
+
+        if (msgIdTypes.contains("highlighted-message"))
+        {
+            builder->flags.set(MessageFlag::RedeemedHighlight);
+        }
+
+        if (msgIdTypes.contains("viewermilestone") ||
+            msgIdTypes.contains("modiversary"))
+        {
+            builder->flags.set(MessageFlag::WatchStreak);
+        }
     }
 
     if (tags.contains("first-msg") && tags["first-msg"].toString() == "1")

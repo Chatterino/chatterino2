@@ -545,7 +545,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
                         MessageSinkTrait::AddMentionsToGlobalChannel);
                     IrcMessageHandler::instance().addMessage(
                         msg.message.get(), sink, this, msg.originalContent,
-                        *server, false, false);
+                        *server, AddMessageArgs{});
                     if (sink.messages().empty())
                     {
                         return true;

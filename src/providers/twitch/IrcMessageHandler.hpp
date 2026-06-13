@@ -26,6 +26,12 @@ struct ClearChatMessage {
     std::optional<QString> username;
 };
 
+struct AddMessageArgs {
+    bool isSub = false;
+    bool isAction = false;
+    bool isSpecial = false;
+};
+
 class IrcMessageHandler
 {
     IrcMessageHandler() = default;
@@ -64,7 +70,7 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *chan, const QString &originalContent,
-                           ITwitchIrcServer &twitch, bool isSub, bool isAction,
+                           ITwitchIrcServer &twitch, AddMessageArgs addArgs,
                            const QString &msgType = "");
 
 private:
