@@ -141,7 +141,7 @@ jobs:
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
