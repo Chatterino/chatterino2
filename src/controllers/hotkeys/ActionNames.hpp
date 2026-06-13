@@ -275,7 +275,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"incremental-search-history",
           ActionDefinition{
               .displayName = "Incrementally search through the input history",
-              .argumentDescription = "[forward/backward] [loop/noloop]",
+              .argumentDescription = "<forward/backward> <loop/noloop>",
               .minCountArguments = 2,
               .maxCountArguments = 2,
               .possibleArguments =

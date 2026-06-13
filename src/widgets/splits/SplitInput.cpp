@@ -1243,14 +1243,8 @@ void SplitInput::editTextChanged()
         {
             QTextCursor cursor = this->ui_.textEdit->textCursor();
             QTextCharFormat format;
-            if (getTheme()->isLightTheme())
-            {
-                format.setBackground(QColor(20, 20, 255, 80));
-            }
-            else
-            {
-                format.setBackground(QColor(110, 110, 255, 80));
-            }
+            format.setBackground(
+                getTheme()->splits.input.searchHighlightBackground);
             format.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
             cursor.setPosition(static_cast<int>(matchIdx),
@@ -1774,8 +1768,9 @@ void SplitInput::updateHistorySearchStatus(bool failed, const QString &message)
     if (failed && !this->historySearchFailed)
     {
         QPalette palette = this->ui_.historySearchWrap->palette();
-        palette.setColor(QPalette::Text, Qt::red);
-        palette.setColor(QPalette::WindowText, Qt::red);
+        auto failColor = getTheme()->splits.input.searchFailText;
+        palette.setColor(QPalette::Text, failColor);
+        palette.setColor(QPalette::WindowText, failColor);
         this->ui_.historySearchWrap->setPalette(palette);
     }
     else if (!failed && this->historySearchFailed)
