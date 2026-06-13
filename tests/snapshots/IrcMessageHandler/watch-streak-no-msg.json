@@ -1,5 +1,5 @@
 {
-    "input": "@badge-info=subscriber/2;badges=subscriber/2,bits/1000;color=#FF4500;display-name=whoopiix;emotes=;flags=;id=d2b32a02-3071-4c52-b2ce-bc3716acdc44;login=whoopiix;mod=0;msg-id=bitsbadgetier;msg-param-threshold=1000;room-id=11148817;subscriber=1;system-msg=bits\\sbadge\\stier\\snotification;tmi-sent-ts=1594520403813;user-id=104252055;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
+    "input": "@badges=subscriber/3,sub-gifter/5;mod=0;historical=1;subscriber=1;flags=;color=#BE0000;rm-received-ts=1780143568293;msg-id=viewermilestone;emotes=;msg-param-id=8f04affa-bab5-4d50-81b9-40f97bff86bb;badge-info=subscriber/3;system-msg=club_reg\\swatched\\s15\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;id=12265c31-d7c1-4344-9afd-894b3c290bc9;display-name=club_reg;vip=0;user-type=;msg-param-value=15;msg-param-category=watch-streak;msg-param-copoReward=450;login=club_reg;user-id=28392974;tmi-sent-ts=1780143566057;room-id=11148817 :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
             "channelName": "",
@@ -19,7 +19,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "2:20"
+                            "12:19"
                         ]
                     },
                     "flags": "Timestamp",
@@ -28,7 +28,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "02:20:03",
+                    "time": "12:19:28",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -45,10 +45,10 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff4500",
-                    "userLoginName": "whoopiix",
+                    "userColor": "#ffbe0000",
+                    "userLoginName": "club_reg",
                     "words": [
-                        "whoopiix"
+                        "club_reg"
                     ]
                 },
                 {
@@ -63,25 +63,27 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "just",
-                        "earned",
+                        "watched",
+                        "15",
+                        "consecutive",
+                        "streams",
+                        "and",
+                        "sparked",
                         "a",
-                        "new",
-                        "1K",
-                        "Bits",
-                        "badge!"
+                        "watch",
+                        "streak!"
                     ]
                 }
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
+            "flags": "System|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
-            "messageText": "whoopiix just earned a new 1K Bits badge!",
-            "searchText": "whoopiix just earned a new 1K Bits badge!",
+            "messageText": "club_reg watched 15 consecutive streams and sparked a watch streak!",
+            "searchText": "club_reg watched 15 consecutive streams and sparked a watch streak!",
             "serverReceivedTime": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {

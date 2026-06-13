@@ -1,5 +1,5 @@
 {
-    "input": "@badge-info=subscriber/2;badges=subscriber/2,bits/1000;color=#FF4500;display-name=whoopiix;emotes=;flags=;id=d2b32a02-3071-4c52-b2ce-bc3716acdc44;login=whoopiix;mod=0;msg-id=bitsbadgetier;msg-param-threshold=1000;room-id=11148817;subscriber=1;system-msg=bits\\sbadge\\stier\\snotification;tmi-sent-ts=1594520403813;user-id=104252055;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
+    "input": "@id=090939a1-18a5-4370-9066-b4f56512c320;badges=moderator/1,subscriber/12,glitchcon2020/1;tmi-sent-ts=1780134274460;color=#FF7F50;system-msg=has\\sbeen\\sa\\smoderator\\sfor\\s18\\smonths!;login=jcrouzer;rm-received-ts=1780134274566;user-id=44850681;msg-param-months=18;room-id=11148817;subscriber=1;display-name=JCRouzer;mod=1;flags=;msg-id=modiversary;user-type=mod;badge-info=subscriber/20;emotes=;historical=1;vip=0 :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
             "channelName": "",
@@ -19,7 +19,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "2:20"
+                            "9:44"
                         ]
                     },
                     "flags": "Timestamp",
@@ -28,7 +28,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "02:20:03",
+                    "time": "09:44:34",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -45,10 +45,10 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff4500",
-                    "userLoginName": "whoopiix",
+                    "userColor": "#ffff7f50",
+                    "userLoginName": "jcrouzer",
                     "words": [
-                        "whoopiix"
+                        "JCRouzer"
                     ]
                 },
                 {
@@ -63,25 +63,25 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "just",
-                        "earned",
+                        "has",
+                        "been",
                         "a",
-                        "new",
-                        "1K",
-                        "Bits",
-                        "badge!"
+                        "moderator",
+                        "for",
+                        "18",
+                        "months!"
                     ]
                 }
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
+            "flags": "System|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
-            "messageText": "whoopiix just earned a new 1K Bits badge!",
-            "searchText": "whoopiix just earned a new 1K Bits badge!",
+            "messageText": "JCRouzer has been a moderator for 18 months!",
+            "searchText": "JCRouzer has been a moderator for 18 months!",
             "serverReceivedTime": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
