@@ -53,6 +53,7 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "ritual",           // new viewer ritual
     "announcement",     // new mod announcement thing
     "viewermilestone",  // watch streak, but other categories possible in future
+    "modiversary",      // Mod anniversary.
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
@@ -106,7 +107,7 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
     if (const auto it = tags.find("reply-parent-display-name");
         it != tags.end())
     {
-        auto displayName = it.value().toString();
+        auto displayName = parseTagString(it.value().toString());
 
         if (content.length() <= 1 + displayName.length())
         {
@@ -118,7 +119,8 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
             content.at(1 + displayName.length()) == ' ' &&
             content.indexOf(displayName, 1) == 1)
         {
-            int messageOffset = 1 + displayName.length() + 1;
+            // Reply prefix's "@" + displayName + " "
+            qsizetype messageOffset = 1 + displayName.length() + 1;
             content.remove(0, messageOffset);
             return messageOffset;
         }
@@ -790,6 +792,19 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         // By default, we return value of system-msg tag
         QString messageText = it.value().toString();
 
+        auto displayName = [&] {
+            if (msgType == u"raid")
+            {
+                return tags.value("msg-param-displayName").toString();
+            }
+            return tags.value("display-name").toString();
+        }();
+        auto login = tags.value("login").toString();
+        if (displayName.isEmpty())
+        {
+            displayName = login;
+        }
+
         if (msgType == "bitsbadgetier")
         {
             messageText =
@@ -890,18 +905,15 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                               .arg(tags.value("display-name").toString(),
                                    QString::number(level));
         }
-
-        auto displayName = [&] {
-            if (msgType == u"raid")
-            {
-                return tags.value("msg-param-displayName").toString();
-            }
-            return tags.value("display-name").toString();
-        }();
-        auto login = tags.value("login").toString();
-        if (displayName.isEmpty())
+        else if (msgType == "modiversary")
         {
-            displayName = login;
+            // The message text we get is "has been a moderator for ..." (without the name).
+            // This might be a bug on Twitch's side.
+            if (!messageText.startsWith(login) &&
+                !messageText.startsWith(displayName))
+            {
+                messageText = displayName % ' ' % messageText;
+            }
         }
 
         auto userID = tags.value("user-id").toString();
@@ -919,7 +931,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             parseTagString(messageText), login, displayName, userColor,
             calculateMessageTime(message).time());
 
-        if (msgType == "viewermilestone")
+        if (msgType == "viewermilestone" || msgType == "modiversary")
         {
             msg->flags.set(MessageFlag::WatchStreak);
         }
@@ -1252,7 +1264,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     {
         if (isSub)
         {
-            if (msgType == "viewermilestone")
+            if (msgType == "viewermilestone" || msgType == "modiversary")
             {
                 msg->flags.set(MessageFlag::WatchStreak);
             }
