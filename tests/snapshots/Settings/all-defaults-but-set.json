@@ -95,7 +95,7 @@
                 {
                     "backgroundColor": "#44444444",
                     "enabled": true,
-                    "id": "channelpoints"
+                    "id": "channelpoints-highlightmymessage"
                 },
                 {
                     "backgroundColor": "#55555555",
