@@ -741,6 +741,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(message != nullptr);
     assert(channel != nullptr);
 
     const auto *userDataController = getApp()->getUserData();
@@ -945,7 +946,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
-            calculateMessageTime(message).time(), message);
+            calculateMessageTime(message).time(), *message);
 
         sink.addMessage(msg, MessageContext::Original);
     }

@@ -586,7 +586,7 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     const QString &text, const QString &loginName, const QString &displayName,
     const MessageColor &userColor, const QTime &time,
-    const Communi::IrcMessage *ircMessage)
+    const Communi::IrcMessage &ircMessage)
 {
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
@@ -609,7 +609,7 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     builder->messageText = text;
     builder->searchText = text;
 
-    auto tags = ircMessage->tags();
+    auto tags = ircMessage.tags();
 
     builder.parseMessageTags(tags);
 
