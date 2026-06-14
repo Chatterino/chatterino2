@@ -84,6 +84,8 @@ const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
 
+const QString ANONYMOUS_GIFTER_ID = "274598607";
+
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
     uint8_t numeric;
@@ -616,11 +618,42 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     return builder.release();
 }
 
-MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
-                                                 const QVariantMap &tags,
+MessagePtrMut MessageBuilder::makeSubgiftMessage(const QVariantMap &tags,
                                                  const QTime &time,
                                                  TwitchChannel *channel)
 {
+    auto text = parseTagString(tags.value("system-msg").toString());
+
+    if (auto monthsIt = tags.find("msg-param-gift-months");
+        monthsIt != tags.end())
+    {
+        int months = monthsIt.value().toInt();
+        if (months > 1)
+        {
+            auto plan = tags.value("msg-param-sub-plan").toString();
+            QString name =
+                ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                    ? "An anonymous user"
+                    : tags.value("display-name").toString();
+            text = QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                       .arg(name, QString::number(months),
+                            plan.isEmpty() ? '1' : plan.at(0),
+                            tags.value("msg-param-recipient-display-name")
+                                .toString());
+
+            if (auto countIt = tags.find("msg-param-sender-count");
+                countIt != tags.end())
+            {
+                int count = countIt.value().toInt();
+                if (count > months)
+                {
+                    text += QString(" They've gifted %1 months in the channel.")
+                                .arg(QString::number(count));
+                }
+            }
+        }
+    }
+
     const auto *userDataController = getApp()->getUserData();
     assert(userDataController != nullptr);
 
@@ -697,6 +730,8 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     builder->flags.set(MessageFlag::DoNotTriggerNotification);
     builder->messageText = text;
     builder->searchText = text;
+
+    builder.parseMessageTags(tags);
 
     return builder.release();
 }

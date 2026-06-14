@@ -243,8 +243,7 @@ public:
         const QString &displayName, const MessageColor &userColor,
         const QTime &time, const Communi::IrcMessage &ircMessage);
 
-    static MessagePtrMut makeSubgiftMessage(const QString &text,
-                                            const QVariantMap &tags,
+    static MessagePtrMut makeSubgiftMessage(const QVariantMap &tags,
                                             const QTime &time,
                                             TwitchChannel *channel);
 
