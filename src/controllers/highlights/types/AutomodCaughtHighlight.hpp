@@ -39,7 +39,7 @@ struct AutomodCaughtHighlight {
     static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr bool SUPPORT_PLAY_SOUND = false;
     // TODO
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(64, 64, 64, 127);
 
     // Default state:
     // Enabled = true
