@@ -35,7 +35,12 @@ public:
     // Called by the header pin button to toggle manual visibility.
     void toggleUserPinned();
 
-    [[nodiscard]] bool hasPinnedMessage() const;
+    /// Emitted whenever this widget becomes shown or hidden.
+    pajlada::Signals::NoArgSignal visibilityChanged;
+
+protected:
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
 private:
     void paintEvent(QPaintEvent *event) override;
@@ -47,13 +52,13 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Header row
-    QLabel *pinnedByLabel_;
-    QLabel *countdownLabel_;
+    QLabel *pinnedByLabel_ = nullptr;
+    QLabel *countdownLabel_ = nullptr;
     DrawnButton *menuButton_{};  // mod menu
 
     // Body
-    QTextEdit *messageLabel_;
-    QLabel *footerLabel_;
+    QTextEdit *messageLabel_ = nullptr;
+    QLabel *footerLabel_ = nullptr;
 
     QTimer *progressTimer_ = nullptr;
     QTimer *autoHideTimer_ = nullptr;

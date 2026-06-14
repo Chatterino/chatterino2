@@ -30,6 +30,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void themeChangedEvent() override;
 
     /// Creates a pin button that is scoped to this window.
     /// When clicked, the user can toggle whether the window is pinned.
@@ -71,8 +72,8 @@ private:
         .light = ":/buttons/pinDisabled-lightMode.svg",
     };
     SvgButton::Src pinEnabledSource_{
-        .dark = ":/buttons/pinEnabled.svg",
-        .light = ":/buttons/pinEnabled.svg",
+        .dark = ":/buttons/pinnedMessage-chat.svg",
+        .light = ":/buttons/pinnedMessage-chat.svg",
     };
     bool isPinned_ = false;
 };

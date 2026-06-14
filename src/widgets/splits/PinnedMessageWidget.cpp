@@ -19,9 +19,12 @@
 #include <QMenu>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QShowEvent>
 #include <QTextEdit>
 #include <QTimer>
 #include <QVBoxLayout>
+
+using namespace std::chrono_literals;
 
 #include <chrono>
 #include <optional>
@@ -36,6 +39,13 @@ constexpr auto MUTED_STYLE = "color: #adadb8;";
 
 PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     : BaseWidget(parent)
+    , pinnedByLabel_(new QLabel(this))
+    , countdownLabel_(new QLabel(this))
+    , menuButton_(new DrawnButton(DrawnButton::Symbol::Kebab, {}, this))
+    , messageLabel_(new QTextEdit(this))
+    , footerLabel_(new QLabel(this))
+    , progressTimer_(new QTimer(this))
+    , autoHideTimer_(new QTimer(this))
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -52,7 +62,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     auto *headerRow = new QHBoxLayout();
     headerRow->setSpacing(4);
 
-    this->pinnedByLabel_ = new QLabel(this);
     {
         QFont f = this->pinnedByLabel_->font();
         f.setPointSize(11);
@@ -60,7 +69,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     }
     headerRow->addWidget(this->pinnedByLabel_);
     headerRow->addStretch(1);
-    this->menuButton_ = new DrawnButton(DrawnButton::Symbol::Kebab, {}, this);
     this->menuButton_->setScaleIndependentSize(28, 28);
     this->menuButton_->setToolTip(QStringLiteral("Mod options"));
     this->menuButton_->hide();
@@ -69,7 +77,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     contentBox->addLayout(headerRow);
 
     // Message body
-    this->messageLabel_ = new QTextEdit(this);
     this->messageLabel_->setReadOnly(true);
     this->messageLabel_->setFocusPolicy(Qt::NoFocus);
     this->messageLabel_->setFrameShape(QFrame::NoFrame);
@@ -93,7 +100,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     QObject::connect(
         this->messageLabel_->document()->documentLayout(),
         &QAbstractTextDocumentLayout::documentSizeChanged, this->messageLabel_,
-        [label = this->messageLabel_](const QSizeF &newSize) {
+        [label = this->messageLabel_](QSizeF newSize) {
             const int h = qBound(1, (int)std::ceil(newSize.height()), 110);
             label->setFixedHeight(h);
         });
@@ -104,7 +111,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     footerRow->setContentsMargins(0, 2, 0, 0);
     footerRow->setSpacing(4);
 
-    this->footerLabel_ = new QLabel(this);
     this->footerLabel_->setStyleSheet(MUTED_STYLE);
     {
         QFont f = this->footerLabel_->font();
@@ -114,7 +120,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     footerRow->addWidget(this->footerLabel_);
     footerRow->addStretch(1);
 
-    this->countdownLabel_ = new QLabel(this);
     this->countdownLabel_->setStyleSheet(MUTED_STYLE);
     {
         QFont f = this->countdownLabel_->font();
@@ -140,14 +145,12 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     outerBox->addWidget(bottomBorder);
 
     // Countdown timer (fires every second)
-    this->progressTimer_ = new QTimer(this);
-    this->progressTimer_->setInterval(1000);
+    this->progressTimer_->setInterval(1s);
     QObject::connect(this->progressTimer_, &QTimer::timeout, this, [this] {
         this->tickProgress();
     });
 
     // auto-hide timer
-    this->autoHideTimer_ = new QTimer(this);
     this->autoHideTimer_->setSingleShot(true);
     QObject::connect(this->autoHideTimer_, &QTimer::timeout, this, [this] {
         if (!this->userToggled_)
@@ -165,13 +168,17 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
 
 void PinnedMessageWidget::tickProgress()
 {
-    const qint64 nowMs = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
     const qint64 endsMs = this->pinEndsAt_.toMSecsSinceEpoch();
 
     if (nowMs >= endsMs)
     {
         this->progressTimer_->stop();
         this->countdownLabel_->hide();
+        if (this->channel_)
+        {
+            this->channel_->clearPinnedMessage();
+        }
         return;
     }
 
@@ -186,14 +193,14 @@ void PinnedMessageWidget::tickProgress()
     {
         timeStr = QStringLiteral("\u23F1 %1:%2:%3")
                       .arg(hours)
-                      .arg(mins, 2, 10, QLatin1Char('0'))
-                      .arg(secs, 2, 10, QLatin1Char('0'));
+                      .arg(mins, 2, 10, QChar(u'0'))
+                      .arg(secs, 2, 10, QChar(u'0'));
     }
     else
     {
         timeStr = QStringLiteral("\u23F1 %1:%2")
-                      .arg(mins, 2, 10, QLatin1Char('0'))
-                      .arg(secs, 2, 10, QLatin1Char('0'));
+                      .arg(mins, 2, 10, QChar(u'0'))
+                      .arg(secs, 2, 10, QChar(u'0'));
     }
 
     this->countdownLabel_->setText(timeStr);
@@ -244,7 +251,7 @@ void PinnedMessageWidget::showModMenu()
 
     QMenu menu(this);
 
-    menu.addAction(QStringLiteral("Unpin this Message"), [this] {
+    menu.addAction(QStringLiteral("Unpin this Message"), this, [this] {
         if (this->channel_)
         {
             this->channel_->unpinCurrentMessage();
@@ -255,12 +262,12 @@ void PinnedMessageWidget::showModMenu()
 
     const auto addDuration = [&](const QString &label,
                                  std::optional<int> seconds) {
-        unpinAfterMenu->addAction(label, [this, seconds] {
+        unpinAfterMenu->addAction(label, this, [this, seconds] {
             if (!this->channel_)
             {
                 return;
             }
-            const auto pin = this->channel_->getPinnedMessage();
+            const auto &pin = this->channel_->getPinnedMessage();
             if (!pin)
             {
                 return;
@@ -288,7 +295,7 @@ void PinnedMessageWidget::showModMenu()
 
     menu.addSeparator();
 
-    menu.addAction(QStringLiteral("Hide for Yourself"), [this] {
+    menu.addAction(QStringLiteral("Hide for Yourself"), this, [this] {
         this->hide();
     });
 
@@ -307,7 +314,7 @@ void PinnedMessageWidget::refresh()
         return;
     }
 
-    const auto pin = this->channel_->getPinnedMessage();
+    const auto &pin = this->channel_->getPinnedMessage();
     if (!pin)
     {
         this->progressTimer_->stop();
@@ -348,7 +355,7 @@ void PinnedMessageWidget::refresh()
     this->autoHideTimer_->stop();
     if (!getSettings()->alwaysShowPinnedMessage && !this->userToggled_)
     {
-        this->autoHideTimer_->start(5000);
+        this->autoHideTimer_->start(30s);
     }
 }
 
@@ -368,9 +375,16 @@ void PinnedMessageWidget::toggleUserPinned()
     }
 }
 
-bool PinnedMessageWidget::hasPinnedMessage() const
+void PinnedMessageWidget::showEvent(QShowEvent *event)
 {
-    return this->channel_ && this->channel_->getPinnedMessage() != nullptr;
+    BaseWidget::showEvent(event);
+    this->visibilityChanged.invoke();
+}
+
+void PinnedMessageWidget::hideEvent(QHideEvent *event)
+{
+    BaseWidget::hideEvent(event);
+    this->visibilityChanged.invoke();
 }
 
 }  // namespace chatterino

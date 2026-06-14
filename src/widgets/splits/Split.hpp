@@ -56,6 +56,7 @@ public:
 
     ChannelView &getChannelView();
     SplitInput &getInput();
+    [[nodiscard]] PinnedMessageWidget *getPinnedBanner() const;
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel() const;

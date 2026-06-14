@@ -8,10 +8,12 @@
 #include <QJsonObject>
 #include <QString>
 
+#include <cstdint>
+
 namespace chatterino {
 
 struct PubSubPinnedChatUpdatesV1Message {
-    enum class Type {
+    enum class Type : std::uint8_t {
         PinMessage,
         UnpinMessage,
         UpdateMessage,
@@ -30,7 +32,7 @@ struct PubSubPinnedChatUpdatesV1Message {
 }  // namespace chatterino
 
 template <>
-constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<  // NOLINT(readability-identifier-naming)
     chatterino::PubSubPinnedChatUpdatesV1Message::Type>(
     chatterino::PubSubPinnedChatUpdatesV1Message::Type value) noexcept
 {
@@ -43,6 +45,6 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
         case chatterino::PubSubPinnedChatUpdatesV1Message::Type::UpdateMessage:
             return "update-message";
         default:
-            return default_tag;
+            return default_tag;  // NOLINT(clazy-rule-of-two-soft)
     }
 }

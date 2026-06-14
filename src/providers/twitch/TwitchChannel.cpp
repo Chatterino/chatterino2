@@ -2575,10 +2575,16 @@ void TwitchChannel::refreshPinnedMessage()
             {
                 return;
             }
-            self->pinnedMessage_ =
-                msg ? std::make_unique<const HelixPinnedChatMessage>(
-                          std::move(*msg))
-                    : nullptr;
+            if (msg)
+            {
+                self->pinnedMessage_ =
+                    std::make_unique<const HelixPinnedChatMessage>(
+                        std::move(*msg));
+            }
+            else
+            {
+                self->pinnedMessage_ = nullptr;
+            }
             self->pinnedMessageChanged.invoke();
         },
         [](const QString &error) {
@@ -2587,9 +2593,9 @@ void TwitchChannel::refreshPinnedMessage()
         });
 }
 
-const HelixPinnedChatMessage *TwitchChannel::getPinnedMessage() const
+const std::unique_ptr<const HelixPinnedChatMessage> &TwitchChannel::getPinnedMessage() const
 {
-    return this->pinnedMessage_.get();
+    return this->pinnedMessage_;
 }
 
 void TwitchChannel::clearPinnedMessage()

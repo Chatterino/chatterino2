@@ -749,6 +749,11 @@ SplitInput &Split::getInput()
     return *this->input_;
 }
 
+PinnedMessageWidget *Split::getPinnedBanner() const
+{
+    return this->pinnedBanner_;
+}
+
 void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
