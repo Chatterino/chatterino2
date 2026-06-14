@@ -45,7 +45,6 @@ jobs:
         include:
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -53,7 +52,6 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -61,12 +59,18 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
             build-deb: false
             plugins: false
+          - os: ubuntu-26.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: true
+            plugins: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
@@ -133,7 +137,7 @@ jobs:
         if: matrix.build-deb
         uses: actions/upload-artifact@v7
         with:
-          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
@@ -144,13 +148,13 @@ jobs:
         include:
           # macOS
           - os: macos-14
-            qt-version: 6.7.1
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.8.3
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
