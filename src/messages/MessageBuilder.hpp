@@ -242,7 +242,7 @@ public:
     static MessagePtrMut makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
-        const QTime &time);
+        const QTime &time, const Communi::IrcMessage *ircMessage);
 
     static MessagePtrMut makeSubgiftMessage(const QString &text,
                                             const QVariantMap &tags,
@@ -286,6 +286,8 @@ private:
                        TwitchChannel *twitchChannel,
                        bool trimSubscriberUsername);
     void parseMessageID(const QVariantMap &tags);
+    /// Parses most of them message flags based on the given tags
+    void parseMessageTags(const QVariantMap &tags);
 
     /// Parses the room-ID this message was received in
     ///

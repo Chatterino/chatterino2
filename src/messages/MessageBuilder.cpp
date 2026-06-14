@@ -97,6 +97,13 @@ const std::unordered_map<QString, HypeChatPaidLevel> HYPE_CHAT_PAID_LEVEL{
     {u"NINE"_s, {4h, 9}},    {u"TEN"_s, {5h, 10}},
 };
 
+/// MessageFlag::Subscription message types
+const QSet<QString> SUB_MESSAGE_TYPES{
+    "sub",      //
+    "subgift",  //
+    "resub",    // resub messages
+};
+
 QString formatUpdatedEmoteList(const QString &platform,
                                const std::vector<QString> &emoteNames,
                                bool isAdd, bool isFirstWord)
@@ -514,6 +521,22 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     return {};
 }
 
+std::pair<QString, bool> parseMessageType(const QVariantMap &tags)
+{
+    auto msgId = tags.value("msg-id").toString();
+
+    bool mirrored = msgId == "sharedchatnotice";
+
+    if (mirrored)
+    {
+        msgId = tags.value("source-msg-id").toString();
+    }
+
+    // TODO: room-id & source-room-id comparison?
+
+    return {msgId, mirrored};
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -562,7 +585,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 
 MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     const QString &text, const QString &loginName, const QString &displayName,
-    const MessageColor &userColor, const QTime &time)
+    const MessageColor &userColor, const QTime &time,
+    const Communi::IrcMessage *ircMessage)
 {
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
@@ -584,6 +608,10 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     builder->flags.set(MessageFlag::DoNotTriggerNotification);
     builder->messageText = text;
     builder->searchText = text;
+
+    auto tags = ircMessage->tags();
+
+    builder.parseMessageTags(tags);
 
     return builder.release();
 }
@@ -1707,23 +1735,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         builder->flags.set(MessageFlag::Disabled);
     }
 
-    auto msgIdIt = tags.constFind("msg-id");
-    if (msgIdIt != tags.constEnd())
-    {
-        // TODO: Why do we have to split this into a list?
-        auto msgIdTypes = msgIdIt->toString().split(';');
-
-        if (msgIdTypes.contains("highlighted-message"))
-        {
-            builder->flags.set(MessageFlag::RedeemedHighlight);
-        }
-
-        if (msgIdTypes.contains("viewermilestone") ||
-            msgIdTypes.contains("modiversary"))
-        {
-            builder->flags.set(MessageFlag::WatchStreak);
-        }
-    }
+    builder.parseMessageTags(tags);
 
     if (tags.contains("first-msg") && tags["first-msg"].toString() == "1")
     {
@@ -2058,6 +2070,49 @@ void MessageBuilder::parseMessageID(const QVariantMap &tags)
     if (iterator != tags.end())
     {
         this->message().id = iterator.value().toString();
+    }
+}
+
+void MessageBuilder::parseMessageTags(const QVariantMap &tags)
+{
+    const auto [messageType, mirrored] = parseMessageType(tags);
+
+    if (!messageType.isEmpty())
+    {
+        if (messageType == "highlighted-message")
+        {
+            this->message().flags.set(MessageFlag::RedeemedHighlight);
+        }
+        else if (SUB_MESSAGE_TYPES.contains(messageType))
+        {
+            this->message().flags.set(MessageFlag::Subscription);
+        }
+        else if (messageType == "announcement")
+        {
+            this->message().flags.set(MessageFlag::Announcement);
+
+            if (auto cit = tags.constFind("msg-param-color"); cit != tags.end())
+            {
+                this->message().announcementColor =
+                    qmagicenum::enumCast<HelixAnnouncementColor>(
+                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                        .value_or(HelixAnnouncementColor::Primary);
+            }
+        }
+        else if (messageType == "viewermilestone" ||
+                 messageType == "modiversary")
+        {
+            this->message().flags.set(MessageFlag::WatchStreak);
+        }
+        else
+        {
+            this->message().flags.set(MessageFlag::UncategorizedNotification);
+        }
+    }
+
+    if (mirrored)
+    {
+        this->message().flags.set(MessageFlag::SharedMessage);
     }
 }
 

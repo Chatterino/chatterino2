@@ -57,19 +57,6 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
-/// Message types that we know and should explicitly not set as uncategorized because their message flag
-/// gets set to a reasonable value elsewhere
-const QSet<QString> KNOWN_MESSAGE_TYPES{
-    "viewermilestone",  // watch streak, but other categories possible in future
-    "modiversary",      // Mod anniversary.
-    "sub",              //
-    "subgift",          //
-    "resub",            // resub messages
-    "bitsbadgetier",    // bits badge upgrade
-    "ritual",           // new viewer ritual
-    "announcement",     // new mod announcement thing
-};
-
 /// MessageFlag::Subscription message types
 const QSet<QString> SUB_MESSAGE_TYPES{
     "sub",      //
@@ -798,6 +785,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         return;
     }
 
+    // TODO: Why are we ONLY allowing these message types to have an additional message with their content added?
     if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
         // Messages are not required, so they might be empty
@@ -956,37 +944,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
-            calculateMessageTime(message).time());
-
-        if (msgType == "viewermilestone" || msgType == "modiversary")
-        {
-            msg->flags.set(MessageFlag::WatchStreak);
-        }
-        else if (msgType == "announcement")
-        {
-            msg->flags.set(MessageFlag::Announcement);
-
-            if (auto cit = tags.find("msg-param-color"); cit != tags.end())
-            {
-                msg->announcementColor =
-                    qmagicenum::enumCast<HelixAnnouncementColor>(
-                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
-                        .value_or(HelixAnnouncementColor::Primary);
-            }
-        }
-        else if (SUB_MESSAGE_TYPES.contains(msgType))
-        {
-            msg->flags.set(MessageFlag::Subscription);
-        }
-        else
-        {
-            msg->flags.set(MessageFlag::UncategorizedNotification);
-        }
-
-        if (mirrored)
-        {
-            msg->flags.set(MessageFlag::SharedMessage);
-        }
+            calculateMessageTime(message).time(), message);
 
         sink.addMessage(msg, MessageContext::Original);
     }
@@ -1297,30 +1255,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
     if (msg)
     {
-        if (isSub)
-        {
-            msg->flags.set(MessageFlag::Subscription);
-        }
-        else if (addArgs.isSpecial)
-        {
-            if (msgType == "announcement")
-            {
-                msg->flags.set(MessageFlag::Announcement);
-
-                if (auto cit = tags.find("msg-param-color"); cit != tags.end())
-                {
-                    msg->announcementColor =
-                        qmagicenum::enumCast<HelixAnnouncementColor>(
-                            cit->toString(), qmagicenum::CASE_INSENSITIVE)
-                            .value_or(HelixAnnouncementColor::Primary);
-                }
-            }
-            else if (!KNOWN_MESSAGE_TYPES.contains(msgType))
-            {
-                msg->flags.set(MessageFlag::UncategorizedNotification);
-            }
-        }
-
         sink.applySimilarityFilters(msg);
 
         if (!msg->flags.has(MessageFlag::Similar) ||
