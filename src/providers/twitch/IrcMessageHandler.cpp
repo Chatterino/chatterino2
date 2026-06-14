@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -30,7 +29,6 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/QMagicEnum.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -38,7 +36,7 @@
 
 #include <memory>
 
-using namespace chatterino::literals;
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -57,27 +55,14 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
-/// Message types that we know and should explicitly not set as uncategorized because their message flag
-/// gets set to a reasonable value elsewhere
-const QSet<QString> KNOWN_MESSAGE_TYPES{
-    "viewermilestone",  // watch streak, but other categories possible in future
-    "modiversary",      // Mod anniversary.
-    "sub",              //
-    "subgift",          //
-    "resub",            // resub messages
-    "bitsbadgetier",    // bits badge upgrade
-    "ritual",           // new viewer ritual
-    "announcement",     // new mod announcement thing
-};
-
 /// MessageFlag::Subscription message types
+/// This is duplicated with SUB_MESSAGE_TYPES in MessageBuilder.cpp until the `isSubscriptionMessage` parameter
+/// in `MessageParseArgs` is no longer used for highlights.
 const QSet<QString> SUB_MESSAGE_TYPES{
     "sub",      //
     "subgift",  //
     "resub",    // resub messages
 };
-
-const QString ANONYMOUS_GIFTER_ID = "274598607";
 
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
@@ -310,8 +295,6 @@ MessagePtr parseNoticeMessage(Communi::IrcNoticeMessage *message)
 }  // namespace
 
 namespace chatterino {
-
-using namespace literals;
 
 IrcMessageHandler &IrcMessageHandler::instance()
 {
@@ -752,6 +735,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(message != nullptr);
     assert(channel != nullptr);
 
     const auto *userDataController = getApp()->getUserData();
@@ -798,6 +782,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         return;
     }
 
+    // TODO: Why are we ONLY allowing these message types to have an additional message with their content added?
     if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
         // Messages are not required, so they might be empty
@@ -807,8 +792,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                        {
                            .isSub = SUB_MESSAGE_TYPES.contains(msgType),
                            .isSpecial = true,
-                       },
-                       msgType);
+                       });
         }
     }
 
@@ -846,50 +830,9 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
         else if (msgType == "subgift")
         {
-            if (auto monthsIt = tags.find("msg-param-gift-months");
-                monthsIt != tags.end())
-            {
-                int months = monthsIt.value().toInt();
-                if (months > 1)
-                {
-                    auto plan = tags.value("msg-param-sub-plan").toString();
-                    QString name =
-                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
-                            ? "An anonymous user"
-                            : tags.value("display-name").toString();
-                    messageText =
-                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(name, QString::number(months),
-                                 plan.isEmpty() ? '1' : plan.at(0),
-                                 tags.value("msg-param-recipient-display-name")
-                                     .toString());
-
-                    if (auto countIt = tags.find("msg-param-sender-count");
-                        countIt != tags.end())
-                    {
-                        int count = countIt.value().toInt();
-                        if (count > months)
-                        {
-                            messageText +=
-                                QString(
-                                    " They've gifted %1 months in the channel.")
-                                    .arg(QString::number(count));
-                        }
-                    }
-                }
-            }
-
             // subgifts are special because they include two users
             auto msg = MessageBuilder::makeSubgiftMessage(
-                parseTagString(messageText), tags,
-                calculateMessageTime(message).time(), channel);
-
-            msg->flags.set(MessageFlag::Subscription);
-
-            if (mirrored)
-            {
-                msg->flags.set(MessageFlag::SharedMessage);
-            }
+                tags, calculateMessageTime(message).time(), channel);
 
             sink.addMessage(msg, MessageContext::Original);
             return;
@@ -956,37 +899,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
-            calculateMessageTime(message).time());
-
-        if (msgType == "viewermilestone" || msgType == "modiversary")
-        {
-            msg->flags.set(MessageFlag::WatchStreak);
-        }
-        else if (msgType == "announcement")
-        {
-            msg->flags.set(MessageFlag::Announcement);
-
-            if (auto cit = tags.find("msg-param-color"); cit != tags.end())
-            {
-                msg->announcementColor =
-                    qmagicenum::enumCast<HelixAnnouncementColor>(
-                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
-                        .value_or(HelixAnnouncementColor::Primary);
-            }
-        }
-        else if (SUB_MESSAGE_TYPES.contains(msgType))
-        {
-            msg->flags.set(MessageFlag::Subscription);
-        }
-        else
-        {
-            msg->flags.set(MessageFlag::UncategorizedNotification);
-        }
-
-        if (mirrored)
-        {
-            msg->flags.set(MessageFlag::SharedMessage);
-        }
+            calculateMessageTime(message).time(), *message);
 
         sink.addMessage(msg, MessageContext::Original);
     }
@@ -1171,8 +1084,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
                                    ITwitchIrcServer &twitch,
-                                   AddMessageArgs addArgs,
-                                   const QString &msgType)
+                                   AddMessageArgs addArgs)
 {
     assert(chan);
 
@@ -1186,10 +1098,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         args.trimSubscriberUsername = true;
     }
 
-    if (chan->isBroadcaster())
-    {
-        args.isStaffOrBroadcaster = true;
-    }
     args.isAction = isAction;
 
     const auto &tags = message->tags();
@@ -1297,30 +1205,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
     if (msg)
     {
-        if (isSub)
-        {
-            msg->flags.set(MessageFlag::Subscription);
-        }
-        else if (addArgs.isSpecial)
-        {
-            if (msgType == "announcement")
-            {
-                msg->flags.set(MessageFlag::Announcement);
-
-                if (auto cit = tags.find("msg-param-color"); cit != tags.end())
-                {
-                    msg->announcementColor =
-                        qmagicenum::enumCast<HelixAnnouncementColor>(
-                            cit->toString(), qmagicenum::CASE_INSENSITIVE)
-                            .value_or(HelixAnnouncementColor::Primary);
-                }
-            }
-            else if (!KNOWN_MESSAGE_TYPES.contains(msgType))
-            {
-                msg->flags.set(MessageFlag::UncategorizedNotification);
-            }
-        }
-
         sink.applySimilarityFilters(msg);
 
         if (!msg->flags.has(MessageFlag::Similar) ||
