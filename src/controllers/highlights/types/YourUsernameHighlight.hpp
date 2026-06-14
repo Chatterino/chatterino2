@@ -30,8 +30,7 @@ struct YourUsernameHighlight {
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
-    // TODO: remove automatic portion of name?
-    static constexpr QStringView DEFAULT_NAME = u"Your Username (automatic)";
+    static constexpr QStringView DEFAULT_NAME = u"Your Username";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;

@@ -30,8 +30,7 @@ struct YourMessagesHighlight {
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
-    // TODO: Remove (automatic) portion of the default name?
-    static constexpr QStringView DEFAULT_NAME = u"Your messages (automatic)";
+    static constexpr QStringView DEFAULT_NAME = u"Your messages";
 
     static constexpr bool ENABLED_BY_DEFAULT = false;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
