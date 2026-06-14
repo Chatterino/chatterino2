@@ -1144,10 +1144,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         args.trimSubscriberUsername = true;
     }
 
-    if (chan->isBroadcaster())
-    {
-        args.isStaffOrBroadcaster = true;
-    }
     args.isAction = isAction;
 
     const auto &tags = message->tags();

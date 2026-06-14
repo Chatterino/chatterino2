@@ -81,7 +81,6 @@ struct MessageParseArgs {
     bool isReceivedWhisper = false;
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
-    bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
     bool allowIgnore = true;
     bool isAction = false;

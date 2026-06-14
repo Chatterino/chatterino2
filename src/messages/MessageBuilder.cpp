@@ -1706,6 +1706,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     builder->flags.set(MessageFlag::Collapsed);
 
     bool senderIsBroadcaster = builder->loginName == channel->getName();
+    bool userIsStaffOrBroadcaster = channel->isBroadcaster();
 
     builder->channelName = channel->getName();
 
@@ -1768,9 +1769,10 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         }
 
         if (tags.value("user-type").toString() == "mod" &&
-            !args.isStaffOrBroadcaster)
+            !userIsStaffOrBroadcaster)
         {
             // You cannot timeout moderators UNLESS you are Twitch Staff or the broadcaster of the channel
+            // TODO: This is actually incorrect now - Twitch Staff do not have universal permission to timeout moderators anymore
             return false;
         }
 
