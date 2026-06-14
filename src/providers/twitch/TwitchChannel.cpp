@@ -538,9 +538,9 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
                 {
                     VectorMessageSink sink(
                         MessageSinkTrait::AddMentionsToGlobalChannel);
-                    IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), sink, this, msg.originalContent,
-                        *server, AddMessageArgs{});
+                    IrcMessageHandler::addMessage(msg.message.get(), sink, this,
+                                                  msg.originalContent, *server,
+                                                  AddMessageArgs{});
                     if (sink.messages().empty())
                     {
                         return true;
