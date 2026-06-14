@@ -46,6 +46,14 @@ public:
         const QString &originalMessage, const MessageFlags &messageFlags,
         filters::RunContext runContext) const;
 
+    /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
+    /// This can happen if a user does some manual cursed surgery on their settings.json file.
+    static QSet<QStringView> missingBillTinHighlights();
+
+    /// Given a set of missing highlight IDs, recreates & adds them to the bottom of the user's highlights.
+    static void recreateMissingBillTinHighlights(
+        const QSet<QStringView> &missingHighlights);
+
 private:
     /**
      * @brief rebuildChecks is called whenever some outside variable has been changed and our checks need to be updated

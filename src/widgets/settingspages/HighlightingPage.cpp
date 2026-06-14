@@ -6,6 +6,7 @@
 
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -68,6 +69,27 @@ HighlightingPage::HighlightingPage()
         }
 
         // MISC
+        if (const auto missing =
+                HighlightController::missingBillTinHighlights();
+            !missing.isEmpty())
+        {
+            auto missingHighlights =
+                layout.emplace<QHBoxLayout>().withoutMargin();
+            auto *lbl = missingHighlights
+                            .emplace<QLabel>(
+                                "You are missing some built-in highlights.")
+                            .getElement();
+            auto *btn =
+                missingHighlights
+                    .emplace<QPushButton>("Recreate built-in highlights")
+                    .getElement();
+            QObject::connect(btn, &QPushButton::clicked, [lbl, btn, missing] {
+                HighlightController::recreateMissingBillTinHighlights(missing);
+                lbl->hide();
+                btn->hide();
+            });
+        }
+
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
             auto label = customSound.append(this->createLabel<QString>(

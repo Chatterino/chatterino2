@@ -54,6 +54,17 @@ void rebuildSharedHighlights(Settings &settings,
     }
 }
 
+/// Recreates the highlight of type T if the highlight's ID is in the missingHighlights set
+template <typename T>
+void recreateIfMissing(const QSet<QStringView> &missingHighlights)
+{
+    if (missingHighlights.contains(T::ID))
+    {
+        qCInfo(LOG) << "Recreating missing highlight" << T::ID;
+        getSettings()->sharedHighlights.append(T{});
+    }
+}
+
 }  // namespace
 
 HighlightController::HighlightController(Settings &settings,
@@ -172,6 +183,52 @@ std::pair<bool, HighlightResult> HighlightController::check(
     }
 
     return {highlighted, result};
+}
+
+QSet<QStringView> HighlightController::missingBillTinHighlights()
+{
+    using namespace chatterino::highlights;
+
+    QSet<QStringView> expectedHighlights{
+        YourUsernameHighlight::ID,               //
+        WhispersHighlight::ID,                   //
+        SubscriptionsHighlight::ID,              //
+        ChannelPointsHighlight::ID,              //
+        FirstMessageHighlight::ID,               //
+        HypeChatHighlight::ID,                   //
+        SubscribedThreadHighlight::ID,           //
+        AutomodCaughtHighlight::ID,              //
+        WatchStreakHighlight::ID,                //
+        YourMessagesHighlight::ID,               //
+        UncategorizedNotificationHighlight::ID,  //
+    };
+
+    const auto highlights = getSettings()->sharedHighlights.readOnly();
+
+    for (const auto &h : *highlights)
+    {
+        expectedHighlights.remove(highlights::getID(h));
+    }
+
+    return expectedHighlights;
+}
+
+void HighlightController::recreateMissingBillTinHighlights(
+    const QSet<QStringView> &missingHighlights)
+{
+    using namespace chatterino::highlights;
+
+    recreateIfMissing<YourUsernameHighlight>(missingHighlights);
+    recreateIfMissing<WhispersHighlight>(missingHighlights);
+    recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
+    recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
+    recreateIfMissing<FirstMessageHighlight>(missingHighlights);
+    recreateIfMissing<HypeChatHighlight>(missingHighlights);
+    recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
+    recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
+    recreateIfMissing<WatchStreakHighlight>(missingHighlights);
+    recreateIfMissing<YourMessagesHighlight>(missingHighlights);
+    recreateIfMissing<UncategorizedNotificationHighlight>(missingHighlights);
 }
 
 }  // namespace chatterino
