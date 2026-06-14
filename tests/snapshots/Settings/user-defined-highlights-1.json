@@ -134,6 +134,9 @@
                     "regex": false,
                     "showInMentions": true,
                     "type": "message"
+                },
+                {
+                    "id": "uncategorizednotification"
                 }
             ]
         },

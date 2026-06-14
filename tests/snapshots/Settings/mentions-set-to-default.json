@@ -39,6 +39,9 @@
                 },
                 {
                     "id": "yourmessages"
+                },
+                {
+                    "id": "uncategorizednotification"
                 }
             ],
             "selfHighlight": {

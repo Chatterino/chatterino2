@@ -130,6 +130,9 @@
                 },
                 {
                     "id": "yourmessages"
+                },
+                {
+                    "id": "uncategorizednotification"
                 }
             ],
             "redeemedHighlight": {
