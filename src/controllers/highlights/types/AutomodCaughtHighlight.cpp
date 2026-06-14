@@ -23,7 +23,10 @@ HighlightCheck AutomodCaughtHighlight::buildCheck() const
             (void)self;             // unused
             (void)runContext;       // unused
 
-            if (!flags.has(MessageFlag::AutoModOffendingMessage))
+            // TODO: Since an automod message message always comes in two parts, should be prevent things like sounds & alerts from triggering twice?
+            // Prooooooobably
+            if (!flags.hasAny({MessageFlag::AutoModOffendingMessage,
+                               MessageFlag::AutoModOffendingMessageHeader}))
             {
                 return std::nullopt;
             }

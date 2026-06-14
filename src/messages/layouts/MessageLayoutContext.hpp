@@ -54,7 +54,6 @@ struct MessagePreferences {
     bool enableRedeemedHighlight{};
     bool enableElevatedMessageHighlight{};
     bool enableFirstMessageHighlight{};
-    bool enableAutomodHighlight{};
     bool enableAnnouncementHighlight{};
     bool enableColoredAnnouncementHighlight{};
 

@@ -65,14 +65,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
-        this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::AutomodHighlight),
-        };
-    }
-
     if (this->flags.has(MessageFlag::Announcement) &&
         getSettings()->enableAnnouncementHighlight)
     {

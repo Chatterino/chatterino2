@@ -129,9 +129,6 @@ void ColorProvider::initTypeColorMap()
               getSettings()->threadHighlightColor,
               HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
-              HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
-
     initColor(ColorType::AnnouncementHighlight,
               getSettings()->announcementHighlightColor,
               HighlightPhrase::FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR);
