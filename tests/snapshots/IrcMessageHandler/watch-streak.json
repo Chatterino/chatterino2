@@ -1,10 +1,10 @@
 {
-    "input": "@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=11148817;subscriber=1;system-msg=ronni\\shas\\ssubscribed\\sfor\\s6\\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!",
+    "input": "@login=imrlazyi;tmi-sent-ts=1780141763360;msg-id=viewermilestone;id=5f360c15-db41-439a-83fd-2e2dbcdebada;msg-param-copoReward=450;emotes=;flags=;color=#FF4500;mod=0;historical=1;user-type=;display-name=IMrLazyI;system-msg=IMrLazyI\\swatched\\s10\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;badges=subscriber/3,hello_neighbor_1/1;room-id=11148817;badge-info=subscriber/5;user-id=55530653;subscriber=1;vip=0;msg-param-value=10;msg-param-id=c3b94206-f875-4153-9c1e-112d9e650d4e;msg-param-category=watch-streak;rm-received-ts=1780141768602 :tmi.twitch.tv USERNOTICE #pajlada 🫣",
     "output": [
         {
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "ronni",
+            "displayName": "IMrLazyI",
             "elements": [
                 {
                     "color": "System",
@@ -34,7 +34,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "23:36"
+                            "11:49"
                         ]
                     },
                     "flags": "Timestamp",
@@ -43,7 +43,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "23:36:12",
+                    "time": "11:49:28",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -60,103 +60,81 @@
                 },
                 {
                     "emote": {
-                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/e8984705-d091-4e54-8241-e53b30a84b0e/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/e8984705-d091-4e54-8241-e53b30a84b0e/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/e8984705-d091-4e54-8241-e53b30a84b0e/3"
                         },
                         "name": "",
-                        "tooltip": "Staff"
+                        "tooltip": "3-Month Subscriber"
                     },
-                    "flags": "BadgeGlobalAuthority",
+                    "flags": "BadgeSubscription",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Staff",
+                    "tooltip": "3-Month Subscriber (5 months)",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
                     "emote": {
+                        "homePage": "https://www.twitch.tv/directory/game/Hello%20Neighbor/details",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/030cab2c-5d14-11e7-8d91-43a5a4306286/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/030cab2c-5d14-11e7-8d91-43a5a4306286/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/030cab2c-5d14-11e7-8d91-43a5a4306286/3"
                         },
                         "name": "",
-                        "tooltip": "Broadcaster"
-                    },
-                    "flags": "BadgeChannelAuthority",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Broadcaster",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/3"
-                        },
-                        "name": "",
-                        "tooltip": "Turbo"
+                        "tooltip": "Hello Neighbor"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Turbo",
+                    "tooltip": "Hello Neighbor",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffff00ff",
+                    "color": "#ffff4500",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "ronni"
+                        "value": "IMrLazyI"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "ronni:"
+                        "IMrLazyI:"
                     ]
                 },
                 {
-                    "color": "Text",
-                    "flags": "Text",
+                    "emote": {
+                        "images": {
+                            "1x": "https://pajbot.com/static/emoji-v2/img/twitter/64/1fae3.png"
+                        },
+                        "name": "🫣",
+                        "tooltip": ":face_with_peeking_eye:<br/>Emoji"
+                    },
+                    "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "style": "ChatMedium",
-                    "tooltip": "",
+                    "tooltip": ":face_with_peeking_eye:<br/>Emoji",
                     "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "Great",
-                        "stream",
-                        "--",
-                        "keep",
-                        "it",
-                        "up!"
-                    ]
+                    "type": "EmoteElement"
                 },
                 {
                     "background": "#ffa0a0a4",
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "db25007f-7a18-43eb-9379-80131e44d633"
+                        "value": "5f360c15-db41-439a-83fd-2e2dbcdebada"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -167,25 +145,24 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Highlighted|Collapsed|Subscription",
+            "flags": "Collapsed|WatchStreak",
             "frozen": false,
-            "highlightColor": "#64c466ff",
-            "id": "db25007f-7a18-43eb-9379-80131e44d633",
+            "id": "5f360c15-db41-439a-83fd-2e2dbcdebada",
             "localizedName": "",
-            "loginName": "ronni",
-            "messageText": "Great stream -- keep it up!",
-            "searchText": "ronni  ronni: Great stream -- keep it up! ",
-            "serverReceivedTime": "2017-10-05T23:36:12Z",
+            "loginName": "imrlazyi",
+            "messageText": "🫣",
+            "searchText": "imrlazyi  imrlazyi: 🫣 ",
+            "serverReceivedTime": "2026-05-30T11:49:28Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
+                "subscriber": "5"
             },
             "twitchBadges": [
-                "staff",
-                "broadcaster",
-                "turbo"
+                "subscriber",
+                "hello_neighbor_1"
             ],
-            "userID": "1337",
-            "usernameColor": "#ffff00ff"
+            "userID": "55530653",
+            "usernameColor": "#ffff4500"
         },
         {
             "channelName": "",
@@ -205,7 +182,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "23:36"
+                            "11:49"
                         ]
                     },
                     "flags": "Timestamp",
@@ -214,7 +191,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "23:36:12",
+                    "time": "11:49:28",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -231,10 +208,10 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff00ff",
-                    "userLoginName": "ronni",
+                    "userColor": "#ffff4500",
+                    "userLoginName": "imrlazyi",
                     "words": [
-                        "ronni"
+                        "IMrLazyI"
                     ]
                 },
                 {
@@ -249,23 +226,27 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "has",
-                        "subscribed",
-                        "for",
-                        "6",
-                        "months!"
+                        "watched",
+                        "10",
+                        "consecutive",
+                        "streams",
+                        "and",
+                        "sparked",
+                        "a",
+                        "watch",
+                        "streak!"
                     ]
                 }
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
-            "messageText": "ronni has subscribed for 6 months!",
-            "searchText": "ronni has subscribed for 6 months!",
+            "messageText": "IMrLazyI watched 10 consecutive streams and sparked a watch streak!",
+            "searchText": "IMrLazyI watched 10 consecutive streams and sparked a watch streak!",
             "serverReceivedTime": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
@@ -275,12 +256,5 @@
             "userID": "",
             "usernameColor": "#ff000000"
         }
-    ],
-    "params": {
-        "userData": {
-            "1337": {
-                "color": "#FF00FF"
-            }
-        }
-    }
+    ]
 }
