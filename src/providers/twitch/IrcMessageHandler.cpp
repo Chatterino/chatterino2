@@ -58,6 +58,8 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
 };
 
 /// MessageFlag::Subscription message types
+/// This is duplicated with SUB_MESSAGE_TYPES in MessageBuilder.cpp until the `isSubscriptionMessage` parameter
+/// in `MessageParseArgs` is no longer used for highlights.
 const QSet<QString> SUB_MESSAGE_TYPES{
     "sub",      //
     "subgift",  //
