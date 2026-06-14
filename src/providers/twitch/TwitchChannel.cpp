@@ -6,10 +6,8 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/Env.hpp"
-#include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
-#include "common/network/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/emotes/EmoteController.hpp"
@@ -39,17 +37,13 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/StreamerMode.hpp"
-#include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
-#include "util/QStringHash.hpp"
 #include "util/VectorMessageSink.hpp"
 #include "widgets/Window.hpp"
 
@@ -63,9 +57,10 @@
 #include <QTimer>
 #include <rapidjson/document.h>
 
+using namespace Qt::StringLiterals;
+
 namespace chatterino {
 
-using namespace literals;
 using namespace std::chrono_literals;
 
 namespace detail {

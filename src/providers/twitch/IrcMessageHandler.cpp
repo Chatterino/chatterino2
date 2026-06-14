@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -38,7 +37,7 @@
 
 #include <memory>
 
-using namespace chatterino::literals;
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -299,8 +298,6 @@ MessagePtr parseNoticeMessage(Communi::IrcNoticeMessage *message)
 }  // namespace
 
 namespace chatterino {
-
-using namespace literals;
 
 IrcMessageHandler &IrcMessageHandler::instance()
 {
