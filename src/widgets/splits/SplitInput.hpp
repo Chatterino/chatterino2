@@ -75,6 +75,8 @@ public:
      **/
     bool isHidden() const;
 
+    bool isInHistorySearch() const;
+
     /**
      * @brief Sets the text of this input
      *
@@ -96,6 +98,7 @@ public:
 
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
+    pajlada::Signals::NoArgSignal historySearchStateChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;

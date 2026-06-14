@@ -1175,6 +1175,11 @@ bool SplitInput::isHidden() const
     return this->hidden;
 }
 
+bool SplitInput::isInHistorySearch() const
+{
+    return this->inHistorySearch;
+}
+
 void SplitInput::setInputText(const QString &newInputText)
 {
     this->ui_.textEdit->setPlainText(newInputText);
@@ -1615,6 +1620,7 @@ void SplitInput::stopHistorySearchIfNecessary()
         return;
     }
     this->inHistorySearch = false;
+    this->historySearchStateChanged.invoke();
     this->ui_.historySearchWrap->hide();
     this->split_->setFocusProxy(this->ui_.textEdit);
     this->ui_.textEdit->setFocus();
@@ -1637,6 +1643,7 @@ void SplitInput::startHistorySearch(bool backwards, bool loop)
     this->ui_.historySearchInput->setFocus(Qt::MouseFocusReason);
     this->historySearchQuery = {};
     this->inHistorySearch = true;
+    this->historySearchStateChanged.invoke();
     this->prevIndexBeforeSearch = this->prevIndex_;
     this->refreshHistorySearch(backwards, loop);
 }
