@@ -406,6 +406,7 @@ void IrcMessageHandler::parsePrivMessageInto(
         auto badgesTag = message->tag("badges");
         if (badgesTag.isValid())
         {
+            // TODO: We should not update mod or vip status from recent messages
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
