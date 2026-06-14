@@ -70,8 +70,7 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *chan, const QString &originalContent,
-                           ITwitchIrcServer &twitch, AddMessageArgs addArgs,
-                           const QString &msgType = "");
+                           ITwitchIrcServer &twitch, AddMessageArgs addArgs);
 
 private:
     static float similarity(const MessagePtr &msg,

@@ -797,8 +797,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                        {
                            .isSub = SUB_MESSAGE_TYPES.contains(msgType),
                            .isSpecial = true,
-                       },
-                       msgType);
+                       });
         }
     }
 
@@ -1131,8 +1130,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
                                    ITwitchIrcServer &twitch,
-                                   AddMessageArgs addArgs,
-                                   const QString &msgType)
+                                   AddMessageArgs addArgs)
 {
     assert(chan);
 
