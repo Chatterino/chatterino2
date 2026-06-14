@@ -84,7 +84,7 @@ const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
 
-const QString ANONYMOUS_GIFTER_ID = "274598607";
+constexpr QStringView ANONYMOUS_GIFTER_ID = u"274598607";
 
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
