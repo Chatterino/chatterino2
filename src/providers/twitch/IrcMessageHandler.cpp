@@ -29,7 +29,6 @@
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/QMagicEnum.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
