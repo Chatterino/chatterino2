@@ -26,8 +26,9 @@ struct HighlightCheck;
 
 namespace chatterino::highlights {
 
+/// Messages that are highlighted with the channel points reward "Highlight My Message"
 struct ChannelPointsHighlight {
-    static constexpr QStringView ID = u"channelpoints";
+    static constexpr QStringView ID = u"channelpoints-highlightmymessage";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
@@ -43,8 +44,7 @@ struct ChannelPointsHighlight {
     static constexpr bool SUPPORT_ALERT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr bool SUPPORT_PLAY_SOUND = false;
-    // TODO
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(28, 126, 141, 60);
 
     // Default state:
     // Enabled = true

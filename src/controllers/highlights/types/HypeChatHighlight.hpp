@@ -15,7 +15,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
-#include <cassert>
 #include <optional>
 
 namespace chatterino {
@@ -35,20 +34,9 @@ struct HypeChatHighlight {
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
-    // TODO: does not support show in mentions
-    static constexpr bool SUPPORTS_SHOW_IN_MENTIONS = false;
     static constexpr bool ALERT_DEFAULT = false;
-    // TODO: Should we disable setting of the "highlight taskbar" somehow cuz it's not supported?
-    static constexpr bool SUPPORT_ALERT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
-    // TODO
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
-
-    // Default state:
-    // Enabled = true
-    // Show in mentions = unavailable (always false)
-    // Flash taskbar = unavailable (always false)
-    // Play sound = false
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(255, 174, 66, 60);
 
     QString name;
     std::optional<bool> enabled;

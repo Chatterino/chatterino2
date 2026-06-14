@@ -35,8 +35,6 @@ struct SubscriptionsHighlight {
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
-    // TODO: Should we disable setting of the "show in mentions" somehow cuz it's not supported?
-    static constexpr bool SUPPORT_SHOW_IN_MENTIONS = false;
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT =
