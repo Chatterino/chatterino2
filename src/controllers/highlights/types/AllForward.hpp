@@ -22,13 +22,24 @@ struct MessageHighlight;
 struct FilterHighlight;
 struct UserHighlight;
 struct BadgeHighlight;
+struct UncategorizedNotificationHighlight;
 
-using AllHighlights =
-    std::variant<YourUsernameHighlight, WhispersHighlight,
-                 SubscriptionsHighlight, ChannelPointsHighlight,
-                 FirstMessageHighlight, HypeChatHighlight,
-                 SubscribedThreadHighlight, AutomodCaughtHighlight,
-                 WatchStreakHighlight, YourMessagesHighlight, MessageHighlight,
-                 UserHighlight, BadgeHighlight, FilterHighlight>;
+using AllHighlights = std::variant<     //
+    YourUsernameHighlight,              //
+    WhispersHighlight,                  //
+    SubscriptionsHighlight,             //
+    ChannelPointsHighlight,             //
+    FirstMessageHighlight,              //
+    HypeChatHighlight,                  //
+    SubscribedThreadHighlight,          //
+    AutomodCaughtHighlight,             //
+    WatchStreakHighlight,               //
+    YourMessagesHighlight,              //
+    MessageHighlight,                   //
+    UserHighlight,                      //
+    BadgeHighlight,                     //
+    FilterHighlight,                    //
+    UncategorizedNotificationHighlight  //
+    >;
 
 }  // namespace chatterino::highlights

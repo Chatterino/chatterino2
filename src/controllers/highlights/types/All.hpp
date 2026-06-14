@@ -13,6 +13,7 @@
 #include "controllers/highlights/types/MessageHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscribedThreadHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"  // IWYU pragma: export
+#include "controllers/highlights/types/UncategorizedNotificationHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/UserHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/WatchStreakHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/WhispersHighlight.hpp"  // IWYU pragma: export
@@ -23,12 +24,22 @@
 
 namespace chatterino::highlights {
 
-using AllHighlights =
-    std::variant<YourUsernameHighlight, WhispersHighlight,
-                 SubscriptionsHighlight, ChannelPointsHighlight,
-                 FirstMessageHighlight, HypeChatHighlight,
-                 SubscribedThreadHighlight, AutomodCaughtHighlight,
-                 WatchStreakHighlight, YourMessagesHighlight, MessageHighlight,
-                 UserHighlight, BadgeHighlight, FilterHighlight>;
+using AllHighlights = std::variant<     //
+    YourUsernameHighlight,              //
+    WhispersHighlight,                  //
+    SubscriptionsHighlight,             //
+    ChannelPointsHighlight,             //
+    FirstMessageHighlight,              //
+    HypeChatHighlight,                  //
+    SubscribedThreadHighlight,          //
+    AutomodCaughtHighlight,             //
+    WatchStreakHighlight,               //
+    YourMessagesHighlight,              //
+    MessageHighlight,                   //
+    UserHighlight,                      //
+    BadgeHighlight,                     //
+    FilterHighlight,                    //
+    UncategorizedNotificationHighlight  //
+    >;
 
 }  // namespace chatterino::highlights

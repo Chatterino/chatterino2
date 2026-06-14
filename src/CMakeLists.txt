@@ -240,6 +240,8 @@ set(SOURCE_FILES
         controllers/highlights/types/UserHighlight.cpp
         controllers/highlights/types/FilterHighlight.hpp
         controllers/highlights/types/FilterHighlight.cpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.hpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.cpp
         controllers/highlights/types/WatchStreakHighlight.hpp
         controllers/highlights/types/WatchStreakHighlight.cpp
         controllers/highlights/types/WhispersHighlight.hpp

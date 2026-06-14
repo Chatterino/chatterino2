@@ -496,6 +496,9 @@ void Settings::migrateHighlights(bool isTest)
 
         this->sharedHighlightsSetting.push_back(to);
     }
+
+    this->sharedHighlightsSetting.push_back(
+        UncategorizedNotificationHighlight{});
 }
 
 bool Settings::isHighlightedUser(const QString &username)
