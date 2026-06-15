@@ -1820,7 +1820,7 @@ void TwitchChannel::refreshBadges()
             shared->addTwitchBadgeSets(channelBadges);
         },
         // failureCallback
-        [weak = this->weakFromThis()](auto error, auto message) {
+        [weak = this->weakFromThis()](auto error, const auto& message) {
             auto shared = weak.lock();
             if (!shared)
             {
