@@ -41,6 +41,7 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
+    void scaleChangedEvent(float newScale) override;
 
 private:
     void paintEvent(QPaintEvent *event) override;

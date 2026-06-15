@@ -62,11 +62,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     auto *headerRow = new QHBoxLayout();
     headerRow->setSpacing(4);
 
-    {
-        QFont f = this->pinnedByLabel_->font();
-        f.setPointSize(11);
-        this->pinnedByLabel_->setFont(f);
-    }
     headerRow->addWidget(this->pinnedByLabel_);
     headerRow->addStretch(1);
     this->menuButton_->setScaleIndependentSize(28, 28);
@@ -92,16 +87,12 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
                                        QSizePolicy::Fixed);
     this->messageLabel_->document()->setDocumentMargin(0);
     this->messageLabel_->setContentsMargins(0, 0, 0, 0);
-    {
-        QFont f = this->messageLabel_->font();
-        f.setPointSize(13);
-        this->messageLabel_->setFont(f);
-    }
     QObject::connect(
         this->messageLabel_->document()->documentLayout(),
         &QAbstractTextDocumentLayout::documentSizeChanged, this->messageLabel_,
         [label = this->messageLabel_](QSizeF newSize) {
-            const int h = qBound(1, (int)std::ceil(newSize.height()), 110);
+            const int h = qBound(1, (int)std::ceil(newSize.height()),
+                                 label->maximumHeight());
             label->setFixedHeight(h);
         });
     contentBox->addWidget(this->messageLabel_);
@@ -112,20 +103,10 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     footerRow->setSpacing(4);
 
     this->footerLabel_->setStyleSheet(MUTED_STYLE);
-    {
-        QFont f = this->footerLabel_->font();
-        f.setPointSize(10);
-        this->footerLabel_->setFont(f);
-    }
     footerRow->addWidget(this->footerLabel_);
     footerRow->addStretch(1);
 
     this->countdownLabel_->setStyleSheet(MUTED_STYLE);
-    {
-        QFont f = this->countdownLabel_->font();
-        f.setPointSize(10);
-        this->countdownLabel_->setFont(f);
-    }
     this->countdownLabel_->hide();
     footerRow->addWidget(this->countdownLabel_);
     contentBox->addLayout(footerRow);
@@ -163,6 +144,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
         this->showModMenu();
     });
 
+    this->scaleChangedEvent(this->scale());
     this->hide();
 }
 
@@ -324,9 +306,11 @@ void PinnedMessageWidget::refresh()
         return;
     }
 
+    const auto mode = static_cast<UsernameDisplayMode>(
+        getSettings()->usernameDisplayMode.getValue());
     this->pinnedByLabel_->setText(
         QStringLiteral("Pinned by <b>%1</b>")
-            .arg(pin->pinnedBy.displayName.toHtmlEscaped()));
+            .arg(pin->pinnedBy.formatted(mode).toHtmlEscaped()));
 
     this->messageLabel_->setPlainText(pin->messageText);
 
@@ -335,7 +319,7 @@ void PinnedMessageWidget::refresh()
             getSettings()->timestampFormat);
         this->footerLabel_->setText(
             QStringLiteral("Sent by %1 \u00B7 %2")
-                .arg(pin->sender.displayName.toHtmlEscaped(), sentAt));
+                .arg(pin->sender.formatted(mode).toHtmlEscaped(), sentAt));
     }
 
     this->progressTimer_->stop();
@@ -385,6 +369,31 @@ void PinnedMessageWidget::hideEvent(QHideEvent *event)
 {
     BaseWidget::hideEvent(event);
     this->visibilityChanged.invoke();
+}
+
+void PinnedMessageWidget::scaleChangedEvent(float newScale)
+{
+    QFont headerFont = this->pinnedByLabel_->font();
+    headerFont.setPointSizeF(11.0F * newScale);
+    this->pinnedByLabel_->setFont(headerFont);
+    this->countdownLabel_->setFont(headerFont);
+
+    QFont bodyFont = this->messageLabel_->font();
+    bodyFont.setPointSizeF(13.0F * newScale);
+    this->messageLabel_->setFont(bodyFont);
+    const int newMax = int(110 * newScale);
+    this->messageLabel_->setMaximumHeight(newMax);
+    // Clamp the current height to the new max so zooming out doesn't leave
+    // the widget stuck at its previous fixed height.
+    const int docH = (int)std::ceil(this->messageLabel_->document()
+                                        ->documentLayout()
+                                        ->documentSize()
+                                        .height());
+    this->messageLabel_->setFixedHeight(qBound(1, docH, newMax));
+
+    QFont footerFont = this->footerLabel_->font();
+    footerFont.setPointSizeF(10.0F * newScale);
+    this->footerLabel_->setFont(footerFont);
 }
 
 }  // namespace chatterino
