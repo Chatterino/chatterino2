@@ -8,10 +8,12 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 ## Use of AI
 
-You may use AI assistance for contributing to Chatterino, as long as you follow these points:
+You may not use AI assistance for contributing to Chatterino, unless you follow these points:
 
+- You have made significant (non-AI generated) Pull Requests before.
 - Test your changes locally on your computer and check that no other functionality was broken.
-- When making significant changes, add a note in the Pull Request description if a large portion of the code is generated.
+- You have reviewed the generated code.
+- You add a note in the Pull Request description.
 - Do not use AI tools for the following:
   - Pull request and issue descriptions
   - Writing documentation (except for grammar checking or wording improvements)
