@@ -10,7 +10,7 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 
 You may not use AI assistance for contributing to Chatterino, unless you follow these points:
 
-- You have made significant (non-AI generated) Pull Requests before.
+- You have made substantial (non-AI generated) Pull Requests before.
 - Test your changes locally on your computer and check that no other functionality was broken.
 - You have reviewed the generated code.
 - You add a note in the Pull Request description.
