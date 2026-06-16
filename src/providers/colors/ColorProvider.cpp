@@ -52,6 +52,7 @@ QSet<QColor> ColorProvider::recentColors() const
     retVal.insert(*this->color(ColorType::Subscription));
     retVal.insert(*this->color(ColorType::WatchStreak));
     retVal.insert(*this->color(ColorType::Whisper));
+    retVal.insert(*this->color(ColorType::AnnouncementHighlight));
 
     return retVal;
 }
@@ -139,6 +140,31 @@ void ColorProvider::initTypeColorMap()
 
     initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
               HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::AnnouncementHighlight,
+              getSettings()->announcementHighlightColor,
+              HighlightPhrase::FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR);
+
+    this->typeColorMap_.insert({
+        ColorType::AnnouncementBlue,
+        std::make_shared<QColor>(
+            HighlightPhrase::ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR),
+    });
+    this->typeColorMap_.insert({
+        ColorType::AnnouncementGreen,
+        std::make_shared<QColor>(
+            HighlightPhrase::ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR),
+    });
+    this->typeColorMap_.insert({
+        ColorType::AnnouncementOrange,
+        std::make_shared<QColor>(
+            HighlightPhrase::ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR),
+    });
+    this->typeColorMap_.insert({
+        ColorType::AnnouncementPurple,
+        std::make_shared<QColor>(
+            HighlightPhrase::ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR),
+    });
 }
 
 void ColorProvider::initDefaultColors()
@@ -157,6 +183,28 @@ void ColorProvider::initDefaultColors()
 
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
+}
+
+ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
+                                              bool enableColoredAnnouncements)
+{
+    if (enableColoredAnnouncements)
+    {
+        switch (color)
+        {
+            case HelixAnnouncementColor::Primary:
+                return ColorType::AnnouncementHighlight;
+            case HelixAnnouncementColor::Blue:
+                return ColorType::AnnouncementBlue;
+            case HelixAnnouncementColor::Green:
+                return ColorType::AnnouncementGreen;
+            case HelixAnnouncementColor::Orange:
+                return ColorType::AnnouncementOrange;
+            case HelixAnnouncementColor::Purple:
+                return ColorType::AnnouncementPurple;
+        }
+    }
+    return ColorType::AnnouncementHighlight;
 }
 
 }  // namespace chatterino

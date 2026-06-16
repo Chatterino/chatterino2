@@ -9,7 +9,6 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "singletons/Settings.hpp"
 
-#include <boost/signals2/connection.hpp>
 #include <pajlada/settings.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -53,7 +52,6 @@ private:
 
     pajlada::SettingListener rebuildListener_;
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bConnections;
 };
 
 }  // namespace chatterino

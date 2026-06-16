@@ -6,7 +6,6 @@
 
 #include "widgets/BaseWindow.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -20,6 +19,9 @@ class UpdateDialog;
 class SplitNotebook;
 class Channel;
 
+/**
+ * @exposeenum c2.WindowType
+ */
 enum class WindowType { Main, Popup, Attached };
 
 class Window : public BaseWindow
@@ -56,7 +58,6 @@ private:
     std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
     PixmapButton *streamerModeTitlebarIcon_ = nullptr;

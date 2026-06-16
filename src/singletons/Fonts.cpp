@@ -256,7 +256,21 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             break;
     }
 
-    return font;
+    // If the requested font is not available, trigger
+    // automatic substitution by the closest font
+    // that is actually available.
+    //
+    // It is absolutely necessary to do this because
+    // QFontMetrics does not care that it computed metrics
+    // for a font that will not be used for the actual rendering.
+    // By fixing up the font early we can prevent some rendering
+    // issues caused by the mismatch between what QFontMetrics
+    // computed and what got painted on the screen.
+
+    QWidget w;
+    w.setFont(font);
+
+    return w.font();
 }
 
 }  // namespace chatterino
