@@ -416,7 +416,8 @@ public:
     void clearPinnedMessage();
 
     /// Returns the currently pinned message, or null if none is pinned.
-    const std::unique_ptr<const HelixPinnedChatMessage> &getPinnedMessage() const;
+    const std::unique_ptr<const HelixPinnedChatMessage> &getPinnedMessage()
+        const;
 
     /**
      * Unpin the currently pinned message. Only valid for moderators.
@@ -630,6 +631,9 @@ private:
 
     /// May be null if no message is currently pinned.
     std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
+    /// Incremented before each getPinnedChatMessage request so that stale
+    /// responses from earlier requests are discarded.
+    uint64_t pinnedMessageRequestId_ = 0;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

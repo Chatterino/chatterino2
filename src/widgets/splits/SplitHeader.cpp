@@ -861,14 +861,16 @@ void SplitHeader::handleChannelChanged()
             twitchChannel->pinnedMessageChanged, [this]() {
                 auto ch = this->split_->getChannel();
                 auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
-                this->updatePinButton(tc != nullptr && tc->getPinnedMessage() != nullptr);
+                this->updatePinButton(tc != nullptr &&
+                                      tc->getPinnedMessage() != nullptr);
             });
 
         this->channelConnections_.managedConnect(
             this->split_->getPinnedBanner()->visibilityChanged, [this]() {
                 auto ch = this->split_->getChannel();
                 auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
-                this->updatePinButton(tc != nullptr && tc->getPinnedMessage() != nullptr);
+                this->updatePinButton(tc != nullptr &&
+                                      tc->getPinnedMessage() != nullptr);
             });
 
         this->updatePinButton(twitchChannel->getPinnedMessage() != nullptr);

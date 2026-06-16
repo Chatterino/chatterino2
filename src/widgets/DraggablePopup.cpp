@@ -133,7 +133,9 @@ void DraggablePopup::themeChangedEvent()
 
     if (this->pinButton_)
     {
-        this->pinButton_->setColor(this->theme->isLightTheme() ? QColor(0x4d, 0x4d, 0x4d) : QColor(0xb7, 0xb7, 0xb7));
+        this->pinButton_->setColor(this->theme->isLightTheme()
+                                       ? QColor(0x4d, 0x4d, 0x4d)
+                                       : QColor(0xb7, 0xb7, 0xb7));
     }
 }
 

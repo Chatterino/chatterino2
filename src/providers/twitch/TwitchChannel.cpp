@@ -2566,12 +2566,13 @@ void TwitchChannel::refreshPinnedMessage()
         return;
     }
 
+    const auto requestId = ++this->pinnedMessageRequestId_;
     getHelix()->getPinnedChatMessage(
         this->roomId(), currentAccount->getUserId(),
-        [weak =
-             this->weakFromThis()](std::optional<HelixPinnedChatMessage> msg) {
+        [weak = this->weakFromThis(),
+         requestId](std::optional<HelixPinnedChatMessage> msg) {
             auto self = weak.lock();
-            if (!self)
+            if (!self || self->pinnedMessageRequestId_ != requestId)
             {
                 return;
             }
@@ -2593,7 +2594,8 @@ void TwitchChannel::refreshPinnedMessage()
         });
 }
 
-const std::unique_ptr<const HelixPinnedChatMessage> &TwitchChannel::getPinnedMessage() const
+const std::unique_ptr<const HelixPinnedChatMessage> &
+    TwitchChannel::getPinnedMessage() const
 {
     return this->pinnedMessage_;
 }

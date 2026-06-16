@@ -304,8 +304,8 @@ public:
     };
 
     /// Behaviour
-    BoolSetting alwaysShowPinnedMessage = {
-        "/behaviour/alwaysShowPinnedMessage", false};
+    BoolSetting alwaysShowPinnedMessage = {"/behaviour/alwaysShowPinnedMessage",
+                                           false};
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
