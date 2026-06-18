@@ -104,6 +104,7 @@ struct WindowDescriptor {
     State state_ = State::None;
 
     QRect geometry_;
+    std::optional<size_t> popupID;
 
     std::vector<TabDescriptor> tabs_;
 };

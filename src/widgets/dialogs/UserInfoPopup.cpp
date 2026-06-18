@@ -320,7 +320,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                             [loginName] {
                                 auto *app = getApp();
                                 auto &window = app->getWindows()->createWindow(
-                                    WindowType::Popup, true);
+                                    WindowType::Popup, {});
                                 auto *split = window.getNotebook()
                                                   .getOrAddSelectedPage()
                                                   ->appendNewSplit(false);

@@ -111,6 +111,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
+    this->setWindowRole(u"chatterino.overlay"_s);
 
     // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
