@@ -385,24 +385,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         return ctx.messageColors.regularBg;
     }();
 
-    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        ctx.preferences.enableElevatedMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
-    }
-
-    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             ctx.preferences.enableFirstMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
-    }
-    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
+    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
+        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         assert(this->message_->highlightColor);
         if (this->message_->highlightColor)
@@ -411,6 +396,20 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             backgroundColor =
                 blendColors(backgroundColor, *this->message_->highlightColor);
         }
+    }
+    else if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
+             ctx.preferences.enableElevatedMessageHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
+    }
+    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+             ctx.preferences.enableFirstMessageHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
     }
     else if (this->message_->flags.has(MessageFlag::WatchStreak) &&
              ctx.preferences.enableWatchStreakHighlight)
