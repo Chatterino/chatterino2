@@ -28,7 +28,6 @@ protected:
     void themeChangedEvent() override;
 
 private:
-
     QColor color_;
 };
 
