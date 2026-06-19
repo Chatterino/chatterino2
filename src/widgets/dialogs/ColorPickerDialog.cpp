@@ -14,6 +14,7 @@
 #include "widgets/helper/color/SBCanvas.hpp"
 
 #include <QDialogButtonBox>
+#include <QFile>
 #include <QLoggingCategory>
 #include <QSet>
 
