@@ -465,6 +465,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
     {
         backgroundColor = QColor("#4A273D");
     }
+    else if (this->message_->flags.has(MessageFlag::UncategorizedNotification))
+    {
+        // TODO: Give this a better/its own color :-)
+        backgroundColor = blendColors(
+            backgroundColor, *ctx.colorProvider.color(ColorType::Subscription));
+    }
 
     painter.fillRect(buffer->rect(), backgroundColor);
 
