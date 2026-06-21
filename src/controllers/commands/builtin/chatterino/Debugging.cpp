@@ -87,7 +87,7 @@ QString setLoggingRules(const CommandContext &ctx)
     {
         ctx.channel->addSystemMessage(
             "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
-            "for all categories from chatterino, use "
+            "for all categories from Chatterino, use "
             "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
             "qloggingcategory.html#configuring-categories");

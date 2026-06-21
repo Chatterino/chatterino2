@@ -124,7 +124,7 @@ Args::Args(const QApplication &app, const Paths &paths)
     QCommandLineOption loginOption(
         "login",
         "Starts Chatterino logged in as the account matching the supplied "
-        "username. If the supplied username does not match any account "
+        "username. If the supplied username does not match any account, "
         "Chatterino starts logged in as anonymous.",
         "username");
 
