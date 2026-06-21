@@ -132,9 +132,8 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Subscription",
+            "flags": "Collapsed|UncategorizedNotification",
             "frozen": false,
-            "highlightColor": "#64c466ff",
             "id": "b468ef1c-f072-4ef9-a620-d7c4bdb8832f",
             "localizedName": "",
             "loginName": "gunny_q",
@@ -224,7 +223,7 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
             "frozen": false,
             "id": "",
             "localizedName": "",

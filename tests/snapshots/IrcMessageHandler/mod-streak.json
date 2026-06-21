@@ -1,10 +1,10 @@
 {
-    "input": "@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=11148817;subscriber=1;system-msg=ronni\\shas\\ssubscribed\\sfor\\s6\\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!",
+    "input": "@id=090939a1-18a5-4370-9066-b4f56512c320;badges=moderator/1,subscriber/12,glitchcon2020/1;tmi-sent-ts=1780134274460;color=#FF7F50;system-msg=has\\sbeen\\sa\\smoderator\\sfor\\s18\\smonths!;login=jcrouzer;rm-received-ts=1780134274566;user-id=44850681;msg-param-months=18;room-id=11148817;subscriber=1;display-name=JCRouzer;mod=1;flags=;msg-id=modiversary;user-type=mod;badge-info=subscriber/20;emotes=;historical=1;vip=0 :tmi.twitch.tv USERNOTICE #pajlada :I don't know what this looks like but new thing to celebrate the indentured servitude! I'm celebrating my 18 month Mod Anniversary!",
     "output": [
         {
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "ronni",
+            "displayName": "JCRouzer",
             "elements": [
                 {
                     "color": "System",
@@ -34,7 +34,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "23:36"
+                            "9:44"
                         ]
                     },
                     "flags": "Timestamp",
@@ -43,92 +43,63 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "23:36:12",
+                    "time": "09:44:34",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
                 },
                 {
-                    "flags": "ModeratorTools",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TwitchModerationElement"
-                },
-                {
-                    "emote": {
-                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
-                        },
-                        "name": "",
-                        "tooltip": "Staff"
-                    },
-                    "flags": "BadgeGlobalAuthority",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Staff",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
                         },
                         "name": "",
-                        "tooltip": "Broadcaster"
+                        "tooltip": "Moderator"
                     },
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Broadcaster",
+                    "tooltip": "Moderator",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
                     "emote": {
+                        "homePage": "https://www.twitchcon.com/",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/1d4b03b9-51ea-42c9-8f29-698e3c85be3d/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/1d4b03b9-51ea-42c9-8f29-698e3c85be3d/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/1d4b03b9-51ea-42c9-8f29-698e3c85be3d/3"
                         },
                         "name": "",
-                        "tooltip": "Turbo"
+                        "tooltip": "GlitchCon 2020"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Turbo",
+                    "tooltip": "GlitchCon 2020",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffff00ff",
+                    "color": "#ffff7f50",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "ronni"
+                        "value": "JCRouzer"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "ronni:"
+                        "JCRouzer:"
                     ]
                 },
                 {
@@ -143,12 +114,28 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Great",
-                        "stream",
-                        "--",
-                        "keep",
-                        "it",
-                        "up!"
+                        "I",
+                        "don't",
+                        "know",
+                        "what",
+                        "this",
+                        "looks",
+                        "like",
+                        "but",
+                        "new",
+                        "thing",
+                        "to",
+                        "celebrate",
+                        "the",
+                        "indentured",
+                        "servitude!",
+                        "I'm",
+                        "celebrating",
+                        "my",
+                        "18",
+                        "month",
+                        "Mod",
+                        "Anniversary!"
                     ]
                 },
                 {
@@ -156,7 +143,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "db25007f-7a18-43eb-9379-80131e44d633"
+                        "value": "090939a1-18a5-4370-9066-b4f56512c320"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -167,25 +154,25 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Highlighted|Collapsed|Subscription",
+            "flags": "Collapsed|WatchStreak",
             "frozen": false,
-            "highlightColor": "#64c466ff",
-            "id": "db25007f-7a18-43eb-9379-80131e44d633",
+            "id": "090939a1-18a5-4370-9066-b4f56512c320",
             "localizedName": "",
-            "loginName": "ronni",
-            "messageText": "Great stream -- keep it up!",
-            "searchText": "ronni  ronni: Great stream -- keep it up! ",
-            "serverReceivedTime": "2017-10-05T23:36:12Z",
+            "loginName": "jcrouzer",
+            "messageText": "I don't know what this looks like but new thing to celebrate the indentured servitude! I'm celebrating my 18 month Mod Anniversary!",
+            "searchText": "jcrouzer  jcrouzer: I don't know what this looks like but new thing to celebrate the indentured servitude! I'm celebrating my 18 month Mod Anniversary! ",
+            "serverReceivedTime": "2026-05-30T09:44:34Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
+                "subscriber": "20"
             },
             "twitchBadges": [
-                "staff",
-                "broadcaster",
-                "turbo"
+                "moderator",
+                "subscriber",
+                "glitchcon2020"
             ],
-            "userID": "1337",
-            "usernameColor": "#ffff00ff"
+            "userID": "44850681",
+            "usernameColor": "#ffff7f50"
         },
         {
             "channelName": "",
@@ -205,7 +192,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "23:36"
+                            "9:44"
                         ]
                     },
                     "flags": "Timestamp",
@@ -214,7 +201,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "23:36:12",
+                    "time": "09:44:34",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -231,10 +218,10 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff00ff",
-                    "userLoginName": "ronni",
+                    "userColor": "#ffff7f50",
+                    "userLoginName": "jcrouzer",
                     "words": [
-                        "ronni"
+                        "JCRouzer"
                     ]
                 },
                 {
@@ -250,22 +237,24 @@
                     "type": "TextElement",
                     "words": [
                         "has",
-                        "subscribed",
+                        "been",
+                        "a",
+                        "moderator",
                         "for",
-                        "6",
+                        "18",
                         "months!"
                     ]
                 }
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
             "id": "",
             "localizedName": "",
             "loginName": "",
-            "messageText": "ronni has subscribed for 6 months!",
-            "searchText": "ronni has subscribed for 6 months!",
+            "messageText": "JCRouzer has been a moderator for 18 months!",
+            "searchText": "JCRouzer has been a moderator for 18 months!",
             "serverReceivedTime": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
@@ -275,12 +264,5 @@
             "userID": "",
             "usernameColor": "#ff000000"
         }
-    ],
-    "params": {
-        "userData": {
-            "1337": {
-                "color": "#FF00FF"
-            }
-        }
-    }
+    ]
 }
