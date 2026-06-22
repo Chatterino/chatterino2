@@ -123,8 +123,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
             // First, check for splits on this page
             for (auto *split : splits)
             {
-                if (split->getChannel()->getName().contains(text,
-                                                            Qt::CaseInsensitive))
+                if (split->getChannel()->getName().contains(
+                        text, Qt::CaseInsensitive))
                 {
                     auto item = std::make_unique<SwitchSplitItem>(sc, split);
                     this->switcherModel_.addItem(std::move(item));

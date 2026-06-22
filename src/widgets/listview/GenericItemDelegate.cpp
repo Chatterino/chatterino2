@@ -48,7 +48,8 @@ QSize SwitcherItemDelegate::sizeHint(const QStyleOptionViewItem &option,
     if (item)
     {
         QRect rect = option.rect;
-        if (auto *view = qobject_cast<const QAbstractItemView *>(this->parent()))
+        if (auto *view =
+                qobject_cast<const QAbstractItemView *>(this->parent()))
         {
             const int viewportWidth = view->viewport()->width();
             if (viewportWidth > 0)

@@ -451,9 +451,8 @@ bool Notebook::selectHistoryPage(bool forward, bool focusPage)
     {
         this->pruneInvalidHistoryEntries();
 
-        const bool canNavigate =
-            forward ? this->tabHistory_.canGoForward()
-                    : this->tabHistory_.canGoBack();
+        const bool canNavigate = forward ? this->tabHistory_.canGoForward()
+                                         : this->tabHistory_.canGoBack();
         if (!canNavigate)
         {
             return false;
