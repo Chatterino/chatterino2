@@ -86,9 +86,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"selectTabHistory",
           ActionDefinition{
-              "Select tab from visit history",
-              "<previous or next>",
-              1,
+              .displayName = "Select tab from visit history",
+              .argumentDescription = "<previous or next>",
+              .minCountArguments = 1,
           }},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
@@ -329,9 +329,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},
          {"selectTabHistory",
           ActionDefinition{
-              "Select tab from visit history",
-              "<previous or next>",
-              1,
+              .displayName = "Select tab from visit history",
+              .argumentDescription = "<previous or next>",
+              .minCountArguments = 1,
           }},
          {"setStreamerMode",
           ActionDefinition{
