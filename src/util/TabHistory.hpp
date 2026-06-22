@@ -12,19 +12,42 @@
 
 namespace chatterino {
 
+/**
+ * @brief Tracks visited notebook pages for back/forward navigation.
+ *
+ * Stores a bounded back stack of pages the user left, and a forward stack of
+ * pages available after navigating back. The currently selected page is not
+ * stored in the history; callers pass it to @ref goBack and @ref goForward.
+ */
 class TabHistory
 {
 public:
+    /// Records @a from as a back-stack entry and clears the forward stack.
     void recordVisit(QWidget *from);
+
+    /// Pops the most recent back entry and optionally pushes @a current onto
+    /// the forward stack.
     std::optional<QWidget *> goBack(QWidget *current);
+
+    /// Pops the most recent forward entry and optionally pushes @a current onto
+    /// the back stack.
     std::optional<QWidget *> goForward(QWidget *current);
+
+    /// Removes all occurrences of @a page from the history.
     void removePage(QWidget *page);
+
     bool canGoBack() const;
     bool canGoForward() const;
     std::optional<QWidget *> peekBack() const;
     std::optional<QWidget *> peekForward() const;
+
+    /// Returns back-stack entries from most recently visited to oldest.
     std::vector<QWidget *> backStackMostRecentFirst() const;
+
+    /// Removes the top back entry without navigating.
     void discardBackTop();
+
+    /// Removes the top forward entry without navigating.
     void discardForwardTop();
 
 private:
