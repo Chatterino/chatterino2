@@ -652,6 +652,8 @@ set(SOURCE_FILES
         widgets/MarkdownLabel.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
+        widgets/TabHistory.cpp
+        widgets/TabHistory.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
         widgets/PluginRepl.cpp

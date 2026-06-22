@@ -84,6 +84,12 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               },
               .argumentsPrompt = "Direction:",
           }},
+         {"selectTabHistory",
+          ActionDefinition{
+              "Select tab from visit history",
+              "<previous or next>",
+              1,
+          }},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
           ActionDefinition{
@@ -321,6 +327,12 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},
+         {"selectTabHistory",
+          ActionDefinition{
+              "Select tab from visit history",
+              "<previous or next>",
+              1,
+          }},
          {"setStreamerMode",
           ActionDefinition{
               .displayName = "Set streamer mode",

@@ -6,6 +6,7 @@
 
 #include "widgets/BaseWidget.hpp"
 #include "widgets/NotebookEnums.hpp"
+#include "widgets/TabHistory.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -16,6 +17,7 @@
 
 #include <functional>
 #include <span>
+#include <vector>
 
 namespace chatterino {
 
@@ -70,7 +72,13 @@ public:
     /**
      * @brief Selects the Notebook tab containing the given page.
      **/
-    virtual void select(QWidget *page, bool focusPage = true);
+    virtual void select(QWidget *page, bool focusPage = true,
+                        bool recordInHistory = true);
+
+    void selectHistoryBack(bool focusPage = true);
+    void selectHistoryForward(bool focusPage = true);
+    QWidget *getPreviousVisitedPage() const;
+    std::vector<QWidget *> getVisitHistoryPages() const;
 
     /**
      * @brief Selects the Notebook tab at the given index. Ignores whether tabs
@@ -90,12 +98,12 @@ public:
     /**
      * @brief Selects the next visible tab. Wraps to the start if required. 
      **/
-    void selectNextTab(bool focusPage = true);
+    void selectNextTab(bool focusPage = true, bool recordInHistory = true);
 
     /**
      * @brief Selects the previous visible tab. Wraps to the end if required. 
      **/
-    void selectPreviousTab(bool focusPage = true);
+    void selectPreviousTab(bool focusPage = true, bool recordInHistory = true);
 
     /**
      * @brief Selects the last visible tab. 
@@ -207,8 +215,11 @@ private:
     void updateTabVisibility();
     void resizeAddButton();
 
-    bool containsPage(QWidget *page);
+    bool containsPage(QWidget *page) const;
     Item *findItem(QWidget *page);
+
+    void pruneInvalidHistoryEntries();
+    bool selectHistoryPage(bool forward, bool focusPage);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
@@ -219,6 +230,8 @@ private:
     QList<Item> items_;
     QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
+
+    TabHistory tabHistory_;
 
     std::vector<Button *> customButtons_;
 
@@ -250,7 +263,8 @@ public:
     SplitContainer *getOrAddSelectedPage();
     /// Returns `nullptr` when no page is selected.
     SplitContainer *getSelectedPage();
-    void select(QWidget *page, bool focusPage = true) override;
+    void select(QWidget *page, bool focusPage = true,
+                bool recordInHistory = true) override;
     void themeChangedEvent() override;
 
     void addNotebookActionsToMenu(QMenu *menu) override;
