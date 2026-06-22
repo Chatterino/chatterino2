@@ -329,7 +329,7 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 
     if (recordInHistory && this->selectedPage_ != nullptr && page != nullptr)
     {
-        this->tabHistory_.recordVisit(this->selectedPage_, page);
+        this->tabHistory_.recordVisit(this->selectedPage_);
     }
 
     if (page)
@@ -410,16 +410,7 @@ QWidget *Notebook::getPreviousVisitedPage() const
 
 std::vector<QWidget *> Notebook::getVisitHistoryPages() const
 {
-    std::vector<QWidget *> pages;
-    for (auto *page : this->tabHistory_.backStackMostRecentFirst())
-    {
-        if (this->containsPage(page))
-        {
-            pages.push_back(page);
-        }
-    }
-
-    return pages;
+    return this->tabHistory_.backStackMostRecentFirst();
 }
 
 void Notebook::pruneInvalidHistoryEntries()

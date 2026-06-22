@@ -424,7 +424,7 @@ void Window::addShortcuts()
              return "";
          }},
         {"selectTabHistory",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.empty())
              {
                  return "selectTabHistory shortcut called without arguments. "

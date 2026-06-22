@@ -6,6 +6,7 @@
 
 #include <QWidget>
 
+#include <deque>
 #include <optional>
 #include <vector>
 
@@ -14,7 +15,7 @@ namespace chatterino {
 class TabHistory
 {
 public:
-    void recordVisit(QWidget *from, QWidget *to);
+    void recordVisit(QWidget *from);
     std::optional<QWidget *> goBack(QWidget *current);
     std::optional<QWidget *> goForward(QWidget *current);
     void removePage(QWidget *page);
@@ -27,10 +28,12 @@ public:
     void discardForwardTop();
 
 private:
-    static void removeFromStack(std::vector<QWidget *> &stack, QWidget *page);
+    static constexpr size_t MAX_TAB_HISTORY_SIZE = 50;
 
-    std::vector<QWidget *> back_;
-    std::vector<QWidget *> forward_;
+    // history_[0, backCount_) is the back stack (oldest to newest).
+    // history_[backCount_, end) is the forward stack (oldest to newest).
+    std::deque<QWidget *> history_;
+    size_t backCount_ = 0;
 };
 
 }  // namespace chatterino
