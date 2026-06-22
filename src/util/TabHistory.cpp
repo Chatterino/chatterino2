@@ -13,9 +13,9 @@ void TabHistory::recordVisit(QWidget *from)
         return;
     }
 
-    this->history_.erase(this->history_.begin() +
-                             static_cast<std::ptrdiff_t>(this->backCount_),
-                         this->history_.end());
+    this->history_.erase(
+        this->history_.begin() + static_cast<std::ptrdiff_t>(this->backCount_),
+        this->history_.end());
     this->history_.push_back(from);
     this->backCount_++;
 

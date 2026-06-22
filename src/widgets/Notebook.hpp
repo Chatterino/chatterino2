@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "util/TabHistory.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/NotebookEnums.hpp"
-#include "util/TabHistory.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
