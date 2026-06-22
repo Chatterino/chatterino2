@@ -6,7 +6,7 @@
 
 #include "widgets/BaseWidget.hpp"
 #include "widgets/NotebookEnums.hpp"
-#include "widgets/TabHistory.hpp"
+#include "util/TabHistory.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>

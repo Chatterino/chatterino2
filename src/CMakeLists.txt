@@ -606,6 +606,8 @@ set(SOURCE_FILES
         util/SignalListener.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
+        util/TabHistory.cpp
+        util/TabHistory.hpp
         util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
@@ -652,8 +654,6 @@ set(SOURCE_FILES
         widgets/MarkdownLabel.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
-        widgets/TabHistory.cpp
-        widgets/TabHistory.hpp
         widgets/OverlayWindow.cpp
         widgets/OverlayWindow.hpp
         widgets/PluginRepl.cpp

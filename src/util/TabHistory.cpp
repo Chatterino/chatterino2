@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "widgets/TabHistory.hpp"
+#include "util/TabHistory.hpp"
 
 namespace chatterino {
 
