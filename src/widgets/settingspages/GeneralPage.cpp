@@ -215,7 +215,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         tabDirectionDropdown->minimumSizeHint().width());
 
     layout.addDropdown<std::underlying_type_t<NotebookTabVisibilityFlag> >(
-        "Tab visibility", {"All tabs", "Live tabs", "Unread tabs", "Other tabs"}, s.tabVisibility,
+        "Tab visibility", {"All tabs", "Live tabs", "Unread tabs", "Live, unread tabs", "Live, other tabs", "Unread, other tabs", "Other tabs"}, s.tabVisibility,
         [](auto val) -> QString {
             const auto visibilityFlags = NotebookTabVisibilityFlags(static_cast<NotebookTabVisibilityFlag>(val));
             if (visibilityFlags.hasAll(NotebookTabVisibilityFlag::Live,
@@ -232,15 +232,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             }
             if (visibilityFlags.has(NotebookTabVisibilityFlag::Unread)) {
                 if (!label.empty()) {
-                    label.append(", ");
+                    label.append(", unread");
+                } else {
+                    label.append("Unread");
                 }
-                label.append("Unread");
             }
             if (visibilityFlags.has(NotebookTabVisibilityFlag::Other)) {
                 if (!label.empty()) {
-                    label.append(", ");
+                    label.append(", other");
+                } else {
+                    label.append("Other");
                 }
-                label.append("Other");
             }
             label.append(" tabs");
             return QString::fromStdString(label);
@@ -253,9 +255,21 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             {
                 return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Unread);
             }
+            else if (args.value == "Live, unread tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Unread);
+            }
             else if (args.value == "Other tabs")
             {
                 return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Other);
+            }
+            else if (args.value == "Live, other tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Other);
+            }
+            else if (args.value == "Unread, other tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Unread | NotebookTabVisibilityFlag::Other);
             }
             else
             {
