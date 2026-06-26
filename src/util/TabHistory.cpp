@@ -6,68 +6,70 @@
 
 namespace chatterino {
 
-void TabHistory::recordVisit(QWidget *from)
+void TabHistory::recordNavigation(QWidget *from, QWidget *to)
 {
-    if (from == nullptr)
+    if (to == nullptr)
     {
         return;
     }
 
-    this->history_.erase(
-        this->history_.begin() + static_cast<std::ptrdiff_t>(this->backCount_),
-        this->history_.end());
-    this->history_.push_back(from);
-    this->backCount_++;
+    if (!this->history_.empty())
+    {
+        this->history_.erase(
+            this->history_.begin() +
+                static_cast<std::ptrdiff_t>(this->currentIndex_ + 1),
+            this->history_.end());
+    }
+
+    if (this->history_.empty())
+    {
+        if (from != nullptr)
+        {
+            this->history_.push_back(from);
+        }
+    }
+
+    this->history_.push_back(to);
+    this->currentIndex_ = this->history_.size() - 1;
 
     while (this->history_.size() > MAX_TAB_HISTORY_SIZE)
     {
-        this->history_.pop_front();
-        if (this->backCount_ > 0)
+        if (this->currentIndex_ > 0)
         {
-            this->backCount_--;
+            this->history_.pop_front();
+            this->currentIndex_--;
+        }
+        else if (this->currentIndex_ + 1 < this->history_.size())
+        {
+            this->history_.pop_back();
+        }
+        else
+        {
+            break;
         }
     }
 }
 
-std::optional<QWidget *> TabHistory::goBack(QWidget *current)
+std::optional<QWidget *> TabHistory::goBack()
 {
-    if (this->backCount_ == 0)
+    if (this->currentIndex_ == 0)
     {
         return std::nullopt;
     }
 
-    QWidget *target = this->history_[this->backCount_ - 1];
-    this->history_.erase(this->history_.begin() +
-                         static_cast<std::ptrdiff_t>(this->backCount_ - 1));
-    this->backCount_--;
-
-    if (current != nullptr)
-    {
-        this->history_.push_back(current);
-    }
-
-    return target;
+    this->currentIndex_--;
+    return this->history_[this->currentIndex_];
 }
 
-std::optional<QWidget *> TabHistory::goForward(QWidget *current)
+std::optional<QWidget *> TabHistory::goForward()
 {
-    if (this->backCount_ >= this->history_.size())
+    if (this->currentIndex_ + 1 >= this->history_.size())
     {
         return std::nullopt;
     }
 
-    QWidget *target = this->history_.back();
-    this->history_.pop_back();
-
-    if (current != nullptr)
-    {
-        this->history_.insert(this->history_.begin() +
-                                  static_cast<std::ptrdiff_t>(this->backCount_),
-                              current);
-        this->backCount_++;
-    }
-
-    return target;
+    this->currentIndex_++;
+    return this->history_[this->currentIndex_];
 }
 
 void TabHistory::removePage(QWidget *page)
@@ -78,9 +80,21 @@ void TabHistory::removePage(QWidget *page)
         {
             this->history_.erase(this->history_.begin() +
                                  static_cast<std::ptrdiff_t>(i));
-            if (i < this->backCount_)
+            if (i < this->currentIndex_)
             {
-                this->backCount_--;
+                this->currentIndex_--;
+            }
+            else if (i == this->currentIndex_ &&
+                     this->currentIndex_ >= this->history_.size())
+            {
+                if (this->history_.empty())
+                {
+                    this->currentIndex_ = 0;
+                }
+                else
+                {
+                    this->currentIndex_ = this->history_.size() - 1;
+                }
             }
         }
         else
@@ -92,40 +106,40 @@ void TabHistory::removePage(QWidget *page)
 
 bool TabHistory::canGoBack() const
 {
-    return this->backCount_ > 0;
+    return this->currentIndex_ > 0;
 }
 
 bool TabHistory::canGoForward() const
 {
-    return this->backCount_ < this->history_.size();
+    return this->currentIndex_ + 1 < this->history_.size();
 }
 
 std::optional<QWidget *> TabHistory::peekBack() const
 {
-    if (this->backCount_ == 0)
+    if (this->currentIndex_ == 0)
     {
         return std::nullopt;
     }
 
-    return this->history_[this->backCount_ - 1];
+    return this->history_[this->currentIndex_ - 1];
 }
 
 std::optional<QWidget *> TabHistory::peekForward() const
 {
-    if (this->backCount_ >= this->history_.size())
+    if (this->currentIndex_ + 1 >= this->history_.size())
     {
         return std::nullopt;
     }
 
-    return this->history_.back();
+    return this->history_[this->currentIndex_ + 1];
 }
 
 std::vector<QWidget *> TabHistory::backStackMostRecentFirst() const
 {
     std::vector<QWidget *> result;
-    result.reserve(this->backCount_);
+    result.reserve(this->currentIndex_);
 
-    for (size_t i = this->backCount_; i > 0; --i)
+    for (size_t i = this->currentIndex_; i > 0; --i)
     {
         result.push_back(this->history_[i - 1]);
     }
@@ -135,24 +149,25 @@ std::vector<QWidget *> TabHistory::backStackMostRecentFirst() const
 
 void TabHistory::discardBackTop()
 {
-    if (this->backCount_ == 0)
+    if (this->currentIndex_ == 0)
     {
         return;
     }
 
     this->history_.erase(this->history_.begin() +
-                         static_cast<std::ptrdiff_t>(this->backCount_ - 1));
-    this->backCount_--;
+                         static_cast<std::ptrdiff_t>(this->currentIndex_ - 1));
+    this->currentIndex_--;
 }
 
 void TabHistory::discardForwardTop()
 {
-    if (this->backCount_ >= this->history_.size())
+    if (this->currentIndex_ + 1 >= this->history_.size())
     {
         return;
     }
 
-    this->history_.pop_back();
+    this->history_.erase(this->history_.begin() +
+                         static_cast<std::ptrdiff_t>(this->currentIndex_ + 1));
 }
 
 }  // namespace chatterino

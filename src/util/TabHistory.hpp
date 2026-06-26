@@ -15,23 +15,20 @@ namespace chatterino {
 /**
  * @brief Tracks visited notebook pages for back/forward navigation.
  *
- * Stores a bounded back stack of pages the user left, and a forward stack of
- * pages available after navigating back. The currently selected page is not
- * stored in the history; callers pass it to @ref goBack and @ref goForward.
+ * Stores a linear history with a current index. Entries before the current
+ * index are the back stack; entries after it are the forward stack.
  */
 class TabHistory
 {
 public:
-    /// Records @a from as a back-stack entry and clears the forward stack.
-    void recordVisit(QWidget *from);
+    /// Records navigation from @a from to @a to, clearing forward entries.
+    void recordNavigation(QWidget *from, QWidget *to);
 
-    /// Pops the most recent back entry and optionally pushes @a current onto
-    /// the forward stack.
-    std::optional<QWidget *> goBack(QWidget *current);
+    /// Moves to the previous entry and returns it.
+    std::optional<QWidget *> goBack();
 
-    /// Pops the most recent forward entry and optionally pushes @a current onto
-    /// the back stack.
-    std::optional<QWidget *> goForward(QWidget *current);
+    /// Moves to the next entry and returns it.
+    std::optional<QWidget *> goForward();
 
     /// Removes all occurrences of @a page from the history.
     void removePage(QWidget *page);
@@ -44,19 +41,19 @@ public:
     /// Returns back-stack entries from most recently visited to oldest.
     std::vector<QWidget *> backStackMostRecentFirst() const;
 
-    /// Removes the top back entry without navigating.
+    /// Removes the most recent back entry (the one @ref peekBack would return).
     void discardBackTop();
 
-    /// Removes the top forward entry without navigating.
+    /// Removes the next forward entry (the one @ref peekForward would return).
     void discardForwardTop();
 
 private:
     static constexpr size_t MAX_TAB_HISTORY_SIZE = 50;
 
-    // history_[0, backCount_) is the back stack (oldest to newest).
-    // history_[backCount_, end) is the forward stack (oldest to newest).
+    // history_[0, currentIndex_] is the back stack plus the current page.
+    // history_[currentIndex_ + 1, end) is the forward stack.
     std::deque<QWidget *> history_;
-    size_t backCount_ = 0;
+    size_t currentIndex_ = 0;
 };
 
 }  // namespace chatterino

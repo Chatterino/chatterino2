@@ -329,7 +329,7 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 
     if (recordInHistory && this->selectedPage_ != nullptr && page != nullptr)
     {
-        this->tabHistory_.recordVisit(this->selectedPage_);
+        this->tabHistory_.recordNavigation(this->selectedPage_, page);
     }
 
     if (page)
@@ -449,8 +449,8 @@ bool Notebook::selectHistoryPage(bool forward, bool focusPage)
             return false;
         }
 
-        auto target = forward ? this->tabHistory_.goForward(this->selectedPage_)
-                              : this->tabHistory_.goBack(this->selectedPage_);
+        auto target = forward ? this->tabHistory_.goForward()
+                              : this->tabHistory_.goBack();
         if (!target || !this->containsPage(*target))
         {
             continue;
