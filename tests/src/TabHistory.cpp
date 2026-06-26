@@ -43,8 +43,7 @@ TEST_F(TabHistoryTest, RecordNavigationBuildsBackStack)
     EXPECT_FALSE(history.canGoForward());
     EXPECT_EQ(history.peekBack(), &a);
     EXPECT_EQ(history.peekForward(), std::nullopt);
-    EXPECT_EQ(history.backStackMostRecentFirst(),
-              (std::vector<QWidget *>{&a}));
+    EXPECT_EQ(history.backStackMostRecentFirst(), (std::vector<QWidget *>{&a}));
 }
 
 TEST_F(TabHistoryTest, RecordNavigationIgnoresNullDestination)
