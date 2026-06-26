@@ -1379,6 +1379,11 @@ void ChannelView::setSelection(const Selection &newSelection)
         this->selection_ = newSelection;
         this->selectionChanged.invoke();
         this->update();
+
+        if (!this->selection_.isEmpty())
+        {
+            copyToSelection(this->getSelectedText());
+        }
     }
 }
 

@@ -10,6 +10,8 @@ namespace chatterino {
 
 void crossPlatformCopy(const QString &text);
 
+void copyToSelection(const QString &text);
+
 QString getClipboardText();
 
 }  // namespace chatterino
