@@ -814,8 +814,10 @@ public:
          {"w", 1}}};
 
     BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
-    ChatterinoSetting<QStringList> enabledPlugins = {"/plugins/enabledPlugins",
-                                                     {}};
+    ChatterinoSetting<QStringList> enabledPlugins = {
+        "/plugins/enabledPlugins",
+        {},
+    };
 
     // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
