@@ -47,7 +47,7 @@ doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
 ```sh
-sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel g++ git openssl-devel boost-devel libnotify-devel cmake hunspell-devel clang-tools-extra
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel g++ git openssl-devel boost-devel libnotify-devel cmake hunspell-devel
 ```
 
 ### NixOS 18.09+
