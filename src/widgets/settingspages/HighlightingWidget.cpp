@@ -75,7 +75,7 @@ HighlightingWidget::HighlightingWidget()
     model->setObjectName("New Highlight Model");
     model->initialize(&getSettings()->sharedHighlights);
 
-    QTableView *view = new QTableView(this);
+    auto *view = new QTableView(this);
     // view->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
     view->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
