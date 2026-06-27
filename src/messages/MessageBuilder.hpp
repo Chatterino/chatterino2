@@ -81,7 +81,6 @@ struct MessageParseArgs {
     bool isReceivedWhisper = false;
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
-    bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
     bool allowIgnore = true;
     bool isAction = false;
@@ -242,10 +241,9 @@ public:
     static MessagePtrMut makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
-        const QTime &time);
+        const QTime &time, const Communi::IrcMessage &ircMessage);
 
-    static MessagePtrMut makeSubgiftMessage(const QString &text,
-                                            const QVariantMap &tags,
+    static MessagePtrMut makeSubgiftMessage(const QVariantMap &tags,
                                             const QTime &time,
                                             TwitchChannel *channel);
 
@@ -286,6 +284,8 @@ private:
                        TwitchChannel *twitchChannel,
                        bool trimSubscriberUsername);
     void parseMessageID(const QVariantMap &tags);
+    /// Parses most of them message flags based on the given tags
+    void parseMessageTags(const QVariantMap &tags);
 
     /// Parses the room-ID this message was received in
     ///
