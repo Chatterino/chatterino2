@@ -19,7 +19,7 @@ The following environment variables can be configured to change the behaviours o
 - `LIBCLANG_LIBRARY_FILE`  
   Will be used to change where clang cindex can find the dynamic library.  
   Must be an absolute path to the file.  
-  Example: `LIBCLANG_LIBRARY_FILE=/opt/llvm/lib/libclang.so.15.0.7`
+  Example: `LIBCLANG_LIBRARY_FILE=/opt/llvm/lib/libclang.so.21.1.8`
 
 - `LIBCLANG_LIBRARY_PATH`  
   Will be used to change where clang cindex can look for the dynamic library.  

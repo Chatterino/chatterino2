@@ -287,9 +287,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
 
     headerLayout->addSpacing(175);  // group markdown toolbar buttons
 
-    auto previewCheckBox =
-        headerLayout.emplace<QCheckBox>("Show Markdown Preview")
-            .assign(&this->previewCheckBox_);
+    headerLayout.emplace<QCheckBox>("Show Markdown Preview")
+        .assign(&this->previewCheckBox_);
 
     auto splitter =
         layout.emplace<QSplitter>(Qt::Horizontal).assign(&this->splitter_);

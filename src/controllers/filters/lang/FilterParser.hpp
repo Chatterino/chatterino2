@@ -23,7 +23,7 @@ public:
     ExpressionPtr release();
 
     const QStringList &errors() const;
-    const QString debugString() const;
+    QString debugString() const;
 
 private:
     ExpressionPtr parseExpression(bool top = false);

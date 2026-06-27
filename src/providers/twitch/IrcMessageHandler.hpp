@@ -23,6 +23,13 @@ class MessageSink;
 struct ClearChatMessage {
     MessagePtr message;
     bool disableAllMessages;
+    std::optional<QString> username;
+};
+
+struct AddMessageArgs {
+    bool isSub = false;
+    bool isAction = false;
+    bool isSpecial = false;
 };
 
 class IrcMessageHandler
@@ -63,8 +70,7 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *chan, const QString &originalContent,
-                           ITwitchIrcServer &twitch, bool isSub, bool isAction,
-                           const QString &msgType = "");
+                           ITwitchIrcServer &twitch, AddMessageArgs addArgs);
 
 private:
     static float similarity(const MessagePtr &msg,

@@ -6,6 +6,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "util/DebugCount.hpp"
 
 #    include <sol/forward.hpp>
 #    include <sol/types.hpp>
@@ -34,7 +35,7 @@ class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 
 public:
     HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req);
-    HTTPRequest(HTTPRequest &&other) = default;
+    HTTPRequest(HTTPRequest &&other) = default;  // TODO: this breaks DebugCount
     HTTPRequest &operator=(HTTPRequest &&) = default;
     HTTPRequest &operator=(HTTPRequest &) = delete;
     HTTPRequest(const HTTPRequest &other) = delete;

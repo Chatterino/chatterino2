@@ -31,7 +31,7 @@ public:
     HTTPResponse &operator=(HTTPResponse &&) = default;
     HTTPResponse &operator=(HTTPResponse &) = delete;
     HTTPResponse(const HTTPResponse &other) = delete;
-    ~HTTPResponse();
+    ~HTTPResponse() = default;
 
 private:
     static void createUserType(sol::table &c2);

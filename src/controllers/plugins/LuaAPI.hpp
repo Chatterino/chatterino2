@@ -84,14 +84,23 @@ struct CompletionEvent {
 
 sol::table toTable(lua_State *L, const CompletionEvent &ev);
 
+/* @lua-fragment
+
+---@alias QSize [integer, integer] A pair of [width, height]
+---@alias QSizeF [number, number] A pair of [width, height]
+*/
+
 /**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/Accounts.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
+ * @includefile controllers/plugins/api/ConnectionHandle.hpp
  * @includefile controllers/plugins/api/HTTPResponse.hpp
  * @includefile controllers/plugins/api/HTTPRequest.hpp
+ * @includefile controllers/plugins/api/Images.hpp
  * @includefile controllers/plugins/api/Message.hpp
  * @includefile controllers/plugins/api/WebSocket.hpp
+ * @includefile controllers/plugins/api/WindowManager.hpp
  * @includefile common/network/NetworkCommon.hpp
  */
 

@@ -181,6 +181,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
                 QSignalBlocker dontTriggerCursorMovement(this);
                 this->completer_->complete();
             }
+            this->textChanged();
             return;
         }
 
@@ -210,6 +211,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             QSignalBlocker dontTriggerCursorMovement(this);
             this->completer_->complete();
         }
+        this->textChanged();
         return;
     }
 
@@ -291,8 +293,8 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
     }
 
     QTextCursor tc = this->textCursor();
-    tc.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor,
-                    prefixSize);
+    int completionStart = tc.position() - prefixSize;
+    tc.setPosition(completionStart, QTextCursor::KeepAnchor);
     tc.insertText(completion);
     this->setTextCursor(tc);
     this->updateGeometry();

@@ -23,6 +23,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <QStringBuilder>
 #include <QThread>
+#include <QTimer>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -111,11 +112,21 @@ void TwitchAccount::loadBlocks()
 {
     assertInGuiThread();
 
+    this->blocksRetryBackoff_.reset();
+    this->tryLoadBlocks();
+}
+
+void TwitchAccount::tryLoadBlocks()
+{
+    assertInGuiThread();
+
     auto token = CancellationToken(false);
     this->blockToken_ = token;
     this->ignores_.clear();
     this->ignoresUserIds_.clear();
     this->ignoresUserLogins_.clear();
+
+    CancellationToken retryToken = token;
 
     getHelix()->loadBlocks(
         getApp()->getAccounts()->twitch.getCurrent()->userId_,
@@ -131,9 +142,21 @@ void TwitchAccount::loadBlocks()
                 this->ignoresUserLogins_.insert(blockedUser.name);
             }
         },
-        [](auto error) {
+        [this, retryToken](const QString &error) {
+            if (retryToken.isCancelled())
+            {
+                return;
+            }
             qCWarning(chatterinoTwitch).noquote()
-                << "Fetching blocks failed:" << error;
+                << "Fetching blocks failed:" << error << "- retrying";
+            auto delay = this->blocksRetryBackoff_.next();
+            QTimer::singleShot(delay, [this, retryToken] {
+                if (retryToken.isCancelled())
+                {
+                    return;
+                }
+                this->tryLoadBlocks();
+            });
         },
         std::move(token));
 }

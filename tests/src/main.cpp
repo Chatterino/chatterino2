@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QJsonArray>
+#include <QLocale>
 #include <QLoggingCategory>
 #include <QtConcurrent>
 #include <QTimer>
@@ -29,6 +30,8 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     // make sure to always debug-log
     QLoggingCategory::setFilterRules("chatterino.*=true");
+    // make sure we use the same language when formatting
+    QLocale::setDefault(QLocale("en_GB"));
 
     initResources();
 

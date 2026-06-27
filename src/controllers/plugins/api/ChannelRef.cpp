@@ -8,7 +8,10 @@
 #    include "Application.hpp"
 #    include "common/Channel.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/SignalCallback.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
+#    include "messages/Message.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 #    include "util/WeakPtrHelpers.hpp"
@@ -119,6 +122,79 @@ void ChannelRef::add_message(std::shared_ptr<Message> &message,
     this->strong()->addMessage(message, ctx, overrideFlags);
 }
 
+std::vector<MessagePtrMut> ChannelRef::message_snapshot(size_t n_items)
+{
+    return this->strong()->getMessageSnapshotMut(n_items);
+}
+
+MessagePtrMut ChannelRef::last_message()
+{
+    return std::const_pointer_cast<Message>(this->strong()->getLastMessage());
+}
+
+void ChannelRef::replace_message(const MessagePtrMut &message,
+                                 const MessagePtrMut &replacement)
+{
+    if (!message || !replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+
+    this->strong()->replaceMessage(message, replacement);
+}
+
+void ChannelRef::replace_message_hint(const MessagePtrMut &message,
+                                      const MessagePtrMut &replacement,
+                                      size_t hint)
+{
+    if (!message || !replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+    if (hint == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
+
+    this->strong()->replaceMessage(hint - 1, message, replacement);
+}
+
+void ChannelRef::replace_message_at(size_t index,
+                                    const MessagePtrMut &replacement)
+{
+    if (!replacement)
+    {
+        throw std::runtime_error("Invalid message");
+    }
+    if (index == 0)
+    {
+        throw std::runtime_error("Invalid index");
+    }
+
+    this->strong()->replaceMessage(index - 1, replacement);
+}
+
+void ChannelRef::clear_messages()
+{
+    this->strong()->clearMessages();
+}
+
+MessagePtrMut ChannelRef::find_message_by_id(const QString &id)
+{
+    return std::const_pointer_cast<Message>(
+        this->strong()->findMessageByID(id));
+}
+
+bool ChannelRef::has_messages()
+{
+    return this->strong()->hasMessages();
+}
+
+size_t ChannelRef::count_messages()
+{
+    return this->strong()->countMessages();
+}
+
 bool ChannelRef::is_twitch_channel()
 {
     return this->strong()->isTwitchChannel();
@@ -169,6 +245,55 @@ bool ChannelRef::operator==(const ChannelRef &other) const noexcept
     return weakOwnerEquals(this->weak, other.weak);
 }
 
+api::ConnectionHandle ChannelRef::on_display_name_changed(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    return plugin->connections.managedConnect(
+        this->strong()->displayNameChanged,
+        plugin->createCallback(std::move(pfn)));
+}
+
+api::ConnectionHandle ChannelRef::on_messages_cleared(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    return plugin->connections.managedConnect(
+        this->strong()->messagesCleared,
+        plugin->createCallback(std::move(pfn)));
+}
+
+api::ConnectionHandle ChannelRef::on_message_replaced(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    auto cb = plugin->createCallback(std::move(pfn));
+    return plugin->connections.managedConnect(
+        this->strong()->messageReplaced,
+        [cb = std::move(cb)](size_t idx, const auto &old,
+                             const auto &replacement) {
+            cb(idx + 1, std::const_pointer_cast<Message>(old),
+               std::const_pointer_cast<Message>(replacement));
+        });
+}
+
+api::ConnectionHandle ChannelRef::on_message_appended(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    auto cb = plugin->createCallback(std::move(pfn));
+    return plugin->connections.managedConnect(
+        this->strong()->messageAppended,
+        [cb = std::move(cb)](const auto &msg, const auto &flags) {
+            std::optional<MessageFlag> unwrapped;
+            if (flags)
+            {
+                unwrapped.emplace(flags->value());
+            }
+            cb(std::const_pointer_cast<Message>(msg), unwrapped);
+        });
+}
+
 std::optional<ChannelRef> ChannelRef::get_by_name(const QString &name)
 {
     auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
@@ -202,10 +327,26 @@ void ChannelRef::createUserType(sol::table &c2)
         "get_name",&ChannelRef::get_name,
         "get_type", &ChannelRef::get_type,
         "get_display_name", &ChannelRef::get_display_name,
+        "is_twitch_channel", &ChannelRef::is_twitch_channel,
+
+        // Messages
         "send_message", &ChannelRef::send_message,
         "add_system_message", &ChannelRef::add_system_message,
         "add_message", &ChannelRef::add_message,
-        "is_twitch_channel", &ChannelRef::is_twitch_channel,
+        "message_snapshot", &ChannelRef::message_snapshot,
+        "last_message", &ChannelRef::last_message,
+        "replace_message", sol::overload(&ChannelRef::replace_message,
+             &ChannelRef::replace_message_hint),
+        "replace_message_at", &ChannelRef::replace_message_at,
+        "clear_messages", &ChannelRef::clear_messages,
+        "find_message_by_id", &ChannelRef::find_message_by_id,
+        "has_messages", &ChannelRef::has_messages,
+        "count_messages", &ChannelRef::count_messages,
+
+        "on_display_name_changed", &ChannelRef::on_display_name_changed,
+        "on_messages_cleared", &ChannelRef::on_messages_cleared,
+        "on_message_replaced", &ChannelRef::on_message_replaced,
+        "on_message_appended", &ChannelRef::on_message_appended,
 
         // TwitchChannel
         "get_room_modes", &ChannelRef::get_room_modes, 

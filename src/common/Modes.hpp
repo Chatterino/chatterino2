@@ -13,7 +13,6 @@ public:
 
     static const Modes &instance();
 
-    bool isNightly{};
     bool isPortable{};
 
     /// Marked by the line `externally-packaged`

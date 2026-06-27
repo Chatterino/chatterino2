@@ -41,12 +41,12 @@ QColor blendColors(const QColor &base, const QColor &apply)
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
 {
-    DebugCount::increase("message layout");
+    DebugCount::increase(DebugObject::MessageLayout);
 }
 
 MessageLayout::~MessageLayout()
 {
-    DebugCount::decrease("message layout");
+    DebugCount::decrease(DebugObject::MessageLayout);
 }
 
 const Message *MessageLayout::getMessage()
@@ -359,7 +359,7 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, qreal width, bool clear)
     }
 
     this->bufferValid_ = false;
-    DebugCount::increase("message drawing buffers");
+    DebugCount::increase(DebugObject::MessageDrawingBuffer);
     return this->buffer_.get();
 }
 
@@ -418,6 +418,15 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
                 blendColors(backgroundColor, *this->message_->highlightColor);
         }
     }
+    else if (this->message_->flags.has(MessageFlag::Announcement) &&
+             ctx.preferences.enableAnnouncementHighlight)
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ctx.colorProvider.color(colorTypeFromHelixAnnouncementColor(
+                this->message_->announcementColor,
+                ctx.preferences.enableColoredAnnouncementHighlight)));
+    }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
              ctx.preferences.enableSubHighlight)
     {
@@ -456,6 +465,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
     {
         backgroundColor = QColor("#4A273D");
     }
+    else if (this->message_->flags.has(MessageFlag::UncategorizedNotification))
+    {
+        // TODO: Give this a better/its own color :-)
+        backgroundColor = blendColors(
+            backgroundColor, *ctx.colorProvider.color(ColorType::Subscription));
+    }
 
     painter.fillRect(buffer->rect(), backgroundColor);
 
@@ -487,7 +502,7 @@ void MessageLayout::deleteBuffer()
 {
     if (this->buffer_ != nullptr)
     {
-        DebugCount::decrease("message drawing buffers");
+        DebugCount::decrease(DebugObject::MessageDrawingBuffer);
 
         this->buffer_ = nullptr;
     }

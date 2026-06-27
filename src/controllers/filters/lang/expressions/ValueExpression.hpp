@@ -15,9 +15,9 @@ public:
     ValueExpression(QVariant value, TokenType type);
     TokenType type();
 
-    QVariant execute(const ContextMap &context) const override;
-    PossibleType synthesizeType(const TypingContext &context) const override;
-    QString debug(const TypingContext &context) const override;
+    QVariant execute(RunContext context) const override;
+    PossibleType synthesizeType() const override;
+    QString debug() const override;
     QString filterString() const override;
 
 private:

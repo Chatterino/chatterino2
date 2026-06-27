@@ -4,9 +4,11 @@
 
 #include "widgets/settingspages/AboutPage.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "singletons/Paths.hpp"
 #include "util/Expected.hpp"  // IWYU pragma: keep - this is being used to see if we're using the expected_lite library
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
@@ -56,10 +58,26 @@ AboutPage::AboutPage()
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto vbox = versionInfo.emplace<QVBoxLayout>();
-            auto version = Version::instance();
+            const auto &version = Version::instance();
 
-            auto label = vbox.emplace<QLabel>(version.buildString() + "<br>" +
-                                              version.runningString());
+            QString string =
+                version.buildString() % "<br>" % version.runningString();
+
+            if (!version.extraString().isEmpty())
+            {
+                string += "<br>" % version.extraString();
+            }
+
+            string +=
+                "<br><br>Your settings directory is located at <a href=\"";
+            string +=
+                QUrl::fromLocalFile(getApp()->getPaths().settingsDirectory)
+                    .toString(QUrl::FullyEncoded);
+            string += "\">";
+            string += getApp()->getPaths().settingsDirectory.toHtmlEscaped();
+            string += "</a>.";
+
+            auto label = vbox.emplace<QLabel>(string);
             label->setWordWrap(true);
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -184,11 +202,6 @@ AboutPage::AboutPage()
             }
 
             QTextStream stream(&contributorsFile);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            // Default encoding of QTextStream is already UTF-8
-#else
-            stream.setCodec("UTF-8");
-#endif
 
             QString line;
 

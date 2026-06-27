@@ -164,7 +164,7 @@ EmoteMap seventv::detail::parseEmotes(const QJsonArray &emoteSetEmotes,
 {
     auto emotes = EmoteMap();
 
-    for (const auto &activeEmoteJson : emoteSetEmotes)
+    for (const auto activeEmoteJson : emoteSetEmotes)
     {
         auto activeEmote = activeEmoteJson.toObject();
         auto emoteData = activeEmote["data"].toObject();

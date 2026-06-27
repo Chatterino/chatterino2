@@ -2,6 +2,7 @@
     "input": "@badge-info=subscriber/47;badges=broadcaster/1,subscriber/3012,twitchconAmsterdam2020/1;color=#FF0000;display-name=Supinic;emotes=;flags=;id=8c26e1ab-b50c-4d9d-bc11-3fd57a941d90;login=supinic;mod=0;msg-id=announcement;msg-param-color=PRIMARY;room-id=11148817;subscriber=1;system-msg=;tmi-sent-ts=1648762219962;user-id=31400525;user-type= :tmi.twitch.tv USERNOTICE #pajlada :mm test lol",
     "output": [
         {
+            "announcementColor": "Primary",
             "channelName": "pajlada",
             "count": 1,
             "displayName": "Supinic",
@@ -132,9 +133,8 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Highlighted|Collapsed|Subscription",
+            "flags": "Collapsed|Announcement",
             "frozen": false,
-            "highlightColor": "#64c466ff",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
@@ -154,6 +154,7 @@
             "usernameColor": "#ffff0000"
         },
         {
+            "announcementColor": "Primary",
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -203,7 +204,7 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|DoNotTriggerNotification|Announcement",
             "frozen": false,
             "id": "",
             "localizedName": "",

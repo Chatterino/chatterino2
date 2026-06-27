@@ -22,12 +22,7 @@ Modes::Modes()
     {
         auto line = QString(file.readLine()).trimmed();
 
-        // we need to know if it is a nightly build to disable updates on windows
-        if (line == "nightly")
-        {
-            this->isNightly = true;
-        }
-        else if (line == "portable")
+        if (line == "portable")
         {
             this->isPortable = true;
         }

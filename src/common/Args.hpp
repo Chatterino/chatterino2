@@ -68,6 +68,8 @@ public:
     bool verbose{};
     bool safeMode{};
 
+    bool useOldScaling = false;
+
 #ifndef NDEBUG
     // twitch event websocket start-server --ssl --port 3012
     bool useLocalEventsub = false;

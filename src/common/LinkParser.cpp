@@ -33,12 +33,6 @@ TldSet &tlds()
         }
         QTextStream stream(&file);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        // Default encoding of QTextStream is already UTF-8, at least in Qt6
-#else
-        stream.setCodec("UTF-8");
-#endif
-
         TldSet set;
 
         while (!stream.atEnd())

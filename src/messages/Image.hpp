@@ -5,8 +5,8 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "util/DebugCount.hpp"
 
-#include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QList>
 #include <QPixmap>
@@ -106,7 +106,6 @@ public:
     bool animated() const;
 
     bool operator==(const Image &image) = delete;
-    bool operator!=(const Image &image) = delete;
 
 private:
     Image();

@@ -130,7 +130,6 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->closeMultipleTabsMenu_ = new QMenu("Close Multiple Tabs", this);
 
-    const auto tabDirection = getSettings()->tabDirection.getEnum();
     this->menu_.addMenu(this->closeMultipleTabsMenu_);
     getSettings()->tabDirection.connect(
         [this](int val) {
@@ -1170,11 +1169,7 @@ void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void NotebookTab::enterEvent(QEnterEvent *event)
-#else
-void NotebookTab::enterEvent(QEvent *event)
-#endif
 {
     this->mouseOver_ = true;
 
