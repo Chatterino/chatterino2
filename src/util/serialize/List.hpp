@@ -41,12 +41,7 @@ struct Deserialize<QList<T>> {
         list.reserve(cArray.Size());
         for (const auto &v : cArray)
         {
-            if (!v.IsString())
-            {
-                PAJLADA_REPORT_ERROR(error);
-                return list;
-            }
-            list.append(Deserialize<QList<T>>::get(v, error));
+            list.append(Deserialize<T>::get(v, error));
         }
         return list;
     }
