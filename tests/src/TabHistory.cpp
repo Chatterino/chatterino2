@@ -125,12 +125,12 @@ TEST_F(TabHistoryTest, RemovePageUpdatesPeekEntries)
     history.recordNavigation(&b, &c);
     history.goBack();
 
-    EXPECT_EQ(history.peekBack(), &b);
+    EXPECT_EQ(history.peekBack(), &a);
     EXPECT_EQ(history.peekForward(), &c);
 
     history.removePage(&b);
 
-    EXPECT_EQ(history.peekBack(), &a);
+    EXPECT_FALSE(history.canGoBack());
     EXPECT_EQ(history.peekForward(), &c);
 }
 

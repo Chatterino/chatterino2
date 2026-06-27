@@ -84,16 +84,22 @@ void TabHistory::removePage(QWidget *page)
             {
                 this->currentIndex_--;
             }
-            else if (i == this->currentIndex_ &&
-                     this->currentIndex_ >= this->history_.size())
+            else if (i == this->currentIndex_)
             {
-                if (this->history_.empty())
+                if (this->currentIndex_ >= this->history_.size())
                 {
-                    this->currentIndex_ = 0;
+                    if (this->history_.empty())
+                    {
+                        this->currentIndex_ = 0;
+                    }
+                    else
+                    {
+                        this->currentIndex_ = this->history_.size() - 1;
+                    }
                 }
-                else
+                else if (this->currentIndex_ > 0)
                 {
-                    this->currentIndex_ = this->history_.size() - 1;
+                    this->currentIndex_--;
                 }
             }
         }
