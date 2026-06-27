@@ -5,6 +5,7 @@
 #include "widgets/settingspages/SettingWidget.hpp"
 
 #include "common/QLogging.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Settings.hpp"  // IWYU pragma: keep
 #include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
@@ -257,6 +258,8 @@ template SettingWidget *SettingWidget::dropdown<ShowModerationState>(
     const QString &label, EnumStringSetting<ShowModerationState> &setting);
 template SettingWidget *SettingWidget::dropdown<EmojiStyle>(
     const QString &label, EnumStringSetting<EmojiStyle> &setting);
+template SettingWidget *SettingWidget::dropdown<BrowserManifestFormat>(
+    const QString &label, EnumStringSetting<BrowserManifestFormat> &setting);
 
 template <typename T>
 SettingWidget *SettingWidget::dropdown(const QString &label,

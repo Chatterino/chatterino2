@@ -651,3 +651,38 @@ TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
+
+TEST_P(TestIrcMessageHandlerP, CloneElements)
+{
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
+
+    VectorMessageSink sink;
+
+    for (auto prevInput : this->snapshot->param("prevMessages").toArray())
+    {
+        auto *ircMessage = Communi::IrcMessage::fromData(
+            prevInput.toString().toUtf8(), nullptr);
+        ASSERT_NE(ircMessage, nullptr);
+        IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+        delete ircMessage;
+    }
+
+    auto *ircMessage =
+        Communi::IrcMessage::fromData(this->snapshot->inputUtf8(), nullptr);
+    ASSERT_NE(ircMessage, nullptr);
+    IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+    delete ircMessage;
+
+    for (const auto &message : sink.messages())
+    {
+        for (const auto &original : message->elements)
+        {
+            auto originalObj = original->toJson();
+            auto clonedObj = original->clone()->toJson();
+            ASSERT_EQ(originalObj, clonedObj)
+                << "\noriginal:\n"
+                << QJsonDocument(originalObj).toJson() << "\ncloned:\n"
+                << QJsonDocument(clonedObj).toJson();
+        }
+    }
+}

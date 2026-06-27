@@ -395,7 +395,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Message overflow", {"Highlight", "Prevent", "Allow"},
         s.messageOverflow,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<MessageOverflow>(args.index);
@@ -412,7 +412,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -429,7 +429,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickModifierBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -507,12 +507,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.fadeMessageHistory)
         ->setTooltip(
             "Reduce opacity of messages that were posted before Chatterino "
-            "was started or while re-connection.")
+            "was started or while re-connecting.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
         ->setTooltip(
             "When enabled, messages deleted by moderators will be hidden.")
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Hide message timestamps when channel is live",
+                            s.hideMessageTimestampsWhenLive)
         ->addTo(layout);
 
     layout.addDropdown<QString>(
@@ -752,6 +756,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "that you don't want to show on stream.")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Hide user notes", s.streamerModeHideUserNotes)
+        ->setTooltip("Hide user notes from showing in usercards.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Mute mention sounds", s.streamerModeMuteMentions)
         ->setTooltip("Mute your ping sound from playing.")
         ->addTo(layout);
@@ -942,11 +950,38 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             ->addTo(layout, form);
     }
 
+#ifndef Q_OS_WIN
+    {
+        auto *note = layout.addDescription(
+            "A path to write the native messaging manifest to. The manifest is "
+            "already automatically created for Firefox and Google Chrome if "
+            "they are installed."
+#    ifdef Q_OS_LINUX
+            "\nYou may use $XDG_CONFIG_HOME or $XDG_DATA_HOME in the path."
+#    endif
+        );
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
+        layout.addWidget(note);
+
+        auto *form = new QFormLayout();
+        layout.addLayout(form);
+        SettingWidget::lineEdit("Custom manifest path",
+                                s.customNativeMessagingManifestPath,
+                                "/full/path/to/native/messaging/manifest.json")
+            ->addTo(layout, form);
+
+        SettingWidget::dropdown("Custom manifest format",
+                                s.customNativeMessagingManifestFormat)
+            ->addTo(layout);
+    }
+#endif
+
     layout.addTitle("AppData & Cache");
 
     layout.addSubtitle("Application Data");
     layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
+                          "stored in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
         QDesktopServices::openUrl("file://" +
@@ -1359,7 +1394,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Mention users with a comma",
                             s.mentionUsersWithComma)
-        ->setTooltip("When using tab-completon, if the username is at the "
+        ->setTooltip("When using tab-completion, if the username is at the "
                      "start of the message, include a comma at the end of the "
                      "name.\ne.g. pajl -> pajlada,")
         ->addTo(layout);
@@ -1444,7 +1479,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             },
             false,
             "Customizes how you see Asian Language names.\nUsing an option "
-            "that includes \"localized\" will display the username in it's "
+            "that includes \"localized\" will display the username in its "
             "respective Asian language.\ne.g. "
             "Username and localized: testaccount_420(테스트계정420)\n"
             "Username: testaccount_420\n"
@@ -1471,7 +1506,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Double click to open links and other elements in chat",
         s.linksDoubleClickOnly)
         ->setTooltip("When enabled, opening links/usercards requires "
-                     "double-clicking.\nUseful making sure you don't "
+                     "double-clicking.\nUseful for making sure you don't "
                      "accidentally click on suspicious links.")
         ->addTo(layout);
 
@@ -1585,18 +1620,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
-        ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
+        ->setTooltip("'Helix' will use Twitch's Helix API to send messages. "
                      "'IRC' will use IRC to send messages.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Show send message button", s.showSendButton)
         ->setTooltip("Show a Send button next to each split input that can be "
                      "clicked to send the message")
-        ->addTo(layout);
-
-    SettingWidget::checkbox(
-        "Enable experimental Twitch EventSub support (requires restart)",
-        s.enableExperimentalEventSub)
         ->addTo(layout);
 
     SettingWidget::checkbox("Disable renaming of tabs on double-click",

@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -37,7 +36,7 @@
 
 #include <memory>
 
-using namespace chatterino::literals;
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -52,9 +51,18 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "ritual",           // new viewer ritual
     "announcement",     // new mod announcement thing
     "viewermilestone",  // watch streak, but other categories possible in future
+    "modiversary",      // Mod anniversary.
+    "socialsharingbadge",  // social media badge from sharing clips
 };
 
-const QString ANONYMOUS_GIFTER_ID = "274598607";
+/// MessageFlag::Subscription message types
+/// This is duplicated with SUB_MESSAGE_TYPES in MessageBuilder.cpp until the `isSubscriptionMessage` parameter
+/// in `MessageParseArgs` is no longer used for highlights.
+const QSet<QString> SUB_MESSAGE_TYPES{
+    "sub",      //
+    "subgift",  //
+    "resub",    // resub messages
+};
 
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
@@ -104,7 +112,7 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
     if (const auto it = tags.find("reply-parent-display-name");
         it != tags.end())
     {
-        auto displayName = it.value().toString();
+        auto displayName = parseTagString(it.value().toString());
 
         if (content.length() <= 1 + displayName.length())
         {
@@ -116,7 +124,8 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
             content.at(1 + displayName.length()) == ' ' &&
             content.indexOf(displayName, 1) == 1)
         {
-            int messageOffset = 1 + displayName.length() + 1;
+            // Reply prefix's "@" + displayName + " "
+            qsizetype messageOffset = 1 + displayName.length() + 1;
             content.remove(0, messageOffset);
             return messageOffset;
         }
@@ -287,8 +296,6 @@ MessagePtr parseNoticeMessage(Communi::IrcNoticeMessage *message)
 
 namespace chatterino {
 
-using namespace literals;
-
 IrcMessageHandler &IrcMessageHandler::instance()
 {
     static IrcMessageHandler instance;
@@ -423,9 +430,12 @@ void IrcMessageHandler::parsePrivMessageInto(
         }
     }
 
-    IrcMessageHandler::addMessage(
-        message, sink, channel, unescapeZeroWidthJoiner(message->content()),
-        *getApp()->getTwitch(), false, message->isAction());
+    IrcMessageHandler::addMessage(message, sink, channel,
+                                  unescapeZeroWidthJoiner(message->content()),
+                                  *getApp()->getTwitch(),
+                                  {
+                                      .isAction = message->isAction(),
+                                  });
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -725,6 +735,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                                                    MessageSink &sink,
                                                    TwitchChannel *channel)
 {
+    assert(message != nullptr);
     assert(channel != nullptr);
 
     const auto *userDataController = getApp()->getUserData();
@@ -771,13 +782,17 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         return;
     }
 
+    // TODO: Why are we ONLY allowing these message types to have an additional message with their content added?
     if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
             addMessage(message, sink, channel, content, *getApp()->getTwitch(),
-                       true, false, msgType);
+                       {
+                           .isSub = SUB_MESSAGE_TYPES.contains(msgType),
+                           .isSpecial = true,
+                       });
         }
     }
 
@@ -787,6 +802,19 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
     {
         // By default, we return value of system-msg tag
         QString messageText = it.value().toString();
+
+        auto displayName = [&] {
+            if (msgType == u"raid")
+            {
+                return tags.value("msg-param-displayName").toString();
+            }
+            return tags.value("display-name").toString();
+        }();
+        auto login = tags.value("login").toString();
+        if (displayName.isEmpty())
+        {
+            displayName = login;
+        }
 
         if (msgType == "bitsbadgetier")
         {
@@ -802,50 +830,9 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
         else if (msgType == "subgift")
         {
-            if (auto monthsIt = tags.find("msg-param-gift-months");
-                monthsIt != tags.end())
-            {
-                int months = monthsIt.value().toInt();
-                if (months > 1)
-                {
-                    auto plan = tags.value("msg-param-sub-plan").toString();
-                    QString name =
-                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
-                            ? "An anonymous user"
-                            : tags.value("display-name").toString();
-                    messageText =
-                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(name, QString::number(months),
-                                 plan.isEmpty() ? '1' : plan.at(0),
-                                 tags.value("msg-param-recipient-display-name")
-                                     .toString());
-
-                    if (auto countIt = tags.find("msg-param-sender-count");
-                        countIt != tags.end())
-                    {
-                        int count = countIt.value().toInt();
-                        if (count > months)
-                        {
-                            messageText +=
-                                QString(
-                                    " They've gifted %1 months in the channel.")
-                                    .arg(QString::number(count));
-                        }
-                    }
-                }
-            }
-
             // subgifts are special because they include two users
             auto msg = MessageBuilder::makeSubgiftMessage(
-                parseTagString(messageText), tags,
-                calculateMessageTime(message).time(), channel);
-
-            msg->flags.set(MessageFlag::Subscription);
-
-            if (mirrored)
-            {
-                msg->flags.set(MessageFlag::SharedMessage);
-            }
+                tags, calculateMessageTime(message).time(), channel);
 
             sink.addMessage(msg, MessageContext::Original);
             return;
@@ -881,18 +868,22 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 }
             }
         }
-
-        auto displayName = [&] {
-            if (msgType == u"raid")
-            {
-                return tags.value("msg-param-displayName").toString();
-            }
-            return tags.value("display-name").toString();
-        }();
-        auto login = tags.value("login").toString();
-        if (displayName.isEmpty())
+        else if (msgType == "socialsharingbadge")
         {
-            displayName = login;
+            int level = tags.value("msg-param-current-badge-level").toInt();
+            messageText = QString("%1 earned a Level %2 Social Media Badge!")
+                              .arg(tags.value("display-name").toString(),
+                                   QString::number(level));
+        }
+        else if (msgType == "modiversary")
+        {
+            // The message text we get is "has been a moderator for ..." (without the name).
+            // This might be a bug on Twitch's side.
+            if (!messageText.startsWith(login) &&
+                !messageText.startsWith(displayName))
+            {
+                messageText = displayName % ' ' % messageText;
+            }
         }
 
         auto userID = tags.value("user-id").toString();
@@ -908,21 +899,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
-            calculateMessageTime(message).time());
-
-        if (msgType == "viewermilestone")
-        {
-            msg->flags.set(MessageFlag::WatchStreak);
-        }
-        else
-        {
-            msg->flags.set(MessageFlag::Subscription);
-        }
-
-        if (mirrored)
-        {
-            msg->flags.set(MessageFlag::SharedMessage);
-        }
+            calculateMessageTime(message).time(), *message);
 
         sink.addMessage(msg, MessageContext::Original);
     }
@@ -1111,22 +1088,21 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
-                                   ITwitchIrcServer &twitch, bool isSub,
-                                   bool isAction, const QString &msgType)
+                                   ITwitchIrcServer &twitch,
+                                   AddMessageArgs addArgs)
 {
     assert(chan);
 
+    auto isSub = addArgs.isSub;
+    auto isAction = addArgs.isAction;
+
     MessageParseArgs args;
-    if (isSub)
+    args.isSubscriptionMessage = isSub;
+    if (addArgs.isSpecial)
     {
-        args.isSubscriptionMessage = true;
         args.trimSubscriberUsername = true;
     }
 
-    if (chan->isBroadcaster())
-    {
-        args.isStaffOrBroadcaster = true;
-    }
     args.isAction = isAction;
 
     const auto &tags = message->tags();
@@ -1234,25 +1210,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
     if (msg)
     {
-        if (isSub)
-        {
-            if (msgType == "viewermilestone")
-            {
-                msg->flags.set(MessageFlag::WatchStreak);
-            }
-            else
-            {
-                msg->flags.set(MessageFlag::Subscription);
-            }
-
-            if (tags.value("msg-id") != "announcement")
-            {
-                // Announcements are currently tagged as subscriptions,
-                // but we want them to be able to show up in mentions
-                msg->flags.unset(MessageFlag::Highlighted);
-            }
-        }
-
         sink.applySimilarityFilters(msg);
 
         if (!msg->flags.has(MessageFlag::Similar) ||

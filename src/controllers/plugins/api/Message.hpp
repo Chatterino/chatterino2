@@ -192,9 +192,10 @@ c2.Message = {}
 function c2.Message:elements() end
 
 --- Add an element to this message.
+--- If given a MessageElement, it will be cloned before being added.
 ---
----@param init MessageElementInit The element to add
-function c2.Message:append_element(init) end
+---@param elem (MessageElement|MessageElementInit) The element to add
+function c2.Message:append_element(elem) end
 
 ---A table to initialize a new message
 ---@class MessageInit
@@ -211,7 +212,7 @@ function c2.Message:append_element(init) end
 ---@field username_color? string The color of the username
 ---@field server_received_time? number The time the server received the message (in milliseconds since epoch)
 ---@field highlight_color? string|nil The color of the highlight (if any)
----@field elements? MessageElementInit[] The elements of the message
+---@field elements? (MessageElementInit|MessageElement)[] The elements of the message
 
 ---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
 

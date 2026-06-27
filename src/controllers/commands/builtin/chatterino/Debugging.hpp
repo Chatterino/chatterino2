@@ -42,4 +42,8 @@ QString debugTest(const CommandContext &ctx);
 QString relaunchWithConsole(const CommandContext &ctx);
 #endif
 
+QString disableLogfile(const CommandContext &ctx);
+QString enableLogfile(const CommandContext &ctx);
+QString relaunchWithLogfile(const CommandContext &ctx);
+
 }  // namespace chatterino::commands

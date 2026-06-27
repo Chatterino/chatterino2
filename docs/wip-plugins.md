@@ -752,6 +752,7 @@ end)
 ```
 
 The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
+Existing `MessageElement`s in `elements` field of the table will be cloned regardless if they can be created in Lua.
 
 ##### `Message:elements()`
 
@@ -893,6 +894,92 @@ Create a new image set.
 All arguments accept an [`Image`](#image) or a `string` (URL).
 
 Requires the [network permission](#permissions).
+
+#### `Split`
+
+A leaf node in the tab-tree of a Chatterino window.
+It shows a `channel` ([Channel](#channel)) along with a header and an input box.
+See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
+
+#### `SplitContainerNode`
+
+A node in a split container.
+
+It can be one of the following `type`s (`SplitContainerNodeType`):
+
+- `EmptyRoot`: This is the only node in the `SplitContainer` and it's empty.
+- `Split`: This is a leaf node which holds a `split`.
+- `VerticalContainer`: The children of this node are arranged vertically. Each child's `vertical_flex` indicates how much space it takes.
+- `HorizontalContainer`: The children of this node are arranged horizontally. Each child's `horizontal_flex` indicates how much space it takes.
+
+It has the following fields:
+
+- `type` (`SplitContainerNodeType`) The type of this node
+- `split` ([`Split`](#split)?) The split contained in this code (if this is a split node)
+- `parent` ([`SplitContainerNode`](#splitcontainernode)?) The parent node
+- `horizontal_flex` (`number`) The amount of horizontal space this split takes
+- `vertical_flex` (`number`) The amount of vertical space this split takes
+
+##### `SplitContainerNode:children()`
+
+Get all children ([`SplitContainerNode`](#splitcontainernode)) of this node.
+
+#### `SplitContainer`
+
+A container with potentially multiple splits each tab in Chatterino contains one `SplitContainer`.
+It has the following fields:
+
+- `selected_split` ([`Split`](#split)) The currently selected split.
+- `base_node` ([`SplitContainerNode`](#splitcontainernode)) The top level node.
+
+##### `SplitContainer:splits()`
+
+Get all splits ([`Split`](#split)) contained in this container.
+
+#### `SplitNotebook`
+
+The tab bar in a Chatterino window. Each tab is called a "page" which holds a `SplitContainer`.
+
+- `selected_page` ([`SplitContainer`](#splitcontainer)?) The currently selected page.
+- `page_count` (`integer`) The number of pages/tabs.
+
+##### `SplitNotebook:page_at(i)`
+
+Get the notebook page at a specific index.
+`i` is the zero based index of the page.
+Returns the page ([`SplitContainer`](#splitcontainer)) contained at the specified index.
+
+#### `Window`
+
+It has the following fields:
+
+- `notebook` ([`SplitNotebook`](#splitnotebook)) The notebook of this window.
+- `type` (`WindowType`) The type of this window.
+
+#### `WindowManager`
+
+Conceptually the windows in Chatterino are the root nodes of a tree with split containers as intermediate nodes and splits as leaf nodes.
+
+[`docs/resources/window-graph.lua`](resources/window-graph.lua) is a utility to generate a GraphViz description of the window state.
+For example, the following tab is shown below:
+
+![Screenshot of a Chatterino tab](resources/window-example.png)
+
+GraphViz output:
+![GraphViz output for tab](resources/window-example.svg)
+
+`WindowManager` has the following fields:
+
+- `main_window` ([`Window`](#window)) The main window.
+- `last_selected_window` ([`Window`](#window)) The last selected window (or the main window if none were selected last).
+
+##### `WindowManager:all()`
+
+Get all open windows.
+
+#### `c2.windows`
+
+The global [`WindowManager`](#windowmanager).
 
 ### Input/Output API
 

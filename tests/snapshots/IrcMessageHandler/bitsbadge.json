@@ -75,7 +75,7 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
             "frozen": false,
             "id": "",
             "localizedName": "",

@@ -128,18 +128,6 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
     return nullptr;
 }
 
-eventsub::IController *makeEventSubController(Settings &settings)
-{
-    bool enabled = settings.enableExperimentalEventSub;
-
-    if (enabled)
-    {
-        return new eventsub::Controller();
-    }
-
-    return new eventsub::DummyController();
-}
-
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -172,7 +160,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , emotes(new EmoteController)
     , accounts(new AccountController)
-    , eventSub(makeEventSubController(_settings))
+    , eventSub(new eventsub::Controller())
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(_args, paths, _settings, *this->themes,
                                 *this->fonts))

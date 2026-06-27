@@ -78,7 +78,7 @@ void MessageThread::markSubscribed()
     }
 
     this->subscription_ = Subscription::Subscribed;
-    this->subscriptionUpdated();
+    this->subscriptionUpdated.invoke();
 }
 
 void MessageThread::markUnsubscribed()
@@ -89,7 +89,7 @@ void MessageThread::markUnsubscribed()
     }
 
     this->subscription_ = Subscription::Unsubscribed;
-    this->subscriptionUpdated();
+    this->subscriptionUpdated.invoke();
 }
 
 QJsonObject MessageThread::toJson() const
