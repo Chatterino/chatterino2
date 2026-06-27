@@ -407,9 +407,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isPluginEnabled(const QString &id)
 {
-    auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), id);
-    return it != vec.end();
+    return getSettings()->enabledPlugins.getValue().contains(id);
 }
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
