@@ -29,7 +29,7 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoHighlights;
 
-// TODO: is this good? xd
+/// Tips that will be randomized once on launch and shown at the top of the settings highlights page
 const std::vector<QStringView> TIPS{
     uR"(Filter highlights are handy for advanced highlights.)",
     uR"(User highlights highlights any message from the given user.)",
