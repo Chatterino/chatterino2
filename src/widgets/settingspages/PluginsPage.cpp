@@ -228,12 +228,10 @@ void PluginsPage::rebuildContent()
             auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
             QObject::connect(
                 toggleButton, &QPushButton::pressed, [name = id, this]() {
-                    std::vector<QString> val =
-                        getSettings()->enabledPlugins.getValue();
+                    QStringList val = getSettings()->enabledPlugins;
                     if (PluginController::isPluginEnabled(name))
                     {
-                        val.erase(std::remove(val.begin(), val.end(), name),
-                                  val.end());
+                        val.removeAll(name);
                     }
                     else
                     {

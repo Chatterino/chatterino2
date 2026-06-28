@@ -60,6 +60,8 @@
       "input": {
         "background": "#080808",
         "backgroundPulse": "#083808",
+        "searchFailText": "#ff0000",
+        "searchHighlightBackground": "#506e6eff",
         "text": "#ffffff"
       },
       "messageSeperator": "#3c3c3c",
