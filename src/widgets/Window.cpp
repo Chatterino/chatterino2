@@ -123,9 +123,9 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
-void Window::setPopupID(size_t ID)
+void Window::setPopupID(size_t id)
 {
-    this->popupID_ = ID;
+    this->popupID_ = id;
 }
 
 std::optional<size_t> Window::popupID() const

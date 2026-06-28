@@ -34,7 +34,7 @@ public:
     WindowType getType();
     SplitNotebook &getNotebook();
 
-    void setPopupID(size_t ID);
+    void setPopupID(size_t id);
     std::optional<size_t> popupID() const;
 
     pajlada::Signals::NoArgSignal closed;
