@@ -21,6 +21,16 @@ void crossPlatformCopy(const QString &text)
     }
 }
 
+void copyToSelection(const QString &text)
+{
+    auto *clipboard = QApplication::clipboard();
+
+    if (clipboard->supportsSelection())
+    {
+        clipboard->setText(text, QClipboard::Selection);
+    }
+}
+
 QString getClipboardText()
 {
     return QApplication::clipboard()->text();

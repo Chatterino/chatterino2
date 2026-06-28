@@ -352,9 +352,19 @@
               "properties": {
                 "background": { "$ref": "#/definitions/qt-color" },
                 "backgroundPulse": { "$ref": "#/definitions/qt-color" },
+                "searchHighlightBackground": {
+                  "$ref": "#/definitions/qt-color"
+                },
+                "searchFailText": { "$ref": "#/definitions/qt-color" },
                 "text": { "$ref": "#/definitions/qt-color" }
               },
-              "required": ["background", "text"]
+              "required": [
+                "background",
+                "backgroundPulse",
+                "searchHighlightBackground",
+                "searchFailText",
+                "text"
+              ]
             },
             "messageSeperator": { "$ref": "#/definitions/qt-color" },
             "resizeHandle": { "$ref": "#/definitions/qt-color" },
