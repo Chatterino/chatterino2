@@ -9,8 +9,6 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "util/IrcHelpers.hpp"
 
-#include <QStringBuilder>
-
 namespace chatterino::highlights {
 
 BadgeHighlight::BadgeHighlight(QStringView _id)
