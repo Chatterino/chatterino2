@@ -106,6 +106,8 @@ HighlightingWidget::HighlightingWidget()
     view->horizontalHeader()->setSectionResizeMode(
         highlights::Model::Column::Enabled, QHeaderView::ResizeToContents);
     view->horizontalHeader()->setSectionResizeMode(
+        highlights::Model::Column::Sound, QHeaderView::ResizeToContents);
+    view->horizontalHeader()->setSectionResizeMode(
         highlights::Model::Column::Name, QHeaderView::Stretch);
 
     auto *hints = new QHBoxLayout;
