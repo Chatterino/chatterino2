@@ -10,17 +10,13 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
-#include <qcolor.h>
-#include <qdebug.h>
-#include <qpixmap.h>
-#include <QStringList>
+#include <QColor>
+#include <QDebug>
 #include <QStringView>
-#include <qurl.h>
+#include <QtContainerFwd>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
-#include <cassert>
-#include <memory>
 #include <optional>
 
 namespace chatterino::highlights {
@@ -185,5 +181,3 @@ struct Deserialize<chatterino::highlights::BadgeHighlight> {
 };
 
 }  // namespace pajlada
-
-// QDebug operator<<(QDebug dbg, const chatterino::BadgeHighlight &v);
