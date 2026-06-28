@@ -5,7 +5,6 @@
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/StandardItemHelper.hpp"
-#include "util/Variant.hpp"
 
 #include <QPalette>
 
@@ -55,21 +54,15 @@ void updateRow(const AllHighlights &highlight,
 
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
 
-    // TODO: use an "if type is BadgeHighlight"
-    std::visit(variant::Overloaded{
-                   [row](const BadgeHighlight &h) {
-                       getApp()->getTwitchBadges()->getBadgeIcon(
-                           h.getBadgeName(),
-                           [row](const QString &name,
-                                 const std::shared_ptr<QIcon> &icon) {
-                               (void)name;  // unused
-                               row[Column::Name]->setData(*icon,
-                                                          Qt::DecorationRole);
-                           });
-                   },
-                   [row](auto &&v) {},
-               },
-               highlight);
+    if (const auto *h = std::get_if<BadgeHighlight>(&highlight))
+    {
+        getApp()->getTwitchBadges()->getBadgeIcon(
+            h->getBadgeName(),
+            [row](const QString &name, const std::shared_ptr<QIcon> &icon) {
+                (void)name;  // unused
+                row[Column::Name]->setData(*icon, Qt::DecorationRole);
+            });
+    }
 
     setStringItem(row[Column::Name], getName(highlight), false);
     setStringItem(row[Column::Sound], "");  // TODO: include full URL?
