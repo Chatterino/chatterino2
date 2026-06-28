@@ -42,12 +42,12 @@ sudo zypper install cmake pkgconf boost-devel libboost_json1_89_0-devel desktop-
 doas emerge dev-libs/openssl dev-qt/qt5compat dev-qt/qtbase dev-qt/qtsvg dev-qt/qtimageformats x11-libs/libnotify dev-libs/qtkeychain dev-libs/boost dev-build/cmake app-text/hunspell
 ```
 
-### Fedora 39 and above
+### Fedora 42 and above
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
 ```sh
-sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel g++ git openssl-devel boost-devel libnotify-devel cmake hunspell
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel g++ git openssl-devel boost-devel libnotify-devel cmake hunspell-devel
 ```
 
 ### NixOS 18.09+
