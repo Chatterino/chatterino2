@@ -32,8 +32,8 @@ bool HighlightResult::operator==(const HighlightResult &other) const
         qInfo() << "did not match playSound";
         return false;
     }
-    if (auto ourUrl = this->customSoundUrl.value_or({}),
-        theirUrl = other.customSoundUrl.value_or({});
+    if (auto ourUrl = this->customSoundUrl.value_or(QUrl{}),
+        theirUrl = other.customSoundUrl.value_or(QUrl{});
         ourUrl != theirUrl)
     {
         qInfo() << "did not match customSoundUrl";
