@@ -27,9 +27,8 @@ HighlightCheck ChannelPointsHighlight::buildCheck() const
             (void)self;             // unused
             (void)runContext;       // unused
 
-            if (true)
+            if (!flags.has(MessageFlag::RedeemedHighlight))
             {
-                // TODO: Implement
                 return std::nullopt;
             }
 

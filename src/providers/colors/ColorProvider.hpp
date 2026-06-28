@@ -17,7 +17,7 @@ namespace chatterino {
 enum class ColorType {
     SelfHighlight,
     Whisper,
-    RedeemedHighlight,
+    // RedeemedHighlight,
     ElevatedMessageHighlight,
     ThreadMessageHighlight,
     // Used in automatic highlights of your own messages

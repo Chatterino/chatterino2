@@ -37,9 +37,9 @@ QSet<QColor> ColorProvider::recentColors() const
     // TODO: Grab user's custom highlight colors and add them here
 
     // Insert preset highlight colors
-    retVal.insert(*this->color(ColorType::SelfHighlight));
-    retVal.insert(*this->color(ColorType::Whisper));
-    retVal.insert(*this->color(ColorType::AnnouncementHighlight));
+    // retVal.insert(*this->color(ColorType::SelfHighlight));
+    // retVal.insert(*this->color(ColorType::Whisper));
+    // retVal.insert(*this->color(ColorType::AnnouncementHighlight));
 
     return retVal;
 }
@@ -93,23 +93,19 @@ void ColorProvider::initTypeColorMap()
             false);
     };
 
-    initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
+    //initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
+    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::SelfMessageHighlight,
-              getSettings()->selfMessageHighlightColor,
-              HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
+    // initColor(ColorType::SelfMessageHighlight,
+    //           getSettings()->selfMessageHighlightColor,
+    //           HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
+    //initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
+    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::RedeemedHighlight,
-              getSettings()->redeemedHighlightColor,
-              HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::ElevatedMessageHighlight,
-              getSettings()->elevatedMessageHighlightColor,
-              HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
+    // initColor(ColorType::ElevatedMessageHighlight,
+    //           getSettings()->elevatedMessageHighlightColor,
+    //           HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
 
     initColor(ColorType::ThreadMessageHighlight,
               getSettings()->threadHighlightColor,

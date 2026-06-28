@@ -273,21 +273,6 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
             ctx.messageColors.disabled);
     }
 
-    if (!ctx.isMentions &&
-        (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward) ||
-         this->message_->flags.has(MessageFlag::RedeemedHighlight)) &&
-        ctx.preferences.enableRedeemedHighlight)
-    {
-        ctx.painter.fillRect(
-            QRect{
-                0,
-                ctx.y,
-                static_cast<int>(this->scale_ * 4),
-                pixmap->height(),
-            },
-            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
-    }
-
     // draw selection
     if (!ctx.selection.isEmpty())
     {
@@ -416,16 +401,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             *ctx.colorProvider.color(colorTypeFromHelixAnnouncementColor(
                 this->message_->announcementColor,
                 ctx.preferences.enableColoredAnnouncementHighlight)));
-    }
-    else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
-              this->message_->flags.has(
-                  MessageFlag::RedeemedChannelPointReward)) &&
-             ctx.preferences.enableRedeemedHighlight)
-    {
-        // Blend highlight color with usual background color
-        backgroundColor =
-            blendColors(backgroundColor,
-                        *ctx.colorProvider.color(ColorType::RedeemedHighlight));
     }
     else if (this->message_->flags.has(MessageFlag::AutoMod) ||
              this->message_->flags.has(MessageFlag::LowTrustUsers))

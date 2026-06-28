@@ -77,6 +77,114 @@ public:
     ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
         "/highlighting/badges",
     };
+
+    BoolSetting enableSelfHighlight = {
+        "/highlighting/selfHighlight/nameIsHighlightKeyword",
+        true,
+    };
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions",
+        true,
+    };
+    BoolSetting enableSelfHighlightSound = {
+        "/highlighting/selfHighlight/enableSound",
+        true,
+    };
+    BoolSetting enableSelfHighlightTaskbar = {
+        "/highlighting/selfHighlight/enableTaskbarFlashing",
+        true,
+    };
+    QStringSetting selfHighlightSoundUrl = {
+        "/highlighting/selfHighlightSoundUrl",
+        "",
+    };
+    QStringSetting selfHighlightColor = {
+        "/highlighting/selfHighlightColor",
+        "",
+    };
+
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled",
+        false,
+    };
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions",
+        false,
+    };
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color",
+        "",
+    };
+
+    BoolSetting enableWhisperHighlight = {
+        "/highlighting/whisperHighlight/whispersHighlighted",
+        true,
+    };
+    BoolSetting enableWhisperHighlightSound = {
+        "/highlighting/whisperHighlight/enableSound",
+        false,
+    };
+    BoolSetting enableWhisperHighlightTaskbar = {
+        "/highlighting/whisperHighlight/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting whisperHighlightSoundUrl = {
+        "/highlighting/whisperHighlightSoundUrl",
+        "",
+    };
+    QStringSetting whisperHighlightColor = {
+        "/highlighting/whisperHighlightColor",
+        "",
+    };
+
+    BoolSetting enableRedeemedHighlight = {
+        "/highlighting/redeemedHighlight/highlighted",
+        true,
+    };
+    QStringSetting redeemedHighlightColor = {
+        "/highlighting/redeemedHighlightColor",
+        "",
+    };
+
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted",
+        true,
+    };
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor",
+        "",
+    };
+
+    BoolSetting enableElevatedMessageHighlight = {
+        "/highlighting/elevatedMessageHighlight/highlighted",
+        true,
+    };
+    QStringSetting elevatedMessageHighlightColor = {
+        "/highlighting/elevatedMessageHighlight/color",
+        "",
+    };
+
+    BoolSetting enableSubHighlight = {
+        "/highlighting/subHighlight/subsHighlighted",
+        true,
+    };
+    BoolSetting enableSubHighlightSound = {
+        "/highlighting/subHighlight/enableSound",
+        false,
+    };
+    BoolSetting enableSubHighlightTaskbar = {
+        "/highlighting/subHighlight/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting subHighlightSoundUrl = {
+        "/highlighting/subHighlightSoundUrl",
+        "",
+    };
+
+    QStringSetting subHighlightColor = {
+        "/highlighting/subHighlightColor",
+        "",
+    };
 };
 
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
@@ -121,34 +229,35 @@ void Settings::migrateHighlights(bool isTest)
     {
         YourUsernameHighlight h;
 
-        if (const auto &s = this->enableSelfHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableSelfHighlight; s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
-        if (const auto &s = this->showSelfHighlightInMentions;
+        if (const auto &s = this->p->showSelfHighlightInMentions;
             s.hasValueBeenSet())
         {
             h.outcome.showInMentions = s.getValue();
         }
 
-        if (const auto &s = this->enableSelfHighlightTaskbar;
+        if (const auto &s = this->p->enableSelfHighlightTaskbar;
             s.hasValueBeenSet())
         {
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->enableSelfHighlightSound; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableSelfHighlightSound;
+            s.hasValueBeenSet())
         {
             h.outcome.playSound = s.getValue();
         }
 
-        if (const auto &s = this->selfHighlightSoundUrl; s.hasValueBeenSet())
+        if (const auto &s = this->p->selfHighlightSoundUrl; s.hasValueBeenSet())
         {
             h.outcome.customSoundURL = s.getValue();
         }
 
-        if (const auto &s = this->selfHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->selfHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -159,31 +268,33 @@ void Settings::migrateHighlights(bool isTest)
     {
         WhispersHighlight h;
 
-        if (const auto &s = this->enableWhisperHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableWhisperHighlight;
+            s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
         // Whisper highlights do not support "show in mentions" - no setting to migrate
 
-        if (const auto &s = this->enableWhisperHighlightTaskbar;
+        if (const auto &s = this->p->enableWhisperHighlightTaskbar;
             s.hasValueBeenSet())
         {
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->enableWhisperHighlightSound;
+        if (const auto &s = this->p->enableWhisperHighlightSound;
             s.hasValueBeenSet())
         {
             h.outcome.playSound = s.getValue();
         }
 
-        if (const auto &s = this->whisperHighlightSoundUrl; s.hasValueBeenSet())
+        if (const auto &s = this->p->whisperHighlightSoundUrl;
+            s.hasValueBeenSet())
         {
             h.outcome.customSoundURL = s.getValue();
         }
 
-        if (const auto &s = this->whisperHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->whisperHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -194,30 +305,31 @@ void Settings::migrateHighlights(bool isTest)
     {
         SubscriptionsHighlight h;
 
-        if (const auto &s = this->enableSubHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableSubHighlight; s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
         // Sub highlights do not support "show in mentions" - no setting to migrate
 
-        if (const auto &s = this->enableSubHighlightTaskbar;
+        if (const auto &s = this->p->enableSubHighlightTaskbar;
             s.hasValueBeenSet())
         {
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->enableSubHighlightSound; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableSubHighlightSound;
+            s.hasValueBeenSet())
         {
             h.outcome.playSound = s.getValue();
         }
 
-        if (const auto &s = this->subHighlightSoundUrl; s.hasValueBeenSet())
+        if (const auto &s = this->p->subHighlightSoundUrl; s.hasValueBeenSet())
         {
             h.outcome.customSoundURL = s.getValue();
         }
 
-        if (const auto &s = this->subHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->subHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -228,7 +340,8 @@ void Settings::migrateHighlights(bool isTest)
     {
         ChannelPointsHighlight h;
 
-        if (const auto &s = this->enableRedeemedHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableRedeemedHighlight;
+            s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
@@ -237,7 +350,8 @@ void Settings::migrateHighlights(bool isTest)
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        if (const auto &s = this->redeemedHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->redeemedHighlightColor;
+            s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -248,7 +362,7 @@ void Settings::migrateHighlights(bool isTest)
     {
         FirstMessageHighlight h;
 
-        if (const auto &s = this->enableFirstMessageHighlight;
+        if (const auto &s = this->p->enableFirstMessageHighlight;
             s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
@@ -258,7 +372,7 @@ void Settings::migrateHighlights(bool isTest)
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        if (const auto &s = this->firstMessageHighlightColor;
+        if (const auto &s = this->p->firstMessageHighlightColor;
             s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
@@ -270,7 +384,7 @@ void Settings::migrateHighlights(bool isTest)
     {
         HypeChatHighlight h;
 
-        if (const auto &s = this->enableElevatedMessageHighlight;
+        if (const auto &s = this->p->enableElevatedMessageHighlight;
             s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
@@ -280,7 +394,7 @@ void Settings::migrateHighlights(bool isTest)
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        if (const auto &s = this->elevatedMessageHighlightColor;
+        if (const auto &s = this->p->elevatedMessageHighlightColor;
             s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
@@ -393,13 +507,13 @@ void Settings::migrateHighlights(bool isTest)
     {
         YourMessagesHighlight h;
 
-        if (const auto &s = this->enableSelfMessageHighlight;
+        if (const auto &s = this->p->enableSelfMessageHighlight;
             s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
-        if (const auto &s = this->showSelfMessageHighlightInMentions;
+        if (const auto &s = this->p->showSelfMessageHighlightInMentions;
             s.hasValueBeenSet())
         {
             h.outcome.showInMentions = s.getValue();
@@ -408,7 +522,7 @@ void Settings::migrateHighlights(bool isTest)
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        if (const auto &s = this->selfMessageHighlightColor;
+        if (const auto &s = this->p->selfMessageHighlightColor;
             s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
