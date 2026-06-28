@@ -206,9 +206,9 @@ void Helix::fetchStreams(
 
             successCallback(streams);
         })
-        .onError([this, failureCallback](auto result) {
+        .onError([failureCallback](auto result) {
             // TODO: make better xd
-            if (!this->oauthToken.isEmpty() &&
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
                 result.status().value_or(0) == 401)
             {
                 getApp()->getAccounts()->twitch.loginExpired.invoke();
@@ -486,8 +486,8 @@ void Helix::fetchChannels(
 
             successCallback(channels);
         })
-        .onError([this, failureCallback](auto result) {
-            if (!this->oauthToken.isEmpty() &&
+        .onError([failureCallback](auto result) {
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
                 result.status().value_or(0) == 401)
             {
                 getApp()->getAccounts()->twitch.loginExpired.invoke();

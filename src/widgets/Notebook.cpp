@@ -1511,17 +1511,13 @@ void SplitNotebook::addCustomButtons()
     auto *userBtn = this->addCustomButton<SvgButton>(normalAccountSrc);
     userBtn->setPadding({0, 0});
 
-    // Shared state: whether login is currently expired.
-    // While expired the button is always shown regardless of the user's setting.
+    // Shared state: whether login is currently expired. Used to restore the
+    // normal icon (and the user's visibility setting) once they re-authenticate.
     auto loginExpiredState = std::make_shared<bool>(false);
 
     userBtn->setVisible(!getSettings()->hideUserButton.getValue());
     getSettings()->hideUserButton.connect(
-        [this, userBtn, loginExpiredState](bool hide) {
-            if (*loginExpiredState)
-            {
-                return;
-            }
+        [this, userBtn](bool hide) {
             auto oldVisibility = userBtn->isVisible();
             auto newVisibility = !hide;
             userBtn->setVisible(newVisibility);
@@ -1544,7 +1540,8 @@ void SplitNotebook::addCustomButtons()
             }
         });
 
-    getApp()->getAccounts()->twitch.currentUserChanged.connect(
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged,
         [this, userBtn, normalAccountSrc, loginExpiredState] {
             if (!*loginExpiredState)
             {
