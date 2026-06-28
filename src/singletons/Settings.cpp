@@ -210,6 +210,40 @@ public:
         "/highlighting/threadHighlightColor",
         "",
     };
+
+    BoolSetting enableAutomodHighlight = {
+        "/highlighting/automod/enabled",
+        true,
+    };
+    BoolSetting showAutomodInMentions = {
+        "/highlighting/automod/showInMentions",
+        false,
+    };
+    BoolSetting enableAutomodHighlightSound = {
+        "/highlighting/automod/enableSound",
+        false,
+    };
+    BoolSetting enableAutomodHighlightTaskbar = {
+        "/highlighting/automod/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting automodHighlightSoundUrl = {
+        "/highlighting/automod/soundUrl",
+        "",
+    };
+    QStringSetting automodHighlightColor = {
+        "/highlighting/automod/color",
+        "",
+    };
+
+    BoolSetting enableWatchStreakHighlight = {
+        "/highlighting/watchStreak/enabled",
+        true,
+    };
+    QStringSetting watchStreakHighlightColor = {
+        "/highlighting/watchStreak/color",
+        "",
+    };
 };
 
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
@@ -473,34 +507,36 @@ void Settings::migrateHighlights(bool isTest)
         // TODO: This should _actually_ be migrated _AFTER_ message highlights.
         AutomodCaughtHighlight h;
 
-        if (const auto &s = this->enableAutomodHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableAutomodHighlight;
+            s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
-        if (const auto &s = this->showAutomodInMentions; s.hasValueBeenSet())
+        if (const auto &s = this->p->showAutomodInMentions; s.hasValueBeenSet())
         {
             h.outcome.showInMentions = s.getValue();
         }
 
-        if (const auto &s = this->enableAutomodHighlightTaskbar;
+        if (const auto &s = this->p->enableAutomodHighlightTaskbar;
             s.hasValueBeenSet())
         {
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->enableAutomodHighlightSound;
+        if (const auto &s = this->p->enableAutomodHighlightSound;
             s.hasValueBeenSet())
         {
             h.outcome.playSound = s.getValue();
         }
 
-        if (const auto &s = this->automodHighlightSoundUrl; s.hasValueBeenSet())
+        if (const auto &s = this->p->automodHighlightSoundUrl;
+            s.hasValueBeenSet())
         {
             h.outcome.customSoundURL = s.getValue();
         }
 
-        if (const auto &s = this->automodHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -511,7 +547,7 @@ void Settings::migrateHighlights(bool isTest)
     {
         WatchStreakHighlight h;
 
-        if (const auto &s = this->enableWatchStreakHighlight;
+        if (const auto &s = this->p->enableWatchStreakHighlight;
             s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
@@ -521,7 +557,7 @@ void Settings::migrateHighlights(bool isTest)
         // This does not support "flash taskbar" - no setting to migrate
         // This does not support "play sound" - no setting to migrate
 
-        if (const auto &s = this->watchStreakHighlightColor;
+        if (const auto &s = this->p->watchStreakHighlightColor;
             s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());

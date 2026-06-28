@@ -511,11 +511,6 @@ public:
     };
 
     /// Highlighting
-    BoolSetting enableWatchStreakHighlight = {
-        "/highlighting/watchStreak/enabled", true};
-    QStringSetting watchStreakHighlightColor = {
-        "/highlighting/watchStreak/color", ""};
-
     BoolSetting enableAnnouncementHighlight = {
         "/highlighting/announcement/enabled",
         true,
@@ -528,28 +523,6 @@ public:
         "/highlighting/announcement/coloredAnnouncement/enabled",
         true,
     };
-
-    BoolSetting enableAutomodHighlight = {
-        "/highlighting/automod/enabled",
-        true,
-    };
-    BoolSetting showAutomodInMentions = {
-        "/highlighting/automod/showInMentions",
-        false,
-    };
-    BoolSetting enableAutomodHighlightSound = {
-        "/highlighting/automod/enableSound",
-        false,
-    };
-    BoolSetting enableAutomodHighlightTaskbar = {
-        "/highlighting/automod/enableTaskbarFlashing",
-        false,
-    };
-    QStringSetting automodHighlightSoundUrl = {
-        "/highlighting/automod/soundUrl",
-        "",
-    };
-    QStringSetting automodHighlightColor = {"/highlighting/automod/color", ""};
 
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
