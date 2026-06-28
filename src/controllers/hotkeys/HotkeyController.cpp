@@ -287,7 +287,7 @@ void HotkeyController::loadHotkeys()
             continue;
         }
         this->hotkeys_.append(std::make_shared<Hotkey>(
-            *category, QKeySequence(keySequence), action, arguments,
+            *category, QKeySequence(keySequence), nullptr, action, arguments,
             QString::fromStdString(key)));
     }
 
@@ -445,18 +445,12 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         {
             this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
                                 QKeySequence("Return"), "sendMessage",
-                                std::vector<QString>(), "send message");
+                                std::vector<QString>(), "send message",
+                                new QKeySequence("Shift+Return"));
             this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
                                 QKeySequence("Ctrl+Return"), "sendMessage",
-                                {"keepInput"}, "send message and keep text");
-
-            this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
-                                QKeySequence("Shift+Return"), "sendMessage",
-                                std::vector<QString>(), "send message");
-            this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
-                                QKeySequence("Ctrl+Shift+Return"),
-                                "sendMessage", {"keepInput"},
-                                "send message and keep text");
+                                {"keepInput"}, "send message and keep text",
+                                new QKeySequence("Ctrl+Shift+Return"));
         }
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
@@ -586,7 +580,8 @@ void HotkeyController::clearRemovedDefaults()
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
                                      HotkeyCategory category,
                                      QKeySequence keySequence, QString action,
-                                     std::vector<QString> args, QString name)
+                                     std::vector<QString> args, QString name,
+                                     QKeySequence *keySequenceAlt)
 {
     qCDebug(chatterinoHotkeys) << "Try add default" << name;
     if (addedHotkeys.count(name) != 0)
@@ -595,8 +590,8 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
         return;  // hotkey was added before
     }
     qCDebug(chatterinoHotkeys) << "Inserted";
-    this->hotkeys_.append(
-        std::make_shared<Hotkey>(category, keySequence, action, args, name));
+    this->hotkeys_.append(std::make_shared<Hotkey>(
+        category, keySequence, keySequenceAlt, action, args, name));
     addedHotkeys.insert(name);
 }
 
