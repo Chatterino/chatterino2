@@ -288,6 +288,8 @@ private:
     void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
     void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool causedByShow);
+    void updateScrollbarLastMessageMarker(
+        const std::vector<MessageLayoutPtr> &messages);
 
     void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
