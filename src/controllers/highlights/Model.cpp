@@ -17,6 +17,9 @@ void updateRow(const AllHighlights &highlight,
 {
     using Column = Model::Column;
 
+    QIcon enabledIcon{":/buttons/checkmark-square.svg"};
+    QIcon disabledIcon{":/buttons/dismiss-square.svg"};
+
     auto soundIcon = [highlight] {
         if (willPlayCustomSound(highlight))
         {
@@ -42,6 +45,7 @@ void updateRow(const AllHighlights &highlight,
         // Undim name
         const auto &b = palette.text();
         row[Column::Name]->setData(b, Qt::ForegroundRole);
+        row[Column::Enabled]->setData(enabledIcon, Qt::DecorationRole);
     }
     else
     {
@@ -50,6 +54,7 @@ void updateRow(const AllHighlights &highlight,
         // Dim name
         const auto &b = palette.placeholderText();
         row[Column::Name]->setData(b, Qt::ForegroundRole);
+        row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
     }
 
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
