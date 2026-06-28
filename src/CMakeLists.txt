@@ -201,7 +201,6 @@ set(SOURCE_FILES
 
         controllers/highlights/ConfigureDialog.cpp
         controllers/highlights/ConfigureDialog.hpp
-        controllers/highlights/HighlightBadge.cpp
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
@@ -210,7 +209,6 @@ set(SOURCE_FILES
         controllers/highlights/HighlightController.hpp
         controllers/highlights/Model.cpp
         controllers/highlights/Model.hpp
-        controllers/highlights/HighlightPhrase.cpp
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp

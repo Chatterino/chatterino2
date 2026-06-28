@@ -56,6 +56,29 @@ const auto &LOG = chatterinoSettings;
 
 }  // namespace
 
+class SettingsPrivate
+{
+public:
+    ChatterinoSetting<std::vector<highlights::AllHighlights>>
+        sharedHighlightsSetting = {
+            "/highlighting/highlights2",
+    };
+
+    /// Old version 0 message highlights
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
+        {
+            "/highlighting/highlights",
+    };
+    /// Old version 0 user highlights
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedUsersSetting = {
+        "/highlighting/users",
+    };
+    /// Old version 0 badge highlights
+    ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
+        "/highlighting/badges",
+    };
+};
+
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
 
 void _actuallyRegisterSetting(
@@ -93,7 +116,7 @@ void Settings::migrateHighlights(bool isTest)
     using namespace chatterino::highlights;
 
     // TODO: This is not necessary in release - remove this
-    this->sharedHighlightsSetting.setValue({});
+    this->p->sharedHighlightsSetting.setValue({});
 
     {
         YourUsernameHighlight h;
@@ -130,7 +153,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -165,7 +188,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -199,7 +222,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -219,7 +242,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -241,7 +264,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -263,7 +286,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -303,7 +326,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -342,7 +365,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -364,7 +387,7 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -391,14 +414,14 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.setBackgroundColor(s.getValue());
         }
 
-        this->sharedHighlightsSetting.push_back(h);
+        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     // this migration ID is used for tests to provide a stable "uuid" replacement for created user defined highlights,
     // and also to provide some output to the user in their logs for how many highlights were migrated
     int migrationID = 0;
 
-    for (const auto &from : this->highlightedMessagesSetting.getValue())
+    for (const auto &from : this->p->highlightedMessagesSetting.getValue())
     {
         auto generatedId = [&] {
             migrationID += 1;
@@ -414,25 +437,25 @@ void Settings::migrateHighlights(bool isTest)
 
         MessageHighlight to{generatedId};
 
-        to.setPattern(from.getPattern());
-        to.outcome.showInMentions = from.showInMentions();
-        to.outcome.alert = from.hasAlert();
-        to.setRegex(from.isRegex());
-        to.setCaseSensitive(from.isCaseSensitive());
-        to.outcome.playSound = from.hasSound();
-        if (from.hasCustomSound())
+        to.setPattern(from.pattern);
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        to.setRegex(from.isRegex);
+        to.setCaseSensitive(from.isCaseSensitive);
+        to.outcome.playSound = from.hasSound;
+        if (!from.soundUrl.isEmpty())
         {
-            to.outcome.customSoundURL = from.getSoundUrl();
+            to.outcome.customSoundURL = from.soundUrl;
         }
-        if (auto fromColor = from.getColor(); fromColor)
+        if (auto fromColor = from.color; fromColor.isValid())
         {
-            to.outcome.setBackgroundColor(*fromColor);
+            to.outcome.setBackgroundColor(fromColor);
         }
 
-        this->sharedHighlightsSetting.push_back(to);
+        this->p->sharedHighlightsSetting.push_back(to);
     }
 
-    for (const auto &from : this->highlightedUsersSetting.getValue())
+    for (const auto &from : this->p->highlightedUsersSetting.getValue())
     {
         auto generatedId = [&] {
             migrationID += 1;
@@ -448,23 +471,23 @@ void Settings::migrateHighlights(bool isTest)
 
         UserHighlight to{generatedId};
 
-        to.setUsername(from.getPattern());
-        to.outcome.showInMentions = from.showInMentions();
-        to.outcome.alert = from.hasAlert();
-        to.outcome.playSound = from.hasSound();
-        if (from.hasCustomSound())
+        to.setUsername(from.pattern);
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        to.outcome.playSound = from.hasSound;
+        if (!from.soundUrl.isEmpty())
         {
-            to.outcome.customSoundURL = from.getSoundUrl();
+            to.outcome.customSoundURL = from.soundUrl;
         }
-        if (auto fromColor = from.getColor(); fromColor)
+        if (auto fromColor = from.color; fromColor.isValid())
         {
-            to.outcome.setBackgroundColor(*fromColor);
+            to.outcome.setBackgroundColor(fromColor);
         }
 
-        this->sharedHighlightsSetting.push_back(to);
+        this->p->sharedHighlightsSetting.push_back(to);
     }
 
-    for (const auto &from : this->highlightedBadgesSetting.getValue())
+    for (const auto &from : this->p->highlightedBadgesSetting.getValue())
     {
         auto generatedId = [&] {
             migrationID += 1;
@@ -480,40 +503,22 @@ void Settings::migrateHighlights(bool isTest)
 
         BadgeHighlight to{generatedId};
 
-        to.setBadgeName(from.badgeName());
-        to.setDisplayName(from.displayName());
-        to.outcome.showInMentions = from.showInMentions();
-        to.outcome.alert = from.hasAlert();
-        to.outcome.playSound = from.hasSound();
-        if (from.hasCustomSound())
+        to.setBadgeName(from.badgeName);
+        to.setDisplayName(from.displayName);
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        to.outcome.playSound = from.hasSound;
+        to.outcome.customSoundURL = from.soundUrl;
+        if (auto fromColor = from.color; fromColor.isValid())
         {
-            to.outcome.customSoundURL = from.getSoundUrl();
-        }
-        if (auto fromColor = from.getColor(); fromColor)
-        {
-            to.outcome.setBackgroundColor(*fromColor);
+            to.outcome.setBackgroundColor(fromColor);
         }
 
-        this->sharedHighlightsSetting.push_back(to);
+        this->p->sharedHighlightsSetting.push_back(to);
     }
 
-    this->sharedHighlightsSetting.push_back(
+    this->p->sharedHighlightsSetting.push_back(
         UncategorizedNotificationHighlight{});
-}
-
-bool Settings::isHighlightedUser(const QString &username)
-{
-    auto items = this->highlightedUsers.readOnly();
-
-    for (const auto &highlightedUser : *items)
-    {
-        if (highlightedUser.isMatch(username))
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool Settings::isBlacklistedUser(const QString &username)
@@ -601,6 +606,7 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
                    const SettingsArgs &settingsArgs)
     : prevInstance_(Settings::instance_)
     , disableSaving(args.dontSaveSettings)
+    , p(std::make_unique<SettingsPrivate>())
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
@@ -661,14 +667,8 @@ Settings::Settings(const Args &args, const QString &settingsDirectory,
         this->migrate(settingsArgs.isTest);
     }
 
-    initializeSignalVector(this->signalHolder, this->sharedHighlightsSetting,
+    initializeSignalVector(this->signalHolder, this->p->sharedHighlightsSetting,
                            this->sharedHighlights);
-    initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
-                           this->highlightedMessages);
-    initializeSignalVector(this->signalHolder, this->highlightedUsersSetting,
-                           this->highlightedUsers);
-    initializeSignalVector(this->signalHolder, this->highlightedBadgesSetting,
-                           this->highlightedBadges);
     initializeSignalVector(this->signalHolder, this->blacklistedUsersSetting,
                            this->blacklistedUsers);
     initializeSignalVector(this->signalHolder, this->ignoredMessagesSetting,

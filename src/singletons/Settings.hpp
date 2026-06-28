@@ -13,10 +13,8 @@
 #include "common/ThumbnailPreviewMode.hpp"
 #include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
-#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AllForward.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -34,9 +32,9 @@
 #include <pajlada/settings/settingmanager.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+#include <memory>
 #include <optional>
 #include <string_view>
-#include <variant>
 #include <vector>
 
 using TimeoutButton = std::pair<QString, int>;
@@ -126,6 +124,8 @@ struct SettingsArgs {
     bool isTest = false;
     bool runMigrations = true;
 };
+
+class SettingsPrivate;
 
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
@@ -851,17 +851,7 @@ public:
 #endif
 
 private:
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
-        {"/highlighting/highlights"};
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedUsersSetting = {
-        "/highlighting/users"};
-    ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
-        "/highlighting/badges"};
     // TODO: is this the correct name? should i name it differently?
-    ChatterinoSetting<std::vector<highlights::AllHighlights>>
-        sharedHighlightsSetting = {
-            "/highlighting/highlights2",
-    };
     ChatterinoSetting<std::vector<HighlightBlacklistUser>>
         blacklistedUsersSetting = {"/highlighting/blacklist"};
     ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
@@ -891,9 +881,6 @@ private:
     void migrateHighlights(bool isTest);
 
 public:
-    SignalVector<HighlightPhrase> highlightedMessages;
-    SignalVector<HighlightPhrase> highlightedUsers;
-    SignalVector<HighlightBadge> highlightedBadges;
     SignalVector<highlights::AllHighlights> sharedHighlights;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
@@ -902,7 +889,6 @@ public:
     SignalVector<ModerationAction> moderationActions;
     SignalVector<ChannelLog> loggedChannels;
 
-    bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
@@ -916,6 +902,8 @@ private:
     std::unique_ptr<rapidjson::Document> snapshot_;
 
     pajlada::Signals::SignalHolder signalHolder;
+
+    std::unique_ptr<SettingsPrivate> p;
 };
 
 Settings *getSettings();

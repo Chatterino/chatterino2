@@ -34,26 +34,12 @@ QSet<QColor> ColorProvider::recentColors() const
 {
     QSet<QColor> retVal;
 
-    /*
-     * Currently, only colors used in highlight phrases are considered. This
-     * may change at any point in the future.
-     */
-    for (const auto &phrase : getSettings()->highlightedMessages)
-    {
-        retVal.insert(*phrase.getColor());
-    }
-
-    for (const auto &userHl : getSettings()->highlightedUsers)
-    {
-        retVal.insert(*userHl.getColor());
-    }
+    // TODO: Grab user's custom highlight colors and add them here
 
     // Insert preset highlight colors
     retVal.insert(*this->color(ColorType::SelfHighlight));
     retVal.insert(*this->color(ColorType::Whisper));
     retVal.insert(*this->color(ColorType::AnnouncementHighlight));
-
-    // TODO: I';m removing some stuff here - I should fix that
 
     return retVal;
 }
