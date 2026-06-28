@@ -11,7 +11,7 @@ It's currently configurable in the dialog, and doesn't gray things out but chang
 > Message matches regex "dfkjghdfkjghkjhfgdfdg"
 > Message matches regex "dfkjghdfkjghkjhfgdfdg" in #forsen
 > Message matches regex "dfkjghdfkjghkjhfgdfdg" by @pajlada in #forsen
-> 
+>
 > Message matches regex "\byour username\b"
 
 Highlights kept their old "simplicity", grouping them into message/user/badge highlights. To allow for more customizable highlights, we allow Filter highlights which use the exact same logic as filters.
@@ -25,7 +25,6 @@ I believe this should be possible - I've left places somewhat open for more opti
 > Can we utilize filter (or filter-like patterns) for replacements i.e. for your username?
 
 not quite but we're using filters for advanced shit
-
 
 > Chatty's highlight edit dialog has a really cool test text feature, especially handy for regex testing.
 
@@ -43,10 +42,9 @@ Issues to keep in mind:
 
 - https://github.com/Chatterino/chatterino2/discussions/6686
 
-
 ```json
 {
-    "subHighlightColor": "#FF00FF"
+  "subHighlightColor": "#FF00FF"
 }
 ```
 
@@ -54,14 +52,15 @@ Issues to keep in mind:
 
 ```json
 {
-    "highlights": {
-        "subhighlight": {
-            "color": "#FF00FF"
-        }
+  "highlights": {
+    "subhighlight": {
+      "color": "#FF00FF"
     }
+  }
 }
 ```
 
 BREAKING(?) changes!!:
- - FirstMessage now also has the Highlighted flag
- - Subscription messages now also have the Highlighted flag
+
+- FirstMessage now also has the Highlighted flag
+- Subscription messages now also have the Highlighted flag
