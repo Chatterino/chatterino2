@@ -7,6 +7,8 @@
 #include "util/StandardItemHelper.hpp"
 #include "util/Variant.hpp"
 
+#include <QPalette>
+
 namespace chatterino::highlights {
 
 namespace {
@@ -30,13 +32,25 @@ void updateRow(const AllHighlights &highlight,
         return QIcon{":/buttons/speaker-mute.svg"};
     }();
 
-    if (isEnabled(highlight))
+    auto enabled = isEnabled(highlight);
+
+    QPalette palette;
+
+    if (enabled)
     {
         setStringItem(row[Column::Enabled], "Enabled", false);
+
+        // Undim name
+        const auto &b = palette.text();
+        row[Column::Name]->setData(b, Qt::ForegroundRole);
     }
     else
     {
         setStringItem(row[Column::Enabled], "Disabled", false);
+
+        // Dim name
+        const auto &b = palette.placeholderText();
+        row[Column::Name]->setData(b, Qt::ForegroundRole);
     }
 
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
@@ -58,7 +72,7 @@ void updateRow(const AllHighlights &highlight,
                highlight);
 
     setStringItem(row[Column::Name], getName(highlight), false);
-    setStringItem(row[Column::Sound], "a");  // TODO: include full URL?
+    setStringItem(row[Column::Sound], "");  // TODO: include full URL?
     row[Column::Sound]->setData(soundIcon, Qt::DecorationRole);
 }
 
