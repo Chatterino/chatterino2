@@ -21,6 +21,11 @@ HighlightCheck BadgeHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
 
+    if (!this->isValid())
+    {
+        return {};
+    }
+
     return {
         [highlight = *this](
             const auto &args, const auto &twitchBadges, const auto &senderName,

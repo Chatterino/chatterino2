@@ -53,4 +53,10 @@ QIcon getIcon(const AllHighlights &h);
 /// Get the background color defined for the highlight, or its default value
 std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h);
 
+/// Get the error of the highlight.
+/// This could be an invalid filter or regular expression.
+/// If no error, the returned QString will be empty.
+/// If there's an error, the returned QString will return a message the user can read.
+QString getError(const AllHighlights &h);
+
 }  // namespace chatterino::highlights

@@ -54,8 +54,6 @@ HighlightCheck MessageHighlight::buildCheck() const
         return {};
     }
 
-    qCDebug(LOG) << "Rebuilding check" << this;
-
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,

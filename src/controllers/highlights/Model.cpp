@@ -38,23 +38,47 @@ void updateRow(const AllHighlights &highlight,
 
     QPalette palette;
 
-    if (enabled)
+    if (auto error = getError(highlight); !error.isEmpty())
     {
-        setStringItem(row[Column::Enabled], "Enabled", false);
+        // Highlight has an error
+        row[Column::Name]->setData(error, Qt::ToolTipRole);
+        row[Column::Enabled]->setData(error, Qt::ToolTipRole);
 
-        // Undim name
-        const auto &b = palette.text();
-        row[Column::Name]->setData(b, Qt::ForegroundRole);
-        row[Column::Enabled]->setData(enabledIcon, Qt::DecorationRole);
+        QFont f;
+        f.setStrikeOut(true);
+        row[Column::Name]->setData(f, Qt::FontRole);
+
+        row[Column::Enabled]->setData("Error", Qt::EditRole);
+        row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
     }
     else
     {
-        setStringItem(row[Column::Enabled], "Disabled", false);
+        row[Column::Name]->setData(QString{}, Qt::ToolTipRole);
+        row[Column::Enabled]->setData(QString{}, Qt::ToolTipRole);
 
-        // Dim name
-        const auto &b = palette.placeholderText();
-        row[Column::Name]->setData(b, Qt::ForegroundRole);
-        row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
+        QFont f;
+        row[Column::Name]->setData(f, Qt::FontRole);
+
+        if (enabled)
+        {
+            // Highlight is enabled
+            row[Column::Enabled]->setData("Enabled", Qt::EditRole);
+
+            // Undim name
+            const auto &b = palette.text();
+            row[Column::Name]->setData(b, Qt::ForegroundRole);
+            row[Column::Enabled]->setData(enabledIcon, Qt::DecorationRole);
+        }
+        else
+        {
+            // Highlight is disabled
+            row[Column::Enabled]->setData("Disabled", Qt::EditRole);
+
+            // Dim name
+            const auto &b = palette.placeholderText();
+            row[Column::Name]->setData(b, Qt::ForegroundRole);
+            row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
+        }
     }
 
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);

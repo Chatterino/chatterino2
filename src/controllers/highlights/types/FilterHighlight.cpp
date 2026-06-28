@@ -22,6 +22,11 @@ HighlightCheck FilterHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
 
+    if (!this->filter)
+    {
+        return {};
+    }
+
     return {
         [highlight = *this](
             const auto &args, const auto &badges, const auto &senderName,
@@ -56,6 +61,11 @@ HighlightCheck FilterHighlight::buildCheck() const
     };
 }
 
+QString FilterHighlight::getError() const
+{
+    return this->error;
+}
+
 void FilterHighlight::rebuildFilter()
 {
     auto res = filters::Filter::fromString(this->filterText);
@@ -63,11 +73,12 @@ void FilterHighlight::rebuildFilter()
     {
         this->filter = std::make_shared<filters::Filter>(
             std::move(std::get<filters::Filter>(res)));
+        this->error.clear();
     }
     else
     {
+        this->error = std::move(std::get<filters::FilterError>(res)).message;
         this->filter.reset();
-        // TODO: Forward error
     }
 }
 

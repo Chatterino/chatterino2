@@ -198,13 +198,17 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
     std::visit(
         variant::Overloaded{
             [formLayout](FilterHighlight &h) {
+                auto *errorLabel = new QLabel(h.getError());
                 auto *w = new QLineEdit();
                 w->setText(h.filterText);
                 QObject::connect(w, &QLineEdit::textChanged,
-                                 [&](const auto &newText) {
+                                 [errorLabel, &h](const auto &newText) {
                                      h.setFilterText(newText);
+                                     // TODO: Make the error display prettier?
+                                     errorLabel->setText(h.getError());
                                  });
                 formLayout->addRow("Filter", w);
+                formLayout->addRow("", errorLabel);
             },
             [formLayout](BadgeHighlight &h) {
                 auto *w = new QComboBox();

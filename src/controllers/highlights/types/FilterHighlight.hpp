@@ -73,6 +73,8 @@ struct FilterHighlight {
 
     HighlightCheck buildCheck() const;
 
+    QString getError() const;
+
 protected:
     template <typename Type, typename RJValue>
     friend struct pajlada::Serialize;
@@ -85,6 +87,8 @@ protected:
     /// Unique identifier for this highlight.
     /// This should be a random UUID
     QString id;
+
+    QString error;
 
     friend QDebug operator<<(QDebug dbg, const FilterHighlight &v);
 

@@ -37,6 +37,11 @@ concept HasDynamicIcon = requires(T a) {
     { a.getType() } -> std::same_as<QIcon>;
 };
 
+template <typename T>
+concept SupportsErrors = requires(T a) {
+    { a.getError() } -> std::same_as<QString>;
+};
+
 bool matchesType(const rapidjson::Value &obj, QStringView expectedType)
 {
     assert(obj.IsObject());
@@ -217,6 +222,19 @@ std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h)
     assert(c);
 
     return c;
+}
+
+QString getError(const AllHighlights &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const SupportsErrors auto &h) {
+                              return h.getError();
+                          },
+                          [](const auto & /*h*/) {
+                              return QString{};
+                          },
+                      },
+                      h);
 }
 
 }  // namespace chatterino::highlights

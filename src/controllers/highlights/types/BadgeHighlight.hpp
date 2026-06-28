@@ -35,7 +35,6 @@ struct BadgeHighlight {
 
     QString getDefaultName() const
     {
-        // TODO: This should have some cool icon too
         return this->displayName;
     }
 
@@ -65,7 +64,7 @@ struct BadgeHighlight {
         this->rebuildBadgeCheck();
     }
 
-    /// The display name/pretty name of this highlight.
+    /// The user-specified display name of this highlight.
     /// If empty, we will try to auto-generate something that makes sense (e.g. "Text contains 'foo'")
     QString name;
 
