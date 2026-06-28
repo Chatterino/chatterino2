@@ -198,6 +198,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
     std::visit(
         variant::Overloaded{
             [formLayout](FilterHighlight &h) {
+                // TODO: We should add some link to the filter help page
                 auto *errorLabel = new QLabel(h.getError());
                 auto *w = new QLineEdit();
                 w->setText(h.filterText);
