@@ -524,8 +524,6 @@ public:
         true,
     };
 
-    QStringSetting highlightColor = {"/highlighting/color", ""};
-
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
     BoolSetting highlightMentions = {"/highlighting/mentions", true};
