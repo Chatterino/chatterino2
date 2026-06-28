@@ -107,9 +107,9 @@ void ColorProvider::initTypeColorMap()
     //           getSettings()->elevatedMessageHighlightColor,
     //           HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::ThreadMessageHighlight,
-              getSettings()->threadHighlightColor,
-              HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
+    // initColor(ColorType::ThreadMessageHighlight,
+    //           getSettings()->threadHighlightColor,
+    //           HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
 
     initColor(ColorType::AnnouncementHighlight,
               getSettings()->announcementHighlightColor,

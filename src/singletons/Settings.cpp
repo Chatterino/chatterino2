@@ -185,6 +185,31 @@ public:
         "/highlighting/subHighlightColor",
         "",
     };
+
+    BoolSetting enableThreadHighlight = {
+        "/highlighting/thread/nameIsHighlightKeyword",
+        true,
+    };
+    BoolSetting showThreadHighlightInMentions = {
+        "/highlighting/thread/showSelfHighlightInMentions",
+        true,
+    };
+    BoolSetting enableThreadHighlightSound = {
+        "/highlighting/thread/enableSound",
+        true,
+    };
+    BoolSetting enableThreadHighlightTaskbar = {
+        "/highlighting/thread/enableTaskbarFlashing",
+        true,
+    };
+    QStringSetting threadHighlightSoundUrl = {
+        "/highlighting/threadHighlightSoundUrl",
+        "",
+    };
+    QStringSetting threadHighlightColor = {
+        "/highlighting/threadHighlightColor",
+        "",
+    };
 };
 
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
@@ -407,35 +432,36 @@ void Settings::migrateHighlights(bool isTest)
         // TODO: This order is probably ALSO wrong.
         SubscribedThreadHighlight h;
 
-        if (const auto &s = this->enableThreadHighlight; s.hasValueBeenSet())
+        if (const auto &s = this->p->enableThreadHighlight; s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
-        if (const auto &s = this->showThreadHighlightInMentions;
+        if (const auto &s = this->p->showThreadHighlightInMentions;
             s.hasValueBeenSet())
         {
             h.outcome.showInMentions = s.getValue();
         }
 
-        if (const auto &s = this->enableThreadHighlightTaskbar;
+        if (const auto &s = this->p->enableThreadHighlightTaskbar;
             s.hasValueBeenSet())
         {
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->enableThreadHighlightSound;
+        if (const auto &s = this->p->enableThreadHighlightSound;
             s.hasValueBeenSet())
         {
             h.outcome.playSound = s.getValue();
         }
 
-        if (const auto &s = this->threadHighlightSoundUrl; s.hasValueBeenSet())
+        if (const auto &s = this->p->threadHighlightSoundUrl;
+            s.hasValueBeenSet())
         {
             h.outcome.customSoundURL = s.getValue();
         }
 
-        if (const auto &s = this->threadHighlightColor; s.hasValueBeenSet())
+        if (const auto &s = this->p->threadHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
