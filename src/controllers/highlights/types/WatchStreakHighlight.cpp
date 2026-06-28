@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/highlights/types/WatchStreakHighlight.hpp"
 
 #include "controllers/highlights/HighlightCheck.hpp"
