@@ -26,7 +26,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 
