@@ -229,7 +229,10 @@ EmoteMap filterEmoteMap(const QString &text,
 
     for (const auto &emote : *emotes)
     {
-        if (emote.first.string.contains(text, Qt::CaseInsensitive))
+        if (emote.first.string.contains(text, Qt::CaseInsensitive) ||
+            (emote.second->baseName.has_value() &&
+             emote.second->baseName.value().string.contains(
+                 text, Qt::CaseInsensitive)))
         {
             filteredMap.insert(emote);
         }
