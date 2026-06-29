@@ -605,9 +605,9 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
 }
 
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
-                                    const QString &searchText)
+                                    const QString &searchWord,
+                                    const QStringList &tags)
 {
-    auto [searchWord, tags] = getSearchWordAndTags(searchText);
     if (this->twitchChannel_)
     {
         auto local = filterEmoteMap(searchWord, tags,
@@ -689,22 +689,27 @@ void EmotePopup::filterEmotes(const QString &searchText)
     auto searchChannel = this->searchView_->underlyingChannel();
     searchChannel->clearMessages();
 
+    auto [searchWord, tags] = getSearchWordAndTags(searchText);
+
     // true in special channels like /mentions
     if (this->channel_->isTwitchChannel())
     {
-        this->filterTwitchEmotes(searchChannel, searchText);
+        this->filterTwitchEmotes(searchChannel, searchWord, tags);
     }
 
     std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
-    for (const auto &emoji : emojis)
+    if (tags.empty())
     {
-        if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+        const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
+        for (const auto &emoji : emojis)
         {
-            filteredEmojis.push_back(emoji);
-            emojiCount++;
+            if (emoji->shortCodes[0].contains(searchWord, Qt::CaseInsensitive))
+            {
+                filteredEmojis.push_back(emoji);
+                emojiCount++;
+            }
         }
     }
     // emojis
