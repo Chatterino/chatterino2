@@ -242,7 +242,6 @@ bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &text,
                                                      Qt::CaseInsensitive)));
 }
 
-// Create an emote
 EmoteMap filterEmoteMap(const QString &text, const QStringList &tags,
                         const std::shared_ptr<const EmoteMap> &emotes)
 {
