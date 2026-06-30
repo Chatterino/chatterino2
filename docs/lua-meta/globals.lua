@@ -462,6 +462,48 @@ c2.ImageSet = {}
 function c2.ImageSet.new(image1, image2, image3) end
 -- End src/controllers/plugins/api/Images.hpp
 
+-- Begin src/controllers/plugins/api/Menu.hpp
+
+
+---A generic menu used for context menus.
+---@class c2.Menu
+c2.Menu = {}
+
+---Appends a new action to the menu.
+---@param text string
+---@param cb fun()
+function c2.Menu:add_action(text, cb) end
+
+---Inserts an action named `text` after `before`. If `before` is not found,
+---the action is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+---@param text string
+---@param cb fun()
+function c2.Menu:insert_action(before, text, cb) end
+
+---Appends a new Menu with `title` to the menu.
+---@param title string
+---@return c2.Menu
+function c2.Menu:add_menu(title) end
+
+---Inserts a new Menu named `title` after `before`. If `before` is not found,
+---the menu is inserted at the end. `before` can either be a name or a one-based
+---index.
+---@param before string|integer A name or index of an action.
+---@param title string
+function c2.Menu:insert_menu(before, title) end
+
+---Appends a new separator.
+function c2.Menu:add_separator() end
+
+---Inserts a new separator after `before`. If `before` is not found,
+---the separator is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+function c2.Menu:insert_separator(before) end
+-- End src/controllers/plugins/api/Menu.hpp
+
 -- Begin src/controllers/plugins/api/Message.hpp
 
 
@@ -930,6 +972,18 @@ c2.WindowManager = {}
 ---Get all open windows.
 ---@return c2.Window[] windows
 function c2.WindowManager:all() end
+
+---@class ChannelViewContextMenuRequestedArgs
+---@field split? c2.Split The split holding the channel view. This is `nil` if the view is not inside a split.
+---@field message c2.Message The clicked message.
+---@field message_element? MessageElement The clicked message element.
+---@field channel? c2.Channel The channel shown in the view. Note that this might be a virtual channel (e.g. in a search popup or usercard).
+---@field menu c2.Menu The context menu. Add your actions here.
+
+---Registers an event handler for context menus in ChannelViews.
+---@param cb fun(args: ChannelViewContextMenuRequestedArgs)
+---@return c2.ConnectionHandle
+function c2.WindowManager:on_channelview_context_menu_requested(cb) end
 
 ---@type c2.WindowManager
 c2.windows = ...
