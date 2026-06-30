@@ -648,6 +648,10 @@ function c2.Message:elements() end
 ---@param elem (MessageElement|MessageElementInit) The element to add
 function c2.Message:append_element(elem) end
 
+---Returns an identical, non-frozen message, independent from this one.
+---@return c2.Message
+function c2.Message:clone() end
+
 ---A table to initialize a new message
 ---@class MessageInit
 ---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
