@@ -212,26 +212,66 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     tabDirectionDropdown->setMinimumWidth(
         tabDirectionDropdown->minimumSizeHint().width());
 
-    layout.addDropdown<std::underlying_type_t<NotebookTabVisibility>>(
-        "Tab visibility", {"All tabs", "Only live tabs"}, s.tabVisibility,
-        [](auto val) {
-            switch (val)
-            {
-                case NotebookTabVisibility::LiveOnly:
-                    return "Only live tabs";
-                case NotebookTabVisibility::AllTabs:
-                default:
-                    return "All tabs";
+    layout.addDropdown<std::underlying_type_t<NotebookTabVisibilityFlag> >(
+        "Tab visibility", {"All tabs", "Live tabs", "Unread tabs", "Live, unread tabs", "Live, other tabs", "Unread, other tabs", "Other tabs"}, s.tabVisibility,
+        [](auto val) -> QString {
+            const auto visibilityFlags = NotebookTabVisibilityFlags(static_cast<NotebookTabVisibilityFlag>(val));
+            if (visibilityFlags.hasAll(NotebookTabVisibilityFlag::Live,
+                                       NotebookTabVisibilityFlag::Unread,
+                                       NotebookTabVisibilityFlag::Other) ||
+                visibilityFlags.hasNone(NotebookTabVisibilityFlag::Live,
+                                        NotebookTabVisibilityFlag::Unread,
+                                        NotebookTabVisibilityFlag::Other)) {
+                return "All tabs";
             }
+            std::string label;
+            if (visibilityFlags.has(NotebookTabVisibilityFlag::Live)) {
+                label.append("Live");
+            }
+            if (visibilityFlags.has(NotebookTabVisibilityFlag::Unread)) {
+                if (!label.empty()) {
+                    label.append(", unread");
+                } else {
+                    label.append("Unread");
+                }
+            }
+            if (visibilityFlags.has(NotebookTabVisibilityFlag::Other)) {
+                if (!label.empty()) {
+                    label.append(", other");
+                } else {
+                    label.append("Other");
+                }
+            }
+            label.append(" tabs");
+            return QString::fromStdString(label);
         },
         [](auto args) {
-            if (args.value == "Only live tabs")
+            if (args.value == "Live tabs") {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live);
+            }
+            else if (args.value == "Unread tabs")
             {
-                return NotebookTabVisibility::LiveOnly;
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Unread);
+            }
+            else if (args.value == "Live, unread tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Unread);
+            }
+            else if (args.value == "Other tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Other);
+            }
+            else if (args.value == "Live, other tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Live | NotebookTabVisibilityFlag::Other);
+            }
+            else if (args.value == "Unread, other tabs")
+            {
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(NotebookTabVisibilityFlag::Unread | NotebookTabVisibilityFlag::Other);
             }
             else
             {
-                return NotebookTabVisibility::AllTabs;
+                return static_cast<std::underlying_type_t<NotebookTabVisibilityFlag>>(-1);
             }
         },
         false, "Choose which tabs are visible in the notebook");

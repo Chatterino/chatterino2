@@ -126,9 +126,10 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    void setShowTabs(bool value);
+
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
 
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
@@ -263,11 +264,14 @@ public:
     void toggleTabVisibility();
 
     QAction *showAllTabsAction;
-    QAction *onlyShowLiveTabsAction;
+    QAction *showLiveTabsAction;
+    QAction *showUnreadTabsAction;
+    QAction *showOtherTabsAction;
     QAction *hideAllTabsAction;
 
 protected:
     void showEvent(QShowEvent *event) override;
+    void updateTabActionCheckedState();
 
 private:
     QAction *sortTabsAlphabeticallyAction_;
