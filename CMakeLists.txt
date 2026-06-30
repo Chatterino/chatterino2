@@ -283,8 +283,13 @@ find_package(Doxygen)
 find_package(BoostCertify REQUIRED)
 
 if (CHATTERINO_PLUGINS)
-    set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
-    add_subdirectory(lib/lua)
+
+    find_package(Lua 5.4)
+
+    if (NOT Lua_FOUND)
+        set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
+        add_subdirectory(lib/lua)
+    endif()
 
     find_package(Sol2 REQUIRED)
 endif()
