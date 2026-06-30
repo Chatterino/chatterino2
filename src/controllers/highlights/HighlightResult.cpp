@@ -4,24 +4,19 @@
 
 #include "controllers/highlights/HighlightResult.hpp"
 
-namespace chatterino {
+#include <qdebug.h>
 
-HighlightResult::HighlightResult(bool _alert, bool _playSound,
-                                 std::optional<QUrl> _customSoundUrl,
-                                 std::shared_ptr<QColor> _color,
-                                 bool _showInMentions)
-    : alert(_alert)
-    , playSound(_playSound)
-    , customSoundUrl(std::move(_customSoundUrl))
-    , color(std::move(_color))
-    , showInMentions(_showInMentions)
-{
-}
+namespace chatterino {
 
 HighlightResult HighlightResult::emptyResult()
 {
     return {
-        false, false, std::nullopt, nullptr, false,
+        .ids = {},
+        .alert = false,
+        .playSound = false,
+        .customSoundUrl = std::nullopt,
+        .color = nullptr,
+        .showInMentions = false,
     };
 }
 
@@ -29,14 +24,19 @@ bool HighlightResult::operator==(const HighlightResult &other) const
 {
     if (this->alert != other.alert)
     {
+        qInfo() << "did not match alert";
         return false;
     }
     if (this->playSound != other.playSound)
     {
+        qInfo() << "did not match playSound";
         return false;
     }
-    if (this->customSoundUrl != other.customSoundUrl)
+    if (auto ourUrl = this->customSoundUrl.value_or(QUrl{}),
+        theirUrl = other.customSoundUrl.value_or(QUrl{});
+        ourUrl != theirUrl)
     {
+        qInfo() << "did not match customSoundUrl";
         return false;
     }
 
@@ -44,12 +44,14 @@ bool HighlightResult::operator==(const HighlightResult &other) const
     {
         if (*this->color != *other.color)
         {
+            qInfo() << "did not match color";
             return false;
         }
     }
 
     if (this->showInMentions != other.showInMentions)
     {
+        qInfo() << "did not match show in mentions";
         return false;
     }
 
@@ -76,14 +78,18 @@ bool HighlightResult::full() const
 
 std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
 {
-    os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
+    os << "IDs: " << result.ids.join(',').toStdString()
+       << ", Alert: " << (result.alert ? "Yes" : "No") << ", "
        << "Play sound: " << (result.playSound ? "Yes" : "No") << " ("
        << (result.customSoundUrl
                ? result.customSoundUrl->toString().toStdString()
                : "")
        << ")"
        << ", "
-       << "Color: " << (result.color ? result.color->name().toStdString() : "")
+       << "Color: "
+       << (result.color
+               ? result.color->name(QColor::NameFormat::HexArgb).toStdString()
+               : "")
        << ", "
        << "Show in mentions: " << (result.showInMentions ? "Yes" : "No");
     return os;

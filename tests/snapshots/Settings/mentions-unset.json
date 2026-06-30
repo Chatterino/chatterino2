@@ -1,0 +1,46 @@
+{
+    "input": {
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

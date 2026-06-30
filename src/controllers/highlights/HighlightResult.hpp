@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QColor>
+#include <QStringList>
 #include <QUrl>
 
 #include <memory>
@@ -14,14 +15,13 @@
 namespace chatterino {
 
 struct HighlightResult {
-    HighlightResult(bool _alert, bool _playSound,
-                    std::optional<QUrl> _customSoundUrl,
-                    std::shared_ptr<QColor> _color, bool _showInMentions);
-
     /**
      * @brief Construct an empty HighlightResult with all side-effects disabled
      **/
     static HighlightResult emptyResult();
+
+    // XXX TODO TEMP TEMPORARY ID OF HIGHLIGHT THAT TRIGGERED THE HIGHLIGHT :-)
+    QStringList ids;
 
     /**
      * @brief true if highlight should trigger the taskbar to flash

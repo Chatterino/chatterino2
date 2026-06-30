@@ -137,7 +137,9 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
     layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     // Top Row
-    bool addCheckbox = getSettings()->enableThreadHighlight;
+    // TODO: how do I solve this?
+    // bool addCheckbox = getSettings()->enableThreadHighlight;
+    bool addCheckbox = true;
     if (addCheckbox || closeAutomatically)
     {
         auto *hbox = new QHBoxLayout();

@@ -1869,7 +1869,8 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
                           builder->searchText;
 
     // highlights
-    HighlightAlert highlight = builder.parseHighlights(tags, content, args);
+    HighlightAlert highlight =
+        builder.parseHighlights(tags, content, args, channel);
     if (tags.contains("historical"))
     {
         highlight.playSound = false;
@@ -2327,7 +2328,8 @@ void MessageBuilder::parseThread(const QString &messageContent,
 
 HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
                                                const QString &originalMessage,
-                                               const MessageParseArgs &args)
+                                               const MessageParseArgs &args,
+                                               Channel *channel)
 {
     if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
@@ -2335,10 +2337,15 @@ HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
         return {};
     }
 
+    filters::RunContext runContext{
+        .message = this->message(),
+        .channel = channel,
+    };
+
     auto badges = parseBadgeTag(tags);
     auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         args, badges, this->message().loginName, originalMessage,
-        this->message().flags);
+        this->message().flags, runContext);
 
     if (!highlighted)
     {
@@ -2348,6 +2355,19 @@ HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
     // This message triggered one or more highlights, act upon the highlight result
 
     this->message().flags.set(MessageFlag::Highlighted);
+
+    qInfo() << "XXX: Highlighted by" << highlightResult.ids;
+
+    if (highlightResult.color)
+    {
+        auto color = *highlightResult.color;
+        qInfo() << "XXX: SET HIGHLIGHT COLOR"
+                << color.name(QColor::NameFormat::HexArgb);
+    }
+    else
+    {
+        qInfo() << "XXX: SET HIGHLIGHT COLOR NULL";
+    }
 
     this->message().highlightColor = highlightResult.color;
 

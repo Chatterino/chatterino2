@@ -1,0 +1,55 @@
+{
+    "input": {
+        "highlighting": {
+            "selfHighlight": {
+                "showSelfHighlightInMentions": false
+            }
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "yourusername",
+                    "showInMentions": false
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "selfHighlight": {
+                "showSelfHighlightInMentions": false
+            }
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

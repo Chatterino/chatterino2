@@ -199,23 +199,55 @@ set(SOURCE_FILES
         controllers/filters/lang/Types.cpp
         controllers/filters/lang/Types.hpp
 
-        controllers/highlights/BadgeHighlightModel.cpp
-        controllers/highlights/BadgeHighlightModel.hpp
-        controllers/highlights/HighlightBadge.cpp
+        controllers/highlights/ConfigureDialog.cpp
+        controllers/highlights/ConfigureDialog.hpp
         controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
-        controllers/highlights/HighlightModel.cpp
-        controllers/highlights/HighlightModel.hpp
-        controllers/highlights/HighlightPhrase.cpp
+        controllers/highlights/Model.cpp
+        controllers/highlights/Model.hpp
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
-        controllers/highlights/UserHighlightModel.cpp
-        controllers/highlights/UserHighlightModel.hpp
+        controllers/highlights/types/AllForward.hpp
+        controllers/highlights/types/All.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.cpp
+        controllers/highlights/types/ChannelPointsHighlight.hpp
+        controllers/highlights/types/ChannelPointsHighlight.cpp
+        controllers/highlights/types/Common.hpp
+        controllers/highlights/types/Common.cpp
+        controllers/highlights/types/Outcome.hpp
+        controllers/highlights/types/Outcome.cpp
+        controllers/highlights/types/FirstMessageHighlight.hpp
+        controllers/highlights/types/FirstMessageHighlight.cpp
+        controllers/highlights/types/HypeChatHighlight.hpp
+        controllers/highlights/types/HypeChatHighlight.cpp
+        controllers/highlights/types/SubscribedThreadHighlight.hpp
+        controllers/highlights/types/SubscribedThreadHighlight.cpp
+        controllers/highlights/types/SubscriptionsHighlight.hpp
+        controllers/highlights/types/SubscriptionsHighlight.cpp
+        controllers/highlights/types/MessageHighlight.hpp
+        controllers/highlights/types/MessageHighlight.cpp
+        controllers/highlights/types/BadgeHighlight.hpp
+        controllers/highlights/types/BadgeHighlight.cpp
+        controllers/highlights/types/UserHighlight.hpp
+        controllers/highlights/types/UserHighlight.cpp
+        controllers/highlights/types/FilterHighlight.hpp
+        controllers/highlights/types/FilterHighlight.cpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.hpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.cpp
+        controllers/highlights/types/WatchStreakHighlight.hpp
+        controllers/highlights/types/WatchStreakHighlight.cpp
+        controllers/highlights/types/WhispersHighlight.hpp
+        controllers/highlights/types/WhispersHighlight.cpp
+        controllers/highlights/types/YourMessagesHighlight.hpp
+        controllers/highlights/types/YourMessagesHighlight.cpp
+        controllers/highlights/types/YourUsernameHighlight.hpp
+        controllers/highlights/types/YourUsernameHighlight.cpp
 
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp
@@ -832,6 +864,8 @@ set(SOURCE_FILES
         widgets/settingspages/GeneralPageView.hpp
         widgets/settingspages/HighlightingPage.cpp
         widgets/settingspages/HighlightingPage.hpp
+        widgets/settingspages/HighlightingWidget.cpp
+        widgets/settingspages/HighlightingWidget.hpp
         widgets/settingspages/IgnoresPage.cpp
         widgets/settingspages/IgnoresPage.hpp
         widgets/settingspages/KeyboardSettingsPage.cpp
@@ -973,7 +1007,7 @@ endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CHATTERINO_WITH_PRIVATE_QT_API)
 endif()
 
@@ -989,7 +1023,7 @@ else()
         )
 endif()
 
-# Set the output of TARGET to be 
+# Set the output of TARGET to be
 # - CMAKE_BIN_DIR/lib for libraries
 # - CMAKE_BIN_DIR/bin for BINARIES
 # an additional argument specifies the subdirectory.

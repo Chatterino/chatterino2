@@ -87,6 +87,7 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
 
         buttons->addSpacing(10);
 
+        // TODO: default colors or recent colors (idr which) is a bit broken since i'm messing up colorprovider
         buttons->addWidget(new QLabel(u"Default colors"_s));
         buttons->addLayout(
             makeColorGrid(ColorProvider::instance().defaultColors(), this,

@@ -1,0 +1,147 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#11111111",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#22222222",
+                    "pattern": "my phrase 2",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": "sound2"
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#33333333",
+                    "pattern": "my phrase 3",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": "sound3"
+                }
+            ]
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#11111111",
+                    "pattern": "my phrase",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#22222222",
+                    "pattern": "my phrase 2",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": "sound2"
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#33333333",
+                    "pattern": "my phrase 3",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": "sound3"
+                }
+            ],
+            "highlights2": [
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "hypechat"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#11111111",
+                    "caseSensitive": false,
+                    "id": "test-1",
+                    "pattern": "my phrase",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true,
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#22222222",
+                    "caseSensitive": false,
+                    "customSoundURL": "sound2",
+                    "id": "test-2",
+                    "pattern": "my phrase 2",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true,
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#33333333",
+                    "caseSensitive": false,
+                    "customSoundURL": "sound3",
+                    "id": "test-3",
+                    "pattern": "my phrase 3",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": true,
+                    "type": "message"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

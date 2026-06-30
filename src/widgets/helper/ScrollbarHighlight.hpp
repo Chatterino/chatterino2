@@ -31,8 +31,11 @@ public:
 
     QColor getColor() const;
     Style getStyle() const;
+    // TODO: This should just be a highlight
     bool isRedeemedHighlight() const;
+    // TODO: This should just be a highlight
     bool isFirstMessageHighlight() const;
+    // TODO: This should just be a highlight
     bool isElevatedMessageHighlight() const;
     bool isNull() const;
 

@@ -309,11 +309,15 @@ private:
                      const Channel *channel,
                      const std::shared_ptr<MessageThread> &thread,
                      const MessagePtr &parent);
+
+public:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     HighlightAlert parseHighlights(const QVariantMap &tags,
                                    const QString &originalMessage,
-                                   const MessageParseArgs &args);
+                                   const MessageParseArgs &args,
+                                   Channel *channel);
 
+private:
     void appendChannelName(const Channel *channel);
     void appendUsername(const QVariantMap &tags, const MessageParseArgs &args);
 

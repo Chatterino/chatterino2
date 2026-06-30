@@ -7,432 +7,70 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/Common.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "providers/colors/ColorProvider.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
-#include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Variant.hpp"
+
+namespace chatterino {
+
+template <typename T>
+concept SupportsValidityCheck = requires(T a) {
+    { a.isValid() } -> std::same_as<bool>;
+};
 
 namespace {
 
-using namespace chatterino;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoHighlights;
 
-auto highlightPhraseCheck(const HighlightPhrase &highlight) -> HighlightCheck
+void rebuildSharedHighlights(Settings &settings,
+                             std::vector<HighlightCheck> &checks)
 {
-    return HighlightCheck{
-        [highlight](const auto &args, const auto &twitchBadges,
-                    const auto &senderName, const auto &originalMessage,
-                    const auto &flags,
-                    const auto self) -> std::optional<HighlightResult> {
-            (void)args;          // unused
-            (void)twitchBadges;  // unused
-            (void)senderName;    // unused
-            (void)flags;         // unused
+    auto highlights = settings.sharedHighlights.readOnly();
 
-            if (self)
-            {
-                // Phrase checks should ignore highlights from the user
-                return std::nullopt;
-            }
-
-            if (!highlight.isMatch(originalMessage))
-            {
-                return std::nullopt;
-            }
-
-            std::optional<QUrl> highlightSoundUrl;
-            if (highlight.hasCustomSound())
-            {
-                highlightSoundUrl = highlight.getSoundUrl();
-            }
-
-            return HighlightResult{
-                highlight.hasAlert(),       highlight.hasSound(),
-                highlightSoundUrl,          highlight.getColor(),
-                highlight.showInMentions(),
-            };
-        }};
-}
-
-void rebuildSubscriptionHighlights(Settings &settings,
-                                   std::vector<HighlightCheck> &checks)
-{
-    if (settings.enableSubHighlight)
+    for (const auto &highlight : *highlights)
     {
-        auto highlightSound = settings.enableSubHighlightSound.getValue();
-        auto highlightAlert = settings.enableSubHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue = settings.subHighlightSoundUrl.getValue();
-        std::optional<QUrl> highlightSoundUrl;
-        if (!highlightSoundUrlValue.isEmpty())
+        auto enabled = highlights::isEnabled(highlight);
+
+        if (!enabled)
         {
-            highlightSoundUrl = highlightSoundUrlValue;
+            continue;
         }
 
-        // The custom sub highlight color is handled in ColorProvider
-
-        checks.emplace_back(HighlightCheck{
-            [=](const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
-                const auto self) -> std::optional<HighlightResult> {
-                (void)twitchBadges;     // unused
-                (void)senderName;       // unused
-                (void)originalMessage;  // unused
-                (void)flags;            // unused
-                (void)self;             // unused
-
-                if (!args.isSubscriptionMessage)
+        std::visit(
+            [&checks](auto &&h) {
+                auto check = h.buildCheck();
+                if (check.cb)
                 {
-                    return std::nullopt;
+                    checks.emplace_back(std::move(check));
                 }
-
-                auto highlightColor =
-                    ColorProvider::instance().color(ColorType::Subscription);
-
-                return HighlightResult{
-                    highlightAlert,     // alert
-                    highlightSound,     // playSound
-                    highlightSoundUrl,  // customSoundUrl
-                    highlightColor,     // color
-                    false,              // showInMentions
-                };
-            }});
+            },
+            highlight);
     }
 }
 
-void rebuildWhisperHighlights(Settings &settings,
-                              std::vector<HighlightCheck> &checks)
+/// Recreates the highlight of type T if the highlight's ID is in the missingHighlights set
+template <typename T>
+void recreateIfMissing(const QSet<QStringView> &missingHighlights)
 {
-    if (settings.enableWhisperHighlight)
+    if (missingHighlights.contains(T::ID))
     {
-        auto highlightSound = settings.enableWhisperHighlightSound.getValue();
-        auto highlightAlert = settings.enableWhisperHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue =
-            settings.whisperHighlightSoundUrl.getValue();
-        std::optional<QUrl> highlightSoundUrl;
-        if (!highlightSoundUrlValue.isEmpty())
-        {
-            highlightSoundUrl = highlightSoundUrlValue;
-        }
-
-        // The custom whisper highlight color is handled in ColorProvider
-
-        checks.emplace_back(HighlightCheck{
-            [=](const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
-                const auto self) -> std::optional<HighlightResult> {
-                (void)twitchBadges;     // unused
-                (void)senderName;       // unused
-                (void)originalMessage;  // unused
-                (void)flags;            // unused
-                (void)self;             // unused
-
-                if (!args.isReceivedWhisper)
-                {
-                    return std::nullopt;
-                }
-
-                return HighlightResult{
-                    highlightAlert,
-                    highlightSound,
-                    highlightSoundUrl,
-                    ColorProvider::instance().color(ColorType::Whisper),
-                    false,
-                };
-            }});
-    }
-}
-
-void rebuildReplyThreadHighlight(Settings &settings,
-                                 std::vector<HighlightCheck> &checks)
-{
-    if (settings.enableThreadHighlight)
-    {
-        auto highlightSound = settings.enableThreadHighlightSound.getValue();
-        auto highlightAlert = settings.enableThreadHighlightTaskbar.getValue();
-        auto highlightSoundUrlValue =
-            settings.threadHighlightSoundUrl.getValue();
-        std::optional<QUrl> highlightSoundUrl;
-        if (!highlightSoundUrlValue.isEmpty())
-        {
-            highlightSoundUrl = highlightSoundUrlValue;
-        }
-        auto highlightInMentions =
-            settings.showThreadHighlightInMentions.getValue();
-        checks.emplace_back(HighlightCheck{
-            [=](const auto & /*args*/, const auto & /*twitchBadges*/,
-                const auto & /*senderName*/, const auto & /*originalMessage*/,
-                const auto &flags,
-                const auto self) -> std::optional<HighlightResult> {
-                if (flags.has(MessageFlag::SubscribedThread) && !self)
-                {
-                    return HighlightResult{
-                        highlightAlert,
-                        highlightSound,
-                        highlightSoundUrl,
-                        ColorProvider::instance().color(
-                            ColorType::ThreadMessageHighlight),
-                        highlightInMentions,
-                    };
-                }
-
-                return std::nullopt;
-            }});
-    }
-}
-
-void rebuildMessageHighlights(Settings &settings,
-                              std::vector<HighlightCheck> &checks)
-{
-    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
-    QString currentUsername = currentUser->getUserName();
-
-    if (settings.enableSelfHighlight && !currentUsername.isEmpty() &&
-        !currentUser->isAnon())
-    {
-        HighlightPhrase highlight(
-            currentUsername, settings.showSelfHighlightInMentions,
-            settings.enableSelfHighlightTaskbar,
-            settings.enableSelfHighlightSound, false, false,
-            settings.selfHighlightSoundUrl.getValue(),
-            ColorProvider::instance().color(ColorType::SelfHighlight));
-
-        checks.emplace_back(highlightPhraseCheck(highlight));
-    }
-
-    auto messageHighlights = settings.highlightedMessages.readOnly();
-    for (const auto &highlight : *messageHighlights)
-    {
-        checks.emplace_back(highlightPhraseCheck(highlight));
-    }
-
-    if (settings.enableAutomodHighlight)
-    {
-        const auto highlightSound =
-            settings.enableAutomodHighlightSound.getValue();
-        const auto highlightAlert =
-            settings.enableAutomodHighlightTaskbar.getValue();
-        const auto highlightSoundUrlValue =
-            settings.automodHighlightSoundUrl.getValue();
-        auto highlightColor =
-            ColorProvider::instance().color(ColorType::AutomodHighlight);
-
-        checks.emplace_back(HighlightCheck{
-            [=](const auto & /*args*/, const auto & /*twitchBadges*/,
-                const auto & /*senderName*/, const auto & /*originalMessage*/,
-                const auto &flags,
-                const auto /*self*/) -> std::optional<HighlightResult> {
-                if (!flags.has(MessageFlag::AutoModOffendingMessage))
-                {
-                    return std::nullopt;
-                }
-
-                std::optional<QUrl> highlightSoundUrl;
-                if (!highlightSoundUrlValue.isEmpty())
-                {
-                    highlightSoundUrl = highlightSoundUrlValue;
-                }
-
-                return HighlightResult{
-                    highlightAlert,     // alert
-                    highlightSound,     // playSound
-                    highlightSoundUrl,  // customSoundUrl
-                    highlightColor,     // color
-                    false,              // showInMentions
-                };
-            }});
-    }
-}
-
-void rebuildUserHighlights(Settings &settings,
-                           std::vector<HighlightCheck> &checks)
-{
-    auto userHighlights = settings.highlightedUsers.readOnly();
-
-    if (settings.enableSelfMessageHighlight)
-    {
-        bool showInMentions = settings.showSelfMessageHighlightInMentions;
-
-        checks.emplace_back(HighlightCheck{
-            [showInMentions](
-                const auto &args, const auto &twitchBadges,
-                const auto &senderName, const auto &originalMessage,
-                const auto &flags,
-                const auto self) -> std::optional<HighlightResult> {
-                (void)args;             //unused
-                (void)twitchBadges;     //unused
-                (void)senderName;       //unused
-                (void)flags;            //unused
-                (void)originalMessage;  //unused
-
-                if (!self)
-                {
-                    return std::nullopt;
-                }
-
-                // Highlight color is provided by the ColorProvider and will be updated accordingly
-                auto highlightColor = ColorProvider::instance().color(
-                    ColorType::SelfMessageHighlight);
-
-                return HighlightResult{false, false, (QUrl) nullptr,
-                                       highlightColor, showInMentions};
-            }});
-    }
-
-    for (const auto &highlight : *userHighlights)
-    {
-        checks.emplace_back(HighlightCheck{
-            [highlight](const auto &args, const auto &twitchBadges,
-                        const auto &senderName, const auto &originalMessage,
-                        const auto &flags,
-                        const auto self) -> std::optional<HighlightResult> {
-                (void)args;             // unused
-                (void)twitchBadges;     // unused
-                (void)originalMessage;  // unused
-                (void)flags;            // unused
-                (void)self;             // unused
-
-                if (!highlight.isMatch(senderName))
-                {
-                    return std::nullopt;
-                }
-
-                std::optional<QUrl> highlightSoundUrl;
-                if (highlight.hasCustomSound())
-                {
-                    highlightSoundUrl = highlight.getSoundUrl();
-                }
-
-                return HighlightResult{
-                    highlight.hasAlert(),        //
-                    highlight.hasSound(),        //
-                    highlightSoundUrl,           //
-                    highlight.getColor(),        //
-                    highlight.showInMentions(),  //
-                };
-            }});
-    }
-}
-
-void rebuildBadgeHighlights(Settings &settings,
-                            std::vector<HighlightCheck> &checks)
-{
-    auto badgeHighlights = settings.highlightedBadges.readOnly();
-
-    for (const auto &highlight : *badgeHighlights)
-    {
-        checks.emplace_back(HighlightCheck{
-            [highlight](const auto &args, const auto &twitchBadges,
-                        const auto &senderName, const auto &originalMessage,
-                        const auto &flags,
-                        const auto self) -> std::optional<HighlightResult> {
-                (void)args;             // unused
-                (void)senderName;       // unused
-                (void)originalMessage;  // unused
-                (void)flags;            // unused
-                (void)self;             // unused
-
-                for (const TwitchBadge &badge : twitchBadges)
-                {
-                    if (highlight.isMatch(badge))
-                    {
-                        std::optional<QUrl> highlightSoundUrl;
-                        if (highlight.hasCustomSound())
-                        {
-                            highlightSoundUrl = highlight.getSoundUrl();
-                        }
-
-                        return HighlightResult{
-                            highlight.hasAlert(),        //
-                            highlight.hasSound(),        //
-                            highlightSoundUrl,           //
-                            highlight.getColor(),        //
-                            highlight.showInMentions(),  //
-                        };
-                    }
-                }
-
-                return std::nullopt;
-            }});
+        qCInfo(LOG) << "Recreating missing highlight" << T::ID;
+        getSettings()->sharedHighlights.append(T{});
     }
 }
 
 }  // namespace
 
-namespace chatterino {
-
 HighlightController::HighlightController(Settings &settings,
                                          AccountController *accounts)
 {
     assert(accounts != nullptr);
-
-    this->rebuildListener_.addSetting(settings.enableSelfHighlight);
-    this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);
-    this->rebuildListener_.addSetting(settings.enableSelfHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.selfHighlightSoundUrl);
-    this->rebuildListener_.addSetting(settings.showSelfHighlightInMentions);
-
-    this->rebuildListener_.addSetting(settings.enableWhisperHighlight);
-    this->rebuildListener_.addSetting(settings.enableWhisperHighlightSound);
-    this->rebuildListener_.addSetting(settings.enableWhisperHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.whisperHighlightSoundUrl);
-
-    this->rebuildListener_.addSetting(settings.enableSubHighlight);
-    this->rebuildListener_.addSetting(settings.enableSubHighlightSound);
-    this->rebuildListener_.addSetting(settings.enableSubHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.enableSelfMessageHighlight);
-    this->rebuildListener_.addSetting(
-        settings.showSelfMessageHighlightInMentions);
-    // We do not need to rebuild the listener for the selfMessagesHighlightColor
-    // The color is dynamically fetched any time the self message highlight is triggered
-    this->rebuildListener_.addSetting(settings.subHighlightSoundUrl);
-
-    this->rebuildListener_.addSetting(settings.enableThreadHighlight);
-    this->rebuildListener_.addSetting(settings.enableThreadHighlightSound);
-    this->rebuildListener_.addSetting(settings.enableThreadHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.threadHighlightSoundUrl);
-    this->rebuildListener_.addSetting(settings.showThreadHighlightInMentions);
-
-    this->rebuildListener_.addSetting(settings.enableAutomodHighlight);
-    this->rebuildListener_.addSetting(settings.showAutomodInMentions);
-    this->rebuildListener_.addSetting(settings.enableAutomodHighlightSound);
-    this->rebuildListener_.addSetting(settings.enableAutomodHighlightTaskbar);
-    this->rebuildListener_.addSetting(settings.automodHighlightSoundUrl);
-
-    this->rebuildListener_.setCB([this, &settings] {
-        qCDebug(chatterinoHighlights)
-            << "Rebuild checks because a setting changed";
-        this->rebuildChecks(settings);
-    });
-
-    this->signalHolder_.managedConnect(
-        getSettings()->highlightedBadges.delayedItemsChanged,
-        [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because highlight badges changed";
-            this->rebuildChecks(settings);
-        });
-
-    this->signalHolder_.managedConnect(
-        getSettings()->highlightedUsers.delayedItemsChanged, [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because highlight users changed";
-            this->rebuildChecks(settings);
-        });
-
-    this->signalHolder_.managedConnect(
-        getSettings()->highlightedMessages.delayedItemsChanged,
-        [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because highlight messages changed";
-            this->rebuildChecks(settings);
-        });
 
     this->signalHolder_.managedConnect(
         accounts->twitch.currentUserChanged, [this, &settings] {
@@ -447,6 +85,14 @@ HighlightController::HighlightController(Settings &settings,
                 << "Rebuild checks because user name changed";
             this->rebuildChecks(settings);
         });
+
+    this->signalHolder_.managedConnect(
+        getSettings()->sharedHighlights.delayedItemsChanged, [this, &settings] {
+            qCInfo(chatterinoHighlights)
+                << "XXX: Rebuild checks because shared highlights changed";
+            this->rebuildChecks(settings);
+        });
+
     this->rebuildChecks(settings);
 }
 
@@ -456,26 +102,13 @@ void HighlightController::rebuildChecks(Settings &settings)
     auto checks = this->checks_.access();
     checks->clear();
 
-    // CURRENT ORDER:
-    // Subscription -> Whisper -> Message -> User -> Reply Threads -> Badge
-
-    rebuildSubscriptionHighlights(settings, *checks);
-
-    rebuildWhisperHighlights(settings, *checks);
-
-    rebuildMessageHighlights(settings, *checks);
-
-    rebuildUserHighlights(settings, *checks);
-
-    rebuildReplyThreadHighlight(settings, *checks);
-
-    rebuildBadgeHighlights(settings, *checks);
+    rebuildSharedHighlights(settings, *checks);
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
     const MessageParseArgs &args, const std::vector<TwitchBadge> &twitchBadges,
     const QString &senderName, const QString &originalMessage,
-    const MessageFlags &messageFlags) const
+    const MessageFlags &messageFlags, filters::RunContext runContext) const
 {
     bool highlighted = false;
     auto result = HighlightResult::emptyResult();
@@ -488,11 +121,15 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
     for (const auto &check : *checks)
     {
-        if (auto checkResult = check.cb(args, twitchBadges, senderName,
-                                        originalMessage, messageFlags, self);
+        if (auto checkResult =
+                check.cb(args, twitchBadges, senderName, originalMessage,
+                         messageFlags, self, runContext);
             checkResult)
         {
             highlighted = true;
+
+            // TODO TEMP XD
+            result.ids.append(checkResult->ids);
 
             if (checkResult->alert)
             {
@@ -520,9 +157,12 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
             if (checkResult->color)
             {
-                if (!result.color)
+                if (checkResult->color->isValid())
                 {
-                    result.color = checkResult->color;
+                    if (!result.color)
+                    {
+                        result.color = checkResult->color;
+                    }
                 }
             }
 
@@ -543,6 +183,52 @@ std::pair<bool, HighlightResult> HighlightController::check(
     }
 
     return {highlighted, result};
+}
+
+QSet<QStringView> HighlightController::missingBillTinHighlights()
+{
+    using namespace chatterino::highlights;
+
+    QSet<QStringView> expectedHighlights{
+        YourUsernameHighlight::ID,               //
+        WhispersHighlight::ID,                   //
+        SubscriptionsHighlight::ID,              //
+        ChannelPointsHighlight::ID,              //
+        FirstMessageHighlight::ID,               //
+        HypeChatHighlight::ID,                   //
+        SubscribedThreadHighlight::ID,           //
+        AutomodCaughtHighlight::ID,              //
+        WatchStreakHighlight::ID,                //
+        YourMessagesHighlight::ID,               //
+        UncategorizedNotificationHighlight::ID,  //
+    };
+
+    const auto highlights = getSettings()->sharedHighlights.readOnly();
+
+    for (const auto &h : *highlights)
+    {
+        expectedHighlights.remove(highlights::getID(h));
+    }
+
+    return expectedHighlights;
+}
+
+void HighlightController::recreateMissingBillTinHighlights(
+    const QSet<QStringView> &missingHighlights)
+{
+    using namespace chatterino::highlights;
+
+    recreateIfMissing<YourUsernameHighlight>(missingHighlights);
+    recreateIfMissing<WhispersHighlight>(missingHighlights);
+    recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
+    recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
+    recreateIfMissing<FirstMessageHighlight>(missingHighlights);
+    recreateIfMissing<HypeChatHighlight>(missingHighlights);
+    recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
+    recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
+    recreateIfMissing<WatchStreakHighlight>(missingHighlights);
+    recreateIfMissing<YourMessagesHighlight>(missingHighlights);
+    recreateIfMissing<UncategorizedNotificationHighlight>(missingHighlights);
 }
 
 }  // namespace chatterino
