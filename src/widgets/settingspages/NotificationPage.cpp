@@ -63,7 +63,8 @@ NotificationPage::NotificationPage()
                     "start menu folder if needed by live notifications."
                     "\n(On portable mode, this is disabled by "
                     "default)"));
-
+#endif
+#if defined(Q_OS_WIN) || defined(CHATTERINO_WITH_LIBNOTIFY)
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
