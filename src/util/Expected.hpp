@@ -6,7 +6,7 @@
 
 #include <version>
 
-#if __cpp_lib_expected >= 202202L
+#if __cpp_lib_expected >= 202211L
 #    include <expected>
 #else
 #    define CHATTERINO_USING_NONSTD_EXPECTED
@@ -19,7 +19,7 @@ class QString;
 
 namespace chatterino {
 
-#if __cpp_lib_expected >= 202202L
+#if __cpp_lib_expected >= 202211L
 template <typename T, typename E>
 using Expected = std::expected<T, E>;
 
