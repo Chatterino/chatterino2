@@ -354,6 +354,8 @@ public:
 
     pajlada::Signals::Signal<const QString &> sendWaitUpdate;
 
+    pajlada::Signals::Signal<const QStringList &> sharedChatStatusChanged;
+
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
                              const QString &originalContent,
@@ -399,6 +401,8 @@ public:
 
     bool isLoadingRecentMessages() const;
 
+    const QStringList &getSharedChatSessionParticipants() const;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -432,6 +436,9 @@ private:
     /// roomIdChanged is called whenever this channel's ID has been changed
     /// This should only happen once per channel, whenever the ID goes from unset to set
     void roomIdChanged();
+
+    void probeSharedChatSession();
+    void refreshSharedChatSessionState();
 
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
@@ -589,6 +596,35 @@ private:
     std::weak_ptr<const Message> lastLiveUpdateMessage_;
     /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
+
+    /**
+     * List of display names of  broadcasters participating in a
+     * shared chat session on this channel. The list does not include
+     * the broadcaster who owns the channel.
+     * This list is passed to the UI for display.
+     */
+    QStringList sharedChatSessionParticipants_;
+
+    /**
+     * Set of broadcasterIDs of broadcasters participating in a
+     * shared chat session on this channel. The set does not include
+     * the broadcaster who owns the channel.
+     * This set is used to quickly determine if the participants have
+     * changed since the last query of the shared chat session state.
+     */
+    QSet<QString> sharedChatSessionParticipantIds_;
+
+    /**
+     * Timer scheduling the next check of the shared chat session state.
+     */
+    QTimer nextSharedChatSessionUpdateTimer_;
+
+    /**
+     * Time when the next probe of shared chat session state triggered
+     * by reception of a shared chat message is allowed.
+     * Used to rate-limit Twitch API queries.
+     */
+    QDateTime nextSharedChatSessionProbe_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 
