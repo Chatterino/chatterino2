@@ -356,6 +356,12 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+Shift+Tab"), "openTab",
                             {"previous"}, "popup select previous tab");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::PopupWindow,
+                            QKeySequence("Ctrl+Alt+Left"), "selectTabHistory",
+                            {"previous"}, "popup tab history back");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::PopupWindow,
+                            QKeySequence("Ctrl+Alt+Right"), "selectTabHistory",
+                            {"next"}, "popup tab history forward");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::PopupWindow,
                             QKeySequence("PgUp"), "scrollPage", {"up"},
                             "popup scroll up");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::PopupWindow,
@@ -552,6 +558,13 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
                             {"toggle"}, "toggle tab visibility");
+
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+Alt+Left"), "selectTabHistory",
+                            {"previous"}, "tab history back");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+Alt+Right"), "selectTabHistory",
+                            {"next"}, "tab history forward");
     }
 }
 

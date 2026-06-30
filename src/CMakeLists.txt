@@ -606,6 +606,8 @@ set(SOURCE_FILES
         util/SignalListener.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
+        util/TabHistory.cpp
+        util/TabHistory.hpp
         util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp

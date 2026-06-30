@@ -404,6 +404,32 @@ void EmotePopup::addShortcuts()
              }
              return "";
          }},
+        {"selectTabHistory",
+         [this](const std::vector<QString> &arguments) -> QString {
+             if (arguments.empty())
+             {
+                 return "selectTabHistory shortcut called without arguments. "
+                        "Takes one argument: \"previous\" or \"next\".";
+             }
+
+             const auto &direction = arguments.at(0);
+             if (direction == "previous")
+             {
+                 this->notebook_->selectHistoryBack(false);
+             }
+             else if (direction == "next")
+             {
+                 this->notebook_->selectHistoryForward(false);
+             }
+             else
+             {
+                 return QString("Invalid argument for selectTabHistory "
+                                "shortcut: \"%1\". Use \"previous\" or "
+                                "\"next\".")
+                     .arg(direction);
+             }
+             return "";
+         }},
         {"delete",
          [this](const std::vector<QString> &) -> QString {
              this->close();
