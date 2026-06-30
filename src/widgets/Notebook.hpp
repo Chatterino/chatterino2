@@ -75,8 +75,8 @@ public:
     virtual void select(QWidget *page, bool focusPage = true,
                         bool recordInHistory = true);
 
-    void selectHistoryBack(bool focusPage = true);
-    void selectHistoryForward(bool focusPage = true);
+    void selectHistoryBack(bool focusPage);
+    void selectHistoryForward(bool focusPage);
     QWidget *getPreviousVisitedPage() const;
     std::vector<QWidget *> getVisitHistoryPages() const;
 
@@ -219,7 +219,6 @@ private:
     Item *findItem(QWidget *page);
 
     void pruneInvalidHistoryEntries();
-    bool selectHistoryPage(bool forward, bool focusPage);
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);

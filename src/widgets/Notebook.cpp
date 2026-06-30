@@ -38,12 +38,6 @@
 #include <ranges>
 #include <utility>
 
-namespace {
-
-constexpr size_t MAX_TAB_HISTORY_NAV_ATTEMPTS = 50;
-
-}  // namespace
-
 namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
@@ -389,12 +383,48 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 
 void Notebook::selectHistoryBack(bool focusPage)
 {
-    this->selectHistoryPage(false, focusPage);
+    this->pruneInvalidHistoryEntries();
+
+    for (size_t attempt = 0; attempt < TabHistory::MAX_TAB_HISTORY_SIZE;
+         ++attempt)
+    {
+        auto target = this->tabHistory_.goBack();
+        if (!target)
+        {
+            return;
+        }
+
+        if (!this->containsPage(*target))
+        {
+            continue;
+        }
+
+        this->select(*target, focusPage, false);
+        return;
+    }
 }
 
 void Notebook::selectHistoryForward(bool focusPage)
 {
-    this->selectHistoryPage(true, focusPage);
+    this->pruneInvalidHistoryEntries();
+
+    for (size_t attempt = 0; attempt < TabHistory::MAX_TAB_HISTORY_SIZE;
+         ++attempt)
+    {
+        auto target = this->tabHistory_.goForward();
+        if (!target)
+        {
+            return;
+        }
+
+        if (!this->containsPage(*target))
+        {
+            continue;
+        }
+
+        this->select(*target, focusPage, false);
+        return;
+    }
 }
 
 QWidget *Notebook::getPreviousVisitedPage() const
@@ -434,33 +464,6 @@ void Notebook::pruneInvalidHistoryEntries()
 
         this->tabHistory_.discardForwardTop();
     }
-}
-
-bool Notebook::selectHistoryPage(bool forward, bool focusPage)
-{
-    for (size_t attempt = 0; attempt < MAX_TAB_HISTORY_NAV_ATTEMPTS; ++attempt)
-    {
-        this->pruneInvalidHistoryEntries();
-
-        const bool canNavigate = forward ? this->tabHistory_.canGoForward()
-                                         : this->tabHistory_.canGoBack();
-        if (!canNavigate)
-        {
-            return false;
-        }
-
-        auto target = forward ? this->tabHistory_.goForward()
-                              : this->tabHistory_.goBack();
-        if (!target || !this->containsPage(*target))
-        {
-            continue;
-        }
-
-        this->select(*target, focusPage, false);
-        return true;
-    }
-
-    return false;
 }
 
 bool Notebook::containsPage(QWidget *page) const

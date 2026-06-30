@@ -21,6 +21,9 @@ namespace chatterino {
 class TabHistory
 {
 public:
+    /// Maximum number of page pointers stored in @ref history_.
+    static constexpr size_t MAX_TAB_HISTORY_SIZE = 50;
+
     /// Records navigation from @a from to @a to, clearing forward entries.
     void recordNavigation(QWidget *from, QWidget *to);
 
@@ -48,8 +51,6 @@ public:
     void discardForwardTop();
 
 private:
-    static constexpr size_t MAX_TAB_HISTORY_SIZE = 50;
-
     // history_[0, currentIndex_] is the back stack plus the current page.
     // history_[currentIndex_ + 1, end) is the forward stack.
     std::deque<QWidget *> history_;

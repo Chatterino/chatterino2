@@ -434,11 +434,11 @@ void Window::addShortcuts()
              const auto &direction = arguments.at(0);
              if (direction == "previous")
              {
-                 this->notebook_->selectHistoryBack();
+                 this->notebook_->selectHistoryBack(true);
              }
              else if (direction == "next")
              {
-                 this->notebook_->selectHistoryForward();
+                 this->notebook_->selectHistoryForward(true);
              }
              else
              {

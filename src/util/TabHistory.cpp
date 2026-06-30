@@ -15,6 +15,8 @@ void TabHistory::recordNavigation(QWidget *from, QWidget *to)
 
     if (!this->history_.empty())
     {
+        // Drop the forward stack: after going back, a new navigation replaces
+        // any pages that were ahead of the current index.
         this->history_.erase(
             this->history_.begin() +
                 static_cast<std::ptrdiff_t>(this->currentIndex_ + 1),
