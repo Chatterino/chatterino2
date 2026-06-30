@@ -34,6 +34,8 @@ public:
                               const QString &colorString) = 0;
     virtual void setUserNotes(const QString &userID, const QString &notes) = 0;
 
+    virtual void setUserAlias(const QString &userID, const QString &alias) = 0;
+
     virtual pajlada::Signals::NoArgSignal &userDataUpdated() = 0;
 };
 
@@ -52,6 +54,8 @@ public:
 
     // Update or insert extra data for the notes about a user
     void setUserNotes(const QString &userID, const QString &notes) override;
+
+    void setUserAlias(const QString &userID, const QString &alias) override;
 
     pajlada::Signals::NoArgSignal &userDataUpdated() override;
 
