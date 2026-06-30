@@ -26,12 +26,12 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 
 #include <QAbstractButton>
 #include <QHBoxLayout>
+#include <qregularexpression.h>
 #include <QRegularExpression>
 #include <QStringBuilder>
 #include <QTabWidget>
@@ -221,15 +221,34 @@ void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
     channel.addMessage(makeEmojiMessage(emojiMap), MessageContext::Original);
 }
 
-// Create an emote
-EmoteMap filterEmoteMap(const QString &text,
+bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &text,
+                               const QStringList &tags)
+{
+    bool tagsMatch = tags.empty();
+    for (const auto &tag : tags)
+    {
+        if (emote->tags.contains(tag, Qt::CaseInsensitive))
+        {
+            tagsMatch = true;
+            break;
+        }
+    }
+
+    return tagsMatch &&
+           (emote->name.string.contains(text, Qt::CaseInsensitive) ||
+            (emote->baseName.has_value() &&
+             emote->baseName.value().string.contains(text,
+                                                     Qt::CaseInsensitive)));
+}
+
+EmoteMap filterEmoteMap(const QString &text, const QStringList &tags,
                         const std::shared_ptr<const EmoteMap> &emotes)
 {
     EmoteMap filteredMap;
 
     for (const auto &emote : *emotes)
     {
-        if (emote.first.string.contains(text, Qt::CaseInsensitive))
+        if (emoteMatchesSearchAndTags(emote.second, text, tags))
         {
             filteredMap.insert(emote);
         }
@@ -239,19 +258,52 @@ EmoteMap filterEmoteMap(const QString &text,
 }
 
 std::vector<EmotePtr> filterEmoteVec(const QString &text,
+                                     const QStringList &tags,
                                      const std::vector<EmotePtr> &emotes)
 {
     std::vector<EmotePtr> filtered;
 
     for (const auto &emote : emotes)
     {
-        if (emote->name.string.contains(text, Qt::CaseInsensitive))
+        if (emoteMatchesSearchAndTags(emote, text, tags))
         {
             filtered.emplace_back(emote);
         }
     }
 
     return filtered;
+}
+
+/// Extracts the seach word and tags from the search input. If two search words
+/// exist that don't have the `tag:` prefix, only the first one is considered.
+/// Examples:
+///  - "tag:foo bar tag:baz" returns ("bar", ["foo", "baz"])
+///  - "asdf ta" returns ("asdf", [])
+std::pair<QString, QStringList> getSearchWordAndTags(const QString &text)
+{
+    static const QRegularExpression regex(
+        R"((?:tag:(\S+))|(\S+))", QRegularExpression::CaseInsensitiveOption);
+
+    QStringList tags;
+    QString searchWord;
+
+    for (const auto &match : regex.globalMatch(text))
+    {
+        if (match.hasCaptured(1))
+        {
+            tags.append(match.captured(1));
+        }
+        else if (match.hasCaptured(2) && searchWord.isEmpty())
+        {
+            // it might happen that we match the second capture group twice
+            // if we are in the middle of typing a tag after the emote name
+            // e.g. "emote ta". We therefore only consider the first match of
+            // the second capture group.
+            searchWord = match.captured(2);
+        }
+    }
+
+    return {searchWord, tags};
 }
 
 }  // namespace
@@ -275,7 +327,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);
 
-    QRegularExpression searchRegex("\\S*");
+    QRegularExpression searchRegex(R"((?:tag:\S+ )*\S+(?: tag:\S+)*)");
     searchRegex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -286,7 +338,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout2->setSpacing(8);
 
     this->search_->setPlaceholderText("Search all emotes...");
-    this->search_->setValidator(new TrimRegExpValidator(searchRegex));
+    this->search_->setValidator(new QRegularExpressionValidator(searchRegex));
     this->search_->setClearButtonEnabled(true);
     this->search_->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
@@ -553,11 +605,12 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
 }
 
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
-                                    const QString &searchText)
+                                    const QString &searchWord,
+                                    const QStringList &tags)
 {
     if (this->twitchChannel_)
     {
-        auto local = filterEmoteMap(searchText,
+        auto local = filterEmoteMap(searchWord, tags,
                                     this->twitchChannel_->localTwitchEmotes());
         if (!local.empty())
         {
@@ -568,7 +621,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         for (const auto &[_id, set] :
              **getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets())
         {
-            auto filtered = filterEmoteVec(searchText, set.emotes);
+            auto filtered = filterEmoteVec(searchWord, tags, set.emotes);
             if (!filtered.empty())
             {
                 addEmotes(*searchChannel, std::move(filtered), set.title());
@@ -577,11 +630,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getBttvEmotes()->emotes());
+        filterEmoteMap(searchWord, tags, getApp()->getBttvEmotes()->emotes());
     auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->getFfzEmotes()->emotes());
+        filterEmoteMap(searchWord, tags, getApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->getSeventvEmotes()->globalEmotes());
+        searchWord, tags, getApp()->getSeventvEmotes()->globalEmotes());
 
     // global
     if (!bttvGlobalEmotes.empty())
@@ -603,11 +656,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
+        filterEmoteMap(searchWord, tags, this->twitchChannel_->bttvEmotes());
     auto ffzChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
+        filterEmoteMap(searchWord, tags, this->twitchChannel_->ffzEmotes());
     auto seventvChannelEmotes =
-        filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
+        filterEmoteMap(searchWord, tags, this->twitchChannel_->seventvEmotes());
 
     // channel
     if (!bttvChannelEmotes.empty())
@@ -636,22 +689,27 @@ void EmotePopup::filterEmotes(const QString &searchText)
     auto searchChannel = this->searchView_->underlyingChannel();
     searchChannel->clearMessages();
 
+    auto [searchWord, tags] = getSearchWordAndTags(searchText);
+
     // true in special channels like /mentions
     if (this->channel_->isTwitchChannel())
     {
-        this->filterTwitchEmotes(searchChannel, searchText);
+        this->filterTwitchEmotes(searchChannel, searchWord, tags);
     }
 
     std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
-    for (const auto &emoji : emojis)
+    if (tags.empty())
     {
-        if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+        const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
+        for (const auto &emoji : emojis)
         {
-            filteredEmojis.push_back(emoji);
-            emojiCount++;
+            if (emoji->shortCodes[0].contains(searchWord, Qt::CaseInsensitive))
+            {
+                filteredEmojis.push_back(emoji);
+                emojiCount++;
+            }
         }
     }
     // emojis

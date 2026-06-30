@@ -52,7 +52,7 @@ private:
     Notebook *notebook_;
 
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
-                            const QString &searchText);
+                            const QString &searchWord, const QStringList &tags);
     void filterEmotes(const QString &text);
     void addShortcuts() override;
     bool eventFilter(QObject *object, QEvent *event) override;
