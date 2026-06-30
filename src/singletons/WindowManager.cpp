@@ -532,13 +532,16 @@ void WindowManager::save()
         for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
              tabIndex++)
         {
-            QJsonObject tabObj;
-            SplitContainer *tab = dynamic_cast<SplitContainer *>(
+            auto *container = dynamic_cast<SplitContainer *>(
                 window->getNotebook().getPageAt(tabIndex));
-            assert(tab != nullptr);
+            assert(container != nullptr);
 
-            bool isSelected = window->getNotebook().getSelectedPage() == tab;
-            WindowManager::encodeTab(tab, isSelected, tabObj);
+            bool isSelected =
+                window->getNotebook().getSelectedPage() == container;
+
+            QJsonObject tabObj;
+            TabDescriptor::fromRootContainer(*container, isSelected)
+                .appendJson(tabObj);
             tabsArr.append(tabObj);
         }
 
@@ -651,135 +654,6 @@ std::set<QString> WindowManager::getVisibleChannelNames() const
 std::span<Window *const> WindowManager::windows() const
 {
     return this->windows_;
-}
-
-void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
-                              QJsonObject &obj)
-{
-    // custom tab title
-    if (tab->getTab()->hasCustomTitle())
-    {
-        obj.insert("title", tab->getTab()->getCustomTitle());
-    }
-
-    // selected
-    if (isSelected)
-    {
-        obj.insert("selected", true);
-    }
-
-    // highlighting on new messages
-    obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
-
-    // splits
-    QJsonObject splits;
-
-    WindowManager::encodeNodeRecursively(tab->getBaseNode(), splits);
-
-    obj.insert("splits2", splits);
-}
-
-void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
-{
-    switch (node->getType())
-    {
-        case SplitNode::Type::Split: {
-            obj.insert("type", "split");
-            obj.insert("moderationMode", node->getSplit()->getModerationMode());
-
-            QJsonObject split;
-            WindowManager::encodeChannel(node->getSplit()->getIndirectChannel(),
-                                         split);
-            obj.insert("data", split);
-
-            QJsonArray filters;
-            WindowManager::encodeFilters(node->getSplit(), filters);
-            obj.insert("filters", filters);
-
-            auto spellOverride = node->getSplit()->checkSpellingOverride();
-            if (spellOverride)
-            {
-                obj["checkSpelling"] = *spellOverride;
-            }
-        }
-        break;
-        case SplitNode::Type::HorizontalContainer:
-        case SplitNode::Type::VerticalContainer: {
-            obj.insert("type",
-                       node->getType() == SplitNode::Type::HorizontalContainer
-                           ? "horizontal"
-                           : "vertical");
-
-            QJsonArray itemsArr;
-            for (const auto &n : node->getChildren())
-            {
-                QJsonObject subObj;
-                WindowManager::encodeNodeRecursively(n.get(), subObj);
-                itemsArr.append(subObj);
-            }
-            obj.insert("items", itemsArr);
-        }
-        break;
-
-        default:
-            break;
-    }
-
-    obj.insert("flexh", node->getHorizontalFlex());
-    obj.insert("flexv", node->getVerticalFlex());
-}
-
-void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
-{
-    assertInGuiThread();
-
-    switch (channel.getType())
-    {
-        case Channel::Type::Twitch: {
-            obj.insert("type", "twitch");
-            obj.insert("name", channel.get()->getName());
-        }
-        break;
-        case Channel::Type::TwitchAutomod: {
-            obj.insert("type", "automod");
-        }
-        break;
-        case Channel::Type::TwitchMentions: {
-            obj.insert("type", "mentions");
-        }
-        break;
-        case Channel::Type::TwitchWatching: {
-            obj.insert("type", "watching");
-        }
-        break;
-        case Channel::Type::TwitchWhispers: {
-            obj.insert("type", "whispers");
-        }
-        break;
-        case Channel::Type::TwitchLive: {
-            obj.insert("type", "live");
-        }
-        break;
-        case Channel::Type::Misc: {
-            obj.insert("type", "misc");
-            obj.insert("name", channel.get()->getName());
-        }
-        break;
-
-        default:
-            break;
-    }
-}
-
-void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
-{
-    assertInGuiThread();
-
-    auto filters = split->getFilters();
-    for (const auto &f : filters)
-    {
-        arr.append(f.toString(QUuid::WithoutBraces));
-    }
 }
 
 void WindowManager::closeAll()

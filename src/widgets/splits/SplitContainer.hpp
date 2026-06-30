@@ -101,7 +101,7 @@ public:
         Node *getParent() const;
         qreal getHorizontalFlex() const;
         qreal getVerticalFlex() const;
-        const std::vector<std::shared_ptr<Node>> &getChildren();
+        const std::vector<std::shared_ptr<Node>> &getChildren() const;
 
     private:
         bool isOrContainsNode(Node *_node);
@@ -222,6 +222,7 @@ public:
 
     NotebookTab *getTab() const;
     Node *getBaseNode();
+    const Node *getBaseNode() const;
 
     void setTab(NotebookTab *tab);
     void hideResizeHandles();
@@ -245,7 +246,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    NodeDescriptor buildDescriptorRecursively(const Node *currentNode) const;
+    static NodeDescriptor buildDescriptorRecursively(const Node &node);
     void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
                                         Node *baseNode);
 
