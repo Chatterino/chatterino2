@@ -55,6 +55,8 @@
 
 #include <functional>
 
+using namespace Qt::Literals;
+
 namespace chatterino {
 namespace {
 void showTutorialVideo(QWidget *parent, const QString &source,
@@ -1092,7 +1094,7 @@ void Split::explainSplitting()
 void Split::popup()
 {
     auto *app = getApp();
-    Window &window = app->getWindows()->createWindow(WindowType::Popup);
+    Window &window = app->getWindows()->createWindow(WindowType::Popup, {});
 
     auto *split = new Split(window.getNotebook().getOrAddSelectedPage());
 
