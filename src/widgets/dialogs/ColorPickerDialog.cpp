@@ -5,6 +5,7 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
 #include "common/Literals.hpp"
+#include "common/QLogging.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "widgets/helper/color/AlphaSlider.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
@@ -13,6 +14,8 @@
 #include "widgets/helper/color/SBCanvas.hpp"
 
 #include <QDialogButtonBox>
+#include <QFile>
+#include <QLoggingCategory>
 #include <QSet>
 
 namespace {
@@ -76,6 +79,17 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
 {
     this->setWindowTitle(u"Chatterino - Color picker"_s);
     this->setAttribute(Qt::WA_DeleteOnClose);
+
+    this->themeChangedEvent();
+    QFile styleFile(":/qss/settings.qss");
+    if (!styleFile.open(QFile::ReadOnly))
+    {
+        assert(false && "Resources not loaded");
+        qCWarning(chatterinoWidget) << "Resources not loaded";
+    }
+    QString stylesheet = QString::fromUtf8(styleFile.readAll());
+    this->setStyleSheet(stylesheet);
+    this->overrideBackgroundColor_ = QColor("#111111");
 
     auto *dialogContents = new QHBoxLayout;
     dialogContents->setContentsMargins(10, 10, 10, 10);
@@ -161,6 +175,15 @@ void ColorPickerDialog::setColor(const QColor &color)
     }
     this->color_ = color;
     this->colorChanged(color);
+}
+
+void ColorPickerDialog::themeChangedEvent()
+{
+    BaseWindow::themeChangedEvent();
+
+    QPalette palette;
+    palette.setColor(QPalette::Window, QColor("#111"));
+    this->setPalette(palette);
 }
 
 }  // namespace chatterino
