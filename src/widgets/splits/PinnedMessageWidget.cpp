@@ -13,14 +13,13 @@
 #include "singletons/Theme.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
 
-#include <QAbstractTextDocumentLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QScrollArea>
 #include <QShowEvent>
-#include <QTextEdit>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -42,7 +41,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     , pinnedByLabel_(new QLabel(this))
     , countdownLabel_(new QLabel(this))
     , menuButton_(new DrawnButton(DrawnButton::Symbol::Kebab, {}, this))
-    , messageLabel_(new QTextEdit(this))
+    , messageLabel_(new QLabel(this))
     , footerLabel_(new QLabel(this))
     , progressTimer_(new QTimer(this))
     , autoHideTimer_(new QTimer(this))
@@ -72,30 +71,28 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     contentBox->addLayout(headerRow);
 
     // Message body
-    this->messageLabel_->setReadOnly(true);
-    this->messageLabel_->setFocusPolicy(Qt::NoFocus);
-    this->messageLabel_->setFrameShape(QFrame::NoFrame);
-    this->messageLabel_->setStyleSheet(
-        "QTextEdit { background: transparent; }");
-    this->messageLabel_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->messageLabel_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    this->messageLabel_->setContextMenuPolicy(Qt::NoContextMenu);
-    this->messageLabel_->setWordWrapMode(
-        QTextOption::WrapAtWordBoundaryOrAnywhere);
-    this->messageLabel_->setMaximumHeight(110);
+    this->messageLabel_->setWordWrap(true);
+    this->messageLabel_->setTextFormat(Qt::PlainText);
+    this->messageLabel_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    this->messageLabel_->setStyleSheet("background: transparent;");
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
-                                       QSizePolicy::Fixed);
-    this->messageLabel_->document()->setDocumentMargin(0);
-    this->messageLabel_->setContentsMargins(0, 0, 0, 0);
-    QObject::connect(
-        this->messageLabel_->document()->documentLayout(),
-        &QAbstractTextDocumentLayout::documentSizeChanged, this->messageLabel_,
-        [label = this->messageLabel_](QSizeF newSize) {
-            const int h = qBound(1, (int)std::ceil(newSize.height()),
-                                 label->maximumHeight());
-            label->setFixedHeight(h);
-        });
-    contentBox->addWidget(this->messageLabel_);
+                                       QSizePolicy::Preferred);
+
+    this->messageScrollArea_ = new QScrollArea(this);
+    this->messageScrollArea_->setWidgetResizable(true);
+    this->messageScrollArea_->setHorizontalScrollBarPolicy(
+        Qt::ScrollBarAlwaysOff);
+    this->messageScrollArea_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    this->messageScrollArea_->setFrameShape(QFrame::NoFrame);
+    this->messageScrollArea_->setFocusPolicy(Qt::NoFocus);
+    this->messageScrollArea_->setStyleSheet(
+        "QScrollArea { background: transparent; } "
+        "QScrollArea > QWidget > QWidget { background: transparent; }");
+    this->messageScrollArea_->viewport()->setAutoFillBackground(false);
+    this->messageScrollArea_->setSizePolicy(QSizePolicy::Expanding,
+                                            QSizePolicy::Fixed);
+    this->messageScrollArea_->setWidget(this->messageLabel_);
+    contentBox->addWidget(this->messageScrollArea_);
 
     // Footer: [sender · time] ... [countdown]
     auto *footerRow = new QHBoxLayout();
@@ -312,7 +309,8 @@ void PinnedMessageWidget::refresh()
         QStringLiteral("Pinned by <b>%1</b>")
             .arg(pin->pinnedBy.formatted(mode).toHtmlEscaped()));
 
-    this->messageLabel_->setPlainText(pin->messageText);
+    this->messageLabel_->setText(pin->messageText);
+    this->updateMessageHeight();
 
     {
         const QString sentAt = pin->startsAt.toLocalTime().toString(
@@ -359,6 +357,32 @@ void PinnedMessageWidget::toggleUserPinned()
     }
 }
 
+void PinnedMessageWidget::updateMessageHeight()
+{
+    if (!this->messageLabel_ || !this->messageScrollArea_)
+    {
+        return;
+    }
+
+    // Wrapped height of the label at the current viewport width.
+    const int width = this->messageScrollArea_->viewport()->width();
+    int contentH = this->messageLabel_->heightForWidth(width);
+    if (contentH <= 0)
+    {
+        contentH = this->messageLabel_->sizeHint().height();
+    }
+
+    // Size to content, but never taller than the cap.
+    this->messageScrollArea_->setFixedHeight(
+        qBound(1, contentH, this->messageMaxHeight_));
+}
+
+void PinnedMessageWidget::resizeEvent(QResizeEvent *event)
+{
+    BaseWidget::resizeEvent(event);
+    this->updateMessageHeight();
+}
+
 void PinnedMessageWidget::showEvent(QShowEvent *event)
 {
     BaseWidget::showEvent(event);
@@ -381,15 +405,8 @@ void PinnedMessageWidget::scaleChangedEvent(float newScale)
     QFont bodyFont = this->messageLabel_->font();
     bodyFont.setPointSizeF(13.0F * newScale);
     this->messageLabel_->setFont(bodyFont);
-    const int newMax = int(110 * newScale);
-    this->messageLabel_->setMaximumHeight(newMax);
-    // Clamp the current height to the new max so zooming out doesn't leave
-    // the widget stuck at its previous fixed height.
-    const int docH = (int)std::ceil(this->messageLabel_->document()
-                                        ->documentLayout()
-                                        ->documentSize()
-                                        .height());
-    this->messageLabel_->setFixedHeight(qBound(1, docH, newMax));
+    this->messageMaxHeight_ = int(110 * newScale);
+    this->updateMessageHeight();
 
     QFont footerFont = this->footerLabel_->font();
     footerFont.setPointSizeF(10.0F * newScale);

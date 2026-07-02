@@ -11,7 +11,7 @@
 #include <QTimer>
 
 class QLabel;
-class QTextEdit;
+class QScrollArea;
 
 namespace chatterino {
 
@@ -41,6 +41,7 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     void scaleChangedEvent(float newScale) override;
 
 private:
@@ -48,6 +49,9 @@ private:
     void refresh();
     void showModMenu();
     void tickProgress();
+    /// Sizes the message scroll area to its wrapped content, capped at the
+    /// (scaled) maximum height. A vertical scrollbar appears past the cap.
+    void updateMessageHeight();
 
     TwitchChannel *channel_ = nullptr;
     pajlada::Signals::SignalHolder signalHolder_;
@@ -58,13 +62,15 @@ private:
     DrawnButton *menuButton_{};  // mod menu
 
     // Body
-    QTextEdit *messageLabel_ = nullptr;
+    QScrollArea *messageScrollArea_ = nullptr;
+    QLabel *messageLabel_ = nullptr;
     QLabel *footerLabel_ = nullptr;
 
     QTimer *progressTimer_ = nullptr;
     QTimer *autoHideTimer_ = nullptr;
-    bool userToggled_ = false;  // true while user manually pinned the widget
-    QDateTime pinEndsAt_;       // invalid when no end time
+    int messageMaxHeight_ = 110;  // scaled cap for the message body
+    bool userToggled_ = false;    // true while user manually pinned the widget
+    QDateTime pinEndsAt_;         // invalid when no end time
 };
 
 }  // namespace chatterino
