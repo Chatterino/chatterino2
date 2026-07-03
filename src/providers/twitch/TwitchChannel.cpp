@@ -2594,10 +2594,9 @@ void TwitchChannel::refreshPinnedMessage()
         });
 }
 
-const std::unique_ptr<const HelixPinnedChatMessage> &
-    TwitchChannel::getPinnedMessage() const
+const HelixPinnedChatMessage *TwitchChannel::getPinnedMessage() const
 {
-    return this->pinnedMessage_;
+    return this->pinnedMessage_.get();
 }
 
 void TwitchChannel::clearPinnedMessage()

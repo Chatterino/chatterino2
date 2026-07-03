@@ -37,7 +37,7 @@ public:
 
     void updateChannelText();
     void updateIcons();
-    void updatePinButton(bool hasPinnedMessage);
+    void updatePinButton();
     // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
     // has changed (e.g. sub mode toggled)
     void updateRoomModes();

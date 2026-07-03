@@ -24,8 +24,10 @@
 #include <QVBoxLayout>
 
 using namespace std::chrono_literals;
+using namespace Qt::Literals;
 
 #include <chrono>
+#include <memory>
 #include <optional>
 
 namespace chatterino {
@@ -47,7 +49,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     , autoHideTimer_(new QTimer(this))
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    this->setAttribute(Qt::WA_OpaquePaintEvent);
 
     auto *outerBox = new QVBoxLayout(this);
     outerBox->setContentsMargins(0, 0, 0, 0);
@@ -64,7 +65,8 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     headerRow->addWidget(this->pinnedByLabel_);
     headerRow->addStretch(1);
     this->menuButton_->setScaleIndependentSize(28, 28);
-    this->menuButton_->setToolTip(QStringLiteral("Mod options"));
+    this->menuButton_->setToolTip(u"Mod options"_s);
+    this->menuButton_->setMenu(this->buildModMenu());
     this->menuButton_->hide();
     headerRow->addWidget(this->menuButton_);
 
@@ -137,10 +139,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
         }
     });
 
-    QObject::connect(this->menuButton_, &Button::leftClicked, this, [this] {
-        this->showModMenu();
-    });
-
     this->scaleChangedEvent(this->scale());
     this->hide();
 }
@@ -170,14 +168,14 @@ void PinnedMessageWidget::tickProgress()
     QString timeStr;
     if (hours > 0)
     {
-        timeStr = QStringLiteral("\u23F1 %1:%2:%3")
+        timeStr = u"\u23F1 %1:%2:%3"_s
                       .arg(hours)
                       .arg(mins, 2, 10, QChar(u'0'))
                       .arg(secs, 2, 10, QChar(u'0'));
     }
     else
     {
-        timeStr = QStringLiteral("\u23F1 %1:%2")
+        timeStr = u"\u23F1 %1:%2"_s
                       .arg(mins, 2, 10, QChar(u'0'))
                       .arg(secs, 2, 10, QChar(u'0'));
     }
@@ -221,32 +219,27 @@ void PinnedMessageWidget::setChannel(TwitchChannel *channel)
     this->refresh();
 }
 
-void PinnedMessageWidget::showModMenu()
+std::unique_ptr<QMenu> PinnedMessageWidget::buildModMenu()
 {
-    if (!this->channel_)
-    {
-        return;
-    }
+    auto menu = std::make_unique<QMenu>(this);
 
-    QMenu menu(this);
-
-    menu.addAction(QStringLiteral("Unpin this Message"), this, [this] {
+    menu->addAction(u"Unpin this Message"_s, this, [this] {
         if (this->channel_)
         {
             this->channel_->unpinCurrentMessage();
         }
     });
 
-    auto *unpinAfterMenu = menu.addMenu(QStringLiteral("Unpin After"));
+    auto *unpinAfterMenu = menu->addMenu(u"Unpin After"_s);
 
     const auto addDuration = [&](const QString &label,
-                                 std::optional<int> seconds) {
-        unpinAfterMenu->addAction(label, this, [this, seconds] {
+                                 std::optional<std::chrono::seconds> duration) {
+        unpinAfterMenu->addAction(label, this, [this, duration] {
             if (!this->channel_)
             {
                 return;
             }
-            const auto &pin = this->channel_->getPinnedMessage();
+            const auto *pin = this->channel_->getPinnedMessage();
             if (!pin)
             {
                 return;
@@ -256,30 +249,26 @@ void PinnedMessageWidget::showModMenu()
             {
                 return;
             }
-            std::optional<std::chrono::seconds> duration =
-                seconds ? std::make_optional(std::chrono::seconds(*seconds))
-                        : std::nullopt;
             this->channel_->updatePinnedMessageAs(
                 pin->messageID, duration, *currentAccount, pin->messageText);
         });
     };
 
-    addDuration(QStringLiteral("1 minute"), 60);
-    addDuration(QStringLiteral("5 minutes"), 300);
-    addDuration(QStringLiteral("10 minutes"), 600);
-    addDuration(QStringLiteral("20 minutes"), 1200);
-    addDuration(QStringLiteral("30 minutes"), 1800);
+    addDuration(u"1 minute"_s, 1min);
+    addDuration(u"5 minutes"_s, 5min);
+    addDuration(u"10 minutes"_s, 10min);
+    addDuration(u"20 minutes"_s, 20min);
+    addDuration(u"30 minutes"_s, 30min);
     unpinAfterMenu->addSeparator();
-    addDuration(QStringLiteral("End of stream"), std::nullopt);
+    addDuration(u"End of stream"_s, std::nullopt);
 
-    menu.addSeparator();
+    menu->addSeparator();
 
-    menu.addAction(QStringLiteral("Hide for Yourself"), this, [this] {
+    menu->addAction(u"Hide for Yourself"_s, this, [this] {
         this->hide();
     });
 
-    menu.exec(
-        this->menuButton_->mapToGlobal(QPoint(0, this->menuButton_->height())));
+    return menu;
 }
 
 void PinnedMessageWidget::refresh()
@@ -293,7 +282,7 @@ void PinnedMessageWidget::refresh()
         return;
     }
 
-    const auto &pin = this->channel_->getPinnedMessage();
+    const auto *pin = this->channel_->getPinnedMessage();
     if (!pin)
     {
         this->progressTimer_->stop();
@@ -306,7 +295,7 @@ void PinnedMessageWidget::refresh()
     const auto mode = static_cast<UsernameDisplayMode>(
         getSettings()->usernameDisplayMode.getValue());
     this->pinnedByLabel_->setText(
-        QStringLiteral("Pinned by <b>%1</b>")
+        u"Pinned by <b>%1</b>"_s
             .arg(pin->pinnedBy.formatted(mode).toHtmlEscaped()));
 
     this->messageLabel_->setText(pin->messageText);
@@ -316,7 +305,7 @@ void PinnedMessageWidget::refresh()
         const QString sentAt = pin->startsAt.toLocalTime().toString(
             getSettings()->timestampFormat);
         this->footerLabel_->setText(
-            QStringLiteral("Sent by %1 \u00B7 %2")
+            u"Sent by %1 \u00B7 %2"_s
                 .arg(pin->sender.formatted(mode).toHtmlEscaped(), sentAt));
     }
 

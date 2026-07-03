@@ -10,8 +10,11 @@
 #include <QDateTime>
 #include <QTimer>
 
+#include <memory>
+
 class QLabel;
 class QScrollArea;
+class QMenu;
 
 namespace chatterino {
 
@@ -47,7 +50,8 @@ protected:
 private:
     void paintEvent(QPaintEvent *event) override;
     void refresh();
-    void showModMenu();
+    /// Builds the moderator menu shown when clicking the menu button.
+    std::unique_ptr<QMenu> buildModMenu();
     void tickProgress();
     /// Sizes the message scroll area to its wrapped content, capped at the
     /// (scaled) maximum height. A vertical scrollbar appears past the cap.
@@ -59,7 +63,8 @@ private:
     // Header row
     QLabel *pinnedByLabel_ = nullptr;
     QLabel *countdownLabel_ = nullptr;
-    DrawnButton *menuButton_{};  // mod menu
+    /// Mod Menu.
+    DrawnButton *menuButton_ = nullptr;
 
     // Body
     QScrollArea *messageScrollArea_ = nullptr;
@@ -68,9 +73,12 @@ private:
 
     QTimer *progressTimer_ = nullptr;
     QTimer *autoHideTimer_ = nullptr;
-    int messageMaxHeight_ = 110;  // scaled cap for the message body
-    bool userToggled_ = false;    // true while user manually pinned the widget
-    QDateTime pinEndsAt_;         // invalid when no end time
+    /// Scaled cap for the message body.
+    int messageMaxHeight_ = 110;
+    /// True while user manually pinned the widget.
+    bool userToggled_ = false;
+    /// Invalid when no end time.
+    QDateTime pinEndsAt_;
 };
 
 }  // namespace chatterino

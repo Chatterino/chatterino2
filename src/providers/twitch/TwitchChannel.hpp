@@ -416,8 +416,7 @@ public:
     void clearPinnedMessage();
 
     /// Returns the currently pinned message, or null if none is pinned.
-    const std::unique_ptr<const HelixPinnedChatMessage> &getPinnedMessage()
-        const;
+    const HelixPinnedChatMessage *getPinnedMessage() const;
 
     /**
      * Unpin the currently pinned message. Only valid for moderators.

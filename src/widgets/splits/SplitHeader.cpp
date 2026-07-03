@@ -859,25 +859,19 @@ void SplitHeader::handleChannelChanged()
 
         this->channelConnections_.managedConnect(
             twitchChannel->pinnedMessageChanged, [this]() {
-                auto ch = this->split_->getChannel();
-                auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
-                this->updatePinButton(tc != nullptr &&
-                                      tc->getPinnedMessage() != nullptr);
+                this->updatePinButton();
             });
 
         this->channelConnections_.managedConnect(
             this->split_->getPinnedBanner()->visibilityChanged, [this]() {
-                auto ch = this->split_->getChannel();
-                auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
-                this->updatePinButton(tc != nullptr &&
-                                      tc->getPinnedMessage() != nullptr);
+                this->updatePinButton();
             });
 
-        this->updatePinButton(twitchChannel->getPinnedMessage() != nullptr);
+        this->updatePinButton();
     }
     else
     {
-        this->updatePinButton(false);
+        this->updatePinButton();
     }
 }
 
@@ -900,8 +894,13 @@ void SplitHeader::setAddButtonVisible(bool value)
     this->addButton_->setVisible(value);
 }
 
-void SplitHeader::updatePinButton(bool hasPinnedMessage)
+void SplitHeader::updatePinButton()
 {
+    auto channel = this->split_->getChannel();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    const bool hasPinnedMessage =
+        twitchChannel != nullptr && twitchChannel->getPinnedMessage() != nullptr;
+
     this->pinButton_->setVisible(hasPinnedMessage);
     if (hasPinnedMessage && this->split_->getPinnedBanner()->isVisible())
     {
@@ -1179,9 +1178,7 @@ void SplitHeader::themeChangedEvent()
     this->titleLabel_->setPalette(palette);
 
     // Re-apply pin button color to respect updated theme
-    auto ch = this->split_->getChannel();
-    auto *tc = dynamic_cast<TwitchChannel *>(ch.get());
-    this->updatePinButton(tc != nullptr && tc->getPinnedMessage() != nullptr);
+    this->updatePinButton();
 
     auto bg = this->theme->splits.header.background;
     this->addButton_->setOptions({
