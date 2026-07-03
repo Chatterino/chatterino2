@@ -10,7 +10,7 @@
 - Bugfix: Improve nightly downgrade message. (#6842)
 - Bugfix: Improved blocked user loading on poor internet connections. (#6846)
 - Bugfix: Fixed an issue that could prevent your Twitch subscription emotes from loading. (#6860)
-- Dev: Removed unused dependency on QtKeychain.
+- Dev: Removed unused dependency on QtKeychain. (#7078)
 
 ## 2.5.5-beta.1
 
