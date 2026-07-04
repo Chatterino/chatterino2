@@ -101,8 +101,6 @@ else()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
 endif()
 
-enable_testing()
-
 add_subdirectory(lib/twitch-eventsub-ws)
 add_subdirectory(src)
 
@@ -111,6 +109,7 @@ if(BUILD_TESTS OR BUILD_BENCHMARKS)
 endif()
 
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(tests)
 endif()
 
