@@ -69,6 +69,7 @@ public:
     WebSocketPool &webSocketPool();
 
     pajlada::Signals::Signal<Plugin *> onPluginLoaded;
+    pajlada::Signals::NoArgSignal onPluginsUpdated;
 
 private:
     void loadPlugins();
@@ -82,12 +83,17 @@ private:
 
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
+
+    void queueChangeNotification();
+
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
     WebSocketPool webSocketPool_;
 
     std::vector<
         std::pair<std::string, std::function<sol::object(sol::state_view)>>>
         loaders_;
+
+    bool changeNotificationQueued = false;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;
