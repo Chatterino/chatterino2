@@ -158,7 +158,7 @@ Settings::Settings(const Modes &modes, const Args &args,
     , disableSaving(args.dontSaveSettings)
     , createShortcutForToasts(
           "/notifications/createShortcutForToasts",
-          not(modes.isPortable || modes.isExternallyPackaged))
+          (modes.isPortable || modes.isExternallyPackaged) ? false : true)
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
