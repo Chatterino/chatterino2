@@ -45,7 +45,6 @@ jobs:
         include:
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -53,7 +52,6 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -61,18 +59,24 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
             build-deb: false
             plugins: false
+          - os: ubuntu-26.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: true
+            plugins: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -133,7 +137,7 @@ jobs:
         if: matrix.build-deb
         uses: actions/upload-artifact@v7
         with:
-          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
@@ -144,13 +148,13 @@ jobs:
         include:
           # macOS
           - os: macos-14
-            qt-version: 6.7.1
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.8.3
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -161,7 +165,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -217,7 +221,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -364,39 +368,24 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # allows for tags access
 
-      # Windows
       - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1
+        name: Download artifacts
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
-
-      - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
-          path: release-artifacts/
-
-      # Linux
-      - uses: actions/download-artifact@v8
-        name: Ubuntu 22.04 deb
-        with:
-          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v8
-        name: Ubuntu 24.04 deb
-        with:
-          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
-          path: release-artifacts/
+          merge-multiple: true
 
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
+
+      - name: Remove macOS artifacts
+        run: |
+          rm -f release-artifacts/*macos*.dmg
         shell: bash
 
       - name: Setup Python

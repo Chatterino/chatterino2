@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Common.hpp"
-#include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -71,10 +70,10 @@ Window::Window(WindowType type, QWidget *parent)
     this->addMenuBar();
 #endif
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->onAccountSelected();
-        }));
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)

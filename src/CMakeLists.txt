@@ -26,8 +26,6 @@ set(SOURCE_FILES
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
         common/ChatterSet.hpp
-        common/Credentials.cpp
-        common/Credentials.hpp
         common/Env.cpp
         common/Env.hpp
         common/LastMessageLineStyle.hpp
@@ -593,6 +591,9 @@ set(SOURCE_FILES
         util/OnceFlag.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
+        util/RapidJsonSerializeQSize.hpp
+        util/RapidJsonSerializeQString.hpp
+        util/RapidJsonSerializeQStringView.hpp
         util/RatelimitBucket.cpp
         util/RatelimitBucket.hpp
         util/RenameThread.cpp
@@ -889,6 +890,12 @@ list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if (APPLE)
+    target_link_libraries(${LIBRARY_PROJECT} PRIVATE
+        "$<LINK_LIBRARY:FRAMEWORK,Security>"
+    )
+endif ()
+
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
         PUBLIC
@@ -917,7 +924,6 @@ if (CHATTERINO_GENERATE_COVERAGE)
         EXCLUDE "lib/lua/*"
         EXCLUDE "lib/magic_enum/*"
         EXCLUDE "lib/miniaudio/*"
-        EXCLUDE "lib/qtkeychain/*"
         EXCLUDE "lib/rapidjson/*"
         EXCLUDE "lib/semver/*"
         EXCLUDE "lib/serialize/*"
@@ -976,18 +982,6 @@ if (CHATTERINO_ALLOW_PRIVATE_QT_API)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
         CHATTERINO_WITH_PRIVATE_QT_API)
-endif()
-
-if (BUILD_WITH_QTKEYCHAIN)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            qt${MAJOR_QT_VERSION}keychain
-            )
-else()
-    target_compile_definitions(${LIBRARY_PROJECT}
-        PUBLIC
-        NO_QTKEYCHAIN
-        )
 endif()
 
 # Set the output of TARGET to be 
@@ -1201,11 +1195,6 @@ set(_c2_qt_defs
 target_compile_definitions(${VERSION_PROJECT} PUBLIC ${_c2_qt_defs})
 target_compile_definitions(${LIBRARY_PROJECT} PUBLIC ${_c2_qt_defs})
 
-if (USE_SYSTEM_QTKEYCHAIN)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
-        CMAKE_BUILD
-        )
-endif ()
 if (WIN32)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         USEWINSDK
