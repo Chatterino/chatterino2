@@ -67,11 +67,11 @@ include(dependencies)
 # Can stil be broken into smaller modules
 include(toolchain)
 
-if (WIN32)
+if(WIN32)
     add_subdirectory(lib/WinToast EXCLUDE_FROM_ALL)
-endif ()
+endif()
 
-if (BUILD_TESTS)
+if(BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
     # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
@@ -80,43 +80,43 @@ if (BUILD_TESTS)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
 
     mark_as_advanced(
-            BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
-            gmock_build_tests gtest_build_samples gtest_build_tests
-            gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+        BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+        gmock_build_tests gtest_build_samples gtest_build_tests
+        gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
     )
 
     set_target_properties(gtest PROPERTIES FOLDER lib)
     set_target_properties(gtest_main PROPERTIES FOLDER lib)
     set_target_properties(gmock PROPERTIES FOLDER lib)
     set_target_properties(gmock_main PROPERTIES FOLDER lib)
-endif ()
+endif()
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
 # For CI runs, however, the date of build file generation should be consistent with the date of
 # compilation so this approximation is "good enough" for our purpose.
-if (DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
+if(DEFINED ENV{CHATTERINO_SKIP_DATE_GEN})
     set(cmake_gen_date "1970-01-01")
-else ()
+else()
     string(TIMESTAMP cmake_gen_date "%Y-%m-%d")
-endif ()
+endif()
 
 enable_testing()
 
 add_subdirectory(lib/twitch-eventsub-ws)
 add_subdirectory(src)
 
-if (BUILD_TESTS OR BUILD_BENCHMARKS)
+if(BUILD_TESTS OR BUILD_BENCHMARKS)
     add_subdirectory(mocks)
-endif ()
+endif()
 
-if (BUILD_TESTS)
+if(BUILD_TESTS)
     add_subdirectory(tests)
-endif ()
+endif()
 
 
-if (BUILD_BENCHMARKS)
+if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
-endif ()
+endif()
 
 feature_summary(WHAT ALL)

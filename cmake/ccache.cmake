@@ -2,17 +2,17 @@ include_guard(GLOBAL)
 
 find_program(CCACHE_PROGRAM ccache)
 find_program(SCCACHE_PROGRAM sccache)
-if (SCCACHE_PROGRAM)
+if(SCCACHE_PROGRAM)
     set(CCACHE_COMPILER_LAUNCHER ${SCCACHE_PROGRAM})
-elseif (CCACHE_PROGRAM)
+elseif(CCACHE_PROGRAM)
     set(CCACHE_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
 endif()
 
-if (CCACHE_COMPILER_LAUNCHER)
+if(CCACHE_COMPILER_LAUNCHER)
     message(STATUS "Overriding ${CMAKE_CXX_COMPILER_LAUNCHER} with ${CCACHE_COMPILER_LAUNCHER} for faster incremental builds")
     set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_COMPILER_LAUNCHER}" CACHE STRING "CXX compiler launcher")
 
-    if (MSVC)
+    if(MSVC)
         # /Zi can't be used with (s)ccache
         # Use /Z7 instead (debug info in object files)
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
