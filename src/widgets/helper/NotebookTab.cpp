@@ -20,6 +20,7 @@
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/Window.hpp"
 
 #include <boost/bind/bind.hpp>
 #include <boost/container_hash/hash.hpp>
@@ -548,13 +549,13 @@ void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
     this->removeHighlightSource(channelViewId);
     this->updateHighlightStateDueSourcesChange();
 
-    auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
-    if (splitNotebook)
+    for (auto *window : getApp()->getWindows()->windows())
     {
-        for (int i = 0; i < splitNotebook->getPageCount(); ++i)
+        auto &splitNotebook = window->getNotebook();
+        for (int i = 0; i < splitNotebook.getPageCount(); ++i)
         {
             auto *splitContainer =
-                dynamic_cast<SplitContainer *>(splitNotebook->getPageAt(i));
+                dynamic_cast<SplitContainer *>(splitNotebook.getPageAt(i));
             if (splitContainer)
             {
                 auto *tab = splitContainer->getTab();
@@ -633,13 +634,13 @@ void NotebookTab::setSelected(bool value)
 
     if (value)
     {
-        auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
-        if (splitNotebook)
+        for (auto *window : getApp()->getWindows()->windows())
         {
-            for (int i = 0; i < splitNotebook->getPageCount(); ++i)
+            auto &splitNotebook = window->getNotebook();
+            for (int i = 0; i < splitNotebook.getPageCount(); ++i)
             {
                 auto *splitContainer =
-                    dynamic_cast<SplitContainer *>(splitNotebook->getPageAt(i));
+                    dynamic_cast<SplitContainer *>(splitNotebook.getPageAt(i));
                 if (splitContainer)
                 {
                     auto *tab = splitContainer->getTab();
@@ -796,17 +797,19 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
 bool NotebookTab::shouldMessageHighlight(
     const ChannelView &channelViewSource) const
 {
-    auto *visibleSplitContainer =
-        dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
-    if (visibleSplitContainer != nullptr)
+    for (auto *window : getApp()->getWindows()->windows())
     {
-        const auto &visibleSplits = visibleSplitContainer->getSplits();
-        for (const auto &visibleSplit : visibleSplits)
+        auto *visibleSplitContainer = window->getNotebook().getSelectedPage();
+        if (visibleSplitContainer != nullptr)
         {
-            if (channelViewSource.getID() ==
-                visibleSplit->getChannelView().getID())
+            const auto &visibleSplits = visibleSplitContainer->getSplits();
+            for (const auto &visibleSplit : visibleSplits)
             {
-                return false;
+                if (channelViewSource.getID() ==
+                    visibleSplit->getChannelView().getID())
+                {
+                    return false;
+                }
             }
         }
     }
