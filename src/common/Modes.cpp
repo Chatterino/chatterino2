@@ -33,10 +33,4 @@ Modes::Modes()
     }
 }
 
-const Modes &Modes::instance()
-{
-    static Modes instance;
-    return instance;
-}
-
 }  // namespace chatterino
