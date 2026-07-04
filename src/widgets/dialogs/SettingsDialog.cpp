@@ -28,7 +28,6 @@
 #include "widgets/settingspages/PluginsPage.hpp"
 
 #include <QDialogButtonBox>
-#include <QFile>
 #include <QLineEdit>
 
 namespace chatterino {
@@ -40,6 +39,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
               BaseWindow::Flags::Dialog,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
+              BaseWindow::UseSettingsStylesheet,
           },
           parent)
 {
@@ -50,15 +50,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
                          ~Qt::WindowContextHelpButtonHint);
 
     this->resize(915, 600);
-    this->themeChangedEvent();
-    QFile styleFile(":/qss/settings.qss");
-    if (!styleFile.open(QFile::ReadOnly))
-    {
-        assert(false && "Resources not loaded");
-        qCWarning(chatterinoWidget) << "Resources not loaded";
-    }
-    QString stylesheet = QString::fromUtf8(styleFile.readAll());
-    this->setStyleSheet(stylesheet);
 
     this->initUi();
     this->addTabs();
@@ -424,15 +415,6 @@ void SettingsDialog::scaleChangedEvent(float newScale)
     {
         this->ui_.tabContainerContainer->setFixedWidth(150);
     }
-}
-
-void SettingsDialog::themeChangedEvent()
-{
-    BaseWindow::themeChangedEvent();
-
-    QPalette palette;
-    palette.setColor(QPalette::Window, QColor("#111"));
-    this->setPalette(palette);
 }
 
 void SettingsDialog::showEvent(QShowEvent *e)
