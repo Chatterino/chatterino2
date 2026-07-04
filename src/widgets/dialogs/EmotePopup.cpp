@@ -31,7 +31,6 @@
 
 #include <QAbstractButton>
 #include <QHBoxLayout>
-#include <qregularexpression.h>
 #include <QRegularExpression>
 #include <QStringBuilder>
 #include <QTabWidget>

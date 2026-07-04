@@ -7,7 +7,7 @@
 #include "common/Aliases.hpp"
 #include "messages/ImageSet.hpp"
 
-#include <qstringlist.h>
+#include <QStringList>
 
 #include <functional>
 #include <memory>
