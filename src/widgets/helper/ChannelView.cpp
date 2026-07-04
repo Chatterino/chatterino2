@@ -2447,6 +2447,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 return;
             }
 
+            this->elementClicked.invoke(hoveredElement, event->modifiers());
+
             const auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
@@ -2456,7 +2458,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             // Invoke to signal from EmotePopup.
             if (link.type == Link::InsertText)
             {
-                this->linkClicked.invoke(link);
+                this->linkClicked.invoke(link, event->modifiers());
 
                 if (this->context_ == Context::None)
                 {
@@ -2619,6 +2621,8 @@ void ChannelView::addContextMenuItems(
 
     // Add executable command options
     this->addCommandExecutionContextMenuItems(menu, layout);
+
+    this->messageMenuCreated.invoke(menu, hoveredElement);
 
     menu->popup(QCursor::pos());
     menu->raise();
