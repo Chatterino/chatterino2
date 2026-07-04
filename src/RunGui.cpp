@@ -242,8 +242,8 @@ void clearCrashes(QDir dir)
 }
 }  // namespace
 
-void runGui(QApplication &a, const Paths &paths, Settings &settings,
-            const Args &args, Updates &updates)
+void runGui(QApplication &a, const Modes &modes, const Paths &paths,
+            Settings &settings, const Args &args, Updates &updates)
 {
     initQt(args);
     initResources();
@@ -290,7 +290,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     });
 
     Application app(settings, paths, args, updates);
-    app.initialize(settings, paths);
+    app.initialize(settings, modes, paths);
     app.run();
 
     chatterino::NetworkManager::deinit();
