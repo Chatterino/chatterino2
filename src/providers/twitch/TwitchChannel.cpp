@@ -2548,9 +2548,8 @@ void TwitchChannel::refreshSharedChatSessionState()
     getHelix()->getSharedChatSession(
         this->roomId(),
         [this,
-         weak = this->weak_from_this()](const HelixSharedChatSession &session) {
-            const auto self =
-                std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
+         weak = this->weakFromThis()](const HelixSharedChatSession &session) {
+            const auto self = weak.lock();
             if (!self)
             {
                 return;
@@ -2599,9 +2598,8 @@ void TwitchChannel::refreshSharedChatSessionState()
 
             getHelix()->fetchUsers(
                 session.participantIds, {},
-                [this, weak = this->weak_from_this()](const auto &users) {
-                    const auto self =
-                        std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
+                [this, weak = this->weakFromThis()](const auto &users) {
+                    const auto self = weak.lock();
                     if (!self)
                     {
                         return;
