@@ -53,7 +53,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     this->initUi();
     this->addTabs();
-    this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,

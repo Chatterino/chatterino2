@@ -24,9 +24,6 @@ Q_SIGNALS:
 public Q_SLOTS:
     void setColor(const QColor &color);
 
-protected:
-    void themeChangedEvent() override;
-
 private:
     QColor color_;
 };
