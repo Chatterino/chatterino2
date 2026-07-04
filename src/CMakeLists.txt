@@ -886,6 +886,12 @@ list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
+if (APPLE)
+    target_link_libraries(${LIBRARY_PROJECT} PRIVATE
+        "$<LINK_LIBRARY:FRAMEWORK,Security>"
+    )
+endif ()
+
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
         PUBLIC
