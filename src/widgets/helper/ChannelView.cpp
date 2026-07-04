@@ -2282,6 +2282,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (this->isDoubleClick_)
         {
             this->isDoubleClick_ = false;
+
+            if (!this->selection_.isEmpty())
+            {
+                copyToSelection(this->getSelectedText());
+            }
+
             // Was actually not a wanted triple-click
             if (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                                event->globalPosition())) > 10.F)
@@ -2293,6 +2299,11 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         else if (this->isLeftMouseDown_)
         {
             this->isLeftMouseDown_ = false;
+
+            if (!this->selection_.isEmpty())
+            {
+                copyToSelection(this->getSelectedText());
+            }
 
             if (std::abs(distanceBetweenPoints(this->lastLeftPressPosition_,
                                                event->globalPosition())) > 15.F)
@@ -2307,6 +2318,10 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                  10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
+                if (!this->selection_.isEmpty())
+                {
+                    copyToSelection(this->getSelectedText());
+                }
                 return;
             }
         }

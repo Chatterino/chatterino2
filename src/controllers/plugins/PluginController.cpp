@@ -312,6 +312,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
+    this->queueChangeNotification();
 
     if (getApp()->getArgs().safeMode)
     {
@@ -361,6 +362,7 @@ bool PluginController::reload(const QString &id)
     QDir loadDir = it->second->loadDirectory_;
     // Since Plugin owns the state, it will clean up everything related to it
     this->plugins_.erase(id);
+    this->queueChangeNotification();
     this->tryLoadFromDir(loadDir);
     return true;
 }
@@ -407,9 +409,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isPluginEnabled(const QString &id)
 {
-    auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), id);
-    return it != vec.end();
+    return getSettings()->enabledPlugins.getValue().contains(id);
 }
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
@@ -488,6 +488,22 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 WebSocketPool &PluginController::webSocketPool()
 {
     return this->webSocketPool_;
+}
+
+void PluginController::queueChangeNotification()
+{
+    if (this->changeNotificationQueued)
+    {
+        return;
+    }
+    this->changeNotificationQueued = true;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this] {
+            this->changeNotificationQueued = false;
+            this->onPluginsUpdated.invoke();
+        },
+        Qt::QueuedConnection);
 }
 
 }  // namespace chatterino
