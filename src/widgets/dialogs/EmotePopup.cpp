@@ -378,7 +378,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     auto clicked = [this](const MessageLayoutElement *hoveredElement,
                           Qt::KeyboardModifiers modifiers) {
-        if (modifiers & Qt::KeyboardModifier::ControlModifier)
+        if (modifiers.testFlag(Qt::KeyboardModifier::ControlModifier))
         {
             if (hoveredElement == nullptr)
             {
@@ -416,7 +416,7 @@ EmotePopup::EmotePopup(QWidget *parent)
                 this->addFavouriteEmote(EmoteName{identifier});
             }
 
-            if (!(modifiers & Qt::KeyboardModifier::ShiftModifier))
+            if (!modifiers.testFlag(Qt::KeyboardModifier::ShiftModifier))
             {
                 return;
             }
