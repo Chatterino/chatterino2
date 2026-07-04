@@ -93,8 +93,8 @@ bool isFavouriteEmoteOrEmoji(const QString &identifier, bool isEmoji)
 
 auto saveFavouriteEmojis(const std::unordered_map<QString, EmojiPtr> &emojis)
 {
-    std::vector<QString> emojiNames;
-    emojiNames.reserve(emojis.size());
+    QStringList emojiNames;
+    emojiNames.reserve(static_cast<qsizetype>(emojis.size()));
 
     std::ranges::transform(emojis, std::back_inserter(emojiNames),
                            [](const auto &it) {
@@ -737,7 +737,7 @@ void EmotePopup::removeFavouriteEmote(const EmoteName &name)
     });
 
     auto emoteNames = getSettings()->favouriteEmotes.getValue();
-    std::erase_if(emoteNames, [name](const auto &emoteName) {
+    emoteNames.removeIf([name](const auto &emoteName) {
         return emoteName == name.string;
     });
     getSettings()->favouriteEmotes = emoteNames;

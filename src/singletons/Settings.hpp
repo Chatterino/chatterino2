@@ -446,8 +446,8 @@ public:
     BoolSetting enableSevenTVEventAPI = {"/emotes/seventv/eventapi", true};
     BoolSetting sendSevenTVActivity = {"/emotes/seventv/sendActivity", true};
 
-    ChatterinoSetting<std::vector<QString>> favouriteEmotes = {"/emotes/favouriteEmotes", {}};
-    ChatterinoSetting<std::vector<QString>> favouriteEmojis = {"/emotes/favouriteEmojis", {}};
+    ChatterinoSetting<QStringList> favouriteEmotes = {"/emotes/favouriteEmotes", {}};
+    ChatterinoSetting<QStringList> favouriteEmojis = {"/emotes/favouriteEmojis", {}};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
