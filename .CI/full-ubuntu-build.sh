@@ -25,6 +25,6 @@ cmake \
     -DCHATTERINO_STATIC_QT_BUILD=On \
     -DCMAKE_CXX_FLAGS="-fno-sized-deallocation" \
     .
-cmake --build build
+cmake --build build -j$(nproc) # builds the project with all available cores
 
 # sh ./../.CI/CreateUbuntuDeb.sh

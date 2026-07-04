@@ -1,0 +1,9 @@
+include_guard(GLOBAL)
+
+# Find special case json package for vcpkg
+set(BOOST_VCPKG_REQUIRED_COMPONENTS "")
+if(VCPKG_TARGET_TRIPLET)
+    list(APPEND BOOST_VCPKG_REQUIRED_COMPONENTS json)
+endif()
+
+find_package(Boost REQUIRED CONFIG COMPONENTS ${BOOST_VCPKG_REQUIRED_COMPONENTS} OPTIONAL_COMPONENTS headers)
