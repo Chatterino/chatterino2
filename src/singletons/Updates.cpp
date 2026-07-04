@@ -50,9 +50,9 @@ const QString CHATTERINO_OS = u"unknown"_s;
 
 namespace chatterino {
 
-Updates::Updates(const Modes &modes, const Paths &paths_, Settings &settings)
+Updates::Updates(const Modes &modes_, const Paths &paths_, Settings &settings)
     : paths(paths_)
-    , modes(modes)
+    , modes(modes_)
     , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {

@@ -27,7 +27,7 @@ class Updates
     const Modes &modes;
 
 public:
-    Updates(const Modes &modes, const Paths &paths_, Settings &settings);
+    Updates(const Modes &modes_, const Paths &paths_, Settings &settings);
 
     enum Status {
         None,
