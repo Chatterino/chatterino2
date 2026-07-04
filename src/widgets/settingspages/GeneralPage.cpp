@@ -1364,16 +1364,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("When possible, restart Chatterino if the program crashes")
         ->addTo(layout);
 
-#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getApp()->getPaths().isPortable())
-    {
-        SettingWidget::checkbox(
-            "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring)
-            ->addTo(layout);
-    }
-#endif
-
     SettingWidget::inverseCheckbox("Show moderation messages",
                                    s.hideModerationActions)
         ->setTooltip(
