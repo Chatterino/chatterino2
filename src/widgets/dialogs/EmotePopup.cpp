@@ -1075,13 +1075,13 @@ std::optional<EmotePtr> EmotePopup::findEmote(const EmoteName &name)
             }
         }
 
-        emote = this->twitchChannel_->bttvEmote(name);
+        emote = this->twitchChannel_->ffzEmote(name);
         if (emote)
         {
             return emote;
         }
 
-        emote = this->twitchChannel_->ffzEmote(name);
+        emote = this->twitchChannel_->bttvEmote(name);
         if (emote)
         {
             return emote;
@@ -1094,13 +1094,13 @@ std::optional<EmotePtr> EmotePopup::findEmote(const EmoteName &name)
         }
     }
 
-    auto emote = getApp()->getBttvEmotes()->emote(name);
+    auto emote = getApp()->getFfzEmotes()->emote(name);
     if (emote)
     {
         return emote;
     }
 
-    emote = getApp()->getFfzEmotes()->emote(name);
+    emote = getApp()->getBttvEmotes()->emote(name);
     if (emote)
     {
         return emote;
