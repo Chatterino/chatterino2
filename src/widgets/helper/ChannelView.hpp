@@ -181,6 +181,13 @@ public:
     /// Checks if this view has a #sourceChannel
     bool hasSourceChannel() const;
 
+    /// The platform channel this view derives its messages from.
+    ///
+    /// The currently active non-virtual source channel. In case of nested
+    /// views, this uses the #sourceChannel(), otherwise it uses the
+    /// #underlyingChannel().
+    ChannelPtr effectiveSourceChannel() const;
+
     std::vector<MessageLayoutPtr> &getMessagesSnapshot();
 
     void queueLayout();
