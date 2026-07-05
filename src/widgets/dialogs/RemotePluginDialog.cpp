@@ -11,7 +11,6 @@
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/RemotePlugin.hpp"
 #    include "singletons/Settings.hpp"
-#    include "util/files/ZipArchive.hpp"
 #    include "widgets/helper/Line.hpp"
 
 #    include <QInputDialog>
@@ -157,7 +156,7 @@ RemotePluginDialog::RemotePluginDialog(RemotePluginPtr remotePlugin,
         },
         this->connections_, false);
     this->connections_.emplace_back(
-        getApp()->getPlugins()->pluginsUpdated.connect([this] {
+        getApp()->getPlugins()->onPluginsUpdated.connect([this] {
             this->refreshButtons();
         }));
 
@@ -293,52 +292,38 @@ void RemotePluginDialog::installPlugin(bool update)
         this->installButton->setDisabled(true);
     }
 
-    NetworkRequest(this->remotePlugin->downloadURL)
-        .caller(this)
-        .onSuccess([this, update](const NetworkResult &result) {
-            ZipArchive archive;
-            auto res = archive.openMemory(result.getData());
-            if (res)
-            {
-                res = getApp()->getPlugins()->loadFromZip(
-                    this->remotePlugin->id,
-                    {
-                        .zip = archive,
-                        .newMetadata = this->remotePlugin->meta,
-                        .onExistingOverwrite =
-                            [&] {
-                                auto res = QMessageBox::warning(
-                                    this, "Chatterino",
-                                    u"A plugin with the ID '" %
-                                        this->remotePlugin->id %
-                                        "' already exists.\nDo you want to "
-                                        "replace it?",
-                                    QMessageBox::Yes | QMessageBox::No);
-                                return res == QMessageBox::Yes;
-                            },
-                        .update = update,
-                    });
-            }
-
-            if (!res)
-            {
-                QMessageBox::warning(
+    getApp()->getPlugins()->download({
+        .remotePlugin = this->remotePlugin,
+        .onExistingOverwrite =
+            [&] {
+                auto res = QMessageBox::warning(
                     this, "Chatterino",
-                    u"Failed to install plugin: " % res.error());
-            }
-        })
-        .onError([this](const NetworkResult &result) {
-            QMessageBox::warning(
-                this, "Chatterino",
-                u"Failed to download plugin: " % result.formatError());
-        })
-        .finally([btn = this->installButton] {
-            if (btn)
-            {
-                btn->setDisabled(false);
-            }
-        })
-        .execute();
+                    u"A plugin with the ID '" % this->remotePlugin->id %
+                        "' already exists.\nDo you want to "
+                        "replace it?",
+                    QMessageBox::Yes | QMessageBox::No);
+                return res == QMessageBox::Yes;
+            },
+        .onDone =
+            [self = QPointer(this)](ExpectedStr<void> res) {
+                if (!self)
+                {
+                    return;
+                }
+                if (self->installButton)
+                {
+                    self->installButton->setDisabled(false);
+                }
+
+                if (!res)
+                {
+                    QMessageBox::warning(
+                        self, "Chatterino",
+                        u"Failed to install plugin: " % res.error());
+                }
+            },
+        .update = update,
+    });
 }
 
 void RemotePluginDialog::uninstallPlugin()

@@ -558,6 +558,7 @@ void PluginsPage::refreshRepositories()
     this->remoteTableModel->clear();
     this->repositories.clear();
     this->showRemoteWarningsButton->hide();
+    this->remoteWarnings.clear();
     for (const auto &url : getSettings()->remotePluginURLs.getValue())
     {
         auto &it = this->repositories.emplace_back(

@@ -119,8 +119,8 @@ QUrl PluginRepository::fileUrl(const QString &filename) const
 
 ExpectedStr<void> PluginRepository::loadFromJson(const QJsonObject &root)
 {
-    static const QRegularExpression nameRegex(uR"(^[\w +-_'()[\]{}*~:&]+$)"_s);
-    static const QRegularExpression idRegex(uR"(^[\w +-_@~]+$)"_s);
+    static const QRegularExpression nameRegex(uR"(^[\w +\.\-_':&]+$)"_s);
+    static const QRegularExpression idRegex(uR"(^[\w+\.\-_@~]+$)"_s);
 
     const auto meta = root["metadata"_L1].toObject();
     if (meta.isEmpty())
@@ -183,7 +183,7 @@ ExpectedStr<void> PluginRepository::loadFromJson(const QJsonObject &root)
 
         if (pluginPtr->downloadPath.isEmpty())
         {
-            pluginPtr->downloadPath = pluginPtr->id % u".c2plugin";
+            pluginPtr->downloadPath = pluginPtr->id;
         }
         pluginPtr->downloadURL = this->fileUrl(pluginPtr->downloadPath);
 

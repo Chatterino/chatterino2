@@ -628,9 +628,6 @@ set(SOURCE_FILES
         util/XDGHelper.cpp
         util/XDGHelper.hpp
 
-        util/files/ZipArchive.cpp
-        util/files/ZipArchive.hpp
-
         util/serialize/Container.hpp
 
         widgets/AccountSwitchPopup.cpp
@@ -975,7 +972,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         BoostCertify
         )
 if (CHATTERINO_PLUGINS)
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2 zip::zip)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
 
 if (CHATTERINO_SPELLCHECK)

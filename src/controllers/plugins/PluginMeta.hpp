@@ -41,7 +41,8 @@ struct PluginMeta {
 
     std::vector<PluginPermission> permissions;
 
-    /// Extra fields ignored by Chatterino but preserved when re-exporting.
+    /// Extra fields ignored by Chatterino but preserved when re-exporting the
+    /// metadata.
     ///
     /// Key: "private"
     QJsonObject privateFields;
@@ -49,8 +50,20 @@ struct PluginMeta {
     /// The URL to the meta.json. For local plugins this is empty. If this URL
     /// is added in the settings, the plugin can be updated through the UI.
     ///
+    /// Plugins with the same ID but from different base URLs are considered
+    /// different (see #isRelatedTo()).
+    ///
     /// Key: "remote"
     QString remoteBaseURL;
+
+    /// Files that are included in this plugin.
+    ///
+    /// This is only used for downloading plugins. It's not used at runtime
+    /// to check the integrity or file accesses. When serializing to JSON, this
+    /// is discarded.
+    ///
+    /// Key: "files"
+    std::vector<QString> files;
 
     // errors that occurred while parsing info.json
     std::vector<QString> errors;

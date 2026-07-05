@@ -11,7 +11,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[\\w +-_'()[\\]{}*~:&]+$"
+          "pattern": "^[\\w +\\.\\-_':&]+"
         }
       },
       "required": ["name"]
@@ -24,15 +24,12 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[\\w +-_@~]+$"
+            "pattern": "^[\\w+\\.\\-_@~]+$"
           },
           "download": {
             "type": "string",
-            "$comment": "Path to download the plugin. This can either be relative to the base URL or absolute (starting with a leading slash).",
-            "examples": [
-              "plugins/plugin.c2plugin",
-              "/static/plugins/plugin.c2plugin"
-            ]
+            "$comment": "Path to the directory of the plugin - the file paths are appended to this. This can either be relative to the base URL or absolute (starting with a leading slash).",
+            "examples": ["plugins/plugin", "/static/plugins/plugin"]
           },
           "meta": {
             "$ref": "https://github.com/Chatterino/chatterino2/raw/refs/heads/master/docs/plugin-info.schema.json#"

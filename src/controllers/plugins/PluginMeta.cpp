@@ -5,13 +5,30 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginMeta.hpp"
 
+#    include "util/Expected.hpp"
 #    include "util/QMagicEnum.hpp"
 
 #    include <QJsonArray>
 #    include <QJsonObject>
 #    include <QJsonValue>
+#    include <QRegularExpression>
 
 using namespace Qt::Literals;
+
+namespace {
+
+using namespace chatterino;
+
+bool validatePath(const QString &path)
+{
+    static const QRegularExpression regex(uR"(^[\w_\-+\./]+$)"_s);
+
+    return regex.matchView(path).hasMatch() && !path.contains(u"..") &&
+           !path.contains(u"//") && !path.startsWith('/') &&
+           !path.endsWith('/');
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -198,6 +215,39 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             return;
         }
     }
+
+    auto files = obj["files"];
+    if (!files.isUndefined())
+    {
+        if (!files.isArray())
+        {
+            this->errors.emplace_back(
+                u"\"files\" is not an array (its type is %1)"_s.arg(
+                    qmagicenum::enumName(files.type())));
+            return;
+        }
+        const auto arr = files.toArray();
+        for (qsizetype i = 0; i < arr.size(); ++i)
+        {
+            auto v = arr[i];
+            if (!v.isString())
+            {
+                this->errors.emplace_back(
+                    u"\"files\"[%1] is not a string (its type is %2)"_s.arg(
+                        QString::number(i), qmagicenum::enumName(v.type())));
+                continue;
+            }
+            QString str = v.toString();
+            if (!validatePath(str))
+            {
+                this->errors.emplace_back(
+                    u"\"files\"[%1] contains invalid characters"_s.arg(
+                        QString::number(i)));
+                continue;
+            }
+            this->files.emplace_back(str);
+        }
+    }
 }
 // NOLINTEND(clazy-reserve-candidates)
 
@@ -246,6 +296,7 @@ QJsonObject PluginMeta::toJson() const
         {"tags"_L1, ifNotEmpty(map(this->tags, std::identity{}))},
         {"private"_L1, ifNotEmpty(this->privateFields)},
         {"remote"_L1, ifNotEmpty(this->remoteBaseURL)},
+        // Forget "files".
     };
 }
 

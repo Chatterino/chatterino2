@@ -9,6 +9,7 @@
 #    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/RemotePlugin.hpp"
 #    include "util/Expected.hpp"
 #    include "util/FunctionRef.hpp"
 
@@ -62,15 +63,14 @@ public:
 
     ExpectedStr<void> removePlugin(const QString &id, bool eraseData);
 
-    struct LoadFromZipArgs {
-        ZipArchive &zip;
-        const PluginMeta &newMetadata;
+    struct DownloadArgs {
+        RemotePluginPtr remotePlugin;
         FunctionRef<bool()> onExistingOverwrite;
+        std::function<void(ExpectedStr<void>)> onDone;
         bool update = false;
     };
 
-    ExpectedStr<void> loadFromZip(const QString &id,
-                                  const LoadFromZipArgs &args);
+    void download(const DownloadArgs &args);
 
     /**
      * @brief Checks settings to tell if a plugin named by id is enabled.
@@ -88,8 +88,6 @@ public:
     pajlada::Signals::Signal<Plugin *> onPluginLoaded;
     pajlada::Signals::NoArgSignal onPluginsUpdated;
 
-    pajlada::Signals::NoArgSignal pluginsUpdated;
-
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
@@ -104,6 +102,11 @@ private:
     bool tryLoadFromDir(const QDir &pluginDir);
 
     void queueChangeNotification();
+
+    ExpectedStr<void> downloadImpl(const DownloadArgs &args);
+
+    ExpectedStr<void> finishDownload(const RemotePlugin &remote,
+                                     const std::filesystem::path &pluginDir);
 
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
     WebSocketPool webSocketPool_;

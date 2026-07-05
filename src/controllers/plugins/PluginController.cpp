@@ -31,7 +31,6 @@
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 #    include "singletons/WindowManager.hpp"
-#    include "util/files/ZipArchive.hpp"
 #    include "util/FilesystemHelpers.hpp"
 #    include "widgets/splits/SplitContainer.hpp"
 #    include "widgets/Window.hpp"
@@ -431,16 +430,25 @@ ExpectedStr<void> PluginController::removePlugin(const QString &id,
     return {};
 }
 
-ExpectedStr<void> PluginController::loadFromZip(const QString &id,
-                                                const LoadFromZipArgs &args)
+void PluginController::download(const DownloadArgs &args)
 {
+    auto res = this->downloadImpl(args);
+    if (!res)
+    {
+        args.onDone(std::move(res));
+    }
+}
+
+ExpectedStr<void> PluginController::downloadImpl(const DownloadArgs &args)
+{
+    auto id = args.remotePlugin->id;
     auto existingIt = this->plugins_.find(id);
     if (existingIt != this->plugins_.end())
     {
         if (args.update)
         {
             QString conflicts;
-            if (!existingIt->second->meta.isRelatedTo(args.newMetadata,
+            if (!existingIt->second->meta.isRelatedTo(args.remotePlugin->meta,
                                                       &conflicts))
             {
                 return makeUnexpected(
@@ -477,12 +485,137 @@ ExpectedStr<void> PluginController::loadFromZip(const QString &id,
         return makeUnexpected(u"Failed to create plugin directory: " %
                               QString::fromStdString(ec.message()));
     }
-    auto res = args.zip.extractTo(pluginDir);
-    if (!res)
+
+    auto infoJsonPath =
+        std::filesystem::weakly_canonical(pluginDir / "info.json", ec);
+    if (ec)
     {
-        return makeUnexpected(u"Failed to extract archive: " % res.error());
+        return makeUnexpected(u"Failed canonicalize info.json path: " %
+                              QString::fromStdString(ec.message()));
     }
 
+    QUrl baseUrl = args.remotePlugin->downloadURL;
+    std::vector<std::pair<QUrl, QString>> files;
+    for (const auto &path : args.remotePlugin->meta.files)
+    {
+        auto url = baseUrl;
+        url.setPath(url.path(QUrl::FullyEncoded) % '/' % path);
+        if (!baseUrl.isParentOf(url))
+        {
+            return makeUnexpected(u"Plugin contains invalid file: '" %
+                                  url.toString() % "'");
+        }
+        auto localPath = std::filesystem::weakly_canonical(
+            pluginDir / qStringToStdPath(path), ec);
+        if (ec)
+        {
+            return makeUnexpected(u"Failed canonicalize path: " %
+                                  QString::fromStdString(ec.message()));
+        }
+        if (localPath == infoJsonPath)
+        {
+            continue;  // We write this later.
+        }
+        auto parent = localPath.parent_path();
+        if (parent != localPath)
+        {
+            std::filesystem::create_directories(parent, ec);
+            if (ec)
+            {
+                return makeUnexpected(u"Failed crete parent directories for '" %
+                                      path % u"': " %
+                                      QString::fromStdString(ec.message()));
+            }
+        }
+        files.emplace_back(std::move(url), stdPathToQString(localPath));
+    }
+
+    if (files.empty())
+    {
+        return makeUnexpected(u"No files to download"_s);
+    }
+
+    struct State {
+        RemotePluginPtr plugin;
+        std::filesystem::path pluginDir;
+
+        size_t remainingRequests = 0;
+        QString errors;
+
+        std::function<void(ExpectedStr<void>)> onDone;
+    };
+    auto state = std::make_shared<State>(State{
+        .plugin = args.remotePlugin,
+        .pluginDir = pluginDir,
+        .remainingRequests = files.size(),
+        .onDone = args.onDone,
+    });
+
+    auto pushResult = [this, state](ExpectedStr<void> res) {
+        if (isAppAboutToQuit() || !tryGetApp())
+        {
+            return;
+        }
+
+        assertInGuiThread();
+        if (!res)
+        {
+            if (!state->errors.isEmpty())
+            {
+                state->errors += u"\n";
+            }
+            state->errors += res.error();
+        }
+        state->remainingRequests -= 1;
+        if (state->remainingRequests > 0)
+        {
+            return;
+        }
+
+        // We're the last result everyone was waiting for.
+        if (!state->errors.isEmpty())
+        {
+            state->onDone(makeUnexpected(state->errors));
+            return;
+        }
+
+        state->onDone(this->finishDownload(*state->plugin, state->pluginDir));
+    };
+
+    // Send out the requests - rely on Qt to buffer requests.
+    for (const auto &[url, path] : files)
+    {
+        NetworkRequest(url)
+            .timeout(30'000)
+            .followRedirects(true)
+            .onSuccess([pushResult, path](const NetworkResult &res) {
+                {
+                    QFile f(path);
+                    if (!f.open(QFile::WriteOnly | QFile::Truncate))
+                    {
+                        pushResult(makeUnexpected(u"Failed to open '" % path %
+                                                  u"' for writing: " %
+                                                  f.errorString()));
+                        return;
+                    }
+                    f.write(res.getData());
+                }
+                pushResult({});
+            })
+            .onError([pushResult, url](const NetworkResult &res) {
+                pushResult(makeUnexpected(u"Failed to fetch '" %
+                                          url.toString() % u"': " %
+                                          res.formatError()));
+            })
+            .execute();
+    }
+
+    return {};
+}
+
+ExpectedStr<void> PluginController::finishDownload(
+    const RemotePlugin &remote, const std::filesystem::path &pluginDir)
+{
     {
         QFile metaFile(stdPathToQString(pluginDir / "info.json"));
         if (!metaFile.open(QFile::WriteOnly))
@@ -490,14 +623,14 @@ ExpectedStr<void> PluginController::loadFromZip(const QString &id,
             return makeUnexpected(u"Failed to open info.json for writing: " %
                                   metaFile.errorString());
         }
-        metaFile.write(QJsonDocument(args.newMetadata.toJson()).toJson());
+        metaFile.write(QJsonDocument(remote.meta.toJson()).toJson());
     }
-
     bool ok = this->tryLoadFromDir(pluginDir);
     if (!ok)
     {
-        return makeUnexpected("Failed to load plugin from directory");
+        return makeUnexpected(u"Failed to load plugin from directory"_s);
     }
+
     return {};
 }
 
