@@ -91,11 +91,43 @@ std::optional<Args::Channel> parseActivateOption(QString input)
     };
 }
 
+std::vector<Args::Channel> parseCustomChannels(const QString &string)
+{
+    std::vector<Args::Channel> list;
+
+    for (QStringView part : string.tokenize(u";", Qt::SkipEmptyParts))
+    {
+        qsizetype split = part.indexOf(u':');
+        QStringView name = part;
+
+        if (split != -1)
+        {
+            QStringView provider = part.first(split);
+            name = part.last(part.length() - (split + 1));
+
+            if (provider.isEmpty() || name.isEmpty() || provider != u"t")
+            {
+                qCWarning(chatterinoArgs).nospace()
+                    << "bad channel specifier passed to --channel: " << part;
+                continue;
+            }
+        }
+
+        list.push_back(Args::Channel{
+            .provider = ProviderId::Twitch,
+            .name = QString(name),
+        });
+    }
+
+    list.shrink_to_fit();
+    return list;
+}
+
 }  // namespace
 
 namespace chatterino {
 
-Args::Args(const QApplication &app, const Paths &paths)
+Args::Args(const QApplication &app)
 {
     QCommandLineParser parser;
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
@@ -195,7 +227,11 @@ Args::Args(const QApplication &app, const Paths &paths)
 
     if (parser.isSet(channelLayout))
     {
-        this->applyCustomChannelLayout(parser.value(channelLayout), paths);
+        this->customChannels = parseCustomChannels(parser.value(channelLayout));
+        if (not this->customChannels.empty())
+        {
+            this->dontSaveSettings = true;
+        }
     }
 
     this->verbose = parser.isSet(verboseOption);
@@ -263,8 +299,14 @@ QStringList Args::currentArguments() const
     return this->currentArguments_;
 }
 
-void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
+std::optional<WindowLayout> Args::makeCustomChannelLayout(
+    const QString &windowLayoutFile) const
 {
+    if (this->customChannels.empty())
+    {
+        return {};
+    }
+
     WindowLayout layout;
     WindowDescriptor window;
 
@@ -275,10 +317,7 @@ void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
     window.type_ = WindowType::Main;
 
     // Load main window layout from config file so we can use the same geometry
-    const QRect configMainLayout = [paths] {
-        const QString windowLayoutFile = combinePath(
-            paths.settingsDirectory, WindowManager::WINDOW_LAYOUT_FILENAME);
-
+    const QRect configMainLayout = [windowLayoutFile] {
         const WindowLayout configLayout =
             WindowLayout::loadFromFile(windowLayoutFile);
 
@@ -297,49 +336,21 @@ void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
 
     window.geometry_ = configMainLayout;
 
-    QStringList channelArgList = argValue.split(";");
-    for (const QString &channelArg : channelArgList)
+    for (const Channel &channel : this->customChannels)
     {
-        if (channelArg.isEmpty())
-        {
-            continue;
-        }
+        assert(channel.provider == ProviderId::Twitch);
 
-        // Twitch is default platform
-        QString platform = "t";
-        QString channelName = channelArg;
-
-        const QRegularExpression regExp("(.):(.*)");
-        if (auto match = regExp.match(channelArg); match.hasMatch())
-        {
-            platform = match.captured(1);
-            channelName = match.captured(2);
-        }
-
-        // Twitch (default)
-        if (platform == "t")
-        {
-            TabDescriptor tab;
-
-            // Set first tab as selected
-            tab.selected_ = window.tabs_.empty();
-            tab.rootNode_ = SplitNodeDescriptor{{
-                .type_ = "twitch",
-                .channelName_ = channelName,
-            }};
-
-            window.tabs_.emplace_back(std::move(tab));
-        }
+        TabDescriptor tab = {.selected_ = window.tabs_.empty(),
+                             .rootNode_ = SplitNodeDescriptor{{
+                                 .type_ = "twitch",
+                                 .channelName_ = channel.name,
+                             }}};
+        window.tabs_.emplace_back(std::move(tab));
     }
 
-    // Only respect --channels if we could actually parse any channels
-    if (!window.tabs_.empty())
-    {
-        this->dontSaveSettings = true;
+    layout.windows_.emplace_back(std::move(window));
 
-        layout.windows_.emplace_back(std::move(window));
-        this->customChannelLayout = std::move(layout);
-    }
+    return layout;
 }
 
 }  // namespace chatterino
