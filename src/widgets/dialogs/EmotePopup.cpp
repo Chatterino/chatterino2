@@ -999,7 +999,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     auto ffzGlobalEmotes =
         filterEmoteMap(searchWord, tags, *getApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchWord, tags, getApp()->getSeventvEmotes()->globalEmotes());
+        searchWord, tags, *getApp()->getSeventvEmotes()->globalEmotes());
 
     // global
     if (!bttvGlobalEmotes.empty())
