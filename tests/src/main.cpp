@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "common/Args.hpp"
+#include "common/Modes.hpp"
 #include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -42,7 +43,7 @@ int main(int argc, char **argv)
     // Ensure settings are initialized before any tests are run
     QTemporaryDir settingsDir;
     settingsDir.setAutoRemove(false);  // we'll remove it manually
-    chatterino::Settings settings(args, settingsDir.path());
+    chatterino::Settings settings(Modes(), args, settingsDir.path());
 
     QTimer::singleShot(0, [&]() {
         auto res = RUN_ALL_TESTS();

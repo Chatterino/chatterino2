@@ -11,8 +11,6 @@ class Modes
 public:
     Modes();
 
-    static const Modes &instance();
-
     bool isPortable{};
 
     /// Marked by the line `externally-packaged`

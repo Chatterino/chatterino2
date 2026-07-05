@@ -15,6 +15,7 @@ namespace chatterino {
 
 class Paths;
 class Settings;
+class Modes;
 
 /**
  * To check for updates, use the `checkForUpdates` method.
@@ -23,9 +24,10 @@ class Settings;
 class Updates
 {
     const Paths &paths;
+    const Modes &modes;
 
 public:
-    Updates(const Paths &paths_, Settings &settings);
+    Updates(const Modes &modes_, const Paths &paths_, Settings &settings);
 
     enum Status {
         None,
