@@ -1155,6 +1155,15 @@ bool ChannelView::hasSourceChannel() const
     return this->sourceChannel_ != nullptr;
 }
 
+ChannelPtr ChannelView::effectiveSourceChannel() const
+{
+    if (this->sourceChannel_)
+    {
+        return this->sourceChannel_;
+    }
+    return this->underlyingChannel_;
+}
+
 void ChannelView::messageAppended(MessagePtr &message,
                                   std::optional<MessageFlags> overridingFlags)
 {
@@ -2376,9 +2385,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                     MessageElementFlag::Username))
             {
                 const auto userName = hoverLayoutElement->getLink().value;
-                const auto type = this->hasSourceChannel()
-                                      ? this->sourceChannel_->getType()
-                                      : this->channel_->getType();
+                const auto type = this->effectiveSourceChannel()->getType();
                 switch (type)
                 {
                     case Channel::Type::TwitchWhispers:
@@ -2761,8 +2768,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         }
     }
 
-    auto *twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+    auto chan = this->effectiveSourceChannel();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
         twitchChannel->hasModRights())
     {
@@ -2950,18 +2957,9 @@ void ChannelView::addCommandExecutionContextMenuItems(
         inputText.push_front(cmd.name + " ");
 
         cmdMenu->addAction(cmd.name, [this, layout, cmd, inputText] {
-            ChannelPtr channel;
-
             /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
              * we would still like to execute commands from them. Use their source channel instead if applicable. */
-            if (this->hasSourceChannel())
-            {
-                channel = this->sourceChannel();
-            }
-            else
-            {
-                channel = this->underlyingChannel_;
-            }
+            ChannelPtr channel = this->effectiveSourceChannel();
             auto *split = dynamic_cast<Split *>(this->parentWidget());
             QString userText;
             if (split)
@@ -3061,8 +3059,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 
     auto contextChannel =
         getApp()->getTwitch()->getChannelOrEmpty(alternativePopoutChannel);
-    auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
-                                                   : this->underlyingChannel_;
+    auto openingChannel = this->effectiveSourceChannel();
     userPopup->setData(userName, contextChannel, openingChannel);
 
     QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
@@ -3131,18 +3128,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
-            ChannelPtr channel = this->underlyingChannel_;
-            auto *searchPopup =
-                dynamic_cast<SearchPopup *>(this->parentWidget());
-            if (searchPopup != nullptr)
-            {
-                auto *split =
-                    dynamic_cast<Split *>(searchPopup->parentWidget());
-                if (split != nullptr)
-                {
-                    channel = split->getChannel();
-                }
-            }
+            ChannelPtr channel = this->effectiveSourceChannel();
 
             // Execute command clicking a moderator button
             value = getApp()->getCommands()->execCustomCommand(
