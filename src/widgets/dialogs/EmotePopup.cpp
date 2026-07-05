@@ -351,7 +351,7 @@ EmoteMap filterEmoteMap(const QString &text, const QStringList &tags,
     return filteredMap;
 }
 
-/// Extracts the seach word and tags from the search input. If two search words
+/// Extracts the search word and tags from the search input. If two search words
 /// exist that don't have the `tag:` prefix, only the first one is considered.
 /// Examples:
 ///  - "tag:foo bar tag:baz" returns ("bar", ["foo", "baz"])
