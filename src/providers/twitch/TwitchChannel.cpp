@@ -181,7 +181,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->threadClearTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->nextSharedChatSessionUpdateTimer_, &QTimer::timeout,
-                     [this] {
+                     &this->lifetimeGuard_, [this] {
                          this->refreshSharedChatSessionState();
                      });
 
