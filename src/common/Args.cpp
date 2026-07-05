@@ -228,7 +228,7 @@ Args::Args(const QApplication &app)
     if (parser.isSet(channelLayout))
     {
         this->customChannels = parseCustomChannels(parser.value(channelLayout));
-        if (not this->customChannels.empty())
+        if (!this->customChannels.empty())
         {
             this->dontSaveSettings = true;
         }
