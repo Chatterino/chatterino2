@@ -43,6 +43,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     , pinnedByLabel_(new QLabel(this))
     , countdownLabel_(new QLabel(this))
     , menuButton_(new DrawnButton(DrawnButton::Symbol::Kebab, {}, this))
+    , messageScrollArea_(new QScrollArea(this))
     , messageLabel_(new QLabel(this))
     , footerLabel_(new QLabel(this))
     , progressTimer_(new QTimer(this))
@@ -80,7 +81,6 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
                                        QSizePolicy::Preferred);
 
-    this->messageScrollArea_ = new QScrollArea(this);
     this->messageScrollArea_->setWidgetResizable(true);
     this->messageScrollArea_->setHorizontalScrollBarPolicy(
         Qt::ScrollBarAlwaysOff);
@@ -168,15 +168,13 @@ void PinnedMessageWidget::tickProgress()
     QString timeStr;
     if (hours > 0)
     {
-        timeStr = u"\u23F1 %1:%2:%3"_s
-                      .arg(hours)
+        timeStr = u"\u23F1 %1:%2:%3"_s.arg(hours)
                       .arg(mins, 2, 10, QChar(u'0'))
                       .arg(secs, 2, 10, QChar(u'0'));
     }
     else
     {
-        timeStr = u"\u23F1 %1:%2"_s
-                      .arg(mins, 2, 10, QChar(u'0'))
+        timeStr = u"\u23F1 %1:%2"_s.arg(mins, 2, 10, QChar(u'0'))
                       .arg(secs, 2, 10, QChar(u'0'));
     }
 
@@ -294,9 +292,8 @@ void PinnedMessageWidget::refresh()
 
     const auto mode = static_cast<UsernameDisplayMode>(
         getSettings()->usernameDisplayMode.getValue());
-    this->pinnedByLabel_->setText(
-        u"Pinned by <b>%1</b>"_s
-            .arg(pin->pinnedBy.formatted(mode).toHtmlEscaped()));
+    this->pinnedByLabel_->setText(u"Pinned by <b>%1</b>"_s.arg(
+        pin->pinnedBy.formatted(mode).toHtmlEscaped()));
 
     this->messageLabel_->setText(pin->messageText);
     this->updateMessageHeight();
@@ -304,9 +301,8 @@ void PinnedMessageWidget::refresh()
     {
         const QString sentAt = pin->startsAt.toLocalTime().toString(
             getSettings()->timestampFormat);
-        this->footerLabel_->setText(
-            u"Sent by %1 \u00B7 %2"_s
-                .arg(pin->sender.formatted(mode).toHtmlEscaped(), sentAt));
+        this->footerLabel_->setText(u"Sent by %1 \u00B7 %2"_s.arg(
+            pin->sender.formatted(mode).toHtmlEscaped(), sentAt));
     }
 
     this->progressTimer_->stop();
