@@ -2555,6 +2555,12 @@ void TwitchChannel::refreshSharedChatSessionState()
                 return;
             }
 
+            auto intervalSecs = std::clamp(
+                getSettings()->sharedChatSessionRefreshInterval.getValue(), 5,
+                999);
+            this->nextSharedChatSessionUpdateTimer_.setInterval(intervalSecs *
+                                                                1000);
+
             if (session.participantIds.empty())
             {
                 // Allow immediate re-probe
@@ -2619,12 +2625,7 @@ void TwitchChannel::refreshSharedChatSessionState()
                         }
                     }
 
-                    auto intervalSecs = std::clamp(
-                        getSettings()
-                            ->sharedChatSessionRefreshInterval.getValue(),
-                        5, 999);
-                    this->nextSharedChatSessionUpdateTimer_.start(intervalSecs *
-                                                                  1000);
+                    this->nextSharedChatSessionUpdateTimer_.start();
 
                     this->sharedChatStatusChanged.invoke(
                         this->sharedChatSessionParticipants_);
