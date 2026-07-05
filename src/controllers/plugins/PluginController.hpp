@@ -31,7 +31,6 @@ namespace chatterino {
 
 class Settings;
 class Paths;
-class ZipArchive;
 
 class PluginController
 {

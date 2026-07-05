@@ -136,9 +136,6 @@ AboutPage::AboutPage()
 #ifdef CHATTERINO_HAVE_PLUGINS
             addLicense(form.getElement(), "lua", "https://lua.org",
                        ":/licenses/lua.txt");
-            this->addLicense(form.getElement(), "kuba--/zip",
-                             "https://github.com/kuba--/zip",
-                             ":/licenses/kuba-zip.txt");
 #endif
 #ifdef CHATTERINO_WITH_CRASHPAD
             addLicense(form.getElement(), "sentry-crashpad",
