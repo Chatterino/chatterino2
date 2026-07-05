@@ -103,10 +103,6 @@ void ColorProvider::initTypeColorMap()
     //initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
     //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    // initColor(ColorType::ElevatedMessageHighlight,
-    //           getSettings()->elevatedMessageHighlightColor,
-    //           HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
-
     // initColor(ColorType::ThreadMessageHighlight,
     //           getSettings()->threadHighlightColor,
     //           HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);

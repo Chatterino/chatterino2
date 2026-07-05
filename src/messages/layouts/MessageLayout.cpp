@@ -371,16 +371,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         return ctx.messageColors.regularBg;
     }();
 
-    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        ctx.preferences.enableElevatedMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
-    }
-    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
+    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
+        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         // NOTE: As we move more things into Highlighted, and less things to use custom flags for their color,
         // they will start respecting the IgnoreHighlights flag. Keep this in mind.

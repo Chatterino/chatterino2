@@ -54,9 +54,6 @@ void MessagePreferences::connectSettings(Settings *settings,
     this->enableRedeemedHighlight = true;
 
     // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
-    this->enableElevatedMessageHighlight = true;
-
-    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
     this->enableFirstMessageHighlight = true;
 
     settings->enableAnnouncementHighlight.connect(

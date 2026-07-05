@@ -196,8 +196,6 @@ public:
         QString prefix, const std::vector<HelixModerator> &users,
         Channel *channel, MessageFlags extraFlags = {});
 
-    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
-
     /// @brief Builds a message out of an `ircMessage`.
     ///
     /// Building a message won't cause highlights to be triggered. They will

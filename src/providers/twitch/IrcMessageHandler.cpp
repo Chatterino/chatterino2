@@ -437,15 +437,6 @@ void IrcMessageHandler::parsePrivMessageInto(
                                   {
                                       .isAction = message->isAction(),
                                   });
-
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = MessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            sink.addMessage(ptr, MessageContext::Original);
-        }
-    }
 }
 
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
