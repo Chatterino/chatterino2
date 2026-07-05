@@ -486,13 +486,13 @@ ExpectedStr<void> PluginController::downloadImpl(const DownloadArgs &args)
                               QString::fromStdString(ec.message()));
     }
 
-    auto infoJsonPath =
-        std::filesystem::weakly_canonical(pluginDir / "info.json", ec);
+    pluginDir = std::filesystem::canonical(pluginDir, ec);
     if (ec)
     {
-        return makeUnexpected(u"Failed canonicalize info.json path: " %
+        return makeUnexpected(u"Failed canonicalize plugin directory: " %
                               QString::fromStdString(ec.message()));
     }
+    auto infoJsonPath = pluginDir / "info.json";
 
     QUrl baseUrl = args.remotePlugin->downloadURL;
     std::vector<std::pair<QUrl, QString>> files;
@@ -505,13 +505,7 @@ ExpectedStr<void> PluginController::downloadImpl(const DownloadArgs &args)
             return makeUnexpected(u"Plugin contains invalid file: '" %
                                   url.toString() % "'");
         }
-        auto localPath = std::filesystem::weakly_canonical(
-            pluginDir / qStringToStdPath(path), ec);
-        if (ec)
-        {
-            return makeUnexpected(u"Failed canonicalize path: " %
-                                  QString::fromStdString(ec.message()));
-        }
+        auto localPath = pluginDir / qStringToStdPath(path);
         if (localPath == infoJsonPath)
         {
             continue;  // We write this later.
