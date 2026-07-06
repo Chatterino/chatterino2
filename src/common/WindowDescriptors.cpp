@@ -114,6 +114,11 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     return Channel::getEmpty();
 }
 
+SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)
+    : SplitDescriptor(std::move(descriptor))
+{
+}
+
 SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
 {
     SplitNodeDescriptor descriptor(SplitDescriptor::loadFromJSON(root));
