@@ -153,6 +153,8 @@ private:
      **/
     void refreshModerationMode();
 
+    void refreshInputState(const QString &inputText);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};

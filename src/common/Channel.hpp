@@ -207,6 +207,9 @@ constexpr magic_enum::customize::customize_t
         chatterino::Channel::Type value) noexcept
 {
     using Type = chatterino::Channel::Type;
+
+    // These names are used for encoding channels in the window layout settings.
+    // They need to be stable across Chatterino versions.
     switch (value)
     {
         case Type::Twitch:
