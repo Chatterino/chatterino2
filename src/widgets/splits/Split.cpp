@@ -1334,6 +1334,38 @@ void Split::setInputReply(const MessagePtr &reply)
     this->input_->setReply(reply);
 }
 
+SplitDescriptor Split::buildDescriptor() const
+{
+    SplitDescriptor descriptor;
+    descriptor.moderationMode_ = this->getModerationMode();
+    descriptor.filters_ = this->getFilters();
+    descriptor.spellCheckOverride = this->checkSpellingOverride();
+
+    auto chan = this->getChannel();
+    descriptor.type_ = qmagicenum::enumNameString(chan->getType());
+    switch (chan->getType())
+    {
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
+            descriptor.channelName_ = chan->getName();
+            break;
+
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;
+    }
+
+    return descriptor;
+}
+
 void Split::unpause()
 {
     this->view_->unpause(PauseReason::KeyboardModifier);
