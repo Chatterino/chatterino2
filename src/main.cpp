@@ -50,8 +50,8 @@ int main(int argc, char **argv)
         Version::instance().appUserModelID().c_str());
 #endif
 
-    const Modes modes;
     const Args args(a);
+    const Modes modes(a);
     std::unique_ptr<Paths> paths;
 
     // Optional logger override that logs to a file

@@ -294,8 +294,8 @@ public:
     }
 
     QTemporaryDir settingsDir;
-    Modes modes_;
     Args args_;
+    Modes modes_ = {args_};
     Paths paths_ = {args_, modes_};
 };
 

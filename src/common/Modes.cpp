@@ -4,15 +4,29 @@
 
 #include "common/Modes.hpp"
 
+#include "common/Args.hpp"
 #include "util/CombinePath.hpp"
 
 #include <QCoreApplication>
 
 namespace chatterino {
 
-Modes::Modes()
+Modes::Modes(const Args &args)
 {
-    QFile file(combinePath(QCoreApplication::applicationDirPath(), "modes"));
+    QString parentDirectory;
+
+    if (args.portableDirectory.has_value())
+    {
+        this->isPortable = true;
+        parentDirectory = args.portableDirectory.value();
+    }
+    else
+    {
+        parentDirectory = QCoreApplication::applicationDirPath();
+    }
+
+    QFile file(combinePath(parentDirectory, "modes"));
+
     if (!file.open(QIODevice::ReadOnly))
     {
         return;
