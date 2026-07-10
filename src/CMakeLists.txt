@@ -262,6 +262,8 @@ set(SOURCE_FILES
         controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/api/ConnectionHandle.cpp
         controllers/plugins/api/ConnectionHandle.hpp
+        controllers/plugins/api/DateTime.cpp
+        controllers/plugins/api/DateTime.hpp
         controllers/plugins/api/DebugLibrary.cpp
         controllers/plugins/api/DebugLibrary.hpp
         controllers/plugins/api/EventType.hpp

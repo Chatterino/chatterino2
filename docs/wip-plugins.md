@@ -981,6 +981,50 @@ Get all open windows.
 
 The global [`WindowManager`](#windowmanager).
 
+#### `DateTime`
+
+A zoned date and time.
+
+##### `DateTime.from_iso_string(str)`
+
+Parse a date from an ISO 8601 string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+
+##### `DateTime:to_iso_string()`
+
+Format the datetime as an ISO string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+
+##### `DateTime:to_iso_string_without_ms()`
+
+Format the datetime as an ISO string without milliseconds (yyyy-MM-ddTHH:mm:ss)
+
+##### `DateTime.current_local()`
+
+Get the current datetime in the system's local time zone.
+
+##### `DateTime.current_utc()`
+
+Get the current datetime in the UTC time zone (00:00).
+
+##### `DateTime.from_unix_milliseconds(ts)`
+
+Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+
+The returned date time will be in the local time zone.
+
+##### `DateTime.from_unix_seconds(ts)`
+
+Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+
+The returned date time will be in the local time zone.
+
+##### `DateTime:to_unix_milliseconds()`
+
+Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+
+##### `DateTime:to_unix_seconds()`
+
+Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+
 ### Input/Output API
 
 These functions are wrappers for Lua's I/O library. Functions on file pointer
