@@ -44,7 +44,7 @@ public:
     };
 
     Args() = default;
-    Args(const QApplication &app);
+    explicit Args(const QApplication &app);
 
     bool printVersion{};
 
