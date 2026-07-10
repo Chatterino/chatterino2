@@ -340,11 +340,14 @@ std::optional<WindowLayout> Args::makeCustomChannelLayout(
     {
         assert(channel.provider == ProviderId::Twitch);
 
-        TabDescriptor tab = {.selected_ = window.tabs_.empty(),
-                             .rootNode_ = SplitNodeDescriptor{{
-                                 .type_ = "twitch",
-                                 .channelName_ = channel.name,
-                             }}};
+        TabDescriptor tab = {
+            .selected_ = window.tabs_.empty(),
+            .rootNode_ = SplitNodeDescriptor{{
+                .type_ = "twitch",
+                .channelName_ = channel.name,
+            }},
+        };
+
         window.tabs_.emplace_back(std::move(tab));
     }
 
