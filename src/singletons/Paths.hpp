@@ -6,16 +6,15 @@
 
 #include <QString>
 
-#include <optional>
-
 namespace chatterino {
 
 class Modes;
+class Args;
 
 class Paths
 {
 public:
-    Paths(const Modes &modes);
+    Paths(const Args &args, const Modes &modes);
 
     // Root directory for the configuration files. %APPDATA%/chatterino or
     // ExecutablePath for portable mode
@@ -64,11 +63,8 @@ public:
 
 private:
     void initAppFilePathHash();
-    void initCheckPortable();
-    void initRootDirectory(const Modes &modes);
+    void initRootDirectory(const Args &args, const Modes &modes);
     void initSubDirectories();
-
-    std::optional<bool> portable_;
 
     // Directory for cache files. Same as <appDataDirectory>/Misc
     QString cacheDirectory_;
