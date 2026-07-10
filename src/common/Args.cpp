@@ -91,32 +91,37 @@ std::optional<Args::Channel> parseActivateOption(QString input)
     };
 }
 
-std::vector<Args::Channel> parseCustomChannels(const QString &string)
+std::vector<Args::Channel> parseCustomChannels(const QString &argValue)
 {
     std::vector<Args::Channel> list;
 
-    for (QStringView part : string.tokenize(u";", Qt::SkipEmptyParts))
+    QStringList channelArgList = argValue.split(";");
+    for (const QString &channelArg : channelArgList)
     {
-        qsizetype split = part.indexOf(u':');
-        QStringView name = part;
-
-        if (split != -1)
+        if (channelArg.isEmpty())
         {
-            QStringView provider = part.first(split);
-            name = part.last(part.length() - (split + 1));
-
-            if (provider.isEmpty() || name.isEmpty() || provider != u"t")
-            {
-                qCWarning(chatterinoArgs).nospace()
-                    << "bad channel specifier passed to --channel: " << part;
-                continue;
-            }
+            continue;
         }
 
-        list.push_back(Args::Channel{
-            .provider = ProviderId::Twitch,
-            .name = QString(name),
-        });
+        // Twitch is default platform
+        QString platform = "t";
+        QString channelName = channelArg;
+
+        const QRegularExpression regExp("(.):(.*)");
+        if (auto match = regExp.match(channelArg); match.hasMatch())
+        {
+            platform = match.captured(1);
+            channelName = match.captured(2);
+        }
+
+        // Twitch (default)
+        if (platform == "t")
+        {
+            list.push_back(Args::Channel{
+                .provider = ProviderId::Twitch,
+                .name = channelName,
+            });
+        }
     }
 
     list.shrink_to_fit();
