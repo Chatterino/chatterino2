@@ -78,16 +78,15 @@ void Paths::initAppFilePathHash()
 void Paths::initRootDirectory(const Args &args, const Modes &modes)
 {
     this->rootAppDataDirectory = [&]() -> QString {
-        // portable mode with given directory
-        if (args.portableDirectory.has_value())
-        {
-            assert(modes.isPortable);
-            return args.portableDirectory.value();
-        }
-
-        // portable mode next to executable
+        // portable
         if (modes.isPortable)
         {
+            // override
+            if (args.portableDirectory.has_value())
+            {
+                return args.portableDirectory.value();
+            }
+
             return QCoreApplication::applicationDirPath();
         }
 
