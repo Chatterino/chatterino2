@@ -188,13 +188,10 @@ Args::Args(const QApplication &app)
         "like you have to use this, please reach out to our issue tracker at "
         "https://github.com/Chatterino/chatterino2/issues");
 
-    QCommandLineOption portable(
-        "portable",
-        "Starts Chatterino in portable mode in the current directory");
+    QCommandLineOption portableEnable("portable", "Enable portable mode.");
 
-    QCommandLineOption portableDir(
-        "portable-dir",
-        "Starts Chatterino in portable mode in the given directory",
+    QCommandLineOption portableDirectory(
+        "portable-dir", "Directory to use when portable mode is enabled.",
         "directory");
 
 #ifndef NDEBUG
@@ -216,8 +213,8 @@ Args::Args(const QApplication &app)
         channelLayout,
         activateOption,
         useOldScalingOption,
-        portable,
-        portableDir,
+        portableEnable,
+        portableDirectory,
 #ifndef NDEBUG
         useLocalEventsubOption,
 #endif
@@ -294,20 +291,15 @@ Args::Args(const QApplication &app)
         this->useOldScaling = true;
     }
 
-    if (parser.isSet(portableDir) && parser.isSet(portable))
+    if (parser.isSet(portableEnable))
     {
-        qCWarning(chatterinoArgs) << "--portable combined with "
-                                     "--portable-dir is not accepted";
+        this->portableEnable = true;
     }
-    else if (parser.isSet(portableDir))
+
+    if (parser.isSet(portableDirectory))
     {
-        // note: empty value will act as --portable
-        QString value = parser.value(portableDir);
-        this->portableDirectory = QDir(value).absolutePath();
-    }
-    else if (parser.isSet(portable))
-    {
-        this->portableDirectory = QDir::currentPath();
+        this->portableDirectory =
+            QDir(parser.value(portableDirectory)).absolutePath();
     }
 
 #ifndef NDEBUG

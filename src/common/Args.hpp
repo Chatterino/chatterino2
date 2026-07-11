@@ -67,6 +67,8 @@ public:
     std::optional<QString> initialLogin;
     bool verbose{};
     bool safeMode{};
+
+    bool portableEnable{};
     std::optional<QString> portableDirectory;
 
     bool useOldScaling = false;
