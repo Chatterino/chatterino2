@@ -176,3 +176,103 @@ TEST_F(TabHistoryTest, TrimsOldestEntriesAtCapacity)
     EXPECT_EQ(stack.front(), pages[50].get());
     EXPECT_EQ(stack.back(), pages[2].get());
 }
+
+TEST_F(TabHistoryTest, RecordNavigationSeedsFromOnEmptyHistory)
+{
+    QWidget a(&this->parent);
+    QWidget b(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(&a, &b);
+
+    EXPECT_TRUE(history.canGoBack());
+    EXPECT_EQ(history.peekBack(), &a);
+}
+
+TEST_F(TabHistoryTest, GoBackAndForwardAtBoundaries)
+{
+    QWidget a(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+
+    EXPECT_EQ(history.goBack(), std::nullopt);
+    EXPECT_EQ(history.goForward(), std::nullopt);
+    EXPECT_EQ(history.peekBack(), std::nullopt);
+}
+
+TEST_F(TabHistoryTest, DiscardTopEntriesAtBoundaries)
+{
+    QWidget a(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+
+    history.discardBackTop();
+    history.discardForwardTop();
+
+    EXPECT_FALSE(history.canGoBack());
+    EXPECT_FALSE(history.canGoForward());
+}
+
+TEST_F(TabHistoryTest, RemoveCurrentPageWhenLastEntry)
+{
+    QWidget a(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+    history.removePage(&a);
+
+    EXPECT_FALSE(history.canGoBack());
+    EXPECT_FALSE(history.canGoForward());
+    EXPECT_EQ(history.backStackMostRecentFirst(), (std::vector<QWidget *>{}));
+}
+
+TEST_F(TabHistoryTest, RemoveCurrentPageWhenNotLastEntry)
+{
+    QWidget a(&this->parent);
+    QWidget b(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+    history.recordNavigation(&a, &b);
+    history.removePage(&b);
+
+    EXPECT_FALSE(history.canGoBack());
+    EXPECT_FALSE(history.canGoForward());
+    EXPECT_EQ(history.peekBack(), std::nullopt);
+}
+
+TEST_F(TabHistoryTest, RemoveForwardPageDoesNotMoveCurrentIndex)
+{
+    QWidget a(&this->parent);
+    QWidget b(&this->parent);
+    QWidget c(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+    history.recordNavigation(&a, &b);
+    history.recordNavigation(&b, &c);
+    history.goBack();
+
+    history.removePage(&c);
+
+    EXPECT_TRUE(history.canGoBack());
+    EXPECT_EQ(history.peekBack(), &a);
+    EXPECT_FALSE(history.canGoForward());
+}
+
+TEST_F(TabHistoryTest, RemoveDuplicatePages)
+{
+    QWidget a(&this->parent);
+    QWidget b(&this->parent);
+    TabHistory history;
+
+    history.recordNavigation(nullptr, &a);
+    history.recordNavigation(&a, &b);
+    history.recordNavigation(&b, &a);
+    history.removePage(&a);
+
+    EXPECT_FALSE(history.canGoBack());
+    EXPECT_FALSE(history.canGoForward());
+}
