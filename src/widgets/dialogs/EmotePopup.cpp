@@ -316,11 +316,11 @@ void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
     channel.addMessage(makeEmojiMessage(emojiMap), MessageContext::Original);
 }
 
-bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &text,
-                               const QStringList &tags)
+bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &queryText,
+                               const QStringList &queryTags)
 {
-    bool tagsMatch = tags.empty();
-    for (auto tag = tags.constBegin(); tag != tags.constEnd() && !tagsMatch;
+    bool tagsMatch = queryTags.empty();
+    for (auto tag = queryTags.constBegin(); tag != queryTags.constEnd() && !tagsMatch;
          ++tag)
     {
         for (const auto &emoteTag : emote->tags)
@@ -334,9 +334,9 @@ bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &text,
     }
 
     return tagsMatch &&
-           (emote->name.string.contains(text, Qt::CaseInsensitive) ||
+           (emote->name.string.contains(queryText, Qt::CaseInsensitive) ||
             (emote->baseName.has_value() &&
-             emote->baseName.value().string.contains(text,
+             emote->baseName.value().string.contains(queryText,
                                                      Qt::CaseInsensitive)));
 }
 
