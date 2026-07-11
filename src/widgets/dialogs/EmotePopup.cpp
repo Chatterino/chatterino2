@@ -320,8 +320,8 @@ bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &queryText,
                                const QStringList &queryTags)
 {
     bool tagsMatch = queryTags.empty();
-    for (auto tag = queryTags.constBegin(); tag != queryTags.constEnd() && !tagsMatch;
-         ++tag)
+    for (auto tag = queryTags.constBegin();
+         tag != queryTags.constEnd() && !tagsMatch; ++tag)
     {
         for (const auto &emoteTag : emote->tags)
         {
