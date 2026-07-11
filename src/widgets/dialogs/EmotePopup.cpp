@@ -38,6 +38,7 @@
 #include <QStringBuilder>
 #include <QTabWidget>
 
+#include <algorithm>
 #include <utility>
 
 namespace {
@@ -319,19 +320,14 @@ void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
 bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &queryText,
                                const QStringList &queryTags)
 {
-    bool tagsMatch = queryTags.empty();
-    for (auto tag = queryTags.constBegin();
-         tag != queryTags.constEnd() && !tagsMatch; ++tag)
-    {
-        for (const auto &emoteTag : emote->tags)
-        {
-            if (emoteTag.contains(*tag, Qt::CaseInsensitive))
-            {
-                tagsMatch = true;
-                break;
-            }
-        }
-    }
+    bool tagsMatch =
+        queryTags.empty() ||
+        std::ranges::any_of(queryTags, [&](const QString &queryTag) {
+            return std::ranges::any_of(
+                emote->tags, [&](const QString &emoteTag) {
+                    return emoteTag.contains(queryTag, Qt::CaseInsensitive);
+                });
+        });
 
     return tagsMatch &&
            (emote->name.string.contains(queryText, Qt::CaseInsensitive) ||
