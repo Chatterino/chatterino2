@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 #endif
 
     const Args args(a);
-    const Modes modes(a);
+    const Modes modes(args);
     std::unique_ptr<Paths> paths;
 
     // Optional logger override that logs to a file
