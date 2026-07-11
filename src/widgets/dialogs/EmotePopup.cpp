@@ -1024,8 +1024,8 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
         filterEmoteMap(searchWord, tags, *this->twitchChannel_->bttvEmotes());
     auto ffzChannelEmotes =
         filterEmoteMap(searchWord, tags, *this->twitchChannel_->ffzEmotes());
-    auto seventvChannelEmotes =
-        filterEmoteMap(searchWord, tags, *this->twitchChannel_->seventvEmotes());
+    auto seventvChannelEmotes = filterEmoteMap(
+        searchWord, tags, *this->twitchChannel_->seventvEmotes());
 
     // channel
     if (!bttvChannelEmotes.empty())
