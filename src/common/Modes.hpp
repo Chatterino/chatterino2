@@ -11,7 +11,7 @@ class Args;
 class Modes
 {
 public:
-    Modes(const Args &args);
+    explicit Modes(const Args &args);
 
     /// Marked by the line `portable` or `--portable[-dir]` option from `Args`
     bool isPortable{};
