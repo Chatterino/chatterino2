@@ -107,7 +107,7 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
             : createTooltip(emoteName.string, author.string, isGlobal);
     auto imageSet = SeventvEmotes::createImageSet(emoteData, false);
 
-    auto tagsArray = emoteData["tags"].toArray();
+    const auto tagsArray = emoteData["tags"].toArray();
     QStringList tags;
     tags.reserve(tagsArray.size());
     for (const auto tag : tagsArray)
