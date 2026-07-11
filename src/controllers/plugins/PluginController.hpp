@@ -9,6 +9,9 @@
 #    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/RemotePlugin.hpp"
+#    include "util/Expected.hpp"
+#    include "util/FunctionRef.hpp"
 
 #    include <pajlada/signals/signal.hpp>
 #    include <QDir>
@@ -45,6 +48,8 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
+    Plugin *getPluginByID(const QString &id);
+
     // TODO: make a function that iterates plugins that aren't errored/enabled
     const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
 
@@ -54,6 +59,37 @@ public:
      * @param id This is the unique identifier of the plugin, the name of the directory it is in
      */
     bool reload(const QString &id);
+
+    struct RemovePluginArgs {
+        bool eraseData = true;
+        bool disable = true;
+    };
+
+    ExpectedStr<void> removePlugin(const QString &id, RemovePluginArgs args);
+
+    struct DownloadArgs {
+        /// The plugin to install.
+        RemotePluginPtr remotePlugin;
+
+        /// Optional callback to ask the user about an existing, unrelated plugin.
+        ///
+        /// If this is not specified, unrelated plugins won't be updated.
+        FunctionRef<bool()> onExistingOverwrite;
+
+        /// Required completion callback.
+        std::function<void(ExpectedStr<void>)> onDone;
+
+        /// Optional callback to fetch files.
+        ///
+        /// By default `NetworkRequest` is used.
+        FunctionRef<void(QUrl, std::function<void(ExpectedStr<QByteArray>)>)>
+            fetchFile;
+
+        /// Update or (re-)install the plugin?
+        bool update = false;
+    };
+
+    void download(const DownloadArgs &args);
 
     /**
      * @brief Checks settings to tell if a plugin named by id is enabled.
@@ -86,6 +122,11 @@ private:
 
     void queueChangeNotification();
 
+    ExpectedStr<void> downloadImpl(const DownloadArgs &args);
+
+    ExpectedStr<void> finishDownload(const RemotePlugin &remote,
+                                     const std::filesystem::path &pluginDir);
+
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
     WebSocketPool webSocketPool_;
 
@@ -94,6 +135,8 @@ private:
         loaders_;
 
     bool changeNotificationQueued = false;
+
+    std::shared_ptr<bool> lifetime;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;

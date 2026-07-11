@@ -15,6 +15,7 @@
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/PluginRepository.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "lib/Snapshot.hpp"
 #    include "messages/Message.hpp"
@@ -40,6 +41,7 @@
 using namespace chatterino;
 using chatterino::mock::MockChannel;
 using namespace std::chrono_literals;
+using namespace Qt::Literals;
 
 namespace {
 
@@ -50,7 +52,9 @@ const QString TEST_SETTINGS = R"(
     "plugins": {
         "supportEnabled": true,
         "enabledPlugins": [
-            "test"
+            "test",
+            "first-plugin",
+            "second-plugin"
         ]
     },
     "accounts": {
@@ -199,6 +203,11 @@ public:
     static bool tryLoadFromDir(const QDir &pluginDir)
     {
         return getApp()->getPlugins()->tryLoadFromDir(pluginDir);
+    }
+
+    static void loadPlugins()
+    {
+        getApp()->getPlugins()->loadPlugins();
     }
 
     static void openLibrariesFor(Plugin *plugin)
@@ -1775,6 +1784,440 @@ TEST_F(PluginTest, debugTraceback)
     )lua")
                    .get<std::shared_ptr<Message>>();
     ASSERT_EQ(msg->id, "who would do this");
+}
+
+namespace {
+
+const QByteArrayView REMOTE_REPO_META(R"(
+{
+  "metadata": {
+    "name": "My Plugin Store"
+  },
+  "plugins": [
+    {
+      "id": "first-plugin",
+      "download": "my-plugin",
+      "meta": {
+        "name": "My Plugin",
+        "description": "",
+        "authors": [],
+        "version": "0.1.1",
+        "license": "MIT",
+        "permissions": [],
+        "files": ["init.lua"]
+      }
+    },
+    {
+      "id": "second-plugin",
+      "download": "second",
+      "meta": {
+        "name": "Second plugin",
+        "description": "",
+        "authors": [],
+        "version": "0.2.0",
+        "license": "MIT",
+        "permissions": [],
+        "files": [
+          "init.lua",
+          "info.json"
+        ]
+      }
+    }
+  ]
+}
+)");
+
+const QByteArrayView CONTENT_FIRST_INIT_LUA(R"(plugin_name = "first")");
+const QByteArrayView CONTENT_SECOND_INIT_LUA(R"(plugin_name = "second")");
+const QByteArrayView CONTENT_SECOND_INFO_JSON(R"({
+  "name": "DO NOT USE THIS",
+  "description": "",
+  "authors": ["User"],
+  "version": "1.0.0",
+  "license": "MIT",
+  "permissions": []
+})");
+
+const QByteArrayView CONTENT_FIRST_EXISTING_INIT_LUA(
+    R"(plugin_name = "ex-first")");
+const QByteArrayView CONTENT_FIRST_EXISTING_INFO_JSON(R"({
+  "name": "My Plugin",
+  "description": "",
+  "authors": ["User"],
+  "version": "0.1.0",
+  "license": "MIT",
+  "permissions": [],
+  "remote": "https://plugins.chatterino.com"
+})");
+// To fix clangd(?) -> "
+
+}  // namespace
+
+class RemotePluginTest : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        this->app = std::make_unique<MockApplication>();
+        this->app->paths_.pluginsDirectory = this->app->settingsDir.path();
+        this->remoteDir = std::make_unique<QTemporaryDir>();
+        this->initRemote();
+        this->initExisting();
+        PluginControllerAccess::loadPlugins();
+    }
+
+    void TearDown() override
+    {
+        this->remoteDir.reset();
+        this->app.reset();
+    }
+
+    void fetchCallback(const QUrl &url,
+                       const std::function<void(ExpectedStr<QByteArray>)> &cb)
+    {
+        auto path = url.path(QUrl::FullyEncoded);
+        path.removeFirst();  // first '/'
+        QFile f(this->remoteDir->filePath(path));
+        if (!f.open(QFile::ReadOnly))
+        {
+            cb(makeUnexpected(f.errorString()));
+            return;
+        }
+        cb(f.readAll());
+    }
+
+    std::string loadedPluginName(const QString &id) const
+    {
+        auto *plugin = this->app->getPlugins()->getPluginByID(id);
+        if (plugin)
+        {
+            return plugin->state().get_or("plugin_name",
+                                          std::string("NO-GLOBAL"));
+        }
+        return "NOT-FOUND";
+    }
+
+    std::unique_ptr<MockApplication> app;
+    std::unique_ptr<QTemporaryDir> remoteDir;
+
+private:
+    static void writeFile(const QString &path, QByteArrayView data)
+    {
+        QFile f(path);
+        if (!f.open(QFile::WriteOnly))
+        {
+            return;
+        }
+        f.write(data.data(), data.size());
+    }
+
+    void initRemote()
+    {
+        QDir dir(this->remoteDir->path());
+        dir.mkdir("my-plugin");
+        dir.mkdir("second");
+        writeFile(dir.filePath("my-plugin/init.lua"), CONTENT_FIRST_INIT_LUA);
+        writeFile(dir.filePath("second/init.lua"), CONTENT_SECOND_INIT_LUA);
+        writeFile(dir.filePath("second/info.json"), CONTENT_SECOND_INFO_JSON);
+    }
+
+    void initExisting()
+    {
+        QDir dir(this->app->getPaths().pluginsDirectory);
+        dir.mkdir("first-plugin");
+        dir.mkdir("first-plugin/data");
+        writeFile(dir.filePath("first-plugin/init.lua"),
+                  CONTENT_FIRST_EXISTING_INIT_LUA);
+        writeFile(dir.filePath("first-plugin/info.json"),
+                  CONTENT_FIRST_EXISTING_INFO_JSON);
+        writeFile(dir.filePath("first-plugin/data/file.txt"), "a file");
+    }
+};
+
+TEST_F(RemotePluginTest, install)
+{
+    ASSERT_EQ(this->loadedPluginName("second-plugin"), "NOT-FOUND");
+
+    PluginRepository repo("https://plugins.chatterino.com");
+    auto res = repo.loadFromJson(
+        QJsonDocument::fromJson(REMOTE_REPO_META.toByteArray()).object());
+    ASSERT_TRUE(res.has_value());
+
+    auto secondRemote = repo.getPluginByID(u"second-plugin");
+    ASSERT_NE(secondRemote, nullptr);
+
+    std::optional<ExpectedStr<void>> onDoneResult;
+    getApp()->getPlugins()->download({
+        .remotePlugin = secondRemote,
+        .onExistingOverwrite =
+            [] {
+                EXPECT_FALSE(true);
+                return false;
+            },
+        .onDone =
+            [&](auto res) {
+                onDoneResult = std::move(res);
+            },
+        .fetchFile =
+            [&](auto &&...args) {
+                return this->fetchCallback(
+                    std::forward<decltype(args)>(args)...);
+            },
+        .update = false,
+    });
+
+    ASSERT_EQ(onDoneResult, ExpectedStr<void>{});
+    ASSERT_EQ(this->loadedPluginName("second-plugin"), "second");
+    auto *second = getApp()->getPlugins()->getPluginByID("second-plugin");
+    ASSERT_NE(second, nullptr);
+    ASSERT_EQ(second->meta.name, "Second plugin");  // Not "DO NOT USE THIS".
+
+    // Even after reloading.
+    PluginControllerAccess::loadPlugins();
+    second = getApp()->getPlugins()->getPluginByID("second-plugin");
+    ASSERT_NE(second, nullptr);
+    ASSERT_EQ(second->meta.name, "Second plugin");
+}
+
+TEST_F(RemotePluginTest, reinstall)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+
+    PluginRepository repo("https://plugins.chatterino.com");
+    auto res = repo.loadFromJson(
+        QJsonDocument::fromJson(REMOTE_REPO_META.toByteArray()).object());
+    ASSERT_TRUE(res.has_value());
+
+    auto firstRemote = repo.getPluginByID(u"first-plugin");
+    ASSERT_NE(firstRemote, nullptr);
+
+    bool overwriteCalled = false;
+    getApp()->getPlugins()->download({
+        .remotePlugin = firstRemote,
+        .onExistingOverwrite =
+            [&] {
+                overwriteCalled = true;
+                return false;  // Don't install it.
+            },
+        .onDone =
+            [&](auto &&...) {
+                EXPECT_FALSE(true);
+            },
+        .fetchFile =
+            [&](auto &&...) {
+                EXPECT_FALSE(true);
+            },
+        .update = false,
+    });
+    ASSERT_TRUE(overwriteCalled);
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+
+    overwriteCalled = false;
+    std::optional<ExpectedStr<void>> onDoneResult;
+    getApp()->getPlugins()->download({
+        .remotePlugin = firstRemote,
+        .onExistingOverwrite =
+            [&] {
+                overwriteCalled = true;
+                return true;  // Yes, overwrite it.
+            },
+        .onDone =
+            [&](auto res) {
+                onDoneResult = std::move(res);
+            },
+        .fetchFile =
+            [&](auto &&...args) {
+                return this->fetchCallback(
+                    std::forward<decltype(args)>(args)...);
+            },
+        .update = false,
+    });
+
+    ASSERT_TRUE(overwriteCalled);
+    ASSERT_EQ(onDoneResult, ExpectedStr<void>{});
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "first");
+}
+
+TEST_F(RemotePluginTest, update)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+
+    PluginRepository repo("https://plugins.chatterino.com");
+    auto res = repo.loadFromJson(
+        QJsonDocument::fromJson(REMOTE_REPO_META.toByteArray()).object());
+    ASSERT_TRUE(res.has_value());
+
+    auto firstRemote = repo.getPluginByID(u"first-plugin");
+    ASSERT_NE(firstRemote, nullptr);
+    auto secondRemote = repo.getPluginByID(u"second-plugin");
+    ASSERT_NE(secondRemote, nullptr);
+
+    std::optional<ExpectedStr<void>> onDoneResult;
+    getApp()->getPlugins()->download({
+        .remotePlugin = firstRemote,
+        .onExistingOverwrite =
+            [] {
+                EXPECT_FALSE(true);
+                return false;
+            },
+        .onDone =
+            [&](auto res) {
+                onDoneResult = std::move(res);
+            },
+        .fetchFile =
+            [&](auto &&...args) {
+                return this->fetchCallback(
+                    std::forward<decltype(args)>(args)...);
+            },
+        .update = true,
+    });
+
+    ASSERT_EQ(onDoneResult, ExpectedStr<void>{});
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "first");
+
+    // Now try updating the second plugin (not added locally).
+    ASSERT_EQ(this->loadedPluginName("second-plugin"), "NOT-FOUND");
+    onDoneResult.reset();
+    getApp()->getPlugins()->download({
+        .remotePlugin = secondRemote,
+        .onExistingOverwrite =
+            [] {
+                EXPECT_FALSE(true);
+                return false;
+            },
+        .onDone =
+            [&](auto res) {
+                onDoneResult = std::move(res);
+            },
+        .fetchFile =
+            [&](auto &&...) {
+                EXPECT_FALSE(true);
+            },
+        .update = true,
+    });
+
+    ASSERT_EQ(onDoneResult, makeUnexpected(u"Plugin does not exist."_s));
+    ASSERT_EQ(this->loadedPluginName("second-plugin"), "NOT-FOUND");
+}
+
+TEST_F(RemotePluginTest, updateUnrelated)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+
+    // We're using a different URL here. Plugins with different URLs are unrelated.
+    PluginRepository repo("https://plugins2.chatterino.com");
+    auto res = repo.loadFromJson(
+        QJsonDocument::fromJson(REMOTE_REPO_META.toByteArray()).object());
+    ASSERT_TRUE(res.has_value());
+
+    auto firstRemote = repo.getPluginByID(u"first-plugin");
+    ASSERT_NE(firstRemote, nullptr);
+
+    std::optional<ExpectedStr<void>> onDoneResult;
+    getApp()->getPlugins()->download({
+        .remotePlugin = firstRemote,
+        .onExistingOverwrite =
+            [] {
+                EXPECT_FALSE(true);
+                return false;
+            },
+        .onDone =
+            [&](auto res) {
+                onDoneResult = std::move(res);
+            },
+        .fetchFile =
+            [&](auto &&...) {
+                EXPECT_FALSE(true);
+            },
+        .update = true,
+    });
+
+    ASSERT_TRUE(onDoneResult.has_value());
+    ASSERT_FALSE(onDoneResult->has_value());
+    ASSERT_TRUE(onDoneResult->error().startsWith(
+        u"Plugin was installed from a different source: "));
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+}
+
+TEST_F(RemotePluginTest, removeKeepData)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+    QDir dir(this->app->getPaths().pluginsDirectory);
+
+    ASSERT_TRUE(dir.exists("first-plugin"));
+    ASSERT_TRUE(dir.exists("first-plugin/init.lua"));
+    ASSERT_TRUE(dir.exists("first-plugin/info.json"));
+    ASSERT_TRUE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_TRUE(PluginController::isPluginEnabled("first-plugin"));
+
+    auto res = getApp()->getPlugins()->removePlugin("first-plugin",
+                                                    {
+                                                        .eraseData = false,
+                                                        .disable = false,
+                                                    });
+    ASSERT_TRUE(res.has_value());
+
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "NOT-FOUND");
+
+    ASSERT_TRUE(dir.exists("first-plugin"));
+    ASSERT_FALSE(dir.exists("first-plugin/init.lua"));
+    ASSERT_FALSE(dir.exists("first-plugin/info.json"));
+    ASSERT_TRUE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_TRUE(PluginController::isPluginEnabled("first-plugin"));
+}
+
+TEST_F(RemotePluginTest, removeEraseData)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+    QDir dir(this->app->getPaths().pluginsDirectory);
+
+    ASSERT_TRUE(dir.exists("first-plugin"));
+    ASSERT_TRUE(dir.exists("first-plugin/init.lua"));
+    ASSERT_TRUE(dir.exists("first-plugin/info.json"));
+    ASSERT_TRUE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_TRUE(PluginController::isPluginEnabled("first-plugin"));
+
+    auto res = getApp()->getPlugins()->removePlugin("first-plugin",
+                                                    {
+                                                        .eraseData = true,
+                                                        .disable = false,
+                                                    });
+    ASSERT_TRUE(res.has_value());
+
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "NOT-FOUND");
+
+    ASSERT_FALSE(dir.exists("first-plugin"));
+    ASSERT_FALSE(dir.exists("first-plugin/init.lua"));
+    ASSERT_FALSE(dir.exists("first-plugin/info.json"));
+    ASSERT_FALSE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_TRUE(PluginController::isPluginEnabled("first-plugin"));
+}
+
+TEST_F(RemotePluginTest, removeDisable)
+{
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "ex-first");
+    QDir dir(this->app->getPaths().pluginsDirectory);
+
+    ASSERT_TRUE(dir.exists("first-plugin"));
+    ASSERT_TRUE(dir.exists("first-plugin/init.lua"));
+    ASSERT_TRUE(dir.exists("first-plugin/info.json"));
+    ASSERT_TRUE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_TRUE(PluginController::isPluginEnabled("first-plugin"));
+
+    auto res = getApp()->getPlugins()->removePlugin("first-plugin",
+                                                    {
+                                                        .eraseData = true,
+                                                        .disable = true,
+                                                    });
+    ASSERT_TRUE(res.has_value());
+
+    ASSERT_EQ(this->loadedPluginName("first-plugin"), "NOT-FOUND");
+
+    ASSERT_FALSE(dir.exists("first-plugin"));
+    ASSERT_FALSE(dir.exists("first-plugin/init.lua"));
+    ASSERT_FALSE(dir.exists("first-plugin/info.json"));
+    ASSERT_FALSE(dir.exists("first-plugin/data/file.txt"));
+    ASSERT_FALSE(PluginController::isPluginEnabled("first-plugin"));
 }
 
 #endif

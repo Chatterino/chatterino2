@@ -820,6 +820,15 @@ public:
         "/plugins/enabledPlugins",
         {},
     };
+    ChatterinoSetting<QStringList> remotePluginURLs = {
+        "/plugins/remote/urls",
+        {
+            // Resolves to DEFAULT_PLUGIN_REPOSITORY.
+            // Using a placeholder here to allow changing the actual URL without
+            // requiring users to change their settings.
+            "(default)",
+        },
+    };
 
     // Sound
     EnumStringSetting<SoundBackend> soundBackend = {

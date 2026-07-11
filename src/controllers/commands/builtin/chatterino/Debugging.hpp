@@ -46,4 +46,9 @@ QString disableLogfile(const CommandContext &ctx);
 QString enableLogfile(const CommandContext &ctx);
 QString relaunchWithLogfile(const CommandContext &ctx);
 
+#ifdef CHATTERINO_HAVE_PLUGINS
+/// Temporary command until there's UI for remote plugins.
+QString debugPlugin(const CommandContext &ctx);
+#endif
+
 }  // namespace chatterino::commands
