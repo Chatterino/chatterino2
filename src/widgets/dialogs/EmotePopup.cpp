@@ -319,12 +319,16 @@ bool emoteMatchesSearchAndTags(const EmotePtr &emote, const QString &text,
                                const QStringList &tags)
 {
     bool tagsMatch = tags.empty();
-    for (const auto &tag : tags)
+    for (auto tag = tags.constBegin(); tag != tags.constEnd() && !tagsMatch;
+         ++tag)
     {
-        if (emote->tags.contains(tag, Qt::CaseInsensitive))
+        for (const auto &emoteTag : emote->tags)
         {
-            tagsMatch = true;
-            break;
+            if (emoteTag.contains(*tag, Qt::CaseInsensitive))
+            {
+                tagsMatch = true;
+                break;
+            }
         }
     }
 
