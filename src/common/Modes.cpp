@@ -13,20 +13,12 @@ namespace chatterino {
 
 Modes::Modes(const Args &args)
 {
-    QString parentDirectory;
-
-    if (args.portableDirectory.has_value())
+    if (args.portableEnable)
     {
         this->isPortable = true;
-        parentDirectory = args.portableDirectory.value();
-    }
-    else
-    {
-        parentDirectory = QCoreApplication::applicationDirPath();
     }
 
-    QFile file(combinePath(parentDirectory, "modes"));
-
+    QFile file(combinePath(QCoreApplication::applicationDirPath(), "modes"));
     if (!file.open(QIODevice::ReadOnly))
     {
         return;
