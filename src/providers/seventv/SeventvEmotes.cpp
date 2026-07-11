@@ -110,7 +110,7 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
     auto tagsArray = emoteData["tags"].toArray();
     QStringList tags;
     tags.reserve(tagsArray.size());
-    for (auto &tag : tagsArray.toVariantList())
+    for (const auto tag : tagsArray)
     {
         tags.append(tag.toString());
     }
