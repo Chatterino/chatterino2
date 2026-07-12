@@ -414,6 +414,11 @@ public:
     IntSetting sharedChatSessionRefreshInterval = {
         "/behaviour/sharedChatSessionRefreshInterval", 60};
 
+    BoolSetting sharedChatAlwaysShowBadge = {
+        "/behaviour/sharedChatAlwaysShowBadge",
+        false,
+    };
+
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
