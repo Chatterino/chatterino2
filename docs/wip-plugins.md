@@ -987,15 +987,15 @@ A zoned date and time.
 
 ##### `DateTime.from_iso_string(str)`
 
-Parse a date from an ISO 8601 string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+Parse a date from an ISO 8601 string with milliseconds (`yyyy-MM-ddTHH:mm:ss.zzz±hh:mm`)
 
 ##### `DateTime:to_iso_string()`
 
-Format the datetime as an ISO string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+Format the datetime as an ISO string with milliseconds (`yyyy-MM-ddTHH:mm:ss.zzz±hh:mm`)
 
 ##### `DateTime:to_iso_string_without_ms()`
 
-Format the datetime as an ISO string without milliseconds (yyyy-MM-ddTHH:mm:ss)
+Format the datetime as an ISO string without milliseconds (`yyyy-MM-ddTHH:mm:ss±hh:mm`)
 
 ##### `DateTime.current_local()`
 
