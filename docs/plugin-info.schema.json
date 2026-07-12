@@ -9,7 +9,7 @@
     "name": {
       "type": "string",
       "description": "Plugin name shown to the user.",
-      "pattern": "[\\w +\\.\\-_':&]+$"
+      "pattern": "^[\\w +\\.\\-_':&]+$"
     },
     "description": {
       "type": "string",

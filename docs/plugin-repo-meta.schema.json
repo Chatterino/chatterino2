@@ -11,7 +11,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[\\w +\\.\\-_':&]+"
+          "pattern": "^[\\w +\\.\\-_':&]+$"
         }
       },
       "required": ["name"]
@@ -24,7 +24,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[\\w+\\.\\-_@~]+$"
+            "pattern": "^[A-Za-z][\\w+\\.\\-_@~]+$"
           },
           "download": {
             "type": "string",
