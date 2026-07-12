@@ -54,13 +54,15 @@ struct SplitDescriptor {
 
     QList<QUuid> filters_;
 
-    static void loadFromJSON(SplitDescriptor &descriptor,
-                             const QJsonObject &root, const QJsonObject &data);
+    static SplitDescriptor loadFromJSON(const QJsonObject &root);
 
     IndirectChannel decodeChannel() const;
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
+    SplitNodeDescriptor() = default;
+    SplitNodeDescriptor(SplitDescriptor descriptor);
+
     qreal flexH_ = 1;
     qreal flexV_ = 1;
 
