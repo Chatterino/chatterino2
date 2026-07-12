@@ -81,7 +81,6 @@ void PluginRepository::load()
     }
 
     NetworkRequest(this->fileUrl(u"meta.json"_s))
-        .followRedirects(true)
         .timeout(10 * 1000)
         .onSuccess([weak = this->weak_from_this()](const NetworkResult &res) {
             auto self = weak.lock();

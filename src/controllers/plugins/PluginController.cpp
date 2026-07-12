@@ -595,7 +595,6 @@ void PluginController::download(const DownloadArgs &args)
                 const std::function<void(ExpectedStr<QByteArray>)> &cb) {
                 NetworkRequest(url)
                     .timeout(30'000)
-                    .followRedirects(true)
                     .onSuccess([cb](const NetworkResult &res) {
                         cb(res.getData());
                     })
