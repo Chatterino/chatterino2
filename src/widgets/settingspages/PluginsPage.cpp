@@ -98,7 +98,15 @@ PluginsPage::PluginsPage()
         }
     }
 
-    this->rebuildContent();
+    this->managedConnections_.managedConnect(
+        getApp()->getPlugins()->onPluginsUpdated, [this] {
+            this->rebuildContent();
+        });
+    getSettings()->enabledPlugins.connect(
+        [this] {
+            this->rebuildContent();
+        },
+        this->managedConnections_);
 }
 
 void PluginsPage::rebuildContent()
@@ -220,12 +228,10 @@ void PluginsPage::rebuildContent()
             auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
             QObject::connect(
                 toggleButton, &QPushButton::pressed, [name = id, this]() {
-                    std::vector<QString> val =
-                        getSettings()->enabledPlugins.getValue();
+                    QStringList val = getSettings()->enabledPlugins;
                     if (PluginController::isPluginEnabled(name))
                     {
-                        val.erase(std::remove(val.begin(), val.end(), name),
-                                  val.end());
+                        val.removeAll(name);
                     }
                     else
                     {
@@ -233,17 +239,14 @@ void PluginsPage::rebuildContent()
                     }
                     getSettings()->enabledPlugins.setValue(val);
                     getApp()->getPlugins()->reload(name);
-                    this->rebuildContent();
                 });
             pluginEntry->addRow(toggleButton);
         }
 
         auto *reloadButton = new QPushButton("Reload", this->dataFrame_);
-        QObject::connect(reloadButton, &QPushButton::pressed,
-                         [name = id, this]() {
-                             getApp()->getPlugins()->reload(name);
-                             this->rebuildContent();
-                         });
+        QObject::connect(reloadButton, &QPushButton::pressed, [name = id]() {
+            getApp()->getPlugins()->reload(name);
+        });
         pluginEntry->addRow(reloadButton);
         if (getApp()->getArgs().safeMode)
         {

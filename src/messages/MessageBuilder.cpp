@@ -53,7 +53,6 @@
 #include "util/Variant.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/variant.hpp>
 #include <QApplication>
 #include <QColor>
 #include <QDateTime>
@@ -85,6 +84,8 @@ const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QRegularExpression SPACE_REGEX("\\s");
 
+constexpr QStringView ANONYMOUS_GIFTER_ID = u"274598607";
+
 struct HypeChatPaidLevel {
     std::chrono::seconds duration;
     uint8_t numeric;
@@ -96,6 +97,13 @@ const std::unordered_map<QString, HypeChatPaidLevel> HYPE_CHAT_PAID_LEVEL{
     {u"FIVE"_s, {30min, 5}}, {u"SIX"_s, {1h, 6}},
     {u"SEVEN"_s, {2h, 7}},   {u"EIGHT"_s, {3h, 8}},
     {u"NINE"_s, {4h, 9}},    {u"TEN"_s, {5h, 10}},
+};
+
+/// MessageFlag::Subscription message types
+const QSet<QString> SUB_MESSAGE_TYPES{
+    "sub",      //
+    "subgift",  //
+    "resub",    // resub messages
 };
 
 QString formatUpdatedEmoteList(const QString &platform,
@@ -334,12 +342,8 @@ void appendBadges(MessageBuilder *builder,
             {
                 auto infoValue = badgeInfoIt->second;
                 auto predictionText =
-                    infoValue
-                        .replace(R"(\s)", " ")  // standard IRC escapes
-                        .replace(R"(\:)", ";")
-                        .replace(R"(\\)", R"(\)")
-                        .replace("⸝", ",");  // twitch's comma escape
-                // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
+                    parseTagString(infoValue).replace("⸝", ",");
+                // Twitch's comma escape. Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 
                 tooltip = QString("Predicted %1").arg(predictionText);
             }
@@ -360,7 +364,8 @@ std::vector<TwitchBadge> appendSharedChatBadges(
     auto appendedBadges = std::vector<TwitchBadge>{};
     for (const auto &badge : sharedBadges)
     {
-        if (badge.key_ != "moderator" && badge.key_ != "vip")
+        if (badge.key_ != "moderator" && badge.key_ != "vip" &&
+            badge.key_ != "lead_moderator")
         {
             continue;
         }
@@ -518,6 +523,22 @@ EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
     return {};
 }
 
+std::pair<QString, bool> parseMessageType(const QVariantMap &tags)
+{
+    auto msgId = tags.value("msg-id").toString();
+
+    bool mirrored = msgId == "sharedchatnotice";
+
+    if (mirrored)
+    {
+        msgId = tags.value("source-msg-id").toString();
+    }
+
+    // TODO: room-id & source-room-id comparison?
+
+    return {msgId, mirrored};
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -566,7 +587,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 
 MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     const QString &text, const QString &loginName, const QString &displayName,
-    const MessageColor &userColor, const QTime &time)
+    const MessageColor &userColor, const QTime &time,
+    const Communi::IrcMessage &ircMessage)
 {
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
@@ -589,14 +611,49 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     builder->messageText = text;
     builder->searchText = text;
 
+    auto tags = ircMessage.tags();
+
+    builder.parseMessageTags(tags);
+
     return builder.release();
 }
 
-MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
-                                                 const QVariantMap &tags,
+MessagePtrMut MessageBuilder::makeSubgiftMessage(const QVariantMap &tags,
                                                  const QTime &time,
                                                  TwitchChannel *channel)
 {
+    auto text = parseTagString(tags.value("system-msg").toString());
+
+    if (auto monthsIt = tags.find("msg-param-gift-months");
+        monthsIt != tags.end())
+    {
+        int months = monthsIt.value().toInt();
+        if (months > 1)
+        {
+            auto plan = tags.value("msg-param-sub-plan").toString();
+            QString name =
+                ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                    ? "An anonymous user"
+                    : tags.value("display-name").toString();
+            text = QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                       .arg(name, QString::number(months),
+                            plan.isEmpty() ? '1' : plan.at(0),
+                            tags.value("msg-param-recipient-display-name")
+                                .toString());
+
+            if (auto countIt = tags.find("msg-param-sender-count");
+                countIt != tags.end())
+            {
+                int count = countIt.value().toInt();
+                if (count > months)
+                {
+                    text += QString(" They've gifted %1 months in the channel.")
+                                .arg(QString::number(count));
+                }
+            }
+        }
+    }
+
     const auto *userDataController = getApp()->getUserData();
     assert(userDataController != nullptr);
 
@@ -673,6 +730,8 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
     builder->flags.set(MessageFlag::DoNotTriggerNotification);
     builder->messageText = text;
     builder->searchText = text;
+
+    builder.parseMessageTags(tags);
 
     return builder.release();
 }
@@ -1552,6 +1611,96 @@ MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
     return builder.release();
 }
 
+MessagePtrMut MessageBuilder::makePinSuccessMessage(QString text,
+                                                    const QString &id)
+{
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>();
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification,
+                       MessageFlag::ModerationAction);
+    QString searchText;
+    builder.emplaceSystemTextAndUpdate("Pinned", searchText);
+
+    if (text.isEmpty())
+    {
+        text = id;
+        builder.emplaceSystemTextAndUpdate("message with ID", searchText);
+    }
+
+    if (text.length() > 50)
+    {
+        text = std::move(text).left(50) + "…";
+    }
+    searchText += text;
+
+    builder
+        .emplace<TextElement>(text, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, id});
+
+    builder->messageText = searchText;
+    builder->searchText = searchText;
+    return builder.release();
+}
+
+MessagePtrMut MessageBuilder::makeCurrentPinnedMessage(
+    const TwitchChannel &chan, const HelixPinnedChatMessage &pin)
+{
+    MessageBuilder builder;
+    builder->channelName = chan.getName();
+    builder.emplace<TimestampElement>();
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification);
+
+    QString text = pin.pinnedBy.login + ' ';
+    builder.emplace<MentionElement>(pin.pinnedBy.displayName,
+                                    pin.pinnedBy.login, MessageColor::System,
+                                    chan.getUserColor(pin.pinnedBy.login));
+    builder.emplaceSystemTextAndUpdate("pinned a message", text);
+
+    auto now = QDateTime::currentDateTimeUtc();
+    builder.appendOrEmplaceSystemTextAndUpdate(
+        formatTime(std::chrono::duration_cast<std::chrono::seconds>(
+            now - pin.startsAt)),
+        text);
+    builder.appendOrEmplaceSystemTextAndUpdate("ago", text);
+    if (pin.endsAt)
+    {
+        auto remaining =
+            std::chrono::duration_cast<std::chrono::seconds>(*pin.endsAt - now);
+        builder.appendOrEmplaceSystemTextAndUpdate(
+            '(' % formatTime(remaining) % " remaining)", text);
+    }
+    else
+    {
+        builder.appendOrEmplaceSystemTextAndUpdate("until the stream ends",
+                                                   text);
+    }
+    builder.appendOrEmplaceSystemTextAndUpdate("from", text);
+    builder
+        .emplace<MentionElement>(pin.sender.displayName, pin.sender.login,
+                                 MessageColor::System,
+                                 chan.getUserColor(pin.sender.login))
+        ->setTrailingSpace(false);
+    text += pin.sender.login;
+    builder.appendOrEmplaceSystemTextAndUpdate(u":"_s, text);
+
+    auto pinMessageText = pin.messageText;
+    if (pinMessageText.length() > 50)
+    {
+        pinMessageText = pinMessageText.left(50) + "…";
+    }
+
+    builder
+        .emplace<TextElement>(pinMessageText, MessageElementFlag::Text,
+                              MessageColor::Text)
+        ->setLink({Link::JumpToMessage, pin.messageID});
+    builder->messageText = pinMessageText;
+    builder->searchText = pinMessageText;
+    return builder.release();
+}
+
 std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     /* mutable */ Channel *channel, const Communi::IrcMessage *ircMessage,
     const MessageParseArgs &args, /* mutable */ QString content,
@@ -1592,6 +1741,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     builder->flags.set(MessageFlag::Collapsed);
 
     bool senderIsBroadcaster = builder->loginName == channel->getName();
+    bool userIsStaffOrBroadcaster = channel->isBroadcaster();
 
     builder->channelName = channel->getName();
 
@@ -1621,11 +1771,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         builder->flags.set(MessageFlag::Disabled);
     }
 
-    if (tags.contains("msg-id") &&
-        tags["msg-id"].toString().split(';').contains("highlighted-message"))
-    {
-        builder->flags.set(MessageFlag::RedeemedHighlight);
-    }
+    builder.parseMessageTags(tags);
 
     if (tags.contains("first-msg") && tags["first-msg"].toString() == "1")
     {
@@ -1658,9 +1804,10 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         }
 
         if (tags.value("user-type").toString() == "mod" &&
-            !args.isStaffOrBroadcaster)
+            !userIsStaffOrBroadcaster)
         {
             // You cannot timeout moderators UNLESS you are Twitch Staff or the broadcaster of the channel
+            // TODO: This is actually incorrect now - Twitch Staff do not have universal permission to timeout moderators anymore
             return false;
         }
 
@@ -1960,6 +2107,49 @@ void MessageBuilder::parseMessageID(const QVariantMap &tags)
     if (iterator != tags.end())
     {
         this->message().id = iterator.value().toString();
+    }
+}
+
+void MessageBuilder::parseMessageTags(const QVariantMap &tags)
+{
+    const auto [messageType, mirrored] = parseMessageType(tags);
+
+    if (!messageType.isEmpty())
+    {
+        if (messageType == "highlighted-message")
+        {
+            this->message().flags.set(MessageFlag::RedeemedHighlight);
+        }
+        else if (SUB_MESSAGE_TYPES.contains(messageType))
+        {
+            this->message().flags.set(MessageFlag::Subscription);
+        }
+        else if (messageType == "announcement")
+        {
+            this->message().flags.set(MessageFlag::Announcement);
+
+            if (auto cit = tags.constFind("msg-param-color"); cit != tags.end())
+            {
+                this->message().announcementColor =
+                    qmagicenum::enumCast<HelixAnnouncementColor>(
+                        cit->toString(), qmagicenum::CASE_INSENSITIVE)
+                        .value_or(HelixAnnouncementColor::Primary);
+            }
+        }
+        else if (messageType == "viewermilestone" ||
+                 messageType == "modiversary")
+        {
+            this->message().flags.set(MessageFlag::WatchStreak);
+        }
+        else
+        {
+            this->message().flags.set(MessageFlag::UncategorizedNotification);
+        }
+    }
+
+    if (mirrored)
+    {
+        this->message().flags.set(MessageFlag::SharedMessage);
     }
 }
 

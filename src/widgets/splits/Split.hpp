@@ -9,7 +9,6 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/splits/SplitCommon.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QPointer>
@@ -24,6 +23,7 @@ class SplitHeader;
 class SplitInput;
 class SplitContainer;
 class SplitOverlay;
+class PinnedMessageWidget;
 class SelectChannelDialog;
 class OverlayWindow;
 
@@ -55,6 +55,7 @@ public:
 
     ChannelView &getChannelView();
     SplitInput &getInput();
+    [[nodiscard]] PinnedMessageWidget *getPinnedBanner() const;
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel() const;
@@ -154,6 +155,8 @@ private:
      **/
     void refreshModerationMode();
 
+    void refreshInputState(const QString &inputText);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -164,6 +167,7 @@ private:
 
     QVBoxLayout *const vbox_;
     SplitHeader *const header_;
+    PinnedMessageWidget *const pinnedBanner_;
     ChannelView *const view_;
     SplitInput *const input_;
     SplitOverlay *const overlay_;
@@ -182,7 +186,6 @@ private:
     pajlada::Signals::SignalHolder channelSignalHolder_;
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public Q_SLOTS:
     void addSibling();
@@ -204,6 +207,7 @@ public Q_SLOTS:
     void openChatterList();
     void openSubPage();
     void reconnect();
+    void togglePinnedBanner();
 };
 
 }  // namespace chatterino

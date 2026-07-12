@@ -50,6 +50,7 @@ int main(int argc, char **argv)
         Version::instance().appUserModelID().c_str());
 #endif
 
+    const Modes modes;
     std::unique_ptr<Paths> paths;
 
     // Optional logger override that logs to a file
@@ -57,12 +58,12 @@ int main(int argc, char **argv)
 
     try
     {
-        paths = std::make_unique<Paths>();
+        paths = std::make_unique<Paths>(modes);
     }
     catch (std::runtime_error &error)
     {
         QMessageBox box;
-        if (Modes::instance().isPortable)
+        if (modes.isPortable)
         {
             auto errorMessage =
                 error.what() +
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
     }
     ipc::initPaths(paths.get());
 
-    const Args args(a, *paths);
+    const Args args(a);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
     const auto crashpadHandler = installCrashHandler(args, *paths);
@@ -135,16 +136,16 @@ int main(int argc, char **argv)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
                               << QSslSocket::supportedProtocols();
 
-        Settings settings(args, paths->settingsDirectory);
+        Settings settings(modes, args, paths->settingsDirectory);
 
-        Updates updates(*paths, settings);
+        Updates updates(modes, *paths, settings);
 
         NetworkConfigurationProvider::applyFromEnv(Env::get());
 
         IvrApi::initialize();
         Helix::initialize();
 
-        runGui(a, *paths, settings, args, updates);
+        runGui(a, modes, *paths, settings, args, updates);
     }
     return 0;
 }

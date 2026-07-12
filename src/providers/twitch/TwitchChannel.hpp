@@ -18,7 +18,6 @@
 #include "util/ThreadGuard.hpp"
 
 #include <boost/circular_buffer/space_optimized.hpp>
-#include <boost/signals2.hpp>
 #include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -26,6 +25,7 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
@@ -62,6 +62,7 @@ struct HelixStream;
 struct HelixCheermoteSet;
 struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
+struct HelixPinnedChatMessage;
 
 class TwitchIrcServer;
 class TwitchAccount;
@@ -171,6 +172,9 @@ public:
     TwitchChannel &operator=(const TwitchChannel &) = delete;
     TwitchChannel &operator=(TwitchChannel &&) = delete;
 
+    std::shared_ptr<TwitchChannel> sharedFromThis();
+    std::weak_ptr<TwitchChannel> weakFromThis();
+
     void initialize();
 
     // Channel methods
@@ -193,6 +197,18 @@ public:
     /// If the ID is empty, all messages will be deleted, effectively clearing
     /// the chat.
     void deleteMessagesAs(const QString &messageID, TwitchAccount *moderator);
+
+    void pinMessageAs(const QString &messageID,
+                      std::optional<std::chrono::seconds> duration,
+                      const TwitchAccount &moderator, QString textHint = {});
+
+    void updatePinnedMessageAs(const QString &messageID,
+                               std::optional<std::chrono::seconds> duration,
+                               const TwitchAccount &moderator,
+                               QString textHint = {});
+
+    void unpinMessageAs(const QString &messageID,
+                        const TwitchAccount &moderator);
 
     // Data
     const QString &subscriptionUrl();
@@ -385,6 +401,30 @@ public:
 
     bool isLoadingRecentMessages() const;
 
+    // Pinned message
+    /**
+     * Fetches the currently pinned message for this channel via the Helix API.
+     * Only has effect when the local user has moderator privileges.
+     */
+    void refreshPinnedMessage();
+
+    /**
+     * Clears the pinned message for this channel immediately (e.g. on unpin
+     * PubSub event).
+     */
+    void clearPinnedMessage();
+
+    /// Returns the currently pinned message, or null if none is pinned.
+    const HelixPinnedChatMessage *getPinnedMessage() const;
+
+    /**
+     * Unpin the currently pinned message. Only valid for moderators.
+     */
+    void unpinCurrentMessage();
+
+    /// Fires when the pinned message changes (set, cleared, or updated).
+    pajlada::Signals::NoArgSignal pinnedMessageChanged;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -489,6 +529,10 @@ private:
                                              const QString &actor,
                                              const QString &emoteName);
 
+    void pinOrUpdateMessage(bool update, const QString &messageID,
+                            std::optional<std::chrono::seconds> duration,
+                            const TwitchAccount &moderator, QString textHint);
+
     // Data
     const QString subscriptionUrl_;
     const QString channelUrl_;
@@ -573,7 +617,6 @@ private:
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     eventsub::SubscriptionHandle eventSubChannelModerateHandle;
     eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
@@ -582,6 +625,12 @@ private:
     eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
+    /// May be null if no message is currently pinned.
+    std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
+    /// Incremented before each getPinnedChatMessage request so that stale
+    /// responses from earlier requests are discarded.
+    uint64_t pinnedMessageRequestId_ = 0;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

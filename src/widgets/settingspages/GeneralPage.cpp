@@ -395,7 +395,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Message overflow", {"Highlight", "Prevent", "Allow"},
         s.messageOverflow,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<MessageOverflow>(args.index);
@@ -412,7 +412,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -429,7 +429,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickModifierBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -507,7 +507,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.fadeMessageHistory)
         ->setTooltip(
             "Reduce opacity of messages that were posted before Chatterino "
-            "was started or while re-connection.")
+            "was started or while re-connecting.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
@@ -981,7 +981,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Application Data");
     layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
+                          "stored in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
         QDesktopServices::openUrl("file://" +
@@ -1364,16 +1364,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("When possible, restart Chatterino if the program crashes")
         ->addTo(layout);
 
-#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getApp()->getPaths().isPortable())
-    {
-        SettingWidget::checkbox(
-            "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring)
-            ->addTo(layout);
-    }
-#endif
-
     SettingWidget::inverseCheckbox("Show moderation messages",
                                    s.hideModerationActions)
         ->setTooltip(
@@ -1394,7 +1384,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Mention users with a comma",
                             s.mentionUsersWithComma)
-        ->setTooltip("When using tab-completon, if the username is at the "
+        ->setTooltip("When using tab-completion, if the username is at the "
                      "start of the message, include a comma at the end of the "
                      "name.\ne.g. pajl -> pajlada,")
         ->addTo(layout);
@@ -1419,6 +1409,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox(
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Always show pinned channel message",
+                            s.alwaysShowPinnedMessage)
+        ->setTooltip(
+            "When enabled, pinned messages will stay visible instead of "
+            "automatically hiding after a few seconds.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
@@ -1479,7 +1476,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             },
             false,
             "Customizes how you see Asian Language names.\nUsing an option "
-            "that includes \"localized\" will display the username in it's "
+            "that includes \"localized\" will display the username in its "
             "respective Asian language.\ne.g. "
             "Username and localized: testaccount_420(테스트계정420)\n"
             "Username: testaccount_420\n"
@@ -1506,7 +1503,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Double click to open links and other elements in chat",
         s.linksDoubleClickOnly)
         ->setTooltip("When enabled, opening links/usercards requires "
-                     "double-clicking.\nUseful making sure you don't "
+                     "double-clicking.\nUseful for making sure you don't "
                      "accidentally click on suspicious links.")
         ->addTo(layout);
 
@@ -1620,7 +1617,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
-        ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
+        ->setTooltip("'Helix' will use Twitch's Helix API to send messages. "
                      "'IRC' will use IRC to send messages.")
         ->addTo(layout);
 

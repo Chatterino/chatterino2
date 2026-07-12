@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/Modes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
 
@@ -293,7 +294,8 @@ public:
     }
 
     QTemporaryDir settingsDir;
-    Paths paths_;
+    Modes modes_;
+    Paths paths_ = {modes_};
     Args args_;
 };
 

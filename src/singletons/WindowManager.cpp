@@ -425,9 +425,11 @@ void WindowManager::initialize()
     {
         WindowLayout windowLayout;
 
-        if (this->appArgs.customChannelLayout)
+        if (std::optional<WindowLayout> layout =
+                this->appArgs.makeCustomChannelLayout(
+                    this->windowLayoutFilePath))
         {
-            windowLayout = this->appArgs.customChannelLayout.value();
+            windowLayout = layout.value();
         }
         else
         {
@@ -733,40 +735,24 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 {
     assertInGuiThread();
 
+    obj.insert("type", qmagicenum::enumNameString(channel.getType()));
     switch (channel.getType())
     {
-        case Channel::Type::Twitch: {
-            obj.insert("type", "twitch");
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
             obj.insert("name", channel.get()->getName());
-        }
-        break;
-        case Channel::Type::TwitchAutomod: {
-            obj.insert("type", "automod");
-        }
-        break;
-        case Channel::Type::TwitchMentions: {
-            obj.insert("type", "mentions");
-        }
-        break;
-        case Channel::Type::TwitchWatching: {
-            obj.insert("type", "watching");
-        }
-        break;
-        case Channel::Type::TwitchWhispers: {
-            obj.insert("type", "whispers");
-        }
-        break;
-        case Channel::Type::TwitchLive: {
-            obj.insert("type", "live");
-        }
-        break;
-        case Channel::Type::Misc: {
-            obj.insert("type", "misc");
-            obj.insert("name", channel.get()->getName());
-        }
-        break;
+            break;
 
-        default:
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
             break;
     }
 }
@@ -780,43 +766,6 @@ void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
     {
         arr.append(f.toString(QUuid::WithoutBraces));
     }
-}
-
-IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
-{
-    assertInGuiThread();
-
-    if (descriptor.type_ == "twitch")
-    {
-        return getApp()->getTwitch()->getOrAddChannel(descriptor.channelName_);
-    }
-    else if (descriptor.type_ == "mentions")
-    {
-        return getApp()->getTwitch()->getMentionsChannel();
-    }
-    else if (descriptor.type_ == "watching")
-    {
-        return getApp()->getTwitch()->getWatchingChannel();
-    }
-    else if (descriptor.type_ == "whispers")
-    {
-        return getApp()->getTwitch()->getWhispersChannel();
-    }
-    else if (descriptor.type_ == "live")
-    {
-        return getApp()->getTwitch()->getLiveChannel();
-    }
-    else if (descriptor.type_ == "automod")
-    {
-        return getApp()->getTwitch()->getAutomodChannel();
-    }
-    else if (descriptor.type_ == "misc")
-    {
-        return getApp()->getTwitch()->getChannelOrEmpty(
-            descriptor.channelName_);
-    }
-
-    return Channel::getEmpty();
 }
 
 void WindowManager::closeAll()

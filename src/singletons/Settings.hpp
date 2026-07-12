@@ -6,8 +6,8 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/enums/UsernameDisplayMode.hpp"
 #include "common/LastMessageLineStyle.hpp"
-#include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "common/StreamerModeSetting.hpp"
 #include "common/ThumbnailPreviewMode.hpp"
@@ -25,6 +25,7 @@
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+#include "util/serialize/List.hpp"             // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -40,6 +41,7 @@ using TimeoutButton = std::pair<QString, int>;
 namespace chatterino {
 
 class Args;
+class Modes;
 
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT_FAMILY "Segoe UI"
@@ -56,12 +58,6 @@ class Args;
 
 void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting);
-
-enum UsernameDisplayMode : int {
-    Username = 1,                  // Username
-    LocalizedName = 2,             // Localized name
-    UsernameAndLocalizedName = 3,  // Username (Localized name)
-};
 
 enum UsernameRightClickBehavior : int {
     Reply = 0,
@@ -132,7 +128,8 @@ class Settings
     bool disableSaving;
 
 public:
-    Settings(const Args &args, const QString &settingsDirectory,
+    Settings(const Modes &modes, const Args &args,
+             const QString &settingsDirectory,
              const SettingsArgs &settingsArgs = {});
     ~Settings();
 
@@ -309,6 +306,8 @@ public:
     };
 
     /// Behaviour
+    BoolSetting alwaysShowPinnedMessage = {"/behaviour/alwaysShowPinnedMessage",
+                                           false};
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
@@ -444,6 +443,15 @@ public:
     BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
     BoolSetting enableSevenTVEventAPI = {"/emotes/seventv/eventapi", true};
     BoolSetting sendSevenTVActivity = {"/emotes/seventv/sendActivity", true};
+
+    ChatterinoSetting<QStringList> favouriteEmotes = {
+        "/emotes/favouriteEmotes",
+        {},
+    };
+    ChatterinoSetting<QStringList> favouriteEmojis = {
+        "/emotes/favouriteEmojis",
+        {},
+    };
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -688,12 +696,7 @@ public:
         "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    BoolSetting createShortcutForToasts = {
-        "/notifications/createShortcutForToasts",
-        (Modes::instance().isPortable || Modes::instance().isExternallyPackaged)
-            ? false
-            : true,
-    };
+    BoolSetting createShortcutForToasts;  // initialized in ctor
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 
@@ -725,9 +728,6 @@ public:
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
-#ifdef Q_OS_LINUX
-    BoolSetting useKeyring = {"/misc/useKeyring", true};
-#endif
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
@@ -813,8 +813,10 @@ public:
          {"w", 1}}};
 
     BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
-    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
-        "/plugins/enabledPlugins", {}};
+    ChatterinoSetting<QStringList> enabledPlugins = {
+        "/plugins/enabledPlugins",
+        {},
+    };
 
     // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
