@@ -864,6 +864,10 @@ void Split::setChannel(IndirectChannel newChannel)
                 this->getInput().setSendWaitStatus(text);
             });
 
+        this->channelSignalHolder_.managedConnect(
+            tc->sharedChatStatusChanged, [this](const QStringList &) {
+                this->header_->updateChannelText();
+            });
         this->pinnedBanner_->setChannel(tc);
     }
     else

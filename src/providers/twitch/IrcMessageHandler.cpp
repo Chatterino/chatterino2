@@ -1224,6 +1224,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                                     MessageContext::Original);
         }
 
+        if (msg->flags.has(MessageFlag::SharedMessage))
+        {
+            chan->probeSharedChatSession();
+        }
+
         sink.addMessage(msg, MessageContext::Original);
         chan->addRecentChatter(msg->displayName);
     }
