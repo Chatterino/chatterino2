@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     }
     ipc::initPaths(paths.get());
 
-    const Args args(a, *paths);
+    const Args args(a);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
     const auto crashpadHandler = installCrashHandler(args, *paths);

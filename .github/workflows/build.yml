@@ -147,7 +147,7 @@ jobs:
       matrix:
         include:
           # macOS
-          - os: macos-14
+          - os: macos-26
             qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
