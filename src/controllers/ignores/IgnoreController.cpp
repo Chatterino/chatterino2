@@ -354,7 +354,7 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
 
                 replaceMessageAt(phrase, from, match.capturedLength(),
                                  replacement);
-                from += phrase.getReplace().length();
+                from += replacement.length();
                 iterations++;
                 if (iterations >= 128)
                 {
