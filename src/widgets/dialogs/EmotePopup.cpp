@@ -404,16 +404,6 @@ void EmotePopup::addShortcuts()
              }
              return "";
          }},
-        {"selectTabHistoryBack",
-         [this](const std::vector<QString> &) -> QString {
-             this->notebook_->selectHistoryBack(false);
-             return "";
-         }},
-        {"selectTabHistoryForward",
-         [this](const std::vector<QString> &) -> QString {
-             this->notebook_->selectHistoryForward(false);
-             return "";
-         }},
         {"delete",
          [this](const std::vector<QString> &) -> QString {
              this->close();

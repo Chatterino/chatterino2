@@ -586,10 +586,6 @@ void HotkeyController::clearRemovedDefaults()
                                       "selectTabHistory", {"previous"});
     this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
                                       "selectTabHistory", {"next"});
-    this->warnForRemovedHotkeyActions(HotkeyCategory::PopupWindow,
-                                      "selectTabHistory", {"previous"});
-    this->warnForRemovedHotkeyActions(HotkeyCategory::PopupWindow,
-                                      "selectTabHistory", {"next"});
 }
 
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,

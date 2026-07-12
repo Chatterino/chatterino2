@@ -84,10 +84,6 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               },
               .argumentsPrompt = "Direction:",
           }},
-         {"selectTabHistoryBack",
-          ActionDefinition{"Select previous tab from visit history"}},
-         {"selectTabHistoryForward",
-          ActionDefinition{"Select next tab from visit history"}},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
           ActionDefinition{
