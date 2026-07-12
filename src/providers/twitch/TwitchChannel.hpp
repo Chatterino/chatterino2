@@ -25,6 +25,7 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
@@ -61,6 +62,7 @@ struct HelixStream;
 struct HelixCheermoteSet;
 struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
+struct HelixPinnedChatMessage;
 
 class TwitchIrcServer;
 class TwitchAccount;
@@ -402,6 +404,29 @@ public:
     bool isLoadingRecentMessages() const;
 
     const QStringList &getSharedChatSessionParticipants() const;
+    // Pinned message
+    /**
+     * Fetches the currently pinned message for this channel via the Helix API.
+     * Only has effect when the local user has moderator privileges.
+     */
+    void refreshPinnedMessage();
+
+    /**
+     * Clears the pinned message for this channel immediately (e.g. on unpin
+     * PubSub event).
+     */
+    void clearPinnedMessage();
+
+    /// Returns the currently pinned message, or null if none is pinned.
+    const HelixPinnedChatMessage *getPinnedMessage() const;
+
+    /**
+     * Unpin the currently pinned message. Only valid for moderators.
+     */
+    void unpinCurrentMessage();
+
+    /// Fires when the pinned message changes (set, cleared, or updated).
+    pajlada::Signals::NoArgSignal pinnedMessageChanged;
 
 private:
     struct NameOptions {
@@ -635,6 +660,12 @@ private:
     eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
+    /// May be null if no message is currently pinned.
+    std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
+    /// Incremented before each getPinnedChatMessage request so that stale
+    /// responses from earlier requests are discarded.
+    uint64_t pinnedMessageRequestId_ = 0;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

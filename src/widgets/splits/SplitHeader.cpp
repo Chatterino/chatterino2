@@ -30,6 +30,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/splits/PinnedMessageWidget.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -316,6 +317,18 @@ void SplitHeader::initializeLayout()
         },
         this, {4, 4});
 
+    this->pinButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/pinnedMessage-chat.svg",
+            .light = ":/buttons/pinnedMessage-chat.svg",
+        },
+        this, {4, 4});
+    this->pinButton_->setToolTip(QStringLiteral("Toggle pinned message"));
+    this->pinButton_->setColor(this->theme->isLightTheme()
+                                   ? QColor(0x42, 0x42, 0x42)
+                                   : QColor(0xc0, 0xc0, 0xc0));
+    this->pinButton_->hide();
+
     this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
                                        {
                                            .padding = 3,
@@ -354,6 +367,8 @@ void SplitHeader::initializeLayout()
             w->hide();
             w->setMenu(this->createChatModeMenu());
         }),
+        // pin indicator
+        this->pinButton_,
         // moderator
         this->moderationButton_,
         // chatter list
@@ -401,6 +416,10 @@ void SplitHeader::initializeLayout()
                      [this]() {
                          this->split_->openChatterList();
                      });
+
+    QObject::connect(this->pinButton_, &Button::leftClicked, this, [this]() {
+        this->split_->togglePinnedBanner();
+    });
 
     QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
         this->split_->addSibling();
@@ -845,6 +864,22 @@ void SplitHeader::handleChannelChanged()
             twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
+
+        this->channelConnections_.managedConnect(
+            twitchChannel->pinnedMessageChanged, [this]() {
+                this->updatePinButton();
+            });
+
+        this->channelConnections_.managedConnect(
+            this->split_->getPinnedBanner()->visibilityChanged, [this]() {
+                this->updatePinButton();
+            });
+
+        this->updatePinButton();
+    }
+    else
+    {
+        this->updatePinButton();
     }
 }
 
@@ -857,6 +892,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
+    this->pinButton_->setFixedWidth(w);
 
     this->addButton_->setFixedWidth(addSplitWidth);
 }
@@ -864,6 +900,26 @@ void SplitHeader::scaleChangedEvent(float scale)
 void SplitHeader::setAddButtonVisible(bool value)
 {
     this->addButton_->setVisible(value);
+}
+
+void SplitHeader::updatePinButton()
+{
+    auto channel = this->split_->getChannel();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    const bool hasPinnedMessage = twitchChannel != nullptr &&
+                                  twitchChannel->getPinnedMessage() != nullptr;
+
+    this->pinButton_->setVisible(hasPinnedMessage);
+    if (hasPinnedMessage && this->split_->getPinnedBanner()->isVisible())
+    {
+        this->pinButton_->setColor(this->theme->accent);
+    }
+    else
+    {
+        this->pinButton_->setColor(this->theme->isLightTheme()
+                                       ? QColor(0x42, 0x42, 0x42)
+                                       : QColor(0xc0, 0xc0, 0xc0));
+    }
 }
 
 void SplitHeader::updateChannelText()
@@ -1131,6 +1187,9 @@ void SplitHeader::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
+
+    // Re-apply pin button color to respect updated theme
+    this->updatePinButton();
 
     auto bg = this->theme->splits.header.background;
     this->addButton_->setOptions({
