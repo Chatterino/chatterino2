@@ -32,6 +32,7 @@
 #    include "singletons/Settings.hpp"
 #    include "singletons/WindowManager.hpp"
 #    include "util/FilesystemHelpers.hpp"
+#    include "util/PostToThread.hpp"
 #    include "widgets/splits/SplitContainer.hpp"
 #    include "widgets/Window.hpp"
 
@@ -556,8 +557,9 @@ void PluginController::download(const DownloadArgs &args)
         .onDone = args.onDone,
     });
 
-    auto pushResult = [this, state](ExpectedStr<void> res) {
-        if (isAppAboutToQuit() || !tryGetApp())
+    auto pushResult = [this, lifetime = std::weak_ptr{this->lifetime},
+                       state](ExpectedStr<void> res) {
+        if (lifetime.expired())
         {
             return;
         }
@@ -586,6 +588,11 @@ void PluginController::download(const DownloadArgs &args)
 
         state->onDone(this->finishDownload(*state->plugin, state->pluginDir));
     };
+    auto pushOnGUI = [pushResult](ExpectedStr<void> res) {
+        runInGuiThread([pushResult, res = std::move(res)] mutable {
+            pushResult(std::move(res));
+        });
+    };
 
     auto fetchFile = args.fetchFile;
     if (!fetchFile)
@@ -595,6 +602,7 @@ void PluginController::download(const DownloadArgs &args)
                 const std::function<void(ExpectedStr<QByteArray>)> &cb) {
                 NetworkRequest(url)
                     .timeout(30'000)
+                    .concurrent()
                     .onSuccess([cb](const NetworkResult &res) {
                         cb(res.getData());
                     })
@@ -610,10 +618,10 @@ void PluginController::download(const DownloadArgs &args)
     // Send out the requests - rely on Qt to buffer requests.
     for (const auto &[url, path] : files)
     {
-        fetchFile(url, [pushResult, path](ExpectedStr<QByteArray> res) {
+        fetchFile(url, [pushOnGUI, path](ExpectedStr<QByteArray> res) mutable {
             if (!res)
             {
-                pushResult(makeUnexpected(std::move(res).error()));
+                pushOnGUI(makeUnexpected(std::move(res).error()));
                 return;
             }
 
@@ -621,14 +629,14 @@ void PluginController::download(const DownloadArgs &args)
                 QFile f(path);
                 if (!f.open(QFile::WriteOnly | QFile::Truncate))
                 {
-                    pushResult(makeUnexpected(u"Failed to open '" % path %
-                                              u"' for writing: " %
-                                              f.errorString()));
+                    pushOnGUI(makeUnexpected(u"Failed to open '" % path %
+                                             u"' for writing: " %
+                                             f.errorString()));
                     return;
                 }
                 f.write(*res);
             }
-            pushResult({});
+            pushOnGUI({});
         });
     }
 }
