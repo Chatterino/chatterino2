@@ -8,11 +8,13 @@
 #include <QKeySequence>
 #include <QWidget>
 
+#include <functional>
 #include <span>
 
 class QAbstractTableModel;
 class QTableView;
 class QHBoxLayout;
+class QPushButton;
 
 namespace chatterino {
 
@@ -31,6 +33,7 @@ public:
 
     void addCustomButton(QWidget *widget);
     void addRegexHelpLink();
+    void setRowRemovalPredicate(std::function<bool(int)> predicate);
 
     bool filterSearchResults(const QString &query,
                              std::span<const int> columnSelect);
@@ -40,8 +43,11 @@ private:
     QTableView *tableView_{};
     QAbstractTableModel *model_{};
     QHBoxLayout *buttons_{};
+    QPushButton *removeButton_{};
+    std::function<bool(int)> rowRemovalPredicate_;
 
     void moveRow(int dir);
+    void updateRemoveButton();
 };
 
 }  // namespace chatterino

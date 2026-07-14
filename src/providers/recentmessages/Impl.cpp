@@ -4,7 +4,6 @@
 
 #include "providers/recentmessages/Impl.hpp"
 
-#include "common/Env.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -85,13 +84,13 @@ std::vector<MessagePtr> buildRecentMessages(
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
 QUrl constructRecentMessagesUrl(
-    const QString &name, const int limit,
+    const QString &providerUrl, const QString &name, const int limit,
     const std::optional<std::chrono::time_point<std::chrono::system_clock>>
         after,
     const std::optional<std::chrono::time_point<std::chrono::system_clock>>
         before)
 {
-    QUrl url(Env::get().recentMessagesApiUrl.arg(name));
+    QUrl url(providerUrl.arg(name));
     QUrlQuery urlQuery(url);
     if (!urlQuery.hasQueryItem("limit"))
     {
@@ -115,6 +114,38 @@ QUrl constructRecentMessagesUrl(
     }
     url.setQuery(urlQuery);
     return url;
+}
+
+ResponseType classifyRecentMessagesResponse(const QJsonObject &root)
+{
+    const auto messagesValue = root.value("messages");
+    if (!messagesValue.isArray())
+    {
+        return ResponseType::Invalid;
+    }
+
+    const auto messages = messagesValue.toArray();
+    for (const auto &message : messages)
+    {
+        if (!message.isString())
+        {
+            return ResponseType::Invalid;
+        }
+    }
+
+    const auto error = root.value("error");
+    const auto errorCode = root.value("error_code");
+    const bool hasError = !error.isUndefined() && !error.isNull();
+    const bool hasErrorCode = !errorCode.isUndefined() && !errorCode.isNull();
+    if (!hasError && !hasErrorCode)
+    {
+        return ResponseType::Complete;
+    }
+    if (errorCode.toString() == "channel_not_joined" && !messages.isEmpty())
+    {
+        return ResponseType::Partial;
+    }
+    return ResponseType::Invalid;
 }
 
 }  // namespace chatterino::recentmessages::detail

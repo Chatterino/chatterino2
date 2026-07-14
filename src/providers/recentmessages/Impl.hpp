@@ -31,8 +31,16 @@ std::vector<MessagePtr> buildRecentMessages(
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
 QUrl constructRecentMessagesUrl(
-    const QString &name, int limit,
+    const QString &providerUrl, const QString &name, int limit,
     std::optional<std::chrono::time_point<std::chrono::system_clock>> after,
     std::optional<std::chrono::time_point<std::chrono::system_clock>> before);
+
+enum class ResponseType {
+    Complete,
+    Partial,
+    Invalid,
+};
+
+ResponseType classifyRecentMessagesResponse(const QJsonObject &root);
 
 }  // namespace chatterino::recentmessages::detail

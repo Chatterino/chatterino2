@@ -232,6 +232,16 @@ Settings::Settings(const Modes &modes, const Args &args,
                            this->moderationActions);
     initializeSignalVector(this->signalHolder, this->loggedChannelsSetting,
                            this->loggedChannels);
+    const auto reconciledProviders = recentmessages::reconcileProviders(
+        this->recentMessagesProvidersSetting.getValue(),
+        recentmessages::defaultProviders());
+    if (reconciledProviders != this->recentMessagesProvidersSetting.getValue())
+    {
+        this->recentMessagesProvidersSetting.setValue(reconciledProviders);
+    }
+    initializeSignalVector(this->signalHolder,
+                           this->recentMessagesProvidersSetting,
+                           this->recentMessagesProviders);
 
     instance_ = this;
 

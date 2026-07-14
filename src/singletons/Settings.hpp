@@ -22,6 +22,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/emoji/EmojiStyle.hpp"
+#include "providers/recentmessages/Provider.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
@@ -867,6 +868,11 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
+    ChatterinoSetting<std::vector<recentmessages::Provider>>
+        recentMessagesProvidersSetting = {
+            "/misc/twitch/recentMessageProviders",
+            recentmessages::defaultProviders(),
+    };
     SignalVector<QString> mutedChannels;
 
 public:
@@ -879,6 +885,7 @@ public:
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
     SignalVector<ChannelLog> loggedChannels;
+    SignalVector<recentmessages::Provider> recentMessagesProviders;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);

@@ -11,11 +11,14 @@
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
+
+#include <utility>
 
 namespace chatterino {
 
@@ -54,9 +57,9 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     });
 
     // remove
-    QPushButton *remove = new QPushButton("Remove");
-    buttons->addWidget(remove);
-    QObject::connect(remove, &QPushButton::clicked, [this] {
+    this->removeButton_ = new QPushButton("Remove");
+    buttons->addWidget(this->removeButton_);
+    QObject::connect(this->removeButton_, &QPushButton::clicked, [this] {
         auto selected = this->getTableView()->selectionModel()->selectedRows(0);
 
         // Remove rows backwards so indices don't shift.
@@ -70,7 +73,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
         for (auto &&row : rows)
         {
-            this->model_->removeRow(row);
+            if (!this->rowRemovalPredicate_ || this->rowRemovalPredicate_(row))
+            {
+                this->model_->removeRow(row);
+            }
         }
     });
 
@@ -103,6 +109,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     QObject::connect(this->model_, &QAbstractTableModel::rowsInserted, this,
                      [this](const QModelIndex &parent, int first, int last) {
                          this->tableView_->selectRow(last);
+                     });
+    QObject::connect(this->tableView_->selectionModel(),
+                     &QItemSelectionModel::selectionChanged, this, [this] {
+                         this->updateRemoveButton();
                      });
 
     // add tableview
@@ -154,6 +164,26 @@ void EditableModelView::addRegexHelpLink()
                    "<span style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
+}
+
+void EditableModelView::setRowRemovalPredicate(
+    std::function<bool(int)> predicate)
+{
+    this->rowRemovalPredicate_ = std::move(predicate);
+    this->updateRemoveButton();
+}
+
+void EditableModelView::updateRemoveButton()
+{
+    if (!this->rowRemovalPredicate_)
+    {
+        this->removeButton_->setEnabled(true);
+        return;
+    }
+
+    const auto selected = this->tableView_->selectionModel()->selectedRows(0);
+    this->removeButton_->setEnabled(
+        selected.size() == 1 && this->rowRemovalPredicate_(selected[0].row()));
 }
 
 bool EditableModelView::filterSearchResults(const QString &query,

@@ -5,10 +5,13 @@
 #include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
+#include "common/Env.hpp"
 #include "common/Literals.hpp"  // IWYU pragma: keep
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/recentmessages/Provider.hpp"
+#include "providers/recentmessages/ProviderModel.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -21,6 +24,7 @@
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/FontSettingWidget.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
@@ -29,10 +33,13 @@
 #include <QFileDialog>
 #include <QFontDialog>
 #include <QFormLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPalette>
+#include <QPushButton>
 #include <QSignalBlocker>
+#include <QTableView>
 
 namespace {
 
@@ -1547,6 +1554,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "will use your \"Subscribed Reply Threads\" highlight settings.")
         ->addTo(layout);
 
+    layout.addSubtitle("Message history");
+
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
         ->addTo(layout);
@@ -1560,6 +1569,72 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                 .singleStep = 10,
                             })
         ->addTo(layout);
+
+    layout.addDescription(
+        "Message history is fetched from the list of " +
+        formatRichNamedLink("https://github.com/robotty/recent-messages2",
+                            "robotty/recent-messages2") +
+        " instances below. If a request to a provider fails, the next "
+        "provider in the list is tried. You can add custom instances and "
+        "reorder the list. Use %1 where the channel name should be inserted.");
+
+    const bool providerListOverridden =
+        !Env::get().recentMessagesApiUrl.isEmpty();
+    if (providerListOverridden)
+    {
+        layout.addDescription(
+            "CHATTERINO2_RECENT_MESSAGES_URL is set. The provider list below "
+            "is not used.");
+    }
+
+    auto *providerModel = new recentmessages::ProviderModel(nullptr);
+    providerModel->initialize(&s.recentMessagesProviders);
+    auto *providerView = new EditableModelView(providerModel);
+    providerView->setRowRemovalPredicate([providerModel](int row) {
+        return providerModel->canRemoveRow(row);
+    });
+    providerView->setTitles({"Enabled", "URL"});
+    providerView->setMinimumHeight(220);
+    providerView->getTableView()->horizontalHeader()->setSectionResizeMode(
+        QHeaderView::ResizeToContents);
+    providerView->getTableView()->horizontalHeader()->setSectionResizeMode(
+        1, QHeaderView::Stretch);
+    s.loadTwitchMessageHistoryOnConnect.connect(
+        [providerView, providerListOverridden](const bool &enabled) {
+            providerView->setEnabled(enabled && !providerListOverridden);
+        },
+        this->managedConnections_);
+
+    std::ignore = providerView->addButtonPressed.connect([] {
+        getSettings()->recentMessagesProviders.append(recentmessages::Provider{
+            "https://example.com/api/v2/recent-messages/%1", true});
+    });
+
+    auto *resetProviders = new QPushButton("Reset to defaults");
+    providerView->addCustomButton(resetProviders);
+    QObject::connect(resetProviders, &QPushButton::clicked, [providerView] {
+        const auto reply = QMessageBox::question(
+            providerView, "Reset recent message providers",
+            "Reset recent message providers to their defaults?",
+            QMessageBox::Yes | QMessageBox::Cancel);
+        if (reply != QMessageBox::Yes)
+        {
+            return;
+        }
+
+        auto &providers = getSettings()->recentMessagesProviders;
+        while (!providers.raw().empty())
+        {
+            providers.removeAt(static_cast<int>(providers.raw().size() - 1));
+        }
+        for (const auto &provider : recentmessages::defaultProviders())
+        {
+            providers.append(provider);
+        }
+    });
+
+    layout.addWidget(providerView,
+                     {"message history", "recent messages", "providers"});
 
     SettingWidget::intInput("Split message scrollback limit (requires restart)",
                             s.scrollbackSplitLimit,

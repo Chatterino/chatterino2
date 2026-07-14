@@ -430,6 +430,10 @@ set(SOURCE_FILES
         providers/recentmessages/Api.hpp
         providers/recentmessages/Impl.cpp
         providers/recentmessages/Impl.hpp
+        providers/recentmessages/Provider.cpp
+        providers/recentmessages/Provider.hpp
+        providers/recentmessages/ProviderModel.cpp
+        providers/recentmessages/ProviderModel.hpp
 
         providers/seventv/SeventvAPI.cpp
         providers/seventv/SeventvAPI.hpp

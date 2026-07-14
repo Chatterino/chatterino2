@@ -33,7 +33,7 @@ using ErrorCallback = std::function<void()>;
  * @param channelName Name of Twitch channel
  * @param channelPtr Weak pointer to Channel to use to build messages
  * @param onLoaded Callback taking the built messages as a const std::vector<MessagePtr> &
- * @param onError Callback called when the network request fails
+ * @param onError Callback called when message history cannot be loaded
  * @param limit Maximum number of messages to query
  * @param after Only return messages that were received after this timestamp; ignored if `std::nullopt`
  * @param before Only return messages that were received before this timestamp; ignored if `std::nullopt`
