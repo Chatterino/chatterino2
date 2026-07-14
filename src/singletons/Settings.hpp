@@ -738,6 +738,9 @@ public:
 
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
+    BoolSetting useCustomMessageHistoryUrl = {
+        "/misc/twitch/useCustomMessageHistoryUrl", false};
+    QStringSetting messageHistoryUrl = {"/misc/twitch/messageHistoryUrl", ""};
     IntSetting twitchMessageHistoryLimit = {
         "/misc/twitch/messageHistoryLimit",
         800,
