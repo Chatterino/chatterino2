@@ -38,7 +38,7 @@ FiltersPage::FiltersPage()
             .getElement();
     this->view_ = view;
 
-    view->setTitles({"Name", "Filter", "Valid"});
+    view->setTitles({"Name", "Filter", "Valid", "Global"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Interactive);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -48,6 +48,7 @@ FiltersPage::FiltersPage()
         view->getTableView()->resizeColumnsToContents();
         view->getTableView()->setColumnWidth(0, 150);
         view->getTableView()->setColumnWidth(2, 125);
+        view->getTableView()->setColumnWidth(3, 50);
     });
 
     // We can safely ignore this signal connection since we own the view

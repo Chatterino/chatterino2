@@ -997,7 +997,8 @@ void SplitHeader::updateChannelText()
         }
     }
 
-    if (!title.isEmpty() && !this->split_->getFilters().empty())
+    if (!title.isEmpty() && !this->split_->getFilters().empty() &&
+        !this->split_->hasGlobalFiltersOnly())
     {
         title += " - filtered";
     }

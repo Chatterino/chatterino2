@@ -1257,6 +1257,20 @@ QList<QUuid> Split::getFilters() const
     return this->view_->getFilterIds();
 }
 
+bool Split::hasGlobalFiltersOnly() const
+{
+    const auto allFilters = getSettings()->filterRecords.readOnly();
+    const auto viewFilters = getFilters();
+
+    for (const auto &f : *allFilters)
+    {
+        if (!f->isGlobal() && viewFilters.contains(f->getId()))
+            return false;
+    }
+
+    return true;
+}
+
 void Split::showSearch(bool singleChannel)
 {
     auto *popup = new SearchPopup(this, this);
