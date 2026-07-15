@@ -282,6 +282,11 @@ SplitHeader::SplitHeader(Split *split)
     getSettings()->headerGame.connect(_, this->managedConnections_);
     getSettings()->headerUptime.connect(_, this->managedConnections_);
 
+    this->filtersChanged_ =
+        getSettings()->filterRecords.delayedItemsChanged.connect([this] {
+            this->updateChannelText();
+        });
+
     auto *window = dynamic_cast<BaseWindow *>(this->window());
     if (window)
     {
@@ -297,6 +302,11 @@ SplitHeader::SplitHeader(Split *split)
     }
 
     this->scaleChangedEvent(this->scale());
+}
+
+SplitHeader::~SplitHeader()
+{
+    this->filtersChanged_.disconnect();
 }
 
 void SplitHeader::initializeLayout()
