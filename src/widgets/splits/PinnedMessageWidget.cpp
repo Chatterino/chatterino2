@@ -80,6 +80,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setStyleSheet("background: transparent;");
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
                                        QSizePolicy::Preferred);
+    this->messageLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     this->messageScrollArea_->setWidgetResizable(true);
     this->messageScrollArea_->setHorizontalScrollBarPolicy(
