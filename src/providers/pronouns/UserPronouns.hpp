@@ -25,7 +25,7 @@ public:
 
     bool isUnspecified() const;
 
-    /// True, iff the pronouns are not unspecified.
+    /// True, if the pronouns are not unspecified.
     operator bool() const;
 
 private:
