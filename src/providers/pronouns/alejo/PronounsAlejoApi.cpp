@@ -139,7 +139,6 @@ UserPronouns AlejoApi::parsePronoun(const QJsonObject &object)
         return {};
     }
 
-    // Return Subject/Object or
     if (!pronounAlt.isString())
     {
         if (iterMain->second.singular)
