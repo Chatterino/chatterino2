@@ -208,8 +208,7 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
         }
         else
         {
-            const auto mode = static_cast<UsernameDisplayMode>(
-                getSettings()->usernameDisplayMode.getValue());
+            const auto mode = getSettings()->usernameDisplayMode.getEnum();
             QStringList names;
             for (const auto &p : sharedChatParticipants)
             {
