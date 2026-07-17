@@ -45,6 +45,11 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
+    // On some Linux distros such as NixOS, Qt's automatic setting of the desktop file name
+    // leads to a wrong desktop file name ("com.chatterino." instead of "com.chatterino.chatterino"),
+    // which further leads to GNOME not being able to match the window to the desktop file,
+    // so it shows up without any name or icon.
+    QGuiApplication::setDesktopFileName("com.chatterino.chatterino");
 #ifdef Q_OS_WIN
     SetCurrentProcessExplicitAppUserModelID(
         Version::instance().appUserModelID().c_str());
