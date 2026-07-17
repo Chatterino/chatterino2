@@ -46,6 +46,7 @@ protected:
     void hideEvent(QHideEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void scaleChangedEvent(float newScale) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     void paintEvent(QPaintEvent *event) override;

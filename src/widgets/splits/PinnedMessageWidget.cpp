@@ -399,4 +399,9 @@ void PinnedMessageWidget::scaleChangedEvent(float newScale)
     this->footerLabel_->setFont(footerFont);
 }
 
+void PinnedMessageWidget::mousePressEvent(QMouseEvent *event)
+{
+    // ignore to disable the parent's right click menu
+}
+
 }  // namespace chatterino
