@@ -1070,11 +1070,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Show the stream title")
         ->addTo(layout);
 
-    layout.addSubtitle("R9K");
+    layout.addSubtitle("Unique chat (R9K)");
     auto toggleLocalr9kSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "toggleLocalR9K");
     QString toggleLocalr9kShortcut =
-        "an assigned hotkey (Window -> Toggle local R9K)";
+        "an assigned hotkey (Window -> Toggle local unique chat (R9K))";
     if (!toggleLocalr9kSeq.isEmpty())
     {
         toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
