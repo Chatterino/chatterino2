@@ -50,7 +50,8 @@ int main(int argc, char **argv)
         Version::instance().appUserModelID().c_str());
 #endif
 
-    const Modes modes;
+    const Args args(a);
+    const Modes modes(args);
     std::unique_ptr<Paths> paths;
 
     // Optional logger override that logs to a file
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
 
     try
     {
-        paths = std::make_unique<Paths>(modes);
+        paths = std::make_unique<Paths>(args, modes);
     }
     catch (std::runtime_error &error)
     {
@@ -84,8 +85,6 @@ int main(int argc, char **argv)
         return 1;
     }
     ipc::initPaths(paths.get());
-
-    const Args args(a);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
     const auto crashpadHandler = installCrashHandler(args, *paths);
