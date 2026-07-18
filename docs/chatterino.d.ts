@@ -419,7 +419,7 @@ declare namespace c2 {
     }
 
     interface VipBadgeElement extends Omit<BadgeElement, "type"> {
-        type: "ffz-badge";
+        type: "vip-badge";
     }
 
     interface FfzBadgeElement extends Omit<BadgeElement, "type"> {

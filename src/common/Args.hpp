@@ -68,6 +68,9 @@ public:
     bool verbose{};
     bool safeMode{};
 
+    bool portableEnable{};
+    std::optional<QString> portableDirectory;
+
     bool useOldScaling = false;
 
 #ifndef NDEBUG

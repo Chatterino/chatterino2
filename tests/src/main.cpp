@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     // Ensure settings are initialized before any tests are run
     QTemporaryDir settingsDir;
     settingsDir.setAutoRemove(false);  // we'll remove it manually
-    chatterino::Settings settings(Modes(), args, settingsDir.path());
+    chatterino::Settings settings(Modes(args), args, settingsDir.path());
 
     QTimer::singleShot(0, [&]() {
         auto res = RUN_ALL_TESTS();
