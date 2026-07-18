@@ -32,7 +32,7 @@ QJsonArray loadWindowArray(const QString &settingsPath)
     return windows_arr;
 }
 
-const QList<QUuid> loadFilters(QJsonValue val)
+QList<QUuid> loadFilters(const QJsonValue &val)
 {
     QList<QUuid> filterIds;
 
@@ -51,10 +51,11 @@ const QList<QUuid> loadFilters(QJsonValue val)
 
 }  // namespace
 
-void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
-                                   const QJsonObject &root,
-                                   const QJsonObject &data)
+SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
 {
+    const QJsonObject data = root["data"].toObject();
+
+    SplitDescriptor descriptor;
     descriptor.type_ = data.value("type").toString();
     descriptor.server_ = data.value("server").toInt(-1);
     descriptor.moderationMode_ = root.value("moderationMode").toBool();
@@ -73,6 +74,8 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     {
         descriptor.spellCheckOverride = spellOverride.toBool();
     }
+
+    return descriptor;
 }
 
 IndirectChannel SplitDescriptor::decodeChannel() const
@@ -111,10 +114,14 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     return Channel::getEmpty();
 }
 
+SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)
+    : SplitDescriptor(std::move(descriptor))
+{
+}
+
 SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
 {
-    SplitNodeDescriptor descriptor;
-    SplitDescriptor::loadFromJSON(descriptor, root, root["data"].toObject());
+    SplitNodeDescriptor descriptor(SplitDescriptor::loadFromJSON(root));
     descriptor.flexH_ = root["flexh"].toDouble(1.0);
     descriptor.flexV_ = root["flexv"].toDouble(1.0);
     return descriptor;

@@ -14,6 +14,7 @@
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -185,7 +186,8 @@ auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
         .arg(s.title.toHtmlEscaped());
 }
 
-auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
+auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
+                 const std::vector<HelixMinimalUser> &sharedChatParticipants)
 {
     auto title = QString();
 
@@ -200,7 +202,22 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     }
     else
     {
-        title += " (live)";
+        if (sharedChatParticipants.empty())
+        {
+            title += " (live)";
+        }
+        else
+        {
+            const auto mode = getSettings()->usernameDisplayMode.getEnum();
+            QStringList names;
+            for (const auto &p : sharedChatParticipants)
+            {
+                auto name = p.formatted(mode);
+                names.push_back(std::move(name));
+            }
+
+            title += " (live with " + names.join(", ") + ")";
+        }
     }
 
     // description
@@ -978,7 +995,10 @@ void SplitHeader::updateChannelText()
                 this->lastThumbnail_.restart();
             }
             this->tooltipText_ = formatTooltip(*streamStatus, this->thumbnail_);
-            title += formatTitle(*streamStatus, *getSettings());
+
+            title +=
+                formatTitle(*streamStatus, *getSettings(),
+                            twitchChannel->getSharedChatSessionParticipants());
         }
         else
         {
