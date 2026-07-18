@@ -319,14 +319,7 @@ void PinnedMessageWidget::refresh()
     this->menuButton_->setVisible(isMod);
 
     this->show();
-    // Resize events for children are delivered after resize events for
-    // ourselves when showing the widget. Check that our viewport still has the
-    // expected size. Otherwise, we need to recalculate.
-    if (this->lastViewportWidth_ !=
-        this->messageScrollArea_->viewport()->width())
-    {
-        this->updateMessageHeight();
-    }
+    this->updateMessageHeightIfNeeded();
 
     this->autoHideTimer_->stop();
     if (!getSettings()->alwaysShowPinnedMessage && !this->userToggled_)
@@ -348,6 +341,7 @@ void PinnedMessageWidget::toggleUserPinned()
         this->userToggled_ = true;
         this->autoHideTimer_->stop();
         this->show();
+        this->updateMessageHeightIfNeeded();
     }
 }
 
@@ -370,6 +364,15 @@ void PinnedMessageWidget::updateMessageHeight()
     // Size to content, but never taller than the cap.
     this->messageScrollArea_->setFixedHeight(
         qBound(1, contentH, this->messageMaxHeight_));
+}
+
+void PinnedMessageWidget::updateMessageHeightIfNeeded()
+{
+    if (this->lastViewportWidth_ !=
+        this->messageScrollArea_->viewport()->width())
+    {
+        this->updateMessageHeight();
+    }
 }
 
 void PinnedMessageWidget::resizeEvent(QResizeEvent *event)
