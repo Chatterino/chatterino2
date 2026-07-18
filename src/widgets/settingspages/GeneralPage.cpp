@@ -1642,8 +1642,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Show shared chat badge for all messages",
                             s.sharedChatAlwaysShowBadge)
-        ->setTooltip("By default only messages from other participants have a "
-                     "shared chat badge")
+        ->setTooltip(
+            "If turned off, only messages from other participants have a "
+            "shared chat badge")
         ->addTo(layout);
 
     layout.addStretch();

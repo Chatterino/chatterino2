@@ -416,7 +416,7 @@ public:
 
     BoolSetting sharedChatAlwaysShowBadge = {
         "/behaviour/sharedChatAlwaysShowBadge",
-        false,
+        true,
     };
 
     /// Emotes
