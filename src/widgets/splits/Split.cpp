@@ -865,7 +865,8 @@ void Split::setChannel(IndirectChannel newChannel)
             });
 
         this->channelSignalHolder_.managedConnect(
-            tc->sharedChatStatusChanged, [this](const QStringList &) {
+            tc->sharedChatStatusChanged,
+            [this](const std::vector<HelixMinimalUser> &) {
                 this->header_->updateChannelText();
             });
         this->pinnedBanner_->setChannel(tc);
