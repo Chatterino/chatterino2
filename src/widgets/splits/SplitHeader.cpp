@@ -14,6 +14,7 @@
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -186,7 +187,7 @@ auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
 }
 
 auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
-                 const QStringList &sharedChatParticipants)
+                 const std::vector<HelixMinimalUser> &sharedChatParticipants)
 {
     auto title = QString();
 
@@ -201,13 +202,21 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
     }
     else
     {
-        if (sharedChatParticipants.isEmpty())
+        if (sharedChatParticipants.empty())
         {
             title += " (live)";
         }
         else
         {
-            title += " (live with " + sharedChatParticipants.join(", ") + ")";
+            const auto mode = getSettings()->usernameDisplayMode.getEnum();
+            QStringList names;
+            for (const auto &p : sharedChatParticipants)
+            {
+                auto name = p.formatted(mode);
+                names.push_back(std::move(name));
+            }
+
+            title += " (live with " + names.join(", ") + ")";
         }
     }
 

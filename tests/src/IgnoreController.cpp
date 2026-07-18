@@ -172,6 +172,13 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
             "Kappa",
             {emoteAt(127, "Kappa")},
         },
+        {
+            {regexReplace("(f)o(o)", "\\1\\2", false)},
+            "foo foo foo foo Kappa",
+            {emoteAt(15, "Kappa")},
+            "fo fo fo fo Kappa",
+            {emoteAt(11, "Kappa")},
+        },
     };
 
     for (const auto &test : testCases)
