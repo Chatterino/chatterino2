@@ -2534,7 +2534,8 @@ bool TwitchChannel::isLoadingRecentMessages() const
     return this->loadingRecentMessages_.test();
 }
 
-const QStringList &TwitchChannel::getSharedChatSessionParticipants() const
+const std::vector<HelixMinimalUser> &
+    TwitchChannel::getSharedChatSessionParticipants() const
 {
     return this->sharedChatSessionParticipants_;
 }
@@ -2629,7 +2630,7 @@ void TwitchChannel::refreshSharedChatSessionState()
                             this->sharedChatSessionParticipantIds_.insert(
                                 user.id);
                             this->sharedChatSessionParticipants_.push_back(
-                                user.displayName);
+                                {user.id, user.login, user.displayName});
                         }
                     }
 
