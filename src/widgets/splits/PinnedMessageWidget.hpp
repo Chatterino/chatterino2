@@ -80,6 +80,8 @@ private:
     bool userToggled_ = false;
     /// Invalid when no end time.
     QDateTime pinEndsAt_;
+
+    int lastViewportWidth_ = -1;
 };
 
 }  // namespace chatterino

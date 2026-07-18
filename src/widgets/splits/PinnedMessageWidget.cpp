@@ -319,6 +319,14 @@ void PinnedMessageWidget::refresh()
     this->menuButton_->setVisible(isMod);
 
     this->show();
+    // Resize events for children are delivered after resize events for
+    // ourselves when showing the widget. Check that our viewport still has the
+    // expected size. Otherwise, we need to recalculate.
+    if (this->lastViewportWidth_ !=
+        this->messageScrollArea_->viewport()->width())
+    {
+        this->updateMessageHeight();
+    }
 
     this->autoHideTimer_->stop();
     if (!getSettings()->alwaysShowPinnedMessage && !this->userToggled_)
@@ -351,8 +359,9 @@ void PinnedMessageWidget::updateMessageHeight()
     }
 
     // Wrapped height of the label at the current viewport width.
-    const int width = this->messageScrollArea_->viewport()->width();
-    int contentH = this->messageLabel_->heightForWidth(width);
+    this->lastViewportWidth_ = this->messageScrollArea_->viewport()->width();
+    int contentH =
+        this->messageLabel_->heightForWidth(this->lastViewportWidth_);
     if (contentH <= 0)
     {
         contentH = this->messageLabel_->sizeHint().height();
