@@ -80,6 +80,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageLabel_->setStyleSheet("background: transparent;");
     this->messageLabel_->setSizePolicy(QSizePolicy::Expanding,
                                        QSizePolicy::Preferred);
+    this->messageLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     this->messageScrollArea_->setWidgetResizable(true);
     this->messageScrollArea_->setHorizontalScrollBarPolicy(
@@ -396,6 +397,11 @@ void PinnedMessageWidget::scaleChangedEvent(float newScale)
     QFont footerFont = this->footerLabel_->font();
     footerFont.setPointSizeF(10.0F * newScale);
     this->footerLabel_->setFont(footerFont);
+}
+
+void PinnedMessageWidget::mousePressEvent(QMouseEvent *event)
+{
+    // ignore to disable the parent's right click menu
 }
 
 }  // namespace chatterino
