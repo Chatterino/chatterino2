@@ -1640,6 +1640,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "shared chat session status.")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Show shared chat badge for all messages",
+                            s.sharedChatAlwaysShowBadge)
+        ->setTooltip(
+            "If turned off, only messages from other participants have a "
+            "shared chat badge")
+        ->addTo(layout);
+
     layout.addStretch();
 
     // invisible element for width
