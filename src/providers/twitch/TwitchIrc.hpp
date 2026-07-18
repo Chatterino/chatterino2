@@ -7,6 +7,7 @@
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
+#include <IrcTagsRef>
 #include <QString>
 #include <QVariantMap>
 
@@ -37,7 +38,7 @@ struct TwitchEmoteOccurrence {
 ///
 /// @param tags The tags of the IRC message
 /// @returns A map of badge-names to their values
-std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags);
+std::unordered_map<QString, QString> parseBadgeInfoTag(Communi::TagsRef tags);
 
 /// @brief Parses the badges from the specified tag of an IRC message
 ///
@@ -51,7 +52,7 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags);
 /// @param tags The tags of the IRC message
 /// @param tagName The name of the tag to read badges from
 /// @returns A list of badges (name and version)
-std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
+std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
                                        const QString &tagName = "badges");
 
 /// @brief Parses Twitch emotes in an IRC message
@@ -66,7 +67,7 @@ std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
 ///                      original message (`@a foo` (original message) -> `foo`
 ///                      (content)).
 /// @returns A list of emotes and their positions
-std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
+std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(Communi::TagsRef tags,
                                                      const QString &content,
                                                      int messageOffset);
 
