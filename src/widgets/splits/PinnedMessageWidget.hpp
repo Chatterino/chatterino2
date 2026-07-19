@@ -58,6 +58,12 @@ private:
     /// (scaled) maximum height. A vertical scrollbar appears past the cap.
     void updateMessageHeight();
 
+    /// If the scroll viewport width has changed since the last time
+    /// updateMessageHeight() was called, update the height again, because
+    /// resize events for children are delivered after resize events for
+    /// ourselves when showing the widget.
+    void updateMessageHeightIfNeeded();
+
     TwitchChannel *channel_ = nullptr;
     pajlada::Signals::SignalHolder signalHolder_;
 
@@ -80,6 +86,8 @@ private:
     bool userToggled_ = false;
     /// Invalid when no end time.
     QDateTime pinEndsAt_;
+
+    int lastViewportWidth_ = -1;
 };
 
 }  // namespace chatterino
