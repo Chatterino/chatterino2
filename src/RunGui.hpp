@@ -12,8 +12,9 @@ class Args;
 class Paths;
 class Settings;
 class Updates;
+class Modes;
 
-void runGui(QApplication &a, const Paths &paths, Settings &settings,
-            const Args &args, Updates &updates);
+void runGui(QApplication &a, const Modes &modes, const Paths &paths,
+            Settings &settings, const Args &args, Updates &updates);
 
 }  // namespace chatterino

@@ -307,5 +307,10 @@
             "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "params": {
+        "helixExpectations": {
+            "getSharedChatSession": 1
+        }
+    }
 }

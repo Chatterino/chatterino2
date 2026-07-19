@@ -121,11 +121,6 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Serialize",
                        "https://github.com/pajlada/serialize",
                        ":/licenses/pajlada_serialize.txt");
-#ifndef NO_QTKEYCHAIN
-            addLicense(form.getElement(), "QtKeychain",
-                       "https://github.com/frankosterfeld/qtkeychain",
-                       ":/licenses/qtkeychain.txt");
-#endif
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
