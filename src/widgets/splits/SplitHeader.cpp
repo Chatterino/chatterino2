@@ -14,6 +14,7 @@
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -30,6 +31,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/splits/PinnedMessageWidget.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -65,7 +67,7 @@ auto formatRoomModeUnclean(
 
     if (modes->r9k)
     {
-        text += "r9k, ";
+        text += "unique, ";
     }
     if (modes->slowMode > 0)
     {
@@ -184,7 +186,8 @@ auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
         .arg(s.title.toHtmlEscaped());
 }
 
-auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
+auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
+                 const std::vector<HelixMinimalUser> &sharedChatParticipants)
 {
     auto title = QString();
 
@@ -199,7 +202,22 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     }
     else
     {
-        title += " (live)";
+        if (sharedChatParticipants.empty())
+        {
+            title += " (live)";
+        }
+        else
+        {
+            const auto mode = getSettings()->usernameDisplayMode.getEnum();
+            QStringList names;
+            for (const auto &p : sharedChatParticipants)
+            {
+                auto name = p.formatted(mode);
+                names.push_back(std::move(name));
+            }
+
+            title += " (live with " + names.join(", ") + ")";
+        }
     }
 
     // description
@@ -308,6 +326,18 @@ void SplitHeader::initializeLayout()
         },
         this, {4, 4});
 
+    this->pinButton_ = new SvgButton(
+        {
+            .dark = ":/buttons/pinnedMessage-chat.svg",
+            .light = ":/buttons/pinnedMessage-chat.svg",
+        },
+        this, {4, 4});
+    this->pinButton_->setToolTip(QStringLiteral("Toggle pinned message"));
+    this->pinButton_->setColor(this->theme->isLightTheme()
+                                   ? QColor(0x42, 0x42, 0x42)
+                                   : QColor(0xc0, 0xc0, 0xc0));
+    this->pinButton_->hide();
+
     this->addButton_ = new DrawnButton(DrawnButton::Symbol::Plus,
                                        {
                                            .padding = 3,
@@ -346,6 +376,8 @@ void SplitHeader::initializeLayout()
             w->hide();
             w->setMenu(this->createChatModeMenu());
         }),
+        // pin indicator
+        this->pinButton_,
         // moderator
         this->moderationButton_,
         // chatter list
@@ -393,6 +425,10 @@ void SplitHeader::initializeLayout()
                      [this]() {
                          this->split_->openChatterList();
                      });
+
+    QObject::connect(this->pinButton_, &Button::leftClicked, this, [this]() {
+        this->split_->togglePinnedBanner();
+    });
 
     QObject::connect(this->addButton_, &Button::leftClicked, this, [this]() {
         this->split_->addSibling();
@@ -682,7 +718,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     this->modeActionSetSub = new QAction("Subscriber only", this);
     this->modeActionSetEmote = new QAction("Emote only", this);
     this->modeActionSetSlow = new QAction("Slow", this);
-    this->modeActionSetR9k = new QAction("R9K", this);
+    this->modeActionSetR9k = new QAction("Unique chat (R9K)", this);
     this->modeActionSetFollowers = new QAction("Followers only", this);
 
     this->modeActionSetFollowers->setCheckable(true);
@@ -837,6 +873,22 @@ void SplitHeader::handleChannelChanged()
             twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
+
+        this->channelConnections_.managedConnect(
+            twitchChannel->pinnedMessageChanged, [this]() {
+                this->updatePinButton();
+            });
+
+        this->channelConnections_.managedConnect(
+            this->split_->getPinnedBanner()->visibilityChanged, [this]() {
+                this->updatePinButton();
+            });
+
+        this->updatePinButton();
+    }
+    else
+    {
+        this->updatePinButton();
     }
 }
 
@@ -849,6 +901,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
     this->chattersButton_->setFixedWidth(w);
+    this->pinButton_->setFixedWidth(w);
 
     this->addButton_->setFixedWidth(addSplitWidth);
 }
@@ -856,6 +909,26 @@ void SplitHeader::scaleChangedEvent(float scale)
 void SplitHeader::setAddButtonVisible(bool value)
 {
     this->addButton_->setVisible(value);
+}
+
+void SplitHeader::updatePinButton()
+{
+    auto channel = this->split_->getChannel();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    const bool hasPinnedMessage = twitchChannel != nullptr &&
+                                  twitchChannel->getPinnedMessage() != nullptr;
+
+    this->pinButton_->setVisible(hasPinnedMessage);
+    if (hasPinnedMessage && this->split_->getPinnedBanner()->isVisible())
+    {
+        this->pinButton_->setColor(this->theme->accent);
+    }
+    else
+    {
+        this->pinButton_->setColor(this->theme->isLightTheme()
+                                       ? QColor(0x42, 0x42, 0x42)
+                                       : QColor(0xc0, 0xc0, 0xc0));
+    }
 }
 
 void SplitHeader::updateChannelText()
@@ -922,7 +995,10 @@ void SplitHeader::updateChannelText()
                 this->lastThumbnail_.restart();
             }
             this->tooltipText_ = formatTooltip(*streamStatus, this->thumbnail_);
-            title += formatTitle(*streamStatus, *getSettings());
+
+            title +=
+                formatTitle(*streamStatus, *getSettings(),
+                            twitchChannel->getSharedChatSessionParticipants());
         }
         else
         {
@@ -1120,6 +1196,9 @@ void SplitHeader::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
+
+    // Re-apply pin button color to respect updated theme
+    this->updatePinButton();
 
     auto bg = this->theme->splits.header.background;
     this->addButton_->setOptions({
