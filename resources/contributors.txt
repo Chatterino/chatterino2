@@ -98,7 +98,7 @@ Juliapixel | https://github.com/Juliapixel | :/avatars/juliapixel.png
 Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
 Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 tlos | https://github.com/realtlos | :/avatars/realtlos.jpg
-ArmpitsLover420 | https://github.com/JEC15 | :/avatars/armpitslover420.png
+ArmpitsLover420 | https://github.com/JEC15 | :/avatars/armpitslover420.jpg
 
 # If you are a contributor add yourself above this line
 
