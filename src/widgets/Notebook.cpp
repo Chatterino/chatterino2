@@ -6,8 +6,8 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
-#include "controllers/accounts/AccountController.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Resources.hpp"
