@@ -178,25 +178,27 @@ void Notebook::removePage(QWidget *page)
         if (this->items_.count() == 1)
         {
             // Deleting only tab, select nothing
-            this->select(nullptr);
+            this->select(nullptr, true, false);
         }
         else if (countVisible == 1)
         {
             // Closing the only visible tab, try to select any tab (even if not visible)
             int nextIndex = (removingIndex + 1) % this->items_.count();
-            this->select(this->items_[nextIndex].page);
+            this->select(this->items_[nextIndex].page, true, false);
         }
         else if (visibleIndex == countVisible - 1)
         {
             // Closing last visible tab, select the previous visible tab
-            this->selectPreviousTab();
+            this->selectPreviousTab(true, false);
         }
         else
         {
             // Otherwise, select the next visible tab
-            this->selectNextTab();
+            this->selectNextTab(true, false);
         }
     }
+
+    this->tabHistory_.removePage(page);
 
     // Remove page and delete resources
     this->items_[removingIndex].page->deleteLater();
@@ -311,12 +313,17 @@ int Notebook::getVisibleTabCount() const
     return i;
 }
 
-void Notebook::select(QWidget *page, bool focusPage)
+void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 {
     if (page == this->selectedPage_)
     {
         // Nothing has changed
         return;
+    }
+
+    if (recordInHistory && this->selectedPage_ != nullptr && page != nullptr)
+    {
+        this->tabHistory_.recordNavigation(this->selectedPage_, page);
     }
 
     if (page)
@@ -374,7 +381,92 @@ void Notebook::select(QWidget *page, bool focusPage)
     this->updateTabVisibility();
 }
 
-bool Notebook::containsPage(QWidget *page)
+void Notebook::selectHistoryBack(bool focusPage)
+{
+    this->pruneInvalidHistoryEntries();
+
+    for (size_t attempt = 0; attempt < TabHistory::MAX_TAB_HISTORY_SIZE;
+         ++attempt)
+    {
+        auto target = this->tabHistory_.goBack();
+        if (!target)
+        {
+            return;
+        }
+
+        if (!this->containsPage(*target))
+        {
+            continue;
+        }
+
+        this->select(*target, focusPage, false);
+        return;
+    }
+}
+
+void Notebook::selectHistoryForward(bool focusPage)
+{
+    this->pruneInvalidHistoryEntries();
+
+    for (size_t attempt = 0; attempt < TabHistory::MAX_TAB_HISTORY_SIZE;
+         ++attempt)
+    {
+        auto target = this->tabHistory_.goForward();
+        if (!target)
+        {
+            return;
+        }
+
+        if (!this->containsPage(*target))
+        {
+            continue;
+        }
+
+        this->select(*target, focusPage, false);
+        return;
+    }
+}
+
+QWidget *Notebook::getPreviousVisitedPage() const
+{
+    auto previous = this->tabHistory_.peekBack();
+    if (!previous || !this->containsPage(*previous))
+    {
+        return nullptr;
+    }
+
+    return *previous;
+}
+
+std::vector<QWidget *> Notebook::getVisitHistoryPages() const
+{
+    return this->tabHistory_.backStackMostRecentFirst();
+}
+
+void Notebook::pruneInvalidHistoryEntries()
+{
+    while (auto peeked = this->tabHistory_.peekBack())
+    {
+        if (this->containsPage(*peeked))
+        {
+            break;
+        }
+
+        this->tabHistory_.discardBackTop();
+    }
+
+    while (auto peeked = this->tabHistory_.peekForward())
+    {
+        if (this->containsPage(*peeked))
+        {
+            break;
+        }
+
+        this->tabHistory_.discardForwardTop();
+    }
+}
+
+bool Notebook::containsPage(QWidget *page) const
 {
     return std::any_of(this->items_.begin(), this->items_.end(),
                        [page](const auto &item) {
@@ -442,7 +534,7 @@ void Notebook::selectVisibleIndex(int index, bool focusPage)
     }
 }
 
-void Notebook::selectNextTab(bool focusPage)
+void Notebook::selectNextTab(bool focusPage, bool recordInHistory)
 {
     const int size = this->items_.size();
 
@@ -454,7 +546,7 @@ void Notebook::selectNextTab(bool focusPage)
         }
 
         auto index = (this->indexOf(this->selectedPage_) + 1) % size;
-        this->select(this->items_[index].page, focusPage);
+        this->select(this->items_[index].page, focusPage, recordInHistory);
         return;
     }
 
@@ -466,14 +558,14 @@ void Notebook::selectNextTab(bool focusPage)
     {
         if (this->tabVisibilityFilter_(this->items_[index].tab))
         {
-            this->select(this->items_[index].page, focusPage);
+            this->select(this->items_[index].page, focusPage, recordInHistory);
             return;
         }
         index = (index + 1) % size;
     }
 }
 
-void Notebook::selectPreviousTab(bool focusPage)
+void Notebook::selectPreviousTab(bool focusPage, bool recordInHistory)
 {
     const int size = this->items_.size();
 
@@ -490,7 +582,7 @@ void Notebook::selectPreviousTab(bool focusPage)
             index += size;
         }
 
-        this->select(this->items_[index].page, focusPage);
+        this->select(this->items_[index].page, focusPage, recordInHistory);
         return;
     }
 
@@ -502,7 +594,7 @@ void Notebook::selectPreviousTab(bool focusPage)
     {
         if (this->tabVisibilityFilter_(this->items_[index].tab))
         {
-            this->select(this->items_[index].page, focusPage);
+            this->select(this->items_[index].page, focusPage, recordInHistory);
             return;
         }
 
@@ -1607,7 +1699,7 @@ SplitContainer *SplitNotebook::getSelectedPage()
     return dynamic_cast<SplitContainer *>(Notebook::getSelectedPage());
 }
 
-void SplitNotebook::select(QWidget *page, bool focusPage)
+void SplitNotebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 {
     // If there's a previously selected page, go through its splits and
     // update their "last read message" indicator
@@ -1622,7 +1714,7 @@ void SplitNotebook::select(QWidget *page, bool focusPage)
         }
     }
 
-    this->Notebook::select(page, focusPage);
+    this->Notebook::select(page, focusPage, recordInHistory);
 }
 
 void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
