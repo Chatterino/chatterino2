@@ -327,4 +327,14 @@ enum class HelixUnpinMessageError : std::uint8_t {
     Forwarded,
 };
 
+enum class HelixGetSharedChatSessionError : std::uint8_t {
+    Unknown,
+    InvalidBroadcasterId,
+    UserMissingScope,
+    UserNotAuthorized,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 }  // namespace chatterino

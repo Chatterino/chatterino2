@@ -76,7 +76,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -147,7 +147,7 @@ jobs:
       matrix:
         include:
           # macOS
-          - os: macos-14
+          - os: macos-26
             qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
@@ -165,7 +165,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -221,7 +221,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -368,7 +368,7 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # allows for tags access
 
@@ -381,6 +381,11 @@ jobs:
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
+        shell: bash
+
+      - name: Remove macOS artifacts
+        run: |
+          rm -f release-artifacts/*macos*.dmg
         shell: bash
 
       - name: Setup Python

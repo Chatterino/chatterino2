@@ -19,6 +19,7 @@
 #include "widgets/Window.hpp"
 
 #include <QApplication>
+#include <QFile>
 #include <QFont>
 #include <QIcon>
 #include <QScreen>
@@ -268,6 +269,20 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+
+    if (this->flags_.has(UseSettingsStylesheet))
+    {
+        QFile styleFile(":/qss/settings.qss");
+        if (!styleFile.open(QFile::ReadOnly))
+        {
+            assert(false && "Resources not loaded");
+            qCWarning(chatterinoWidget) << "Resources not loaded";
+        }
+        QString stylesheet = QString::fromUtf8(styleFile.readAll());
+        this->setStyleSheet(stylesheet);
+        this->overrideBackgroundColor_ = QColor("#111111");
+    }
+
     DebugCount::increase(DebugObject::BaseWindow);
 }
 
@@ -527,6 +542,12 @@ void BaseWindow::themeChangedEvent()
         {
             button->setMouseEffectColor(this->theme->window.text);
         }
+    }
+    else if (this->flags_.has(UseSettingsStylesheet))
+    {
+        QPalette palette;
+        palette.setColor(QPalette::Window, QColor("#111"));
+        this->setPalette(palette);
     }
     else
     {

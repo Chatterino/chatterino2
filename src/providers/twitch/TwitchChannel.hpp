@@ -12,6 +12,7 @@
 #include "common/UniqueAccess.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
@@ -25,6 +26,7 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
@@ -61,6 +63,7 @@ struct HelixStream;
 struct HelixCheermoteSet;
 struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
+struct HelixPinnedChatMessage;
 
 class TwitchIrcServer;
 class TwitchAccount;
@@ -354,6 +357,9 @@ public:
 
     pajlada::Signals::Signal<const QString &> sendWaitUpdate;
 
+    pajlada::Signals::Signal<const std::vector<HelixMinimalUser> &>
+        sharedChatStatusChanged;
+
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
                              const QString &originalContent,
@@ -399,6 +405,32 @@ public:
 
     bool isLoadingRecentMessages() const;
 
+    const std::vector<HelixMinimalUser> &getSharedChatSessionParticipants()
+        const;
+    // Pinned message
+    /**
+     * Fetches the currently pinned message for this channel via the Helix API.
+     * Only has effect when the local user has moderator privileges.
+     */
+    void refreshPinnedMessage();
+
+    /**
+     * Clears the pinned message for this channel immediately (e.g. on unpin
+     * PubSub event).
+     */
+    void clearPinnedMessage();
+
+    /// Returns the currently pinned message, or null if none is pinned.
+    const HelixPinnedChatMessage *getPinnedMessage() const;
+
+    /**
+     * Unpin the currently pinned message. Only valid for moderators.
+     */
+    void unpinCurrentMessage();
+
+    /// Fires when the pinned message changes (set, cleared, or updated).
+    pajlada::Signals::NoArgSignal pinnedMessageChanged;
+
 private:
     struct NameOptions {
         // displayName is the non-CJK-display name for this user
@@ -432,6 +464,9 @@ private:
     /// roomIdChanged is called whenever this channel's ID has been changed
     /// This should only happen once per channel, whenever the ID goes from unset to set
     void roomIdChanged();
+
+    void probeSharedChatSession();
+    void refreshSharedChatSessionState();
 
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
@@ -590,6 +625,35 @@ private:
     /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
+    /**
+     * List of display names of  broadcasters participating in a
+     * shared chat session on this channel. The list does not include
+     * the broadcaster who owns the channel.
+     * This list is passed to the UI for display.
+     */
+    std::vector<HelixMinimalUser> sharedChatSessionParticipants_;
+
+    /**
+     * Set of broadcasterIDs of broadcasters participating in a
+     * shared chat session on this channel. The set does not include
+     * the broadcaster who owns the channel.
+     * This set is used to quickly determine if the participants have
+     * changed since the last query of the shared chat session state.
+     */
+    QSet<QString> sharedChatSessionParticipantIds_;
+
+    /**
+     * Timer scheduling the next check of the shared chat session state.
+     */
+    QTimer nextSharedChatSessionUpdateTimer_;
+
+    /**
+     * Time when the next probe of shared chat session state triggered
+     * by reception of a shared chat message is allowed.
+     * Used to rate-limit Twitch API queries.
+     */
+    QDateTime nextSharedChatSessionProbe_;
+
     pajlada::Signals::SignalHolder signalHolder_;
 
     eventsub::SubscriptionHandle eventSubChannelModerateHandle;
@@ -599,6 +663,12 @@ private:
     eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
+    /// May be null if no message is currently pinned.
+    std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
+    /// Incremented before each getPinnedChatMessage request so that stale
+    /// responses from earlier requests are discarded.
+    uint64_t pinnedMessageRequestId_ = 0;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;
