@@ -396,18 +396,18 @@ void PinnedMessageWidget::hideEvent(QHideEvent *event)
 void PinnedMessageWidget::scaleChangedEvent(float newScale)
 {
     QFont headerFont = this->pinnedByLabel_->font();
-    headerFont.setPointSizeF(11.0F * newScale);
+    headerFont.setPointSizeF(9.5F * newScale);
     this->pinnedByLabel_->setFont(headerFont);
     this->countdownLabel_->setFont(headerFont);
 
     QFont bodyFont = this->messageLabel_->font();
-    bodyFont.setPointSizeF(13.0F * newScale);
+    bodyFont.setPointSizeF(11.0F * newScale);
     this->messageLabel_->setFont(bodyFont);
     this->messageMaxHeight_ = int(110 * newScale);
     this->updateMessageHeight();
 
     QFont footerFont = this->footerLabel_->font();
-    footerFont.setPointSizeF(10.0F * newScale);
+    footerFont.setPointSizeF(9.0F * newScale);
     this->footerLabel_->setFont(footerFont);
 }
 
