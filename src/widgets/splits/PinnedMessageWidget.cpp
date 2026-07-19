@@ -319,6 +319,7 @@ void PinnedMessageWidget::refresh()
     this->menuButton_->setVisible(isMod);
 
     this->show();
+    this->updateMessageHeightIfNeeded();
 
     this->autoHideTimer_->stop();
     if (!getSettings()->alwaysShowPinnedMessage && !this->userToggled_)
@@ -340,6 +341,7 @@ void PinnedMessageWidget::toggleUserPinned()
         this->userToggled_ = true;
         this->autoHideTimer_->stop();
         this->show();
+        this->updateMessageHeightIfNeeded();
     }
 }
 
@@ -351,8 +353,9 @@ void PinnedMessageWidget::updateMessageHeight()
     }
 
     // Wrapped height of the label at the current viewport width.
-    const int width = this->messageScrollArea_->viewport()->width();
-    int contentH = this->messageLabel_->heightForWidth(width);
+    this->lastViewportWidth_ = this->messageScrollArea_->viewport()->width();
+    int contentH =
+        this->messageLabel_->heightForWidth(this->lastViewportWidth_);
     if (contentH <= 0)
     {
         contentH = this->messageLabel_->sizeHint().height();
@@ -361,6 +364,15 @@ void PinnedMessageWidget::updateMessageHeight()
     // Size to content, but never taller than the cap.
     this->messageScrollArea_->setFixedHeight(
         qBound(1, contentH, this->messageMaxHeight_));
+}
+
+void PinnedMessageWidget::updateMessageHeightIfNeeded()
+{
+    if (this->lastViewportWidth_ !=
+        this->messageScrollArea_->viewport()->width())
+    {
+        this->updateMessageHeight();
+    }
 }
 
 void PinnedMessageWidget::resizeEvent(QResizeEvent *event)
