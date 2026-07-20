@@ -248,8 +248,8 @@ void EditHotkeyDialog::afterEdit()
     }
 
     auto hotkey = std::make_shared<Hotkey>(
-        *category, this->ui_->keyComboEdit->keySequence(), action, arguments,
-        nameText);
+        *category, this->ui_->keyComboEdit->keySequence(), nullptr, action,
+        arguments, nameText);
     auto keyComboWasEdited =
         this->data() &&
         this->ui_->keyComboEdit->keySequence() != this->data()->keySequence();
