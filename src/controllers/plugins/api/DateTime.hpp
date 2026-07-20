@@ -54,6 +54,22 @@ function c2.DateTime:to_unix_milliseconds() end
 ---Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
 ---@return number
 function c2.DateTime:to_unix_seconds() end
+
+---Check if the datetime is in the user's local/system timezone.
+---@return boolean
+function c2.DateTime:is_local() end
+
+---Check if the datetime is in UTC.
+---@return boolean
+function c2.DateTime:is_utc() end
+
+---Returns a copy of this datetime converted to the user's local/system timezone.
+---@return c2.DateTime
+function c2.DateTime:to_local() end
+
+---Returns a copy of this datetime converted to UTC.
+---@return c2.DateTime
+function c2.DateTime:to_utc() end
 */
 
 /// Creates
