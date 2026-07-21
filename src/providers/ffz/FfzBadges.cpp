@@ -107,7 +107,8 @@ void FfzBadges::load()
                     auto userIDString = QString::number(user.toInt());
 
                     auto [userBadges, created] = this->userBadges.emplace(
-                        std::move(userIDString), badgeID);
+                        std::move(userIDString),
+                        QVarLengthArray<int, 2>{badgeID});
                     if (!created)
                     {
                         // User already had a badge assigned
@@ -147,7 +148,8 @@ void FfzBadges::assignBadgeToUser(const UserId &userID, int badgeID)
     }
     else
     {
-        this->userBadges.emplace(userID.string, badgeID);
+        this->userBadges.emplace(userID.string,
+                                 QVarLengthArray<int, 2>{badgeID});
     }
 }
 
