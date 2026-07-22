@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Chatterino Plugin Repo Metadata",
+  "description": "Metadata describing a plugin repository and its available plugins",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalItems": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w +\\.\\-_':&]+"
+        }
+      },
+      "required": ["name"]
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalItems": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w+\\.\\-_@~]+$"
+          },
+          "download": {
+            "type": "string",
+            "$comment": "Path to the directory of the plugin - the file paths are appended to this. This can either be relative to the base URL or absolute (starting with a leading slash).",
+            "examples": ["plugins/plugin", "/static/plugins/plugin"]
+          },
+          "meta": {
+            "$ref": "https://github.com/Chatterino/chatterino2/raw/refs/heads/master/docs/plugin-info.schema.json#"
+          }
+        },
+        "required": ["id", "download", "meta"]
+      }
+    },
+    "$schema": { "type": "string" }
+  },
+  "required": ["metadata", "plugins"]
+}

@@ -5,11 +5,30 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginMeta.hpp"
 
+#    include "util/Expected.hpp"
 #    include "util/QMagicEnum.hpp"
 
 #    include <QJsonArray>
 #    include <QJsonObject>
 #    include <QJsonValue>
+#    include <QRegularExpression>
+
+using namespace Qt::Literals;
+
+namespace {
+
+using namespace chatterino;
+
+bool validatePath(const QString &path)
+{
+    static const QRegularExpression regex(uR"(^[\w_\-+\./]+$)"_s);
+
+    return regex.matchView(path).hasMatch() && !path.contains(u"..") &&
+           !path.contains(u"//") && !path.startsWith('/') &&
+           !path.endsWith('/');
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -180,8 +199,106 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             this->tags.push_back(t.toString());
         }
     }
+
+    auto remote = obj["remote"];
+    if (!remote.isUndefined())
+    {
+        if (remote.isString())
+        {
+            this->remoteBaseURL = remote.toString();
+        }
+        else
+        {
+            this->errors.emplace_back(
+                u"Remote URL is not a string (its type is %1)"_s.arg(
+                    qmagicenum::enumName(remote.type())));
+            return;
+        }
+    }
+
+    auto files = obj["files"];
+    if (!files.isUndefined())
+    {
+        if (!files.isArray())
+        {
+            this->errors.emplace_back(
+                u"\"files\" is not an array (its type is %1)"_s.arg(
+                    qmagicenum::enumName(files.type())));
+            return;
+        }
+        const auto arr = files.toArray();
+        for (qsizetype i = 0; i < arr.size(); ++i)
+        {
+            auto v = arr[i];
+            if (!v.isString())
+            {
+                this->errors.emplace_back(
+                    u"\"files\"[%1] is not a string (its type is %2)"_s.arg(
+                        QString::number(i), qmagicenum::enumName(v.type())));
+                continue;
+            }
+            QString str = v.toString();
+            if (!validatePath(str))
+            {
+                this->errors.emplace_back(
+                    u"\"files\"[%1] contains invalid characters"_s.arg(
+                        QString::number(i)));
+                continue;
+            }
+            this->files.emplace_back(str);
+        }
+    }
 }
 // NOLINTEND(clazy-reserve-candidates)
+
+bool PluginMeta::isRelatedTo(const PluginMeta &other, QString *conflicts) const
+{
+    if (other.remoteBaseURL != this->remoteBaseURL)
+    {
+        if (conflicts)
+        {
+            *conflicts =
+                u"Remote URLs differ (current: \"%1\", other: \"%2\")"_s.arg(
+                    other.remoteBaseURL, this->remoteBaseURL);
+        }
+        return false;
+    }
+
+    return true;
+}
+
+QJsonObject PluginMeta::toJson() const
+{
+    auto map = [](const auto &range, auto &&cb) {
+        QJsonArray arr;
+        for (const auto &it : range)
+        {
+            arr.append(std::invoke(cb, it));
+        }
+        return arr;
+    };
+    auto ifNotEmpty = [](auto &&value) -> QJsonValue {
+        if (!value.isEmpty())
+        {
+            return value;
+        }
+        return QJsonValue::Undefined;
+    };
+
+    return {
+        {"homepage"_L1, ifNotEmpty(this->homepage)},
+        {"name"_L1, this->name},
+        {"description"_L1, this->description},
+        {"authors"_L1, map(this->authors, std::identity{})},
+        {"license"_L1, this->license},
+        {"version"_L1, QString::fromStdString(this->version.to_string())},
+        {"permissions"_L1, map(this->permissions, &PluginPermission::toJson)},
+        {"tags"_L1, ifNotEmpty(map(this->tags, std::identity{}))},
+        {"private"_L1, ifNotEmpty(this->privateFields)},
+        {"remote"_L1, ifNotEmpty(this->remoteBaseURL)},
+        // Forget "files".
+    };
+}
 
 }  // namespace chatterino
 

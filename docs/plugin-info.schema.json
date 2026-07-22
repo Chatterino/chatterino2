@@ -8,7 +8,8 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Plugin name shown to the user."
+      "description": "Plugin name shown to the user.",
+      "pattern": "[\\w +\\.\\-_':&]+$"
     },
     "description": {
       "type": "string",
@@ -55,6 +56,17 @@
           }
         }
       }
+    },
+    "files": {
+      "type": "array",
+      "description": "A list of files associated with this plugin. This is only used for metadata of remote plugins.",
+      "items": {
+        "type": "string",
+        "pattern": "^[\\w_\\-+\\./]+$"
+      }
+    },
+    "private": {
+      "description": "Private data of the plugin preserved when generating a metadata file."
     },
     "$schema": { "type": "string" }
   },
