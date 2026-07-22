@@ -197,7 +197,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
 
     for (const auto value : magic_enum::enum_values<T>())
     {
-        combo->addItem(qmagicenum::enumDisplayNameString(value),
+        combo->addItem(qmagicenum::DisplayName::enumNameString(value),
                        QVariant(static_cast<std::underlying_type_t<T>>(value)));
     }
 
@@ -273,7 +273,7 @@ SettingWidget *SettingWidget::dropdown(const QString &label,
 
     for (const auto value : magic_enum::enum_values<T>())
     {
-        combo->addItem(qmagicenum::enumDisplayNameString(value),
+        combo->addItem(qmagicenum::DisplayName::enumNameString(value),
                        QVariant(static_cast<std::underlying_type_t<T>>(value)));
     }
 
