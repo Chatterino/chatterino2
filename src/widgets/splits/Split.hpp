@@ -63,6 +63,7 @@ public:
 
     void setFilters(const QList<QUuid> ids);
     QList<QUuid> getFilters() const;
+    bool hasGlobalFiltersOnly() const;
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
