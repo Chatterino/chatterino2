@@ -207,6 +207,7 @@ declare namespace c2 {
         frozen: boolean;
         elements(): MessageElement[];
         append_element(init: MessageElementInit | MessageElement): void;
+        clone(): Message;
     }
 
     interface MessageConstructor {
