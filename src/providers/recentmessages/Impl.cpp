@@ -6,8 +6,10 @@
 
 #include "common/Env.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/VectorMessageSink.hpp"
 
@@ -91,7 +93,18 @@ QUrl constructRecentMessagesUrl(
     const std::optional<std::chrono::time_point<std::chrono::system_clock>>
         before)
 {
-    QUrl url(Env::get().recentMessagesApiUrl.arg(name));
+    const auto &env = Env::get();
+    auto urlTemplate = env.recentMessagesApiUrl;
+    if (urlTemplate.isEmpty() && getSettings()->useCustomMessageHistoryUrl)
+    {
+        urlTemplate = getSettings()->messageHistoryUrl.getValue();
+    }
+    if (urlTemplate.isEmpty())
+    {
+        urlTemplate = DEFAULT_API_URL.toString();
+    }
+
+    QUrl url(urlTemplate.arg(name));
     QUrlQuery urlQuery(url);
     if (!urlQuery.hasQueryItem("limit"))
     {

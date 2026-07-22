@@ -9,6 +9,7 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -1549,6 +1550,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Use custom message history URL",
+                            s.useCustomMessageHistoryUrl)
+        ->addTo(layout);
+
+    SettingWidget::lineEdit("URL", s.messageHistoryUrl,
+                            recentmessages::DEFAULT_API_URL.toString())
+        ->setTooltip(
+            "Use %1 where the channel name should be inserted, for example: " +
+            recentmessages::DEFAULT_API_URL.toString())
+        ->conditionallyEnabledBy(s.useCustomMessageHistoryUrl)
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
