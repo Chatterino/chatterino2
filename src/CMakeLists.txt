@@ -303,6 +303,10 @@ set(SOURCE_FILES
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/PluginRef.cpp
         controllers/plugins/PluginRef.hpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/RemotePlugin.cpp
+        controllers/plugins/RemotePlugin.hpp
         controllers/plugins/SolTypes.cpp
         controllers/plugins/SolTypes.hpp
 
