@@ -1025,6 +1025,22 @@ Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in mil
 
 Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
 
+##### `DateTime:is_local()`
+
+Check if the datetime is in the user's local/system timezone.
+
+##### `DateTime:is_utc()`
+
+Check if the datetime is in UTC.
+
+##### `DateTime:to_local()`
+
+Returns a copy of this datetime converted to the user's local/system timezone.
+
+##### `DateTime:to_utc()`
+
+Returns a copy of this datetime converted to UTC.
+
 ### Input/Output API
 
 These functions are wrappers for Lua's I/O library. Functions on file pointer
