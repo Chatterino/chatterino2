@@ -27,6 +27,8 @@ class PinnedMessageWidget;
 class SelectChannelDialog;
 class OverlayWindow;
 
+struct SplitDescriptor;
+
 // Each ChatWidget consists of three sub-elements that handle their own part of
 // the chat widget: ChatWidgetHeader
 //   - Responsible for rendering which channel the ChatWidget is in, and the
@@ -85,6 +87,8 @@ public:
     void setContainer(SplitContainer *container);
 
     void setInputReply(const MessagePtr &reply);
+
+    SplitDescriptor buildDescriptor() const;
 
     // This is called on window focus lost
     void unpause();
