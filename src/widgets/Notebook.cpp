@@ -10,7 +10,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -1656,13 +1655,19 @@ void SplitNotebook::addCustomButtons()
         this->signalHolder_);
 
     // streamer mode
-    this->streamerModeIcon_ = this->addCustomButton<PixmapButton>();
+    this->streamerModeIcon_ = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/streamerModeEnabledDark.svg",
+        .light = ":/buttons/streamerModeEnabledLight.svg",
+    });
+
     QObject::connect(this->streamerModeIcon_, &Button::leftClicked, [this] {
         getApp()->getWindows()->showSettingsDialog(
             this, SettingsDialogPreference::StreamerMode);
     });
+
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
+
     this->updateStreamerModeIcon();
 
     this->performLayout(false);
@@ -1674,25 +1679,15 @@ void SplitNotebook::updateStreamerModeIcon()
     {
         return;
     }
-    // A duplicate of this code is in Window class
-    // That copy handles the TitleBar icon in Window (main window on Windows)
-    // This one is the one near splits (on linux and mac or non-main windows on Windows)
-    if (getTheme()->isLightTheme())
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledLight);
-    }
-    else
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledDark);
-    }
 
-    auto oldVisibility = this->streamerModeIcon_->isVisible();
-    auto newVisibility = getApp()->getStreamerMode()->isEnabled();
+    // The icon is an SvgButton configured with light/dark SVG paths when it is
+    // created, so this function only needs to update its visibility.
+    const auto oldVisibility = this->streamerModeIcon_->isVisible();
+    const auto newVisibility = getApp()->getStreamerMode()->isEnabled();
 
     this->streamerModeIcon_->setVisible(newVisibility);
 
+    // Showing or hiding the icon changes the available notebook space.
     if (oldVisibility != newVisibility)
     {
         this->performLayout();
