@@ -165,8 +165,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
+            "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "automod_af40eeff-3b0d-4099-81ad-bca76c9bc214",
             "localizedName": "",
             "loginName": "automod",
@@ -276,8 +277,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "",
             "localizedName": "",
             "loginName": "pajlada",

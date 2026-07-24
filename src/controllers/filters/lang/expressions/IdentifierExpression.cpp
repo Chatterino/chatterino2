@@ -268,11 +268,27 @@ const AccessorMap &accessorMap()
         },
         {
             u"flags.elevated_message"_s,
-            {Type::Bool, flagAccessor<MessageFlag::ElevatedMessage>},
+            {
+                Type::Bool,
+
+                [](RunContext /*ctx*/) {
+                    // Feature deprecated by Twitch in 2023
+                    return false;
+                },
+
+            },
         },
         {
             u"flags.hype_chat"_s,
-            {Type::Bool, flagAccessor<MessageFlag::ElevatedMessage>},
+            {
+                Type::Bool,
+
+                [](RunContext /*ctx*/) {
+                    // Feature deprecated by Twitch in 2023
+                    return false;
+                },
+
+            },
         },
         {
             u"flags.cheer_message"_s,

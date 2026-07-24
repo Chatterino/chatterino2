@@ -833,7 +833,6 @@ c2.MessageFlag = {
     ShowInMentions = 0,
     FirstMessage = 0,
     ReplyMessage = 0,
-    ElevatedMessage = 0,
     SubscribedThread = 0,
     CheerMessage = 0,
     LiveUpdatesAdd = 0,

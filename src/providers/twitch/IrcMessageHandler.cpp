@@ -406,6 +406,7 @@ void IrcMessageHandler::parsePrivMessageInto(
         auto badgesTag = message->tag("badges");
         if (badgesTag.isValid())
         {
+            // TODO: We should not update mod or vip status from recent messages
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
@@ -436,15 +437,6 @@ void IrcMessageHandler::parsePrivMessageInto(
                                   {
                                       .isAction = message->isAction(),
                                   });
-
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = MessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            sink.addMessage(ptr, MessageContext::Original);
-        }
-    }
 }
 
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)

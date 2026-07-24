@@ -1504,47 +1504,6 @@ MessagePtr MessageBuilder::makeListOfUsersMessage(
     return builder.release();
 }
 
-MessagePtr MessageBuilder::buildHypeChatMessage(
-    Communi::IrcPrivateMessage *message)
-{
-    auto levelID = message->tag(u"pinned-chat-paid-level"_s).toString();
-    auto currency = message->tag(u"pinned-chat-paid-currency"_s).toString();
-    bool okAmount = false;
-    auto amount = message->tag(u"pinned-chat-paid-amount"_s).toInt(&okAmount);
-    bool okExponent = false;
-    auto exponent =
-        message->tag(u"pinned-chat-paid-exponent"_s).toInt(&okExponent);
-    if (!okAmount || !okExponent || currency.isEmpty())
-    {
-        return {};
-    }
-    // additionally, there's `pinned-chat-paid-is-system-message` which isn't used by Chatterino.
-
-    QString subtitle;
-    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(levelID);
-    if (levelIt != HYPE_CHAT_PAID_LEVEL.end())
-    {
-        const auto &level = levelIt->second;
-        subtitle = u"Level %1 Hype Chat (%2) "_s.arg(level.numeric)
-                       .arg(formatTime(level.duration));
-    }
-    else
-    {
-        subtitle = u"Hype Chat "_s;
-    }
-
-    // actualAmount = amount * 10^(-exponent)
-    double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
-
-    auto locale = getSystemLocale();
-    subtitle += locale.toCurrencyString(actualAmount, currency);
-
-    auto dt = calculateMessageTime(message);
-    MessageBuilder builder(systemMessage, parseTagString(subtitle), dt.time());
-    builder->flags.set(MessageFlag::ElevatedMessage);
-    return builder.release();
-}
-
 MessagePtrMut MessageBuilder::makeMissingScopesMessage(
     const QString &missingScopes)
 {
@@ -1778,11 +1737,6 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         builder->flags.set(MessageFlag::FirstMessage);
     }
 
-    if (tags.contains("pinned-chat-paid-amount"))
-    {
-        builder->flags.set(MessageFlag::ElevatedMessage);
-    }
-
     if (tags.contains("bits"))
     {
         builder->flags.set(MessageFlag::CheerMessage);
@@ -1869,7 +1823,8 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
                           builder->searchText;
 
     // highlights
-    HighlightAlert highlight = builder.parseHighlights(tags, content, args);
+    HighlightAlert highlight =
+        builder.parseHighlights(tags, content, args, channel);
     if (tags.contains("historical"))
     {
         highlight.playSound = false;
@@ -2327,7 +2282,8 @@ void MessageBuilder::parseThread(const QString &messageContent,
 
 HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
                                                const QString &originalMessage,
-                                               const MessageParseArgs &args)
+                                               const MessageParseArgs &args,
+                                               Channel *channel)
 {
     if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
@@ -2335,10 +2291,15 @@ HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
         return {};
     }
 
+    filters::RunContext runContext{
+        .message = this->message(),
+        .channel = channel,
+    };
+
     auto badges = parseBadgeTag(tags);
     auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         args, badges, this->message().loginName, originalMessage,
-        this->message().flags);
+        this->message().flags, runContext);
 
     if (!highlighted)
     {
@@ -2348,6 +2309,19 @@ HighlightAlert MessageBuilder::parseHighlights(const QVariantMap &tags,
     // This message triggered one or more highlights, act upon the highlight result
 
     this->message().flags.set(MessageFlag::Highlighted);
+
+    qInfo() << "XXX: Highlighted by" << highlightResult.ids;
+
+    if (highlightResult.color)
+    {
+        auto color = *highlightResult.color;
+        qInfo() << "XXX: SET HIGHLIGHT COLOR"
+                << color.name(QColor::NameFormat::HexArgb);
+    }
+    else
+    {
+        qInfo() << "XXX: SET HIGHLIGHT COLOR NULL";
+    }
 
     this->message().highlightColor = highlightResult.color;
 

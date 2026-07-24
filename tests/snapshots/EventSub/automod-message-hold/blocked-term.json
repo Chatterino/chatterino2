@@ -140,8 +140,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
+            "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "automod_c0fac418-25a9-41b8-adf3-5bd637fca1e1",
             "localizedName": "",
             "loginName": "automod",
@@ -249,8 +250,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

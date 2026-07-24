@@ -154,8 +154,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|WatchStreak",
+            "flags": "Highlighted|Collapsed|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "090939a1-18a5-4370-9066-b4f56512c320",
             "localizedName": "",
             "loginName": "jcrouzer",

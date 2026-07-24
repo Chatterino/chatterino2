@@ -50,41 +50,11 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
 void MessagePreferences::connectSettings(Settings *settings,
                                          pajlada::Signals::SignalHolder &holder)
 {
-    settings->enableRedeemedHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableRedeemedHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableRedeemedHighlight = true;
 
-    settings->enableElevatedMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableElevatedMessageHighlight = newValue;
-        },
-        holder);
-
-    settings->enableFirstMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableFirstMessageHighlight = newValue;
-        },
-        holder);
-
-    settings->enableSubHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableSubHighlight = newValue;
-        },
-        holder);
-
-    settings->enableWatchStreakHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableWatchStreakHighlight = newValue;
-        },
-        holder);
-
-    settings->enableAutomodHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableAutomodHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableFirstMessageHighlight = true;
 
     settings->enableAnnouncementHighlight.connect(
         [this](const auto &newValue) {

@@ -18,13 +18,11 @@ ScrollbarHighlight::ScrollbarHighlight()
 
 ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
                                        Style style, bool isRedeemedHighlight,
-                                       bool isFirstMessageHighlight,
-                                       bool isElevatedMessageHighlight)
+                                       bool isFirstMessageHighlight)
     : color_(color)
     , style_(style)
     , isRedeemedHighlight_(isRedeemedHighlight)
     , isFirstMessageHighlight_(isFirstMessageHighlight)
-    , isElevatedMessageHighlight_(isElevatedMessageHighlight)
 {
 }
 
@@ -47,11 +45,6 @@ bool ScrollbarHighlight::isRedeemedHighlight() const
 bool ScrollbarHighlight::isFirstMessageHighlight() const
 {
     return this->isFirstMessageHighlight_;
-}
-
-bool ScrollbarHighlight::isElevatedMessageHighlight() const
-{
-    return this->isElevatedMessageHighlight_;
 }
 
 bool ScrollbarHighlight::isNull() const
