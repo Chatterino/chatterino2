@@ -67,7 +67,7 @@ auto formatRoomModeUnclean(
 
     if (modes->r9k)
     {
-        text += "r9k, ";
+        text += "unique, ";
     }
     if (modes->slowMode > 0)
     {
@@ -718,7 +718,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     this->modeActionSetSub = new QAction("Subscriber only", this);
     this->modeActionSetEmote = new QAction("Emote only", this);
     this->modeActionSetSlow = new QAction("Slow", this);
-    this->modeActionSetR9k = new QAction("R9K", this);
+    this->modeActionSetR9k = new QAction("Unique chat (R9K)", this);
     this->modeActionSetFollowers = new QAction("Followers only", this);
 
     this->modeActionSetFollowers->setCheckable(true);

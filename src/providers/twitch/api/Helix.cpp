@@ -10,6 +10,7 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QMagicEnum.hpp"
 
@@ -205,8 +206,13 @@ void Helix::fetchStreams(
 
             successCallback(streams);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([failureCallback](const auto &result) {
             // TODO: make better xd
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .finally(finallyCallback)
@@ -480,7 +486,12 @@ void Helix::fetchChannels(
 
             successCallback(channels);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([failureCallback](const auto &result) {
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .execute();

@@ -188,6 +188,12 @@ Args::Args(const QApplication &app)
         "like you have to use this, please reach out to our issue tracker at "
         "https://github.com/Chatterino/chatterino2/issues");
 
+    QCommandLineOption portableEnable("portable", "Enable portable mode.");
+
+    QCommandLineOption portableDirectory(
+        "portable-dir", "Directory to use when portable mode is enabled.",
+        "directory");
+
 #ifndef NDEBUG
     QCommandLineOption useLocalEventsubOption(
         "use-local-eventsub",
@@ -207,6 +213,8 @@ Args::Args(const QApplication &app)
         channelLayout,
         activateOption,
         useOldScalingOption,
+        portableEnable,
+        portableDirectory,
 #ifndef NDEBUG
         useLocalEventsubOption,
 #endif
@@ -281,6 +289,17 @@ Args::Args(const QApplication &app)
     if (parser.isSet(useOldScalingOption))
     {
         this->useOldScaling = true;
+    }
+
+    if (parser.isSet(portableEnable))
+    {
+        this->portableEnable = true;
+    }
+
+    if (parser.isSet(portableDirectory))
+    {
+        this->portableDirectory =
+            QDir(parser.value(portableDirectory)).absolutePath();
     }
 
 #ifndef NDEBUG

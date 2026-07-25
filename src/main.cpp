@@ -45,12 +45,18 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
+    // On some Linux distros such as NixOS, Qt's automatic setting of the desktop file name
+    // leads to a wrong desktop file name ("com.chatterino." instead of "com.chatterino.chatterino"),
+    // which further leads to GNOME not being able to match the window to the desktop file,
+    // so it shows up without any name or icon.
+    QGuiApplication::setDesktopFileName("com.chatterino.chatterino");
 #ifdef Q_OS_WIN
     SetCurrentProcessExplicitAppUserModelID(
         Version::instance().appUserModelID().c_str());
 #endif
 
-    const Modes modes;
+    const Args args(a);
+    const Modes modes(args);
     std::unique_ptr<Paths> paths;
 
     // Optional logger override that logs to a file
@@ -58,7 +64,7 @@ int main(int argc, char **argv)
 
     try
     {
-        paths = std::make_unique<Paths>(modes);
+        paths = std::make_unique<Paths>(args, modes);
     }
     catch (std::runtime_error &error)
     {
@@ -84,8 +90,6 @@ int main(int argc, char **argv)
         return 1;
     }
     ipc::initPaths(paths.get());
-
-    const Args args(a);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
     const auto crashpadHandler = installCrashHandler(args, *paths);
