@@ -706,7 +706,7 @@ void WindowManager::encodeNodeRecursively(const NodeDescriptor &descriptor,
                        WindowManager::encodeFilters(split.filters_, filters);
                        obj.insert("filters", filters);
 
-                       if (split.spellCheckOverride)
+                       if (split.spellCheckOverride.has_value())
                        {
                            obj["checkSpelling"] = *split.spellCheckOverride;
                        }
