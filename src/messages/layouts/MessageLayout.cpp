@@ -386,7 +386,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
     }();
 
     if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             ctx.preferences.enableFirstMessageHighlight)
+        ctx.preferences.enableFirstMessageHighlight)
     {
         backgroundColor = blendColors(
             backgroundColor,
