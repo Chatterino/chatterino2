@@ -1778,13 +1778,11 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     builder.appendUsername(tags, args);
 
     TextState textState{.twitchChannel = twitchChannel};
-    QString bits;
 
     if (auto optBits = tags.get("bits"))
     {
         textState.hasBits = true;
         textState.bitsLeft = optBits->toInt();
-        bits = *std::move(optBits);
     }
 
     // Twitch emotes
