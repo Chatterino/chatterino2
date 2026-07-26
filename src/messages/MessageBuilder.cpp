@@ -2050,7 +2050,7 @@ void MessageBuilder::parseMessageID(Communi::TagsRef tags)
 {
     if (auto id = tags.get("id"))
     {
-        this->message().id = *std::move(id);
+        this->message().id = *id;
     }
 }
 
@@ -2107,7 +2107,7 @@ QString MessageBuilder::parseRoomID(Communi::TagsRef tags,
 
     if (auto optRoomID = tags.get("room-id"))
     {
-        auto roomID = *std::move(optRoomID);
+        const auto &roomID = *optRoomID;
         if (twitchChannel->roomId() != roomID)
         {
             if (twitchChannel->roomId().isEmpty())
@@ -2138,7 +2138,7 @@ TwitchChannel *MessageBuilder::parseSharedChatInfo(Communi::TagsRef tags,
 
     if (auto optSourceRoom = tags.get("source-room-id"))
     {
-        auto sourceRoom = *std::move(optSourceRoom);
+        const auto &sourceRoom = *optSourceRoom;
         if (twitchChannel->roomId() != sourceRoom)
         {
             this->message().flags.set(MessageFlag::SharedMessage);
