@@ -202,7 +202,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     // "deserialize"
     for (const auto windowVal : loadWindowArray(path))
     {
-        QJsonObject windowObj = windowVal.toObject();
+        const QJsonObject windowObj = windowVal.toObject();
 
         WindowDescriptor window;
 
@@ -242,6 +242,13 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             int height = windowObj.value("height").toInt(-1);
 
             window.geometry_ = QRect(x, y, width, height);
+        }
+
+        // Load popup ID
+        auto idVal = windowObj["popupID"];
+        if (idVal.isDouble())
+        {
+            window.popupID = idVal.toInt(1);
         }
 
         bool hasSetASelectedTab = false;

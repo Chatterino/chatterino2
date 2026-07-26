@@ -816,7 +816,8 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 
 void SplitContainer::popup()
 {
-    Window &window = getApp()->getWindows()->createWindow(WindowType::Popup);
+    Window &window =
+        getApp()->getWindows()->createWindow(WindowType::Popup, {});
     auto *popupContainer = window.getNotebook().getOrAddSelectedPage();
 
     QJsonObject encodedTab;
