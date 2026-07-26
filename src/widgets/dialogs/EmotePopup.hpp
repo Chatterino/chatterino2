@@ -58,7 +58,7 @@ private:
     std::unordered_map<QString, EmojiPtr> favouriteEmojis_;
 
     void filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
-                            const QString &searchText);
+                            const QString &searchWord, const QStringList &tags);
     void filterEmotes(const QString &text);
     std::optional<EmotePtr> findEmote(const EmoteName &name);
     void addShortcuts() override;

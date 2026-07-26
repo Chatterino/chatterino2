@@ -2607,7 +2607,9 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
 
     auto badges = parseBadgeTag(tags);
 
-    if (this->message().flags.has(MessageFlag::SharedMessage))
+    if (this->message().flags.has(MessageFlag::SharedMessage) ||
+        (getSettings()->sharedChatAlwaysShowBadge &&
+         !twitchChannel->getSharedChatSessionParticipants().empty()))
     {
         const QString sourceId = tags["source-room-id"].toString();
         QString sourceName;

@@ -411,6 +411,14 @@ public:
         false,
     };
 
+    IntSetting sharedChatSessionRefreshInterval = {
+        "/behaviour/sharedChatSessionRefreshInterval", 60};
+
+    BoolSetting sharedChatAlwaysShowBadge = {
+        "/behaviour/sharedChatAlwaysShowBadge",
+        true,
+    };
+
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};

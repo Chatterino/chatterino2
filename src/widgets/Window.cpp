@@ -422,6 +422,16 @@ void Window::addShortcuts()
              }
              return "";
          }},
+        {"selectTabHistoryBack",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryBack(true);
+             return "";
+         }},
+        {"selectTabHistoryForward",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryForward(true);
+             return "";
+         }},
         {"popup",
          [this](std::vector<QString> arguments) -> QString {
              if (arguments.size() == 0)
