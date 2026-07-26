@@ -26,7 +26,13 @@ class Window;
 class ChannelView;
 class IndirectChannel;
 class Split;
+
 struct SplitDescriptor;
+struct SplitNodeDescriptor;
+struct ContainerNodeDescriptor;
+using NodeDescriptor =
+    std::variant<ContainerNodeDescriptor, SplitNodeDescriptor>;
+
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
@@ -63,8 +69,7 @@ public:
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
-    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static void encodeFilters(Split *split, QJsonArray &arr);
+    static void encodeFilters(std::span<const QUuid> filters, QJsonArray &arr);
 
     void showSettingsDialog(
         QWidget *parent,
@@ -162,7 +167,7 @@ public:
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
 private:
-    static void encodeNodeRecursively(SplitContainer::Node *node,
+    static void encodeNodeRecursively(const NodeDescriptor &descriptor,
                                       QJsonObject &obj);
 
     // Load window layout from the window-layout.json file
