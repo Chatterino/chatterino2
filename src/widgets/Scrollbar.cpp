@@ -300,8 +300,6 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
     bool enableFirstMessageHighlights =
         getSettings()->enableFirstMessageHighlight;
-    bool enableElevatedMessageHighlights =
-        getSettings()->enableElevatedMessageHighlight;
 
     if (this->shouldShowThumb())
     {
@@ -345,12 +343,6 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 
             if (highlight.isFirstMessageHighlight() &&
                 !enableFirstMessageHighlights)
-            {
-                continue;
-            }
-
-            if (highlight.isElevatedMessageHighlight() &&
-                !enableElevatedMessageHighlights)
             {
                 continue;
             }
