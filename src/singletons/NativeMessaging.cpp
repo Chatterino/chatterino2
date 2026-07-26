@@ -240,9 +240,9 @@ namespace chatterino {
 using namespace chatterino::nm::detail;
 using namespace literals;
 
-void registerNmHost(const Paths &paths)
+void registerNmHost(const Modes &modes, const Paths &paths)
 {
-    if (Modes::instance().isPortable)
+    if (modes.isPortable)
     {
         return;
     }

@@ -10,6 +10,7 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QMagicEnum.hpp"
 
@@ -205,8 +206,13 @@ void Helix::fetchStreams(
 
             successCallback(streams);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([failureCallback](const auto &result) {
             // TODO: make better xd
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .finally(finallyCallback)
@@ -480,7 +486,12 @@ void Helix::fetchChannels(
 
             successCallback(channels);
         })
-        .onError([failureCallback](auto /*result*/) {
+        .onError([failureCallback](const auto &result) {
+            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
+                result.status().value_or(0) == 401)
+            {
+                getApp()->getAccounts()->twitch.loginExpired.invoke();
+            }
             failureCallback();
         })
         .execute();
@@ -3745,6 +3756,82 @@ void Helix::createEventSubSubscription(
                     qCWarning(chatterinoTwitchEventSub)
                         << "Helix Create EventSub Subscription, unhandled "
                            "error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Forwarded, message);
+                }
+            }
+        })
+        .execute();
+}
+
+void Helix::getSharedChatSession(
+    QString broadcasterID,
+    ResultCallback<HelixSharedChatSession> successCallback,
+    FailureCallback<HelixGetSharedChatSessionError, QString> failureCallback)
+{
+    using Error = HelixGetSharedChatSessionError;
+
+    this->makeGet("shared_chat/session", {{u"broadcaster_id"_s, broadcasterID}})
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting shared chat session was "
+                    << result.formatError() << " but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            const auto session = response["data"_L1].toArray().at(0);
+
+            successCallback(HelixSharedChatSession(session.toObject()));
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (*result.status())
+            {
+                case 400: {
+                    failureCallback(Error::InvalidBroadcasterId, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                }
+                break;
+
+                case 500: {
+                    if (message.isEmpty())
+                    {
+                        failureCallback(Error::Unknown,
+                                        "Twitch internal server error");
+                    }
+                    else
+                    {
+                        failureCallback(Error::Unknown, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix get shared chat session, unhandled error "
+                           "data:"
                         << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Forwarded, message);
                 }

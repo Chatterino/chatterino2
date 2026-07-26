@@ -16,6 +16,7 @@
 #include "util/CombinePath.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
+#include "util/Variant.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/FramelessEmbedWindow.hpp"
@@ -444,9 +445,11 @@ void WindowManager::initialize()
     {
         WindowLayout windowLayout;
 
-        if (this->appArgs.customChannelLayout)
+        if (std::optional<WindowLayout> layout =
+                this->appArgs.makeCustomChannelLayout(
+                    this->windowLayoutFilePath))
         {
-            windowLayout = this->appArgs.customChannelLayout.value();
+            windowLayout = layout.value();
         }
         else
         {
@@ -699,108 +702,62 @@ void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
     // splits
     QJsonObject splits;
 
-    WindowManager::encodeNodeRecursively(tab->getBaseNode(), splits);
+    WindowManager::encodeNodeRecursively(tab->buildDescriptor(), splits);
 
     obj.insert("splits2", splits);
 }
 
-void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
+void WindowManager::encodeNodeRecursively(const NodeDescriptor &descriptor,
+                                          QJsonObject &obj)
 {
-    switch (node->getType())
-    {
-        case SplitNode::Type::Split: {
-            obj.insert("type", "split");
-            obj.insert("moderationMode", node->getSplit()->getModerationMode());
+    std::visit(variant::Overloaded{
+                   [&](const SplitNodeDescriptor &split) {
+                       obj.insert("type", "split");
+                       obj.insert("flexh", split.flexH_);
+                       obj.insert("flexv", split.flexV_);
 
-            QJsonObject split;
-            WindowManager::encodeChannel(node->getSplit()->getIndirectChannel(),
-                                         split);
-            obj.insert("data", split);
+                       obj.insert("moderationMode", split.moderationMode_);
 
-            QJsonArray filters;
-            WindowManager::encodeFilters(node->getSplit(), filters);
-            obj.insert("filters", filters);
+                       QJsonObject data{{"type"_L1, split.type_}};
+                       if (!split.channelName_.isEmpty())
+                       {
+                           data.insert("name"_L1, split.channelName_);
+                       }
+                       obj.insert("data", data);
 
-            auto spellOverride = node->getSplit()->checkSpellingOverride();
-            if (spellOverride)
-            {
-                obj["checkSpelling"] = *spellOverride;
-            }
-        }
-        break;
-        case SplitNode::Type::HorizontalContainer:
-        case SplitNode::Type::VerticalContainer: {
-            obj.insert("type",
-                       node->getType() == SplitNode::Type::HorizontalContainer
-                           ? "horizontal"
-                           : "vertical");
+                       QJsonArray filters;
+                       WindowManager::encodeFilters(split.filters_, filters);
+                       obj.insert("filters", filters);
 
-            QJsonArray itemsArr;
-            for (const auto &n : node->getChildren())
-            {
-                QJsonObject subObj;
-                WindowManager::encodeNodeRecursively(n.get(), subObj);
-                itemsArr.append(subObj);
-            }
-            obj.insert("items", itemsArr);
-        }
-        break;
+                       if (split.spellCheckOverride.has_value())
+                       {
+                           obj["checkSpelling"] = *split.spellCheckOverride;
+                       }
+                   },
+                   [&](const ContainerNodeDescriptor &container) {
+                       obj.insert("type", container.vertical_ ? "vertical"
+                                                              : "horizontal");
+                       obj.insert("flexh", container.flexH_);
+                       obj.insert("flexv", container.flexV_);
 
-        default:
-            break;
-    }
-
-    obj.insert("flexh", node->getHorizontalFlex());
-    obj.insert("flexv", node->getVerticalFlex());
+                       QJsonArray itemsArr;
+                       for (const auto &n : container.items_)
+                       {
+                           QJsonObject subObj;
+                           WindowManager::encodeNodeRecursively(n, subObj);
+                           itemsArr.append(subObj);
+                       }
+                       obj.insert("items", itemsArr);
+                   },
+               },
+               descriptor);
 }
 
-void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
+void WindowManager::encodeFilters(std::span<const QUuid> filters,
+                                  QJsonArray &arr)
 {
     assertInGuiThread();
 
-    switch (channel.getType())
-    {
-        case Channel::Type::Twitch: {
-            obj.insert("type", "twitch");
-            obj.insert("name", channel.get()->getName());
-        }
-        break;
-        case Channel::Type::TwitchAutomod: {
-            obj.insert("type", "automod");
-        }
-        break;
-        case Channel::Type::TwitchMentions: {
-            obj.insert("type", "mentions");
-        }
-        break;
-        case Channel::Type::TwitchWatching: {
-            obj.insert("type", "watching");
-        }
-        break;
-        case Channel::Type::TwitchWhispers: {
-            obj.insert("type", "whispers");
-        }
-        break;
-        case Channel::Type::TwitchLive: {
-            obj.insert("type", "live");
-        }
-        break;
-        case Channel::Type::Misc: {
-            obj.insert("type", "misc");
-            obj.insert("name", channel.get()->getName());
-        }
-        break;
-
-        default:
-            break;
-    }
-}
-
-void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
-{
-    assertInGuiThread();
-
-    auto filters = split->getFilters();
     for (const auto &f : filters)
     {
         arr.append(f.toString(QUuid::WithoutBraces));

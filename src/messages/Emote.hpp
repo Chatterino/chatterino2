@@ -7,6 +7,8 @@
 #include "common/Aliases.hpp"
 #include "messages/ImageSet.hpp"
 
+#include <QStringList>
+
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -30,6 +32,7 @@ struct Emote {
      * the original (base) name of the emote.
      */
     std::optional<EmoteName> baseName;
+    QStringList tags;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const

@@ -254,6 +254,38 @@ void TwitchIrcServer::initialize()
                 }
             });
         });
+
+    this->signalHolder.managedConnect(
+        getApp()->getTwitchPubSub()->pinnedChatUpdates.pinned,
+        [this](const QString &channelId) {
+            auto chan = this->getChannelOrEmptyByID(channelId);
+            postToThread([chan] {
+                if (isAppAboutToQuit())
+                {
+                    return;
+                }
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->refreshPinnedMessage();
+                }
+            });
+        });
+
+    this->signalHolder.managedConnect(
+        getApp()->getTwitchPubSub()->pinnedChatUpdates.unpinned,
+        [this](const QString &channelId) {
+            auto chan = this->getChannelOrEmptyByID(channelId);
+            postToThread([chan] {
+                if (isAppAboutToQuit())
+                {
+                    return;
+                }
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->clearPinnedMessage();
+                }
+            });
+        });
 }
 
 void TwitchIrcServer::aboutToQuit()

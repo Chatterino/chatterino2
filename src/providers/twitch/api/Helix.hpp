@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "common/enums/UsernameDisplayMode.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "providers/twitch/api/HelixEnums.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
@@ -58,6 +59,31 @@ struct HelixMinimalUser {
     QString id;
     QString login;
     QString displayName;
+
+    /// Returns the display name formatted according to @a mode.
+    [[nodiscard]] QString formatted(UsernameDisplayMode mode) const
+    {
+        const bool hasLocalizedName =
+            this->displayName.compare(this->login, Qt::CaseInsensitive) != 0;
+
+        switch (mode)
+        {
+            case UsernameDisplayMode::Username:
+                return this->login;
+
+            case UsernameDisplayMode::LocalizedName:
+                return hasLocalizedName ? this->displayName : this->login;
+
+            default:
+            case UsernameDisplayMode::UsernameAndLocalizedName:
+                if (hasLocalizedName)
+                {
+                    return this->login + QStringLiteral(" (") +
+                           this->displayName + QStringLiteral(")");
+                }
+                return this->login;
+        }
+    }
 };
 
 struct HelixGetChannelFollowersResponse {
@@ -578,6 +604,21 @@ struct HelixPredictions {
         {
             HelixPrediction prediction(p.toObject());
             this->predictions.push_back(prediction);
+        }
+    }
+};
+
+struct HelixSharedChatSession {
+    QStringList participantIds;
+
+    explicit HelixSharedChatSession(const QJsonObject &jsonObject)
+    {
+        const auto &participants = jsonObject.value("participants").toArray();
+        for (const auto p : participants)
+        {
+            const auto broadcasterId =
+                p.toObject().value("broadcaster_id").toString();
+            this->participantIds.push_back(broadcasterId);
         }
     }
 };
@@ -1156,6 +1197,13 @@ public:
         const QString &messageID, ResultCallback<> successCallback,
         FailureCallback<HelixUnpinMessageError, QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    virtual void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1584,6 +1632,13 @@ public:
         const QString &broadcasterID, const QString &moderatorID,
         const QString &messageID, ResultCallback<> successCallback,
         FailureCallback<HelixUnpinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

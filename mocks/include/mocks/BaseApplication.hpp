@@ -20,11 +20,11 @@ class BaseApplication : public EmptyApplication
 {
 public:
     BaseApplication()
-        : settings(this->args_, this->settingsDir.path(),
+        : settings(this->modes_, this->args_, this->settingsDir.path(),
                    {
                        .isTest = true,
                    })
-        , updates(this->paths_, this->settings)
+        , updates(this->modes_, this->paths_, this->settings)
         , theme(this->paths_)
         , fonts(this->settings)
     {
@@ -32,11 +32,11 @@ public:
 
     explicit BaseApplication(const QString &settingsData)
         : EmptyApplication(settingsData)
-        , settings(this->args_, this->settingsDir.path(),
+        , settings(this->modes_, this->args_, this->settingsDir.path(),
                    {
                        .isTest = true,
                    })
-        , updates(this->paths_, this->settings)
+        , updates(this->modes_, this->paths_, this->settings)
         , theme(this->paths_)
         , fonts(this->settings)
     {
