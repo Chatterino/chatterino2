@@ -2250,7 +2250,7 @@ void MessageBuilder::parseThread(const QString &messageContent,
             }
             else
             {
-                auto name = *std::move(replyDisplayName);
+                const auto &name = *replyDisplayName;
                 body = parseTagString(*replyBody);
 
                 this->emplace<TextElement>(
