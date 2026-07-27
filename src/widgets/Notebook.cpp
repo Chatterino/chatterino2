@@ -368,8 +368,8 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
         // Hide the previously selected page
         this->selectedPage_->hide();
 
-        auto item = std::ranges::find_if(
-            this->items_.begin(), this->items_.end(), [this](const auto &item) {
+        auto item =
+            std::ranges::find_if(this->items_, [this](const auto &item) {
                 return this->selectedPage_ == item.page;
             });
         if (item == this->items_.end())
