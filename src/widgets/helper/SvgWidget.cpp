@@ -1,5 +1,6 @@
 #include "widgets/helper/SvgWidget.hpp"
 
+#include <QPainter>
 #include <QSvgRenderer>
 
 namespace chatterino {
