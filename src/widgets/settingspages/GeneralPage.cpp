@@ -1504,7 +1504,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.linksDoubleClickOnly)
         ->setTooltip("When enabled, opening links/usercards requires "
                      "double-clicking.\nUseful for making sure you don't "
-                     "accidentally click on suspicious links.")
+                     "accidentally click on suspicious links.\nClicking a link "
+                     "once will pause the chat briefly to allow for a less "
+                     "accident-prone double-clicking.")
+        ->addKeywords({"pause"})
         ->addTo(layout);
 
     SettingWidget::checkbox("Unshorten links", s.unshortLinks)
