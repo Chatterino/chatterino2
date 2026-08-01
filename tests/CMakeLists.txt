@@ -13,7 +13,6 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkResult.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
@@ -64,6 +63,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/InputHighlighter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BalancedResolverResults.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilSerializeList.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp

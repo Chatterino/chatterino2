@@ -4,123 +4,60 @@
 
 #pragma once
 
+#include "pajlada/serialize/common.hpp"
+#include "pajlada/serialize/deserialize.hpp"
+#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
 #include <QColor>
-#include <QRegularExpression>
 #include <QString>
 #include <QUrl>
-
-#include <memory>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
 
 namespace chatterino {
 
-class HighlightPhrase
-{
-public:
-    bool operator==(const HighlightPhrase &other) const;
+/// HighlightPhrase is how the old highlight system defined a message and user highlight
+/// The base struct & serialization is kept for migration from old settings versions.
+struct HighlightPhrase {
+    static constexpr QColor FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
+    /// Used for automatic self messages highlighing
+    static constexpr QColor FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR =
+        QColor(0, 118, 221, 115);
+    static constexpr QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
+        QColor(28, 126, 141, 60);
+    static constexpr QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =
+        QColor(72, 127, 63, 60);
+    static constexpr QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR =
+        QColor(255, 174, 66, 60);
+    static constexpr QColor FALLBACK_THREAD_HIGHLIGHT_COLOR =
+        QColor(143, 48, 24, 60);
+    static constexpr QColor FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR =
+        QColor(255, 102, 237, 100);
+    static constexpr QColor ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR =
+        QColor(102, 148, 255, 100);
+    static constexpr QColor ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR =
+        QColor(96, 255, 96, 100);
+    static constexpr QColor ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR =
+        QColor(233, 210, 0, 100);
+    static constexpr QColor ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR =
+        QColor(255, 102, 237, 100);
 
-    /**
-     * @brief Create a new HighlightPhrase.
-     *
-     * Use this constructor when creating a new HighlightPhrase.
-     */
-    HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, QColor color);
-
-    /**
-     * @brief Create a new HighlightPhrase.
-     *
-     * Use this constructor when updating an existing HighlightPhrase's color.
-     */
-    HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, std::shared_ptr<QColor> color);
-
-    const QString &getPattern() const;
-    bool showInMentions() const;
-    bool hasAlert() const;
-
-    /**
-     * @brief Check if this highlight phrase should play a sound when
-     *        triggered.
-     *
-     * In distinction from `HighlightPhrase::hasCustomSound`, this method only
-     * checks whether or not ANY sound should be played when the phrase is
-     * triggered.
-     * 
-     * To check whether a custom sound is set, use
-     * `HighlightPhrase::hasCustomSound` instead.
-     *
-     * @return true, if this highlight phrase should play a sound when
-     *         triggered, false otherwise
-     */
-    bool hasSound() const;
-
-    /**
-     * @brief Check if this highlight phrase has a custom sound set.
-     *
-     * Note that this method only checks whether the path to the custom sound
-     * is not empty. It does not check whether the file still exists, is a
-     * sound file, or anything else.
-     *
-     * @return true, if the custom sound file path is not empty, false otherwise
-     */
-    bool hasCustomSound() const;
-
-    bool isRegex() const;
-    bool isValid() const;
-    bool isMatch(const QString &subject) const;
-    bool isCaseSensitive() const;
-    const QUrl &getSoundUrl() const;
-    const std::shared_ptr<QColor> getColor() const;
-
-    /*
-     * XXX: Use the constexpr constructor here once we are building with
-     * Qt>=5.13.
-     */
-    static QColor FALLBACK_HIGHLIGHT_COLOR;
-    // Used for automatic self messages highlighing
-    static QColor FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_SUB_COLOR;
-    static QColor FALLBACK_WATCH_STREAK_COLOR;
-    static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_THREAD_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_AUTOMOD_HIGHLIGHT_COLOR;
-    static QColor FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR;
-    static QColor ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR;
-    static QColor ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR;
-    static QColor ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR;
-    static QColor ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR;
-
-private:
-    QString pattern_;
-    bool showInMentions_;
-    bool hasAlert_;
-    bool hasSound_;
-    bool isRegex_;
-    bool isCaseSensitive_;
-    QUrl soundUrl_;
-    std::shared_ptr<QColor> color_;
-    QRegularExpression regex_;
+    QString pattern;
+    bool showInMentions{false};
+    bool hasAlert{false};
+    bool hasSound{false};
+    bool isRegex{false};
+    bool isCaseSensitive{false};
+    QUrl soundUrl;
+    QColor color;
 };
 
 }  // namespace chatterino
 
 namespace pajlada {
-
-namespace {
-chatterino::HighlightPhrase constructError()
-{
-    return chatterino::HighlightPhrase(QString(), false, false, false, false,
-                                       false, QString(), QColor());
-}
-}  // namespace
 
 template <>
 struct Serialize<chatterino::HighlightPhrase> {
@@ -129,15 +66,14 @@ struct Serialize<chatterino::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "pattern", value.getPattern(), a);
-        chatterino::rj::set(ret, "showInMentions", value.showInMentions(), a);
-        chatterino::rj::set(ret, "alert", value.hasAlert(), a);
-        chatterino::rj::set(ret, "sound", value.hasSound(), a);
-        chatterino::rj::set(ret, "regex", value.isRegex(), a);
-        chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
-        chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
-        chatterino::rj::set(ret, "color",
-                            value.getColor()->name(QColor::HexArgb), a);
+        chatterino::rj::set(ret, "pattern", value.pattern, a);
+        chatterino::rj::set(ret, "showInMentions", value.showInMentions, a);
+        chatterino::rj::set(ret, "alert", value.hasAlert, a);
+        chatterino::rj::set(ret, "sound", value.hasSound, a);
+        chatterino::rj::set(ret, "regex", value.isRegex, a);
+        chatterino::rj::set(ret, "case", value.isCaseSensitive, a);
+        chatterino::rj::set(ret, "soundUrl", value.soundUrl.toString(), a);
+        chatterino::rj::set(ret, "color", value.color.name(QColor::HexArgb), a);
 
         return ret;
     }
@@ -148,40 +84,38 @@ struct Deserialize<chatterino::HighlightPhrase> {
     static chatterino::HighlightPhrase get(const rapidjson::Value &value,
                                            bool *error = nullptr)
     {
+        chatterino::HighlightPhrase h;
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
 
-            return constructError();
+            return h;
         }
 
-        QString _pattern;
-        bool _showInMentions = true;
-        bool _hasAlert = true;
-        bool _hasSound = false;
-        bool _isRegex = false;
-        bool _isCaseSensitive = false;
-        QString _soundUrl;
+        QString iSoundUrl;
         QString encodedColor;
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "showInMentions", _showInMentions);
-        chatterino::rj::getSafe(value, "alert", _hasAlert);
-        chatterino::rj::getSafe(value, "sound", _hasSound);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
-        chatterino::rj::getSafe(value, "case", _isCaseSensitive);
-        chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
+        chatterino::rj::getSafe(value, "pattern", h.pattern);
+        chatterino::rj::getSafe(value, "showInMentions", h.showInMentions);
+        chatterino::rj::getSafe(value, "alert", h.hasAlert);
+        chatterino::rj::getSafe(value, "sound", h.hasSound);
+        chatterino::rj::getSafe(value, "regex", h.isRegex);
+        chatterino::rj::getSafe(value, "case", h.isCaseSensitive);
+        chatterino::rj::getSafe(value, "soundUrl", iSoundUrl);
+        h.soundUrl = iSoundUrl;
         chatterino::rj::getSafe(value, "color", encodedColor);
 
-        auto _color = QColor(encodedColor);
-        if (!_color.isValid())
+        auto iColor = QColor(encodedColor);
+        if (!iColor.isValid())
         {
-            _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
+            iColor = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
+        }
+        else
+        {
+            h.color = iColor;
         }
 
-        return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
-                                           _hasSound, _isRegex,
-                                           _isCaseSensitive, _soundUrl, _color);
+        return h;
     }
 };
 
