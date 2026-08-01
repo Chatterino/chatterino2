@@ -1,6 +1,6 @@
-if (NOT WIN32 OR MINGW)
-    return()
-endif()
+# SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+#
+# SPDX-License-Identifier: CC0-1.0
 
 if(NOT DEFINED ENV{VSINSTALLDIR})
     message(WARNING "Missing VSINSTALLDIR environment variable - not enabling segment heap.")
