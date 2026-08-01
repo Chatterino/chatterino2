@@ -1,14 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/highlights/types/All.hpp"
-#include "util/DisplayBadge.hpp"
 #include "widgets/BasePopup.hpp"
 
-#include <qtmetamacros.h>
 #include <QWidget>
-
-#include <memory>
-#include <optional>
 
 namespace chatterino::highlights {
 
