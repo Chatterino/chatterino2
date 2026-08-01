@@ -69,7 +69,6 @@ public:
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
-    static void encodeFilters(std::span<const QUuid> filters, QJsonArray &arr);
 
     void showSettingsDialog(
         QWidget *parent,
@@ -172,9 +171,6 @@ public:
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
 
 private:
-    static void encodeNodeRecursively(const NodeDescriptor &descriptor,
-                                      QJsonObject &obj);
-
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;
 
