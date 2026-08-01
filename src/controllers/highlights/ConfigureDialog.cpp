@@ -8,23 +8,18 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
 
-#include <qboxlayout.h>
-#include <qcheckbox.h>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDesktopServices>
-#include <qdialogbuttonbox.h>
+#include <QDialogButtonBox>
 #include <QFileDialog>
-#include <qformlayout.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qmenu.h>
-#include <qnamespace.h>
-#include <qpushbutton.h>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
 #include <QSignalBlocker>
-#include <qsizepolicy.h>
-#include <qtextedit.h>
 #include <QToolButton>
+#include <QVBoxLayout>
 
 using namespace Qt::StringLiterals;
 
@@ -243,8 +238,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 w->setCurrentText(h.displayName);
 
                 getApp()->getTwitchBadges()->getBadgeIcons(
-                    AVAILABLE_BADGES,
-                    [w](QString identifier, const std::shared_ptr<QIcon> icon) {
+                    AVAILABLE_BADGES, [w](const QString &identifier,
+                                          const std::shared_ptr<QIcon> &icon) {
                         if (!w)
                         {
                             return;
@@ -335,13 +330,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
     dialogLayout->addLayout(formLayout);
 
-    // TODO
-    // Group of side effects
-    //  - Show message in mentions
-    //  - Highlight message
-    //  - Flash taskbar
-    //  - Not implemented but highlight portion of message?
-    //  - Play sound (default sound? custom sound url?)
     {
         auto *group = new QGroupBox("Side effects");
 
@@ -404,8 +392,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             QObject::connect(w, &ColorButton::clicked, [this, w]() {
                 auto *dialog =
                     new ColorPickerDialog(*getBackgroundColor(this->data), w);
-                // TODO: confirm colorButton & setting are never deleted and the signal is deleted
-                // once the dialog is closed
                 QObject::connect(
                     dialog, &ColorPickerDialog::colorConfirmed, w,
                     [this, w](auto selected) {
@@ -419,7 +405,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                 this->data);
                         }
                     });
-                // dialog->setWindowModality(Qt::WindowModality::ApplicationModal);
                 dialog->show();
             });
             l->addRow(lbl, w);
