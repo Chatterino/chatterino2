@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -27,7 +28,7 @@ struct HighlightCheck {
         const MessageParseArgs &args,
         const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
         const QString &originalMessage, const MessageFlags &messageFlags,
-        bool self)>;
+        bool self, filters::RunContext runContext)>;
     Checker cb;
 };
 
