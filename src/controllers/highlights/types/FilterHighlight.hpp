@@ -31,6 +31,12 @@ namespace chatterino::highlights {
 struct FilterHighlight {
     static constexpr QStringView TYPE = u"filter";
     static constexpr QStringView ICON_RESOURCE = u":/settings/filters.svg";
+    static constexpr QStringView DESCRIPTION =
+        u"Filters allow you to create more complex "
+        "highlights.<br />See <a "
+        "href=\"https://wiki.chatterino.com/Filters/"
+        "\">wiki.chatterino.com/Filters</a> "
+        "for more information.";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;

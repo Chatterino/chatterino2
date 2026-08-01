@@ -52,6 +52,11 @@ concept SupportsGetID = requires(T a) {
     { a.getID() } -> std::same_as<QStringView>;
 };
 
+template <typename T>
+concept HasDescription = requires {
+    { T::DESCRIPTION } -> std::convertible_to<QStringView>;
+};
+
 using namespace Qt::StringLiterals;
 
 namespace {
@@ -125,20 +130,26 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
     auto *dialogLayout = new QVBoxLayout;
 
-    // TODO
-    // An enabled toggle
-    // Is "Active" a better phrase for this?
+    std::visit(variant::Overloaded{
+                   [dialogLayout](HasDescription auto &h) {
+                       using ActualType = std::decay_t<decltype(h)>;
 
-    // TODO
-    // The highlight pattern
-    // The default case should preferably always be text matching
-    // We should provide some functionality underneath this or nearby this to highlight on badges I think
+                       auto *w = new QLabel(ActualType::DESCRIPTION.toString());
+                       w->setOpenExternalLinks(true);
+                       w->setSizePolicy(QSizePolicy::Minimum,
+                                        QSizePolicy::Fixed);
 
-    // this->setLayout(layout);
+                       dialogLayout->addWidget(w);
+                   },
+                   [](auto &&) {},
+               },
+               this->data);
+
     auto *formLayout = new QFormLayout;
 
 #ifndef NDEBUG
     {
+        // When in debug mode, we also show the highlights ID. Not sure if that can be handy for everyone
         auto value = std::visit(variant::Overloaded{
                                     [](SupportsGetID auto &h) {
                                         return h.getID();
@@ -195,21 +206,20 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             this->data);
     }
 
+    // Pattern / Badge / User / Filter
     std::visit(
         variant::Overloaded{
             [formLayout](FilterHighlight &h) {
-                // TODO: We should add some link to the filter help page
                 auto *errorLabel = new QLabel(h.getError());
                 auto *w = new QLineEdit();
                 w->setText(h.filterText);
                 QObject::connect(w, &QLineEdit::textChanged,
                                  [errorLabel, &h](const auto &newText) {
                                      h.setFilterText(newText);
-                                     // TODO: Make the error display prettier?
                                      errorLabel->setText(h.getError());
                                  });
                 formLayout->addRow("Filter", w);
-                formLayout->addRow("", errorLabel);
+                formLayout->addRow(errorLabel);
             },
             [formLayout](BadgeHighlight &h) {
                 auto *w = new QComboBox();
