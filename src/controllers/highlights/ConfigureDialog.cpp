@@ -113,11 +113,11 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
               BaseWindow::EnableCustomFrame,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
+              BaseWindow::UseSettingsStylesheet,
           },
           parent)
     , data(std::move(_data))
 {
-    // TODO: THIS DIALOG IS INVISIBLE IN LIGHT THEME
     this->setWindowTitle(u"Chatterino - Highlight editor"_s);
     this->setAttribute(Qt::WA_DeleteOnClose);
 
