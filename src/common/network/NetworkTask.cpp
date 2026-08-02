@@ -194,6 +194,8 @@ void NetworkTask::timeout()
         << this->data_->typeString() << "[timed out]"
         << this->data_->request.url().toString();
 
+    NetworkManager::accessManager->clearConnectionCache();
+
     this->data_->emitError({NetworkResult::NetworkError::TimeoutError, {}, {}});
     this->data_->emitFinally();
 }
