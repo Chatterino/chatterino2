@@ -118,7 +118,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction(u"Rename Tab\u2026"_s, this, [this]() {
+    this->menu_.addAction(u"Rename Tab…"_s, this, [this]() {
         this->showRenameDialog();
     });
 
