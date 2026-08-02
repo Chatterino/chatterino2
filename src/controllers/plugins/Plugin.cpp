@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "api/ChannelProviders.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/Plugin.hpp"
+
+#    include "api/ChannelProviders.hpp"
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
-#    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "controllers/plugins/SignalCallback.hpp"
