@@ -71,6 +71,7 @@ protected:
         if (this->getPageCount() > 1 && !this->getShowTabs())
         {
             this->setShowTabs(true);
+            this->setShowAddButton(false);
         }
     }
 };

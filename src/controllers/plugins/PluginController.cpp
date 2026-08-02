@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "api/ChannelProviders.hpp"
-#include "controllers/plugins/PluginChannel.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/PluginController.hpp"
+
+#    include "api/ChannelProviders.hpp"
 #    include "Application.hpp"
 #    include "common/Args.hpp"
 #    include "common/network/NetworkCommon.hpp"
@@ -26,7 +27,7 @@
 #    include "controllers/plugins/api/WindowManager.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
-#    include "controllers/plugins/PluginController.hpp"
+#    include "controllers/plugins/PluginChannel.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "messages/MessageElement.hpp"
