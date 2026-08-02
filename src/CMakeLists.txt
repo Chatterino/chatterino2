@@ -788,8 +788,6 @@ set(SOURCE_FILES
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
-        widgets/helper/MicroNotebook.cpp
-        widgets/helper/MicroNotebook.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/OverlayInteraction.cpp

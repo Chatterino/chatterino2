@@ -14,7 +14,7 @@
 #include "singletons/Theme.hpp"
 #include "util/Variant.hpp"
 #include "util/WeakPtrHelpers.hpp"
-#include "widgets/helper/MicroNotebook.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -49,6 +49,73 @@ struct WeakChannelProvider {
 #endif
 };
 
+class MyNotebook : public Notebook
+{
+public:
+    MyNotebook(QWidget *parent = nullptr)
+        : Notebook(parent)
+    {
+        this->setShowAddButton(false);
+        this->setShowTabs(false);
+        this->setAllowUserTabManagement(false);
+    }
+
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+    bool hasHeightForWidth() const override;
+    int heightForWidth(int width) const override;
+
+protected:
+    void afterPageAdded() override
+    {
+        if (this->getPageCount() > 1 && !this->getShowTabs())
+        {
+            this->setShowTabs(true);
+        }
+    }
+};
+
+QSize MyNotebook::sizeHint() const
+{
+    if (auto *sp = this->getSelectedPage())
+    {
+        QSize hint = sp->sizeHint();
+        hint.rheight() += this->height() - sp->height();
+        return hint;
+    }
+    return {0, 0};
+}
+
+QSize MyNotebook::minimumSizeHint() const
+{
+    if (auto *sp = this->getSelectedPage())
+    {
+        QSize hint = sp->minimumSizeHint();
+        hint.rheight() += this->height() - sp->height();
+        return hint;
+    }
+    return {0, 0};
+}
+
+bool MyNotebook::hasHeightForWidth() const
+{
+    if (auto *sp = this->getSelectedPage())
+    {
+        return sp->hasHeightForWidth();
+    }
+    return false;
+}
+
+int MyNotebook::heightForWidth(int width) const
+{
+    if (auto *sp = this->getSelectedPage())
+    {
+        int hfw = sp->heightForWidth(width);
+        return hfw + (this->height() - sp->height());
+    }
+    return 0;
+}
+
 }  // namespace
 
 Q_DECLARE_METATYPE(WeakChannelProvider)
@@ -75,7 +142,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     auto &ui = this->ui_;
     auto *rootLayout = new QVBoxLayout(this->getLayoutContainer());
     rootLayout->setContentsMargins({});
-    ui.notebook = new MicroNotebook(this->getLayoutContainer());
+    ui.notebook = new MyNotebook(this->getLayoutContainer());
     rootLayout->addWidget(ui.notebook, 1);
 
     ui.twitchPage = new QWidget;
@@ -214,11 +281,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     }
 #endif
 
-    if (providers.empty())
-    {
-        this->ui_.notebook->setShowHeader(false);
-    }
-    else
+    if (!providers.empty())
     {
 #ifdef CHATTERINO_HAVE_PLUGINS
         ui.pluginPage = new QWidget;
@@ -353,7 +416,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
     }
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-    if (this->ui_.notebook->isSelected(this->ui_.pluginPage))
+    if (this->ui_.notebook->getSelectedPage() == this->ui_.pluginPage)
     {
         auto provider = this->ui_.pluginProviderBox->currentData()
                             .value<WeakChannelProvider>()

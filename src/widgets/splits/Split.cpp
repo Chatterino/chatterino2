@@ -12,6 +12,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/plugins/PluginChannel.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -1375,6 +1376,15 @@ SplitDescriptor Split::buildDescriptor() const
         case Channel::Type::Misc:
             descriptor.channelName_ = chan->getName();
             break;
+
+        case Channel::Type::Plugin: {
+            auto *pl = dynamic_cast<PluginChannel *>(chan.get());
+            descriptor.channelName_ = pl->getName();
+            descriptor.pluginID = pl->pluginID();
+            descriptor.providerID = pl->providerID();
+            descriptor.arguments = pl->arguments();
+        }
+        break;
 
         case Channel::Type::TwitchWhispers:
         case Channel::Type::TwitchWatching:

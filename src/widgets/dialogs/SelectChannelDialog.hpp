@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QRadioButton>
+#include <QTabWidget>
 
 #include <optional>
 
@@ -39,8 +40,8 @@ namespace chatterino {
 
 class EditableModelView;
 class IndirectChannel;
-class MicroNotebook;
 class Channel;
+class Notebook;
 using ChannelPtr = std::shared_ptr<Channel>;
 
 namespace lua::api::channelproviders {
@@ -93,7 +94,7 @@ private:
         detail::AutoCheckedRadioButton *automod;
         QLabel *automodLabel;
 
-        MicroNotebook *notebook;
+        Notebook *notebook;
         QWidget *twitchPage;
         QWidget *pluginPage;
 
