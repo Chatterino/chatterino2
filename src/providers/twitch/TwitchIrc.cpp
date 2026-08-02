@@ -90,17 +90,17 @@ void appendTwitchEmoteOccurrences(const QString &emote,
 
 namespace chatterino {
 
-std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
+std::unordered_map<QString, QString> parseBadgeInfoTag(Communi::TagsRef tags)
 {
     std::unordered_map<QString, QString> infoMap;
 
-    auto infoIt = tags.constFind("badge-info");
-    if (infoIt == tags.end())
+    auto infoIt = tags.get("badge-info");
+    if (!infoIt)
     {
         return infoMap;
     }
 
-    auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
+    auto info = infoIt->split(',', Qt::SkipEmptyParts);
 
     for (const QString &badge : info)
     {
@@ -110,18 +110,18 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
     return infoMap;
 }
 
-std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
+std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
                                        const QString &tagName)
 {
     std::vector<TwitchBadge> b;
 
-    auto badgesIt = tags.constFind(tagName);
-    if (badgesIt == tags.end())
+    auto badgesIt = tags.get(tagName);
+    if (!badgesIt)
     {
         return b;
     }
 
-    auto badges = badgesIt.value().toString().split(',', Qt::SkipEmptyParts);
+    auto badges = badgesIt->split(',', Qt::SkipEmptyParts);
 
     for (const QString &badge : badges)
     {
@@ -137,21 +137,21 @@ std::vector<TwitchBadge> parseBadgeTag(const QVariantMap &tags,
     return b;
 }
 
-std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
+std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(Communi::TagsRef tags,
                                                      const QString &content,
                                                      int messageOffset)
 {
     // Twitch emotes
     std::vector<TwitchEmoteOccurrence> twitchEmotes;
 
-    auto emotesTag = tags.find("emotes");
+    auto emotesTag = tags.get("emotes");
 
-    if (emotesTag == tags.end())
+    if (!emotesTag)
     {
         return twitchEmotes;
     }
 
-    QStringList emoteString = emotesTag.value().toString().split('/');
+    QStringList emoteString = emotesTag->split('/');
     std::vector<int> correctPositions;
     for (int i = 0; i < content.size(); ++i)
     {

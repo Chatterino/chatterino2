@@ -69,18 +69,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return {
-            ColorProvider::instance().color(
-                ColorType::ElevatedMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            false,
-            true,
-        };
-    }
-
     if (this->flags.has(MessageFlag::FirstMessage))
     {
         return {
