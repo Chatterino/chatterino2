@@ -36,3 +36,4 @@ BREAKING(?) changes!!:
 - FirstMessage now also has the Highlighted flag
 - Subscription messages now also have the Highlighted flag
 - The "highlight" order of ChannelPointsHighlight, FirstMessageHighlight, HypeChatHighlight, and WatchStreakHighlight are not the same as before. Maybe also Announcements if I get to those.
+- There's no longer a way to keep a custom sound URL attached to a highlight while having the sound disabled. I intend to add a volume slider so you could achieve the same/something similar by setting the volume to 0

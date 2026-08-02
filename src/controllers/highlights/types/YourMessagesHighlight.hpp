@@ -36,7 +36,6 @@ struct YourMessagesHighlight {
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr bool SUPPORT_ALERT = false;
-    static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr bool SUPPORT_PLAY_SOUND = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(0, 118, 221, 115);
 

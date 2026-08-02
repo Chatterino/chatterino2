@@ -75,30 +75,30 @@
                     "backgroundColor": "#33333333",
                     "enabled": true,
                     "id": "subscriptions",
-                    "playSound": false
+                    "sound": ""
                 },
                 {
                     "alert": false,
                     "backgroundColor": "#22222222",
                     "enabled": true,
                     "id": "whispers",
-                    "playSound": false
+                    "sound": ""
                 },
                 {
                     "alert": true,
                     "backgroundColor": "#11111111",
                     "enabled": true,
                     "id": "yourusername",
-                    "playSound": true,
-                    "showInMentions": true
+                    "showInMentions": true,
+                    "sound": "ping2"
                 },
                 {
                     "alert": false,
                     "backgroundColor": "#88888888",
                     "enabled": true,
                     "id": "automodcaught",
-                    "playSound": false,
-                    "showInMentions": false
+                    "showInMentions": false,
+                    "sound": ""
                 },
                 {
                     "id": "yourmessages"
@@ -108,8 +108,8 @@
                     "backgroundColor": "#77777777",
                     "enabled": true,
                     "id": "subscribedthread",
-                    "playSound": true,
-                    "showInMentions": true
+                    "showInMentions": true,
+                    "sound": "ping2"
                 },
                 {
                     "backgroundColor": "#44444444",

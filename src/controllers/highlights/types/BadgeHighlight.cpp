@@ -46,9 +46,7 @@ HighlightCheck BadgeHighlight::buildCheck() const
                         .ids = {highlight.getID().toString()},
                         .alert =
                             highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                        .playSound = highlight.outcome.playSound.value_or(
-                            H::PLAY_SOUND_DEFAULT),
-                        .customSoundUrl = highlight.outcome.customSoundURL,
+                        .sound = highlight.outcome.soundURL,
                         .color = highlight.outcome.getBackgroundColor(),
                         .showInMentions =
                             highlight.outcome.showInMentions.value_or(
@@ -104,7 +102,7 @@ QDebug operator<<(QDebug dbg, const BadgeHighlight &v)
                   << "name:" << v.name << ',' << "badgeName:" << v.badgeName
                   << ',' << "displayName:" << v.displayName << ','
                   << "enabled:" << v.enabled << ','
-                  << "playSound:" << v.outcome.playSound << ')';
+                  << "sound:" << v.outcome.soundURL << ')';
 
     return dbg;
 }

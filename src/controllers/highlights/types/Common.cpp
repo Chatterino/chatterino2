@@ -42,6 +42,11 @@ concept SupportsErrors = requires(T a) {
     { a.getError() } -> std::same_as<QString>;
 };
 
+template <typename T>
+concept HasDefaultSound = requires {
+    { T::SOUND_DEFAULT } -> std::convertible_to<QStringView>;
+};
+
 bool matchesType(const rapidjson::Value &obj, QStringView expectedType)
 {
     assert(obj.IsObject());
@@ -149,11 +154,31 @@ bool isEnabled(const AllHighlights &h)
         h);
 }
 
+QString getSound(const AllHighlights &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const HasDefaultSound auto &&h) {
+                              using ActualType = std::decay_t<decltype(h)>;
+
+                              if (h.outcome.sound.isNull())
+                              {
+                                  return ActualType::DEFAULT_SOUND.toString();
+                              }
+
+                              return h.outcome.sound;
+                          },
+                          [](auto &&h) {
+                              return h.outcome.sound;
+                          },
+                      },
+                      h);
+}
+
 QUrl getSoundURL(const AllHighlights &h)
 {
     return std::visit(
         [](auto &&h) {
-            return h.outcome.customSoundURL;
+            return h.outcome.soundURL;
         },
         h);
 }
@@ -181,16 +206,21 @@ bool shouldAlert(const AllHighlights &h)
 
 bool shouldPlaySound(const AllHighlights &h)
 {
+    return false;
+    /* TODO
     return std::visit(
         [](auto &&h) {
             using ActualType = std::decay_t<decltype(h)>;
             return h.outcome.playSound.value_or(ActualType::PLAY_SOUND_DEFAULT);
         },
         h);
+        */
 }
 
 bool willPlayCustomSound(const AllHighlights &h)
 {
+    return false;
+    /* TODO
     return std::visit(
         [](auto &&h) {
             using ActualType = std::decay_t<decltype(h)>;
@@ -199,6 +229,7 @@ bool willPlayCustomSound(const AllHighlights &h)
                    !h.outcome.customSoundURL.isEmpty();
         },
         h);
+        */
 }
 
 QIcon getIcon(const AllHighlights &h)

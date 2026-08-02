@@ -40,9 +40,8 @@ HighlightCheck SubscribedThreadHighlight::buildCheck() const
             return HighlightResult{
                 .ids = {H::ID.toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .playSound =
-                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
-                .customSoundUrl = highlight.outcome.customSoundURL,
+                .sound =
+                    highlight.outcome.getSoundURLWithDefault(H::SOUND_DEFAULT),
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),

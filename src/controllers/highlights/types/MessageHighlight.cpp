@@ -78,15 +78,15 @@ HighlightCheck MessageHighlight::buildCheck() const
                 return std::nullopt;
             }
 
-            qCDebug(LOG) << "MATCH - compared with highlight" << highlight;
+            qCDebug(LOG) << "MATCH - compared with highlight" << highlight
+                         << highlight.outcome.sound
+                         << highlight.outcome.soundURL;
 
             return HighlightResult{
                 .ids = {highlight.getID().toString()},
                 .alert = highlight.outcome.alert.value_or(
                     MessageHighlight::ALERT_DEFAULT),
-                .playSound = highlight.outcome.playSound.value_or(
-                    MessageHighlight::PLAY_SOUND_DEFAULT),
-                .customSoundUrl = highlight.outcome.customSoundURL,
+                .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     MessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
@@ -129,7 +129,7 @@ QDebug operator<<(QDebug dbg, const MessageHighlight &v)
                   << "name:" << v.name << ',' << "pattern:" << v.pattern << ','
                   << "patternRegex:" << v.regexPattern << ','
                   << "enabled:" << v.enabled << ','
-                  << "playSound:" << v.outcome.playSound << ','
+                  << "sound:" << v.outcome.soundURL << ','
                   << "isRegex:" << v.regex << ','
                   << "isCaseSensitive:" << v.caseSensitive << ','
                   << "outcome:" << v.outcome << ')';

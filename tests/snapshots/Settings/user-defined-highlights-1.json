@@ -85,33 +85,31 @@
                     "caseSensitive": false,
                     "id": "test-1",
                     "pattern": "my phrase",
-                    "playSound": false,
                     "regex": false,
                     "showInMentions": true,
+                    "sound": "",
                     "type": "message"
                 },
                 {
                     "alert": true,
                     "backgroundColor": "#22222222",
                     "caseSensitive": false,
-                    "customSoundURL": "sound2",
                     "id": "test-2",
                     "pattern": "my phrase 2",
-                    "playSound": false,
                     "regex": false,
                     "showInMentions": true,
+                    "sound": "",
                     "type": "message"
                 },
                 {
                     "alert": true,
                     "backgroundColor": "#33333333",
                     "caseSensitive": false,
-                    "customSoundURL": "sound3",
                     "id": "test-3",
                     "pattern": "my phrase 3",
-                    "playSound": false,
                     "regex": false,
                     "showInMentions": true,
+                    "sound": "",
                     "type": "message"
                 },
                 {
