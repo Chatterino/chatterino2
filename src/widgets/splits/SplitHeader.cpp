@@ -5,7 +5,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/Literals.hpp"
 #include "common/network/NetworkCommon.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -46,10 +45,11 @@
 
 #include <cmath>
 
+using namespace Qt::StringLiterals;
+
 namespace {
 
 using namespace chatterino;
-using namespace chatterino::literals;
 
 /// The width of the standard button.
 constexpr const int BUTTON_WIDTH = 28;

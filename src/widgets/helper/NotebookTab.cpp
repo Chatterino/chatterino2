@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -37,9 +36,10 @@
 
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
+
 namespace chatterino {
 namespace {
-using namespace chatterino::literals;
 // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
 // For example, if location is Top, the rectangle will be translated in the negative Y direction,
 // or "up" on the screen, by amount.
