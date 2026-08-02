@@ -45,6 +45,8 @@
 
 #include <cmath>
 
+using namespace Qt::StringLiterals;
+
 namespace {
 
 using namespace chatterino;
@@ -471,12 +473,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Popup overlay",
         h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"),
         this->split_, &Split::showOverlayWindow);
-    menu->addAction("Search",
+    menu->addAction(u"Search…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "showSearch"),
                     this->split_, [this] {
                         this->split_->showSearch(true);
                     });
-    menu->addAction("Set filters",
+    menu->addAction(u"Set filters…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"),
                     this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
