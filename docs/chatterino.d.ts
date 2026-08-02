@@ -679,7 +679,7 @@ declare namespace c2 {
         to_unix_seconds(): number;
     }
 
-        interface ChannelProviderInit {
+    interface ChannelProviderInit {
         id: string;
         display_name: string;
         description?: string;
