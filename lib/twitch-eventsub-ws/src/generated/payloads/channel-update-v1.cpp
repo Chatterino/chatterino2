@@ -159,8 +159,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto subscription =
-        boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
+    auto subscription = boost::json::try_value_to<
+        chatterino::eventsub::lib::payload::subscription::Subscription>(
+        *jvsubscription);
 
     if (subscription.has_error())
     {

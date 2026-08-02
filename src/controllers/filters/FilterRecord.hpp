@@ -32,7 +32,7 @@ public:
 
     bool valid() const;
 
-    bool filter(const filters::ContextMap &context) const;
+    bool filter(filters::RunContext context) const;
 
     bool operator==(const FilterRecord &other) const;
 

@@ -102,7 +102,8 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -115,7 +116,9 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -128,7 +131,9 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -158,7 +163,8 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -171,7 +177,9 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -184,7 +192,9 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -214,7 +224,8 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -227,7 +238,9 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -240,7 +253,9 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -270,7 +285,8 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -283,7 +299,9 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -296,7 +314,9 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -326,7 +346,8 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -339,7 +360,9 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -352,7 +375,9 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -365,7 +390,8 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<String>(*jvreason);
+    auto reason =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvreason);
 
     if (reason.has_error())
     {
@@ -409,7 +435,8 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -422,7 +449,9 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -435,7 +464,9 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -478,7 +509,8 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -491,7 +523,9 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -504,7 +538,9 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -517,7 +553,8 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<String>(*jvreason);
+    auto reason =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvreason);
 
     if (reason.has_error())
     {
@@ -579,7 +616,8 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -592,7 +630,9 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -605,7 +645,9 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -648,7 +690,8 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -661,7 +704,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -674,7 +719,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -720,7 +767,8 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -733,7 +781,9 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -746,7 +796,9 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -776,7 +828,8 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -789,7 +842,9 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -802,7 +857,9 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -815,7 +872,9 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageID = boost::json::try_value_to<String>(*jvmessageID);
+    auto messageID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmessageID);
 
     if (messageID.has_error())
     {
@@ -828,7 +887,9 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageBody = boost::json::try_value_to<String>(*jvmessageBody);
+    auto messageBody =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmessageBody);
 
     if (messageBody.has_error())
     {
@@ -873,7 +934,8 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto action = boost::json::try_value_to<String>(*jvaction);
+    auto action =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvaction);
 
     if (action.has_error())
     {
@@ -886,7 +948,8 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto list = boost::json::try_value_to<String>(*jvlist);
+    auto list =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvlist);
 
     if (list.has_error())
     {
@@ -1014,7 +1077,8 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1027,7 +1091,9 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1040,7 +1106,9 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -1054,7 +1122,8 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorMessage =
-        boost::json::try_value_to<String>(*jvmoderatorMessage);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmoderatorMessage);
 
     if (moderatorMessage.has_error())
     {
@@ -1112,7 +1181,8 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<String>(*jvuserID);
+    auto userID =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1125,7 +1195,9 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
+    auto userLogin =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1138,7 +1210,9 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<String>(*jvuserName);
+    auto userName =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvuserName);
 
     if (userName.has_error())
     {
@@ -1151,7 +1225,8 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<String>(*jvreason);
+    auto reason =
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(*jvreason);
 
     if (reason.has_error())
     {
@@ -1249,7 +1324,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserID =
-        boost::json::try_value_to<String>(*jvbroadcasterUserID);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -1264,7 +1340,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserLogin =
-        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -1279,7 +1356,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserName =
-        boost::json::try_value_to<String>(*jvbroadcasterUserName);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -1349,7 +1427,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserID =
-        boost::json::try_value_to<String>(*jvmoderatorUserID);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmoderatorUserID);
 
     if (moderatorUserID.has_error())
     {
@@ -1363,7 +1442,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserLogin =
-        boost::json::try_value_to<String>(*jvmoderatorUserLogin);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmoderatorUserLogin);
 
     if (moderatorUserLogin.has_error())
     {
@@ -1377,7 +1457,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserName =
-        boost::json::try_value_to<String>(*jvmoderatorUserName);
+        boost::json::try_value_to<chatterino::eventsub::lib::String>(
+            *jvmoderatorUserName);
 
     if (moderatorUserName.has_error())
     {
@@ -1850,8 +1931,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto subscription =
-        boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
+    auto subscription = boost::json::try_value_to<
+        chatterino::eventsub::lib::payload::subscription::Subscription>(
+        *jvsubscription);
 
     if (subscription.has_error())
     {

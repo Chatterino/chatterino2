@@ -14,13 +14,16 @@
 #    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/api/ConnectionHandle.hpp"
+#    include "controllers/plugins/api/DateTime.hpp"
 #    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
+#    include "controllers/plugins/api/Images.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/JSON.hpp"
 #    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
+#    include "controllers/plugins/api/WindowManager.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -28,6 +31,9 @@
 #    include "messages/MessageElement.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
+#    include "singletons/WindowManager.hpp"
+#    include "widgets/splits/SplitContainer.hpp"
+#    include "widgets/Window.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -247,7 +253,10 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::WebSocket::createUserType(c2, plugin);
     lua::api::ConnectionHandle::createUserType(c2);
     lua::api::message::createUserType(c2);
+    lua::api::images::createUserTypes(c2);
     lua::api::createAccounts(c2);
+    lua::api::windowmanager::createUserTypes(c2);
+    lua::api::datetime::createUserTypes(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
@@ -259,6 +268,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
     c2["LinkType"] =
         lua::createEnumTable<lua::api::message::ExposedLinkType>(lua);
+    c2["SplitContainerNodeType"] =
+        lua::createEnumTable<SplitContainer::Node::Type>(lua);
+    c2["WindowType"] = lua::createEnumTable<WindowType>(lua);
+
+    c2["windows"] = getApp()->getWindows();
 
     sol::table io = g["io"];
     io.set_function(
@@ -300,6 +314,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
+    this->queueChangeNotification();
 
     if (getApp()->getArgs().safeMode)
     {
@@ -320,7 +335,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     temp->dataDirectory().mkpath(".");
 
     // make sure we capture log messages during load
-    this->onPluginLoaded(temp);
+    this->onPluginLoaded.invoke(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -349,6 +364,7 @@ bool PluginController::reload(const QString &id)
     QDir loadDir = it->second->loadDirectory_;
     // Since Plugin owns the state, it will clean up everything related to it
     this->plugins_.erase(id);
+    this->queueChangeNotification();
     this->tryLoadFromDir(loadDir);
     return true;
 }
@@ -395,9 +411,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isPluginEnabled(const QString &id)
 {
-    auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), id);
-    return it != vec.end();
+    return getSettings()->enabledPlugins.getValue().contains(id);
 }
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
@@ -476,6 +490,22 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 WebSocketPool &PluginController::webSocketPool()
 {
     return this->webSocketPool_;
+}
+
+void PluginController::queueChangeNotification()
+{
+    if (this->changeNotificationQueued)
+    {
+        return;
+    }
+    this->changeNotificationQueued = true;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this] {
+            this->changeNotificationQueued = false;
+            this->onPluginsUpdated.invoke();
+        },
+        Qt::QueuedConnection);
 }
 
 }  // namespace chatterino

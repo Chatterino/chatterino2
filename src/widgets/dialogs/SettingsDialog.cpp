@@ -28,8 +28,9 @@
 #include "widgets/settingspages/PluginsPage.hpp"
 
 #include <QDialogButtonBox>
-#include <QFile>
 #include <QLineEdit>
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 
@@ -40,29 +41,21 @@ SettingsDialog::SettingsDialog(QWidget *parent)
               BaseWindow::Flags::Dialog,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
+              BaseWindow::UseSettingsStylesheet,
           },
           parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    this->setWindowRole(u"chatterino.settings"_s);
     // Disable the ? button in the titlebar until we decide to use it
     this->setWindowFlags(this->windowFlags() &
                          ~Qt::WindowContextHelpButtonHint);
 
     this->resize(915, 600);
-    this->themeChangedEvent();
-    QFile styleFile(":/qss/settings.qss");
-    if (!styleFile.open(QFile::ReadOnly))
-    {
-        assert(false && "Resources not loaded");
-        qCWarning(chatterinoWidget) << "Resources not loaded";
-    }
-    QString stylesheet = QString::fromUtf8(styleFile.readAll());
-    this->setStyleSheet(stylesheet);
 
     this->initUi();
     this->addTabs();
-    this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
@@ -248,7 +241,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new NicknamesPage;},        "Nicknames",      ":/settings/accounts.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
-    this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");
+    this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg", SettingsTabId::Highlights);
     this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->addTab([]{return new FiltersPage;},          "Filters",        ":/settings/filters.svg");
     this->ui_.tabContainer->addSpacing(16);
@@ -361,6 +354,10 @@ void SettingsDialog::showDialog(QWidget *parent,
             instance->selectTab(SettingsTabId::Accounts);
             break;
 
+        case SettingsDialogPreference::Highlights:
+            instance->selectTab(SettingsTabId::Highlights);
+            break;
+
         case SettingsDialogPreference::ModerationActions:
             if (auto *tab = instance->tab(SettingsTabId::Moderation))
             {
@@ -420,15 +417,6 @@ void SettingsDialog::scaleChangedEvent(float newScale)
     {
         this->ui_.tabContainerContainer->setFixedWidth(150);
     }
-}
-
-void SettingsDialog::themeChangedEvent()
-{
-    BaseWindow::themeChangedEvent();
-
-    QPalette palette;
-    palette.setColor(QPalette::Window, QColor("#111"));
-    this->setPalette(palette);
 }
 
 void SettingsDialog::showEvent(QShowEvent *e)

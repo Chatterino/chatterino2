@@ -86,6 +86,9 @@ public:
         Node();
         Node(Split *_split, Node *_parent);
 
+        /**
+         * @exposeenum c2.SplitContainerNodeType
+         */
         enum class Type {
             EmptyRoot,
             Split,

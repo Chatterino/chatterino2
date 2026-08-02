@@ -46,6 +46,9 @@ public:
 
         /// special flag that enables the Qt::Popup flag on Linux
         LinuxPopup = 1 << 10,
+
+        /// Override the default stylesheet & user-specificed theme with our settings.qss stylesheet
+        UseSettingsStylesheet = 1 << 11,
     };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
@@ -128,13 +131,8 @@ protected:
 
     virtual void windowDeactivationEvent();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
-#else
-    bool nativeEvent(const QByteArray &eventType, void *message,
-                     long *result) override;
-#endif
     void scaleChangedEvent(float) override;
 
     void paintEvent(QPaintEvent *) override;
@@ -177,13 +175,8 @@ private:
     bool handleSHOWWINDOW(MSG *msg);
     bool handleSIZE(MSG *msg);
     bool handleMOVE(MSG *msg);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool handleNCCALCSIZE(MSG *msg, qintptr *result);
     bool handleNCHITTEST(MSG *msg, qintptr *result);
-#else
-    bool handleNCCALCSIZE(MSG *msg, long *result);
-    bool handleNCHITTEST(MSG *msg, long *result);
-#endif
 
     void appendTitlebarButton(Button *button);
 

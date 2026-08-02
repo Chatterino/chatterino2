@@ -29,6 +29,17 @@ QColor HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR =
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
 QColor HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR = QColor(64, 64, 64);
 QColor HighlightPhrase::FALLBACK_WATCH_STREAK_COLOR = QColor(0, 130, 255, 70);
+QColor HighlightPhrase::FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR =
+    QColor(255, 102, 237, 100);
+
+QColor HighlightPhrase::ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR =
+    QColor(102, 148, 255, 100);
+QColor HighlightPhrase::ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR =
+    QColor(96, 255, 96, 100);
+QColor HighlightPhrase::ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR =
+    QColor(233, 210, 0, 100);
+QColor HighlightPhrase::ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR =
+    QColor(255, 102, 237, 100);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {

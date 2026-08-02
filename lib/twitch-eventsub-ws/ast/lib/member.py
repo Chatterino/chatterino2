@@ -14,12 +14,13 @@ from .membertype import MemberType
 log = logging.getLogger(__name__)
 
 
-def get_type_name(type: clang.cindex.Type, namespace: tuple[str, ...]) -> str:
+def get_type_name(type: clang.cindex.Type, cursor: clang.cindex.Cursor, namespace: tuple[str, ...]) -> str:
     if namespace:
         namespace_str = f"{'::'.join(namespace)}::"
     else:
         namespace_str = ""
-    type_name = type.spelling
+    pp = clang.cindex.PrintingPolicy.create(cursor)
+    type_name = type.get_fully_qualified_name(pp)
 
     if type.is_const_qualified():
         type_name = type_name.replace("const", "").strip()
@@ -109,7 +110,7 @@ class Member:
 
         name = node.spelling
         member_type = MemberType.BASIC
-        type_name = get_type_name(node.type, namespace)
+        type_name = get_type_name(node.type, node, namespace)
 
         log.debug(f"{node.spelling} - {type_name} - {node.type.is_const_qualified()}")
 
@@ -122,7 +123,7 @@ class Member:
             # log.debug(node.type.get_template_argument_type(0).get_named_type().spelling)
             # log.debug(node.type.get_template_argument_type(0).get_class_type().spelling)
 
-            type_name = get_type_name(node.type.get_template_argument_type(0), namespace)
+            type_name = get_type_name(node.type.get_template_argument_type(0), node, namespace)
 
             for xd in node.get_children():
                 match xd.kind:
@@ -153,7 +154,7 @@ class Member:
                                 log.warning(f"Unhandled template type: {other}")
 
                     case CursorKind.TYPE_REF:
-                        type_name = get_type_name(xd.type, namespace)
+                        type_name = get_type_name(xd.type, node, namespace)
 
                     case other:
                         log.debug(f"Unhandled child kind type: {other}")
@@ -169,15 +170,15 @@ class Member:
         member.apply_comment_commands(comment_commands)
 
         if member.member_type == MemberType.VARIANT:
-            member.apply_variant(node.type, namespace)
+            member.apply_variant(node.type, node, namespace)
 
         return member
 
-    def apply_variant(self, type: clang.cindex.Type, namespace: tuple[str, ...]):
+    def apply_variant(self, type: clang.cindex.Type, cursor: clang.cindex.Cursor, namespace: tuple[str, ...]):
         self.variant_types = []
         for idx in range(type.get_num_template_arguments()):
             inner = type.get_template_argument_type(idx)
-            name = get_type_name(inner, namespace)
+            name = get_type_name(inner, cursor, namespace)
             if name == "std::string" or name == "String":
                 assert not self.variant_fallback
                 self.variant_fallback = name

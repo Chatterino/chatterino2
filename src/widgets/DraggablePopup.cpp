@@ -16,12 +16,17 @@ namespace chatterino {
 namespace {
 
 constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS{
-#ifdef Q_OS_LINUX
+// On macOS, the Dialog flag maps the popup to a Qt::Dialog window so the
+// NSWindow gets NSWindowCollectionBehaviorFullScreenAuxiliary.
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     BaseWindow::Dialog,
 #endif
     BaseWindow::EnableCustomFrame,
 };
 constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS_CLOSE_AUTOMATICALLY{
+#ifdef Q_OS_MACOS
+    BaseWindow::Dialog,
+#endif
     BaseWindow::EnableCustomFrame,
     BaseWindow::Frameless,
     BaseWindow::FramelessDraggable,

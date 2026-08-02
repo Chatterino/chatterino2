@@ -254,6 +254,46 @@ api::ConnectionHandle ChannelRef::on_display_name_changed(
         plugin->createCallback(std::move(pfn)));
 }
 
+api::ConnectionHandle ChannelRef::on_messages_cleared(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    return plugin->connections.managedConnect(
+        this->strong()->messagesCleared,
+        plugin->createCallback(std::move(pfn)));
+}
+
+api::ConnectionHandle ChannelRef::on_message_replaced(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    auto cb = plugin->createCallback(std::move(pfn));
+    return plugin->connections.managedConnect(
+        this->strong()->messageReplaced,
+        [cb = std::move(cb)](size_t idx, const auto &old,
+                             const auto &replacement) {
+            cb(idx + 1, std::const_pointer_cast<Message>(old),
+               std::const_pointer_cast<Message>(replacement));
+        });
+}
+
+api::ConnectionHandle ChannelRef::on_message_appended(
+    ThisPluginState state, sol::main_protected_function pfn)
+{
+    auto *plugin = state.plugin();
+    auto cb = plugin->createCallback(std::move(pfn));
+    return plugin->connections.managedConnect(
+        this->strong()->messageAppended,
+        [cb = std::move(cb)](const auto &msg, const auto &flags) {
+            std::optional<MessageFlag> unwrapped;
+            if (flags)
+            {
+                unwrapped.emplace(flags->value());
+            }
+            cb(std::const_pointer_cast<Message>(msg), unwrapped);
+        });
+}
+
 std::optional<ChannelRef> ChannelRef::get_by_name(const QString &name)
 {
     auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
@@ -304,6 +344,9 @@ void ChannelRef::createUserType(sol::table &c2)
         "count_messages", &ChannelRef::count_messages,
 
         "on_display_name_changed", &ChannelRef::on_display_name_changed,
+        "on_messages_cleared", &ChannelRef::on_messages_cleared,
+        "on_message_replaced", &ChannelRef::on_message_replaced,
+        "on_message_appended", &ChannelRef::on_message_appended,
 
         // TwitchChannel
         "get_room_modes", &ChannelRef::get_room_modes, 

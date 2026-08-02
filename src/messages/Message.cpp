@@ -69,18 +69,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return {
-            ColorProvider::instance().color(
-                ColorType::ElevatedMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            false,
-            true,
-        };
-    }
-
     if (this->flags.has(MessageFlag::FirstMessage))
     {
         return {
@@ -96,6 +84,24 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
     {
         return {
             ColorProvider::instance().color(ColorType::AutomodHighlight),
+        };
+    }
+
+    if (this->flags.has(MessageFlag::Announcement) &&
+        getSettings()->enableAnnouncementHighlight)
+    {
+        return {
+            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
+                this->announcementColor,
+                getSettings()->enableColoredAnnouncementHighlight)),
+        };
+    }
+
+    if (this->flags.has(MessageFlag::UncategorizedNotification))
+    {
+        // TODO: Give this a better/its own color :-)
+        return {
+            ColorProvider::instance().color(ColorType::Subscription),
         };
     }
 
@@ -156,6 +162,17 @@ QJsonObject Message::toJson() const
     if (this->reward)
     {
         msg["reward"_L1] = this->reward->toJson();
+    }
+
+    if (this->bits > 0)
+    {
+        msg["bits"_L1] = static_cast<qint64>(this->bits);
+    }
+
+    if (this->flags.has(MessageFlag::Announcement))
+    {
+        msg["announcementColor"_L1] =
+            qmagicenum::enumNameString(this->announcementColor);
     }
 
     // XXX: figure out if we can add this in tests

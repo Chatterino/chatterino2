@@ -83,10 +83,13 @@ void installCustomPalette()
     QApplication::setPalette(dark);
 }
 
-void initQt()
+void initQt(const Args &args)
 {
-    // set up the QApplication flags
-    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    if (args.useOldScaling)
+    {
+        qCWarning(chatterinoApp) << "Using old scaling";
+        QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    }
 
 #ifdef Q_OS_WIN32
     // Avoid promoting child widgets to child windows
@@ -239,10 +242,10 @@ void clearCrashes(QDir dir)
 }
 }  // namespace
 
-void runGui(QApplication &a, const Paths &paths, Settings &settings,
-            const Args &args, Updates &updates)
+void runGui(QApplication &a, const Modes &modes, const Paths &paths,
+            Settings &settings, const Args &args, Updates &updates)
 {
-    initQt();
+    initQt(args);
     initResources();
     initSignalHandler();
 
@@ -287,7 +290,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     });
 
     Application app(settings, paths, args, updates);
-    app.initialize(settings, paths);
+    app.initialize(settings, modes, paths);
     app.run();
 
     chatterino::NetworkManager::deinit();

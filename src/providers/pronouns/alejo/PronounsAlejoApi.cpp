@@ -57,7 +57,7 @@ void AlejoApi::fetch(
             auto parsed = this->parsePronoun(object);
             onDone({parsed});
         })
-        .onError([onDone, username](auto result) {
+        .onError([onDone, username](const auto &result) {
             auto status = result.status();
             if (status.has_value() && status == 404)
             {
@@ -88,7 +88,7 @@ void AlejoApi::loadAvailablePronouns()
                 return;
             }
 
-            std::unordered_map<QString, QString> newPronouns;
+            std::unordered_map<QString, PronounEntry> newPronouns;
 
             for (auto it = root.begin(); it != root.end(); ++it)
             {
@@ -105,15 +105,8 @@ void AlejoApi::loadAvailablePronouns()
                                    << "was malformed:" << pronounObj;
                     continue;
                 }
-
-                if (singular)
-                {
-                    newPronouns[pronounId] = subject;
-                }
-                else
-                {
-                    newPronouns[pronounId] = subject % "/" % object;
-                }
+                newPronouns[pronounId] =
+                    PronounEntry{subject, object, singular};
             }
 
             {
@@ -130,26 +123,37 @@ void AlejoApi::loadAvailablePronouns()
 
 UserPronouns AlejoApi::parsePronoun(const QJsonObject &object)
 {
-    if (this->pronouns.empty())
+    const QJsonValue pronounMain = object["pronoun_id"];
+    const QJsonValue pronounAlt = object["alt_pronoun_id"];
+
+    if (!pronounMain.isString())
     {
         return {};
     }
 
-    const auto &pronoun = object["pronoun_id"];
-
-    if (!pronoun.isString())
-    {
-        return {};
-    }
-
-    auto pronounStr = pronoun.toString();
     std::shared_lock lock(this->mutex);
-    auto iter = this->pronouns.find(pronounStr);
-    if (iter != this->pronouns.end())
+
+    const auto iterMain = this->pronouns.find(pronounMain.toString());
+    if (iterMain == this->pronouns.end())
     {
-        return {iter->second};
+        return {};
     }
+
+    if (!pronounAlt.isString())
+    {
+        if (iterMain->second.singular)
+        {
+            return {iterMain->second.subject};
+        }
+        return {iterMain->second.subject + "/" + iterMain->second.object};
+    }
+
+    const auto iterAlt = this->pronouns.find(pronounAlt.toString());
+    if (iterAlt != this->pronouns.end())
+    {
+        return {iterMain->second.subject + "/" + iterAlt->second.subject};
+    }
+
     return {};
 }
-
 }  // namespace chatterino::pronouns

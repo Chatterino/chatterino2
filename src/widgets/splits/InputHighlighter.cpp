@@ -96,12 +96,13 @@ namespace chatterino {
 
 namespace inputhighlight::detail {
 
-// A word is a string of unicode letters. Words are seperated by whitespace
-// (tokenRegex) or, inside a token, by punctuation characters (except '_')
+/// A word is a string of unicode letters possibly concatenated by `'` or `-`.
+/// This regex assumes the text it's matched on does not contain whitespace.
+/// Any words next to underscores (`_`) is ignored.
 QRegularExpression wordRegex()
 {
     static QRegularExpression regex{
-        R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
+        R"((?<=^|(?!_)\p{P})\p{L}+(?:['-]\p{L}+)*(?=$|(?!_)\p{P}))",
         QRegularExpression::PatternOption::UseUnicodePropertiesOption,
     };
     return regex;

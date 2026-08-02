@@ -6,8 +6,8 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/enums/UsernameDisplayMode.hpp"
 #include "common/LastMessageLineStyle.hpp"
-#include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "common/StreamerModeSetting.hpp"
 #include "common/ThumbnailPreviewMode.hpp"
@@ -22,8 +22,10 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/emoji/EmojiStyle.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+#include "util/serialize/List.hpp"             // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -39,6 +41,7 @@ using TimeoutButton = std::pair<QString, int>;
 namespace chatterino {
 
 class Args;
+class Modes;
 
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT_FAMILY "Segoe UI"
@@ -46,7 +49,7 @@ class Args;
 #else
 #    ifdef Q_OS_MACOS
 #        define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#        define DEFAULT_FONT_SIZE 12
+#        define DEFAULT_FONT_SIZE 16
 #    else
 #        define DEFAULT_FONT_FAMILY "Arial"
 #        define DEFAULT_FONT_SIZE 11
@@ -55,12 +58,6 @@ class Args;
 
 void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting);
-
-enum UsernameDisplayMode : int {
-    Username = 1,                  // Username
-    LocalizedName = 2,             // Localized name
-    UsernameAndLocalizedName = 3,  // Username (Localized name)
-};
 
 enum UsernameRightClickBehavior : int {
     Reply = 0,
@@ -117,6 +114,11 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
     }
 }
 
+struct SettingsArgs {
+    bool isTest = false;
+    bool runMigrations = true;
+};
+
 /// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -127,8 +129,9 @@ class Settings
     bool disableSaving;
 
 public:
-    Settings(const Args &args, const QString &settingsDirectory,
-             bool isTest = false);
+    Settings(const Modes &modes, const Args &args,
+             const QString &settingsDirectory,
+             const SettingsArgs &settingsArgs = {});
     ~Settings();
 
     static Settings &instance();
@@ -158,6 +161,8 @@ public:
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
+    BoolSetting hideMessageTimestampsWhenLive = {
+        "/appearance/messages/hideMessageTimestampsWhenLive", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
@@ -302,6 +307,8 @@ public:
     };
 
     /// Behaviour
+    BoolSetting alwaysShowPinnedMessage = {"/behaviour/alwaysShowPinnedMessage",
+                                           false};
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
@@ -405,6 +412,14 @@ public:
         false,
     };
 
+    IntSetting sharedChatSessionRefreshInterval = {
+        "/behaviour/sharedChatSessionRefreshInterval", 60};
+
+    BoolSetting sharedChatAlwaysShowBadge = {
+        "/behaviour/sharedChatAlwaysShowBadge",
+        true,
+    };
+
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
@@ -437,6 +452,15 @@ public:
     BoolSetting enableSevenTVChannelEmotes = {"/emotes/seventv/channel", true};
     BoolSetting enableSevenTVEventAPI = {"/emotes/seventv/eventapi", true};
     BoolSetting sendSevenTVActivity = {"/emotes/seventv/sendActivity", true};
+
+    ChatterinoSetting<QStringList> favouriteEmotes = {
+        "/emotes/favouriteEmotes",
+        {},
+    };
+    ChatterinoSetting<QStringList> favouriteEmojis = {
+        "/emotes/favouriteEmojis",
+        {},
+    };
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -476,6 +500,10 @@ public:
         "/streamerMode/suppressInlineWhispers", true};
     BoolSetting streamerModeHideBlockedTermText = {
         "/streamerMode/hideBlockedTermText",
+        true,
+    };
+    BoolSetting streamerModeHideUserNotes = {
+        "/streamerMode/hideUserNotes",
         true,
     };
 
@@ -576,6 +604,19 @@ public:
     QStringSetting watchStreakHighlightColor = {
         "/highlighting/watchStreak/color", ""};
 
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+    BoolSetting enableColoredAnnouncementHighlight = {
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
+
     BoolSetting enableAutomodHighlight = {
         "/highlighting/automod/enabled",
         true,
@@ -664,12 +705,7 @@ public:
         "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    BoolSetting createShortcutForToasts = {
-        "/notifications/createShortcutForToasts",
-        (Modes::instance().isPortable || Modes::instance().isExternallyPackaged)
-            ? false
-            : true,
-    };
+    BoolSetting createShortcutForToasts;  // initialized in ctor
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 
@@ -701,9 +737,6 @@ public:
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
-#ifdef Q_OS_LINUX
-    BoolSetting useKeyring = {"/misc/useKeyring", true};
-#endif
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
@@ -789,20 +822,36 @@ public:
          {"w", 1}}};
 
     BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
-    ChatterinoSetting<std::vector<QString>> enabledPlugins = {
-        "/plugins/enabledPlugins", {}};
+    ChatterinoSetting<QStringList> enabledPlugins = {
+        "/plugins/enabledPlugins",
+        {},
+    };
 
-    // Advanced
+    // Sound
     EnumStringSetting<SoundBackend> soundBackend = {
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
-    BoolSetting enableExperimentalEventSub = {
-        "/eventsub/enableExperimental",
-        true,
+
+    BoolSetting soundMiniaudioKeepEngineAlive = {
+        "/sound/miniaudio/keepEngineAlive",
+        false,
     };
 
+    // Advanced
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
+
+#ifndef Q_OS_WIN
+    QStringSetting customNativeMessagingManifestPath{
+        "/misc/extension/customManifestPath",
+        "",
+    };
+    EnumStringSetting<BrowserManifestFormat>
+        customNativeMessagingManifestFormat = {
+            "/misc/extension/customManifestFormat",
+            BrowserManifestFormat::Chrome,
+    };
+#endif
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
@@ -825,6 +874,13 @@ private:
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
     SignalVector<QString> mutedChannels;
+
+    IntSetting settingsVersion = {
+        "/misc/settingsVersion",
+        0,
+    };
+
+    void migrate(bool isTest);
 
 public:
     SignalVector<HighlightPhrase> highlightedMessages;

@@ -20,11 +20,6 @@ bool operator==(const Emote &a, const Emote &b)
            std::tie(b.homePage, b.name, b.tooltip, b.images);
 }
 
-bool operator!=(const Emote &a, const Emote &b)
-{
-    return !(a == b);
-}
-
 QJsonObject Emote::toJson() const
 {
     QJsonObject obj{

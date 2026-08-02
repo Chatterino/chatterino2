@@ -84,7 +84,8 @@ class FTest : public PubSub
 {
 public:
     explicit FTest(const char *path, std::chrono::seconds pingInterval)
-        : PubSub(QString("wss://127.0.0.1:9050%1").arg(path), pingInterval)
+        : PubSub(QString("wss://%1%2").arg(PUBSUB_WSS_ADDR).arg(path),
+                 pingInterval)
     {
     }
 };

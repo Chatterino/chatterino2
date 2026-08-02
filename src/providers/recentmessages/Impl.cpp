@@ -28,7 +28,7 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
         return messages;
     }
 
-    for (const auto &jsonMessage : jsonMessages)
+    for (const auto jsonMessage : jsonMessages)
     {
         auto content = unescapeZeroWidthJoiner(jsonMessage.toString());
 
@@ -56,11 +56,10 @@ std::vector<MessagePtr> buildRecentMessages(
 
     for (auto *message : messages)
     {
-        if (message->tags().contains("rm-received-ts"))
+        if (auto optReceivedTs = message->tags().get("rm-received-ts"))
         {
             const auto msgDate =
-                QDateTime::fromMSecsSinceEpoch(
-                    message->tags().value("rm-received-ts").toLongLong())
+                QDateTime::fromMSecsSinceEpoch(optReceivedTs->toLongLong())
                     .date();
 
             // Check if we need to insert a message stating that a new day began

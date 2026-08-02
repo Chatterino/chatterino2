@@ -29,7 +29,7 @@ env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   CHATTERINO_BUILD_TYPE: ${{ case(inputs.buildType != '', inputs.buildType, 'auto') }}
-  CONAN_VERSION: 2.11.0
+  CONAN_VERSION: 2.28.1
 
 jobs:
   build-ubuntu-docker:
@@ -45,7 +45,6 @@ jobs:
         include:
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -53,7 +52,6 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -61,18 +59,24 @@ jobs:
             plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
             build-deb: false
             plugins: false
+          - os: ubuntu-26.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: true
+            plugins: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -104,16 +108,6 @@ jobs:
             exit 1
           fi
 
-      - name: Install Python and libclang (24.04)
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt update
-          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
-            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
-          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
-
       - name: Build
         run: |
           mkdir build
@@ -128,16 +122,10 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
-            -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
-            -DCHATTERINO_PLUGINS=${{ matrix.plugins && 'On' || 'Off' }} \
+            -DFORCE_JSON_GENERATION=Off \
+            -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
             ..
           make -j"$(nproc)"
-
-      - name: Check generated sources
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
-          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
 
       - name: Package - .deb (Ubuntu)
         if: matrix.build-deb
@@ -149,24 +137,24 @@ jobs:
         if: matrix.build-deb
         uses: actions/upload-artifact@v7
         with:
-          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           # macOS
-          - os: macos-14
-            qt-version: 6.7.1
+          - os: macos-26
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.8.3
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -177,7 +165,7 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
@@ -207,7 +195,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.3.0
+        uses: jurplel/install-qt-action@v4.3.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -217,11 +205,11 @@ jobs:
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: Chatterino/msvc-dev-cmd@v2.0.7
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.20
+        uses: hendrikmuhs/ccache-action@v1.2.23
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -233,7 +221,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -278,7 +266,7 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
-              -DFORCE_JSON_GENERATION=On `
+              -DFORCE_JSON_GENERATION=Off `
               -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
@@ -299,7 +287,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           cd build
-          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --force-openssl --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           ..\.CI\deploy-crt.ps1 Chatterino2
 
@@ -380,43 +368,28 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # allows for tags access
 
-      # Windows
       - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1
+        name: Download artifacts
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
-
-      - uses: actions/download-artifact@v8
-        name: Windows Qt6.7.1 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
-          path: release-artifacts/
-
-      # Linux
-      - uses: actions/download-artifact@v8
-        name: Ubuntu 22.04 deb
-        with:
-          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v8
-        name: Ubuntu 24.04 deb
-        with:
-          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
-          path: release-artifacts/
+          merge-multiple: true
 
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
         shell: bash
 
+      - name: Remove macOS artifacts
+        run: |
+          rm -f release-artifacts/*macos*.dmg
+        shell: bash
+
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 

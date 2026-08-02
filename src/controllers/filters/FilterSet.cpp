@@ -46,10 +46,13 @@ bool FilterSet::filter(const MessagePtr &m, ChannelPtr channel) const
         return true;
     }
 
-    filters::ContextMap context = filters::buildContextMap(m, channel.get());
+    filters::RunContext ctx{
+        .message = *m,
+        .channel = channel.get(),
+    };
     for (const auto &f : this->filters_.values())
     {
-        if (!f->valid() || !f->filter(context))
+        if (!f->valid() || !f->filter(ctx))
         {
             return false;
         }

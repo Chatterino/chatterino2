@@ -6,6 +6,7 @@
 
 #include "controllers/filters/lang/expressions/BinaryOperation.hpp"
 #include "controllers/filters/lang/expressions/Expression.hpp"
+#include "controllers/filters/lang/expressions/IdentifierExpression.hpp"
 #include "controllers/filters/lang/expressions/ListExpression.hpp"
 #include "controllers/filters/lang/expressions/RegexExpression.hpp"
 #include "controllers/filters/lang/expressions/UnaryOperation.hpp"
@@ -40,8 +41,7 @@ FilterParser::FilterParser(const QString &text)
 
     // safety: returnType must not live longer than the parsed expression. See
     // comment on IllTyped::expr.
-    auto returnType =
-        this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
+    auto returnType = this->builtExpression_->synthesizeType();
     if (isIllTyped(returnType))
     {
         this->errorLog(explainIllType(std::get<IllTyped>(returnType)));
@@ -223,8 +223,7 @@ ExpressionPtr FilterParser::parseValue()
         }
         else if (type == TokenType::IDENTIFIER)
         {
-            return std::make_unique<ValueExpression>(this->tokenizer_.next(),
-                                                     type);
+            return createIdentifierExpression(this->tokenizer_.next());
         }
         else if (type == TokenType::REGULAR_EXPRESSION)
         {
@@ -316,9 +315,9 @@ const QStringList &FilterParser::errors() const
     return this->parseLog_;
 }
 
-const QString FilterParser::debugString() const
+QString FilterParser::debugString() const
 {
-    return this->builtExpression_->debug(MESSAGE_TYPING_CONTEXT);
+    return this->builtExpression_->debug();
 }
 
 }  // namespace chatterino::filters

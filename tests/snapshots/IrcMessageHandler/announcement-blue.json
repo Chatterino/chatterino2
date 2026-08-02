@@ -1,0 +1,232 @@
+{
+    "input": "@tmi-sent-ts=1776510908780;subscriber=1;id=40a7aa20-5f3b-421c-8fd0-4d17c57ccc74;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/124;color=#CC44FF;flags=;user-type=;emotes=;msg-param-color=BLUE;msg-id=announcement;system-msg= :tmi.twitch.tv USERNOTICE #pajlada :blue announcement",
+    "output": [
+        {
+            "announcementColor": "Blue",
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "pajlada",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "11:15"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "11:15:08",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                        },
+                        "name": "",
+                        "tooltip": "Broadcaster"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Broadcaster",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/tb-1",
+                            "2x": "https://chatterino.com/tb-2",
+                            "3x": "https://chatterino.com/tb-3"
+                        },
+                        "name": "",
+                        "tooltip": "Subscriber"
+                    },
+                    "flags": "BadgeSubscription",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Subscriber (Tier 3, 124 months)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
+                        },
+                        "name": "",
+                        "tooltip": "Verified"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Verified",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ffcc44ff",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "pajlada:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "blue",
+                        "announcement"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "Collapsed|Announcement",
+            "frozen": false,
+            "id": "40a7aa20-5f3b-421c-8fd0-4d17c57ccc74",
+            "localizedName": "",
+            "loginName": "pajlada",
+            "messageText": "blue announcement",
+            "searchText": "pajlada  pajlada: blue announcement ",
+            "serverReceivedTime": "2026-04-18T11:15:08Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "124"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber",
+                "partner"
+            ],
+            "userID": "11148817",
+            "usernameColor": "#ffcc44ff"
+        },
+        {
+            "announcementColor": "Blue",
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "11:15"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "11:15:08",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Announcement"
+                    ]
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "System|DoNotTriggerNotification|Announcement",
+            "frozen": false,
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Announcement",
+            "searchText": "Announcement",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}
