@@ -7,7 +7,6 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Common.hpp"
-#include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -71,10 +70,10 @@ Window::Window(WindowType type, QWidget *parent)
     this->addMenuBar();
 #endif
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->onAccountSelected();
-        }));
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)
@@ -121,6 +120,16 @@ WindowType Window::getType()
 SplitNotebook &Window::getNotebook()
 {
     return *this->notebook_;
+}
+
+void Window::setPopupID(size_t id)
+{
+    this->popupID_ = id;
+}
+
+std::optional<size_t> Window::popupID() const
+{
+    return this->popupID_;
 }
 
 bool Window::event(QEvent *event)
@@ -421,6 +430,16 @@ void Window::addShortcuts()
                          .arg(target);
                  }
              }
+             return "";
+         }},
+        {"selectTabHistoryBack",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryBack(true);
+             return "";
+         }},
+        {"selectTabHistoryForward",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryForward(true);
              return "";
          }},
         {"popup",

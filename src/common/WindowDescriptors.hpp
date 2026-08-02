@@ -19,8 +19,6 @@
 namespace chatterino {
 
 class IndirectChannel;
-class SplitContainer;
-class Split;
 
 /**
  * A WindowLayout contains one or more windows.
@@ -62,13 +60,9 @@ struct SplitDescriptor {
 
     static SplitDescriptor loadFromJSON(const QJsonObject &root);
 
-    static SplitDescriptor fromSplit(const Split &split);
-
-    void appendJson(QJsonObject &root) const;
+    QJsonObject toJson() const;
 
     IndirectChannel decodeChannel() const;
-
-    void applyTo(Split &split) const;
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
@@ -80,7 +74,7 @@ struct SplitNodeDescriptor : SplitDescriptor {
 
     static SplitNodeDescriptor loadFromJSON(const QJsonObject &root);
 
-    void appendJson(QJsonObject &root) const /* override */;
+    QJsonObject toJson() const;
 };
 
 struct ContainerNodeDescriptor;
@@ -98,7 +92,7 @@ struct ContainerNodeDescriptor {
 
     static ContainerNodeDescriptor loadFromJSON(const QJsonObject &root);
 
-    void appendJson(QJsonObject &root) const;
+    QJsonObject toJson() const;
 };
 
 struct TabDescriptor {
@@ -109,11 +103,6 @@ struct TabDescriptor {
     std::optional<NodeDescriptor> rootNode_;
 
     static TabDescriptor loadFromJSON(const QJsonObject &tabObj);
-
-    static TabDescriptor fromRootContainer(const SplitContainer &container,
-                                           bool isSelected);
-
-    void appendJson(QJsonObject &root) const;
 };
 
 struct WindowDescriptor {
@@ -127,6 +116,7 @@ struct WindowDescriptor {
     State state_ = State::None;
 
     QRect geometry_;
+    std::optional<size_t> popupID;
 
     std::vector<TabDescriptor> tabs_;
 };

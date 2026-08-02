@@ -5,21 +5,18 @@
 #include "common/WindowDescriptors.hpp"
 
 #include "Application.hpp"
-#include "common/Channel.hpp"
 #include "common/QLogging.hpp"
-#include "controllers/plugins/api/ChannelProviders.hpp"
-#include "controllers/plugins/PluginChannel.hpp"
 #include "controllers/plugins/PluginController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/QMagicEnum.hpp"
-#include "widgets/helper/NotebookTab.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 
@@ -59,57 +56,21 @@ QList<QUuid> loadFilters(const QJsonValue &val)
 
 QJsonArray encodeFilters(std::span<const QUuid> filters)
 {
-    QJsonArray array;
+    QJsonArray arr;
     for (const auto &f : filters)
     {
-        array.append(f.toString(QUuid::WithoutBraces));
+        arr.append(f.toString(QUuid::WithoutBraces));
     }
-    return array;
-}
-
-NodeDescriptor buildDescriptorRecursively(const SplitContainer::Node &node)
-{
-    using Type = SplitContainer::Node::Type;
-    switch (node.getType())
-    {
-        case Type::Split: {
-            SplitNodeDescriptor descriptor(
-                SplitDescriptor::fromSplit(*node.getSplit()));
-            descriptor.flexH_ = node.getHorizontalFlex();
-            descriptor.flexV_ = node.getVerticalFlex();
-            return descriptor;
-        }
-        case Type::HorizontalContainer:
-        case Type::VerticalContainer: {
-            ContainerNodeDescriptor descriptor{
-                .flexH_ = node.getHorizontalFlex(),
-                .flexV_ = node.getVerticalFlex(),
-                .vertical_ = node.getType() == Type::VerticalContainer,
-            };
-
-            for (const auto &n : node.getChildren())
-            {
-                descriptor.items_.emplace_back(buildDescriptorRecursively(*n));
-            }
-            return descriptor;
-        }
-        case Type::EmptyRoot:
-            return ContainerNodeDescriptor{
-                .flexH_ = node.getHorizontalFlex(),
-                .flexV_ = node.getVerticalFlex(),
-            };
-    }
-
-    return ContainerNodeDescriptor{};
+    return arr;
 }
 
 }  // namespace
 
 SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
 {
-    SplitDescriptor descriptor;
+    const QJsonObject data = root["data"].toObject();
 
-    auto data = root["data"].toObject();
+    SplitDescriptor descriptor;
     descriptor.type_ = data.value("type").toString();
     descriptor.moderationMode_ = root.value("moderationMode").toBool();
     if (data.contains("channel"))
@@ -127,64 +88,37 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     {
         descriptor.spellCheckOverride = spellOverride.toBool();
     }
-    if (descriptor.type_ == u"plugin")
-    {
-        descriptor.pluginID = data["pluginID"_L1].toString();
-        descriptor.providerID = data["providerID"_L1].toString();
-        descriptor.arguments = data["arguments"_L1].toObject();
-    }
+
     return descriptor;
 }
 
-SplitDescriptor SplitDescriptor::fromSplit(const Split &split)
+QJsonObject SplitDescriptor::toJson() const
 {
-    SplitDescriptor descriptor;
-    descriptor.type_ =
-        qmagicenum::enumNameString(split.getIndirectChannel().getType());
-    descriptor.channelName_ = split.getChannel()->getName();
-    descriptor.filters_ = split.getFilters();
-    descriptor.moderationMode_ = split.getModerationMode();
-    if (auto *pc = dynamic_cast<PluginChannel *>(split.getChannel().get()))
-    {
-        descriptor.pluginID = pc->pluginID();
-        descriptor.providerID = pc->providerID();
-        descriptor.arguments = pc->arguments();
-    }
-    return descriptor;
-}
+    QJsonObject obj;
 
-void SplitDescriptor::appendJson(QJsonObject &root) const
-{
-    root.insert("moderationMode", this->moderationMode_);
-    QJsonObject data{
-        {"type", this->type_},
-    };
+    obj.insert("type", "split");
+    obj.insert("moderationMode", this->moderationMode_);
+
+    QJsonObject data{{"type"_L1, this->type_}};
     if (!this->channelName_.isEmpty())
     {
-        data["name"] = this->channelName_;
+        data.insert("name"_L1, this->channelName_);
     }
-    if (this->type_ == u"plugin")
-    {
-        data["pluginID"] = this->pluginID;
-        data["providerID"] = this->providerID;
-        data["arguments"] = this->arguments;
-    }
+    obj.insert("data", data);
 
-    root.insert("data", data);
+    obj.insert("filters", encodeFilters(this->filters_));
 
-    if (!this->filters_.empty())
+    if (this->spellCheckOverride.has_value())
     {
-        root.insert("filters", encodeFilters(this->filters_));
+        obj["checkSpelling"] = *this->spellCheckOverride;
     }
-
-    if (this->spellCheckOverride)
-    {
-        root["checkSpelling"] = *this->spellCheckOverride;
-    }
+    return obj;
 }
 
 IndirectChannel SplitDescriptor::decodeChannel() const
 {
+    assertInGuiThread();
+
     auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
     if (!type)
     {
@@ -224,14 +158,6 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     return Channel::getEmpty();
 }
 
-void SplitDescriptor::applyTo(Split &split) const
-{
-    split.setChannel(this->decodeChannel());
-    split.setModerationMode(this->moderationMode_);
-    split.setFilters(this->filters_);
-    split.setCheckSpellingOverride(this->spellCheckOverride);
-}
-
 SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)
     : SplitDescriptor(std::move(descriptor))
 {
@@ -245,12 +171,12 @@ SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
     return descriptor;
 }
 
-void SplitNodeDescriptor::appendJson(QJsonObject &root) const
+QJsonObject SplitNodeDescriptor::toJson() const
 {
-    SplitDescriptor::appendJson(root);
-    root.insert("flexh", this->flexH_);
-    root.insert("flexv", this->flexV_);
-    root.insert("type", "split");
+    QJsonObject obj = SplitDescriptor::toJson();
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
+    return obj;
 }
 
 ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
@@ -283,31 +209,24 @@ ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
     return descriptor;
 }
 
-void ContainerNodeDescriptor::appendJson(QJsonObject &root) const
+QJsonObject ContainerNodeDescriptor::toJson() const
 {
-    root.insert("flexh", this->flexH_);
-    root.insert("flexv", this->flexV_);
-    if (this->vertical_)
-    {
-        root.insert("type", "vertical");
-    }
-    else
-    {
-        root.insert("type", "horizontal");
-    }
+    QJsonObject obj;
+    obj.insert("type", this->vertical_ ? "vertical" : "horizontal");
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
 
-    QJsonArray items;
-    for (const auto &item : this->items_)
+    QJsonArray itemsArr;
+    for (const auto &n : this->items_)
     {
-        QJsonObject obj;
-        std::visit(
-            [&](const auto &it) {
-                it.appendJson(obj);
+        itemsArr.append(std::visit(
+            [](auto &&it) {
+                return it.toJson();
             },
-            item);
-        items.append(obj);
+            n));
     }
-    root.insert("items", items);
+    obj.insert("items", itemsArr);
+    return obj;
 }
 
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
@@ -346,47 +265,6 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
     return tab;
 }
 
-TabDescriptor TabDescriptor::fromRootContainer(const SplitContainer &container,
-                                               bool isSelected)
-{
-    TabDescriptor descriptor;
-    if (container.getTab()->hasCustomTitle())
-    {
-        descriptor.customTitle_ = container.getTab()->getCustomTitle();
-    }
-    descriptor.selected_ = isSelected;
-    descriptor.highlightsEnabled_ = container.getTab()->hasHighlightsEnabled();
-
-    // splits
-    if (container.getBaseNode()->getType() !=
-        SplitContainer::Node::Type::EmptyRoot)
-    {
-        descriptor.rootNode_ =
-            buildDescriptorRecursively(*container.getBaseNode());
-    }
-    return descriptor;
-}
-
-void TabDescriptor::appendJson(QJsonObject &root) const
-{
-    if (!this->customTitle_.isEmpty())
-    {
-        root.insert("title", this->customTitle_);
-    }
-    root.insert("selected", this->selected_);
-    root.insert("highlightsEnabled", this->highlightsEnabled_);
-    if (this->rootNode_)
-    {
-        QJsonObject splits;
-        std::visit(
-            [&](const auto &it) {
-                it.appendJson(splits);
-            },
-            *this->rootNode_);
-        root.insert("splits2", splits);
-    }
-}
-
 WindowLayout WindowLayout::loadFromFile(const QString &path)
 {
     WindowLayout layout;
@@ -396,7 +274,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     // "deserialize"
     for (const auto windowVal : loadWindowArray(path))
     {
-        QJsonObject windowObj = windowVal.toObject();
+        const QJsonObject windowObj = windowVal.toObject();
 
         WindowDescriptor window;
 
@@ -436,6 +314,13 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             int height = windowObj.value("height").toInt(-1);
 
             window.geometry_ = QRect(x, y, width, height);
+        }
+
+        // Load popup ID
+        auto idVal = windowObj["popupID"];
+        if (idVal.isDouble())
+        {
+            window.popupID = idVal.toInt(1);
         }
 
         bool hasSetASelectedTab = false;

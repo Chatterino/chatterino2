@@ -16,6 +16,7 @@
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/Helix.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -66,13 +67,8 @@ const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication()
-        : highlights(this->settings, &this->accounts)
-    {
-    }
-
     MockApplication(const QString &settingsData)
-        : mock::BaseApplication(settingsData)
+        : mock::BaseApplication(settingsData, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)
     {
     }
@@ -160,6 +156,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::EmoteController emotes;
+    mock::Helix helix;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
@@ -561,6 +558,21 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
+
+        const auto helixExpectations =
+            this->snapshot->param("helixExpectations").toObject();
+        if (!helixExpectations.isEmpty())
+        {
+            initializeHelix(&this->mockHelix);
+
+            int nCalls =
+                helixExpectations.value("getSharedChatSession").toInt();
+            if (nCalls > 0)
+            {
+                EXPECT_CALL(this->mockHelix, getSharedChatSession)
+                    .Times(nCalls);
+            }
+        }
     }
 
     void TearDown() override
@@ -573,6 +585,7 @@ public:
     std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<testlib::Snapshot> snapshot;
+    testing::StrictMock<mock::Helix> mockHelix;
 };
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
@@ -593,6 +606,9 @@ public:
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
 /// - `nAdditional`: Include n additional built messages (from `prevMessages`)
+/// - `helixExpectations`: An object with names of Helix API methods that will
+///   be called during the test and the expected call count. Name of the method
+///   is the key and the number of calls its value.
 TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
@@ -650,4 +666,39 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST_P(TestIrcMessageHandlerP, CloneElements)
+{
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
+
+    VectorMessageSink sink;
+
+    for (auto prevInput : this->snapshot->param("prevMessages").toArray())
+    {
+        auto *ircMessage = Communi::IrcMessage::fromData(
+            prevInput.toString().toUtf8(), nullptr);
+        ASSERT_NE(ircMessage, nullptr);
+        IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+        delete ircMessage;
+    }
+
+    auto *ircMessage =
+        Communi::IrcMessage::fromData(this->snapshot->inputUtf8(), nullptr);
+    ASSERT_NE(ircMessage, nullptr);
+    IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+    delete ircMessage;
+
+    for (const auto &message : sink.messages())
+    {
+        for (const auto &original : message->elements)
+        {
+            auto originalObj = original->toJson();
+            auto clonedObj = original->clone()->toJson();
+            ASSERT_EQ(originalObj, clonedObj)
+                << "\noriginal:\n"
+                << QJsonDocument(originalObj).toJson() << "\ncloned:\n"
+                << QJsonDocument(clonedObj).toJson();
+        }
+    }
 }

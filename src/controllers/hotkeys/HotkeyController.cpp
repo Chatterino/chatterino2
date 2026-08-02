@@ -581,6 +581,11 @@ void HotkeyController::clearRemovedDefaults()
 
     this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
                                       "setTabVisibility", {"toggleLiveOnly"});
+
+    this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
+                                      "selectTabHistory", {"previous"});
+    this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
+                                      "selectTabHistory", {"next"});
 }
 
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,

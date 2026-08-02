@@ -16,6 +16,7 @@
 #include "util/CombinePath.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
+#include "util/Variant.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/FramelessEmbedWindow.hpp"
@@ -37,6 +38,8 @@
 
 #include <chrono>
 #include <optional>
+
+using namespace Qt::Literals;
 
 namespace {
 
@@ -156,6 +159,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->forceLayoutChannelViewsListener.add(
         settings.removeSpacesBetweenEmotes);
     this->forceLayoutChannelViewsListener.add(settings.emoteScale);
+    this->forceLayoutChannelViewsListener.add(
+        settings.hideMessageTimestampsWhenLive);
     this->forceLayoutChannelViewsListener.add(settings.timestampFormat);
     this->forceLayoutChannelViewsListener.add(settings.collpseMessagesMinLines);
     this->forceLayoutChannelViewsListener.add(settings.enableRedeemedHighlight);
@@ -170,6 +175,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.streamerModeHideRestrictedUsers);
     this->forceLayoutChannelViewsListener.add(fonts.fontChanged);
 
+    this->layoutChannelViewsListener.add(
+        settings.hideMessageTimestampsWhenLive);
     this->layoutChannelViewsListener.add(settings.timestampFormat);
 
     this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
@@ -315,18 +322,16 @@ Window *WindowManager::getLastSelectedWindow() const
     return this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
+Window &WindowManager::createWindow(WindowType type,
+                                    const CreateWindowArgs &args)
 {
     assertInGuiThread();
 
-    auto *const realParent = [this, type, parent]() -> QWidget * {
-        (void)this;
-        (void)type;
-
-        if (parent)
+    auto *const realParent = [&]() -> QWidget * {
+        if (args.parent)
         {
             // If a parent is explicitly specified, we use that immediately.
-            return parent;
+            return args.parent;
         }
 
         // FIXME: On Windows, parenting popup windows causes unwanted behavior (see
@@ -348,9 +353,28 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     }();
 
     auto *window = new Window(type, realParent);
+    assert(!window->testAttribute(Qt::WA_WState_Created));
+    switch (type)
+    {
+        case WindowType::Main: {
+            window->setWindowRole(u"chatterino.main"_s);
+        }
+        break;
+        case WindowType::Popup: {
+            size_t popupID = this->takePopupID(args.popupID);
+            window->setWindowRole(u"chatterino.popup." %
+                                  QString::number(popupID));
+            window->setPopupID(popupID);
+            qCDebug(chatterinoWindowmanager)
+                << "Creating popup with ID" << popupID;
+        }
+        break;
+        case WindowType::Attached:
+            break;  // No window role for you.
+    }
 
     this->windows_.push_back(window);
-    if (show)
+    if (args.parent)
     {
         window->show();
     }
@@ -359,17 +383,15 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
     {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
-        QObject::connect(window, &QWidget::destroyed, this, [this, window] {
-            for (auto it = this->windows_.begin(); it != this->windows_.end();
-                 it++)
-            {
-                if (*it == window)
-                {
-                    this->windows_.erase(it);
-                    break;
-                }
-            }
-        });
+        auto popupID = window->popupID();
+        QObject::connect(window, &QWidget::destroyed, this,
+                         [this, window, popupID] {
+                             std::erase(this->windows_, window);
+                             if (popupID)
+                             {
+                                 this->closePopup(*popupID);
+                             }
+                         });
     }
 
     return *window;
@@ -377,7 +399,9 @@ Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
 
 Window &WindowManager::openInPopup(ChannelPtr channel)
 {
-    auto &popup = this->createWindow(WindowType::Popup, true);
+    auto &popup = this->createWindow(WindowType::Popup, {
+                                                            .show = true,
+                                                        });
     auto *split =
         popup.getNotebook().getOrAddSelectedPage()->appendNewSplit(false);
     split->setChannel(channel);
@@ -421,9 +445,11 @@ void WindowManager::initialize()
     {
         WindowLayout windowLayout;
 
-        if (this->appArgs.customChannelLayout)
+        if (std::optional<WindowLayout> layout =
+                this->appArgs.makeCustomChannelLayout(
+                    this->windowLayoutFilePath))
         {
-            windowLayout = this->appArgs.customChannelLayout.value();
+            windowLayout = layout.value();
         }
         else
         {
@@ -450,7 +476,7 @@ void WindowManager::initialize()
     // No main window has been created from loading, create an empty one
     if (this->mainWindow_ == nullptr)
     {
-        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_ = &this->createWindow(WindowType::Main, {});
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
@@ -515,6 +541,12 @@ void WindowManager::save()
         windowObj.insert("width", rect.width());
         windowObj.insert("height", rect.height());
 
+        auto popupID = window->popupID();
+        if (popupID)
+        {
+            windowObj.insert("popupID", static_cast<qsizetype>(*popupID));
+        }
+
         windowObj["emotePopup"] = QJsonObject{
             {"x", this->emotePopupBounds_.x()},
             {"y", this->emotePopupBounds_.y()},
@@ -528,16 +560,13 @@ void WindowManager::save()
         for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
              tabIndex++)
         {
-            auto *container = dynamic_cast<SplitContainer *>(
-                window->getNotebook().getPageAt(tabIndex));
-            assert(container != nullptr);
-
-            bool isSelected =
-                window->getNotebook().getSelectedPage() == container;
-
             QJsonObject tabObj;
-            TabDescriptor::fromRootContainer(*container, isSelected)
-                .appendJson(tabObj);
+            SplitContainer *tab = dynamic_cast<SplitContainer *>(
+                window->getNotebook().getPageAt(tabIndex));
+            assert(tab != nullptr);
+
+            bool isSelected = window->getNotebook().getSelectedPage() == tab;
+            WindowManager::encodeTab(tab, isSelected, tabObj);
             tabsArr.append(tabObj);
         }
 
@@ -652,6 +681,32 @@ std::span<Window *const> WindowManager::windows() const
     return this->windows_;
 }
 
+void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
+                              QJsonObject &obj)
+{
+    // custom tab title
+    if (tab->getTab()->hasCustomTitle())
+    {
+        obj.insert("title", tab->getTab()->getCustomTitle());
+    }
+
+    // selected
+    if (isSelected)
+    {
+        obj.insert("selected", true);
+    }
+
+    // highlighting on new messages
+    obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+    // splits
+    obj.insert("splits2", std::visit(
+                              [](auto &&it) {
+                                  return it.toJson();
+                              },
+                              tab->buildDescriptor()));
+}
+
 void WindowManager::closeAll()
 {
     assertInGuiThread();
@@ -694,7 +749,9 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
     {
         auto type = windowData.type_;
 
-        Window &window = this->createWindow(type, false);
+        Window &window = this->createWindow(type, {
+                                                      .show = false,
+                                                  });
 
         if (type == WindowType::Main)
         {
@@ -792,6 +849,39 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 break;
         }
     }
+
+    // We might've opened a few popups, so make sure the next ID is unused.
+    this->refreshNextPopupID();
+}
+
+size_t WindowManager::takePopupID(std::optional<size_t> preferred)
+{
+    size_t id = this->nextPopupID;
+    if (preferred && !this->usedPopupIDs.contains(*preferred))
+    {
+        id = *preferred;
+    }
+    assert(!this->usedPopupIDs.contains(id));
+    this->usedPopupIDs.insert(id);
+    this->refreshNextPopupID();
+    return id;
+}
+
+void WindowManager::closePopup(size_t id)
+{
+    // The user closed a popup. Remember this ID, so the popup will get this ID.
+    this->nextPopupID = id;
+    this->usedPopupIDs.remove(id);
+}
+
+void WindowManager::refreshNextPopupID()
+{
+    size_t selected = 1;
+    while (this->usedPopupIDs.contains(selected))
+    {
+        selected += 1;
+    }
+    this->nextPopupID = selected;
 }
 
 }  // namespace chatterino

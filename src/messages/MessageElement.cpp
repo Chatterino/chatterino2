@@ -25,6 +25,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <memory>
+#include <utility>
+
 #ifdef CHATTERINO_WITH_PRIVATE_QT_API
 #    include <QtGui/private/qtextengine_p.h>
 #endif
@@ -106,6 +109,14 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
+void MessageElement::cloneFrom(const MessageElement &source)
+{
+    this->link_ = source.link_;
+    this->tooltip_ = source.tooltip_;
+    this->flags_ = source.flags_;
+    this->trailingSpace = source.trailingSpace;
+}
+
 QJsonObject MessageElement::toJson() const
 {
     return {
@@ -158,6 +169,13 @@ std::string_view ImageElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> ImageElement::clone() const
+{
+    auto im = std::make_unique<ImageElement>(this->image_, this->getFlags());
+    im->cloneFrom(*this);
+    return im;
+}
+
 CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
@@ -195,6 +213,14 @@ QJsonObject CircularImageElement::toJson() const
 std::string_view CircularImageElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> CircularImageElement::clone() const
+{
+    auto im = std::make_unique<CircularImageElement>(
+        this->image_, this->padding(), this->background(), this->getFlags());
+    im->cloneFrom(*this);
+    return im;
 }
 
 // EMOTE
@@ -288,6 +314,14 @@ QJsonObject EmoteElement::toJson() const
 std::string_view EmoteElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> EmoteElement::clone() const
+{
+    auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
+                                               this->textColor_);
+    elem->cloneFrom(*this);
+    return elem;
 }
 
 LayeredEmoteElement::LayeredEmoteElement(
@@ -490,6 +524,15 @@ std::string_view LayeredEmoteElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> LayeredEmoteElement::clone() const
+{
+    std::vector<Emote> emotesCopy = this->emotes_;
+    auto elem = std::make_unique<LayeredEmoteElement>(
+        std::move(emotesCopy), this->getFlags(), this->textElementColor_);
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -541,6 +584,12 @@ std::string_view BadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> BadgeElement::clone() const
+{
+    auto elem = std::make_unique<BadgeElement>(this->emote_, this->getFlags());
+    elem->cloneFrom(*this);
+    return elem;
+}
 
 // MOD BADGE
 ModBadgeElement::ModBadgeElement(const EmotePtr &data,
@@ -573,6 +622,14 @@ std::string_view ModBadgeElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> ModBadgeElement::clone() const
+{
+    auto elem =
+        std::make_unique<ModBadgeElement>(this->getEmote(), this->getFlags());
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 // VIP BADGE
 VipBadgeElement::VipBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -599,6 +656,13 @@ QJsonObject VipBadgeElement::toJson() const
 std::string_view VipBadgeElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+std::unique_ptr<MessageElement> VipBadgeElement::clone() const
+{
+    auto elem =
+        std::make_unique<VipBadgeElement>(this->getEmote(), this->getFlags());
+    elem->cloneFrom(*this);
+    return elem;
 }
 
 // FFZ Badge
@@ -632,6 +696,14 @@ std::string_view FfzBadgeElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> FfzBadgeElement::clone() const
+{
+    auto elem = std::make_unique<FfzBadgeElement>(
+        this->getEmote(), this->getFlags(), this->color);
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -641,6 +713,15 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 {
     this->words_ = text.split(' ');
     // fourtf: add logic to store multiple spaces after message
+}
+TextElement::TextElement(TextElement::CloneConstructorTag /*hack*/,
+                         QStringList words, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : MessageElement(flags)
+    , words_(std::move(words))
+    , color_(color)
+    , style_(style)
+{
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
@@ -872,6 +953,15 @@ std::string_view TextElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> TextElement::clone() const
+{
+    auto elem = std::make_unique<TextElement>(
+        TextElement::CloneConstructorTag{}, this->words_, this->getFlags(),
+        this->color_, this->style_);
+
+    elem->cloneFrom(*this);
+    return elem;
+}
 
 SingleLineTextElement::SingleLineTextElement(const QString &text,
                                              MessageElementFlags flags,
@@ -881,6 +971,15 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
     , color_(color)
     , style_(style)
     , words_(text.split(' '))
+{
+}
+SingleLineTextElement::SingleLineTextElement(
+    SingleLineTextElement::CloneConstructorTag /*hack*/, QStringList words,
+    MessageElementFlags flags, const MessageColor &color, FontStyle style)
+    : MessageElement(flags)
+    , color_(color)
+    , style_(style)
+    , words_(std::move(words))
 {
 }
 
@@ -1014,6 +1113,16 @@ std::string_view SingleLineTextElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
+{
+    auto elem = std::make_unique<SingleLineTextElement>(
+        SingleLineTextElement::CloneConstructorTag{}, this->words_,
+        this->getFlags(), this->color_, this->style_);
+
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
                          MessageElementFlags flags, const MessageColor &color,
                          FontStyle style)
@@ -1023,6 +1132,21 @@ LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
     , original_({parsed.original})
 {
     this->setTooltip(parsed.original);
+}
+
+LinkElement::LinkElement(TextElement::CloneConstructorTag /*hack*/,
+                         QStringList lowercase, QStringList original,
+                         const QString &fullUrl, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : TextElement({}, flags, color, style)
+    , linkInfo_(fullUrl)
+    , lowercase_(std::move(lowercase))
+    , original_(std::move(original))
+{
+    if (!this->original_.isEmpty())
+    {
+        this->setTooltip(this->original_.at(0));
+    }
 }
 
 void LinkElement::addToContainer(MessageLayoutContainer &container,
@@ -1054,10 +1178,33 @@ std::string_view LinkElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> LinkElement::clone() const
+{
+    auto elem = std::make_unique<LinkElement>(
+        LinkElement::CloneConstructorTag{}, this->lowercase_, this->original_,
+        this->linkInfo_.originalUrl(), this->getFlags(), this->color_,
+        this->style_);
+
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
-                               MessageColor fallbackColor_,
-                               MessageColor userColor_)
+                               const MessageColor &fallbackColor_,
+                               const MessageColor &userColor_)
     : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor_(fallbackColor_)
+    , userColor_(userColor_)
+    , userLoginName_(std::move(loginName_))
+{
+}
+
+MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
+                               QStringList words, QString loginName_,
+                               const MessageColor &fallbackColor_,
+                               const MessageColor &userColor_)
+    : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
     , userColor_(userColor_)
@@ -1067,7 +1214,8 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 
 template <typename>
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
-                               MessageColor fallbackColor_, QColor userColor_)
+                               const MessageColor &fallbackColor_,
+                               QColor userColor_)
     : TextElement(displayName,
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
@@ -1078,7 +1226,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 
 template MentionElement::MentionElement(const QString &displayName,
                                         QString loginName_,
-                                        MessageColor fallbackColor_,
+                                        const MessageColor &fallbackColor_,
                                         QColor userColor_);
 
 void MentionElement::addToContainer(MessageLayoutContainer &container,
@@ -1139,6 +1287,17 @@ QJsonObject MentionElement::toJson() const
 std::string_view MentionElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> MentionElement::clone() const
+{
+    auto elem = std::make_unique<MentionElement>(
+        TextElement::CloneConstructorTag{}, this->words_, this->userLoginName_,
+        this->fallbackColor_, this->userColor_);
+
+    elem->setTooltip(this->getTooltip());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 // TIMESTAMP
@@ -1209,6 +1368,13 @@ std::string_view TimestampElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> TimestampElement::clone() const
+{
+    auto elem = std::make_unique<TimestampElement>(this->time_);
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
     : MessageElement(MessageElementFlag::ModeratorTools)
@@ -1258,6 +1424,13 @@ std::string_view TwitchModerationElement::type() const
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
 
+std::unique_ptr<MessageElement> TwitchModerationElement::clone() const
+{
+    auto elem = std::make_unique<TwitchModerationElement>();
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 LinebreakElement::LinebreakElement(MessageElementFlags flags)
     : MessageElement(flags)
 {
@@ -1283,6 +1456,13 @@ QJsonObject LinebreakElement::toJson() const
 std::string_view LinebreakElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> LinebreakElement::clone() const
+{
+    auto elem = std::make_unique<LinebreakElement>(this->getFlags());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
@@ -1327,6 +1507,13 @@ std::string_view ScalingImageElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
 }
+std::unique_ptr<MessageElement> ScalingImageElement::clone() const
+{
+    auto elem =
+        std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
+}
 
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
@@ -1361,6 +1548,13 @@ QJsonObject ReplyCurveElement::toJson() const
 std::string_view ReplyCurveElement::type() const
 {
     return std::remove_pointer_t<decltype(this)>::TYPE;
+}
+
+std::unique_ptr<MessageElement> ReplyCurveElement::clone() const
+{
+    auto elem = std::make_unique<ReplyCurveElement>();
+    elem->setTrailingSpace(this->hasTrailingSpace());
+    return elem;
 }
 
 }  // namespace chatterino

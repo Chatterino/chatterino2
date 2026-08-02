@@ -67,7 +67,7 @@ Plugin::Plugin(QString id, lua_State *state, PluginMeta meta,
 
 Plugin::~Plugin()
 {
-    this->onUnloaded();
+    this->onUnloaded.invoke();
 
     for (auto *timer : this->activeTimeouts)
     {
@@ -173,7 +173,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
         lua_pop(L, 1);
     }
 
-    this->onLog(level, fullMessage);
+    this->onLog.invoke(level, fullMessage);
 }
 
 sol::state_view Plugin::state()

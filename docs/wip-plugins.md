@@ -884,6 +884,7 @@ end)
 ```
 
 The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
+Existing `MessageElement`s in `elements` field of the table will be cloned regardless if they can be created in Lua.
 
 ##### `Message:elements()`
 
@@ -1028,12 +1029,22 @@ Requires the [network permission](#permissions).
 
 #### `Split`
 
-A split. See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
-This holds a `channel` ([Channel](#channel)) that's open in this split.
+A leaf node in the tab-tree of a Chatterino window.
+It shows a `channel` ([Channel](#channel)) along with a header and an input box.
+See [Anatomy of a Chatterino window](https://wiki.chatterino.com/Glossary/#anatomy-of-a-chatterino-window).
 
 #### `SplitContainerNode`
 
-A node in a split container. It has the following fields:
+A node in a split container.
+
+It can be one of the following `type`s (`SplitContainerNodeType`):
+
+- `EmptyRoot`: This is the only node in the `SplitContainer` and it's empty.
+- `Split`: This is a leaf node which holds a `split`.
+- `VerticalContainer`: The children of this node are arranged vertically. Each child's `vertical_flex` indicates how much space it takes.
+- `HorizontalContainer`: The children of this node are arranged horizontally. Each child's `horizontal_flex` indicates how much space it takes.
+
+It has the following fields:
 
 - `type` (`SplitContainerNodeType`) The type of this node
 - `split` ([`Split`](#split)?) The split contained in this code (if this is a split node)
@@ -1047,7 +1058,8 @@ Get all children ([`SplitContainerNode`](#splitcontainernode)) of this node.
 
 #### `SplitContainer`
 
-A container with potentially multiple splits. It has the following fields:
+A container with potentially multiple splits each tab in Chatterino contains one `SplitContainer`.
+It has the following fields:
 
 - `selected_split` ([`Split`](#split)) The currently selected split.
 - `base_node` ([`SplitContainerNode`](#splitcontainernode)) The top level node.
@@ -1057,6 +1069,8 @@ A container with potentially multiple splits. It has the following fields:
 Get all splits ([`Split`](#split)) contained in this container.
 
 #### `SplitNotebook`
+
+The tab bar in a Chatterino window. Each tab is called a "page" which holds a `SplitContainer`.
 
 - `selected_page` ([`SplitContainer`](#splitcontainer)?) The currently selected page.
 - `page_count` (`integer`) The number of pages/tabs.
@@ -1076,7 +1090,17 @@ It has the following fields:
 
 #### `WindowManager`
 
-It has the following fields:
+Conceptually the windows in Chatterino are the root nodes of a tree with split containers as intermediate nodes and splits as leaf nodes.
+
+[`docs/resources/window-graph.lua`](resources/window-graph.lua) is a utility to generate a GraphViz description of the window state.
+For example, the following tab is shown below:
+
+![Screenshot of a Chatterino tab](resources/window-example.png)
+
+GraphViz output:
+![GraphViz output for tab](resources/window-example.svg)
+
+`WindowManager` has the following fields:
 
 - `main_window` ([`Window`](#window)) The main window.
 - `last_selected_window` ([`Window`](#window)) The last selected window (or the main window if none were selected last).
@@ -1088,6 +1112,50 @@ Get all open windows.
 #### `c2.windows`
 
 The global [`WindowManager`](#windowmanager).
+
+#### `DateTime`
+
+A zoned date and time.
+
+##### `DateTime.from_iso_string(str)`
+
+Parse a date from an ISO 8601 string with milliseconds (`yyyy-MM-ddTHH:mm:ss.zzz±hh:mm`)
+
+##### `DateTime:to_iso_string()`
+
+Format the datetime as an ISO string with milliseconds (`yyyy-MM-ddTHH:mm:ss.zzz±hh:mm`)
+
+##### `DateTime:to_iso_string_without_ms()`
+
+Format the datetime as an ISO string without milliseconds (`yyyy-MM-ddTHH:mm:ss±hh:mm`)
+
+##### `DateTime.current_local()`
+
+Get the current datetime in the system's local time zone.
+
+##### `DateTime.current_utc()`
+
+Get the current datetime in the UTC time zone (00:00).
+
+##### `DateTime.from_unix_milliseconds(ts)`
+
+Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+
+The returned date time will be in the local time zone.
+
+##### `DateTime.from_unix_seconds(ts)`
+
+Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+
+The returned date time will be in the local time zone.
+
+##### `DateTime:to_unix_milliseconds()`
+
+Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+
+##### `DateTime:to_unix_seconds()`
+
+Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
 
 ### Input/Output API
 

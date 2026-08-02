@@ -207,7 +207,7 @@ declare namespace c2 {
         highlight_color: string | null;
         frozen: boolean;
         elements(): MessageElement[];
-        append_element(init: MessageElementInit): void;
+        append_element(init: MessageElementInit | MessageElement): void;
     }
 
     interface MessageConstructor {
@@ -229,7 +229,7 @@ declare namespace c2 {
         username_color?: string;
         server_received_time?: number;
         highlight_color?: string | null;
-        elements?: MessageElementInit[];
+        elements?: (MessageElementInit | MessageElement)[];
     }
 
     interface MessageElementBase {
@@ -420,7 +420,7 @@ declare namespace c2 {
     }
 
     interface VipBadgeElement extends Omit<BadgeElement, "type"> {
-        type: "ffz-badge";
+        type: "vip-badge";
     }
 
     interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
@@ -469,7 +469,6 @@ declare namespace c2 {
         ShowInMentions = 0,
         FirstMessage = 0,
         ReplyMessage = 0,
-        ElevatedMessage = 0,
         SubscribedThread = 0,
         CheerMessage = 0,
         LiveUpdatesAdd = 0,
@@ -487,6 +486,8 @@ declare namespace c2 {
         EventSub = 0,
         ModerationAction = 0,
         InvalidReplyTarget = 0,
+        WatchStreak = 0,
+        Announcement = 0,
     }
 
     enum MessageElementFlag {
@@ -664,7 +665,21 @@ declare namespace c2 {
 
     var windows: WindowManager;
 
-    interface ChannelProviderInit {
+    class DateTime {
+        static from_iso_string(str: string): DateTime;
+        to_iso_string(): string;
+        to_iso_string_without_ms(): string;
+
+        static current_local(): DateTime;
+        static current_utc(): DateTime;
+
+        static from_unix_milliseconds(ts: number): DateTime;
+        static from_unix_seconds(ts: number): DateTime;
+        to_unix_milliseconds(): number;
+        to_unix_seconds(): number;
+    }
+
+        interface ChannelProviderInit {
         id: string;
         display_name: string;
         description?: string;

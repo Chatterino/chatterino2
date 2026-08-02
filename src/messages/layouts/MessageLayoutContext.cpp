@@ -56,12 +56,6 @@ void MessagePreferences::connectSettings(Settings *settings,
         },
         holder);
 
-    settings->enableElevatedMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableElevatedMessageHighlight = newValue;
-        },
-        holder);
-
     settings->enableFirstMessageHighlight.connect(
         [this](const auto &newValue) {
             this->enableFirstMessageHighlight = newValue;
@@ -83,6 +77,17 @@ void MessagePreferences::connectSettings(Settings *settings,
     settings->enableAutomodHighlight.connect(
         [this](const auto &newValue) {
             this->enableAutomodHighlight = newValue;
+        },
+        holder);
+
+    settings->enableAnnouncementHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableAnnouncementHighlight = newValue;
+        },
+        holder);
+    settings->enableColoredAnnouncementHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableColoredAnnouncementHighlight = newValue;
         },
         holder);
 

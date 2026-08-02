@@ -821,10 +821,13 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 
 void SplitContainer::popup()
 {
-    Window &window = getApp()->getWindows()->createWindow(WindowType::Popup);
+    Window &window =
+        getApp()->getWindows()->createWindow(WindowType::Popup, {});
     auto *popupContainer = window.getNotebook().getOrAddSelectedPage();
 
-    auto tab = TabDescriptor::fromRootContainer(*this, true);
+    QJsonObject encodedTab;
+    WindowManager::encodeTab(this, true, encodedTab);
+    TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
 
     // custom title
     if (!tab.customTitle_.isEmpty())
@@ -847,13 +850,12 @@ void SplitContainer::popup()
 NodeDescriptor SplitContainer::buildDescriptorRecursively(
     const Node *currentNode) const
 {
-    if (currentNode->children_.empty())
+    if (currentNode->children_.empty() && currentNode->split_)
     {
-        SplitNodeDescriptor descriptor(
-            SplitDescriptor::fromSplit(*currentNode->split_));
-        descriptor.flexH_ = currentNode->flexH_;
-        descriptor.flexV_ = currentNode->flexV_;
-        return descriptor;
+        SplitNodeDescriptor result(currentNode->split_->buildDescriptor());
+        result.flexH_ = currentNode->flexH_;
+        result.flexV_ = currentNode->flexV_;
+        return result;
     }
 
     ContainerNodeDescriptor descriptor;
@@ -864,6 +866,8 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(
         descriptor.items_.push_back(
             this->buildDescriptorRecursively(child.get()));
     }
+    descriptor.flexH_ = currentNode->flexH_;
+    descriptor.flexV_ = currentNode->flexV_;
 
     return descriptor;
 }
@@ -883,7 +887,10 @@ void SplitContainer::applyFromDescriptorRecursively(
         const auto &splitNode = *n;
 
         auto *split = new Split(this);
-        splitNode.applyTo(*split);
+        split->setChannel(splitNode.decodeChannel());
+        split->setModerationMode(splitNode.moderationMode_);
+        split->setFilters(splitNode.filters_);
+        split->setCheckSpellingOverride(splitNode.spellCheckOverride);
 
         this->insertSplit(split);
 
@@ -916,7 +923,10 @@ void SplitContainer::applyFromDescriptorRecursively(
                 }
                 const auto &splitNode = *inner;
                 auto *split = new Split(this);
-                splitNode.applyTo(*split);
+                split->setFilters(splitNode.filters_);
+                split->setChannel(splitNode.decodeChannel());
+                split->setModerationMode(splitNode.moderationMode_);
+                split->setCheckSpellingOverride(splitNode.spellCheckOverride);
 
                 auto node = std::make_shared<Node>();
                 node->parent_ = baseNode;

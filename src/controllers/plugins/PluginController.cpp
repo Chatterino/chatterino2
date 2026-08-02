@@ -14,6 +14,7 @@
 #    include "controllers/plugins/api/Accounts.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/api/ConnectionHandle.hpp"
+#    include "controllers/plugins/api/DateTime.hpp"
 #    include "controllers/plugins/api/DebugLibrary.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
@@ -259,6 +260,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::createAccounts(c2);
     lua::api::windowmanager::createUserTypes(c2);
     lua::api::channelproviders::createUserTypes(c2);
+    lua::api::datetime::createUserTypes(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
@@ -316,6 +318,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
+    this->queueChangeNotification();
 
     if (getApp()->getArgs().safeMode)
     {
@@ -336,7 +339,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     temp->dataDirectory().mkpath(".");
 
     // make sure we capture log messages during load
-    this->onPluginLoaded(temp);
+    this->onPluginLoaded.invoke(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -365,6 +368,7 @@ bool PluginController::reload(const QString &id)
     QDir loadDir = it->second->loadDirectory_;
     // Since Plugin owns the state, it will clean up everything related to it
     this->plugins_.erase(id);
+    this->queueChangeNotification();
     this->tryLoadFromDir(loadDir);
     return true;
 }
@@ -411,9 +415,7 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
 
 bool PluginController::isPluginEnabled(const QString &id)
 {
-    auto vec = getSettings()->enabledPlugins.getValue();
-    auto it = std::find(vec.begin(), vec.end(), id);
-    return it != vec.end();
+    return getSettings()->enabledPlugins.getValue().contains(id);
 }
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
@@ -629,6 +631,22 @@ void PluginController::rememberOrphanedChannel(PluginChannel &chan)
 {
     this->orphanedChannels_[{chan.pluginID(), chan.providerID()}].emplace(
         chan.getName(), chan.weakFromThis());
+}
+
+void PluginController::queueChangeNotification()
+{
+    if (this->changeNotificationQueued)
+    {
+        return;
+    }
+    this->changeNotificationQueued = true;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this] {
+            this->changeNotificationQueued = false;
+            this->onPluginsUpdated.invoke();
+        },
+        Qt::QueuedConnection);
 }
 
 }  // namespace chatterino
