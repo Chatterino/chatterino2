@@ -14,7 +14,6 @@
 
 #    include <memory>
 
-
 namespace chatterino {
 
 namespace lua::api {
