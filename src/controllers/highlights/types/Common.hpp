@@ -38,6 +38,10 @@ QString getName(const AllHighlights &h);
 
 bool isEnabled(const AllHighlights &h);
 
+/// Get the configured sound string - same as stored in the settings
+/// TODO: This currently does not take into consideration the default sound
+QString getSound(const AllHighlights &h);
+
 QUrl getSoundURL(const AllHighlights &h);
 
 bool shouldShowInMentions(const AllHighlights &h);

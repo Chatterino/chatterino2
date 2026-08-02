@@ -5,6 +5,7 @@
 #include "controllers/highlights/ConfigureDialog.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/DisplayBadge.hpp"
@@ -438,30 +439,118 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         }
 
         {
-            auto *lbl = new QLabel("Play sound");
-            auto *w = new QCheckBox;
-            w->setChecked(shouldPlaySound(this->data));
+            // SOUND V2
 
-            QObject::connect(w, &QCheckBox::checkStateChanged,
-                             [&](auto checkstate) {
-                                 std::visit(
-                                     [checkstate](auto &&h) {
-                                         h.outcome.playSound = checkstate;
-                                     },
-                                     this->data);
-                             });
-            l->addRow(lbl, w);
+            auto *w = new QComboBox();
+            auto currentSound = highlights::getSound(this->data);
+            auto *soundURLLabel = new QLabel;
 
-            addSettingMenu(lbl, w, [this, w] {
+            w->addItem("None", u""_s);  // empty string = disable sound
+            for (const auto &[soundID, defaultSound] :
+                 highlights::defaultSounds())
+            {
+                w->addItem(defaultSound.displayName,
+                           QVariant::fromValue(defaultSound));
+            }
+            w->addItem("Custom sound...");
+
+            if (currentSound.isNull())
+            {
+                qInfo() << "XXX: Current sound is null, so trying to set "
+                           "current text to None";
+                w->setCurrentText("None");
+                soundURLLabel->setText("Not playing any sound");
+            }
+            else
+            {
+                qInfo() << "XXX: Current sound is" << currentSound;
+                if (auto d = highlights::resolveDefaultSound(currentSound))
+                {
+                    qInfo() << "XXX: resolved to default sound";
+                    w->setCurrentText(d->displayName);
+                    soundURLLabel->setText(u"Playing bill-tin " %
+                                           d->displayName);
+                }
+                else
+                {
+                    w->setCurrentText("Custom sound...");
+                    soundURLLabel->setText(u"Playing custom " % currentSound);
+                }
+            }
+
+            QObject::connect(
+                w, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                [this, w, soundURLLabel](int index) {
+                    auto data = w->currentData();
+                    if (data.canConvert<highlights::DefaultSound>())
+                    {
+                        auto defaultSound =
+                            data.value<highlights::DefaultSound>();
+                        qInfo()
+                            << "XXX: Default sound" << defaultSound.displayName;
+                        std::visit(
+                            [&defaultSound](auto &&h) {
+                                h.outcome.setSound(defaultSound.id);
+                            },
+                            this->data);
+                        soundURLLabel->setText(u"Playing bill-tin " %
+                                               defaultSound.displayName);
+                        return;
+                    }
+
+                    auto sound = data.toString();
+                    if (sound.isNull())
+                    {
+                        qInfo() << "XXX: CUSTOM SOUND";
+                        // TODO CUSTOM SOUND?
+
+                        auto fileUrl = QFileDialog::getOpenFileUrl(
+                            this, tr("Open Sound"), QUrl(),
+                            tr("Audio Files (*.mp3 *.wav)"));
+                        // soundURLLabel->setText(fileUrl.toLocalFile());
+                        std::visit(
+                            [fileUrl](auto &&h) {
+                                h.outcome.setSound(fileUrl.toString());
+                            },
+                            this->data);
+                        soundURLLabel->setText(u"Playing custom " %
+                                               fileUrl.toString());
+                        return;
+                    }
+
+                    if (sound.isEmpty())
+                    {
+                        qInfo() << "XXX: DISABLE SOUND";
+                        std::visit(
+                            [](auto &&h) {
+                                h.outcome.setSound("");
+                            },
+                            this->data);
+                        soundURLLabel->setText("Not playing any sound");
+                        return;
+                    }
+
+                    qInfo() << "XXX: " << index << w->currentData();
+                });
+
+            auto *playSoundLabel = new QLabel("Play sound");
+            l->addRow(playSoundLabel, w);
+            l->addRow(soundURLLabel);
+
+            // TODO: This doesn't actually reset to default, it resets to default & then sets the ui to show "None", but that might not be the default
+            // How do we resolve this?
+            addSettingMenu(playSoundLabel, w, [w, this] {
                 std::visit(
                     [](auto &&h) {
-                        h.outcome.playSound = std::nullopt;
+                        h.outcome.setSound({});
                     },
                     this->data);
-                w->setChecked(shouldPlaySound(this->data));
+                QSignalBlocker signalBlocker(w);
+                w->setCurrentText("None");
             });
         }
 
+        /*
         {
             auto *ll = new QHBoxLayout;
 
@@ -526,6 +615,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             soundURLLabel->addAction(editAction);
             soundURLLabel->addAction(clearAction);
         }
+        */
 
         group->setLayout(l);
 

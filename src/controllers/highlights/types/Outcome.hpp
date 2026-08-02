@@ -32,13 +32,27 @@ struct Outcome {
     /// On macOS, this will make Chatterino bounce in the taskbar.
     std::optional<bool> alert;
 
-    /// Play a sound.
-    /// If the highlight specifies a "customSoundURL", it will play that, otherwise it will
-    /// play the default highlight sound.
-    std::optional<bool> playSound;
+    /// Play a sound when this highlight is triggered.
+    /// A null sound means whatever the default sound is should be played (controlled by the highlight)
+    /// An empty string means no sound is played
+    /// A string matching one of our built-in sounds means it will play the given resource
+    /// An absolute file URL, probably prefixed with file:/// meaning it will play a custom sound
+    QString sound;
 
-    /// The custom sound URL to play if playSound is enabled.
-    QUrl customSoundURL;
+    void setSound(const QString &newSound);
+
+    /// Transient. Not stored as-is in the JSON.
+    QUrl soundURL;
+
+    QUrl getSoundURLWithDefault(const QStringView &defaultSound) const
+    {
+        if (this->sound.isNull())
+        {
+            return QUrl{defaultSound.toString()};
+        }
+
+        return this->soundURL;
+    }
 
     void setBackgroundColor(std::optional<QColor> color)
     {
@@ -90,6 +104,8 @@ struct Outcome {
 private:
     std::shared_ptr<QColor> resolvedBackgroundColor =
         std::make_shared<QColor>();
+
+    void updateSoundURL();
 };
 
 }  // namespace chatterino::highlights

@@ -42,9 +42,7 @@ HighlightCheck UserHighlight::buildCheck() const
             return HighlightResult{
                 .ids = {highlight.getID().toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .playSound =
-                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
-                .customSoundUrl = highlight.outcome.customSoundURL,
+                .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),
@@ -58,7 +56,7 @@ QDebug operator<<(QDebug dbg, const UserHighlight &v)
     dbg.nospace() << "UserHighlight("
                   << "name:" << v.name << ',' << "username:" << v.username
                   << ',' << "enabled:" << v.enabled << ','
-                  << "playSound:" << v.outcome.playSound << ')';
+                  << "sound:" << v.outcome.soundURL << ')';
 
     return dbg;
 }

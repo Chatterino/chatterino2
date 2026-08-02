@@ -28,17 +28,9 @@ struct HighlightResult {
      **/
     bool alert{false};
 
-    /**
-     * @brief true if highlight should play a notification sound
-     **/
-    bool playSound{false};
-
-    /**
-     * @brief Can be set to a different sound that should play when this highlight is activated
-     *
-     * May only be set if playSound is true
-     **/
-    std::optional<QUrl> customSoundUrl{};
+    /// Sound to play
+    /// Empty or invalid = no sound should play
+    QUrl sound;
 
     /**
      * @brief set if highlight should set a background color

@@ -251,13 +251,10 @@ void Connection::onAutomodMessageHold(
         if (highlighted)
         {
             MessageBuilder::triggerHighlights(
-                channel,
-                {
-                    .customSound =
-                        highlightResult.customSoundUrl.value_or<QUrl>({}),
-                    .playSound = highlightResult.playSound,
-                    .windowAlert = highlightResult.alert,
-                });
+                channel, {
+                             .sound = highlightResult.sound,
+                             .windowAlert = highlightResult.alert,
+                         });
         }
 
         channel->addMessage(header, MessageContext::Original);

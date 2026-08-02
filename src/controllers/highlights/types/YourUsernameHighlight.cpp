@@ -8,6 +8,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/Sounds.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
@@ -60,9 +61,8 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
             return HighlightResult{
                 .ids = {H::ID.toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .playSound =
-                    highlight.outcome.playSound.value_or(H::PLAY_SOUND_DEFAULT),
-                .customSoundUrl = highlight.outcome.customSoundURL,
+                .sound =
+                    highlight.outcome.getSoundURLWithDefault(H::SOUND_DEFAULT),
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),

@@ -210,6 +210,8 @@ set(SOURCE_FILES
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
+        controllers/highlights/Sounds.hpp
+        controllers/highlights/Sounds.cpp
         controllers/highlights/types/AllForward.hpp
         controllers/highlights/types/All.hpp
         controllers/highlights/types/AutomodCaughtHighlight.hpp

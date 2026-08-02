@@ -89,8 +89,7 @@ struct MessageParseArgs {
 };
 
 struct HighlightAlert {
-    QUrl customSound;
-    bool playSound = false;
+    QUrl sound;
     bool windowAlert = false;
 };
 class MessageBuilder

@@ -30,7 +30,6 @@ struct MessageHighlight {
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
     static constexpr bool ALERT_DEFAULT = true;
-    static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     MessageHighlight(QStringView _id);

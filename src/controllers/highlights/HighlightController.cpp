@@ -139,19 +139,11 @@ std::pair<bool, HighlightResult> HighlightController::check(
                 }
             }
 
-            if (checkResult->playSound)
+            if (checkResult->sound.isValid())
             {
-                if (!result.playSound)
+                if (result.sound.isEmpty())
                 {
-                    result.playSound = checkResult->playSound;
-                }
-            }
-
-            if (checkResult->customSoundUrl)
-            {
-                if (!result.customSoundUrl)
-                {
-                    result.customSoundUrl = checkResult->customSoundUrl;
+                    result.sound = checkResult->sound;
                 }
             }
 

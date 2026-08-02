@@ -36,7 +36,6 @@ struct FirstMessageHighlight {
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
     static constexpr bool ALERT_DEFAULT = false;
-    static constexpr bool PLAY_SOUND_DEFAULT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(72, 127, 63, 60);
 
     // Default state:

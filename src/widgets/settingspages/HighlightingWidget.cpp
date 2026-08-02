@@ -150,6 +150,7 @@ HighlightingWidget::HighlightingWidget()
             this->openConfigureDialog(view, vectorIndex,
                                       ConfigureCloseBehaviour::Remove);
         });
+    // TODO: Find a good badge icon
     addMenu->addAction("Badge highlight", [this, view] {
         auto id = highlights::generateID();
         highlights::BadgeHighlight h{id};
@@ -160,7 +161,7 @@ HighlightingWidget::HighlightingWidget()
                                   ConfigureCloseBehaviour::Remove);
     });
     addMenu->addAction(
-        QIcon{":/buttons/filters.svg"}, "Filter highlight", [this, view] {
+        QIcon{":/settings/filters.svg"}, "Filter highlight", [this, view] {
             auto id = highlights::generateID();
             highlights::FilterHighlight h{id};
             h.setFilterText("message.content contains \"my phrase\"");

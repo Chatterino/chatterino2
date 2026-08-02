@@ -41,7 +41,6 @@ struct UncategorizedNotificationHighlight {
     static constexpr bool ALERT_DEFAULT = false;
     // TODO: does not support flash taskbar
     static constexpr bool SUPPORT_ALERT = false;
-    static constexpr bool PLAY_SOUND_DEFAULT = false;
     // TODO: give this its own better color :-)
     static constexpr QColor BACKGROUND_COLOR_DEFAULT =
         QColor(196, 102, 255, 100);

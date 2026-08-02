@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/Sounds.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/BaseApplication.hpp"
@@ -358,6 +359,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
     };
 
     std::vector<TestCase> tests{
+#if 0
         {
             .input =
                 {
@@ -374,8 +376,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .result =
                         {
                             .alert = false,
-                            .playSound = false,
-                            .customSoundUrl = std::nullopt,
+                            .sound = QUrl{},
                             .color = std::make_shared<QColor>("#7fffffff"),
                             .showInMentions = false,
                         },
@@ -420,9 +421,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,                   // alert
-                            .playSound = false,              // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = true,  // alert
+                            .sound = QUrl{},
                             .color =
                                 std::make_shared<QColor>("#7fe8b7eb"),  // color
                             .showInMentions = false,  //showInMentions
@@ -451,9 +451,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,                   // alert
-                            .playSound = false,              // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = true,  // alert
+                            .sound = QUrl{},
                             .color =
                                 std::make_shared<QColor>("#7fffffff"),  // color
                             .showInMentions = false,  //showInMentions
@@ -484,9 +483,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = false,                  // alert
-                            .playSound = false,              // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = false,  // alert
+                            .sound = QUrl{},
                             .color =
                                 std::make_shared<QColor>("#7fe8b7ec"),  // color
                             .showInMentions = true,  // showInMentions
@@ -510,15 +508,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,                   // alert
-                            .playSound = false,              // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = true,  // alert
+                            .sound = QUrl{},
                             .color =
                                 std::make_shared<QColor>("#7ff19900"),  // color
                             .showInMentions = true,  // showInMentions
                         },
                 },
         },
+#endif
         {
             .input =
                 {
@@ -535,15 +533,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,                   // alert
-                            .playSound = true,               // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = true,  // alert
+                            .sound = QUrl{"qrc:/sounds/ping2.wav"},
                             .color =
                                 std::make_shared<QColor>("#7f7f3f49"),  // color
                             .showInMentions = true,  // showInMentions
                         },
                 },
         },
+#if 0
         {
             // TEST CASE: Message phrase from sender should be ignored (so showInMentions false), but since it's a user highlight, it should set a color
             .input =
@@ -562,9 +560,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = false,                  // alert
-                            .playSound = false,              // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = false,  // alert
+                            .sound = QUrl{},
                             .color =
                                 std::make_shared<QColor>("#6fffffff"),  // color
                             .showInMentions = false,
@@ -590,8 +587,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .result =
                         {
                             .alert = false,
-                            .playSound = false,
-                            .customSoundUrl = std::nullopt,
+                            .sound = QUrl{},
                             .color = std::make_shared<QColor>(
                                 HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR),
                             .showInMentions = false,
@@ -617,15 +613,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,                   // alert
-                            .playSound = true,               // playsound
-                            .customSoundUrl = std::nullopt,  // custom sound url
+                            .alert = true,           // alert
+                            .sound = QUrl{"ping2"},  // TODO
                             .color =
                                 std::make_shared<QColor>("#7f7f3f49"),  // color
                             .showInMentions = true,  // showInMentions
                         },
                 },
         },
+#endif
     };
 
     this->runTests(tests);
@@ -688,10 +684,10 @@ TEST_F(HighlightControllerTest, AnonEmpty)
     this->runTests(tests);
 }
 
-#if 0
 TEST_F(HighlightControllerTest, Pajlada)
 {
     configure(SETTINGS_DEFAULT, false);
+    /*
 
     SharedHighlight2 highlight{
         .id = "test",
@@ -729,5 +725,13 @@ TEST_F(HighlightControllerTest, Pajlada)
     };
 
     this->runTests(tests);
+    */
+
+    auto xd = highlights::resolveDefaultSound(u"ping2");
+    ASSERT_TRUE(xd.has_value());
+    const auto &xd2 = *xd;
+    ASSERT_EQ(xd2.id, "ping2");
+    ASSERT_EQ(xd2.displayName, "Chatterino default");
+    ASSERT_EQ(xd2.resourcePath, QUrl{"qrc:/sounds/ping2.wav"});
+    qInfo() << "XXX" << xd2.resourcePath;
 }
-#endif

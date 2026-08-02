@@ -12,6 +12,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -54,6 +55,34 @@ namespace {
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoSettings;
+
+void migrateSound(const BoolSetting &enableSoundSetting,
+                  const QStringSetting &customSoundSetting,
+                  highlights::Outcome &outcome)
+{
+    if (enableSoundSetting.hasValueBeenSet())
+    {
+        if (!enableSoundSetting.getValue())
+        {
+            outcome.setSound("");
+        }
+        else
+        {
+            const auto &customSoundURL = customSoundSetting.getValue();
+            if (customSoundURL.isEmpty())
+            {
+                // Default ping sound
+                outcome.setSound("ping2");
+                assert(
+                    highlights::resolveDefaultSound(outcome.sound).has_value());
+            }
+            else
+            {
+                outcome.setSound(customSoundURL);
+            }
+        }
+    }
+}
 
 }  // namespace
 
@@ -297,16 +326,8 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->p->enableSubHighlightSound;
-            s.hasValueBeenSet())
-        {
-            h.outcome.playSound = s.getValue();
-        }
-
-        if (const auto &s = this->p->subHighlightSoundUrl; s.hasValueBeenSet())
-        {
-            h.outcome.customSoundURL = s.getValue();
-        }
+        migrateSound(this->p->enableSubHighlightSound,
+                     this->p->subHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->subHighlightColor; s.hasValueBeenSet())
         {
@@ -333,17 +354,8 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->p->enableWhisperHighlightSound;
-            s.hasValueBeenSet())
-        {
-            h.outcome.playSound = s.getValue();
-        }
-
-        if (const auto &s = this->p->whisperHighlightSoundUrl;
-            s.hasValueBeenSet())
-        {
-            h.outcome.customSoundURL = s.getValue();
-        }
+        migrateSound(this->p->enableWhisperHighlightSound,
+                     this->p->whisperHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->whisperHighlightColor; s.hasValueBeenSet())
         {
@@ -373,16 +385,8 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->p->enableSelfHighlightSound;
-            s.hasValueBeenSet())
-        {
-            h.outcome.playSound = s.getValue();
-        }
-
-        if (const auto &s = this->p->selfHighlightSoundUrl; s.hasValueBeenSet())
-        {
-            h.outcome.customSoundURL = s.getValue();
-        }
+        migrateSound(this->p->enableSelfHighlightSound,
+                     this->p->selfHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->selfHighlightColor; s.hasValueBeenSet())
         {
@@ -413,10 +417,22 @@ void Settings::migrateHighlights(bool isTest)
         to.outcome.alert = from.hasAlert;
         to.setRegex(from.isRegex);
         to.setCaseSensitive(from.isCaseSensitive);
-        to.outcome.playSound = from.hasSound;
-        if (!from.soundUrl.isEmpty())
+        if (from.hasSound)
         {
-            to.outcome.customSoundURL = from.soundUrl;
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
         }
         if (auto fromColor = from.color; fromColor.isValid())
         {
@@ -446,17 +462,8 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->p->enableAutomodHighlightSound;
-            s.hasValueBeenSet())
-        {
-            h.outcome.playSound = s.getValue();
-        }
-
-        if (const auto &s = this->p->automodHighlightSoundUrl;
-            s.hasValueBeenSet())
-        {
-            h.outcome.customSoundURL = s.getValue();
-        }
+        migrateSound(this->p->enableAutomodHighlightSound,
+                     this->p->automodHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
         {
@@ -512,10 +519,22 @@ void Settings::migrateHighlights(bool isTest)
         to.setUsername(from.pattern);
         to.outcome.showInMentions = from.showInMentions;
         to.outcome.alert = from.hasAlert;
-        to.outcome.playSound = from.hasSound;
-        if (!from.soundUrl.isEmpty())
+        if (from.hasSound)
         {
-            to.outcome.customSoundURL = from.soundUrl;
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
         }
         if (auto fromColor = from.color; fromColor.isValid())
         {
@@ -545,17 +564,8 @@ void Settings::migrateHighlights(bool isTest)
             h.outcome.alert = s.getValue();
         }
 
-        if (const auto &s = this->p->enableThreadHighlightSound;
-            s.hasValueBeenSet())
-        {
-            h.outcome.playSound = s.getValue();
-        }
-
-        if (const auto &s = this->p->threadHighlightSoundUrl;
-            s.hasValueBeenSet())
-        {
-            h.outcome.customSoundURL = s.getValue();
-        }
+        migrateSound(this->p->enableThreadHighlightSound,
+                     this->p->threadHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->threadHighlightColor; s.hasValueBeenSet())
         {
@@ -585,8 +595,23 @@ void Settings::migrateHighlights(bool isTest)
         to.setDisplayName(from.displayName);
         to.outcome.showInMentions = from.showInMentions;
         to.outcome.alert = from.hasAlert;
-        to.outcome.playSound = from.hasSound;
-        to.outcome.customSoundURL = from.soundUrl;
+        if (from.hasSound)
+        {
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
+        }
         if (auto fromColor = from.color; fromColor.isValid())
         {
             to.outcome.setBackgroundColor(fromColor);
