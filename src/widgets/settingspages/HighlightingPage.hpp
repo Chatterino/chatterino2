@@ -5,6 +5,7 @@
 #pragma once
 
 #include "widgets/settingspages/SettingsPage.hpp"
+#include "util/DisplayBadge.hpp"
 
 #include <QAbstractTableModel>
 #include <QTimer>
@@ -23,6 +24,7 @@ public:
 
 private:
     enum HighlightTab { Messages = 0, Users = 1, Badges = 2, Blacklist = 3 };
+    QList<DisplayBadge> badges_;
 
     QTimer disabledUsersChangedTimer_;
 
