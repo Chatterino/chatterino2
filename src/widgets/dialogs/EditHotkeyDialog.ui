@@ -116,6 +116,22 @@ see this message :)</string>
       <widget class="QKeySequenceEdit" name="keyComboEdit"/>
      </item>
      <item row="4" column="0">
+      <widget class="QLabel" name="keyComboLabelAlt">
+       <property name="toolTip">
+        <string>Pressing this keybinding will invoke the hotkey</string>
+       </property>
+       <property name="text">
+        <string>Keybinding alt:</string>
+       </property>
+       <property name="buddy">
+        <cstring>keyComboEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QKeySequenceEdit" name="keyComboEditAlt"/>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="easyArgsLabel">
        <property name="toolTip">
         <string>You are not supposed to see this, please report this!</string>
@@ -125,7 +141,7 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="argumentsLabel">
        <property name="text">
         <string>Arguments:</string>
@@ -135,7 +151,7 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QLabel" name="argumentsDescription">
        <property name="text">
         <string>You should never see this message :)</string>
@@ -154,6 +170,19 @@ see this message :)</string>
      </item>
      <item row="4" column="1">
       <widget class="QComboBox" name="easyArgsPicker">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentText">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="easyArgsPickerAlt">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
