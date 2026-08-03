@@ -11,10 +11,14 @@ if (Sol2_FOUND)
     )
     target_compile_definitions(Sol2 INTERFACE 
         SOL_ALL_SAFETIES_ON=1
-        SOL_USING_CXX_LUA=1
+        SOL_USING_CXX_LUA=0
         SOL_NO_NIL=0
     )
-    target_link_libraries(Sol2 INTERFACE lua)
+    if(TARGET Lua::Lua)
+        target_link_libraries(Sol2 INTERFACE Lua::Lua)
+    else()
+        target_link_libraries(Sol2 INTERFACE lua)
+    endif()
     add_library(sol2::sol2 ALIAS Sol2)
 endif ()
 
