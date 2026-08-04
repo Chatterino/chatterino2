@@ -293,18 +293,18 @@ void MiniaudioBackend::play(const QUrl &sound)
                 qCWarning(chatterinoSound) << "Failed to play sound" << sound
                                            << soundPath << ":" << result;
             }
-
-            return;
         }
-
-        // Play default sound, loaded from our resources in the constructor
-        auto &snd = this->defaultPingSounds[++i % NUM_SOUNDS];
-        ma_sound_seek_to_pcm_frame(snd.get(), 0);
-        result = ma_sound_start(snd.get());
-        if (result != MA_SUCCESS)
+        else
         {
-            qCWarning(chatterinoSound)
-                << "Failed to play default ping" << result;
+            // Play default sound, loaded from our resources in the constructor
+            auto &snd = this->defaultPingSounds[++i % NUM_SOUNDS];
+            ma_sound_seek_to_pcm_frame(snd.get(), 0);
+            result = ma_sound_start(snd.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Failed to play default ping" << result;
+            }
         }
 
         if (!this->keepEngineAlive)

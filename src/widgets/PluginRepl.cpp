@@ -683,8 +683,8 @@ void PluginRepl::setPlugin(Plugin *plugin)
 
     if (!plugin)
     {
-        this->pluginDestroyConn.release();
-        this->pluginLogConn.release();
+        this->pluginDestroyConn = pajlada::Signals::ScopedConnection{};
+        this->pluginLogConn = pajlada::Signals::ScopedConnection{};
         return;
     }
 

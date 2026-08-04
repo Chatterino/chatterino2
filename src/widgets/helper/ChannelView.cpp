@@ -1172,6 +1172,15 @@ bool ChannelView::hasSourceChannel() const
     return this->sourceChannel_ != nullptr;
 }
 
+ChannelPtr ChannelView::effectiveSourceChannel() const
+{
+    if (this->sourceChannel_)
+    {
+        return this->sourceChannel_;
+    }
+    return this->underlyingChannel_;
+}
+
 void ChannelView::messageAppended(MessagePtr &message,
                                   std::optional<MessageFlags> overridingFlags)
 {
@@ -2290,6 +2299,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (this->isDoubleClick_)
         {
             this->isDoubleClick_ = false;
+
+            if (!this->selection_.isEmpty())
+            {
+                copyToSelection(this->getSelectedText());
+            }
+
             // Was actually not a wanted triple-click
             if (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
                                                event->globalPosition())) > 10.F)
@@ -2301,6 +2316,11 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         else if (this->isLeftMouseDown_)
         {
             this->isLeftMouseDown_ = false;
+
+            if (!this->selection_.isEmpty())
+            {
+                copyToSelection(this->getSelectedText());
+            }
 
             if (std::abs(distanceBetweenPoints(this->lastLeftPressPosition_,
                                                event->globalPosition())) > 15.F)
@@ -2315,6 +2335,10 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                  10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
+                if (!this->selection_.isEmpty())
+                {
+                    copyToSelection(this->getSelectedText());
+                }
                 return;
             }
         }
@@ -2369,9 +2393,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                     MessageElementFlag::Username))
             {
                 const auto userName = hoverLayoutElement->getLink().value;
-                const auto type = this->hasSourceChannel()
-                                      ? this->sourceChannel_->getType()
-                                      : this->channel_->getType();
+                const auto type = this->effectiveSourceChannel()->getType();
                 switch (type)
                 {
                     case Channel::Type::TwitchWhispers:
@@ -2440,6 +2462,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 return;
             }
 
+            this->elementClicked.invoke(hoveredElement, event->modifiers());
+
             const auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
@@ -2449,7 +2473,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             // Invoke to signal from EmotePopup.
             if (link.type == Link::InsertText)
             {
-                this->linkClicked.invoke(link);
+                this->linkClicked.invoke(link, event->modifiers());
 
                 if (this->context_ == Context::None)
                 {
@@ -2613,6 +2637,8 @@ void ChannelView::addContextMenuItems(
     // Add executable command options
     this->addCommandExecutionContextMenuItems(menu, layout);
 
+    this->messageMenuCreated.invoke(menu, hoveredElement);
+
     menu->addSeparator();
 
     getApp()->getWindows()->channelViewContextMenuRequested.invoke(
@@ -2755,8 +2781,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         }
     }
 
-    auto *twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+    auto chan = this->effectiveSourceChannel();
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
         twitchChannel->hasModRights())
     {
@@ -2768,6 +2794,30 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             "&Delete message", [twitchChannel, id = layout->getMessage()->id] {
                 twitchChannel->deleteMessagesAs(
                     id, getApp()->getAccounts()->twitch.getCurrent().get());
+            });
+
+        auto *pinAction = moderateMenu->addAction("&Pin");
+        auto *pinMenu = new QMenu(moderateMenu);
+        pinAction->setMenu(pinMenu);
+        auto pinFor = [&](std::optional<std::chrono::seconds> dur) {
+            return [twitchChannel, id = layout->getMessage()->id, dur,
+                    text = layout->getMessage()->messageText] {
+                twitchChannel->pinMessageAs(
+                    id, dur, *getApp()->getAccounts()->twitch.getCurrent(),
+                    text);
+            };
+        };
+        pinMenu->addAction("&Until stream ends", this, pinFor(std::nullopt));
+        pinMenu->addAction("&1 minute", this, pinFor(std::chrono::minutes(1)));
+        pinMenu->addAction("10 minutes", this,
+                           pinFor(std::chrono::minutes(10)));
+        pinMenu->addAction("&30 minutes", this,
+                           pinFor(std::chrono::minutes(30)));
+
+        moderateMenu->addAction(
+            "&Unpin", this, [twitchChannel, id = layout->getMessage()->id] {
+                twitchChannel->unpinMessageAs(
+                    id, *getApp()->getAccounts()->twitch.getCurrent());
             });
     }
 
@@ -2920,18 +2970,9 @@ void ChannelView::addCommandExecutionContextMenuItems(
         inputText.push_front(cmd.name + " ");
 
         cmdMenu->addAction(cmd.name, [this, layout, cmd, inputText] {
-            ChannelPtr channel;
-
             /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
              * we would still like to execute commands from them. Use their source channel instead if applicable. */
-            if (this->hasSourceChannel())
-            {
-                channel = this->sourceChannel();
-            }
-            else
-            {
-                channel = this->underlyingChannel_;
-            }
+            ChannelPtr channel = this->effectiveSourceChannel();
             auto *split = dynamic_cast<Split *>(this->parentWidget());
             QString userText;
             if (split)
@@ -3031,8 +3072,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 
     auto contextChannel =
         getApp()->getTwitch()->getChannelOrEmpty(alternativePopoutChannel);
-    auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
-                                                   : this->underlyingChannel_;
+    auto openingChannel = this->effectiveSourceChannel();
     userPopup->setData(userName, contextChannel, openingChannel);
 
     QPoint offset(userPopup->width() / 3, userPopup->height() / 5);
@@ -3101,18 +3141,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
-            ChannelPtr channel = this->underlyingChannel_;
-            auto *searchPopup =
-                dynamic_cast<SearchPopup *>(this->parentWidget());
-            if (searchPopup != nullptr)
-            {
-                auto *split =
-                    dynamic_cast<Split *>(searchPopup->parentWidget());
-                if (split != nullptr)
-                {
-                    channel = split->getChannel();
-                }
-            }
+            ChannelPtr channel = this->effectiveSourceChannel();
 
             // Execute command clicking a moderator button
             value = getApp()->getCommands()->execCustomCommand(
