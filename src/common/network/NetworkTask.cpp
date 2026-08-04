@@ -194,6 +194,19 @@ void NetworkTask::timeout()
         << this->data_->typeString() << "[timed out]"
         << this->data_->request.url().toString();
 
+    // If we have a stuck connection, QNetworkAccessManager does not have
+    // any means to detect it as stuck and may try to keep using it to issue
+    // HTTP requests. This will cause all issued requests to fail with
+    // a timeout and no indication that they were probably never delivered
+    // to the remote server.
+    //
+    // Calling clearConnectionCache() removes all connections from cache,
+    // forcing QNetworkAccessManager internals to open up a new healthy
+    // connection.
+    //
+    // Since we have no good way of detecting if the request timed out because
+    // of a stuck connection, clearing the connection cache on every timeout
+    // seems like the only way how to reliably recover from such a situation.
     NetworkManager::accessManager->clearConnectionCache();
 
     this->data_->emitError({NetworkResult::NetworkError::TimeoutError, {}, {}});
