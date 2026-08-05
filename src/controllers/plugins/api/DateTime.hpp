@@ -55,7 +55,11 @@ function c2.DateTime:to_unix_milliseconds() end
 ---@return number
 function c2.DateTime:to_unix_seconds() end
 
----Check if the datetime is in the user's local/system timezone.
+---Check if the datetime is a local time.
+---
+---Local times are represented without a timezone.
+---Whenever the timezone is needed (e.g. for comparison) it is queried from the system.
+---This is distinct from a date time with your system timezone.
 ---@return boolean
 function c2.DateTime:is_local() end
 
@@ -63,7 +67,10 @@ function c2.DateTime:is_local() end
 ---@return boolean
 function c2.DateTime:is_utc() end
 
----Returns a copy of this datetime converted to the user's local/system timezone.
+---Returns a copy of this datetime converted to the user's local timezone.
+---
+---Local time is represented without a timezone.
+---That is `1970-01-01T00:00:00` is a local time but `1970-01-01T00:00:00Z` is not.
 ---@return c2.DateTime
 function c2.DateTime:to_local() end
 
