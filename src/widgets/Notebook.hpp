@@ -16,6 +16,7 @@
 #include <QWidget>
 
 #include <functional>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -216,7 +217,7 @@ private:
     void resizeAddButton();
 
     bool containsPage(QWidget *page) const;
-    Item *findItem(QWidget *page);
+    std::optional<Item> findItem(QWidget *page);
 
     void pruneInvalidHistoryEntries();
 
