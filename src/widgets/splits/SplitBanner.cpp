@@ -22,6 +22,8 @@ SplitBanner::SplitBanner(QWidget *parent)
     : BaseWidget(parent)
     , headerLabel_(new QLabel(this))
     , countdownLabel_(new QLabel(this))
+    , headerRow_(new QHBoxLayout())
+    , contentBox_(new QVBoxLayout())
     , countdownTimer_(new QTimer(this))
     , autoHideTimer_(new QTimer(this))
 {
@@ -31,11 +33,9 @@ SplitBanner::SplitBanner(QWidget *parent)
     outerBox->setContentsMargins(0, 0, 0, 0);
     outerBox->setSpacing(0);
 
-    this->contentBox_ = new QVBoxLayout();
     this->contentBox_->setContentsMargins(8, 6, 8, 6);
     this->contentBox_->setSpacing(3);
 
-    this->headerRow_ = new QHBoxLayout();
     this->headerRow_->setSpacing(4);
     this->headerRow_->addWidget(this->headerLabel_);
     this->headerRow_->addStretch(1);
