@@ -149,70 +149,132 @@ template <detail::IsEnum E, typename Tag>
     return {};
 }
 
-}  // namespace detail
-
-/// Get the display name of a specific enum value as a QStringView at compile time.
-///
-/// If the enum type provides a qmagicenumDisplayName specialization, it is used. Otherwise, fall back to magic_enum's name.
-///
-/// @tparam V Enum value
-/// @returns Display name as QStringView, or name as fallback.
-template <detail::IsEnum auto V>
-[[nodiscard]] consteval QStringView enumDisplayName() noexcept
-{
-    if constexpr (requires { qmagicenumDisplayName(V); })
+template <typename Tag, template <typename T> typename IsTagged>
+struct TaggedResolver {
+    /// Get the tagged enum value as a QStringView at compile time.
+    ///
+    /// If the enum type doesn't have a specialization for the tag, this falls
+    /// back to magic_enum's name.
+    ///
+    /// \tparam V Enum value
+    /// \returns Tagged name or a fallback.
+    template <detail::IsEnum auto V>
+    [[nodiscard]] static consteval QStringView enumName() noexcept
     {
-        return detail::enumTaggedData<V, detail::tag::DisplayName>();
+        if constexpr (IsTagged<std::decay_t<decltype(V)>>::value)
+        {
+            return detail::enumTaggedData<V, Tag>();
+        }
+        else
+        {
+            return qmagicenum::enumName<V>();
+        }
     }
 
-    // Fall back to our qmagicenum "enum name" implementation
-    return enumName<V>();
-}
+    /// Get the tagged enum value as a QStringView.
+    ///
+    /// If the enum type doesn't have a specialization for the tag, this falls
+    /// back to magic_enum's name.
+    template <detail::IsEnum E>
+    [[nodiscard]] static constexpr QStringView enumName(E value) noexcept
+    {
+        using D = std::decay_t<E>;
+        if constexpr (IsTagged<D>::value)
+        {
+            return detail::enumTaggedData<D, Tag>(value);
+        }
+        else
+        {
+            return qmagicenum::enumName<D>(value);
+        }
+    }
 
-/// Get the display name of a runtime enum value as a QStringView.
-///
-/// If the enum type provides a qmagicenumDisplayName specialization, it is used. Otherwise, fall back to magic_enum's name.
-///
-/// @param value Enum value
-/// @returns Display name as QStringView, or name as fallback, or an empty string if not available.
-template <detail::IsEnum E>
-[[nodiscard]] constexpr QStringView enumDisplayName(E value) noexcept
-{
-    if constexpr (requires { qmagicenumDisplayName(value); })
+    /// Get the tagged enum value as a QString.
+    ///
+    /// If the enum type doesn't have a specialization for the tag, this falls
+    /// back to magic_enum's name.
+    template <detail::IsEnum auto V>
+    [[nodiscard]] static QString enumNameString() noexcept
+    {
+        return detail::staticString(TaggedResolver::enumName<V>());
+    }
+
+    /// Get the tagged enum value as a QString.
+    ///
+    /// If the enum type doesn't have a specialization for the tag, this falls
+    /// back to magic_enum's name.
+    template <detail::IsEnum E>
+    [[nodiscard]] static QString enumNameString(E value) noexcept
+    {
+        return detail::staticString(TaggedResolver::enumName<E>(value));
+    }
+
+    /// Get the enum value from a name.
+    ///
+    /// If the enum is tagged, the tagged names will be checked. Otherwise,
+    /// magic_enum's name is checked.
+    template <detail::IsEnum E, typename BinaryPredicate = std::equal_to<>>
+    [[nodiscard]] static constexpr std::optional<std::decay_t<E>>
+        enumCast(QStringView name, BinaryPredicate p = {}) noexcept(
+            detail::isNothrowInvocable<BinaryPredicate>())
+        requires std::is_invocable_r_v<bool, BinaryPredicate, QChar, QChar>
     {
         using D = std::decay_t<E>;
 
-        return detail::enumTaggedData<D, detail::tag::DisplayName>(value);
+        if constexpr (IsTagged<D>::value)
+        {
+            for (std::size_t i = 0; i < magic_enum::enum_count<D>(); i++)
+            {
+                if (detail::eq(name, detail::INDEXED_TAGGED_DATA<E, Tag>[i], p))
+                {
+                    return magic_enum::enum_value<D>(i);
+                }
+            }
+            return std::nullopt;  // Invalid value or out of range.
+        }
+        else
+        {
+            return qmagicenum::enumCast<D, BinaryPredicate>(name, p);
+        }
     }
 
-    // Fall back to our qmagicenum "enum name" implementation
-    return enumName(value);
-}
+    /// Get the enum names.
+    ///
+    /// If the enum is tagged, the tagged names will be returned. Otherwise,
+    /// magic_enum's names.
+    template <detail::IsEnum E>
+    [[nodiscard]] static constexpr auto enumNames() noexcept
+    {
+        using D = std::decay_t<E>;
+        if constexpr (IsTagged<D>::value)
+        {
+            return detail::INDEXED_TAGGED_DATA<D, Tag>;
+        }
+        else
+        {
+            return qmagicenum::enumNames<D>();
+        }
+    }
+};
 
-/// Get the display name of a specific enum value as a static QString.
-///
-/// If the enum type provides a qmagicenumDisplayName specialization, it is used. Otherwise, fall back to magic_enum's name.
-///
-/// @tparam V Enum value
-/// @returns Display name as QString. The returned string is static.
-template <detail::IsEnum auto V>
-[[nodiscard]] inline QString enumDisplayNameString() noexcept
-{
-    return detail::staticString(enumDisplayName<V>());
-}
+namespace tag {
 
-/// Get the display name of a runtime enum value as a static QString.
-///
-/// If the enum type provides a qmagicenumDisplayName specialization, it is used. Otherwise, fall back to magic_enum's name.
-///
-/// @param value Enum value
-/// @returns Display name as QString. Returns an empty string if value is invalid. The returned string is static.
-template <detail::IsEnum E>
-[[nodiscard]] inline QString enumDisplayNameString(E value) noexcept
-{
-    using D = std::decay_t<E>;
+template <typename T>
+struct HasDisplayName : std::false_type {
+};
+template <typename T>
+    requires(requires(T v) { qmagicenumDisplayName(v); })
+struct HasDisplayName<T> : std::true_type {
+};
 
-    return detail::staticString(enumDisplayName<D>(value));
-}
+struct DisplayNameResolver : TaggedResolver<DisplayName, HasDisplayName> {
+};
+
+}  // namespace tag
+
+}  // namespace detail
+
+/// Display names specialized with `qmagicenumDisplayName()`.
+using DisplayName = detail::tag::DisplayNameResolver;
 
 }  // namespace chatterino::qmagicenum
