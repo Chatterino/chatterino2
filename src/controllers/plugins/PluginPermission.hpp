@@ -31,6 +31,8 @@ struct PluginPermission {
     }
 
     QString toHtml() const;
+
+    QJsonObject toJson() const;
 };
 
 }  // namespace chatterino

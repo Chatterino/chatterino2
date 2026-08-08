@@ -303,6 +303,10 @@ set(SOURCE_FILES
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/PluginRef.cpp
         controllers/plugins/PluginRef.hpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/PluginRepository.cpp
+        controllers/plugins/RemotePlugin.cpp
+        controllers/plugins/RemotePlugin.hpp
         controllers/plugins/SolTypes.cpp
         controllers/plugins/SolTypes.hpp
 
@@ -724,6 +728,8 @@ set(SOURCE_FILES
         widgets/dialogs/LoginDialog.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
+        widgets/dialogs/RemotePluginDialog.cpp
+        widgets/dialogs/RemotePluginDialog.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
         widgets/dialogs/ReplyThreadPopup.hpp
         widgets/dialogs/RestoreBackupsDialog.cpp
