@@ -8,12 +8,14 @@
 #    include "Application.hpp"
 #    include "common/Args.hpp"
 #    include "controllers/accounts/AccountController.hpp"
+#    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 #    include "util/Helpers.hpp"
 #    include "util/LayoutCreator.hpp"
 #    include "util/RemoveScrollAreaBackground.hpp"
+#    include "util/Variant.hpp"
 #    include "widgets/PluginRepl.hpp"
 #    include "widgets/settingspages/SettingWidget.hpp"
 
@@ -121,54 +123,53 @@ void PluginsPage::rebuildContent()
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
     layout->setParent(this->dataFrame_);
-    for (const auto &[id, plugin] : getApp()->getPlugins()->plugins())
+    for (const auto &[id, plugin] : getApp()->getPlugins()->allPlugins())
     {
+        const auto &meta = std::visit(variant::Overloaded{
+                                          [&](const PluginPtr &plugin) {
+                                              return plugin->meta;
+                                          },
+                                          [&](const UnloadedPlugin &plugin) {
+                                              return plugin.meta;
+                                          },
+                                      },
+                                      plugin);
+
         auto groupHeaderText =
             QString("%1 (%2, from %3)")
-                .arg(plugin->meta.name,
-                     QString::fromStdString(plugin->meta.version.to_string()),
-                     id);
+                .arg(meta.name,
+                     QString::fromStdString(meta.version.to_string()), id);
         auto groupBox = layout.emplace<QGroupBox>(groupHeaderText);
         groupBox->setParent(this->dataFrame_);
+
         auto pluginEntry = groupBox.setLayoutType<QFormLayout>();
         pluginEntry->setParent(groupBox.getElement());
 
-        if (!plugin->meta.isValid())
+        if (!meta.isValid())
         {
             QString errors = "<ul>";
-            for (const auto &err : plugin->meta.errors)
+            for (const auto &err : meta.errors)
             {
                 errors += "<li>" + err.toHtmlEscaped() + "</li>";
             }
             errors += "</ul>";
 
-            auto *warningLabel = new QLabel(
-                "There were errors while loading metadata for this plugin:" +
-                    errors,
-                this->dataFrame_);
+            auto *warningLabel = new QLabel("There were errors while loading "
+                                            "metadata for this plugin:" +
+                                                errors,
+                                            this->dataFrame_);
             warningLabel->setTextFormat(Qt::RichText);
             warningLabel->setStyleSheet("color: #f00");
             pluginEntry->addRow(warningLabel);
         }
-        if (!plugin->error().isNull())
-        {
-            auto *errorLabel =
-                new QLabel("There was an error while loading this plugin: " +
-                               plugin->error(),
-                           this->dataFrame_);
-            errorLabel->setStyleSheet("color: #f00");
-            errorLabel->setWordWrap(true);
-            pluginEntry->addRow(errorLabel);
-        }
 
-        auto *description =
-            new QLabel(plugin->meta.description, this->dataFrame_);
+        auto *description = new QLabel(meta.description, this->dataFrame_);
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
         pluginEntry->addRow(description);
 
         QString authorsTxt;
-        for (const auto &author : plugin->meta.authors)
+        for (const auto &author : meta.authors)
         {
             if (!authorsTxt.isEmpty())
             {
@@ -180,32 +181,49 @@ void PluginsPage::rebuildContent()
         pluginEntry->addRow("Authors",
                             new QLabel(authorsTxt, this->dataFrame_));
 
-        if (!plugin->meta.homepage.isEmpty())
+        if (!meta.homepage.isEmpty())
         {
-            auto *homepage = new QLabel(formatRichLink(plugin->meta.homepage),
-                                        this->dataFrame_);
+            auto *homepage =
+                new QLabel(formatRichLink(meta.homepage), this->dataFrame_);
             homepage->setOpenExternalLinks(true);
             pluginEntry->addRow("Homepage", homepage);
         }
         pluginEntry->addRow("License",
-                            new QLabel(plugin->meta.license, this->dataFrame_));
+                            new QLabel(meta.license, this->dataFrame_));
 
-        QString commandsTxt;
-        for (const auto &cmdName : plugin->listRegisteredCommands())
+        if (const auto *oValidPlugin = std::get_if<PluginPtr>(&plugin))
         {
-            if (!commandsTxt.isEmpty())
+            const auto &validPlugin = *oValidPlugin;
+
+            if (!validPlugin->error().isNull())
             {
-                commandsTxt += ", ";
+                auto *errorLabel = new QLabel(
+                    "There was an error while loading this plugin: " +
+                        validPlugin->error(),
+                    this->dataFrame_);
+                errorLabel->setStyleSheet("color: #f00");
+                errorLabel->setWordWrap(true);
+                pluginEntry->addRow(errorLabel);
             }
 
-            commandsTxt += cmdName;
+            QString commandsTxt;
+            for (const auto &cmdName : validPlugin->listRegisteredCommands())
+            {
+                if (!commandsTxt.isEmpty())
+                {
+                    commandsTxt += ", ";
+                }
+
+                commandsTxt += cmdName;
+            }
+            pluginEntry->addRow("Commands",
+                                new QLabel(commandsTxt, this->dataFrame_));
         }
-        pluginEntry->addRow("Commands",
-                            new QLabel(commandsTxt, this->dataFrame_));
-        if (!plugin->meta.permissions.empty())
+
+        if (!meta.permissions.empty())
         {
             QString perms = "<ul>";
-            for (const auto &perm : plugin->meta.permissions)
+            for (const auto &perm : meta.permissions)
             {
                 perms += "<li>" + perm.toHtml() + "</li>";
             }
@@ -217,30 +235,34 @@ void PluginsPage::rebuildContent()
             pluginEntry->addRow(lbl);
         }
 
-        if (plugin->meta.isValid())
+        QString toggleTxt = "Enable";
+        if (PluginController::isPluginEnabled(id))
         {
-            QString toggleTxt = "Enable";
-            if (PluginController::isPluginEnabled(id))
-            {
-                toggleTxt = "Disable";
-            }
+            toggleTxt = "Disable";
+        }
 
-            auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
-            QObject::connect(
-                toggleButton, &QPushButton::pressed, [name = id, this]() {
-                    QStringList val = getSettings()->enabledPlugins;
-                    if (PluginController::isPluginEnabled(name))
-                    {
-                        val.removeAll(name);
-                    }
-                    else
-                    {
-                        val.push_back(name);
-                    }
-                    getSettings()->enabledPlugins.setValue(val);
-                    getApp()->getPlugins()->reload(name);
-                });
-            pluginEntry->addRow(toggleButton);
+        auto *toggleButton = new QPushButton(toggleTxt, this->dataFrame_);
+        QObject::connect(toggleButton, &QPushButton::pressed, [name = id]() {
+            QStringList val = getSettings()->enabledPlugins;
+            if (PluginController::isPluginEnabled(name))
+            {
+                val.removeAll(name);
+            }
+            else
+            {
+                val.push_back(name);
+            }
+            getSettings()->enabledPlugins.setValue(val);
+            getApp()->getPlugins()->reload(name);
+        });
+        pluginEntry->addRow(toggleButton);
+        if (meta.isValid())
+        {
+            toggleButton->setEnabled(true);
+        }
+        else
+        {
+            toggleButton->setEnabled(false);
         }
 
         auto *reloadButton = new QPushButton("Reload", this->dataFrame_);

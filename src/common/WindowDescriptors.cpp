@@ -15,6 +15,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include <span>
+
 using namespace Qt::Literals;
 
 namespace chatterino {

@@ -688,6 +688,11 @@ declare namespace c2 {
         static from_unix_seconds(ts: number): DateTime;
         to_unix_milliseconds(): number;
         to_unix_seconds(): number;
+
+        is_local(): boolean;
+        is_utc(): boolean;
+        to_local(): DateTime;
+        to_utc(): DateTime;
     }
 
     class Menu {

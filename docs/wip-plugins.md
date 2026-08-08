@@ -1040,6 +1040,27 @@ Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in mil
 
 Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
 
+##### `DateTime:is_local()`
+
+Check if the datetime is in the user's local timezone.
+Local times are represented without a timezone. Whenever the timezone is needed
+(e.g. for comparison) it is queried from the system. This is distinct from a
+datetime with your system timezone.
+
+##### `DateTime:is_utc()`
+
+Check if the datetime is in UTC.
+
+##### `DateTime:to_local()`
+
+Returns a copy of this datetime converted to the user's local timezone.
+A local time is represented without a timezone. That is `1970-01-01T00:00:00` is
+a local time but `1970-01-01T00:00:00Z` is not.
+
+##### `DateTime:to_utc()`
+
+Returns a copy of this datetime converted to UTC.
+
 #### `Menu`
 
 A generic menu used for context menus.
