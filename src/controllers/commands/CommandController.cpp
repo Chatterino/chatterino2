@@ -488,6 +488,9 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-eventsub", &commands::eventsub);
 
     this->registerCommand("/debug-test", &commands::debugTest);
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->registerCommand("/debug-plugin", &commands::debugPlugin);
+#endif
 
 #ifdef Q_OS_WIN
     this->registerCommand("/debug-relaunch-with-console",

@@ -32,6 +32,8 @@
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 #    include "singletons/WindowManager.hpp"
+#    include "util/FilesystemHelpers.hpp"
+#    include "util/PostToThread.hpp"
 #    include "widgets/splits/SplitContainer.hpp"
 #    include "widgets/Window.hpp"
 
@@ -51,8 +53,11 @@
 
 namespace chatterino {
 
+using namespace Qt::Literals;
+
 PluginController::PluginController(const Paths &paths_)
     : paths(paths_)
+    , lifetime(std::make_shared<bool>(true))
 {
     this->loaders_.emplace_back("chatterino.json", &lua::api::loadJson);
 }
@@ -369,6 +374,296 @@ bool PluginController::reload(const QString &id)
     return true;
 }
 
+ExpectedStr<void> PluginController::removePlugin(const QString &id,
+                                                 RemovePluginArgs args)
+{
+    auto it = this->plugins_.find(id);
+    if (it == this->plugins_.end())
+    {
+        return makeUnexpected("Plugin not found");
+    }
+
+    QDir loadDirectory = it->second->loadDirectory();
+    this->plugins_.erase(it);
+    this->queueChangeNotification();
+
+    if (args.eraseData)
+    {
+        qCDebug(chatterinoLua)
+            << "Recursively removing" << loadDirectory.absolutePath();
+        if (!loadDirectory.removeRecursively())
+        {
+            return makeUnexpected(u"Failed to remove directory"_s);
+        }
+    }
+    else
+    {
+        const auto items = loadDirectory.entryInfoList(QDir::AllEntries |
+                                                       QDir::NoDotAndDotDot);
+        for (const auto &entry : items)
+        {
+            if (entry.fileName() == "data")
+            {
+                continue;
+            }
+
+            qCDebug(chatterinoLua) << "Removing" << entry.absoluteFilePath();
+
+            bool ok = false;
+            if (entry.isDir())
+            {
+                ok = QDir(entry.absoluteFilePath()).removeRecursively();
+            }
+            else
+            {
+                ok = loadDirectory.remove(entry.fileName());
+            }
+
+            if (!ok)
+            {
+                return makeUnexpected(u"Failed to remove '" % entry.fileName() %
+                                      "'");
+            }
+        }
+    }
+
+    if (args.disable)
+    {
+        auto vec = getSettings()->enabledPlugins.getValue();
+        vec.removeAll(id);
+        getSettings()->enabledPlugins.setValue(vec);
+    }
+
+    return {};
+}
+
+void PluginController::download(const DownloadArgs &args)
+{
+    auto id = args.remotePlugin->id;
+    auto existingIt = this->plugins_.find(id);
+    if (existingIt != this->plugins_.end())
+    {
+        if (args.update)
+        {
+            QString conflicts;
+            if (!existingIt->second->meta.isRelatedTo(args.remotePlugin->meta,
+                                                      &conflicts))
+            {
+                args.onDone(makeUnexpected(
+                    u"Plugin was installed from a different source: " %
+                    conflicts));
+                return;
+            }
+        }
+        else if (args.onExistingOverwrite)
+        {
+            if (!args.onExistingOverwrite())
+            {
+                // The user should know about it - don't show a new error or success.
+                return;
+            }
+        }
+        else
+        {
+            args.onDone(makeUnexpected(u"Plugin already exists"_s));
+            return;
+        }
+
+        auto err = this->removePlugin(id, {
+                                              .eraseData = false,
+                                              .disable = false,
+                                          });
+        if (!err)
+        {
+            args.onDone(err);
+            return;
+        }
+    }
+    else if (args.update)
+    {
+        args.onDone(makeUnexpected(u"Plugin does not exist."_s));
+        return;
+    }
+
+    auto pluginDir =
+        qStringToStdPath(this->paths.pluginsDirectory) / qStringToStdPath(id);
+    std::error_code ec;
+    std::filesystem::create_directories(pluginDir, ec);
+    if (ec)
+    {
+        args.onDone(makeUnexpected(u"Failed to create plugin directory: " %
+                                   QString::fromStdString(ec.message())));
+        return;
+    }
+
+    pluginDir = std::filesystem::canonical(pluginDir, ec);
+    if (ec)
+    {
+        args.onDone(makeUnexpected(u"Failed canonicalize plugin directory: " %
+                                   QString::fromStdString(ec.message())));
+        return;
+    }
+    auto infoJsonPath = pluginDir / "info.json";
+
+    QUrl baseUrl = args.remotePlugin->downloadURL;
+    std::vector<std::pair<QUrl, QString>> files;
+    for (const auto &path : args.remotePlugin->meta.files)
+    {
+        auto url = baseUrl;
+        url.setPath(url.path(QUrl::FullyEncoded) % '/' % path);
+        if (!baseUrl.isParentOf(url))
+        {
+            args.onDone(makeUnexpected(u"Plugin contains invalid file: '" %
+                                       url.toString() % "'"));
+            return;
+        }
+        auto localPath = pluginDir / qStringToStdPath(path);
+        if (localPath == infoJsonPath)
+        {
+            continue;  // We write this later.
+        }
+        auto parent = localPath.parent_path();
+        if (parent != localPath)
+        {
+            std::filesystem::create_directories(parent, ec);
+            if (ec)
+            {
+                args.onDone(makeUnexpected(
+                    u"Failed crete parent directories for '" % path % u"': " %
+                    QString::fromStdString(ec.message())));
+                return;
+            }
+        }
+        files.emplace_back(std::move(url), stdPathToQString(localPath));
+    }
+
+    if (files.empty())
+    {
+        args.onDone(makeUnexpected(u"No files to download"_s));
+        return;
+    }
+
+    struct State {
+        RemotePluginPtr plugin;
+        std::filesystem::path pluginDir;
+
+        size_t remainingRequests = 0;
+        QString errors;
+
+        std::function<void(ExpectedStr<void>)> onDone;
+    };
+    auto state = std::make_shared<State>(State{
+        .plugin = args.remotePlugin,
+        .pluginDir = pluginDir,
+        .remainingRequests = files.size(),
+        .onDone = args.onDone,
+    });
+
+    auto pushResult = [this, lifetime = std::weak_ptr{this->lifetime},
+                       state](ExpectedStr<void> res) {
+        if (lifetime.expired())
+        {
+            return;
+        }
+
+        assertInGuiThread();
+        if (!res)
+        {
+            if (!state->errors.isEmpty())
+            {
+                state->errors += u"\n";
+            }
+            state->errors += res.error();
+        }
+        state->remainingRequests -= 1;
+        if (state->remainingRequests > 0)
+        {
+            return;
+        }
+
+        // We're the last result everyone was waiting for.
+        if (!state->errors.isEmpty())
+        {
+            state->onDone(makeUnexpected(state->errors));
+            return;
+        }
+
+        state->onDone(this->finishDownload(*state->plugin, state->pluginDir));
+    };
+    auto pushOnGUI = [pushResult](ExpectedStr<void> res) {
+        runInGuiThread([pushResult, res = std::move(res)] mutable {
+            pushResult(std::move(res));
+        });
+    };
+
+    auto fetchFile = args.fetchFile;
+    if (!fetchFile)
+    {
+        fetchFile =
+            +[](const QUrl &url,
+                const std::function<void(ExpectedStr<QByteArray>)> &cb) {
+                NetworkRequest(url)
+                    .timeout(30'000)
+                    .concurrent()
+                    .onSuccess([cb](const NetworkResult &res) {
+                        cb(res.getData());
+                    })
+                    .onError([cb, url](const NetworkResult &res) {
+                        cb(makeUnexpected(u"Failed to fetch '" %
+                                          url.toString() % u"': " %
+                                          res.formatError()));
+                    })
+                    .execute();
+            };
+    }
+
+    // Send out the requests - rely on Qt to buffer requests.
+    for (const auto &[url, path] : files)
+    {
+        fetchFile(url, [pushOnGUI, path](ExpectedStr<QByteArray> res) mutable {
+            if (!res)
+            {
+                pushOnGUI(makeUnexpected(std::move(res).error()));
+                return;
+            }
+
+            {
+                QFile f(path);
+                if (!f.open(QFile::WriteOnly | QFile::Truncate))
+                {
+                    pushOnGUI(makeUnexpected(u"Failed to open '" % path %
+                                             u"' for writing: " %
+                                             f.errorString()));
+                    return;
+                }
+                f.write(*res);
+            }
+            pushOnGUI({});
+        });
+    }
+}
+
+ExpectedStr<void> PluginController::finishDownload(
+    const RemotePlugin &remote, const std::filesystem::path &pluginDir)
+{
+    {
+        QFile metaFile(stdPathToQString(pluginDir / "info.json"));
+        if (!metaFile.open(QFile::WriteOnly))
+        {
+            return makeUnexpected(u"Failed to open info.json for writing: " %
+                                  metaFile.errorString());
+        }
+        metaFile.write(QJsonDocument(remote.meta.toJson()).toJson());
+    }
+    bool ok = this->tryLoadFromDir(pluginDir);
+    if (!ok)
+    {
+        return makeUnexpected(u"Failed to load plugin from directory"_s);
+    }
+
+    return {};
+}
+
 QString PluginController::tryExecPluginCommand(const QString &commandName,
                                                const CommandContext &ctx)
 {
@@ -427,6 +722,16 @@ Plugin *PluginController::getPluginByStatePtr(lua_State *L)
         {
             return plugin.get();
         }
+    }
+    return nullptr;
+}
+
+Plugin *PluginController::getPluginByID(const QString &id)
+{
+    auto it = this->plugins_.find(id);
+    if (it != this->plugins_.end())
+    {
+        return it->second.get();
     }
     return nullptr;
 }
@@ -501,7 +806,11 @@ void PluginController::queueChangeNotification()
     this->changeNotificationQueued = true;
     QMetaObject::invokeMethod(
         qApp,
-        [this] {
+        [this, weak = std::weak_ptr(this->lifetime)] {
+            if (!weak.lock())
+            {
+                return;
+            }
             this->changeNotificationQueued = false;
             this->onPluginsUpdated.invoke();
         },

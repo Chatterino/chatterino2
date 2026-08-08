@@ -9,6 +9,8 @@
 #include "common/Env.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/plugins/PluginController.hpp"
+#include "controllers/plugins/PluginRepository.hpp"
 #include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
@@ -403,5 +405,153 @@ QString relaunchWithLogfile(const CommandContext &ctx)
 
     return {};
 }
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+QString debugPlugin(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+    auto weakChan = ctx.channel->weak_from_this();
+
+    // Send a message in the channel.
+    // Multiple lines will be sent as multiple messages (not spaces).
+    const auto reply = [weakChan](const QString &raw) {
+        auto chan = weakChan.lock();
+        QStringView text = QStringView(raw).trimmed();
+        if (!chan || text.isEmpty())
+        {
+            return;
+        }
+        for (auto line : text.tokenize(u'\n'))
+        {
+            chan->addSystemMessage(line.toString());
+        }
+    };
+
+    // Load the repository at `url` and invoke `cb` once loaded.
+    const auto loadRepository = [](const QString &url, auto &&cb) {
+        auto repo = std::make_shared<PluginRepository>(url);
+        // We're creating a cyclic reference here.
+        std::ignore = repo->onLoaded.connect([cb, repo] mutable {
+            cb(repo);
+            // Clear the repository reference after we're done.
+            // We need to wait until this signal callback is done, so do it in the next iteration.
+            QMetaObject::invokeMethod(qApp, [ref = std::move(repo)] mutable {
+                ref = {};
+            });
+        });
+        repo->load();
+    };
+
+    if (ctx.words.size() < 2)
+    {
+        reply("Missing subcommand");
+        return {};
+    }
+    auto subcommand = ctx.words.at(1);
+    if (subcommand == u"list")
+    {
+        for (const auto &url : getSettings()->remotePluginURLs.getValue())
+        {
+            loadRepository(
+                url, [reply](const std::shared_ptr<PluginRepository> &repo) {
+                    reply(repo->createSummary());
+                });
+        }
+    }
+    else if (subcommand == u"install" || subcommand == u"update")
+    {
+        if (ctx.words.size() < 3)
+        {
+            reply("Missing plugin ID");
+            return {};
+        }
+        auto id = ctx.words.at(2);
+
+        bool isUpdate = subcommand == u"update";
+        auto installIt = [reply, isUpdate](const RemotePluginPtr &plugin) {
+            getApp()->getPlugins()->download({
+                .remotePlugin = plugin,
+                .onExistingOverwrite =
+                    [&] {
+                        reply("Plugin is already installed - overwriting it.");
+                        return true;
+                    },
+                .onDone =
+                    [reply, isUpdate](const auto &result) {
+                        auto term = isUpdate ? u"update"_s : u"install"_s;
+                        if (result)
+                        {
+                            reply(u"Successfully " % term % u"ed plugin.");
+                        }
+                        else
+                        {
+                            reply(u"Failed to " % term % " plugin: " %
+                                  result.error());
+                        }
+                    },
+                .update = isUpdate,
+            });
+        };
+
+        std::shared_ptr<bool> foundID(new bool(false),
+                                      [reply](const bool *ptr) {
+                                          if (!*ptr)
+                                          {
+                                              reply("Failed to find plugin.");
+                                          }
+                                          delete ptr;
+                                      });
+        for (const auto &url : getSettings()->remotePluginURLs.getValue())
+        {
+            loadRepository(url,
+                           [id, foundID, installIt](
+                               const std::shared_ptr<PluginRepository> &repo) {
+                               if (*foundID)
+                               {
+                                   return;
+                               }
+                               for (const auto &plugin : repo->getPlugins())
+                               {
+                                   if (plugin->id == id)
+                                   {
+                                       *foundID = true;
+                                       installIt(plugin);
+                                       break;
+                                   }
+                               }
+                           });
+        }
+    }
+    else if (subcommand == u"uninstall" || subcommand == u"remove")
+    {
+        if (ctx.words.size() < 3)
+        {
+            reply("Missing plugin ID");
+            return {};
+        }
+        auto id = ctx.words.at(2);
+        auto res = getApp()->getPlugins()->removePlugin(
+            id, {
+                    .eraseData = ctx.words.contains(u"--erase-data"_s),
+                });
+        if (res)
+        {
+            reply("Removed " % id);
+        }
+        else
+        {
+            reply("Failed to remove plugin: " % res.error());
+        }
+    }
+    else
+    {
+        reply(u"Unknown subcommand: '" % subcommand % "'");
+    }
+    return {};
+}
+#endif
 
 }  // namespace chatterino::commands
