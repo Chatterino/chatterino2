@@ -223,6 +223,8 @@ public:
 
     Scrollbar *scrollbar();
 
+    Split *findParentSplit() const;
+
     using ChannelViewID = std::size_t;
     ///
     /// \brief Get the ID of this ChannelView
