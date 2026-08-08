@@ -89,8 +89,7 @@ struct MessageParseArgs {
 };
 
 struct HighlightAlert {
-    QUrl customSound;
-    bool playSound = false;
+    QUrl sound;
     bool windowAlert = false;
 };
 class MessageBuilder
@@ -308,11 +307,15 @@ private:
                      const Channel *channel,
                      const std::shared_ptr<MessageThread> &thread,
                      const MessagePtr &parent);
+
+public:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     HighlightAlert parseHighlights(Communi::TagsRef tags,
                                    const QString &originalMessage,
-                                   const MessageParseArgs &args);
+                                   const MessageParseArgs &args,
+                                   Channel *channel);
 
+private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 

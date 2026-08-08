@@ -163,8 +163,8 @@ QUrl getFallbackHighlightSound()
     return QUrl("qrc:/sounds/ping2.wav");
 }
 
-void actuallyTriggerHighlights(const QString &channelName, bool playSound,
-                               const QUrl &customSoundUrl, bool windowAlert)
+void actuallyTriggerHighlights(const QString &channelName, const QUrl &sound,
+                               bool windowAlert)
 {
     if (getApp()->getStreamerMode()->isEnabled() &&
         getSettings()->streamerModeMuteMentions)
@@ -183,14 +183,9 @@ void actuallyTriggerHighlights(const QString &channelName, bool playSound,
     const bool resolveFocus =
         !hasFocus || getSettings()->highlightAlwaysPlaySound;
 
-    if (playSound && resolveFocus)
+    if (!sound.isEmpty() && resolveFocus)
     {
-        QUrl soundUrl = customSoundUrl;
-        if (soundUrl.isEmpty())
-        {
-            soundUrl = getFallbackHighlightSound();
-        }
-        getApp()->getSound()->play(soundUrl);
+        getApp()->getSound()->play(sound);
     }
 
     if (windowAlert)
@@ -1160,12 +1155,12 @@ void MessageBuilder::appendOrEmplaceSystemTextAndUpdate(const QString &text,
 void MessageBuilder::triggerHighlights(const Channel *channel,
                                        const HighlightAlert &alert)
 {
-    if (!alert.windowAlert && !alert.playSound)
+    if (!alert.windowAlert && alert.sound.isEmpty())
     {
         return;
     }
-    actuallyTriggerHighlights(channel->getName(), alert.playSound,
-                              alert.customSound, alert.windowAlert);
+    actuallyTriggerHighlights(channel->getName(), alert.sound,
+                              alert.windowAlert);
 }
 
 void MessageBuilder::appendChannelPointRewardMessage(
@@ -1816,10 +1811,11 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
                           builder->searchText;
 
     // highlights
-    HighlightAlert highlight = builder.parseHighlights(tags, content, args);
+    HighlightAlert highlight =
+        builder.parseHighlights(tags, content, args, channel);
     if (tags.has("historical"))
     {
-        highlight.playSound = false;
+        highlight.sound.clear();
         highlight.windowAlert = false;
     }
 
@@ -2268,7 +2264,8 @@ void MessageBuilder::parseThread(const QString &messageContent,
 
 HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
                                                const QString &originalMessage,
-                                               const MessageParseArgs &args)
+                                               const MessageParseArgs &args,
+                                               Channel *channel)
 {
     if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
@@ -2276,10 +2273,15 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
         return {};
     }
 
+    filters::RunContext runContext{
+        .message = this->message(),
+        .channel = channel,
+    };
+
     auto badges = parseBadgeTag(tags);
     auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         args, badges, this->message().loginName, originalMessage,
-        this->message().flags);
+        this->message().flags, runContext);
 
     if (!highlighted)
     {
@@ -2290,6 +2292,19 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
 
     this->message().flags.set(MessageFlag::Highlighted);
 
+    qInfo() << "XXX: Highlighted by" << highlightResult.ids;
+
+    if (highlightResult.color)
+    {
+        auto color = *highlightResult.color;
+        qInfo() << "XXX: SET HIGHLIGHT COLOR"
+                << color.name(QColor::NameFormat::HexArgb);
+    }
+    else
+    {
+        qInfo() << "XXX: SET HIGHLIGHT COLOR NULL";
+    }
+
     this->message().highlightColor = highlightResult.color;
 
     if (highlightResult.showInMentions)
@@ -2297,16 +2312,8 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
         this->message().flags.set(MessageFlag::ShowInMentions);
     }
 
-    auto customSound = [&] {
-        if (highlightResult.customSoundUrl)
-        {
-            return *highlightResult.customSoundUrl;
-        }
-        return QUrl{};
-    }();
     return {
-        .customSound = customSound,
-        .playSound = highlightResult.playSound,
+        .sound = highlightResult.sound,
         .windowAlert = highlightResult.alert,
     };
 }

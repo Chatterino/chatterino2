@@ -50,11 +50,9 @@ struct MessagePreferences {
     QColor lastMessageColor;
     Qt::BrushStyle lastMessagePattern{};
 
+    // TODO: Figure out which of these "enable...Highlight" are still needed
     bool enableRedeemedHighlight{};
     bool enableFirstMessageHighlight{};
-    bool enableSubHighlight{};
-    bool enableWatchStreakHighlight{};
-    bool enableAutomodHighlight{};
     bool enableAnnouncementHighlight{};
     bool enableColoredAnnouncementHighlight{};
 

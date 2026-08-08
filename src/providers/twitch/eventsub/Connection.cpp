@@ -240,19 +240,21 @@ void Connection::onAutomodMessageHold(
     auto messageText = payload.event.message.text.qt();
     auto userLogin = payload.event.userLogin.qt();
 
-    runInGuiThread([channel, messageText, userLogin, header, body] {
+    filters::RunContext runContext{
+        .message = *body,
+        .channel = channel,
+    };
+
+    runInGuiThread([channel, messageText, userLogin, header, body, runContext] {
         auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags);
+            {}, {}, userLogin, messageText, body->flags, runContext);
         if (highlighted)
         {
             MessageBuilder::triggerHighlights(
-                channel,
-                {
-                    .customSound =
-                        highlightResult.customSoundUrl.value_or<QUrl>({}),
-                    .playSound = highlightResult.playSound,
-                    .windowAlert = highlightResult.alert,
-                });
+                channel, {
+                             .sound = highlightResult.sound,
+                             .windowAlert = highlightResult.alert,
+                         });
         }
 
         channel->addMessage(header, MessageContext::Original);
@@ -263,13 +265,14 @@ void Connection::onAutomodMessageHold(
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
             body, MessageContext::Original);
 
-        if (getSettings()->showAutomodInMentions)
-        {
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                header, MessageContext::Original);
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                body, MessageContext::Original);
-        }
+        // TODO: Is this extra check here really necessary?
+        // if (getSettings()->showAutomodInMentions)
+        // {
+        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
+        //         header, MessageContext::Original);
+        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
+        //         body, MessageContext::Original);
+        // }
     });
 }
 void Connection::onAutomodMessageUpdate(
