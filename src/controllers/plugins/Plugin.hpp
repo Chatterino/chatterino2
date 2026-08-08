@@ -42,7 +42,7 @@ namespace chatterino {
 
 /// A plugin that hasn't been loaded.
 ///
-/// Most likely, it's metadata is invalid.
+/// Most likely, its metadata is invalid.
 class UnloadedPlugin
 {
 public:

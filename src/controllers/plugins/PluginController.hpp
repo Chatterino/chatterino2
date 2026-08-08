@@ -46,8 +46,10 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
+    /// Run `cb` on every loaded plugin, including those with load errors
     void forEachPlugin(
         FunctionRef<void(const std::unique_ptr<Plugin> &)>) const;
+
     const std::map<QString, AnyPlugin> &allPlugins() const;
 
     /**
