@@ -10,6 +10,7 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+#include <boost/bind/bind.hpp>
 
 using namespace std::literals::string_view_literals;
 
@@ -17,6 +18,15 @@ namespace chatterino::ws::detail {
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
+
+// Use a long ping probe interval when there is regular traffic
+// going through the socket
+static constexpr std::chrono::seconds HEALTH_CHECK_INTERVAL_LONG =
+    std::chrono::seconds{60};
+// Use a short intervat when there is no traffic except for the
+// ping probe so that we can detect a failed socket quickly
+static constexpr std::chrono::seconds HEALTH_CHECK_INTERVAL_SHORT =
+    std::chrono::seconds{5};
 
 // MARK: WebSocketConnectionHelper
 
@@ -28,6 +38,8 @@ WebSocketConnectionHelper<Derived, Inner>::WebSocketConnectionHelper(
     : WebSocketConnection(std::move(options), id, std::move(listener), pool,
                           ioc)
     , stream(std::move(stream))
+    , healthCheckTimer(this->stream.get_executor())
+    , pingProbesTried(0)
 {
 }
 
@@ -247,6 +259,54 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
         this->readBuffer,
         beast::bind_front_handler(&WebSocketConnectionHelper::onReadDone,
                                   this->shared_from_this()));
+
+    this->stream.control_callback(
+        boost::bind(&WebSocketConnectionHelper::onControlFrame, this,
+                    boost::placeholders::_1, boost::placeholders::_2));
+    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
+    this->healthCheckTimer.async_wait(
+        boost::bind(&WebSocketConnectionHelper::onHealthCheck,
+                    this->shared_from_this(), boost::placeholders::_1));
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onHealthCheck(
+    const boost::system::error_code &ec)
+{
+    if (ec == boost::asio::error::operation_aborted || this->isClosing)
+    {
+        return;
+    }
+
+    if (this->pingProbesTried >= 3)
+    {
+        this->fail(boost::asio::error::network_down, u"ping");
+        return;
+    }
+
+    this->stream.async_ping({}, [](const boost::system::error_code ec) {
+        (void)ec;
+    });
+    this->pingProbesTried++;
+
+    // Use the short intervat so that we can detect a failed connection quickly
+    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_SHORT);
+    this->healthCheckTimer.async_wait(
+        boost::bind(&WebSocketConnectionHelper::onHealthCheck,
+                    this->shared_from_this(), boost::placeholders::_1));
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onControlFrame(
+    boost::beast::websocket::frame_type frame_type, std::string_view payload)
+{
+    (void)payload;
+
+    if (frame_type == boost::beast::websocket::frame_type::pong)
+    {
+        this->pingProbesTried = 0;
+        this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
+    }
 }
 
 template <typename Derived, typename Inner>
@@ -278,6 +338,10 @@ void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
     {
         this->listener->onBinaryMessage(std::move(data));
     }
+
+    // We got data, push the health check back because the socket
+    // is obviously alive
+    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
 
     this->stream.async_read(
         this->readBuffer,
@@ -339,6 +403,7 @@ void WebSocketConnectionHelper<Derived, Inner>::closeImpl()
     // cancel all pending operations
     this->resolver.cancel();
     beast::get_lowest_layer(this->stream).cancel();
+    this->healthCheckTimer.cancel();
 
     this->stream.async_close(
         beast::websocket::close_code::normal,
