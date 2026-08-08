@@ -22,6 +22,7 @@ public:
 
 private:
     AllHighlights data;
+    int previousSoundIndex;
 };
 
 }  // namespace chatterino::highlights

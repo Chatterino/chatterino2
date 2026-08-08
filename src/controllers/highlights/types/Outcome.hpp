@@ -7,6 +7,7 @@
 #include <QColor>
 #include <QDebug>
 #include <QString>
+#include <QStringView>
 #include <QUrl>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -44,15 +45,11 @@ struct Outcome {
     /// Transient. Not stored as-is in the JSON.
     QUrl soundURL;
 
-    QUrl getSoundURLWithDefault(const QStringView &defaultSound) const
-    {
-        if (this->sound.isNull())
-        {
-            return QUrl{defaultSound.toString()};
-        }
+    /*
+    std::optional<int> volume;
+    */
 
-        return this->soundURL;
-    }
+    QUrl getSoundURLWithDefault(const QStringView &defaultSound) const;
 
     void setBackgroundColor(std::optional<QColor> color)
     {
