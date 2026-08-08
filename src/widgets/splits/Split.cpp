@@ -1367,13 +1367,13 @@ SplitDescriptor Split::buildDescriptor() const
     descriptor.filters_ = this->getFilters();
     descriptor.spellCheckOverride = this->checkSpellingOverride();
 
-    auto chan = this->getChannel();
-    descriptor.type_ = qmagicenum::enumNameString(chan->getType());
-    switch (this->channel_.getType())
+    auto chan = this->getIndirectChannel();
+    descriptor.type_ = qmagicenum::enumNameString(chan.getType());
+    switch (chan.getType())
     {
         case Channel::Type::Twitch:
         case Channel::Type::Misc:
-            descriptor.channelName_ = chan->getName();
+            descriptor.channelName_ = chan.get()->getName();
             break;
 
         case Channel::Type::TwitchWhispers:
