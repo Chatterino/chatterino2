@@ -80,7 +80,7 @@ void performReaction(const ToastReaction &reaction, const QString &channelName)
             QDesktopServices::openUrl(QUrl(TWITCH_PLAYER_URL.arg(channelName)));
             break;
         case ToastReaction::OpenInStreamlink: {
-            openStreamlinkForChannel(channelName);
+            openStreamlinkForChannelOrUrl(channelName);
             break;
         }
         case ToastReaction::OpenInCustomPlayer: {
