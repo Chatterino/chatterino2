@@ -665,16 +665,24 @@ void PluginRepl::log(std::optional<lua::api::LogLevel> level,
 
 void PluginRepl::tryUpdate()
 {
-    auto it = getApp()->getPlugins()->plugins().find(this->id);
-    if (it == getApp()->getPlugins()->plugins().end())
+    auto it = getApp()->getPlugins()->allPlugins().find(this->id);
+    if (it == getApp()->getPlugins()->allPlugins().end())
     {
         return;
     }
+
+    const auto *oPl = std::get_if<PluginPtr>(&it->second);
+    if (oPl == nullptr)
+    {
+        return;
+    }
+    const auto &pl = *oPl;
+
     if (!PluginController::isPluginEnabled(this->id))
     {
         return;
     }
-    this->setPlugin(it->second.get());
+    this->setPlugin(pl.get());
 }
 
 void PluginRepl::setPlugin(Plugin *plugin)
