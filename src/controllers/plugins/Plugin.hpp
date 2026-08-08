@@ -75,8 +75,8 @@ public:
     {
         // The PluginMeta here must be valid, otherwise it should be initialized
         // as an UnloadedPlugin
-        assert(meta.isValid());
-        assert(state != nullptr);
+        assert(this->meta.isValid());
+        assert(this->state_ != nullptr);
     }
 
     ~Plugin();
