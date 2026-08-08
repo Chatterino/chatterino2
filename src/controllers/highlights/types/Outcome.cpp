@@ -24,6 +24,21 @@ void Outcome::setSound(const QString &newSound)
     this->updateSoundURL();
 }
 
+QUrl Outcome::getSoundURLWithDefault(const QStringView &defaultSound) const
+{
+    if (this->sound.isNull())
+    {
+        auto defaultSoundURL = resolveDefaultSound(defaultSound);
+        if (defaultSoundURL.has_value())
+        {
+            return QUrl{defaultSoundURL->resourcePath};
+        }
+        return {};
+    }
+
+    return this->soundURL;
+}
+
 std::shared_ptr<QColor> Outcome::getBackgroundColorWithDefault(
     const QColor &defaultColor) const
 {

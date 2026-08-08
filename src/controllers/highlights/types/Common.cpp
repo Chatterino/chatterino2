@@ -47,6 +47,8 @@ concept HasDefaultSound = requires {
     { T::SOUND_DEFAULT } -> std::convertible_to<QStringView>;
 };
 
+static_assert(HasDefaultSound<YourUsernameHighlight>);
+
 bool matchesType(const rapidjson::Value &obj, QStringView expectedType)
 {
     assert(obj.IsObject());
@@ -157,18 +159,34 @@ bool isEnabled(const AllHighlights &h)
 QString getSound(const AllHighlights &h)
 {
     return std::visit(variant::Overloaded{
-                          [](const HasDefaultSound auto &&h) {
+                          [](const HasDefaultSound auto &h) {
                               using ActualType = std::decay_t<decltype(h)>;
 
                               if (h.outcome.sound.isNull())
                               {
-                                  return ActualType::DEFAULT_SOUND.toString();
+                                  return ActualType::SOUND_DEFAULT.toString();
                               }
 
                               return h.outcome.sound;
                           },
                           [](auto &&h) {
                               return h.outcome.sound;
+                          },
+                      },
+                      h);
+}
+
+QStringView getDefaultSound(const AllHighlights &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const HasDefaultSound auto &h) {
+                              // static_assert(false);
+                              using ActualType = std::decay_t<decltype(h)>;
+
+                              return ActualType::SOUND_DEFAULT;
+                          },
+                          [](auto &&h) {
+                              return QStringView{};
                           },
                       },
                       h);

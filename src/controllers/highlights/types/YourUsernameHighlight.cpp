@@ -37,8 +37,10 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
                              QRegularExpression::UseUnicodePropertiesOption |
                                  QRegularExpression::CaseInsensitiveOption);
 
+    QUrl soundURL = this->outcome.getSoundURLWithDefault(H::SOUND_DEFAULT);
+
     return {
-        [highlight = *this, regex](
+        [highlight = *this, regex, soundURL](
             const auto &args, const auto &badges, const auto &senderName,
             const auto &originalMessage, const auto &flags, const auto self,
             const auto runContext) -> std::optional<HighlightResult> {
@@ -61,8 +63,7 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
             return HighlightResult{
                 .ids = {H::ID.toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .sound =
-                    highlight.outcome.getSoundURLWithDefault(H::SOUND_DEFAULT),
+                .sound = soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),

@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/Common.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/DisplayBadge.hpp"
 #include "util/Variant.hpp"
@@ -22,7 +23,9 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QSignalBlocker>
+#include <QSlider>
 #include <QToolButton>
 #include <QVBoxLayout>
 
@@ -56,8 +59,6 @@ template <typename T>
 concept HasDescription = requires {
     { T::DESCRIPTION } -> std::convertible_to<QStringView>;
 };
-
-using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -454,40 +455,40 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             }
             w->addItem("Custom sound...");
 
-            if (currentSound.isNull())
+            int numRows = w->count();
+
+            if (currentSound.isEmpty())
             {
-                qInfo() << "XXX: Current sound is null, so trying to set "
-                           "current text to None";
                 w->setCurrentText("None");
                 soundURLLabel->setText("Not playing any sound");
             }
             else
             {
-                qInfo() << "XXX: Current sound is" << currentSound;
                 if (auto d = highlights::resolveDefaultSound(currentSound))
                 {
-                    qInfo() << "XXX: resolved to default sound";
                     w->setCurrentText(d->displayName);
                     soundURLLabel->setText(u"Playing bill-tin " %
                                            d->displayName);
                 }
                 else
                 {
-                    w->setCurrentText("Custom sound...");
+                    QUrl currentSoundUrl(currentSound);
+                    w->addItem(currentSoundUrl.fileName());
+                    w->setCurrentText(currentSoundUrl.fileName());
                     soundURLLabel->setText(u"Playing custom " % currentSound);
                 }
             }
 
+            this->previousSoundIndex = w->currentIndex();
+
             QObject::connect(
                 w, QOverload<int>::of(&QComboBox::currentIndexChanged),
-                [this, w, soundURLLabel](int index) {
+                [this, numRows, w, soundURLLabel](int index) {
                     auto data = w->currentData();
                     if (data.canConvert<highlights::DefaultSound>())
                     {
                         auto defaultSound =
                             data.value<highlights::DefaultSound>();
-                        qInfo()
-                            << "XXX: Default sound" << defaultSound.displayName;
                         std::visit(
                             [&defaultSound](auto &&h) {
                                 h.outcome.setSound(defaultSound.id);
@@ -495,127 +496,125 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             this->data);
                         soundURLLabel->setText(u"Playing bill-tin " %
                                                defaultSound.displayName);
+                        this->previousSoundIndex = index;
+                        w->removeItem(numRows);
                         return;
                     }
 
                     auto sound = data.toString();
                     if (sound.isNull())
                     {
-                        qInfo() << "XXX: CUSTOM SOUND";
-                        // TODO CUSTOM SOUND?
-
                         auto fileUrl = QFileDialog::getOpenFileUrl(
                             this, tr("Open Sound"), QUrl(),
                             tr("Audio Files (*.mp3 *.wav)"));
-                        // soundURLLabel->setText(fileUrl.toLocalFile());
-                        std::visit(
-                            [fileUrl](auto &&h) {
-                                h.outcome.setSound(fileUrl.toString());
-                            },
-                            this->data);
-                        soundURLLabel->setText(u"Playing custom " %
-                                               fileUrl.toString());
+                        if (fileUrl.isValid())
+                        {
+                            this->previousSoundIndex = index;
+                            // soundURLLabel->setText(fileUrl.toLocalFile());
+                            std::visit(
+                                [fileUrl](auto &&h) {
+                                    h.outcome.setSound(fileUrl.toString());
+                                },
+                                this->data);
+                            soundURLLabel->setText(u"Playing custom " %
+                                                   fileUrl.toString());
+                            // w->setCurrentText("AAAAAAAAA");
+                            QSignalBlocker block(w);
+                            w->removeItem(numRows);
+                            w->addItem(fileUrl.fileName());
+                            w->setCurrentIndex(numRows);
+                        }
+                        else
+                        {
+                            QSignalBlocker block(w);
+                            w->setCurrentIndex(this->previousSoundIndex);
+                        }
+
                         return;
                     }
 
                     if (sound.isEmpty())
                     {
-                        qInfo() << "XXX: DISABLE SOUND";
                         std::visit(
                             [](auto &&h) {
                                 h.outcome.setSound("");
                             },
                             this->data);
                         soundURLLabel->setText("Not playing any sound");
+                        this->previousSoundIndex = index;
+                        w->removeItem(numRows);
                         return;
                     }
 
-                    qInfo() << "XXX: " << index << w->currentData();
+                    assert(false);
                 });
 
             auto *playSoundLabel = new QLabel("Play sound");
             l->addRow(playSoundLabel, w);
             l->addRow(soundURLLabel);
 
-            // TODO: This doesn't actually reset to default, it resets to default & then sets the ui to show "None", but that might not be the default
-            // How do we resolve this?
-            addSettingMenu(playSoundLabel, w, [w, this] {
+            addSettingMenu(playSoundLabel, w, [w, soundURLLabel, this] {
                 std::visit(
                     [](auto &&h) {
                         h.outcome.setSound({});
                     },
                     this->data);
                 QSignalBlocker signalBlocker(w);
-                w->setCurrentText("None");
+                const auto defaultSound =
+                    highlights::getDefaultSound(this->data);
+                if (defaultSound.isEmpty())
+                {
+                    w->setCurrentText("None");
+                    soundURLLabel->setText("Not playing any sound");
+                }
+                else
+                {
+                    if (auto defaultSoundXD = resolveDefaultSound(defaultSound))
+                    {
+                        w->setCurrentText(defaultSoundXD->displayName);
+                        soundURLLabel->setText("Playing bill-tin " %
+                                               defaultSoundXD->displayName);
+                    }
+                }
             });
-        }
 
-        /*
-        {
-            auto *ll = new QHBoxLayout;
+            /*
+            // TODO: Implement per-highlight sound volume support!
+            auto *slider = new QSlider(Qt::Orientation::Horizontal);
+            slider->setTickPosition(QSlider::TickPosition::TicksBothSides);
 
-            auto *lbl = new QLabel("Custom sound URL");
-
-            auto value = std::visit(
-                [](auto &&h) {
-                    return h.outcome.customSoundURL;
-                },
-                this->data);
-
-            auto *soundURLLabel = new QLabel(value.toLocalFile());
-            ll->addWidget(soundURLLabel);
-
-            auto *editAction = new QAction("Set custom sound");
-            QObject::connect(editAction, &QAction::triggered,
-                             [this, soundURLLabel] {
-                                 auto fileUrl = QFileDialog::getOpenFileUrl(
-                                     this, tr("Open Sound"), QUrl(),
-                                     tr("Audio Files (*.mp3 *.wav)"));
-                                 soundURLLabel->setText(fileUrl.toLocalFile());
+            QObject::connect(slider, &QSlider::valueChanged, this,
+                             [this](const auto &newValue) {
                                  std::visit(
-                                     [fileUrl](auto &&h) {
-                                         h.outcome.customSoundURL = fileUrl;
+                                     [newValue](auto &&h) {
+                                         h.outcome.volume = newValue;
                                      },
                                      this->data);
                              });
+            auto *volumeLabel = new QLabel("Volume");
 
-            auto *edit = new QToolButton;
-            edit->setToolTip("Set custom sound");
-            edit->setIcon(QIcon(":/buttons/edit.svg"));
-            ll->addWidget(edit);
-            QObject::connect(edit, &QToolButton::clicked, editAction,
-                             &QAction::triggered);
+            l->addRow(volumeLabel, slider);
+            addSettingMenu(volumeLabel, slider, [slider, this] {
+                std::visit(
+                    [](auto &&h) {
+                        h.outcome.volume = std::nullopt;
+                    },
+                    this->data);
+                QSignalBlocker signalBlocker(slider);
+                slider->setValue(100);
+            });
+            */
 
-            auto *clearAction = new QAction("Clear custom sound");
-            QObject::connect(clearAction, &QAction::triggered,
-                             [this, soundURLLabel] {
-                                 soundURLLabel->setText({});
-                                 std::visit(
-                                     [](auto &&h) {
-                                         h.outcome.customSoundURL = QUrl{};
-                                     },
-                                     this->data);
-                             });
-            auto *clear = new QToolButton;
-            clear->setToolTip("Clear custom sound");
-            clear->setIcon(QIcon(":/buttons/cancel.svg"));
-            ll->addWidget(clear);
-            QObject::connect(clear, &QToolButton::clicked, clearAction,
-                             &QAction::triggered);
-
-            l->addRow(lbl);
-            l->addRow(ll);
-
-            lbl->setContextMenuPolicy(
-                Qt::ContextMenuPolicy::ActionsContextMenu);
-            lbl->addAction(editAction);
-            lbl->addAction(clearAction);
-            soundURLLabel->setContextMenuPolicy(
-                Qt::ContextMenuPolicy::ActionsContextMenu);
-            soundURLLabel->addAction(editAction);
-            soundURLLabel->addAction(clearAction);
+            auto *test = new QPushButton("Test playsound");
+            QObject::connect(test, &QPushButton::pressed, this, [this] {
+                std::visit(
+                    [](auto &&h) {
+                        getApp()->getSound()->play(h.outcome.soundURL);
+                    },
+                    this->data);
+            });
+            l->addRow(test);
         }
-        */
 
         group->setLayout(l);
 
