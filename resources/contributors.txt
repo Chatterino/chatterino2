@@ -111,5 +111,6 @@ Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
 Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 tlos | https://github.com/realtlos | :/avatars/realtlos.jpg
 ArmpitsLover420 | https://github.com/JEC15 | :/avatars/armpitslover420.jpg
+voiceofgrog | https://github.com/voiceofgrog |
 
 # Add yourself to the list above this comment
