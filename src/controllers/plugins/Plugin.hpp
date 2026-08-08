@@ -29,6 +29,7 @@ class QTimer;
 
 namespace chatterino::lua::api {
 enum class LogLevel;
+class ChannelProvider;
 }  // namespace chatterino::lua::api
 
 namespace chatterino::lua {
@@ -44,14 +45,7 @@ public:
     PluginMeta meta;
 
     Plugin(QString id, lua_State *state, PluginMeta meta,
-           const QDir &loadDirectory)
-        : id(std::move(id))
-        , meta(std::move(meta))
-        , loadDirectory_(loadDirectory)
-        , state_(state)
-        , selfRef_(state ? this : nullptr)
-    {
-    }
+           const QDir &loadDirectory);
 
     ~Plugin();
 
@@ -100,6 +94,11 @@ public:
 
     lua::SignalCallback createCallback(sol::main_protected_function pfn);
 
+    using ChannelProviderMap =
+        std::unordered_map<QString, std::shared_ptr<lua::api::ChannelProvider>>;
+
+    const ChannelProviderMap &channelProviders() const;
+
     /**
      * If the plugin crashes while evaluating the main file, this function will return the error
      */
@@ -116,6 +115,9 @@ public:
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
     bool hasNetworkPermission() const;
+
+    void registerChannelProvider(
+        std::shared_ptr<lua::api::ChannelProvider> provider);
 
     void log(lua_State *L, lua::api::LogLevel level, QDebug stream,
              const sol::variadic_args &args);
@@ -144,6 +146,9 @@ private:
     std::unordered_map<QString, sol::protected_function> ownedCommands;
     std::vector<QTimer *> activeTimeouts;
     int lastTimerId = 0;
+
+    /// Provider ID -> provider
+    ChannelProviderMap channelProviders_;
 
     friend class PluginController;
     friend class PluginControllerAccess;  // this is for tests

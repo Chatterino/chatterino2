@@ -44,15 +44,19 @@ struct SplitDescriptor {
     // Twitch Channel name or IRC channel name
     QString channelName_;
 
-    // IRC server
-    int server_{-1};
-
     // Whether "Moderation Mode" (the sword icon) is enabled in this split or not
     bool moderationMode_{false};
 
     std::optional<bool> spellCheckOverride;
 
     QList<QUuid> filters_;
+
+    /// \defgroup Custom channel providers
+    /// \{
+    QString pluginID;
+    QString providerID;
+    QJsonObject arguments;
+    /// \}
 
     static SplitDescriptor loadFromJSON(const QJsonObject &root);
 

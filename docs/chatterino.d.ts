@@ -22,6 +22,7 @@ declare namespace c2 {
         TwitchLive,
         TwitchAutomod,
         Misc,
+        Plugin,
     }
 
     interface IWeakResource {
@@ -681,6 +682,46 @@ declare namespace c2 {
         is_utc(): boolean;
         to_local(): DateTime;
         to_utc(): DateTime;
+    }
+
+    interface ChannelProviderInit {
+        id: string;
+        display_name: string;
+        description?: string;
+        arguments: ChannelProviderArgumentSpec[];
+        callbacks: ChannelProviderCallbacks;
+    }
+
+    function register_channel_provider(init: ChannelProviderInit): void;
+
+    interface ChannelProviderArgumentSpecBase {
+        id: string;
+        display_name: string;
+        tooltip?: string;
+    }
+    interface ChannelProviderArgumentSpecText extends ChannelProviderArgumentSpecBase {
+        kind: "text";
+        placeholder?: string;
+        default?: string;
+    }
+    type ChannelProviderArgumentSpec = ChannelProviderArgumentSpecText;
+
+    type ChannelProviderUserArgs = Record<string, unknown>;
+    interface ChannelProviderCallbacks {
+        get_name: (arguments: ChannelProviderUserArgs) => string;
+        create: (
+            channel: c2.Channel,
+            args: ChannelProviderCreateArgs
+        ) => CustomChannel;
+    }
+
+    interface ChannelProviderCreateArgs {
+        arguments: ChannelProviderCreateArgs;
+    }
+
+    interface CustomChannel {
+        on_send_message?(msg: string): void;
+        on_destroyed?(): void;
     }
 }
 
