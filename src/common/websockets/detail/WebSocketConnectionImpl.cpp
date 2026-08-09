@@ -22,8 +22,8 @@ namespace beast = boost::beast;
 // going through the socket
 static constexpr std::chrono::seconds HEALTH_CHECK_INTERVAL_LONG =
     std::chrono::seconds{60};
-// Use a short interval when there is no traffic except for the
-// ping probe so that we can detect a failed socket quickly
+// Use a short ping probe interval when we suspect that the connection
+// might be stuck so that we can fail and try to recover quickly
 static constexpr std::chrono::seconds HEALTH_CHECK_INTERVAL_SHORT =
     std::chrono::seconds{5};
 
@@ -38,7 +38,6 @@ WebSocketConnectionHelper<Derived, Inner>::WebSocketConnectionHelper(
                           ioc)
     , stream(std::move(stream))
     , healthCheckTimer(this->stream.get_executor())
-    , pingProbesTried(0)
 {
 }
 
@@ -289,7 +288,9 @@ void WebSocketConnectionHelper<Derived, Inner>::onHealthCheck(
     });
     this->pingProbesTried++;
 
-    // Use the short interval so that we can detect a failed connection quickly
+    // Since we needed to issue a ping check, there is a chance that the
+    // connection might be stuck. Use the short check interval so that
+    // we can fail quickly and try to recover
     this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_SHORT);
     this->healthCheckTimer.async_wait(
         [self{this->shared_from_this()}](auto ec) {
