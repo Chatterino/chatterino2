@@ -37,10 +37,6 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
         {
             this->flags_.set(MessageFlag::FirstMessage);
         }
-        else if (flag == "elevated-msg" || flag == "hype-chat")
-        {
-            this->flags_.set(MessageFlag::ElevatedMessage);
-        }
         else if (flag == "cheer-msg")
         {
             this->flags_.set(MessageFlag::CheerMessage);
@@ -65,6 +61,14 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
         else if (flag == "shared")
         {
             this->flags_.set(MessageFlag::SharedMessage);
+        }
+        else if (flag == "watch-streak")
+        {
+            this->flags_.set(MessageFlag::WatchStreak);
+        }
+        else if (flag == "announcement")
+        {
+            this->flags_.set(MessageFlag::Announcement);
         }
     }
 }

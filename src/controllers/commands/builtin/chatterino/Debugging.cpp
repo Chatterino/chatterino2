@@ -59,6 +59,16 @@ bool restartChatterino(const QProcessEnvironment &env)
     return false;
 }
 
+QString dequoteFilePath(QString filePath)
+{
+    if (filePath.startsWith('"') && filePath.endsWith('"') &&
+        filePath.length() > 2)
+    {
+        return filePath.mid(1, filePath.length() - 2);
+    }
+    return filePath;
+}
+
 QProcessEnvironment setUpEnvironmentForLogging(const QStringList &loggingRules)
 {
     static constexpr QLatin1String loggingRulesEnv("QT_LOGGING_RULES");
@@ -87,7 +97,7 @@ QString setLoggingRules(const CommandContext &ctx)
     {
         ctx.channel->addSystemMessage(
             "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
-            "for all categories from chatterino, use "
+            "for all categories from Chatterino, use "
             "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
             "qloggingcategory.html#configuring-categories");
@@ -341,7 +351,7 @@ QString enableLogfile(const CommandContext &ctx)
         return {};
     }
 
-    QString logFilePath = ctx.words.mid(1).join(" ");
+    QString logFilePath = dequoteFilePath(ctx.words.mid(1).join(" "));
     auto result = FileLogger::instance().enable(logFilePath);
     if (result.has_value())
     {

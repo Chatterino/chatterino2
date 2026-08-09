@@ -170,7 +170,7 @@ HighlightingPage::HighlightingPage()
                 badgeHighlights.emplace<QLabel>(
                     "Play notification sounds and highlight messages based on "
                     "user badges.\n"
-                    "Badge highlights are prioritzed under user and message "
+                    "Badge highlights are prioritized under user and message "
                     "highlights.");
                 auto *view = badgeHighlights
                                  .emplace<EditableModelView>(

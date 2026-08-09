@@ -69,18 +69,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return {
-            ColorProvider::instance().color(
-                ColorType::ElevatedMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            false,
-            true,
-        };
-    }
-
     if (this->flags.has(MessageFlag::FirstMessage))
     {
         return {
@@ -106,6 +94,14 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
             ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
                 this->announcementColor,
                 getSettings()->enableColoredAnnouncementHighlight)),
+        };
+    }
+
+    if (this->flags.has(MessageFlag::UncategorizedNotification))
+    {
+        // TODO: Give this a better/its own color :-)
+        return {
+            ColorProvider::instance().color(ColorType::Subscription),
         };
     }
 

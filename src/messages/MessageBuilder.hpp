@@ -10,6 +10,7 @@
 #include "messages/MessageFlag.hpp"
 
 #include <IrcMessage>
+#include <IrcTagsRef>
 #include <QRegularExpression>
 #include <QString>
 #include <QTime>
@@ -39,6 +40,7 @@ struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
 struct TwitchEmoteOccurrence;
+struct HelixPinnedChatMessage;
 
 namespace linkparser {
 struct Parsed;
@@ -80,7 +82,6 @@ struct MessageParseArgs {
     bool isReceivedWhisper = false;
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
-    bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
     bool allowIgnore = true;
     bool isAction = false;
@@ -196,8 +197,6 @@ public:
         QString prefix, const std::vector<HelixModerator> &users,
         Channel *channel, MessageFlags extraFlags = {});
 
-    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
-
     /// @brief Builds a message out of an `ircMessage`.
     ///
     /// Building a message won't cause highlights to be triggered. They will
@@ -241,10 +240,9 @@ public:
     static MessagePtrMut makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
-        const QTime &time);
+        const QTime &time, const Communi::IrcMessage &ircMessage);
 
-    static MessagePtrMut makeSubgiftMessage(const QString &text,
-                                            const QVariantMap &tags,
+    static MessagePtrMut makeSubgiftMessage(Communi::TagsRef tags,
                                             const QTime &time,
                                             TwitchChannel *channel);
 
@@ -256,6 +254,11 @@ public:
     static MessagePtrMut makeClearChatMessage(const QDateTime &now,
                                               const QString &actor,
                                               uint32_t count = 1);
+
+    static MessagePtrMut makePinSuccessMessage(QString text, const QString &id);
+
+    static MessagePtrMut makeCurrentPinnedMessage(
+        const TwitchChannel &channel, const HelixPinnedChatMessage &pin);
 
 private:
     struct TextState {
@@ -275,16 +278,18 @@ private:
     std::unique_ptr<MessageElement> releaseBack();
 
     void parse();
-    void parseUsernameColor(const QVariantMap &tags, const QString &userID);
+    void parseUsernameColor(Communi::TagsRef tags, const QString &userID);
     void parseUsername(const Communi::IrcMessage *ircMessage,
                        TwitchChannel *twitchChannel,
                        bool trimSubscriberUsername);
-    void parseMessageID(const QVariantMap &tags);
+    void parseMessageID(Communi::TagsRef tags);
+    /// Parses most of them message flags based on the given tags
+    void parseMessageTags(Communi::TagsRef tags);
 
     /// Parses the room-ID this message was received in
     ///
     /// @returns The room-ID
-    static QString parseRoomID(const QVariantMap &tags,
+    static QString parseRoomID(Communi::TagsRef tags,
                                TwitchChannel *twitchChannel);
 
     /// Parses the shared-chat information from this message.
@@ -294,28 +299,28 @@ private:
     /// @returns The source channel - the channel this message originated from.
     ///          If there's no channel currently open, @a twitchChannel is
     ///          returned.
-    TwitchChannel *parseSharedChatInfo(const QVariantMap &tags,
+    TwitchChannel *parseSharedChatInfo(Communi::TagsRef tags,
                                        TwitchChannel *twitchChannel);
 
     // Parse & build thread information into the message
     // Will read information from thread_ or from IRC tags
-    void parseThread(const QString &messageContent, const QVariantMap &tags,
+    void parseThread(const QString &messageContent, Communi::TagsRef tags,
                      const Channel *channel,
                      const std::shared_ptr<MessageThread> &thread,
                      const MessagePtr &parent);
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
-    HighlightAlert parseHighlights(const QVariantMap &tags,
+    HighlightAlert parseHighlights(Communi::TagsRef tags,
                                    const QString &originalMessage,
                                    const MessageParseArgs &args);
 
     void appendChannelName(const Channel *channel);
-    void appendUsername(const QVariantMap &tags, const MessageParseArgs &args);
+    void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 
     void addWords(const QStringList &words,
                   const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
                   TextState &state);
 
-    void appendTwitchBadges(const QVariantMap &tags,
+    void appendTwitchBadges(Communi::TagsRef tags,
                             TwitchChannel *twitchChannel);
     void appendChatterinoBadges(const QString &userID);
     void appendFfzBadges(TwitchChannel *twitchChannel, const QString &userID);
