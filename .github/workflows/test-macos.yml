@@ -68,6 +68,8 @@ jobs:
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_SPELLCHECK=On \
+              -DBUILD_EMBED=On \
+              -DCHATTERINO_EMBED_EXAMPLE=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 
