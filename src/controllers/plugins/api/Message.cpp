@@ -782,7 +782,11 @@ void createUserType(sol::table &c2)
             [](Message *msg, ElementRef &element) {
                 checkWritable(msg);
                 msg->elements.emplace_back(element.constElement()->clone());
-            }));
+            }),
+        "clone",
+        [](const Message &message) {
+            return message.clone();
+        });
 }
 
 }  // namespace chatterino::lua::api::message
