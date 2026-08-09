@@ -10,7 +10,6 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/beast/websocket/ssl.hpp>
-#include <boost/bind/bind.hpp>
 
 using namespace std::literals::string_view_literals;
 
@@ -260,13 +259,14 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
         beast::bind_front_handler(&WebSocketConnectionHelper::onReadDone,
                                   this->shared_from_this()));
 
-    this->stream.control_callback(
-        boost::bind(&WebSocketConnectionHelper::onControlFrame, this,
-                    boost::placeholders::_1, boost::placeholders::_2));
+    this->stream.control_callback([this](auto frame_type, auto payload) {
+        this->onControlFrame(frame_type, payload);
+    });
     this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
     this->healthCheckTimer.async_wait(
-        boost::bind(&WebSocketConnectionHelper::onHealthCheck,
-                    this->shared_from_this(), boost::placeholders::_1));
+        [self{this->shared_from_this()}](auto ec) {
+            self->onHealthCheck(ec);
+        });
 }
 
 template <typename Derived, typename Inner>
@@ -284,7 +284,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onHealthCheck(
         return;
     }
 
-    this->stream.async_ping({}, [](const boost::system::error_code ec) {
+    this->stream.async_ping({}, [](auto ec) {
         (void)ec;
     });
     this->pingProbesTried++;
@@ -292,8 +292,9 @@ void WebSocketConnectionHelper<Derived, Inner>::onHealthCheck(
     // Use the short interval so that we can detect a failed connection quickly
     this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_SHORT);
     this->healthCheckTimer.async_wait(
-        boost::bind(&WebSocketConnectionHelper::onHealthCheck,
-                    this->shared_from_this(), boost::placeholders::_1));
+        [self{this->shared_from_this()}](auto ec) {
+            self->onHealthCheck(ec);
+        });
 }
 
 template <typename Derived, typename Inner>
