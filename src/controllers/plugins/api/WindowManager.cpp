@@ -203,10 +203,13 @@ void createUserTypes(sol::table &c2)
                     }
 
                     std::optional<message::ElementRef> ref;
+
                     auto msg = std::const_pointer_cast<Message>(
                         layout.getMessagePtr());
                     if (element)
                     {
+                        // Find the index of `el` in the message to create an
+                        // `ElementRef`.
                         auto *el = &element->getCreator();
                         for (size_t i = 0; i < msg->elements.size(); ++i)
                         {
@@ -217,6 +220,7 @@ void createUserTypes(sol::table &c2)
                             }
                         }
                     }
+
                     std::optional<ChannelRef> maybeChan;
                     if (auto underlyingChan = view.underlyingChannel())
                     {
