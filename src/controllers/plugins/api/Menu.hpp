@@ -18,7 +18,7 @@ c2.Menu = {}
 ---@param cb fun()
 function c2.Menu:add_action(text, cb) end
 
----Inserts an action named `text` after `before`. If `before` is not found,
+---Inserts an action named `text` before `before`. If `before` is not found,
 ---the action is inserted at the end. `before` can either be a name or a 
 ---one-based index.
 ---@param before string|integer A name or index of an action.
@@ -31,7 +31,7 @@ function c2.Menu:insert_action(before, text, cb) end
 ---@return c2.Menu
 function c2.Menu:add_menu(title) end
 
----Inserts a new Menu named `title` after `before`. If `before` is not found,
+---Inserts a new Menu named `title` before `before`. If `before` is not found,
 ---the menu is inserted at the end. `before` can either be a name or a one-based
 ---index.
 ---@param before string|integer A name or index of an action.
@@ -41,7 +41,7 @@ function c2.Menu:insert_menu(before, title) end
 ---Appends a new separator.
 function c2.Menu:add_separator() end
 
----Inserts a new separator after `before`. If `before` is not found,
+---Inserts a new separator before `before`. If `before` is not found,
 ---the separator is inserted at the end. `before` can either be a name or a 
 ---one-based index.
 ---@param before string|integer A name or index of an action.

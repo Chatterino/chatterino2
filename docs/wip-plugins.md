@@ -1071,7 +1071,7 @@ Appends a new action to the menu.
 
 ##### `Menu:insert_action(before, text, cb)`
 
-Inserts an action named `text` after `before`. If `before` is not found, the
+Inserts an action named `text` before `before`. If `before` is not found, the
 action is inserted at the end. `before` can either be a name or a one-based
 index.
 
@@ -1081,7 +1081,7 @@ Appends a new Menu with `title` to the menu. Returns the new menu.
 
 ##### `Menu:insert_menu(before, text)`
 
-Inserts a new Menu named `title` after `before`. If `before` is not found,
+Inserts a new Menu named `title` before `before`. If `before` is not found,
 the menu is inserted at the end. `before` can either be a name or a one-based
 index. Returns the new menu.
 
@@ -1091,7 +1091,7 @@ Appends a new separator.
 
 ##### `Menu:insert_separator(before)`
 
-Inserts a new separator after `before`. If `before` is not found, the separator
+Inserts a new separator before `before`. If `before` is not found, the separator
 is inserted at the end. `before` can either be a name or a one-based index.
 
 ### Input/Output API
