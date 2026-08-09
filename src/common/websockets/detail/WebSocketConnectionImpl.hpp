@@ -91,7 +91,7 @@ private:
     BalancedResolverResults resolvedEndpoints;
 
     boost::asio::steady_timer healthCheckTimer;
-    int pingProbesTried;
+    unsigned int pingProbesTried = 0;
 };
 
 /// A WebSocket connection over TLS (wss://).
