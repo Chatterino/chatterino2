@@ -310,6 +310,14 @@ public:
         return this->words_;
     }
 
+    /// Set the words of this element.
+    ///
+    /// Normally set during construction, but can be overridden in plugins.
+    void setWords(const QStringList &newWords)
+    {
+        this->words_ = newWords;
+    }
+
 protected:
     QStringList words_;
 
@@ -356,6 +364,14 @@ public:
     QStringList words() const
     {
         return this->words_;
+    }
+
+    /// Set the words of this element.
+    ///
+    /// Normally set during construction, but can be overridden in plugins.
+    void setWords(const QStringList &newWords)
+    {
+        this->words_ = newWords;
     }
 
 private:
