@@ -2962,16 +2962,11 @@ void ChannelView::addCommandExecutionContextMenuItems(
     auto *cmdMenu = new QMenu(menu);
     executeAction->setMenu(cmdMenu);
 
-    QString elementCopyText = "";
+    QString elementCopyText;
     if (hoveredElement != nullptr)
     {
         hoveredElement->addCopyTextToString(elementCopyText);
-        // remove trailing space which addCopyTextToString adds if the hovered
-        // element is followed by a space
-        if (elementCopyText.endsWith(' '))
-        {
-            elementCopyText.truncate(elementCopyText.length() - 1);
-        }
+        elementCopyText = elementCopyText.trimmed();
     }
 
     for (auto &cmd : cmds)
@@ -2997,8 +2992,10 @@ void ChannelView::addCommandExecutionContextMenuItems(
             // Execute command through right-clicking a message -> Execute command
             QString value = getApp()->getCommands()->execCustomCommand(
                 inputText.split(' '), cmd, true, channel, layout->getMessage(),
-                {{"input.text", userText},
-                 {"element.copytext", elementCopyText}});
+                {
+                    {"input.text", userText},
+                    {"element.copytext", elementCopyText},
+                });
 
             value = getApp()->getCommands()->execCommand(value, channel, false);
 
