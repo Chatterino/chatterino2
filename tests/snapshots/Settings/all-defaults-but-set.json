@@ -90,7 +90,7 @@
                     "enabled": true,
                     "id": "yourusername",
                     "showInMentions": true,
-                    "sound": "ping2"
+                    "sound": "001-ping2"
                 },
                 {
                     "alert": false,
@@ -109,7 +109,7 @@
                     "enabled": true,
                     "id": "subscribedthread",
                     "showInMentions": true,
-                    "sound": "ping2"
+                    "sound": "001-ping2"
                 },
                 {
                     "backgroundColor": "#44444444",
