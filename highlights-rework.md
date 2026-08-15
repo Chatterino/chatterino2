@@ -9,5 +9,6 @@ BREAKING(?) changes!!:
 - The "highlight" order of ChannelPointsHighlight, FirstMessageHighlight, HypeChatHighlight, and WatchStreakHighlight are not the same as before. Maybe also Announcements if I get to those.
 - There's no longer a way to keep a custom sound URL attached to a highlight while having the sound disabled. I intend to add a volume slider so you could achieve the same/something similar by setting the volume to 0
 - This has removed the "Highlight inline whispers" setting under the general section, and is now controlled by the "Inline whispers" highlight being enabled or disabled.
+- The "Default" sounds no longer exists. This allows us to provide multiple built in sounds, and simplifies how a highlight figures out which sound to play.
 
 NOTE: If a user happens to have duplicate built-in highlights, should we clean that up on launch?
