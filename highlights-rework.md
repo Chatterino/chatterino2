@@ -1,17 +1,6 @@
-> If we go for a list that contains every single highlight (message, user, badge), we should have some icon to signify for each highlight what type of highlight it is.
-
-There's currently some icons that we need to figure out licenses for, but there's a message, user, badge, "automated", and filter icon.
-
-> Chatty's highlight edit dialog has a really cool test text feature, especially handy for regex testing.
-
-I have not looked at implementing this, but I believe that's best left for a follow-up PR.
-
-Issues to keep in mind:
-
-- https://github.com/Chatterino/chatterino2/discussions/6686
-
 NOTE: Should we add an option for highlights to short-circuit, meaning no further highlights should be executed?
 NOTE: Add some more debug-entries
+NOTE: When adding a highlight under Settings -> Highlights -> Add, there's no icon for the "Badge highlight". In the model/list itself, we use whatever Twitch badge exists, but I'd prefer to use a generic badge in the Add menu.
 
 BREAKING(?) changes!!:
 
