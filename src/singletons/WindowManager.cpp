@@ -374,7 +374,7 @@ Window &WindowManager::createWindow(WindowType type,
     }
 
     this->windows_.push_back(window);
-    if (args.parent)
+    if (args.show)
     {
         window->show();
     }
