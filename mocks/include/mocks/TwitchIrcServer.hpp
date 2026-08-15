@@ -160,6 +160,11 @@ public:
         return this->automodChannel;
     }
 
+    bool isModeratorIn(const QString & /* login */) const override
+    {
+        return false;
+    }
+
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
     ChannelPtr whispersChannel;

@@ -26,6 +26,7 @@
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
@@ -1165,6 +1166,7 @@ void TwitchIrcServer::connect()
                                ConnectionType::Write);
     this->initializeConnection(this->readConnection_.get(),
                                ConnectionType::Read);
+    this->refreshModeratedChannels();
 }
 
 void TwitchIrcServer::disconnect()
@@ -1284,6 +1286,55 @@ void TwitchIrcServer::open(ConnectionType type)
     if (type == ConnectionType::Read)
     {
         this->readConnection_->open();
+    }
+}
+
+bool TwitchIrcServer::isModeratorIn(const QString &broadcasterLogin) const
+{
+    return this->moderatedChannels.contains(broadcasterLogin);
+}
+
+void TwitchIrcServer::refreshModeratedChannels()
+{
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+    if (currentUser->isAnon())
+    {
+        return;
+    }
+    CancellationToken token{false};
+    this->moderatedChannelFetchToken = token;
+    getHelix()->getModeratedChannels(
+        currentUser->getUserId(),
+        [this](auto &&set) {
+            this->moderatedChannels = std::forward<decltype(set)>(set);
+            this->applyModeratedChannelInfo();
+        },
+        [](const auto &message) {
+            qCWarning(chatterinoTwitch)
+                << "Failed to fetch moderated channels:" << message;
+        },
+        std::move(token));
+}
+
+void TwitchIrcServer::applyModeratedChannelInfo()
+{
+    if (this->moderatedChannels.empty())
+    {
+        return;
+    }
+
+    auto currentUserName =
+        getApp()->getAccounts()->twitch.getCurrent()->getUserName();
+    std::lock_guard g(this->channelMutex);
+    for (const auto &weak : this->channels)
+    {
+        if (auto chan = std::dynamic_pointer_cast<TwitchChannel>(weak.lock()))
+        {
+            if (chan->getName() != currentUserName)
+            {
+                chan->setMod(this->moderatedChannels.contains(chan->getName()));
+            }
+        }
     }
 }
 

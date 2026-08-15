@@ -1204,6 +1204,13 @@ public:
         FailureCallback<HelixGetSharedChatSessionError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#get-moderated-channels
+    virtual void getModeratedChannels(
+        QString userID,
+        ResultCallback<QSet</* logins */ QString>> successCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1639,6 +1646,13 @@ public:
         ResultCallback<HelixSharedChatSession> successCallback,
         FailureCallback<HelixGetSharedChatSessionError, QString>
             failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-moderated-channels
+    void getModeratedChannels(
+        QString userID,
+        ResultCallback<QSet</* logins */ QString>> successCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) final;
 
     void update(QString clientId, QString oauthToken) final;
 

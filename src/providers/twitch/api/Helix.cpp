@@ -3840,6 +3840,39 @@ void Helix::getSharedChatSession(
         .execute();
 }
 
+void Helix::getModeratedChannels(QString userID,
+                                 ResultCallback<QSet<QString>> successCallback,
+                                 FailureCallback<QString> failureCallback,
+                                 CancellationToken &&token)
+{
+    this->paginate(
+        "moderation/channels", {{"first", "100"}, {"user_id", userID}},
+        [successCallback, ids = QSet<QString>{}](
+            const QJsonObject &page,
+            const HelixPaginationState &state) mutable {
+            const auto data = page["data"_L1].toArray();
+            for (const auto user : data)
+            {
+                auto login =
+                    user.toObject().value("broadcaster_login").toString();
+                if (!login.isEmpty())
+                {
+                    ids.insert(std::move(login));
+                }
+            }
+
+            if (state.done)
+            {
+                successCallback(std::move(ids));
+            }
+            return true;
+        },
+        [failureCallback](const NetworkResult &res) {
+            failureCallback(res.formatError());
+        },
+        std::move(token));
+}
+
 QDebug &operator<<(QDebug &dbg,
                    const HelixCreateEventSubSubscriptionResponse &data)
 {
