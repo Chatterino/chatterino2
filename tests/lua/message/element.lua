@@ -25,12 +25,16 @@ local tests = {
             })
         end)
         assert(append_init_ok)
+        assert(new_msg:elements()[1])
+        assert(new_msg:elements()[1].type == 'text' and new_msg:elements()[1].words[1] == 'foo')
         local append_element_ok, append_element_err = pcall(function()
             for index, element in ipairs(msg:elements()) do
                 new_msg:append_element(element)
             end
         end)
         assert(append_element_ok)
+        assert(new_msg:elements()[2])
+        assert(new_msg:elements()[2].type == 'text' and new_msg:elements()[2].words[1] == 'abcde')
     end,
 }
 
