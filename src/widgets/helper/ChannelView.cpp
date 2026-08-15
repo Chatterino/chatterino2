@@ -2635,7 +2635,7 @@ void ChannelView::addContextMenuItems(
     addHiddenContextMenuItems(menu, hoveredElement, layout, event);
 
     // Add executable command options
-    this->addCommandExecutionContextMenuItems(menu, layout);
+    this->addCommandExecutionContextMenuItems(menu, hoveredElement, layout);
 
     this->messageMenuCreated.invoke(menu, hoveredElement);
 
@@ -2938,7 +2938,8 @@ void ChannelView::addTwitchLinkContextMenuItems(
 }
 
 void ChannelView::addCommandExecutionContextMenuItems(
-    QMenu *menu, const MessageLayoutPtr &layout)
+    QMenu *menu, const MessageLayoutElement *hoveredElement,
+    const MessageLayoutPtr &layout)
 {
     /* Get commands to be displayed in context menu;
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
@@ -2961,6 +2962,13 @@ void ChannelView::addCommandExecutionContextMenuItems(
     auto *cmdMenu = new QMenu(menu);
     executeAction->setMenu(cmdMenu);
 
+    QString elementCopyText;
+    if (hoveredElement != nullptr)
+    {
+        hoveredElement->addCopyTextToString(elementCopyText);
+        elementCopyText = elementCopyText.trimmed();
+    }
+
     for (auto &cmd : cmds)
     {
         QString inputText = this->selection_.isEmpty()
@@ -2969,7 +2977,8 @@ void ChannelView::addCommandExecutionContextMenuItems(
 
         inputText.push_front(cmd.name + " ");
 
-        cmdMenu->addAction(cmd.name, [this, layout, cmd, inputText] {
+        cmdMenu->addAction(cmd.name, [this, layout, cmd, inputText,
+                                      elementCopyText] {
             /* Search popups and user message history's underlyingChannels aren't of type TwitchChannel, but
              * we would still like to execute commands from them. Use their source channel instead if applicable. */
             ChannelPtr channel = this->effectiveSourceChannel();
@@ -2985,6 +2994,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
                 inputText.split(' '), cmd, true, channel, layout->getMessage(),
                 {
                     {"input.text", userText},
+                    {"element.copytext", elementCopyText},
                 });
 
             value = getApp()->getCommands()->execCommand(value, channel, false);
