@@ -1325,8 +1325,8 @@ void TwitchIrcServer::applyModeratedChannelInfo()
 
     auto currentUserName =
         getApp()->getAccounts()->twitch.getCurrent()->getUserName();
-    std::lock_guard g(this->channelMutex);
-    for (const auto &weak : this->channels)
+    std::scoped_lock g(this->channelMutex);
+    for (const auto &weak : std::as_const(this->channels))
     {
         if (auto chan = std::dynamic_pointer_cast<TwitchChannel>(weak.lock()))
         {

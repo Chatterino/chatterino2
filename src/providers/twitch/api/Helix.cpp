@@ -3848,8 +3848,7 @@ void Helix::getModeratedChannels(QString userID,
     this->paginate(
         "moderation/channels", {{"first", "100"}, {"user_id", userID}},
         [successCallback, ids = QSet<QString>{}](
-            const QJsonObject &page,
-            const HelixPaginationState &state) mutable {
+            const QJsonObject &page, HelixPaginationState state) mutable {
             const auto data = page["data"_L1].toArray();
             for (const auto user : data)
             {
