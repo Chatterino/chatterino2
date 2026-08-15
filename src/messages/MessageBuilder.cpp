@@ -1821,14 +1821,6 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         highlight.windowAlert = false;
     }
 
-    // highlighting incoming whispers if requested per setting
-    if (args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
-    {
-        builder->flags.set(MessageFlag::HighlightedWhisper);
-        builder->highlightColor =
-            ColorProvider::instance().color(ColorType::Whisper);
-    }
-
     if (!args.isReceivedWhisper && tags.getOrEmpty("msg-id") != "announcement")
     {
         if (thread)

@@ -29,8 +29,11 @@ struct WhispersHighlight {
     static constexpr QStringView ID = u"whispers";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
+    static constexpr QStringView DESCRIPTION =
+        u"This only highlights whispers that are shown inline if<br />"
+        u"you have the \"Show Twitch whispers inline\" setting enabled.";
 
-    static constexpr QStringView DEFAULT_NAME = u"Whispers";
+    static constexpr QStringView DEFAULT_NAME = u"Inline whispers";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
