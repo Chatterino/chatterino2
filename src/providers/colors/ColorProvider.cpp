@@ -6,6 +6,7 @@
 
 #include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/types/All.hpp"
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "singletons/Settings.hpp"
 
@@ -32,16 +33,32 @@ std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 
 QSet<QColor> ColorProvider::recentColors() const
 {
-    QSet<QColor> retVal;
+    QSet<QColor> colors;
 
-    // TODO: Grab user's custom highlight colors and add them here
+    const auto highlights = getSettings()->sharedHighlights.readOnly();
 
-    // Insert preset highlight colors
-    // retVal.insert(*this->color(ColorType::SelfHighlight));
-    // retVal.insert(*this->color(ColorType::Whisper));
-    // retVal.insert(*this->color(ColorType::AnnouncementHighlight));
+    for (const auto &highlight : *highlights)
+    {
+        auto enabled = highlights::isEnabled(highlight);
 
-    return retVal;
+        if (!enabled)
+        {
+            continue;
+        }
+
+        const auto color = highlights::getBackgroundColor(highlight);
+        if (!color)
+        {
+            continue;
+        }
+        if (!color->isValid())
+        {
+            continue;
+        }
+        colors.insert(*color);
+    }
+
+    return colors;
 }
 
 const std::vector<QColor> &ColorProvider::defaultColors() const
@@ -92,20 +109,6 @@ void ColorProvider::initTypeColorMap()
             },
             false);
     };
-
-    //initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
-    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-
-    // initColor(ColorType::SelfMessageHighlight,
-    //           getSettings()->selfMessageHighlightColor,
-    //           HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
-
-    //initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
-    //          HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-
-    // initColor(ColorType::ThreadMessageHighlight,
-    //           getSettings()->threadHighlightColor,
-    //           HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
 
     initColor(ColorType::AnnouncementHighlight,
               getSettings()->announcementHighlightColor,
