@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "controllers/highlights/types/MessageHighlight.hpp"
 #include "pajlada/serialize/common.hpp"
 #include "pajlada/serialize/deserialize.hpp"
 #include "pajlada/serialize/serialize.hpp"
@@ -22,18 +23,6 @@ namespace chatterino {
 /// HighlightPhrase is how the old highlight system defined a message and user highlight
 /// The base struct & serialization is kept for migration from old settings versions.
 struct HighlightPhrase {
-    static constexpr QColor FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
-    /// Used for automatic self messages highlighing
-    static constexpr QColor FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR =
-        QColor(0, 118, 221, 115);
-    static constexpr QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
-        QColor(28, 126, 141, 60);
-    static constexpr QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =
-        QColor(72, 127, 63, 60);
-    static constexpr QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR =
-        QColor(255, 174, 66, 60);
-    static constexpr QColor FALLBACK_THREAD_HIGHLIGHT_COLOR =
-        QColor(143, 48, 24, 60);
     static constexpr QColor FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR =
         QColor(255, 102, 237, 100);
     static constexpr QColor ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR =
@@ -108,7 +97,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
         auto iColor = QColor(encodedColor);
         if (!iColor.isValid())
         {
-            iColor = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
+            iColor = chatterino::highlights::MessageHighlight::
+                BACKGROUND_COLOR_DEFAULT;
         }
         else
         {
