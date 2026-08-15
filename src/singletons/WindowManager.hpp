@@ -37,6 +37,8 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+class MessageLayout;
+class MessageLayoutElement;
 class WindowLayout;
 class Theme;
 class Fonts;
@@ -169,6 +171,12 @@ public:
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
     pajlada::Signals::Signal<const MessagePtr &> scrollToMessageSignal;
+
+    /// This is invoked when a context menu for a message is requested in any
+    /// ChannelView. It's primarily used by plugins to add items.
+    pajlada::Signals::Signal<const ChannelView &, const MessageLayout &,
+                             const MessageLayoutElement *, QMenu &>
+        channelViewContextMenuRequested;
 
 private:
     // Load window layout from the window-layout.json file

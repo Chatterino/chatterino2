@@ -340,15 +340,15 @@ QString streamlink(const CommandContext &ctx)
         else
         {
             ctx.channel->addSystemMessage(
-                "/streamlink [channel]. Open specified Twitch channel in "
-                "streamlink. If no channel argument is specified, open the "
+                "/streamlink [channel/URL]. Open specified Twitch channel or "
+                "URL in streamlink. If no argument is specified, open the "
                 "current Twitch channel instead.");
             return "";
         }
     }
 
     stripChannelName(target);
-    openStreamlinkForChannel(target);
+    openStreamlinkForChannelOrUrl(target);
 
     return "";
 }
