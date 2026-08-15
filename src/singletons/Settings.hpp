@@ -573,9 +573,6 @@ public:
     };
     QStringSetting logPath = {"/logging/path", ""};
 
-    QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
-                                         ""};
-
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound",
                                             false};
 

@@ -145,24 +145,6 @@ QString formatUpdatedEmoteList(const QString &platform,
     return text;
 }
 
-/**
- * Gets the default sound url if the user set one,
- * or the chatterino default ping sound if no url is set.
- */
-QUrl getFallbackHighlightSound()
-{
-    QString path = getSettings()->pathHighlightSound;
-    bool fileExists =
-        !path.isEmpty() && QFileInfo::exists(path) && QFileInfo(path).isFile();
-
-    if (fileExists)
-    {
-        return QUrl::fromLocalFile(path);
-    }
-
-    return QUrl("qrc:/sounds/ping2.wav");
-}
-
 void actuallyTriggerHighlights(const QString &channelName, const QUrl &sound,
                                bool windowAlert)
 {

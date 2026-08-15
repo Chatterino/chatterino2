@@ -8,7 +8,6 @@
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "singletons/Settings.hpp"
-#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/settingspages/HighlightingWidget.hpp"
@@ -88,61 +87,6 @@ HighlightingPage::HighlightingPage()
                 lbl->hide();
                 btn->hide();
             });
-        }
-
-        auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
-        {
-            auto label = customSound.append(this->createLabel<QString>(
-                [](const auto &value) {
-                    if (value.isEmpty())
-                    {
-                        return QString("Default sound: Chatterino Ping");
-                    }
-
-                    auto url = QUrl::fromLocalFile(value);
-                    return QString("Default sound: <a href=\"%1\"><span "
-                                   "style=\"color: white\">%2</span></a>")
-                        .arg(url.toString(QUrl::FullyEncoded),
-                             shortenString(url.fileName(), 50));
-                },
-                getSettings()->pathHighlightSound));
-            label->setToolTip(
-                "This sound will play for all highlight phrases that have "
-                "sound enabled and don't have a custom sound set.");
-            label->setTextFormat(Qt::RichText);
-            label->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                           Qt::LinksAccessibleByKeyboard);
-            label->setOpenExternalLinks(true);
-            customSound->setStretchFactor(label.getElement(), 1);
-
-            auto clearSound = customSound.emplace<QPushButton>("Clear");
-            auto selectFile = customSound.emplace<QPushButton>("Change...");
-
-            QObject::connect(selectFile.getElement(), &QPushButton::clicked,
-                             this, [this]() mutable {
-                                 auto fileName = QFileDialog::getOpenFileName(
-                                     this, tr("Open Sound"), "",
-                                     tr("Audio Files (*.mp3 *.wav)"));
-
-                                 getSettings()->pathHighlightSound = fileName;
-                             });
-            QObject::connect(clearSound.getElement(), &QPushButton::clicked,
-                             this, [=]() mutable {
-                                 getSettings()->pathHighlightSound = QString();
-                             });
-
-            getSettings()->pathHighlightSound.connect(
-                [clearSound = clearSound.getElement()](const auto &value) {
-                    if (value.isEmpty())
-                    {
-                        clearSound->hide();
-                    }
-                    else
-                    {
-                        clearSound->show();
-                    }
-                },
-                this->managedConnections_);
         }
 
         layout.append(createCheckBox(
