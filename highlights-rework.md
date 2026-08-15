@@ -12,3 +12,7 @@ BREAKING(?) changes!!:
 - The "Default" sounds no longer exists. This allows us to provide multiple built in sounds, and simplifies how a highlight figures out which sound to play.
 
 NOTE: If a user happens to have duplicate built-in highlights, should we clean that up on launch?
+
+## TODO
+
+Move announcements & colored announcements to separate highlight types
