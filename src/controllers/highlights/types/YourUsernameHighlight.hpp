@@ -35,7 +35,7 @@ struct YourUsernameHighlight {
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
     static constexpr bool ALERT_DEFAULT = true;
-    static constexpr QStringView SOUND_DEFAULT = u"ping2";
+    static constexpr QStringView SOUND_DEFAULT = u"001-ping2";
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(127, 63, 73, 127);
 
     // Default state:

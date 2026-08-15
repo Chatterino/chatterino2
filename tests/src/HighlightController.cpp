@@ -7,7 +7,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/Sounds.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/BaseApplication.hpp"
@@ -682,56 +681,4 @@ TEST_F(HighlightControllerTest, AnonEmpty)
     };
 
     this->runTests(tests);
-}
-
-TEST_F(HighlightControllerTest, Pajlada)
-{
-    configure(SETTINGS_DEFAULT, false);
-    /*
-
-    SharedHighlight2 highlight{
-        .id = "test",
-    };
-
-    std::vector<TestCase> tests{
-        {
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada2",          // sender name
-                "hello!",            // original message
-            },
-            {
-                // expected
-                false,                           // state
-                HighlightResult::emptyResult(),  // result
-            },
-        },
-        {
-            // anonymous default username
-            {
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada2",          // sender name
-                "justinfan64537",    // original message
-            },
-            {
-                // expected
-                false,                           // state
-                HighlightResult::emptyResult(),  // result
-            },
-        },
-    };
-
-    this->runTests(tests);
-    */
-
-    auto xd = highlights::resolveDefaultSound(u"ping2");
-    ASSERT_TRUE(xd.has_value());
-    const auto &xd2 = *xd;
-    ASSERT_EQ(xd2.id, "ping2");
-    ASSERT_EQ(xd2.displayName, "Chatterino default");
-    ASSERT_EQ(xd2.resourcePath, QUrl{"qrc:/sounds/ping2.wav"});
-    qInfo() << "XXX" << xd2.resourcePath;
 }

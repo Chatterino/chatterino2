@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include <boost/container/flat_map.hpp>
 #include <QMetaType>
 #include <QString>
 #include <QStringView>
 #include <QUrl>
 
-#include <map>
 #include <optional>
 
 namespace chatterino::highlights {
@@ -18,7 +18,7 @@ struct DefaultSound {
     QString resourcePath;
 };
 
-const std::map<QString, DefaultSound> &defaultSounds();
+const boost::container::flat_map<QString, DefaultSound> &defaultSounds();
 
 std::optional<DefaultSound> resolveDefaultSound(QStringView id);
 

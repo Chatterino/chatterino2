@@ -4,28 +4,42 @@
 
 namespace chatterino::highlights {
 
-const std::map<QString, DefaultSound> &defaultSounds()
+const boost::container::flat_map<QString, DefaultSound> &defaultSounds()
 {
-    static std::map<QString, DefaultSound> defaultSoundsXD{
+    // If you add a new built-in sound here, double-check its licensing and attribute it
+    // in the about page if necessary.
+    static boost::container::flat_map<QString, DefaultSound> data{
+        boost::container::ordered_unique_range_t{},
         {
-            "ping2",
-            DefaultSound{
-                .id = "ping2",
-                .displayName = "Chatterino default",
-                .resourcePath = "qrc:/sounds/ping2.wav",
+            {
+                "001-ping2",
+                DefaultSound{
+                    .id = "001-ping2",
+                    .displayName = "Chatterino default",
+                    .resourcePath = "qrc:/sounds/ping2.wav",
+                },
             },
-        },
-        {
-            "ping3",
-            DefaultSound{
-                .id = "ping3",
-                .displayName = "Chatterino laser",
-                .resourcePath = "qrc:/sounds/ping3.wav",
+            {
+                "002-sadiquecat-c4-harmonic",
+                DefaultSound{
+                    .id = "002-sadiquecat-c4-harmonic",
+                    .displayName = "Sadiquecat C4 Harmonic",
+                    .resourcePath = "qrc:/sounds/sadiquecat-c4-harmonic.wav",
+                },
+            },
+            {
+                "003-cat-fox_alex-fx-jump-3",
+                DefaultSound{
+                    .id = "003-cat-fox_alex-fx-jump-3",
+                    .displayName = "CAT-FOX_Alex FX-Jump 3",
+                    .resourcePath =
+                        "qrc:/sounds/cat-fox_alex-8bit-fx-jump-3.wav",
+                },
             },
         },
     };
 
-    return defaultSoundsXD;
+    return data;
 }
 
 std::optional<DefaultSound> resolveDefaultSound(QStringView id)

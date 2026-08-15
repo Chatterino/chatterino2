@@ -72,7 +72,7 @@ void migrateSound(const BoolSetting &enableSoundSetting,
             if (customSoundURL.isEmpty())
             {
                 // Default ping sound
-                outcome.setSound("ping2");
+                outcome.setSound("001-ping2");
                 assert(
                     highlights::resolveDefaultSound(outcome.sound).has_value());
             }
@@ -425,7 +425,7 @@ void Settings::migrateHighlights(bool isTest)
             }
             else
             {
-                to.outcome.setSound("ping2");
+                to.outcome.setSound("001-ping2");
                 assert(highlights::resolveDefaultSound(to.outcome.sound)
                            .has_value());
             }
@@ -527,7 +527,7 @@ void Settings::migrateHighlights(bool isTest)
             }
             else
             {
-                to.outcome.setSound("ping2");
+                to.outcome.setSound("001-ping2");
                 assert(highlights::resolveDefaultSound(to.outcome.sound)
                            .has_value());
             }
@@ -603,7 +603,7 @@ void Settings::migrateHighlights(bool isTest)
             }
             else
             {
-                to.outcome.setSound("ping2");
+                to.outcome.setSound("001-ping2");
                 assert(highlights::resolveDefaultSound(to.outcome.sound)
                            .has_value());
             }
