@@ -425,7 +425,7 @@ void TwitchAccountManager::markCurrentAsExpired()
 
 bool TwitchAccountManager::hasExpiredAccount() const
 {
-    std::lock_guard<std::mutex> lock(this->mutex_);
+    std::scoped_lock lock(this->mutex_);
 
     return std::ranges::any_of(this->accounts, [](const auto &account) {
         return account->isExpired();
