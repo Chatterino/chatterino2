@@ -22,3 +22,18 @@ SPDX-License-Identifier = "MIT"
 path = "dismiss-square.svg"
 SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "music-note-1.svg"
+SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "music-note-2.svg"
+SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "speaker-mute.svg"
+SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
+SPDX-License-Identifier = "MIT"

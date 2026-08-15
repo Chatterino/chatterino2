@@ -27,12 +27,12 @@ void updateRow(const AllHighlights &highlight,
     auto soundIcon = [highlight] {
         if (willPlayCustomSound(highlight))
         {
-            return QIcon{":/buttons/music-note.svg"};
+            return QIcon{":/buttons/music-note-2.svg"};
         }
 
         if (shouldPlaySound(highlight))
         {
-            return QIcon{":/buttons/music-note-2.svg"};
+            return QIcon{":/buttons/music-note-1.svg"};
         }
 
         return QIcon{":/buttons/speaker-mute.svg"};
