@@ -10,24 +10,6 @@ Issues to keep in mind:
 
 - https://github.com/Chatterino/chatterino2/discussions/6686
 
-```json
-{
-  "subHighlightColor": "#FF00FF"
-}
-```
-
-->
-
-```json
-{
-  "highlights": {
-    "subhighlight": {
-      "color": "#FF00FF"
-    }
-  }
-}
-```
-
 NOTE: Should we add an option for highlights to short-circuit, meaning no further highlights should be executed?
 NOTE: Add some more debug-entries
 
