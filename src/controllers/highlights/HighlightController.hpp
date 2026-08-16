@@ -41,10 +41,7 @@ public:
      * @brief Checks the given message parameters if it matches our internal checks, and returns a result
      **/
     [[nodiscard]] std::pair<bool, HighlightResult> check(
-        const MessageParseArgs &args,
-        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags,
-        filters::RunContext runContext) const;
+        const HighlightCheck::Params &params) const;
 
     /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
     /// This can happen if a user does some manual cursed surgery on their settings.json file.

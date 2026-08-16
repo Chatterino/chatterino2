@@ -214,6 +214,8 @@ set(SOURCE_FILES
         controllers/highlights/Sounds.cpp
         controllers/highlights/types/AllForward.hpp
         controllers/highlights/types/All.hpp
+        controllers/highlights/types/AnnouncementsHighlight.hpp
+        controllers/highlights/types/AnnouncementsHighlight.cpp
         controllers/highlights/types/AutomodCaughtHighlight.hpp
         controllers/highlights/types/AutomodCaughtHighlight.cpp
         controllers/highlights/types/ChannelPointsHighlight.hpp

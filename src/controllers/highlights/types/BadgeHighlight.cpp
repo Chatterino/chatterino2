@@ -20,6 +20,7 @@ BadgeHighlight::BadgeHighlight(QStringView _id)
 HighlightCheck BadgeHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     if (!this->isValid())
     {
@@ -27,18 +28,8 @@ HighlightCheck BadgeHighlight::buildCheck() const
     }
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &twitchBadges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;             // unused
-            (void)senderName;       // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-            (void)runContext;       // unused
-
-            for (const TwitchBadge &badge : twitchBadges)
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
+            for (const TwitchBadge &badge : p.twitchBadges)
             {
                 if (highlight.isMatch(badge))
                 {

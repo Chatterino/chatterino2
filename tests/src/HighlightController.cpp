@@ -5,14 +5,15 @@
 #include "controllers/highlights/HighlightController.hpp"
 
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/types/WhispersHighlight.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "Test.hpp"
 
@@ -88,7 +89,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7fffffff"
+                "color": "#30000001"
             },
             {
                 "pattern": "testaccount_420",
@@ -98,7 +99,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#6fffffff"
+                "color": "#30000002"
             },
             {
                 "pattern": "gempir",
@@ -108,7 +109,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7ff19900"
+                "color": "#30000003"
             }
         ],
         "alwaysPlaySound": true,
@@ -121,7 +122,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7f7f3f49"
+                "color": "#10000001"
             }
         ],
         "badges": [
@@ -131,7 +132,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7f427f00"
+                "color": "#20000001"
             },
             {
                 "name": "subscriber",
@@ -139,7 +140,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7f7f3f49"
+                "color": "#20000002"
             },
             {
                 "name": "founder",
@@ -147,7 +148,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": true,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7fe8b7eb"
+                "color": "#20000003"
             },
             {
                 "name": "vip",
@@ -156,112 +157,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7fe8b7ec"
-            }
-        ],
-        "subHighlightColor": "#64ffd641"
-    }
-})!";
-
-static QString SETTINGS_DEFAULT_V2 = R"!(
-{
-    "accounts": {
-        "uid117166826": {
-            "username": "testaccount_420",
-            "userID": "117166826",
-            "clientID": "abc",
-            "oauthToken": "def"
-        },
-        "current": "testaccount_420"
-    },
-    "highlighting": {
-        "selfHighlight": {
-            "enableSound": true
-        },
-        "blacklist": [
-            {
-                "pattern": "zenix",
-                "regex": false
-            }
-        ],
-        "users": [
-            {
-                "pattern": "pajlada",
-                "showInMentions": false,
-                "alert": false,
-                "sound": false,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#7fffffff"
-            },
-            {
-                "pattern": "testaccount_420",
-                "showInMentions": false,
-                "alert": false,
-                "sound": false,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#6fffffff"
-            },
-            {
-                "pattern": "gempir",
-                "showInMentions": true,
-                "alert": true,
-                "sound": false,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#7ff19900"
-            }
-        ],
-        "alwaysPlaySound": true,
-        "highlights": [
-            {
-                "pattern": "!testmanxd",
-                "showInMentions": true,
-                "alert": true,
-                "sound": true,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#7f7f3f49"
-            }
-        ],
-        "badges": [
-            {
-                "name": "broadcaster",
-                "displayName": "Broadcaster",
-                "alert": false,
-                "sound": false,
-                "soundUrl": "",
-                "color": "#7f427f00"
-            },
-            {
-                "name": "subscriber",
-                "displayName": "Subscriber",
-                "alert": false,
-                "sound": false,
-                "soundUrl": "",
-                "color": "#7f7f3f49"
-            },
-            {
-                "name": "founder",
-                "displayName": "Founder",
-                "alert": true,
-                "sound": false,
-                "soundUrl": "",
-                "color": "#7fe8b7eb"
-            },
-            {
-                "name": "vip",
-                "displayName": "VIP",
-                "showInMentions": true,
-                "alert": false,
-                "sound": false,
-                "soundUrl": "",
-                "color": "#7fe8b7ec"
+                "color": "#20000004"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -312,15 +208,23 @@ protected:
     {
         for (const auto &[input, expected] : tests)
         {
-            auto [isMatch, matchResult] =
-                this->mockApplication->getHighlights()->check(
-                    input.args, input.badges, input.senderName,
-                    input.originalMessage, input.flags, input.runContext);
+            auto [isMatch,
+                  matchResult] = this->mockApplication->getHighlights()->check({
+                .args = input.args,
+                .twitchBadges = input.badges,
+                .senderName = input.senderName,
+                .originalMessage = input.originalMessage,
+                .messageFlags = input.flags,
+                .self = input.senderName == this->mockApplication->getAccounts()
+                                                ->twitch.getCurrent()
+                                                ->getUserName(),
+                .runContext = input.runContext,
+            });
 
-            ASSERT_EQ(isMatch, expected.state)
+            EXPECT_EQ(isMatch, expected.state)
                 << '[' << input.testName << "] " << input.senderName << ": "
                 << input.originalMessage;
-            ASSERT_EQ(matchResult, expected.result)
+            EXPECT_EQ(matchResult, expected.result)
                 << '[' << input.testName << "] " << input.senderName << ": "
                 << input.originalMessage;
         }
@@ -358,10 +262,10 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
     };
 
     std::vector<TestCase> tests{
-#if 0
         {
             .input =
                 {
+                    .testName = "[User Highlight] Match 001",
                     .args = MessageParseArgs{},   // no special args
                     .badges = {},                 // no badges
                     .senderName = "pajlada",      // sender name
@@ -376,7 +280,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                         {
                             .alert = false,
                             .sound = QUrl{},
-                            .color = std::make_shared<QColor>("#7fffffff"),
+                            .color = std::make_shared<QColor>("#30000001"),
                             .showInMentions = false,
                         },
                 },
@@ -384,7 +288,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
         {
             .input =
                 {
-                    // input
+                    .testName = "No Match 001",
                     .args = MessageParseArgs{},   // no special args
                     .badges = {},                 // no badges
                     .senderName = "pajlada2",     // sender name
@@ -401,8 +305,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
         {
             .input =
                 {
-                    // input
-                    .args = MessageParseArgs{},  // no special args
+                    .testName = "[Badge Highlight] Match Founder Badge 001",
+                    .args = MessageParseArgs{},
                     .badges =
                         {
                             {
@@ -410,29 +314,27 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                                 "0",
                             },  // founder badge
                         },
-                    .senderName = "pajlada22",    // sender name
-                    .originalMessage = "hello!",  // original message
+                    .senderName = "pajlada22",
+                    .originalMessage = "hello!",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
-                            .alert = true,  // alert
+                            .alert = true,
                             .sound = QUrl{},
-                            .color =
-                                std::make_shared<QColor>("#7fe8b7eb"),  // color
-                            .showInMentions = false,  //showInMentions
+                            .color = std::make_shared<QColor>("#20000003"),
+                            .showInMentions = false,
                         },
                 },
         },
         {
             .input =
                 {
-                    // input
-                    .args = MessageParseArgs{},  // no special args
+                    .testName = "[User Highlight + Badge Highlight] Match 001",
+                    .args = MessageParseArgs{},
                     .badges =
                         {
                             {
@@ -440,21 +342,20 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                                 "0",
                             },  // founder badge
                         },
-                    .senderName = "pajlada",      // sender name
-                    .originalMessage = "hello!",  // original message
+                    .senderName = "pajlada",
+                    .originalMessage = "hello!",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
-                            .alert = true,  // alert
+                            .alert = true,
                             .sound = QUrl{},
-                            .color =
-                                std::make_shared<QColor>("#7fffffff"),  // color
-                            .showInMentions = false,  //showInMentions
+                            // Color comes from User Highlight - user highlights, by default, have a higher priority than badge highlights
+                            .color = std::make_shared<QColor>("#30000001"),
+                            .showInMentions = false,
                         },
                 },
         },
@@ -462,7 +363,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             // Badge highlight with showInMentions only
             .input =
                 {
-                    // input
+                    .testName = "[Badge Highlight] alert disabled, show in "
+                                "mentions enabled",
                     .args = MessageParseArgs{},  // no special args
                     .badges =
                         {
@@ -471,22 +373,19 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                                 "0",
                             },
                         },
-                    .senderName = "badge",  // sender name
-                    .originalMessage =
-                        "show in mentions only",  // original message
+                    .senderName = "badge",
+                    .originalMessage = "show in mentions only",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
-                            .alert = false,  // alert
+                            .alert = false,
                             .sound = QUrl{},
-                            .color =
-                                std::make_shared<QColor>("#7fe8b7ec"),  // color
-                            .showInMentions = true,  // showInMentions
+                            .color = std::make_shared<QColor>("#20000004"),
+                            .showInMentions = true,
                         },
                 },
         },
@@ -503,19 +402,16 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
-                            .alert = true,  // alert
+                            .alert = true,
                             .sound = QUrl{},
-                            .color =
-                                std::make_shared<QColor>("#7ff19900"),  // color
-                            .showInMentions = true,  // showInMentions
+                            .color = std::make_shared<QColor>("#30000003"),
+                            .showInMentions = true,
                         },
                 },
         },
-#endif
         {
             .input =
                 {
@@ -532,15 +428,14 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,  // alert
+                            .alert = true,
                             .sound = QUrl{"qrc:/sounds/ping2.wav"},
-                            .color =
-                                std::make_shared<QColor>("#7f7f3f49"),  // color
-                            .showInMentions = true,  // showInMentions
+                            // !testmanxd message highlight color
+                            .color = std::make_shared<QColor>("#10000001"),
+                            .showInMentions = true,
                         },
                 },
         },
-#if 0
         {
             // TEST CASE: Message phrase from sender should be ignored (so showInMentions false), but since it's a user highlight, it should set a color
             .input =
@@ -556,13 +451,12 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             .expected =
                 {
                     // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
-                            .alert = false,  // alert
+                            .alert = false,
                             .sound = QUrl{},
-                            .color =
-                                std::make_shared<QColor>("#6fffffff"),  // color
+                            .color = std::make_shared<QColor>("#30000002"),
                             .showInMentions = false,
                         },
                 },
@@ -588,7 +482,8 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                             .alert = false,
                             .sound = QUrl{},
                             .color = std::make_shared<QColor>(
-                                HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR),
+                                highlights::WhispersHighlight::
+                                    BACKGROUND_COLOR_DEFAULT),
                             .showInMentions = false,
                         },
                 },
@@ -597,7 +492,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             // TEST CASE: Whispers that do hit a highlight phrase should be added to /mentions
             .input =
                 {
-                    // input
+                    .testName = "[Whispers Highlight] Match 001",
                     .args =
                         MessageParseArgs{
                             .isReceivedWhisper = true,
@@ -612,15 +507,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                     .state = true,  // state
                     .result =
                         {
-                            .alert = true,           // alert
-                            .sound = QUrl{"ping2"},  // TODO
-                            .color =
-                                std::make_shared<QColor>("#7f7f3f49"),  // color
-                            .showInMentions = true,  // showInMentions
+                            .alert = true,
+                            .sound = QUrl{"qrc:/sounds/ping2.wav"},
+                            .color = std::make_shared<QColor>(
+                                highlights::WhispersHighlight::
+                                    BACKGROUND_COLOR_DEFAULT),
+                            .showInMentions = true,
                         },
                 },
         },
-#endif
     };
 
     this->runTests(tests);

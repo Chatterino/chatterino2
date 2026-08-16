@@ -15,6 +15,7 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -246,8 +247,19 @@ void Connection::onAutomodMessageHold(
     };
 
     runInGuiThread([channel, messageText, userLogin, header, body, runContext] {
-        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags, runContext);
+        std::vector<TwitchBadge> twitchBadges;
+
+        auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+        auto [highlighted, highlightResult] = getApp()->getHighlights()->check({
+            .args = {},
+            .twitchBadges = twitchBadges,
+            .senderName = userLogin,
+            .originalMessage = messageText,
+            .messageFlags = body->flags,
+            .self = userLogin == currentUser->getUserName(),
+            .runContext = runContext,
+        });
+
         if (highlighted)
         {
             MessageBuilder::triggerHighlights(

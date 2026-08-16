@@ -8,7 +8,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/Sounds.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
@@ -16,6 +15,7 @@ namespace chatterino::highlights {
 HighlightCheck YourUsernameHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
 
@@ -40,22 +40,14 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
     QUrl soundURL = this->outcome.getSoundURLWithDefault(H::SOUND_DEFAULT);
 
     return {
-        [highlight = *this, regex, soundURL](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;        // unused
-            (void)badges;      // unused
-            (void)senderName;  // unused
-            (void)flags;       // unused
-            (void)runContext;  // unused
-
-            if (self)
+        [highlight = *this, regex,
+         soundURL](const Params &p) -> std::optional<HighlightResult> {
+            if (p.self)
             {
                 return std::nullopt;
             }
 
-            if (!regex.match(originalMessage).hasMatch())
+            if (!regex.match(p.originalMessage).hasMatch())
             {
                 return std::nullopt;
             }

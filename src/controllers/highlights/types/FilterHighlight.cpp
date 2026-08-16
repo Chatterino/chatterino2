@@ -21,6 +21,7 @@ FilterHighlight::FilterHighlight(QStringView _id)
 HighlightCheck FilterHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     if (!this->filter)
     {
@@ -28,20 +29,10 @@ HighlightCheck FilterHighlight::buildCheck() const
     }
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;             // unused
-            (void)badges;           // unused
-            (void)senderName;       // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
             assert(highlight.filter);
 
-            auto res = highlight.filter->execute(runContext);
+            auto res = highlight.filter->execute(p.runContext);
             if (!res.toBool())
             {
                 return std::nullopt;

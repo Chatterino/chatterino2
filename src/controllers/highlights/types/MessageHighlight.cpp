@@ -49,29 +49,23 @@ void MessageHighlight::setCaseSensitive(std::optional<bool> newValue)
 
 HighlightCheck MessageHighlight::buildCheck() const
 {
+    using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
+
     if (!this->isValid())
     {
         return {};
     }
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;        // unused
-            (void)badges;      // unused
-            (void)senderName;  // unused
-            (void)flags;       // unused
-            (void)runContext;  // unused
-
-            if (self)
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
+            if (p.self)
             {
                 // Phrase checks should ignore highlights from the user
                 return std::nullopt;
             }
 
-            if (!highlight.isMatch(originalMessage))
+            if (!highlight.isMatch(p.originalMessage))
             {
                 qCDebug(LOG)
                     << "NO MATCH - compared with highlight" << highlight;
@@ -84,12 +78,11 @@ HighlightCheck MessageHighlight::buildCheck() const
 
             return HighlightResult{
                 .ids = {highlight.getID().toString()},
-                .alert = highlight.outcome.alert.value_or(
-                    MessageHighlight::ALERT_DEFAULT),
+                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
                 .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
-                    MessageHighlight::SHOW_IN_MENTIONS_DEFAULT),
+                    H::SHOW_IN_MENTIONS_DEFAULT),
             };
         },
     };

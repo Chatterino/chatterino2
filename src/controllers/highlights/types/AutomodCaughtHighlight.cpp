@@ -13,24 +13,16 @@ namespace chatterino::highlights {
 HighlightCheck AutomodCaughtHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;             // unused
-            (void)badges;           // unused
-            (void)senderName;       // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-            (void)runContext;       // unused
-
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
             // TODO: Since an automod message message always comes in two parts, should be prevent things like sounds & alerts from triggering twice?
             // Prooooooobably
-            if (!flags.hasAny({MessageFlag::AutoModOffendingMessage,
-                               MessageFlag::AutoModOffendingMessageHeader}))
+            if (!p.messageFlags.hasAny({
+                    MessageFlag::AutoModOffendingMessage,
+                    MessageFlag::AutoModOffendingMessageHeader,
+                }))
             {
                 return std::nullopt;
             }

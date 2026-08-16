@@ -7,9 +7,6 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 
-#include <qicon.h>
-#include <QStringBuilder>
-
 namespace chatterino::highlights {
 
 UserHighlight::UserHighlight(QStringView _id)
@@ -20,20 +17,11 @@ UserHighlight::UserHighlight(QStringView _id)
 HighlightCheck UserHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)args;             // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-            (void)badges;           // unused
-            (void)runContext;       // unused
-
-            if (highlight.username.compare(senderName, Qt::CaseInsensitive) !=
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
+            if (highlight.username.compare(p.senderName, Qt::CaseInsensitive) !=
                 0)
             {
                 return std::nullopt;

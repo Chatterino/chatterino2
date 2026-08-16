@@ -2272,15 +2272,21 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
         return {};
     }
 
-    filters::RunContext runContext{
-        .message = this->message(),
-        .channel = channel,
-    };
-
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     auto badges = parseBadgeTag(tags);
-    auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-        args, badges, this->message().loginName, originalMessage,
-        this->message().flags, runContext);
+    auto [highlighted, highlightResult] = getApp()->getHighlights()->check({
+        .args = args,
+        .twitchBadges = badges,
+        .senderName = this->message().loginName,
+        .originalMessage = originalMessage,
+        .messageFlags = this->message().flags,
+        .self = this->message().loginName == currentUser->getUserName(),
+        .runContext =
+            filters::RunContext{
+                .message = this->message(),
+                .channel = channel,
+            },
+    });
 
     if (!highlighted)
     {

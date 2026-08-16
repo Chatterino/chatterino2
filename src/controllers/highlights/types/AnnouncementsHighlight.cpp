@@ -2,28 +2,27 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "controllers/highlights/types/YourMessagesHighlight.hpp"
+#include "controllers/highlights/types/AnnouncementsHighlight.hpp"
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
 
-HighlightCheck YourMessagesHighlight::buildCheck() const
+HighlightCheck AnnouncementsHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
     using Params = HighlightCheck::Params;
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
-            if (!p.self)
+            if (!p.messageFlags.has(MessageFlag::Announcement))
             {
                 return std::nullopt;
             }
 
-            // User has defined a color: std::shared_ptr<QColor>("#ff00ff")
-            // User has not defined a color, should use default: std::shared_ptr<QColor> = {}; // unset shared ptr
-            // User wants NO color, should fall through: std::shared_ptr<QColor> = std::shared_ptr<QColor>({}) // invalid QColor
+            std::shared_ptr<QColor> backgroundColor;
 
             return HighlightResult{
                 .ids = {H::ID.toString()},

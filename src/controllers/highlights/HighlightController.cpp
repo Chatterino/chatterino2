@@ -106,9 +106,7 @@ void HighlightController::rebuildChecks(Settings &settings)
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
-    const MessageParseArgs &args, const std::vector<TwitchBadge> &twitchBadges,
-    const QString &senderName, const QString &originalMessage,
-    const MessageFlags &messageFlags, filters::RunContext runContext) const
+    const HighlightCheck::Params &params) const
 {
     bool highlighted = false;
     auto result = HighlightResult::emptyResult();
@@ -116,15 +114,9 @@ std::pair<bool, HighlightResult> HighlightController::check(
     // Access for checking
     const auto checks = this->checks_.accessConst();
 
-    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
-    auto self = (senderName == currentUser->getUserName());
-
     for (const auto &check : *checks)
     {
-        if (auto checkResult =
-                check.cb(args, twitchBadges, senderName, originalMessage,
-                         messageFlags, self, runContext);
-            checkResult)
+        if (auto checkResult = check.cb(params); checkResult)
         {
             highlighted = true;
 

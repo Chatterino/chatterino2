@@ -13,20 +13,11 @@ namespace chatterino::highlights {
 HighlightCheck SubscriptionsHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
+    using Params = HighlightCheck::Params;
 
     return {
-        [highlight = *this](
-            const auto &args, const auto &badges, const auto &senderName,
-            const auto &originalMessage, const auto &flags, const auto self,
-            const auto runContext) -> std::optional<HighlightResult> {
-            (void)badges;           // unused
-            (void)senderName;       // unused
-            (void)originalMessage;  // unused
-            (void)flags;            // unused
-            (void)self;             // unused
-            (void)runContext;       // unused
-
-            if (!args.isSubscriptionMessage)
+        [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
+            if (!p.args.isSubscriptionMessage)
             {
                 return std::nullopt;
             }
