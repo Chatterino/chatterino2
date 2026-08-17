@@ -101,9 +101,10 @@ const std::unordered_map<QString, HypeChatPaidLevel> HYPE_CHAT_PAID_LEVEL{
 
 /// MessageFlag::Subscription message types
 const QSet<QString> SUB_MESSAGE_TYPES{
-    "sub",      //
-    "subgift",  //
-    "resub",    // resub messages
+    "sub",              //
+    "subgift",          //
+    "resub",            // resub messages
+    "submysterygift",   //
 };
 
 QString formatUpdatedEmoteList(const QString &platform,
