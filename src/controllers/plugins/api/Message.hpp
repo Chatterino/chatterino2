@@ -197,6 +197,10 @@ function c2.Message:elements() end
 ---@param elem (MessageElement|MessageElementInit) The element to add
 function c2.Message:append_element(elem) end
 
+---Returns an identical, non-frozen message, independent from this one.
+---@return c2.Message
+function c2.Message:clone() end
+
 ---A table to initialize a new message
 ---@class MessageInit
 ---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
@@ -244,6 +248,58 @@ enum class ExposedLinkType : std::uint8_t {
  * @includefile messages/MessageFlag.hpp
  * @includefile common/enums/MessageContext.hpp
  */
+
+struct ElementRef {
+    ElementRef() = default;
+    ElementRef(std::shared_ptr<Message> msg, size_t index)
+        : msg(std::move(msg))
+        , index(index)
+    {
+    }
+
+    MessageElement *element() const;
+
+    const MessageElement *constElement() const;
+
+    MessageElement &ref() const;
+    const MessageElement &cref() const;
+
+    /// Cast this element to `T`. Otherwise nullopt is returned.
+    /// Use `.map()` to access the content.
+    template <typename T>
+    sol::optional<T &> as() const;
+
+    /// Cast this element to `const T`. Otherwise nullopt is returned.
+    /// Use `.map()` to access the content.
+    template <typename T>
+    sol::optional<const T &> asConst() const;
+
+    template <typename T>
+    bool is() const;
+
+    /// Visit this element by dynamic casting
+    template <typename... T>
+    auto visit(auto &&...cb) const;
+
+    bool operator==(const ElementRef &rhs) const;
+
+    std::shared_ptr<Message> msg;
+    size_t index = 0;
+
+private:
+    template <bool Const>
+    decltype(auto) maybeConstElement() const;
+
+    /// Run one callback
+    ///
+    /// This is called recursively.
+    /// If the callback returns something, we return an `optional<T>` otherwise
+    /// we return `void`.
+    template <typename TReturn, typename T, typename... Rest>
+    auto visitOne(auto &&cb, auto &&...rest) const
+        -> std::conditional_t<std::is_void_v<TReturn>, void,
+                              sol::optional<TReturn>>;
+};
 
 /// Creates the c2.Message user type
 void createUserType(sol::table &c2);
