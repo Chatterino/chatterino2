@@ -69,7 +69,7 @@ PluginsPage::PluginsPage()
                        ". Each one is a new directory.");
         description->setOpenExternalLinks(true);
         description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
+        // description->setStyleSheet("color: #bbb");
         groupLayout->addRow(description);
 
         auto *box = this->createCheckBox("Enable plugins",
@@ -165,7 +165,7 @@ void PluginsPage::rebuildContent()
 
         auto *description = new QLabel(meta.description, this->dataFrame_);
         description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
+        // description->setStyleSheet("color: #bbb");
         pluginEntry->addRow(description);
 
         QString authorsTxt;

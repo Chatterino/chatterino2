@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/dialogs/font/FontSettingDialog.hpp"
 
 #include <QFont>
@@ -41,7 +42,10 @@ FontSettingWidget::FontSettingWidget(QStringSetting &family, IntSetting &size,
     layout->addWidget(button);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    button->setIcon(QIcon(":/buttons/edit.svg"));
+    const auto *icon = getTheme()->isLightTheme()
+        ? ":/buttons/editLight.svg"
+        : ":/buttons/editDark.svg";
+    button->setIcon(QIcon(icon));
 
     QObject::connect(button, &QToolButton::clicked, this,
                      &FontSettingWidget::showDialog);

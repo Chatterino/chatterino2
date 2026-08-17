@@ -13,6 +13,7 @@
 #include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/settingspages/CustomWidgets.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QBoxLayout>
 #include <QCheckBox>
@@ -556,8 +557,12 @@ SettingWidget *SettingWidget::setTooltip(QString tooltip)
         sz = std::max(sz, this->actionWidget->sizeHint().height());
     }
 
+    auto hintImage = getTheme()->isLightTheme()
+        ? u":/settings/hintLight.svg"_qs
+        : u":/settings/hint.svg"_qs;
+
     this->tooltipIcon->setVisible(true);
-    this->tooltipIcon->load(u":/settings/hint.svg"_qs);
+    this->tooltipIcon->load(hintImage);
     this->tooltipIcon->setToolTip(tooltip);
     auto *r = this->tooltipIcon->renderer();
     auto vb = r->viewBox();

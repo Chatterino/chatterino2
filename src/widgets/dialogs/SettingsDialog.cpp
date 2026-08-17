@@ -27,6 +27,8 @@
 #include "widgets/settingspages/NotificationPage.hpp"
 #include "widgets/settingspages/PluginsPage.hpp"
 
+#include "singletons/Theme.hpp"
+
 #include <QDialogButtonBox>
 #include <QLineEdit>
 
@@ -291,16 +293,28 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 
     this->ui_.pageStack->setCurrentWidget(tab->page());
 
+    const auto *themeFile = getTheme()->isLightTheme()
+        ? ":/qss/settingsLight.qss"
+        : ":/qss/settingsDark.qss";
+    QFile styleFile(themeFile);
+    if (!styleFile.open(QFile::ReadOnly))
+    {
+        assert(false && "Resources not loaded");
+        qCWarning(chatterinoWidget) << "Resources not loaded";
+    }
+    QString stylesheet = QString::fromUtf8(styleFile.readAll());
+
     if (this->selectedTab_ != nullptr)
     {
         this->selectedTab_->setSelected(false);
-        this->selectedTab_->setStyleSheet("color: #FFF");
+        this->selectedTab_->setObjectName("");
+        this->selectedTab_->setStyleSheet(stylesheet);
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet(
-        "background: #222; color: #4FC3F7;"  // Should this be same as accent color?
-        "/*border: 1px solid #555; border-right: none;*/");
+    tab->setObjectName("active");
+    tab->setStyleSheet(stylesheet);
+
     this->selectedTab_ = tab;
     if (byUser)
     {
