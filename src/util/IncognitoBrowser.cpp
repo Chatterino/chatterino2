@@ -7,6 +7,8 @@
 #    include "util/WindowsHelper.hpp"
 #elif defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 #    include "util/XDGHelper.hpp"
+#elif defined(Q_OS_DARWIN)
+#    include <CoreServices/CoreServices.h>
 #endif
 
 #include <QFileInfo>
@@ -55,6 +57,38 @@ QString getDefaultBrowserExecutable()
     }();
 
     return defaultBrowser;
+#elif defined(Q_OS_DARWIN)
+    static QString defaultAppPath = []() -> QString {
+        CFURLRef httpUrl = CFURLCreateWithString(kCFAllocatorDefault,
+                                                 CFSTR("http://"), nullptr);
+        if (!httpUrl)
+        {
+            return {};
+        }
+
+        CFURLRef appUrl =
+            LSCopyDefaultApplicationURLForURL(httpUrl, kLSRolesAll, nullptr);
+        CFRelease(httpUrl);
+
+        if (!appUrl)
+        {
+            return {};
+        }
+
+        char path[PATH_MAX];
+        Boolean success = CFURLGetFileSystemRepresentation(
+            appUrl, true, (UInt8 *)path, sizeof(path));
+        CFRelease(appUrl);
+
+        if (success)
+        {
+            return QString::fromUtf8(path);
+        }
+
+        return {};
+    }();
+
+    return defaultAppPath;
 #else
     return {};
 #endif
@@ -68,16 +102,12 @@ namespace chatterino::incognitobrowser::detail {
 QString getPrivateSwitch(const QString &browserExecutable)
 {
     static auto switches = std::vector<std::pair<QString, QString>>{
-        {"librewolf", "-private-window"},
-        {"waterfox", "-private-window"},
-        {"icecat", "-private-window"},
-        {"chrome", "-incognito"},
-        {"google-chrome-stable", "-incognito"},
-        {"vivaldi", "-incognito"},
-        {"opera", "-newprivatetab"},
-        {"msedge", "-inprivate"},
-        {"chromium", "-incognito"},
-        {"brave", "-incognito"},
+        {"firefox", "-private-window"},  {"librewolf", "-private-window"},
+        {"waterfox", "-private-window"}, {"icecat", "-private-window"},
+        {"chrome", "-incognito"},        {"chromium", "-incognito"},
+        {"vivaldi", "-incognito"},       {"opera", "-incognito"},
+        {"brave", "-incognito"},         {"edge", "-inprivate"},
+
     };
 
     // the browser executable may be a full path, strip it to its basename and
@@ -85,25 +115,12 @@ QString getPrivateSwitch(const QString &browserExecutable)
     auto lowercasedBrowserExecutable =
         QFileInfo(browserExecutable).baseName().toLower();
 
-#ifdef Q_OS_WINDOWS
-    if (lowercasedBrowserExecutable.endsWith(".exe"))
-    {
-        lowercasedBrowserExecutable.chop(4);
-    }
-#endif
-
     for (const auto &switch_ : switches)
     {
-        if (lowercasedBrowserExecutable == switch_.first)
+        if (lowercasedBrowserExecutable.contains(switch_.first))
         {
             return switch_.second;
         }
-    }
-
-    // catch all mozilla distributed variants
-    if (lowercasedBrowserExecutable.startsWith("firefox"))
-    {
-        return "-private-window";
     }
 
     // couldn't match any browser -> unknown browser
