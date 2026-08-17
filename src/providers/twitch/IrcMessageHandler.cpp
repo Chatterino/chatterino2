@@ -60,10 +60,10 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
 /// This is duplicated with SUB_MESSAGE_TYPES in MessageBuilder.cpp until the `isSubscriptionMessage` parameter
 /// in `MessageParseArgs` is no longer used for highlights.
 const QSet<QString> SUB_MESSAGE_TYPES{
-    "sub",              //
-    "subgift",          //
-    "resub",            // resub messages
-    "submysterygift",   //
+    "sub",             //
+    "subgift",         //
+    "resub",           // resub messages
+    "submysterygift",  //
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
