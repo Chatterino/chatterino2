@@ -57,7 +57,7 @@ QString getDefaultBrowserExecutable()
     }();
 
     return defaultBrowser;
-#elif defined(Q_OS_DARWIN)
+#elifdef Q_OS_DARWIN
     static QString defaultAppPath = []() -> QString {
         CFURLRef httpUrl = CFURLCreateWithString(kCFAllocatorDefault,
                                                  CFSTR("http://"), nullptr);
