@@ -7,7 +7,7 @@
 #    include "util/WindowsHelper.hpp"
 #elif defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 #    include "util/XDGHelper.hpp"
-#elif defined(Q_OS_DARWIN)
+#elifdef Q_OS_DARWIN
 #    include <CoreServices/CoreServices.h>
 #endif
 
