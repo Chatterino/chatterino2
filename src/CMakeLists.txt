@@ -972,7 +972,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
-        $<$<AND:$<BOOL:${WIN32}>,$<BOOL:${VCPKG_TARGET_TRIPLET}>>:Crypt32>
         twitch-eventsub-ws
         BoostCertify
         )
