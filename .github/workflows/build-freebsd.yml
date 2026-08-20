@@ -32,6 +32,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Get memory
         id: mem

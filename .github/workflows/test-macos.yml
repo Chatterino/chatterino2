@@ -37,6 +37,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Install Qt
         uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
