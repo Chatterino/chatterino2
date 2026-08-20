@@ -44,7 +44,7 @@ void appendTwitchEmoteOccurrences(QStringView emote,
             qCDebug(chatterinoTwitch) << "Invalid emote range:" << occurrence;
             continue;
         }
-        if (from > to || from < messageOffset)
+        if (from > to || static_cast<int>(from) < messageOffset)
         {
             qCDebug(chatterinoTwitch)
                 << "Out of bounds emote range:" << occurrence
