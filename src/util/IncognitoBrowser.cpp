@@ -8,9 +8,10 @@
 #elif defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)
 #    include "util/XDGHelper.hpp"
 #elifdef Q_OS_DARWIN
-#    include <CoreServices/CoreServices.h>
+#    include "util/MacOsHelpers.h"
 #endif
 
+#include <QDir>
 #include <QFileInfo>
 #include <QProcess>
 #include <QVariant>
@@ -58,37 +59,7 @@ QString getDefaultBrowserExecutable()
 
     return defaultBrowser;
 #elifdef Q_OS_DARWIN
-    static QString defaultAppPath = []() -> QString {
-        CFURLRef httpUrl = CFURLCreateWithString(kCFAllocatorDefault,
-                                                 CFSTR("http://"), nullptr);
-        if (!httpUrl)
-        {
-            return {};
-        }
-
-        CFURLRef appUrl =
-            LSCopyDefaultApplicationURLForURL(httpUrl, kLSRolesAll, nullptr);
-        CFRelease(httpUrl);
-
-        if (!appUrl)
-        {
-            return {};
-        }
-
-        char path[PATH_MAX];
-        Boolean success = CFURLGetFileSystemRepresentation(
-            appUrl, true, (UInt8 *)path, sizeof(path));
-        CFRelease(appUrl);
-
-        if (success)
-        {
-            return QString::fromUtf8(path);
-        }
-
-        return {};
-    }();
-
-    return defaultAppPath;
+    return getMacOSDefaultBrowserPath();
 #else
     return {};
 #endif
@@ -107,13 +78,13 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"chrome", "-incognito"},        {"chromium", "-incognito"},
         {"vivaldi", "-incognito"},       {"opera", "-incognito"},
         {"brave", "-incognito"},         {"edge", "-inprivate"},
-
     };
 
     // the browser executable may be a full path, strip it to its basename and
     // compare case insensitively
-    auto lowercasedBrowserExecutable =
-        QFileInfo(browserExecutable).baseName().toLower();
+
+        auto lowercasedBrowserExecutable =
+        QFileInfo(QDir::cleanPath(browserExecutable)).baseName().toLower();
 
     for (const auto &switch_ : switches)
     {
