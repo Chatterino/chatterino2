@@ -22,7 +22,7 @@ QString getMacOSDefaultBrowserPath()
             return {};
         }
 
-NSBundle *bundle = [NSBundle bundleWithURL:appUrl];
+        NSBundle *bundle = [NSBundle bundleWithURL:appUrl];
         NSURL *execUrl = bundle.executableURL;
         if (execUrl == nil)
         {

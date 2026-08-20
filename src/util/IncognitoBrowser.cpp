@@ -83,7 +83,7 @@ QString getPrivateSwitch(const QString &browserExecutable)
     // the browser executable may be a full path, strip it to its basename and
     // compare case insensitively
 
-        auto lowercasedBrowserExecutable =
+    auto lowercasedBrowserExecutable =
         QFileInfo(QDir::cleanPath(browserExecutable)).baseName().toLower();
 
     for (const auto &switch_ : switches)

@@ -21,7 +21,7 @@ TEST(IncognitoBrowser, getPrivateSwitch)
 
     ASSERT_EQ(getPrivateSwitch("opera.exe"), "-incognito");
 
-    ASSERT_EQ(getPrivateSwitch("opera.exe"), "-inprivate");
+    ASSERT_EQ(getPrivateSwitch("edge"), "-inprivate");
 
     ASSERT_EQ(getPrivateSwitch("unsupportedBrowser.exe"), "");
 }
