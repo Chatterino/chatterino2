@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qglobal.h>
+
 void chatterinoSetMacOsActivationPolicyProhibited();
 
 namespace chatterino {
