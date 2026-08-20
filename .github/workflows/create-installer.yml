@@ -20,12 +20,13 @@ jobs:
       matrix:
         qt-version: ["6.8.3"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Download artifact
-        uses: dawidd6/action-download-artifact@v20
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
@@ -43,7 +44,7 @@ jobs:
         run: echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Enable Developer Command Prompt
-        uses: Chatterino/msvc-dev-cmd@v2.0.7
+        uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
       - name: Build installer
         id: build-installer
@@ -52,7 +53,7 @@ jobs:
         shell: powershell
 
       - name: Upload installer
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
