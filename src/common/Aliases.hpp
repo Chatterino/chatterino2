@@ -30,13 +30,15 @@
 //! `boost::hash<Name>` - all are transparent.
 
 // TODO(Qt6.8+): Use operator<=>(lhs, rhs) = default.
-#define QStringAliasCompareOp(name, OP)                         \
-    friend constexpr bool operator OP(const name &lhs,          \
-                                      const name &rhs) noexcept \
-    {                                                           \
-        return lhs.string OP rhs.string;                        \
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define QStringAliasCompareOp(name, OP)                                \
+    friend bool operator OP(const name &lhs, const name &rhs) noexcept \
+    {                                                                  \
+        return lhs.string OP rhs.string;                               \
     }
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define QStringAliasCompare(name)    \
     QStringAliasCompareOp(name, ==); \
     QStringAliasCompareOp(name, !=); \
@@ -45,6 +47,7 @@
     QStringAliasCompareOp(name, <=); \
     QStringAliasCompareOp(name, >=);
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define QStringAlias(name)                                         \
     namespace chatterino {                                         \
     struct name {                                                  \
@@ -103,3 +106,5 @@ QStringAlias(EmoteName);
 QStringAlias(EmoteAuthor);
 
 #undef QStringAlias
+#undef QStringAliasCompare
+#undef QStringAliasCompareOp
