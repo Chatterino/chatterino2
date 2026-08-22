@@ -1321,6 +1321,15 @@ TimestampElement::TimestampElement(QTime time)
     assert(this->element_ != nullptr);
 }
 
+TimestampElement::TimestampElement(QTime time,
+                                   const MessageElementFlags extraFlags)
+    : MessageElement(extraFlags | MessageElementFlag::Timestamp)
+    , time_(time)
+    , element_(this->formatTime(time))
+{
+    assert(this->element_ != nullptr);
+}
+
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       const MessageLayoutContext &ctx)
 {
@@ -1343,9 +1352,8 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
-    auto *text =
-        new TextElement(format, MessageElementFlag::Timestamp,
-                        MessageColor::System, FontStyle::TimestampMedium);
+    auto *text = new TextElement(format, this->getFlags(), MessageColor::System,
+                                 FontStyle::TimestampMedium);
     text->setLink(this->getLink());
     text->setTooltip(this->getTooltip());
     return text;
