@@ -140,8 +140,8 @@ TEST(Aliases, ContainerMap)
     // We need std::less<> here to unlock the transparent overloads for find and
     // friends. Otherwise, using EmoteIdView won't work for lookup.
     std::map<EmoteId, EmoteName, std::less<>> map;
-    map.emplace(EmoteId("foo"), EmoteName("bar"));
-    map.emplace(EmoteId(u"baz"_s), EmoteName(u"qox"_s));
+    map.emplace(EmoteId{"foo"}, EmoteName{"bar"});
+    map.emplace(EmoteId{u"baz"_s}, EmoteName{u"qox"_s});
 
     EXPECT_TRUE(map.contains(EmoteIdView{u"baz"}));
     EXPECT_TRUE(map.contains(EmoteId{u"foo"_s}));
@@ -159,8 +159,8 @@ TEST(Aliases, ContainerUnorderedMap)
     // We need to use std::equal_to<> here to be able to use EmoteIdView for
     // lookup.
     std::unordered_map<EmoteId, EmoteName, EmoteIdHash, std::equal_to<>> map;
-    map.emplace(EmoteId("foo"), EmoteName("bar"));
-    map.emplace(EmoteId(u"baz"_s), EmoteName(u"qox"_s));
+    map.emplace(EmoteId{"foo"}, EmoteName{"bar"});
+    map.emplace(EmoteId{u"baz"_s}, EmoteName{u"qox"_s});
 
     EXPECT_TRUE(map.contains(EmoteIdView{u"baz"}));
     EXPECT_TRUE(map.contains(EmoteId{u"foo"_s}));
@@ -175,8 +175,8 @@ TEST(Aliases, ContainerUnorderedMap)
     // Check that the map still works even if `std::equal_to<>` isn't used.
     // This should be avoided in practice.
     std::unordered_map<EmoteId, EmoteName> nonTransparent;
-    nonTransparent.emplace(EmoteId("foo"), EmoteName("bar"));
-    nonTransparent.emplace(EmoteId(u"baz"_s), EmoteName(u"qox"_s));
+    nonTransparent.emplace(EmoteId{"foo"}, EmoteName{"bar"});
+    nonTransparent.emplace(EmoteId{u"baz"_s}, EmoteName{u"qox"_s});
     EXPECT_TRUE(nonTransparent.contains(EmoteId{"foo"}));
     // Using `EmoteIdView` won't work.
 }
@@ -186,8 +186,8 @@ TEST(Aliases, ContainerBoostUnorderedFlatMap)
     // We need to use std::equal_to<> here to be able to use EmoteIdView for
     // lookup.
     boost::unordered_flat_map<UserId, Tooltip, UserIdHash, std::equal_to<>> map;
-    map.emplace(UserId("foo"), Tooltip("bar"));
-    map.emplace(UserId(u"baz"_s), Tooltip(u"qox"_s));
+    map.emplace(UserId{"foo"}, Tooltip{"bar"});
+    map.emplace(UserId{u"baz"_s}, Tooltip{u"qox"_s});
 
     EXPECT_TRUE(map.contains(UserIdView{u"baz"}));
     EXPECT_TRUE(map.contains(UserId{u"foo"_s}));
@@ -202,8 +202,8 @@ TEST(Aliases, ContainerBoostUnorderedFlatMap)
     // Check that the map still works even if `std::equal_to<>` isn't used.
     // This should be avoided in practice.
     boost::unordered_flat_map<UserId, Tooltip> nonTransparent;
-    nonTransparent.emplace(UserId("foo"), Tooltip("bar"));
-    nonTransparent.emplace(UserId(u"baz"_s), Tooltip(u"qox"_s));
+    nonTransparent.emplace(UserId{"foo"}, Tooltip{"bar"});
+    nonTransparent.emplace(UserId{u"baz"_s}, Tooltip{u"qox"_s});
     EXPECT_TRUE(nonTransparent.contains(UserId{"foo"}));
     // Using `UserIdView` won't work.
 }
