@@ -42,26 +42,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    // if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-    //     this->flags.has(MessageFlag::RedeemedChannelPointReward))
-    // {
-    //     return {
-    //         ColorProvider::instance().color(ColorType::RedeemedHighlight),
-    //         ScrollbarHighlight::Default,
-    //         true,
-    //     };
-    // }
-
-    if (this->flags.has(MessageFlag::Announcement) &&
-        getSettings()->enableAnnouncementHighlight)
-    {
-        return {
-            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
-                this->announcementColor,
-                getSettings()->enableColoredAnnouncementHighlight)),
-        };
-    }
-
     return {};
 }
 

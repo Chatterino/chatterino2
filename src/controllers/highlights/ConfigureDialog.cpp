@@ -60,6 +60,11 @@ concept HasDescription = requires {
     { T::DESCRIPTION } -> std::convertible_to<QStringView>;
 };
 
+template <typename T>
+concept HasCustomizableName = requires(T a) {
+    { a.name } -> std::convertible_to<QString>;
+};
+
 namespace {
 
 // Add additional badges for highlights here
@@ -184,27 +189,28 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
     }
 
     {
-        auto value = std::visit(
-            [](auto &&h) {
-                return h.name;
-            },
-            this->data);
-        auto *w = new QLineEdit();
-        formLayout->addRow("Name", w);
-
         auto defaultName = getDefaultName(this->data);
 
-        std::visit(
-            [w, defaultName](auto &&h) {
-                w->setPlaceholderText(defaultName);
-                w->setText(h.name);
+        std::visit(variant::Overloaded{
+                       [formLayout, defaultName](HasCustomizableName auto &h) {
+                           auto *w = new QLineEdit();
+                           formLayout->addRow("Name", w);
+                           w->setPlaceholderText(defaultName);
+                           w->setText(h.name);
 
-                QObject::connect(w, &QLineEdit::textChanged,
-                                 [&](const auto &newText) {
-                                     h.name = newText;
-                                 });
-            },
-            this->data);
+                           QObject::connect(w, &QLineEdit::textChanged,
+                                            [&](const auto &newText) {
+                                                h.name = newText;
+                                            });
+                       },
+                       [formLayout](auto &&h) {
+                           using ActualType = std::decay_t<decltype(h)>;
+                           formLayout->addRow(
+                               "Name",
+                               new QLabel(ActualType::DEFAULT_NAME.toString()));
+                       },
+                   },
+                   this->data);
     }
 
     // Pattern / Badge / User / Filter

@@ -6,6 +6,7 @@
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
@@ -19,6 +20,15 @@ HighlightCheck AnnouncementsHighlight::buildCheck() const
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
             if (!p.messageFlags.has(MessageFlag::Announcement))
             {
+                qInfo() << "XXX: Not an announcement :o";
+                return std::nullopt;
+            }
+
+            // We are sneakily making use of the filter's message reference
+            if (p.runContext.message.announcementColor !=
+                HelixAnnouncementColor::Primary)
+            {
+                qInfo() << "XXX: Not a primary announcement :O";
                 return std::nullopt;
             }
 

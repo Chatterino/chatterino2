@@ -16,11 +16,12 @@ namespace chatterino {
 
 enum class ColorType {
     // Used in automatic highlights of your own messages
-    AnnouncementHighlight,
     AnnouncementBlue,
     AnnouncementGreen,
     AnnouncementOrange,
     AnnouncementPurple,
+
+    ThisShouldBeRemovedTODO,
 };
 
 ColorType colorTypeFromHelixAnnouncementColor(

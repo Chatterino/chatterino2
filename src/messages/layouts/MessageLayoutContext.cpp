@@ -56,11 +56,9 @@ void MessagePreferences::connectSettings(Settings *settings,
     // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
     this->enableFirstMessageHighlight = true;
 
-    settings->enableAnnouncementHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableAnnouncementHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableAnnouncementHighlight = true;
+
     settings->enableColoredAnnouncementHighlight.connect(
         [this](const auto &newValue) {
             this->enableColoredAnnouncementHighlight = newValue;

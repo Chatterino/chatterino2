@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "controllers/highlights/types/AnnouncementsHighlight.hpp"
 #include "controllers/highlights/types/AutomodCaughtHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/BadgeHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/ChannelPointsHighlight.hpp"  // IWYU pragma: export
@@ -26,6 +27,7 @@ namespace chatterino::highlights {
 using AllHighlights = std::variant<     //
     YourUsernameHighlight,              //
     WhispersHighlight,                  //
+    AnnouncementsHighlight,             //
     SubscriptionsHighlight,             //
     ChannelPointsHighlight,             //
     FirstMessageHighlight,              //

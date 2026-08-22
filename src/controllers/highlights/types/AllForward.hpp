@@ -10,6 +10,7 @@ namespace chatterino::highlights {
 
 struct YourUsernameHighlight;
 struct WhispersHighlight;
+struct AnnouncementsHighlight;
 struct SubscriptionsHighlight;
 struct ChannelPointsHighlight;
 struct FirstMessageHighlight;
@@ -26,6 +27,7 @@ struct UncategorizedNotificationHighlight;
 using AllHighlights = std::variant<     //
     YourUsernameHighlight,              //
     WhispersHighlight,                  //
+    AnnouncementsHighlight,             //
     SubscriptionsHighlight,             //
     ChannelPointsHighlight,             //
     FirstMessageHighlight,              //

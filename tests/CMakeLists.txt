@@ -65,6 +65,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilSerializeList.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightSounds.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightCommon.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp

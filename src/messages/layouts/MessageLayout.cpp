@@ -385,15 +385,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
                 blendColors(backgroundColor, *this->message_->highlightColor);
         }
     }
-    else if (this->message_->flags.has(MessageFlag::Announcement) &&
-             ctx.preferences.enableAnnouncementHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(colorTypeFromHelixAnnouncementColor(
-                this->message_->announcementColor,
-                ctx.preferences.enableColoredAnnouncementHighlight)));
-    }
     else if (this->message_->flags.has(MessageFlag::Debug))
     {
         backgroundColor = QColor("#4A273D");

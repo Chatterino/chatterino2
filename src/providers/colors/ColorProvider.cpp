@@ -110,10 +110,6 @@ void ColorProvider::initTypeColorMap()
             false);
     };
 
-    initColor(ColorType::AnnouncementHighlight,
-              getSettings()->announcementHighlightColor,
-              HighlightPhrase::FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR);
-
     this->typeColorMap_.insert({
         ColorType::AnnouncementBlue,
         std::make_shared<QColor>(
@@ -133,6 +129,10 @@ void ColorProvider::initTypeColorMap()
         ColorType::AnnouncementPurple,
         std::make_shared<QColor>(
             HighlightPhrase::ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR),
+    });
+    this->typeColorMap_.insert({
+        ColorType::ThisShouldBeRemovedTODO,
+        std::make_shared<QColor>(QColor{255, 0, 255}),
     });
 }
 
@@ -164,7 +164,7 @@ ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
         switch (color)
         {
             case HelixAnnouncementColor::Primary:
-                return ColorType::AnnouncementHighlight;
+                return ColorType::ThisShouldBeRemovedTODO;
             case HelixAnnouncementColor::Blue:
                 return ColorType::AnnouncementBlue;
             case HelixAnnouncementColor::Green:
@@ -175,7 +175,7 @@ ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
                 return ColorType::AnnouncementPurple;
         }
     }
-    return ColorType::AnnouncementHighlight;
+    return ColorType::ThisShouldBeRemovedTODO;
 }
 
 }  // namespace chatterino

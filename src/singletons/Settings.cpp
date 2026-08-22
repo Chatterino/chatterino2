@@ -167,6 +167,15 @@ public:
         "",
     };
 
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+
     BoolSetting enableRedeemedHighlight = {
         "/highlighting/redeemedHighlight/highlighted",
         true,
@@ -358,6 +367,31 @@ void Settings::migrateHighlights(bool isTest)
                      this->p->whisperHighlightSoundUrl, h.outcome);
 
         if (const auto &s = this->p->whisperHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        AnnouncementsHighlight h;
+
+        if (const auto &s = this->p->enableAnnouncementHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "enable regex" - no setting to migrate
+        // Did not support "case-sensitive" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+        // Did not support "custom sound" - no setting to migrate
+
+        if (const auto &s = this->p->announcementHighlightColor;
+            s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }

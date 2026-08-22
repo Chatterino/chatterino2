@@ -534,14 +534,6 @@ public:
     };
 
     /// Highlighting
-    BoolSetting enableAnnouncementHighlight = {
-        "/highlighting/announcement/enabled",
-        true,
-    };
-    QStringSetting announcementHighlightColor = {
-        "/highlighting/announcement/color",
-        "",
-    };
     BoolSetting enableColoredAnnouncementHighlight = {
         "/highlighting/announcement/coloredAnnouncement/enabled",
         true,

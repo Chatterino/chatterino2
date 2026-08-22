@@ -28,14 +28,13 @@ concept HasDynamicDefaultName = requires(T a) {
 };
 
 template <typename T>
-concept HasDynamicName = requires(T a) {
-    { a.getName() } -> std::same_as<QString>;
+concept HasCustomizableName = requires(T a) {
+    { a.name } -> std::convertible_to<QString>;
 };
 
 template <typename T>
-concept HasDynamicIcon = requires(T a) {
-    { a.getType() } -> std::same_as<QIcon>;
-};
+concept HasDynamicAndCustomizableName =
+    HasDynamicDefaultName<T> && HasCustomizableName<T>;
 
 template <typename T>
 concept SupportsErrors = requires(T a) {
@@ -127,20 +126,24 @@ QString getDefaultName(const AllHighlights &h)
 QString getName(const AllHighlights &h)
 {
     return std::visit(variant::Overloaded{
-                          [](const HasDynamicDefaultName auto &h) {
+                          [](const HasDynamicAndCustomizableName auto &h) {
                               if (h.name.isEmpty())
                               {
                                   return h.getDefaultName();
                               }
                               return h.name;
                           },
-                          [](const auto &h) {
+                          [](const HasCustomizableName auto &h) {
                               if (h.name.isEmpty())
                               {
                                   using ActualType = std::decay_t<decltype(h)>;
                                   return ActualType::DEFAULT_NAME.toString();
                               }
                               return h.name;
+                          },
+                          [](const auto &h) {
+                              using ActualType = std::decay_t<decltype(h)>;
+                              return ActualType::DEFAULT_NAME.toString();
                           },
                       },
                       h);
