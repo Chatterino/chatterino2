@@ -17,7 +17,9 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: apt-get update
         run: sudo apt-get update
@@ -26,7 +28,7 @@ jobs:
         run: sudo apt-get -y install dos2unix
 
       - name: Check formatting
-        uses: DoozyX/clang-format-lint-action@v0.20
+        uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73 # v0.20
         with:
           source: "./src ./tests/src ./benchmarks/src ./mocks/include ./lib/twitch-eventsub-ws/include ./lib/twitch-eventsub-ws/src"
           extensions: "hpp,cpp"
