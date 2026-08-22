@@ -1682,6 +1682,9 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     auto userID = tags.getOrEmpty("user-id");
 
     MessageBuilder builder;
+    // calculate timestamp
+    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+
     builder.parseUsernameColor(tags, userID);
     builder->userID = userID;
 
@@ -1743,8 +1746,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     // reply threads
     builder.parseThread(content, tags, channel, thread, parent);
 
-    // timestamp
-    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+    // add timestamp
     builder.emplace<TimestampElement>(builder->serverReceivedTime.time());
 
     bool shouldAddModerationElements = [&] {
