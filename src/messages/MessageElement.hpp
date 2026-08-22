@@ -667,11 +667,19 @@ protected:
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {
+protected:
+    struct CloneConstructorTag {
+    };
+
 public:
     static constexpr std::string_view TYPE = "timestamp";
 
     TimestampElement();
     TimestampElement(QTime time_);
+    TimestampElement(QTime time_, MessageElementFlags extraFlags);
+    /// This is intended only for cloning the element.
+    TimestampElement(TimestampElement::CloneConstructorTag, QTime time_,
+                     MessageElementFlags flags);
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
