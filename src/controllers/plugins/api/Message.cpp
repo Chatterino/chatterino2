@@ -640,10 +640,21 @@ void createUserType(sol::table &c2)
             return el.visit<const ImageElement, const CircularImageElement>(
                 &ImageElement::image, &CircularImageElement::image);
         }),
-        "words", sol::property([](const ElementRef &el) {
-            return el.visit<const TextElement, const SingleLineTextElement>(
-                &TextElement::words, &SingleLineTextElement::words);
-        }),
+        "words",
+        sol::property(
+            [](const ElementRef &el) {
+                return el.visit<const TextElement, const SingleLineTextElement>(
+                    &TextElement::words, &SingleLineTextElement::words);
+            },
+            [](const ElementRef &el, const QStringList &words) {
+                el.visit<TextElement, SingleLineTextElement>(
+                    [&](auto &el) {
+                        el.setWords(words);
+                    },
+                    [&](auto &el) {
+                        el.setWords(words);
+                    });
+            }),
         "color", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
                 [](const TextElement &el) {
