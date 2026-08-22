@@ -144,6 +144,7 @@ ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
     , image_(std::move(image))
 {
+    assert(image_ != nullptr);
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
