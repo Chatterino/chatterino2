@@ -117,6 +117,12 @@ void MessageElement::cloneFrom(const MessageElement &source)
     this->trailingSpace = source.trailingSpace;
 }
 
+bool MessageElement::matchesFlags(const MessageElementFlags &contextFlags) const
+{
+    return this->exhaustiveFlags ? contextFlags.hasAll(this->getFlags())
+                                 : contextFlags.hasAny(this->getFlags());
+}
+
 QJsonObject MessageElement::toJson() const
 {
     return {
@@ -138,12 +144,13 @@ ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
     , image_(std::move(image))
 {
+    assert(image_ != nullptr);
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         container.addElement(new ImageLayoutElement(
             *this, this->image_, this->image_->size() * container.getScale()));
@@ -189,7 +196,7 @@ CircularImageElement::CircularImageElement(ImagePtr image, int padding,
 void CircularImageElement::addToContainer(MessageLayoutContainer &container,
                                           const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         auto imgSize = QSize(this->image_->width(), this->image_->height()) *
                        container.getScale();
@@ -343,7 +350,7 @@ void LayeredEmoteElement::addEmoteLayer(const LayeredEmoteElement::Emote &emote)
 void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
                                          const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         if (ctx.flags.has(MessageElementFlag::EmoteImage))
         {
@@ -544,7 +551,7 @@ BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
 void BadgeElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -729,7 +736,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 {
     auto *app = getApp();
 
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
@@ -988,7 +995,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 {
     auto *app = getApp();
 
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
@@ -1318,7 +1325,7 @@ TimestampElement::TimestampElement(QTime time)
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         this->setTooltip(this->getTooltip());
         if (getSettings()->timestampFormat != this->format_)
@@ -1439,7 +1446,7 @@ LinebreakElement::LinebreakElement(MessageElementFlags flags)
 void LinebreakElement::addToContainer(MessageLayoutContainer &container,
                                       const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         container.breakLine();
     }
@@ -1475,7 +1482,7 @@ ScalingImageElement::ScalingImageElement(ImageSet images,
 void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
                                          const MessageLayoutContext &ctx)
 {
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         const auto &image =
             this->images_.getImageOrLoaded(container.getImageScale());
@@ -1528,7 +1535,7 @@ void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
     static const int radius = 6;         // Radius of the top left corner
     static const int margin = 2;         // Top/Left/Bottom margin
 
-    if (ctx.flags.hasAny(this->getFlags()))
+    if (this->matchesFlags(ctx.flags))
     {
         float scale = container.getScale();
         container.addElement(
