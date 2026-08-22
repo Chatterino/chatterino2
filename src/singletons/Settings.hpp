@@ -159,6 +159,14 @@ public:
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
+    BoolSetting showHeaderTimestamps = {
+        "/appearance/messages/header/showTimestamps",
+        true,
+    };
+    BoolSetting showAnnouncementHeader = {
+        "/appearance/messages/announcements/showHeader",
+        true,
+    };
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
     BoolSetting hideMessageTimestampsWhenLive = {

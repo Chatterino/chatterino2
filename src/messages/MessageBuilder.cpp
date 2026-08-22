@@ -2081,6 +2081,29 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags)
                         *color, qmagicenum::CASE_INSENSITIVE)
                         .value_or(HelixAnnouncementColor::Primary);
             }
+
+            this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time(),
+                    MessageElementFlags{
+                        MessageElementFlag::HeaderTimestamp,
+                        MessageElementFlag::AnnouncementHeader,
+                    })
+                ->exhaustiveFlags = true;
+
+            this->emplace<TextElement>(
+                    "Announcement",
+                    MessageElementFlags({
+                        MessageElementFlag::Text,
+                        MessageElementFlag::AnnouncementHeader,
+                    }),
+                    MessageColor::System, FontStyle::ChatMediumBold)
+                ->exhaustiveFlags = true;
+
+            this
+                ->emplace<LinebreakElement>(MessageElementFlags{
+                    MessageElementFlag::AnnouncementHeader,
+                })
+                ->exhaustiveFlags = true;
         }
         else if (messageType == "viewermilestone" ||
                  messageType == "modiversary")
