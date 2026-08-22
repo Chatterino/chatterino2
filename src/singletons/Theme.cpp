@@ -85,6 +85,13 @@ void parseWindow(const QJsonObject &window, const QJsonObject &windowFallback,
     parseColor(theme, window, text);
 }
 
+void parseAccounts(const QJsonObject &accounts,
+                   const QJsonObject &accountsFallback,
+                   chatterino::Theme &theme)
+{
+    parseColor(theme, accounts, expired);
+}
+
 void parseTabs(const QJsonObject &tabs, const QJsonObject &tabsFallback,
                chatterino::Theme &theme)
 {
@@ -224,6 +231,8 @@ void parseColors(const QJsonObject &root, const QJsonObject &fallbackTheme,
 
     parseWindow(colors["window"_L1].toObject(),
                 fallbackColors["window"_L1].toObject(), theme);
+    parseAccounts(colors["accounts"_L1].toObject(),
+                  fallbackColors["accounts"_L1].toObject(), theme);
     parseTabs(colors["tabs"_L1].toObject(),
               fallbackColors["tabs"_L1].toObject(), theme);
     parseMessages(colors["messages"_L1].toObject(),

@@ -57,6 +57,16 @@ public:
 
     bool isLoggedIn() const;
 
+    /// Marks the account we're currently signed in as as having an expired
+    /// OAuth token, and notifies the UI if that's a change.
+    ///
+    /// Does nothing when signed out or when the account is already marked, so
+    /// it's safe to call this for every request Twitch rejects.
+    void markCurrentAsExpired();
+
+    /// Returns true if any of the added accounts has an expired OAuth token.
+    bool hasExpiredAccount() const;
+
     pajlada::Settings::Setting<QString> currentUsername{"/accounts/current",
                                                         ""};
 
@@ -72,9 +82,10 @@ public:
     pajlada::Signals::NoArgSignal userListUpdated;
     pajlada::Signals::NoArgSignal currentUserNameChanged;
 
-    /// Fired when the IRC server sends a "Login authentication failed" notice,
-    /// indicating the current OAuth token has expired.
-    pajlada::Signals::NoArgSignal loginExpired;
+    /// Fired when an account's expired state changes in either direction -
+    /// when Twitch rejects an account's OAuth token, and when that account is
+    /// signed in again. Listeners should re-read TwitchAccount::isExpired.
+    pajlada::Signals::NoArgSignal loginExpiryChanged;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 

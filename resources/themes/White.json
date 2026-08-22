@@ -5,6 +5,9 @@
   },
   "colors": {
     "accent": "#00aeef",
+    "accounts": {
+      "expired": "#ff0000"
+    },
     "messages": {
       "backgrounds": {
         "alternate": "#f5f5f5",

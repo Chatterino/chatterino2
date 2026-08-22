@@ -108,6 +108,23 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
+bool TwitchAccount::isExpired() const
+{
+    return this->expired_;
+}
+
+bool TwitchAccount::setExpired(bool expired)
+{
+    if (this->expired_ == expired)
+    {
+        return false;
+    }
+
+    this->expired_ = expired;
+
+    return true;
+}
+
 void TwitchAccount::loadBlocks()
 {
     assertInGuiThread();

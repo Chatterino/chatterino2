@@ -208,10 +208,9 @@ void Helix::fetchStreams(
         })
         .onError([failureCallback](const auto &result) {
             // TODO: make better xd
-            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
-                result.status().value_or(0) == 401)
+            if (result.status().value_or(0) == 401)
             {
-                getApp()->getAccounts()->twitch.loginExpired.invoke();
+                getApp()->getAccounts()->twitch.markCurrentAsExpired();
             }
             failureCallback();
         })
@@ -487,10 +486,9 @@ void Helix::fetchChannels(
             successCallback(channels);
         })
         .onError([failureCallback](const auto &result) {
-            if (getApp()->getAccounts()->twitch.isLoggedIn() &&
-                result.status().value_or(0) == 401)
+            if (result.status().value_or(0) == 401)
             {
-                getApp()->getAccounts()->twitch.loginExpired.invoke();
+                getApp()->getAccounts()->twitch.markCurrentAsExpired();
             }
             failureCallback();
         })
