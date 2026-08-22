@@ -60,7 +60,7 @@
             : string(s)                                            \
         {                                                          \
         }                                                          \
-        constexpr name##View(const name &n)                        \
+        name##View(const name &n)                                  \
             : string(n.string)                                     \
         {                                                          \
         }                                                          \
