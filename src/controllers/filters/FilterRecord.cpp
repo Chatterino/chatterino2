@@ -30,13 +30,16 @@ static std::unique_ptr<filters::Filter> buildFilter(const QString &filterText)
 }
 
 FilterRecord::FilterRecord(QString name, QString filter)
-    : FilterRecord(std::move(name), std::move(filter), QUuid::createUuid())
+    : FilterRecord(std::move(name), std::move(filter), false,
+                   QUuid::createUuid())
 {
 }
 
-FilterRecord::FilterRecord(QString name, QString filter, const QUuid &id)
+FilterRecord::FilterRecord(QString name, QString filter, bool global,
+                           const QUuid &id)
     : name_(std::move(name))
     , filterText_(std::move(filter))
+    , global_(global)
     , id_(id)
     , filter_(buildFilter(this->filterText_))
 {
@@ -60,6 +63,11 @@ const QUuid &FilterRecord::getId() const
 bool FilterRecord::valid() const
 {
     return this->filter_ != nullptr;
+}
+
+bool FilterRecord::isGlobal() const
+{
+    return this->global_;
 }
 
 bool FilterRecord::filter(filters::RunContext context) const
