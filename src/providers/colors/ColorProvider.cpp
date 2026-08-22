@@ -6,6 +6,8 @@
 
 #include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QSet>
@@ -31,30 +33,32 @@ std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 
 QSet<QColor> ColorProvider::recentColors() const
 {
-    QSet<QColor> retVal;
+    QSet<QColor> colors;
 
-    /*
-     * Currently, only colors used in highlight phrases are considered. This
-     * may change at any point in the future.
-     */
-    for (const auto &phrase : getSettings()->highlightedMessages)
+    const auto highlights = getSettings()->sharedHighlights.readOnly();
+
+    for (const auto &highlight : *highlights)
     {
-        retVal.insert(*phrase.getColor());
+        auto enabled = highlights::isEnabled(highlight);
+
+        if (!enabled)
+        {
+            continue;
+        }
+
+        const auto color = highlights::getBackgroundColor(highlight);
+        if (!color)
+        {
+            continue;
+        }
+        if (!color->isValid())
+        {
+            continue;
+        }
+        colors.insert(*color);
     }
 
-    for (const auto &userHl : getSettings()->highlightedUsers)
-    {
-        retVal.insert(*userHl.getColor());
-    }
-
-    // Insert preset highlight colors
-    retVal.insert(*this->color(ColorType::SelfHighlight));
-    retVal.insert(*this->color(ColorType::Subscription));
-    retVal.insert(*this->color(ColorType::WatchStreak));
-    retVal.insert(*this->color(ColorType::Whisper));
-    retVal.insert(*this->color(ColorType::AnnouncementHighlight));
-
-    return retVal;
+    return colors;
 }
 
 const std::vector<QColor> &ColorProvider::defaultColors() const
@@ -106,41 +110,6 @@ void ColorProvider::initTypeColorMap()
             false);
     };
 
-    initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::SelfMessageHighlight,
-              getSettings()->selfMessageHighlightColor,
-              HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::Subscription, getSettings()->subHighlightColor,
-              HighlightPhrase::FALLBACK_SUB_COLOR);
-
-    initColor(ColorType::WatchStreak, getSettings()->watchStreakHighlightColor,
-              HighlightPhrase::FALLBACK_WATCH_STREAK_COLOR);
-
-    initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::RedeemedHighlight,
-              getSettings()->redeemedHighlightColor,
-              HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::FirstMessageHighlight,
-              getSettings()->firstMessageHighlightColor,
-              HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::ThreadMessageHighlight,
-              getSettings()->threadHighlightColor,
-              HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
-              HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
-
-    initColor(ColorType::AnnouncementHighlight,
-              getSettings()->announcementHighlightColor,
-              HighlightPhrase::FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR);
-
     this->typeColorMap_.insert({
         ColorType::AnnouncementBlue,
         std::make_shared<QColor>(
@@ -161,6 +130,10 @@ void ColorProvider::initTypeColorMap()
         std::make_shared<QColor>(
             HighlightPhrase::ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR),
     });
+    this->typeColorMap_.insert({
+        ColorType::ThisShouldBeRemovedTODO,
+        std::make_shared<QColor>(QColor{255, 0, 255}),
+    });
 }
 
 void ColorProvider::initDefaultColors()
@@ -177,8 +150,10 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.emplace_back(143, 48, 24, 127);  // Red
     this->defaultColors_.emplace_back(28, 141, 117, 90);  // Cyan
 
-    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
+    this->defaultColors_.push_back(
+        highlights::MessageHighlight::BACKGROUND_COLOR_DEFAULT);
+    this->defaultColors_.push_back(
+        highlights::SubscriptionsHighlight::BACKGROUND_COLOR_DEFAULT);
 }
 
 ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
@@ -189,7 +164,7 @@ ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
         switch (color)
         {
             case HelixAnnouncementColor::Primary:
-                return ColorType::AnnouncementHighlight;
+                return ColorType::ThisShouldBeRemovedTODO;
             case HelixAnnouncementColor::Blue:
                 return ColorType::AnnouncementBlue;
             case HelixAnnouncementColor::Green:
@@ -200,7 +175,7 @@ ColorType colorTypeFromHelixAnnouncementColor(HelixAnnouncementColor color,
                 return ColorType::AnnouncementPurple;
         }
     }
-    return ColorType::AnnouncementHighlight;
+    return ColorType::ThisShouldBeRemovedTODO;
 }
 
 }  // namespace chatterino

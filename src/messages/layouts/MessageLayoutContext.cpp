@@ -50,41 +50,15 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
 void MessagePreferences::connectSettings(Settings *settings,
                                          pajlada::Signals::SignalHolder &holder)
 {
-    settings->enableRedeemedHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableRedeemedHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableRedeemedHighlight = true;
 
-    settings->enableFirstMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableFirstMessageHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableFirstMessageHighlight = true;
 
-    settings->enableSubHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableSubHighlight = newValue;
-        },
-        holder);
+    // TODO: REMOVE THIS OR SOMETHING - THIS SHOULD ALL JUST BE HIGHLIGHTS-SPECIFIC
+    this->enableAnnouncementHighlight = true;
 
-    settings->enableWatchStreakHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableWatchStreakHighlight = newValue;
-        },
-        holder);
-
-    settings->enableAutomodHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableAutomodHighlight = newValue;
-        },
-        holder);
-
-    settings->enableAnnouncementHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableAnnouncementHighlight = newValue;
-        },
-        holder);
     settings->enableColoredAnnouncementHighlight.connect(
         [this](const auto &newValue) {
             this->enableColoredAnnouncementHighlight = newValue;

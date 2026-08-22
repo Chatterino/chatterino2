@@ -811,7 +811,8 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
         else if (msgType == "announcement")
         {
-            messageText = "Announcement";
+            // Early out - announcement headers are added in MessageBuilder
+            return;
         }
         else if (msgType == "subgift")
         {

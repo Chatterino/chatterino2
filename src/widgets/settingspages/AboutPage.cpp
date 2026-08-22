@@ -181,6 +181,8 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Google emojis provided by <a href=\"https://google.com\">Google</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a> "
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/Sadiquecat/sounds/865918/">Sadiquecat C4 Harmonic</a> by <a href="https://freesound.org/people/Sadiquecat/">freesound.org/people/Sadiquecat</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/CAT-FOX_ALEX/sounds/859006/">CAT-FOX_Alex FX-Jump 3</a> by <a href="https://freesound.org/people/CAT-FOX_ALEX/">freesound.org/people/CAT-FOX_ALEX</a>)")->setOpenExternalLinks(true);
             // clang-format on
         }
 

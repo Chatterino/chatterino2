@@ -537,6 +537,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+
+    SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show announcement header",
+                            s.showAnnouncementHeader)
+        ->addTo(layout);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -1532,13 +1540,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
                      "/whispers.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Highlight received inline whispers",
-                            s.highlightInlineWhispers)
-        ->setTooltip(
-            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-            "whispers inline\" is disabled, this setting will do nothing.")
         ->addTo(layout);
 
     SettingWidget::checkbox(

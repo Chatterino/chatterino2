@@ -135,6 +135,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     this->updateWordTypeMaskListener.add(settings.showTimestamps);
+    this->updateWordTypeMaskListener.add(settings.showHeaderTimestamps);
+    this->updateWordTypeMaskListener.add(settings.showAnnouncementHeader);
     this->updateWordTypeMaskListener.add(settings.showBadgesGlobalAuthority);
     this->updateWordTypeMaskListener.add(settings.showBadgesPredictions);
     this->updateWordTypeMaskListener.add(settings.showBadgesChannelAuthority);
@@ -151,11 +153,7 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->forceLayoutChannelViewsListener.add(
         settings.moderationActions.delayedItemsChanged);
     this->forceLayoutChannelViewsListener.add(
-        settings.highlightedMessages.delayedItemsChanged);
-    this->forceLayoutChannelViewsListener.add(
-        settings.highlightedUsers.delayedItemsChanged);
-    this->forceLayoutChannelViewsListener.add(
-        settings.highlightedBadges.delayedItemsChanged);
+        settings.sharedHighlights.delayedItemsChanged);
     this->forceLayoutChannelViewsListener.add(
         settings.removeSpacesBetweenEmotes);
     this->forceLayoutChannelViewsListener.add(settings.emoteScale);
@@ -163,7 +161,6 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
         settings.hideMessageTimestampsWhenLive);
     this->forceLayoutChannelViewsListener.add(settings.timestampFormat);
     this->forceLayoutChannelViewsListener.add(settings.collpseMessagesMinLines);
-    this->forceLayoutChannelViewsListener.add(settings.enableRedeemedHighlight);
     this->forceLayoutChannelViewsListener.add(settings.colorUsernames);
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
     this->forceLayoutChannelViewsListener.add(
@@ -216,6 +213,14 @@ void WindowManager::updateWordTypeMask()
     if (settings->showTimestamps)
     {
         flags.set(MEF::Timestamp);
+    }
+    if (settings->showHeaderTimestamps)
+    {
+        flags.set(MEF::HeaderTimestamp);
+    }
+    if (settings->showAnnouncementHeader)
+    {
+        flags.set(MEF::AnnouncementHeader);
     }
 
     // emotes
