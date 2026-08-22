@@ -8,6 +8,7 @@
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "providers/irc/IrcConnection2.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/RatelimitBucket.hpp"
 
 #include <IrcMessage>
@@ -77,6 +78,8 @@ public:
     virtual void initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
                                SeventvEventAPI *seventvEventAPI) = 0;
 
+    virtual bool isModeratorIn(const QString &broadcasterLogin) const = 0;
+
     // Update this interface with TwitchIrcServer methods as needed
 };
 
@@ -143,6 +146,8 @@ public:
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override;
 
+    bool isModeratorIn(const QString &broadcasterLogin) const override;
+
     void open(ConnectionType type);
 
 private:
@@ -192,6 +197,9 @@ private:
 
     bool prepareToSend(const std::shared_ptr<TwitchChannel> &channel);
 
+    void refreshModeratedChannels();
+    void applyModeratedChannelInfo();
+
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;
 
@@ -214,6 +222,9 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
+
+    QSet</* login */ QString> moderatedChannels;
+    ScopedCancellationToken moderatedChannelFetchToken;
 };
 
 }  // namespace chatterino
