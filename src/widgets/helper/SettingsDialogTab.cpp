@@ -7,6 +7,8 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
+#include "singletons/Theme.hpp"
+
 #include <QPainter>
 #include <QStyleOption>
 
@@ -26,8 +28,6 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog,
     this->ui_.icon.addFile(imageFileName);
 
     this->setCursor(QCursor(Qt::PointingHandCursor));
-
-    this->setStyleSheet("color: #FFF");
 }
 
 void SettingsDialogTab::setSelected(bool _selected)
@@ -66,10 +66,16 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     int iconSize = 20 * this->scale();
     int pad = (this->height() - iconSize) / 2;
+
     QPixmap pixmap = this->ui_.icon.pixmap(
         QSize(this->height() - pad * 2, this->height() - pad * 2));
+    auto image = pixmap.toImage();
+    if (getTheme()->isLightTheme())
+    {
+        image.invertPixels();
+    }
 
-    painter.drawPixmap(pad, pad, pixmap);
+    painter.drawImage(pad, pad, image);
 
     pad = (3 * pad) + iconSize;
 

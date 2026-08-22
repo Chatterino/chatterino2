@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/helper/Line.hpp"
@@ -33,9 +34,22 @@ GeneralPageView::GeneralPageView(QWidget *parent)
 {
     auto *contentWidget = new QWidget;
     contentWidget->setLayout(this->contentLayout_);
+    contentWidget->setObjectName("generalSettingsScrollContent");
+
     this->contentScrollArea_->setWidget(contentWidget);
-    this->contentScrollArea_->setObjectName("generalSettingsScrollContent");
     this->contentScrollArea_->setWidgetResizable(true);
+
+    const auto *themeFile = getTheme()->isLightTheme()
+        ? ":/qss/settingsLight.qss"
+        : ":/qss/settingsDark.qss";
+    QFile styleFile(themeFile);
+    if (!styleFile.open(QFile::ReadOnly))
+    {
+        assert(false && "Resources not loaded");
+        qCWarning(chatterinoWidget) << "Resources not loaded";
+    }
+    QString stylesheet = QString::fromUtf8(styleFile.readAll());
+    contentWidget->setStyleSheet(stylesheet);
 }
 
 GeneralPageView *GeneralPageView::withoutNavigation(QWidget *parent)

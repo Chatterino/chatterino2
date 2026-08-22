@@ -9,6 +9,7 @@
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Theme.hpp"
 #include "util/Expected.hpp"  // IWYU pragma: keep - this is being used to see if we're using the expected_lite library
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
@@ -43,7 +44,11 @@ AboutPage::AboutPage()
     auto layout = widget.setLayoutType<QVBoxLayout>();
     {
         QPixmap pixmap;
-        pixmap.load(":/settings/aboutlogo.png");
+        if (getTheme()->isLightTheme()) {
+            pixmap.load(":/settings/aboutlogoLight.png");
+        } else {
+            pixmap.load(":/settings/aboutlogoDark.png");
+        }
 
         auto logo = layout.emplace<QLabel>().assign(&this->logo_);
         logo->setPixmap(pixmap);

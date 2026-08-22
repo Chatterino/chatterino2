@@ -272,7 +272,10 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     if (this->flags_.has(UseSettingsStylesheet))
     {
-        QFile styleFile(":/qss/settings.qss");
+        const auto *themeFile = getTheme()->isLightTheme()
+            ? ":/qss/settingsLight.qss"
+            : ":/qss/settingsDark.qss";
+        QFile styleFile(themeFile);
         if (!styleFile.open(QFile::ReadOnly))
         {
             assert(false && "Resources not loaded");
@@ -280,7 +283,9 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         }
         QString stylesheet = QString::fromUtf8(styleFile.readAll());
         this->setStyleSheet(stylesheet);
-        this->overrideBackgroundColor_ = QColor("#111111");
+        this->overrideBackgroundColor_ = getTheme()->isLightTheme()
+            ? QColor("#e6e6e6")
+            : QColor("#333333");
     }
 
     DebugCount::increase(DebugObject::BaseWindow);
@@ -525,7 +530,7 @@ void BaseWindow::themeChangedEvent()
     if (this->hasCustomWindowFrame())
     {
         QPalette palette;
-        palette.setColor(QPalette::Window, QColor(80, 80, 80, 255));
+        //palette.setColor(QPalette::Window, QColor(80, 80, 80, 255));
         palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
 
@@ -545,9 +550,7 @@ void BaseWindow::themeChangedEvent()
     }
     else if (this->flags_.has(UseSettingsStylesheet))
     {
-        QPalette palette;
-        palette.setColor(QPalette::Window, QColor("#111"));
-        this->setPalette(palette);
+        // Do nothing
     }
     else
     {
