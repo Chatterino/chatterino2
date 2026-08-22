@@ -5,6 +5,7 @@ This is a set of guidelines for contributing to Chatterino. The goal is to teach
 ## General (non-code related) guidelines for contributing to Chatterino
 
 - Make a specific branch for your pull request instead of using the master, main, or mainline branch. This will prevent future problems with updating your branch after your PR is merged.
+- Use icons from Microsoft's Fluent Icons (see https://fluenticons.co/outlined) if possible, and attribute them correctly in your pull request.
 
 ## Use of AI
 
