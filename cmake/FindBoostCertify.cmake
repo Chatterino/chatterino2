@@ -12,7 +12,7 @@ if (BoostCertify_FOUND)
 
     target_link_libraries(
         BoostCertify INTERFACE
-        $<$<AND:$<BOOL:${WIN32}>,$<BOOL:${VCPKG_TARGET_TRIPLET}>>:Crypt32>
+        $<$<BOOL:${WIN32}>:Crypt32>
     )
 endif ()
 
