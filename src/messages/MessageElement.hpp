@@ -199,12 +199,22 @@ public:
     /// Creates a new identical message element.
     virtual std::unique_ptr<MessageElement> clone() const = 0;
 
+    /// When this element is added to a container, this decides whether the flag check
+    /// should require the context flags to contain all flags of this element (true), as opposed
+    /// to the context flag containing at least one of the flags of this element (false).
+    bool exhaustiveFlags = false;
+
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
     /// Copy MessageElement private data from `source` to this MessageElement
     void cloneFrom(const MessageElement &source);
+
+    /// Checks if the given flags from the layout context matches the flags of this element.
+    ///
+    /// Takes `exhaustiveFlags` into consideration.
+    bool matchesFlags(const MessageElementFlags &contextFlags) const;
 
 private:
     Link link_;
