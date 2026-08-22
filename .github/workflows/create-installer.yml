@@ -22,12 +22,13 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: ["6.7.1"]
+        qt-version: ["6.8.3"]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0 
+          fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Resolve Build workflow run
         id: resolve-build-run
@@ -62,7 +63,7 @@ jobs:
             return String(run.id);
 
       - name: Download artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           github-token: ${{ github.token }}
@@ -81,7 +82,7 @@ jobs:
         run: echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
       - name: Build installer
         id: build-installer
@@ -90,7 +91,7 @@ jobs:
         shell: powershell
 
       - name: Upload installer
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

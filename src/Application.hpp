@@ -31,6 +31,7 @@ class TwitchBadges;
 class PluginController;
 #endif
 
+class Modes;
 class Theme;
 class WindowManager;
 class ILogging;
@@ -143,10 +144,12 @@ public:
         return false;
     }
 
-    void initialize(Settings &settings, const Paths &paths);
+    void initialize(Settings &settings, const Modes &modes, const Paths &paths);
     void load();
     void aboutToQuit();
     void stop();
+
+    void connect();
 
     int run();
 
@@ -244,7 +247,7 @@ public:
     SpellChecker *getSpellChecker() override;
 
 private:
-    void initNm(const Paths &paths);
+    void initNm(const Modes &modes, const Paths &paths);
 
     std::unique_ptr<NativeMessagingServer> nmServer;
     Updates &updates;

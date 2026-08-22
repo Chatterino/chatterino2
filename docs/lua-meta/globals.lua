@@ -332,6 +332,81 @@ function c2.ConnectionHandle:is_connected() end
 
 -- End src/controllers/plugins/api/ConnectionHandle.hpp
 
+-- Begin src/controllers/plugins/api/DateTime.hpp
+
+
+
+---A zoned date and time.
+---@class c2.DateTime
+c2.DateTime = {}
+
+---Parse a date from an ISO 8601 string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+---@param str string
+---@return c2.DateTime
+function c2.DateTime.from_iso_string(str) end
+
+---Format the datetime as an ISO string with milliseconds (yyyy-MM-ddTHH:mm:ss.zzz)
+---@return string
+function c2.DateTime:to_iso_string() end
+
+---Format the datetime as an ISO string without milliseconds (yyyy-MM-ddTHH:mm:ss)
+---@return string
+function c2.DateTime:to_iso_string_without_ms() end
+
+---Get the current datetime in the system's local time zone.
+---@return c2.DateTime
+function c2.DateTime.current_local() end
+
+---Get the current datetime in the UTC time zone (00:00).
+---@return c2.DateTime
+function c2.DateTime.current_utc() end
+
+---Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+---
+---The returned date time will be in the local time zone.
+---@param ts number
+---@return c2.DateTime
+function c2.DateTime.from_unix_milliseconds(ts) end
+
+---Get a datetime from a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+---
+---The returned date time will be in the local time zone.
+---@param ts number
+---@return c2.DateTime
+function c2.DateTime.from_unix_seconds(ts) end
+
+---Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in milliseconds.
+---@return number
+function c2.DateTime:to_unix_milliseconds() end
+
+---Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+---@return number
+function c2.DateTime:to_unix_seconds() end
+
+---Check if the datetime is a local time.
+---
+---Local times are represented without a timezone.
+---Whenever the timezone is needed (e.g. for comparison) it is queried from the system.
+---This is distinct from a date time with your system timezone.
+---@return boolean
+function c2.DateTime:is_local() end
+
+---Check if the datetime is in UTC.
+---@return boolean
+function c2.DateTime:is_utc() end
+
+---Returns a copy of this datetime converted to the user's local timezone.
+---
+---Local time is represented without a timezone.
+---That is `1970-01-01T00:00:00` is a local time but `1970-01-01T00:00:00Z` is not.
+---@return c2.DateTime
+function c2.DateTime:to_local() end
+
+---Returns a copy of this datetime converted to UTC.
+---@return c2.DateTime
+function c2.DateTime:to_utc() end
+-- End src/controllers/plugins/api/DateTime.hpp
+
 -- Begin src/controllers/plugins/api/HTTPResponse.hpp
 
 ---@class c2.HTTPResponse
@@ -461,6 +536,48 @@ c2.ImageSet = {}
 ---@return c2.ImageSet
 function c2.ImageSet.new(image1, image2, image3) end
 -- End src/controllers/plugins/api/Images.hpp
+
+-- Begin src/controllers/plugins/api/Menu.hpp
+
+
+---A generic menu used for context menus.
+---@class c2.Menu
+c2.Menu = {}
+
+---Appends a new action to the menu.
+---@param text string
+---@param cb fun()
+function c2.Menu:add_action(text, cb) end
+
+---Inserts an action named `text` before `before`. If `before` is not found,
+---the action is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+---@param text string
+---@param cb fun()
+function c2.Menu:insert_action(before, text, cb) end
+
+---Appends a new Menu with `title` to the menu.
+---@param title string
+---@return c2.Menu
+function c2.Menu:add_menu(title) end
+
+---Inserts a new Menu named `title` before `before`. If `before` is not found,
+---the menu is inserted at the end. `before` can either be a name or a one-based
+---index.
+---@param before string|integer A name or index of an action.
+---@param title string
+function c2.Menu:insert_menu(before, title) end
+
+---Appends a new separator.
+function c2.Menu:add_separator() end
+
+---Inserts a new separator before `before`. If `before` is not found,
+---the separator is inserted at the end. `before` can either be a name or a
+---one-based index.
+---@param before string|integer A name or index of an action.
+function c2.Menu:insert_separator(before) end
+-- End src/controllers/plugins/api/Menu.hpp
 
 -- Begin src/controllers/plugins/api/Message.hpp
 
@@ -648,6 +765,10 @@ function c2.Message:elements() end
 ---@param elem (MessageElement|MessageElementInit) The element to add
 function c2.Message:append_element(elem) end
 
+---Returns an identical, non-frozen message, independent from this one.
+---@return c2.Message
+function c2.Message:clone() end
+
 ---A table to initialize a new message
 ---@class MessageInit
 ---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
@@ -781,7 +902,6 @@ c2.MessageFlag = {
     ShowInMentions = 0,
     FirstMessage = 0,
     ReplyMessage = 0,
-    ElevatedMessage = 0,
     SubscribedThread = 0,
     CheerMessage = 0,
     LiveUpdatesAdd = 0,
@@ -801,6 +921,7 @@ c2.MessageFlag = {
     InvalidReplyTarget = 0,
     WatchStreak = 0,
     Announcement = 0,
+    UncategorizedNotification = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
@@ -930,6 +1051,18 @@ c2.WindowManager = {}
 ---Get all open windows.
 ---@return c2.Window[] windows
 function c2.WindowManager:all() end
+
+---@class ChannelViewContextMenuRequestedArgs
+---@field split? c2.Split The split holding the channel view. This is `nil` if the view is not inside a split.
+---@field message c2.Message The clicked message.
+---@field message_element? MessageElement The clicked message element.
+---@field channel? c2.Channel The channel shown in the view. Note that this might be a virtual channel (e.g. in a search popup or usercard).
+---@field menu c2.Menu The context menu. Add your actions here.
+
+---Registers an event handler for context menus in ChannelViews.
+---@param cb fun(args: ChannelViewContextMenuRequestedArgs)
+---@return c2.ConnectionHandle
+function c2.WindowManager:on_channelview_context_menu_requested(cb) end
 
 ---@type c2.WindowManager
 c2.windows = ...

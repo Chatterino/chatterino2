@@ -207,6 +207,7 @@ declare namespace c2 {
         frozen: boolean;
         elements(): MessageElement[];
         append_element(init: MessageElementInit | MessageElement): void;
+        clone(): Message;
     }
 
     interface MessageConstructor {
@@ -419,7 +420,7 @@ declare namespace c2 {
     }
 
     interface VipBadgeElement extends Omit<BadgeElement, "type"> {
-        type: "ffz-badge";
+        type: "vip-badge";
     }
 
     interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
@@ -468,7 +469,6 @@ declare namespace c2 {
         ShowInMentions = 0,
         FirstMessage = 0,
         ReplyMessage = 0,
-        ElevatedMessage = 0,
         SubscribedThread = 0,
         CheerMessage = 0,
         LiveUpdatesAdd = 0,
@@ -656,14 +656,58 @@ declare namespace c2 {
         type: WindowType;
     }
 
+    interface ChannelViewContextMenuRequestedArgs {
+        split?: Split;
+        message: Message;
+        message_element: MessageElement;
+        channel?: Channel;
+        menu: Menu;
+    }
+
     class WindowManager {
         main_window: Window;
         last_selected_window: Window;
 
         all(): Window[];
+
+        on_channelview_context_menu_requested(
+            cb: (args: ChannelViewContextMenuRequestedArgs) => void
+        ): ConnectionHandle;
     }
 
     var windows: WindowManager;
+
+    class DateTime {
+        static from_iso_string(str: string): DateTime;
+        to_iso_string(): string;
+        to_iso_string_without_ms(): string;
+
+        static current_local(): DateTime;
+        static current_utc(): DateTime;
+
+        static from_unix_milliseconds(ts: number): DateTime;
+        static from_unix_seconds(ts: number): DateTime;
+        to_unix_milliseconds(): number;
+        to_unix_seconds(): number;
+
+        is_local(): boolean;
+        is_utc(): boolean;
+        to_local(): DateTime;
+        to_utc(): DateTime;
+    }
+
+    class Menu {
+        add_action(text: string, cb: () => void): void;
+        insert_action(
+            before: string | number,
+            text: string,
+            cb: () => void
+        ): void;
+        add_menu(text: string): Menu;
+        insert_menu(before: string | number, text: string): Menu;
+        add_separator(): void;
+        insert_separator(before: string | number): void;
+    }
 }
 
 declare module "chatterino.json" {

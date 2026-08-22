@@ -35,6 +35,7 @@
 #include "widgets/OverlayWindow.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
+#include "widgets/splits/PinnedMessageWidget.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -54,6 +55,8 @@
 #include <QVBoxLayout>
 
 #include <functional>
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 namespace {
@@ -89,6 +92,7 @@ Split::Split(QWidget *parent)
     , channel_(Channel::getEmpty())
     , vbox_(new QVBoxLayout(this))
     , header_(new SplitHeader(this))
+    , pinnedBanner_(new PinnedMessageWidget(this))
     , view_(new ChannelView(this, this, ChannelView::Context::None,
                             getSettings()->scrollbackSplitLimit))
     , input_(new SplitInput(this))
@@ -103,16 +107,17 @@ Split::Split(QWidget *parent)
     this->vbox_->setContentsMargins(1, 1, 1, 1);
 
     this->vbox_->addWidget(this->header_);
+    this->vbox_->addWidget(this->pinnedBanner_);
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     // update placeholder text on Twitch account change and channel change
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->updateInputPlaceholder();
-        }));
+        });
     this->signalHolder_.managedConnect(this->channelChanged, [this] {
         this->updateInputPlaceholder();
     });
@@ -165,39 +170,19 @@ Split::Split(QWidget *parent)
             }
         });
 
-    // this connection can be ignored since the SplitInput is owned by this Split
+    // These connections can be ignored since the SplitInput is owned by this Split.
     std::ignore =
         this->input_->textChanged.connect([this](const QString &newText) {
-            if (getSettings()->showEmptyInput)
-            {
-                // We always show the input regardless of the text, so we can early out here
-                return;
-            }
-
-            if (newText.isEmpty())
-            {
-                this->input_->hide();
-            }
-            else if (this->input_->isHidden())
-            {
-                // Text updated and the input was previously hidden, show it
-                this->input_->show();
-            }
+            this->refreshInputState(newText);
         });
 
+    std::ignore = this->input_->historySearchStateChanged.connect([this] {
+        this->refreshInputState(this->input_->getInputText());
+    });
+
     getSettings()->showEmptyInput.connect(
-        [this](const bool &showEmptyInput) {
-            if (showEmptyInput)
-            {
-                this->input_->show();
-            }
-            else
-            {
-                if (this->input_->getInputText().isEmpty())
-                {
-                    this->input_->hide();
-                }
-            }
+        [this] {
+            this->refreshInputState(this->input_->getInputText());
         },
         this->signalHolder_);
 
@@ -746,6 +731,11 @@ SplitInput &Split::getInput()
     return *this->input_;
 }
 
+PinnedMessageWidget *Split::getPinnedBanner() const
+{
+    return this->pinnedBanner_;
+}
+
 void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
@@ -788,6 +778,29 @@ void Split::refreshModerationMode()
     this->view_->queueLayout();
 }
 
+void Split::refreshInputState(const QString &inputText)
+{
+    if (getSettings()->showEmptyInput)
+    {
+        // We always show the input regardless of the text, so we can early out here
+        if (this->input_->isHidden())
+        {
+            this->input_->show();
+        }
+        return;
+    }
+
+    if (inputText.isEmpty() && !this->input_->isInHistorySearch())
+    {
+        this->input_->hide();
+    }
+    else
+    {
+        // Text updated and the input was previously hidden, show it
+        this->input_->show();
+    }
+}
+
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -801,7 +814,7 @@ void Split::openChannelInStreamlink(const QString channelName)
 {
     try
     {
-        openStreamlinkForChannel(channelName);
+        openStreamlinkForChannelOrUrl(channelName);
     }
     catch (const Exception &ex)
     {
@@ -815,7 +828,7 @@ void Split::openChannelInCustomPlayer(const QString channelName)
     openInCustomPlayer(channelName);
 }
 
-IndirectChannel Split::getIndirectChannel()
+IndirectChannel Split::getIndirectChannel() const
 {
     return this->channel_;
 }
@@ -852,6 +865,17 @@ void Split::setChannel(IndirectChannel newChannel)
             tc->sendWaitUpdate, [this](const QString &text) {
                 this->getInput().setSendWaitStatus(text);
             });
+
+        this->channelSignalHolder_.managedConnect(
+            tc->sharedChatStatusChanged,
+            [this](const std::vector<HelixMinimalUser> &) {
+                this->header_->updateChannelText();
+            });
+        this->pinnedBanner_->setChannel(tc);
+    }
+    else
+    {
+        this->pinnedBanner_->setChannel(nullptr);
     }
 
     this->indirectChannelChangedConnection_ =
@@ -1089,7 +1113,7 @@ void Split::explainSplitting()
 void Split::popup()
 {
     auto *app = getApp();
-    Window &window = app->getWindows()->createWindow(WindowType::Popup);
+    Window &window = app->getWindows()->createWindow(WindowType::Popup, {});
 
     auto *split = new Split(window.getNotebook().getOrAddSelectedPage());
 
@@ -1270,6 +1294,11 @@ void Split::reconnect()
     this->getChannel()->reconnect();
 }
 
+void Split::togglePinnedBanner()
+{
+    this->pinnedBanner_->toggleUserPinned();
+}
+
 void Split::dragEnterEvent(QDragEnterEvent *event)
 {
     if (getSettings()->imageUploaderEnabled &&
@@ -1329,6 +1358,38 @@ void Split::drag()
 void Split::setInputReply(const MessagePtr &reply)
 {
     this->input_->setReply(reply);
+}
+
+SplitDescriptor Split::buildDescriptor() const
+{
+    SplitDescriptor descriptor;
+    descriptor.moderationMode_ = this->getModerationMode();
+    descriptor.filters_ = this->getFilters();
+    descriptor.spellCheckOverride = this->checkSpellingOverride();
+
+    auto chan = this->getIndirectChannel();
+    descriptor.type_ = qmagicenum::enumNameString(chan.getType());
+    switch (chan.getType())
+    {
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
+            descriptor.channelName_ = chan.get()->getName();
+            break;
+
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;
+    }
+
+    return descriptor;
 }
 
 void Split::unpause()

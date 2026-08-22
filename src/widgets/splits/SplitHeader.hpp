@@ -7,7 +7,6 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/TooltipWidget.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -37,6 +36,7 @@ public:
 
     void updateChannelText();
     void updateIcons();
+    void updatePinButton();
     // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
     // has changed (e.g. sub mode toggled)
     void updateRoomModes();
@@ -86,6 +86,8 @@ private:
     QAction *modeActionSetR9k{};
     QAction *modeActionSetFollowers{};
 
+    SvgButton *pinButton_{};
+
     SvgButton *moderationButton_{};
     SvgButton *chattersButton_{};
     DrawnButton *addButton_{};
@@ -100,7 +102,6 @@ private:
     // and don't change when the parent Split changes its underlying channel
     pajlada::Signals::SignalHolder managedConnections_;
     pajlada::Signals::SignalHolder channelConnections_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public Q_SLOTS:
     void reloadChannelEmotes();

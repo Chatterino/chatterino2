@@ -97,7 +97,7 @@ public:
         : mock::BaseApplication(TEST_SETTINGS)
         , plugins(this->paths_)
         , commands(this->paths_)
-        , windows(this->args, this->paths_, this->settings, this->theme,
+        , windows(this->args_, this->paths_, this->settings, this->theme,
                   this->fonts)
     {
     }
@@ -206,7 +206,7 @@ public:
         getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
-    static std::map<QString, std::unique_ptr<Plugin>> &plugins()
+    static std::map<QString, AnyPlugin> &plugins()
     {
         return getApp()->getPlugins()->plugins_;
     }
@@ -1697,6 +1697,19 @@ TEST_F(PluginImageTest, NoPerms)
 
 INSTANTIATE_TEST_SUITE_P(PluginImage, PluginImageTest,
                          testing::ValuesIn(discoverLuaTests("images")));
+
+class PluginDateTimeTest : public PluginTest,
+                           public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginDateTimeTest, Run)
+{
+    this->configure();
+    runLuaTest("datetime", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginDateTimeTest,
+                         testing::ValuesIn(discoverLuaTests("datetime")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)

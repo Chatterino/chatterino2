@@ -69,18 +69,6 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
-    if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return {
-            ColorProvider::instance().color(
-                ColorType::ElevatedMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            false,
-            true,
-        };
-    }
-
     if (this->flags.has(MessageFlag::FirstMessage))
     {
         return {
@@ -109,7 +97,48 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
+    if (this->flags.has(MessageFlag::UncategorizedNotification))
+    {
+        // TODO: Give this a better/its own color :-)
+        return {
+            ColorProvider::instance().color(ColorType::Subscription),
+        };
+    }
+
     return {};
+}
+
+std::shared_ptr<Message> Message::clone() const
+{
+    auto cloned = std::make_shared<Message>();
+    cloned->flags = this->flags;
+    cloned->parseTime = this->parseTime;
+    cloned->id = this->id;
+    cloned->searchText = this->searchText;
+    cloned->messageText = this->messageText;
+    cloned->loginName = this->loginName;
+    cloned->displayName = this->displayName;
+    cloned->localizedName = this->localizedName;
+    cloned->userID = this->userID;
+    cloned->timeoutUser = this->timeoutUser;
+    cloned->channelName = this->channelName;
+    cloned->usernameColor = this->usernameColor;
+    cloned->serverReceivedTime = this->serverReceivedTime;
+    cloned->twitchBadges = this->twitchBadges;
+    cloned->twitchBadgeInfos = this->twitchBadgeInfos;
+    cloned->externalBadges = this->externalBadges;
+    cloned->highlightColor = this->highlightColor;
+    cloned->replyThread = this->replyThread;
+    cloned->replyParent = this->replyParent;
+    cloned->count = this->count;
+    cloned->reward = this->reward;
+    cloned->bits = this->bits;
+    cloned->announcementColor = this->announcementColor;
+    std::ranges::transform(this->elements, std::back_inserter(cloned->elements),
+                           [](const auto &element) {
+                               return element->clone();
+                           });
+    return cloned;
 }
 
 QJsonObject Message::toJson() const

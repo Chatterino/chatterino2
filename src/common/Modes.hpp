@@ -6,13 +6,14 @@
 
 namespace chatterino {
 
+class Args;
+
 class Modes
 {
 public:
-    Modes();
+    explicit Modes(const Args &args);
 
-    static const Modes &instance();
-
+    /// Marked by the line `portable` or `portableEnable` from `Args`
     bool isPortable{};
 
     /// Marked by the line `externally-packaged`

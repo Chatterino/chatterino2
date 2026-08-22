@@ -221,11 +221,12 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize()
 {
-    getApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
-        postToThread([this] {
-            this->connect();
+    this->signalHolder.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this]() {
+            postToThread([this] {
+                this->connect();
+            });
         });
-    });
 
     this->signalHolder.managedConnect(
         getApp()->getTwitchPubSub()->pointReward.redeemed, [this](auto &data) {
@@ -253,6 +254,54 @@ void TwitchIrcServer::initialize()
                 }
             });
         });
+
+    this->signalHolder.managedConnect(
+        getApp()->getTwitchPubSub()->pinnedChatUpdates.pinned,
+        [this](const QString &channelId) {
+            auto chan = this->getChannelOrEmptyByID(channelId);
+            postToThread([chan] {
+                if (isAppAboutToQuit())
+                {
+                    return;
+                }
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->refreshPinnedMessage();
+                }
+            });
+        });
+
+    this->signalHolder.managedConnect(
+        getApp()->getTwitchPubSub()->pinnedChatUpdates.unpinned,
+        [this](const QString &channelId) {
+            auto chan = this->getChannelOrEmptyByID(channelId);
+            postToThread([chan] {
+                if (isAppAboutToQuit())
+                {
+                    return;
+                }
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->clearPinnedMessage();
+                }
+            });
+        });
+
+    getSettings()->enableBTTVChannelEmotes.connect(
+        [this] {
+            this->reloadAllBTTVChannelEmotes();
+        },
+        this->signalHolder, false);
+    getSettings()->enableFFZChannelEmotes.connect(
+        [this] {
+            this->reloadAllFFZChannelEmotes();
+        },
+        this->signalHolder, false);
+    getSettings()->enableSevenTVChannelEmotes.connect(
+        [this] {
+            this->reloadAllSevenTVChannelEmotes();
+        },
+        this->signalHolder, false);
 }
 
 void TwitchIrcServer::aboutToQuit()
