@@ -115,6 +115,7 @@ void MessageElement::cloneFrom(const MessageElement &source)
     this->tooltip_ = source.tooltip_;
     this->flags_ = source.flags_;
     this->trailingSpace = source.trailingSpace;
+    this->exhaustiveFlags = source.exhaustiveFlags;
 }
 
 bool MessageElement::matchesFlags(MessageElementFlags contextFlags) const
@@ -125,7 +126,7 @@ bool MessageElement::matchesFlags(MessageElementFlags contextFlags) const
 
 QJsonObject MessageElement::toJson() const
 {
-    return {
+    QJsonObject msg{
         {"trailingSpace"_L1, this->trailingSpace},
         {
             "link"_L1,
@@ -137,6 +138,13 @@ QJsonObject MessageElement::toJson() const
         {"tooltip"_L1, this->tooltip_},
         {"flags"_L1, qmagicenum::enumFlagsName(this->flags_.value())},
     };
+
+    if (this->exhaustiveFlags)
+    {
+        msg["exhaustiveFlags"_L1] = this->exhaustiveFlags;
+    }
+
+    return msg;
 }
 
 // IMAGE
