@@ -27,9 +27,10 @@
 #include "widgets/settingspages/NotificationPage.hpp"
 #include "widgets/settingspages/PluginsPage.hpp"
 
-#include "singletons/Theme.hpp"
+#include "util/SettingsStylesheet.hpp"
 
 #include <QDialogButtonBox>
+#include <QFile>
 #include <QLineEdit>
 
 using namespace Qt::Literals;
@@ -302,7 +303,7 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
         assert(false && "Resources not loaded");
         qCWarning(chatterinoWidget) << "Resources not loaded";
     }
-    QString stylesheet = QString::fromUtf8(styleFile.readAll());
+    auto stylesheet = loadSettingsStylesheet();
 
     if (this->selectedTab_ != nullptr)
     {
