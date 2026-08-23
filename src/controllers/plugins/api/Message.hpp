@@ -38,6 +38,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
 ---@field link? c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
+---@field exhaustive_flags? boolean Whether this message should only be laid out if all its flags exist in the message layout context.
 
 ---@class c2.TextElement : c2.MessageElementBase
 ---@field type "text"
