@@ -11,6 +11,7 @@
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
 
+#    include <QJsonDocument>
 #    include <sol/sol.hpp>
 
 namespace {
