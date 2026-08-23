@@ -38,6 +38,7 @@
                             "21:30"
                         ]
                     },
+                    "exhaustiveFlags": true,
                     "flags": "Timestamp|HeaderTimestamp|AnnouncementHeader",
                     "format": "",
                     "link": {
@@ -51,6 +52,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": true,
                     "flags": "Text|AnnouncementHeader",
                     "link": {
                         "type": "None",
@@ -65,6 +67,7 @@
                     ]
                 },
                 {
+                    "exhaustiveFlags": true,
                     "flags": "AnnouncementHeader",
                     "link": {
                         "type": "None",
