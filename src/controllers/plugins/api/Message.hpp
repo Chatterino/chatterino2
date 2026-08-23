@@ -19,6 +19,7 @@ namespace chatterino::lua::api::message {
 ---@field flags c2.MessageElementFlag The element's flags
 ---@field tooltip string The tooltip (if any)
 ---@field trailing_space boolean Whether to add a trailing space after the element
+---@field exhaustive_flags boolean Whether the element checks all of its flags for existence when performing a layout
 ---@field link c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
 c2.MessageElementBase = {}
 -- ^^^ this is kinda fake - this table doesn't exist in Lua, we only declare it to add methods
