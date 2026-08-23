@@ -158,8 +158,10 @@ enum class MessageElementFlag : int64_t {
 
     // (1LL << 36) is occupied by BadgeSevenTV
 
+    /// The timestamp in the header (i.e. top part of the "Announcement" message)
     HeaderTimestamp = (1LL << 38),
 
+    /// Applied to all elements of the announcement header
     AnnouncementHeader = (1LL << 39),
 
     Default = Timestamp | Badges | Username | BitsStatic | EmoteImage |
