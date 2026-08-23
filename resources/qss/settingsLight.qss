@@ -76,5 +76,5 @@ chatterino--SettingsDialogTab#active {
     font-family: "Segoe UI";
     font-size: 14;
     color: #00aeef; /* Should this be same as accent color? */
+    background-color: #ddd;
 }
-
