@@ -592,7 +592,8 @@ function c2.Menu:insert_separator(before) end
 c2.MessageElementBase = {}
 -- ^^^ this is kinda fake - this table doesn't exist in Lua, we only declare it to add methods
 
---- Returns the JSON representation of the element
+--- Returns the pretty-printed JSON representation of the element.
+--- This is meant for debugging and is subject to change.
 function c2.MessageElementBase:to_json() end
 
 --- Add flags to this element
