@@ -592,6 +592,10 @@ function c2.Menu:insert_separator(before) end
 c2.MessageElementBase = {}
 -- ^^^ this is kinda fake - this table doesn't exist in Lua, we only declare it to add methods
 
+--- Returns the pretty-printed JSON representation of the element.
+--- This is meant for debugging and is subject to change.
+function c2.MessageElementBase:to_json() end
+
 --- Add flags to this element
 ---
 ---@param flags c2.MessageElementFlag
@@ -602,6 +606,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field tooltip? string Tooltip text
 ---@field trailing_space? boolean Whether to add a trailing space after the element (default: true)
 ---@field link? c2.Link An action when clicking on this element. Mention and Link elements don't support this. They manage the link themselves.
+---@field exhaustive_flags? boolean Whether this message should only be laid out if all its flags exist in the message layout context.
 
 ---@class c2.TextElement : c2.MessageElementBase
 ---@field type "text"
