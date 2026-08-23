@@ -166,6 +166,17 @@ NotebookTab::NotebookTab(Notebook *notebook)
                      });
     this->menu_.addAction(this->highlightNewMessagesAction_);
 
+    this->alwaysShowAction_ =
+        new QAction("Always show Tab", &this->menu_);
+    this->alwaysShowAction_->setCheckable(true);
+    this->alwaysShowAction_->setChecked(this->alwaysShow_);
+    QObject::connect(this->alwaysShowAction_, &QAction::triggered,
+                     [this](bool checked) {
+                         this->alwaysShow_ = checked;
+                         this->notebook_->refresh();
+                     });
+    this->menu_.addAction(this->alwaysShowAction_);
+
     this->menu_.addSeparator();
 
     this->notebook_->addNotebookActionsToMenu(&this->menu_);
@@ -828,6 +839,17 @@ void NotebookTab::setHighlightsEnabled(const bool &newVal)
 bool NotebookTab::hasHighlightsEnabled() const
 {
     return this->highlightEnabled_;
+}
+
+void NotebookTab::setAlwaysShow(const bool &newVal)
+{
+    this->alwaysShowAction_->setChecked(newVal);
+    this->alwaysShow_ = newVal;
+}
+
+bool NotebookTab::alwaysShow() const
+{
+    return this->alwaysShow_;
 }
 
 QRect NotebookTab::getDesiredRect() const

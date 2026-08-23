@@ -238,6 +238,8 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
     // Load tab "highlightsEnabled" state
     tab.highlightsEnabled_ = tabObj.value("highlightsEnabled").toBool(true);
 
+    tab.alwaysShow_ = tabObj.value("alwaysShow").toBool(false);
+
     QJsonObject splitRoot = tabObj.value("splits2").toObject();
 
     // Load tab splits

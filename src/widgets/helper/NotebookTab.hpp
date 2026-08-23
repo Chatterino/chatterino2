@@ -82,6 +82,8 @@ public:
     void newHighlightSourceAdded(const ChannelView &channelViewSource);
     bool hasHighlightsEnabled() const;
     HighlightState highlightState() const;
+    void setAlwaysShow(const bool &newVal);
+    bool alwaysShow() const;
 
     void moveAnimated(QPoint targetPos, bool animated = true);
 
@@ -157,6 +159,9 @@ private:
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
     QAction *highlightNewMessagesAction_;
+
+    bool alwaysShow_ = false;
+    QAction *alwaysShowAction_;
 
     bool isLive_{};
     bool isRerun_{};
