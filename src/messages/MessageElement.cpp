@@ -1495,6 +1495,7 @@ std::unique_ptr<MessageElement> LinebreakElement::clone() const
 {
     auto elem = std::make_unique<LinebreakElement>(this->getFlags());
     elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->exhaustiveFlags = this->exhaustiveFlags;
     return elem;
 }
 
