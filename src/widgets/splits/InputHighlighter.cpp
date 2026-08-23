@@ -24,9 +24,9 @@ namespace {
 
 using namespace chatterino;
 
-bool isEmote(TwitchChannel *twitch, const QString &word)
+bool isEmote(TwitchChannel *twitch, QStringView word)
 {
-    EmoteName name{word};
+    EmoteNameView name{word};
     if (twitch)
     {
         if (twitch->bttvEmote(name) || twitch->ffzEmote(name) ||

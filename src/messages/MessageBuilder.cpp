@@ -461,7 +461,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, EmoteNameView name)
 {
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -1876,7 +1876,7 @@ void MessageBuilder::addTextOrEmote(TextState &state, QString string)
     // Emote name: "forsenPuke" - if string in ignoredEmotes
     // Will match emote regardless of source (i.e. bttv, ffz)
     // Emote source + name: "bttv:nyanPls"
-    if (this->tryAppendEmote(state.twitchChannel, {string}))
+    if (this->tryAppendEmote(state.twitchChannel, EmoteNameView{string}))
     {
         // Successfully appended an emote
         return;
@@ -2419,7 +2419,7 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
 }
 
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
-                                       const EmoteName &name)
+                                       EmoteNameView name)
 {
     auto emote = parseEmote(twitchChannel, name);
 

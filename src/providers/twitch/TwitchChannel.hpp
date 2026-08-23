@@ -233,10 +233,10 @@ public:
     void markConnected();
 
     // Emotes
-    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> twitchEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> bttvEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> ffzEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> seventvEmote(EmoteNameView name) const;
 
     std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
