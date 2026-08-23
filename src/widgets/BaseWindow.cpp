@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+#include "util/SettingsStylesheet.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/TitlebarButton.hpp"
@@ -272,16 +273,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     if (this->flags_.has(UseSettingsStylesheet))
     {
-        const auto *themeFile = getTheme()->isLightTheme()
-            ? ":/qss/settingsLight.qss"
-            : ":/qss/settingsDark.qss";
-        QFile styleFile(themeFile);
-        if (!styleFile.open(QFile::ReadOnly))
-        {
-            assert(false && "Resources not loaded");
-            qCWarning(chatterinoWidget) << "Resources not loaded";
-        }
-        QString stylesheet = QString::fromUtf8(styleFile.readAll());
+        QString stylesheet = loadSettingsStylesheet();
         this->setStyleSheet(stylesheet);
         this->overrideBackgroundColor_ = getTheme()->isLightTheme()
             ? QColor("#e6e6e6")
@@ -550,7 +542,11 @@ void BaseWindow::themeChangedEvent()
     }
     else if (this->flags_.has(UseSettingsStylesheet))
     {
-        // Do nothing
+        auto stylesheet = loadSettingsStylesheet();
+        this->setStyleSheet(stylesheet);
+        this->overrideBackgroundColor_ = getTheme()->isLightTheme()
+            ? QColor("#e6e6e6")
+            : QColor("#333333");
     }
     else
     {

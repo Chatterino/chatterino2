@@ -35,6 +35,8 @@ constexpr QStringView LINK_CHATTERINO_FEATURES =
 
 AboutPage::AboutPage()
 {
+    qDebug() << "AboutPage CREATED";
+
     LayoutCreator<AboutPage> layoutCreator(this);
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
@@ -43,21 +45,8 @@ AboutPage::AboutPage()
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
     {
-        QPixmap pixmap;
-        if (getTheme()->isLightTheme()) {
-            pixmap.load(":/settings/aboutlogoLight.png");
-        } else {
-            pixmap.load(":/settings/aboutlogoDark.png");
-        }
-
-        auto logo = layout.emplace<QLabel>().assign(&this->logo_);
-        logo->setPixmap(pixmap);
-        if (pixmap.width() != 0)
-        {
-            logo->setFixedSize(PIXMAP_WIDTH,
-                               PIXMAP_WIDTH * pixmap.height() / pixmap.width());
-        }
-        logo->setScaledContents(true);
+        layout.emplace<QLabel>().assign(&this->logo_);
+        this->loadLogo();
 
         // Version
         auto versionInfo = layout.emplace<QGroupBox>("Version");
@@ -317,6 +306,31 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
         });
 
     form->addRow(a, b);
+}
+
+void AboutPage::loadLogo()
+{
+    QPixmap pixmap;
+    if (getTheme()->isLightTheme()) {
+        pixmap.load(":/settings/aboutlogoLight.png");
+    } else {
+        pixmap.load(":/settings/aboutlogoDark.png");
+    }
+
+    logo_->setPixmap(pixmap);
+    if (pixmap.width() != 0)
+    {
+        logo_->setFixedSize(PIXMAP_WIDTH,
+                           PIXMAP_WIDTH * pixmap.height() / pixmap.width());
+    }
+    logo_->setScaledContents(true);
+}
+
+void AboutPage::themeChangedEvent()
+{
+    SettingsPage::themeChangedEvent();
+
+    loadLogo();
 }
 
 }  // namespace chatterino
