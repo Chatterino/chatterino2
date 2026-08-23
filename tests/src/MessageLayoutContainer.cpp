@@ -245,4 +245,51 @@ INSTANTIATE_TEST_SUITE_P(
             TextDirection::LTR,
         }));
 
+TEST(MessageLayoutContainer, ExhaustiveFlags)
+{
+    MockApplication app;
+
+    MessageLayoutContainer container;
+
+    ImageElement imageElement(Image::getEmpty(), MessageElementFlags{
+                                                     MessageElementFlag::Text,
+                                                 });
+
+    ImageElement imageHeaderElement(Image::getEmpty(),
+                                    MessageElementFlags{
+                                        MessageElementFlag::Text,
+                                        MessageElementFlag::RepliedMessage,
+                                    });
+
+    ASSERT_EQ(container.elements_.size(), 0);
+
+    MessageLayoutContext ctx{
+        .messageColors = {},
+    };
+
+    // No flags matching, nothing was added
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 0);
+
+    ctx.flags = {
+        MessageElementFlag::Text,
+    };
+
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 1);
+
+    imageHeaderElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 2);
+
+    imageElement.exhaustiveFlags = true;
+    imageHeaderElement.exhaustiveFlags = true;
+
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 3);
+
+    // This was not added, because ctx.flags only contains Text, not RepliedMessage
+    imageHeaderElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 3);
+}
+
 }  // namespace chatterino
