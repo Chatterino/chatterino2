@@ -166,8 +166,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
                      });
     this->menu_.addAction(this->highlightNewMessagesAction_);
 
-    this->alwaysShowAction_ =
-        new QAction("Always show Tab", &this->menu_);
+    this->alwaysShowAction_ = new QAction("Always show Tab", &this->menu_);
     this->alwaysShowAction_->setCheckable(true);
     this->alwaysShowAction_->setChecked(this->alwaysShow_);
     QObject::connect(this->alwaysShowAction_, &QAction::triggered,
