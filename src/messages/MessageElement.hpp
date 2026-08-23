@@ -214,7 +214,7 @@ protected:
     /// Checks if the given flags from the layout context matches the flags of this element.
     ///
     /// Takes `exhaustiveFlags` into consideration.
-    bool matchesFlags(const MessageElementFlags &contextFlags) const;
+    bool matchesFlags(MessageElementFlags contextFlags) const;
 
 private:
     Link link_;

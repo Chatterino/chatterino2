@@ -117,7 +117,7 @@ void MessageElement::cloneFrom(const MessageElement &source)
     this->trailingSpace = source.trailingSpace;
 }
 
-bool MessageElement::matchesFlags(const MessageElementFlags &contextFlags) const
+bool MessageElement::matchesFlags(MessageElementFlags contextFlags) const
 {
     return this->exhaustiveFlags ? contextFlags.hasAll(this->getFlags())
                                  : contextFlags.hasAny(this->getFlags());
