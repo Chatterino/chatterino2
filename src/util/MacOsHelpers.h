@@ -1,6 +1,6 @@
 #pragma once
 
-#include <qglobal.h>
+#include <QString>
 
 void chatterinoSetMacOsActivationPolicyProhibited();
 
