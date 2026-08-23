@@ -9,7 +9,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -23,7 +22,6 @@
                             "20:12"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -37,7 +35,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

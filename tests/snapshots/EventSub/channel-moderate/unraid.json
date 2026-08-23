@@ -45,7 +45,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -59,7 +58,6 @@
                             "12:31"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -73,7 +71,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "fallbackColor": "System",
                     "flags": "Text|Mention",
                     "link": {
@@ -92,7 +89,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -111,7 +107,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "fallbackColor": "System",
                     "flags": "Text|Mention",
                     "link": {
@@ -130,7 +125,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

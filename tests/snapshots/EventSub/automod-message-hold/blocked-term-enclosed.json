@@ -57,7 +57,6 @@
                         "name": "",
                         "tooltip": "AutoMod"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
@@ -69,7 +68,6 @@
                 },
                 {
                     "color": "#ff0000ff",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -85,7 +83,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -117,7 +114,6 @@
                 },
                 {
                     "color": "#ff00ff00",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "AutoModAllow",
@@ -133,7 +129,6 @@
                 },
                 {
                     "color": "#ffff0000",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "AutoModDeny",
@@ -174,7 +169,6 @@
             "elements": [
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -191,7 +185,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -205,7 +198,6 @@
                             "12:31"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -218,7 +210,6 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -230,7 +221,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "fallbackColor": "Text",
                     "flags": "Text|Mention",
                     "link": {
@@ -249,7 +239,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

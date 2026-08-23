@@ -34,7 +34,6 @@
                         "name": "",
                         "tooltip": "AutoMod"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
@@ -46,7 +45,6 @@
                 },
                 {
                     "color": "#ff0000ff",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -62,7 +60,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

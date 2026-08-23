@@ -8,7 +8,6 @@
             "elements": [
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -23,7 +22,6 @@
                     ]
                 },
                 {
-                    "exhaustiveFlags": false,
                     "flags": "RepliedMessage",
                     "link": {
                         "type": "None",
@@ -35,7 +33,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "RepliedMessage",
                     "link": {
                         "type": "ViewThread",
@@ -52,7 +49,6 @@
                 },
                 {
                     "color": "#ffff0000",
-                    "exhaustiveFlags": false,
                     "flags": "RepliedMessage",
                     "link": {
                         "type": "UserInfo",
@@ -68,7 +64,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text|RepliedMessage",
                     "link": {
                         "type": "ViewThread",
@@ -89,7 +84,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -103,7 +97,6 @@
                             "20:16"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -116,7 +109,6 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -128,7 +120,6 @@
                 },
                 {
                     "color": "#ffff0000",
-                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -144,7 +135,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -168,7 +158,6 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -188,7 +177,6 @@
                         "name": "FFZEmote",
                         "tooltip": "FFZEmote Tooltip"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -206,7 +194,6 @@
                         "name": "😭",
                         "tooltip": ":sob:<br/>Emoji"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
@@ -218,7 +205,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -234,7 +220,6 @@
                 },
                 {
                     "background": "#ffa0a0a4",
-                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ViewThread",

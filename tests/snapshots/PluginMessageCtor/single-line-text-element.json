@@ -20,7 +20,6 @@
         "elements": [
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -36,7 +35,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -52,7 +50,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -69,7 +66,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -85,7 +81,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text|Timestamp",
                 "link": {
                     "type": "None",
@@ -101,7 +96,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -117,7 +111,6 @@
             },
             {
                 "color": "System",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -133,7 +126,6 @@
             },
             {
                 "color": "Link",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -149,7 +141,6 @@
             },
             {
                 "color": "#ff008000",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",
@@ -165,7 +156,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "None",

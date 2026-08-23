@@ -130,7 +130,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -144,7 +143,6 @@
                             "17:53"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -158,7 +156,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "UserInfo",
@@ -174,7 +171,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -191,7 +187,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "UserInfo",
@@ -207,7 +202,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -252,7 +246,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -266,7 +259,6 @@
                             "17:54"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -280,7 +272,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "UserInfo",
@@ -296,7 +287,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -313,7 +303,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "UserInfo",
@@ -329,7 +318,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -345,7 +333,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -361,7 +348,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -377,7 +363,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

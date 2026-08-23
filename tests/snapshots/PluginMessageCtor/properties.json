@@ -30,7 +30,6 @@
         "elements": [
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "flags": "Text",
                 "link": {
                     "type": "UserInfo",

@@ -8,7 +8,6 @@
             "elements": [
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -25,7 +24,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -39,7 +37,6 @@
                             "11:49"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -52,7 +49,6 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -72,7 +68,6 @@
                         "name": "",
                         "tooltip": "3-Month Subscriber"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeSubscription",
                     "link": {
                         "type": "None",
@@ -93,7 +88,6 @@
                         "name": "",
                         "tooltip": "Hello Neighbor"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -105,7 +99,6 @@
                 },
                 {
                     "color": "#ffff4500",
-                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -127,7 +120,6 @@
                         "name": "🫣",
                         "tooltip": ":face_with_peeking_eye:<br/>Emoji"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
@@ -139,7 +131,6 @@
                 },
                 {
                     "background": "#ffa0a0a4",
-                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
@@ -181,7 +172,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -195,7 +185,6 @@
                             "11:49"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -209,7 +198,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "fallbackColor": "System",
                     "flags": "Text|Mention",
                     "link": {
@@ -228,7 +216,6 @@
                 },
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",

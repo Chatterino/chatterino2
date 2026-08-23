@@ -8,7 +8,6 @@
             "elements": [
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -25,7 +24,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -39,7 +37,6 @@
                             "11:27"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -61,7 +58,6 @@
                         "name": "",
                         "tooltip": "Broadcaster"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
@@ -81,7 +77,6 @@
                         "name": "",
                         "tooltip": "Subscriber"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeSubscription",
                     "link": {
                         "type": "None",
@@ -102,7 +97,6 @@
                         "name": "",
                         "tooltip": "Verified"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -114,7 +108,6 @@
                 },
                 {
                     "color": "#ffcc44ff",
-                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -138,7 +131,6 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -156,7 +148,6 @@
                         "name": "😂",
                         "tooltip": ":joy:<br/>Emoji"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
@@ -176,7 +167,6 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -188,7 +178,6 @@
                 },
                 {
                     "background": "#ffa0a0a4",
-                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

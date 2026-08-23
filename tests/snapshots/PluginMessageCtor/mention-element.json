@@ -14,7 +14,6 @@
         "elements": [
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "fallbackColor": "#ffff0000",
                 "flags": "Text|Mention",
                 "link": {
@@ -33,7 +32,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "fallbackColor": "#ffff0000",
                 "flags": "Text|Mention",
                 "link": {
@@ -52,7 +50,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "fallbackColor": "#ffff0000",
                 "flags": "Text|Mention",
                 "link": {
@@ -71,7 +68,6 @@
             },
             {
                 "color": "Text",
-                "exhaustiveFlags": false,
                 "fallbackColor": "#ffff0000",
                 "flags": "Text|Mention",
                 "link": {

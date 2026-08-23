@@ -8,7 +8,6 @@
             "elements": [
                 {
                     "color": "System",
-                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -25,7 +24,6 @@
                 {
                     "element": {
                         "color": "System",
-                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -39,7 +37,6 @@
                             "20:00"
                         ]
                     },
-                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -52,7 +49,6 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -73,7 +69,6 @@
                         "name": "",
                         "tooltip": "Shared Message from forsen"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeSharedChannel",
                     "link": {
                         "type": "None",
@@ -94,7 +89,6 @@
                         "name": "",
                         "tooltip": "VIP"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
@@ -115,7 +109,6 @@
                         "name": "",
                         "tooltip": "cheer 100"
                     },
-                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -127,7 +120,6 @@
                 },
                 {
                     "color": "#ff00ff7f",
-                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -143,7 +135,6 @@
                 },
                 {
                     "color": "Text",
-                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -165,7 +156,6 @@
                 },
                 {
                     "background": "#ffa0a0a4",
-                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
