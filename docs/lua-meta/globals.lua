@@ -873,6 +873,8 @@ c2.MessageElementFlag = {
     LowercaseLinks = 0,
     RepliedMessage = 0,
     ReplyButton = 0,
+    HeaderTimestamp = 0,
+    AnnouncementHeader = 0,
     Default = 0,
 }
 
