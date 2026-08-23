@@ -161,7 +161,7 @@ public:
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
     BoolSetting showHeaderTimestamps = {
         "/appearance/messages/header/showTimestamps",
-        true,
+        false,
     };
     BoolSetting showAnnouncementHeader = {
         "/appearance/messages/announcements/showHeader",
