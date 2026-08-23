@@ -115,6 +115,7 @@ void MessageElement::cloneFrom(const MessageElement &source)
     this->tooltip_ = source.tooltip_;
     this->flags_ = source.flags_;
     this->trailingSpace = source.trailingSpace;
+    this->exhaustiveFlags = source.exhaustiveFlags;
 }
 
 bool MessageElement::matchesFlags(MessageElementFlags contextFlags) const
