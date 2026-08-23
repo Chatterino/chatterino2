@@ -9,6 +9,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -22,6 +23,7 @@
                             "0:00"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -35,6 +37,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -52,6 +55,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -67,6 +71,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -83,6 +88,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "JumpToMessage",

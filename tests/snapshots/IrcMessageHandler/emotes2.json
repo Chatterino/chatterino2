@@ -8,6 +8,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -24,6 +25,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -37,6 +39,7 @@
                             "21:42"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -49,6 +52,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -60,6 +64,7 @@
                 },
                 {
                     "color": "#ffff0000",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -83,6 +88,7 @@
                         "name": "BTTVEmote",
                         "tooltip": "BTTVEmote Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -102,6 +108,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -157,6 +164,7 @@
                             "flags": "EmoteImage|EmoteText"
                         }
                     ],
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -164,6 +172,7 @@
                     },
                     "text": {
                         "color": "Text",
+                        "exhaustiveFlags": false,
                         "flags": "Misc",
                         "link": {
                             "type": "None",
@@ -194,6 +203,7 @@
                         "name": "😂",
                         "tooltip": ":joy:<br/>Emoji"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
@@ -211,6 +221,7 @@
                         "name": "😂",
                         "tooltip": ":joy:<br/>Emoji"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmojiImage|EmojiText",
                     "link": {
                         "type": "None",
@@ -230,6 +241,7 @@
                         "name": "PogChamp",
                         "tooltip": "PogChamp<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -250,6 +262,7 @@
                         "name": "7TVGlobal",
                         "tooltip": "7TVGlobal Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -269,6 +282,7 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -288,6 +302,7 @@
                         "name": "FFZEmote",
                         "tooltip": "FFZEmote Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -307,6 +322,7 @@
                         "name": "FFZGlobal",
                         "tooltip": "FFZGlobal Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -318,6 +334,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

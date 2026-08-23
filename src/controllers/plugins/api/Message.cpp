@@ -590,6 +590,10 @@ void createUserType(sol::table &c2)
         "type", sol::property([](const ElementRef &el) {
             return el.cref().type();
         }),
+        "to_json",
+        [](const ElementRef &el) {
+            return QJsonDocument(el.cref().toJson()).toJson();
+        },
         "flags", sol::property([](const ElementRef &el) {
             return el.cref().getFlags().value();
         }),

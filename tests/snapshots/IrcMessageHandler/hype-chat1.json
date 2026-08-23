@@ -8,6 +8,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -24,6 +25,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -37,6 +39,7 @@
                             "16:43"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -49,6 +52,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -68,6 +72,7 @@
                         "name": "",
                         "tooltip": "Predicted Blue (1)"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgePredictions",
                     "link": {
                         "type": "None",
@@ -88,6 +93,7 @@
                         "name": "",
                         "tooltip": "TwitchCon 2020 - Amsterdam"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -99,6 +105,7 @@
                 },
                 {
                     "color": "#ff9da364",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -114,6 +121,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -136,6 +144,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

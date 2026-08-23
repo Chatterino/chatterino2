@@ -9,6 +9,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -25,6 +26,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -38,6 +40,7 @@
                             "2:44"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -50,6 +53,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -70,6 +74,7 @@
                         "name": "",
                         "tooltip": "Bits Leader 3"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -81,6 +86,7 @@
                 },
                 {
                     "color": "#ff0000ff",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -104,6 +110,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsStatic",
                     "link": {
                         "type": "None",
@@ -123,6 +130,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
@@ -134,6 +142,7 @@
                 },
                 {
                     "color": "#ff979797",
+                    "exhaustiveFlags": false,
                     "flags": "BitsAmount",
                     "link": {
                         "type": "None",
@@ -149,6 +158,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -172,6 +182,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsStatic",
                     "link": {
                         "type": "None",
@@ -191,6 +202,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
@@ -202,6 +214,7 @@
                 },
                 {
                     "color": "#ff979797",
+                    "exhaustiveFlags": false,
                     "flags": "BitsAmount",
                     "link": {
                         "type": "None",
@@ -225,6 +238,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsStatic",
                     "link": {
                         "type": "None",
@@ -244,6 +258,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
@@ -255,6 +270,7 @@
                 },
                 {
                     "color": "#ff979797",
+                    "exhaustiveFlags": false,
                     "flags": "BitsAmount",
                     "link": {
                         "type": "None",
@@ -278,6 +294,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsStatic",
                     "link": {
                         "type": "None",
@@ -297,6 +314,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
@@ -308,6 +326,7 @@
                 },
                 {
                     "color": "#ff979797",
+                    "exhaustiveFlags": false,
                     "flags": "BitsAmount",
                     "link": {
                         "type": "None",
@@ -331,6 +350,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsStatic",
                     "link": {
                         "type": "None",
@@ -350,6 +370,7 @@
                         "name": "cheer emote",
                         "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
@@ -361,6 +382,7 @@
                 },
                 {
                     "color": "#ff979797",
+                    "exhaustiveFlags": false,
                     "flags": "BitsAmount",
                     "link": {
                         "type": "None",
@@ -376,6 +398,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -392,6 +415,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

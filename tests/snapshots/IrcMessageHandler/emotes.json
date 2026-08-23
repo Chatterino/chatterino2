@@ -8,6 +8,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -24,6 +25,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -37,6 +39,7 @@
                             "10:31"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -49,6 +52,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -68,6 +72,7 @@
                         "name": "",
                         "tooltip": "Watching without audio"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
@@ -79,6 +84,7 @@
                 },
                 {
                     "color": "#ffdaa521",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -102,6 +108,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -121,6 +128,7 @@
                         "name": "Keepo",
                         "tooltip": "Keepo<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -140,6 +148,7 @@
                         "name": "PogChamp",
                         "tooltip": "PogChamp<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -151,6 +160,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

@@ -136,6 +136,7 @@ QJsonObject MessageElement::toJson() const
         },
         {"tooltip"_L1, this->tooltip_},
         {"flags"_L1, qmagicenum::enumFlagsName(this->flags_.value())},
+        {"exhaustiveFlags"_L1, this->exhaustiveFlags},
     };
 }
 

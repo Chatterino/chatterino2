@@ -9,6 +9,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -22,6 +23,7 @@
                             "0:00"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -35,6 +37,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelPointReward",
                     "link": {
                         "type": "None",
@@ -50,6 +53,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelPointReward",
                     "link": {
                         "type": "None",
@@ -65,6 +69,7 @@
                     ]
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|ChannelPointReward",
                     "image": "https://chatterino.com/reward1x.png",
                     "link": {
@@ -77,6 +82,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelPointReward",
                     "link": {
                         "type": "None",
@@ -91,6 +97,7 @@
                     ]
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ChannelPointReward",
                     "link": {
                         "type": "None",
@@ -102,6 +109,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -118,6 +126,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -131,6 +140,7 @@
                             "12:35"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -143,6 +153,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -154,6 +165,7 @@
                 },
                 {
                     "color": "#ffff0000",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -169,6 +181,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -185,6 +198,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

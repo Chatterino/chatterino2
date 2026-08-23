@@ -13,6 +13,7 @@
         "displayName": "",
         "elements": [
             {
+                "exhaustiveFlags": false,
                 "flags": "RepliedMessage",
                 "link": {
                     "type": "None",
@@ -23,6 +24,7 @@
                 "type": "ReplyCurveElement"
             },
             {
+                "exhaustiveFlags": false,
                 "flags": "RepliedMessage",
                 "link": {
                     "type": "None",
@@ -33,6 +35,7 @@
                 "type": "ReplyCurveElement"
             },
             {
+                "exhaustiveFlags": false,
                 "flags": "RepliedMessage",
                 "link": {
                     "type": "None",
@@ -43,6 +46,7 @@
                 "type": "ReplyCurveElement"
             },
             {
+                "exhaustiveFlags": false,
                 "flags": "RepliedMessage",
                 "link": {
                     "type": "None",

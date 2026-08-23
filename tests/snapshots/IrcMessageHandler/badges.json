@@ -8,6 +8,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -24,6 +25,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -37,6 +39,7 @@
                             "16:40"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -49,6 +52,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -66,6 +70,7 @@
                         "name": "chatterino:Chatterino",
                         "tooltip": "Chatterino badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeChatterino",
                     "link": {
                         "type": "None",
@@ -84,6 +89,7 @@
                         "name": "frankerfacez:FFZ1",
                         "tooltip": "FFZ1 badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeFfz",
                     "link": {
                         "type": "None",
@@ -102,6 +108,7 @@
                         "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeFfz",
                     "link": {
                         "type": "None",
@@ -120,6 +127,7 @@
                         "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeFfz",
                     "link": {
                         "type": "None",
@@ -138,6 +146,7 @@
                         "name": "frankerfacez:FFZ2",
                         "tooltip": "FFZ2 badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeFfz",
                     "link": {
                         "type": "None",
@@ -156,6 +165,7 @@
                         "name": "betterttv:pro",
                         "tooltip": "BTTV Pro"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeBttv",
                     "link": {
                         "type": "None",
@@ -174,6 +184,7 @@
                         "name": "7tv:7TV badge name",
                         "tooltip": "7TV badge"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeSevenTV",
                     "link": {
                         "type": "None",
@@ -185,6 +196,7 @@
                 },
                 {
                     "color": "#ffff0000",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -200,6 +212,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -215,6 +228,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",

@@ -8,6 +8,7 @@
             "elements": [
                 {
                     "color": "System",
+                    "exhaustiveFlags": false,
                     "flags": "ChannelName",
                     "link": {
                         "type": "JumpToChannel",
@@ -24,6 +25,7 @@
                 {
                     "element": {
                         "color": "System",
+                        "exhaustiveFlags": false,
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -37,6 +39,7 @@
                             "14:27"
                         ]
                     },
+                    "exhaustiveFlags": false,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -49,6 +52,7 @@
                     "type": "TimestampElement"
                 },
                 {
+                    "exhaustiveFlags": false,
                     "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
@@ -69,6 +73,7 @@
                         "name": "",
                         "tooltip": "Shared Message from twitchdev"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "BadgeSharedChannel",
                     "link": {
                         "type": "None",
@@ -80,6 +85,7 @@
                 },
                 {
                     "color": "#ffff0000",
+                    "exhaustiveFlags": false,
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -103,6 +109,7 @@
                         "name": "Kappa",
                         "tooltip": "Kappa<br>Twitch Emote"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -114,6 +121,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -137,6 +145,7 @@
                         "name": "BTTVGlobal",
                         "tooltip": "BTTVGlobal Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -148,6 +157,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -172,6 +182,7 @@
                         "name": "7TVGlobal",
                         "tooltip": "7TVGlobal Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -183,6 +194,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": false,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -206,6 +218,7 @@
                         "name": "FFZGlobal",
                         "tooltip": "FFZGlobal Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -225,6 +238,7 @@
                         "name": "BTTVTwitchDev",
                         "tooltip": "BTTVTwitchDev Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -245,6 +259,7 @@
                         "name": "7TVTwitchDev",
                         "tooltip": "7TVTwitchDev Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -264,6 +279,7 @@
                         "name": "FFZTwitchDev",
                         "tooltip": "FFZTwitchDev Tooltip"
                     },
+                    "exhaustiveFlags": false,
                     "flags": "EmoteImage|EmoteText",
                     "link": {
                         "type": "None",
@@ -275,6 +291,7 @@
                 },
                 {
                     "background": "#ffa0a0a4",
+                    "exhaustiveFlags": false,
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
