@@ -12,6 +12,8 @@
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 
+#include <span>
+
 namespace {
 
 using namespace chatterino;
