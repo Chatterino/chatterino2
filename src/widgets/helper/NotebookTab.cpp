@@ -840,7 +840,7 @@ bool NotebookTab::hasHighlightsEnabled() const
     return this->highlightEnabled_;
 }
 
-void NotebookTab::setAlwaysShow(const bool &newVal)
+void NotebookTab::setAlwaysShow(bool newVal)
 {
     this->alwaysShowAction_->setChecked(newVal);
     this->alwaysShow_ = newVal;

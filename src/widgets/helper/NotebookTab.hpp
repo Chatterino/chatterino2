@@ -82,7 +82,7 @@ public:
     void newHighlightSourceAdded(const ChannelView &channelViewSource);
     bool hasHighlightsEnabled() const;
     HighlightState highlightState() const;
-    void setAlwaysShow(const bool &newVal);
+    void setAlwaysShow(bool newVal);
     bool alwaysShow() const;
 
     void moveAnimated(QPoint targetPos, bool animated = true);
