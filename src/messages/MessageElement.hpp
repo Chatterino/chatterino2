@@ -10,7 +10,6 @@
 #include "messages/MessageColor.hpp"
 #include "providers/links/LinkInfo.hpp"
 #include "singletons/Fonts.hpp"
-#include "util/DebugCount.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -157,6 +156,12 @@ enum class MessageElementFlag : int64_t {
     ReplyButton = (1LL << 33),
 
     // (1LL << 36) is occupied by BadgeSevenTV
+
+    /// The timestamp in the header (i.e. top part of the "Announcement" message)
+    HeaderTimestamp = (1LL << 38),
+
+    /// Applied to all elements of the announcement header
+    AnnouncementHeader = (1LL << 39),
 
     Default = Timestamp | Badges | Username | BitsStatic | EmoteImage |
               BitsAmount | Text | AlwaysShow,
@@ -667,11 +672,19 @@ protected:
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {
+protected:
+    struct CloneConstructorTag {
+    };
+
 public:
     static constexpr std::string_view TYPE = "timestamp";
 
     TimestampElement();
     TimestampElement(QTime time_);
+    TimestampElement(QTime time_, MessageElementFlags extraFlags);
+    /// This is intended only for cloning the element.
+    TimestampElement(TimestampElement::CloneConstructorTag, QTime time_,
+                     MessageElementFlags flags);
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,

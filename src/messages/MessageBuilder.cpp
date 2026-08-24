@@ -1682,6 +1682,9 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     auto userID = tags.getOrEmpty("user-id");
 
     MessageBuilder builder;
+    // calculate timestamp
+    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+
     builder.parseUsernameColor(tags, userID);
     builder->userID = userID;
 
@@ -1743,8 +1746,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     // reply threads
     builder.parseThread(content, tags, channel, thread, parent);
 
-    // timestamp
-    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+    // add timestamp
     builder.emplace<TimestampElement>(builder->serverReceivedTime.time());
 
     bool shouldAddModerationElements = [&] {
@@ -2079,6 +2081,29 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags)
                         *color, qmagicenum::CASE_INSENSITIVE)
                         .value_or(HelixAnnouncementColor::Primary);
             }
+
+            this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time(),
+                    MessageElementFlags{
+                        MessageElementFlag::HeaderTimestamp,
+                        MessageElementFlag::AnnouncementHeader,
+                    })
+                ->exhaustiveFlags = true;
+
+            this->emplace<TextElement>(
+                    "Announcement",
+                    MessageElementFlags({
+                        MessageElementFlag::Text,
+                        MessageElementFlag::AnnouncementHeader,
+                    }),
+                    MessageColor::System, FontStyle::ChatMediumBold)
+                ->exhaustiveFlags = true;
+
+            this
+                ->emplace<LinebreakElement>(MessageElementFlags{
+                    MessageElementFlag::AnnouncementHeader,
+                })
+                ->exhaustiveFlags = true;
         }
         else if (messageType == "viewermilestone" ||
                  messageType == "modiversary")

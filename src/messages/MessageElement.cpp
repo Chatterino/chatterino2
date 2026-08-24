@@ -1330,6 +1330,24 @@ TimestampElement::TimestampElement(QTime time)
     assert(this->element_ != nullptr);
 }
 
+TimestampElement::TimestampElement(QTime time,
+                                   const MessageElementFlags extraFlags)
+    : MessageElement(extraFlags | MessageElementFlag::Timestamp)
+    , time_(time)
+    , element_(this->formatTime(time))
+{
+    assert(this->element_ != nullptr);
+}
+
+TimestampElement::TimestampElement(TimestampElement::CloneConstructorTag,
+                                   QTime time, const MessageElementFlags flags)
+    : MessageElement(flags)
+    , time_(time)
+    , element_(this->formatTime(time))
+{
+    assert(this->element_ != nullptr);
+}
+
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       const MessageLayoutContext &ctx)
 {
@@ -1352,9 +1370,8 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
-    auto *text =
-        new TextElement(format, MessageElementFlag::Timestamp,
-                        MessageColor::System, FontStyle::TimestampMedium);
+    auto *text = new TextElement(format, this->getFlags(), MessageColor::System,
+                                 FontStyle::TimestampMedium);
     text->setLink(this->getLink());
     text->setTooltip(this->getTooltip());
     return text;
@@ -1385,7 +1402,8 @@ std::string_view TimestampElement::type() const
 
 std::unique_ptr<MessageElement> TimestampElement::clone() const
 {
-    auto elem = std::make_unique<TimestampElement>(this->time_);
+    auto elem = std::make_unique<TimestampElement>(
+        TimestampElement::CloneConstructorTag{}, this->time_, this->getFlags());
     elem->cloneFrom(*this);
     return elem;
 }
@@ -1477,6 +1495,7 @@ std::unique_ptr<MessageElement> LinebreakElement::clone() const
 {
     auto elem = std::make_unique<LinebreakElement>(this->getFlags());
     elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->exhaustiveFlags = this->exhaustiveFlags;
     return elem;
 }
 
