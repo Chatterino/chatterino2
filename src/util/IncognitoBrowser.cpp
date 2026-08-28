@@ -73,11 +73,22 @@ namespace chatterino::incognitobrowser::detail {
 QString getPrivateSwitch(const QString &browserExecutable)
 {
     static auto switches = std::vector<std::pair<QString, QString>>{
-        {"firefox", "-private-window"},  {"librewolf", "-private-window"},
-        {"waterfox", "-private-window"}, {"icecat", "-private-window"},
-        {"chrome", "-incognito"},        {"chromium", "-incognito"},
-        {"vivaldi", "-incognito"},       {"opera", "-incognito"},
-        {"brave", "-incognito"},         {"edge", "-inprivate"},
+        {"firefox", "-private-window"},
+        {"librewolf", "-private-window"},
+        {"waterfox", "-private-window"},
+        {"icecat", "-private-window"},
+        {"chrome", "-incognito"},
+        {"google chrome", "-incognito"},
+        {"google chrome beta", "-incognito"},
+        {"google chrome canary", "-incognito"},
+        {"google-chrome-stable", "-incognito"},
+        {"chromium", "-incognito"},
+        {"vivaldi", "-incognito"},
+        {"opera", "-incognito"},
+        {"brave", "-incognito"},
+        {"brave browser", "-incognito"},
+        {"msedge", "-inprivate"},
+        {"microsoft edge", "-inprivate"},
     };
 
     // the browser executable may be a full path, strip it to its basename and
@@ -88,10 +99,16 @@ QString getPrivateSwitch(const QString &browserExecutable)
 
     for (const auto &switch_ : switches)
     {
-        if (lowercasedBrowserExecutable.contains(switch_.first))
+        if (lowercasedBrowserExecutable == switch_.first)
         {
             return switch_.second;
         }
+    }
+
+    // catch all mozilla distributed variants
+    if (lowercasedBrowserExecutable.startsWith("firefox"))
+    {
+        return "-private-window";
     }
 
     // couldn't match any browser -> unknown browser
