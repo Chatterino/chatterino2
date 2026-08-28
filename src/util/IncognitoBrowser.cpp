@@ -73,7 +73,6 @@ namespace chatterino::incognitobrowser::detail {
 QString getPrivateSwitch(const QString &browserExecutable)
 {
     static auto switches = std::vector<std::pair<QString, QString>>{
-        {"firefox", "-private-window"},
         {"librewolf", "-private-window"},
         {"waterfox", "-private-window"},
         {"icecat", "-private-window"},
