@@ -135,6 +135,8 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     this->updateWordTypeMaskListener.add(settings.showTimestamps);
+    this->updateWordTypeMaskListener.add(settings.showHeaderTimestamps);
+    this->updateWordTypeMaskListener.add(settings.showAnnouncementHeader);
     this->updateWordTypeMaskListener.add(settings.showBadgesGlobalAuthority);
     this->updateWordTypeMaskListener.add(settings.showBadgesPredictions);
     this->updateWordTypeMaskListener.add(settings.showBadgesChannelAuthority);
@@ -216,6 +218,14 @@ void WindowManager::updateWordTypeMask()
     if (settings->showTimestamps)
     {
         flags.set(MEF::Timestamp);
+    }
+    if (settings->showHeaderTimestamps)
+    {
+        flags.set(MEF::HeaderTimestamp);
+    }
+    if (settings->showAnnouncementHeader)
+    {
+        flags.set(MEF::AnnouncementHeader);
     }
 
     // emotes
@@ -374,7 +384,7 @@ Window &WindowManager::createWindow(WindowType type,
     }
 
     this->windows_.push_back(window);
-    if (args.parent)
+    if (args.show)
     {
         window->show();
     }
@@ -700,68 +710,11 @@ void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
     obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
 
     // splits
-    QJsonObject splits;
-
-    WindowManager::encodeNodeRecursively(tab->buildDescriptor(), splits);
-
-    obj.insert("splits2", splits);
-}
-
-void WindowManager::encodeNodeRecursively(const NodeDescriptor &descriptor,
-                                          QJsonObject &obj)
-{
-    std::visit(variant::Overloaded{
-                   [&](const SplitNodeDescriptor &split) {
-                       obj.insert("type", "split");
-                       obj.insert("flexh", split.flexH_);
-                       obj.insert("flexv", split.flexV_);
-
-                       obj.insert("moderationMode", split.moderationMode_);
-
-                       QJsonObject data{{"type"_L1, split.type_}};
-                       if (!split.channelName_.isEmpty())
-                       {
-                           data.insert("name"_L1, split.channelName_);
-                       }
-                       obj.insert("data", data);
-
-                       QJsonArray filters;
-                       WindowManager::encodeFilters(split.filters_, filters);
-                       obj.insert("filters", filters);
-
-                       if (split.spellCheckOverride.has_value())
-                       {
-                           obj["checkSpelling"] = *split.spellCheckOverride;
-                       }
-                   },
-                   [&](const ContainerNodeDescriptor &container) {
-                       obj.insert("type", container.vertical_ ? "vertical"
-                                                              : "horizontal");
-                       obj.insert("flexh", container.flexH_);
-                       obj.insert("flexv", container.flexV_);
-
-                       QJsonArray itemsArr;
-                       for (const auto &n : container.items_)
-                       {
-                           QJsonObject subObj;
-                           WindowManager::encodeNodeRecursively(n, subObj);
-                           itemsArr.append(subObj);
-                       }
-                       obj.insert("items", itemsArr);
-                   },
-               },
-               descriptor);
-}
-
-void WindowManager::encodeFilters(std::span<const QUuid> filters,
-                                  QJsonArray &arr)
-{
-    assertInGuiThread();
-
-    for (const auto &f : filters)
-    {
-        arr.append(f.toString(QUuid::WithoutBraces));
-    }
+    obj.insert("splits2", std::visit(
+                              [](auto &&it) {
+                                  return it.toJson();
+                              },
+                              tab->buildDescriptor()));
 }
 
 void WindowManager::closeAll()

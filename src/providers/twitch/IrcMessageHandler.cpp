@@ -402,6 +402,7 @@ void IrcMessageHandler::parsePrivMessageInto(
         auto badgesTag = message->tag("badges");
         if (badgesTag.isValid())
         {
+            // TODO: We should not update mod or vip status from recent messages
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
@@ -810,7 +811,8 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
         else if (msgType == "announcement")
         {
-            messageText = "Announcement";
+            // Early out - announcement headers are added in MessageBuilder
+            return;
         }
         else if (msgType == "subgift")
         {

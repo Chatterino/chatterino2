@@ -15,6 +15,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
+#include "messages/AsciiArt.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
@@ -461,7 +462,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     });
 }
 
-EmotePtr parseEmote(TwitchChannel *twitchChannel, const EmoteName &name)
+EmotePtr parseEmote(TwitchChannel *twitchChannel, EmoteNameView name)
 {
     // Emote order:
     //  - FrankerFaceZ Channel
@@ -1682,6 +1683,9 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     auto userID = tags.getOrEmpty("user-id");
 
     MessageBuilder builder;
+    // calculate timestamp
+    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+
     builder.parseUsernameColor(tags, userID);
     builder->userID = userID;
 
@@ -1743,8 +1747,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     // reply threads
     builder.parseThread(content, tags, channel, thread, parent);
 
-    // timestamp
-    builder->serverReceivedTime = calculateMessageTime(ircMessage);
+    // add timestamp
     builder.emplace<TimestampElement>(builder->serverReceivedTime.time());
 
     bool shouldAddModerationElements = [&] {
@@ -1801,6 +1804,11 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             return first.start == second.start;
         });
     twitchEmotes.erase(uniqueEmotes.begin(), uniqueEmotes.end());
+
+    if (getSettings()->wrapAsciiArt && isAsciiArt(content))
+    {
+        builder->flags.set(MessageFlag::AsciiArt);
+    }
 
     // words
     QStringList splits = content.split(' ');
@@ -1874,7 +1882,7 @@ void MessageBuilder::addTextOrEmote(TextState &state, QString string)
     // Emote name: "forsenPuke" - if string in ignoredEmotes
     // Will match emote regardless of source (i.e. bttv, ffz)
     // Emote source + name: "bttv:nyanPls"
-    if (this->tryAppendEmote(state.twitchChannel, {string}))
+    if (this->tryAppendEmote(state.twitchChannel, EmoteNameView{string}))
     {
         // Successfully appended an emote
         return;
@@ -2079,6 +2087,29 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags)
                         *color, qmagicenum::CASE_INSENSITIVE)
                         .value_or(HelixAnnouncementColor::Primary);
             }
+
+            this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time(),
+                    MessageElementFlags{
+                        MessageElementFlag::HeaderTimestamp,
+                        MessageElementFlag::AnnouncementHeader,
+                    })
+                ->exhaustiveFlags = true;
+
+            this->emplace<TextElement>(
+                    "Announcement",
+                    MessageElementFlags({
+                        MessageElementFlag::Text,
+                        MessageElementFlag::AnnouncementHeader,
+                    }),
+                    MessageColor::System, FontStyle::ChatMediumBold)
+                ->exhaustiveFlags = true;
+
+            this
+                ->emplace<LinebreakElement>(MessageElementFlags{
+                    MessageElementFlag::AnnouncementHeader,
+                })
+                ->exhaustiveFlags = true;
         }
         else if (messageType == "viewermilestone" ||
                  messageType == "modiversary")
@@ -2394,7 +2425,7 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
 }
 
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
-                                       const EmoteName &name)
+                                       EmoteNameView name)
 {
     auto emote = parseEmote(twitchChannel, name);
 

@@ -117,7 +117,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     for (int i = 2; i < words.length(); i++)
     {
         {  // Twitch emote
-            auto it = accemotes->find({words[i]});
+            auto it = accemotes->find(EmoteNameView{words[i]});
             if (it != accemotes->end())
             {
                 b.emplace<EmoteElement>(it->second, MessageElementFlag::Emote);
@@ -126,10 +126,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         }  // Twitch emote
 
         {  // bttv/ffz emote
-            emote = bttvemotes->emote({words[i]});
+            emote = bttvemotes->emote(EmoteNameView{words[i]});
             if (!emote)
             {
-                emote = ffzemotes->emote({words[i]});
+                emote = ffzemotes->emote(EmoteNameView{words[i]});
             }
             // TODO: Load 7tv global emotes
             if (emote)

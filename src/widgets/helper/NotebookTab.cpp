@@ -36,6 +36,8 @@
 
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
+
 namespace chatterino {
 namespace {
 // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
@@ -116,7 +118,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction("Rename Tab", [this]() {
+    this->menu_.addAction(u"Rename Tab…"_s, this, [this]() {
         this->showRenameDialog();
     });
 

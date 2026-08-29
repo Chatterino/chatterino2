@@ -5,9 +5,14 @@
 # Adding yourself? Copy and paste this template at the bottom of this file and fill in the fields in a PR!
 # Name | Link | Avatar (Loaded as a resource, avatars are not required).
 
-# Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128).
+# Name should preferably be your GitHub username, but can be another alias you use online (e.g. your Twitch username).
+# If you use a name that's not your GitHub username, please clarify in the pull request description.
+#
+# Link should be a link to your GitHub profile.
+#
+# Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128), and may be a PNG or JPG.
+# Keep the avatar under 10KB.
 # Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng (if the file is in png format).
-# Contributor is what we use for someone who has contributed in general (like sent a programming-related PR).
 
 @header Maintainers
 
@@ -51,6 +56,13 @@ Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg
 matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg
 Karar Al-Remahy | https://github.com/KararTY | :/avatars/kararty.png
 Talen | https://github.com/talneoran |
+Defman21 | https://github.com/Defman21 |
+vilgotf | https://github.com/vilgotf |
+Ian321 | https://github.com/Ian321 |
+Yardanico | https://github.com/Yardanico |
+huti26 | https://github.com/huti26 |
+chrisduerr | https://github.com/chrisduerr |
+ynot01 | https://github.com/ynot01 | :/avatars/ynot01.png
 SLCH | https://github.com/SLCH | :/avatars/slch.png
 ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png
 xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png
@@ -99,17 +111,6 @@ Nevicar | https://github.com/Nevicar | :/avatars/nevicar.png
 Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 tlos | https://github.com/realtlos | :/avatars/realtlos.jpg
 ArmpitsLover420 | https://github.com/JEC15 | :/avatars/armpitslover420.jpg
+voiceofgrog | https://github.com/voiceofgrog |
 
-# If you are a contributor add yourself above this line
-
-@header Documentation
-
-Defman21 | https://github.com/Defman21 |
-vilgotf | https://github.com/vilgotf |
-Ian321 | https://github.com/Ian321 |
-Yardanico | https://github.com/Yardanico |
-huti26 | https://github.com/huti26 |
-chrisduerr | https://github.com/chrisduerr |
-ynot01 | https://github.com/ynot01 | :/avatars/ynot01.png
-
-# Otherwise add yourself right above this one
+# Add yourself to the list above this comment

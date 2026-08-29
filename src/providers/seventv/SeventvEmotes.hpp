@@ -106,7 +106,7 @@ public:
     SeventvEmotes();
 
     std::shared_ptr<const EmoteMap> globalEmotes() const;
-    std::optional<EmotePtr> globalEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> globalEmote(EmoteNameView name) const;
     void loadGlobalEmotes();
     void setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes);
     static void loadChannelEmotes(

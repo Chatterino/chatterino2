@@ -814,7 +814,7 @@ void Split::openChannelInStreamlink(const QString channelName)
 {
     try
     {
-        openStreamlinkForChannel(channelName);
+        openStreamlinkForChannelOrUrl(channelName);
     }
     catch (const Exception &ex)
     {
@@ -828,7 +828,7 @@ void Split::openChannelInCustomPlayer(const QString channelName)
     openInCustomPlayer(channelName);
 }
 
-IndirectChannel Split::getIndirectChannel()
+IndirectChannel Split::getIndirectChannel() const
 {
     return this->channel_;
 }
@@ -1367,13 +1367,13 @@ SplitDescriptor Split::buildDescriptor() const
     descriptor.filters_ = this->getFilters();
     descriptor.spellCheckOverride = this->checkSpellingOverride();
 
-    auto chan = this->getChannel();
-    descriptor.type_ = qmagicenum::enumNameString(chan->getType());
-    switch (chan->getType())
+    auto chan = this->getIndirectChannel();
+    descriptor.type_ = qmagicenum::enumNameString(chan.getType());
+    switch (chan.getType())
     {
         case Channel::Type::Twitch:
         case Channel::Type::Misc:
-            descriptor.channelName_ = chan->getName();
+            descriptor.channelName_ = chan.get()->getName();
             break;
 
         case Channel::Type::TwitchWhispers:
