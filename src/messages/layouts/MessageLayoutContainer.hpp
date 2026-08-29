@@ -386,6 +386,7 @@ private:
 
 #ifdef FRIEND_TEST
     FRIEND_TEST(MessageLayoutContainerTest, RtlReordering);
+    FRIEND_TEST(MessageLayoutContainer, ExhaustiveFlags);
 #endif
 };
 

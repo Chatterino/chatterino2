@@ -537,6 +537,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+
+    SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show announcement header",
+                            s.showAnnouncementHeader)
+        ->addTo(layout);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},

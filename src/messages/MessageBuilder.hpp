@@ -271,7 +271,7 @@ private:
     void addTextOrEmote(TextState &state, QString string);
 
     Outcome tryAppendCheermote(TextState &state, const QString &string);
-    Outcome tryAppendEmote(TwitchChannel *twitchChannel, const EmoteName &name);
+    Outcome tryAppendEmote(TwitchChannel *twitchChannel, EmoteNameView name);
 
     bool isEmpty() const;
     MessageElement &back();
