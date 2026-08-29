@@ -147,7 +147,6 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Gui
     Network
     Svg
-    SvgWidgets
     Concurrent
     )
 if(CHATTERINO_ALLOW_PRIVATE_QT_API)
