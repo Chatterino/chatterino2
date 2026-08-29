@@ -327,6 +327,8 @@ set(SOURCE_FILES
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
+        messages/AsciiArt.cpp
+        messages/AsciiArt.hpp
         messages/Emote.cpp
         messages/Emote.hpp
         messages/Image.cpp

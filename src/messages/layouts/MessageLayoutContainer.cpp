@@ -28,6 +28,8 @@ using namespace chatterino;
 
 constexpr QMargins MARGIN{8, 4, 8, 4};
 constexpr qreal COMPACT_EMOTES_OFFSET = 4;
+/// Target width used to match Twitch's desktop chat layout.
+constexpr qreal ASCII_ART_WIDTH = 340.0;
 
 int maxUncollapsedLines()
 {
@@ -51,7 +53,12 @@ void MessageLayoutContainer::beginLayout(qreal width, float scale,
     this->lineHeight_ = 0;
     this->charIndex_ = 0;
 
-    this->width_ = width;
+    const auto horizontalMargin =
+        int(MARGIN.left() * scale) + int(MARGIN.right() * scale);
+    this->width_ =
+        flags.has(MessageFlag::AsciiArt)
+            ? std::min(width, (ASCII_ART_WIDTH * scale) + horizontalMargin)
+            : width;
     this->height_ = 0;
     this->scale_ = scale;
     this->imageScale_ = imageScale;

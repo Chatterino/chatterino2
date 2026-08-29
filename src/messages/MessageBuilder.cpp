@@ -15,6 +15,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
+#include "messages/AsciiArt.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
@@ -1803,6 +1804,11 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             return first.start == second.start;
         });
     twitchEmotes.erase(uniqueEmotes.begin(), uniqueEmotes.end());
+
+    if (getSettings()->wrapAsciiArt && isAsciiArt(content))
+    {
+        builder->flags.set(MessageFlag::AsciiArt);
+    }
 
     // words
     QStringList splits = content.split(' ');

@@ -100,6 +100,30 @@ using TestParam = std::tuple<QString, QString, TextDirection>;
 
 namespace chatterino {
 
+TEST(AsciiArtLayout, LimitsTheMessageWidth)
+{
+    MockApplication mockApplication;
+    MessageLayoutContainer container;
+    MessageLayoutContext ctx{
+        .messageColors = {},
+        .flags = MessageElementFlag::Text,
+        .width = 1000,
+        .scale = 1.0F,
+        .imageScale = 1.0F,
+    };
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale, {});
+
+    EXPECT_GT(container.remainingWidth(), 340);
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale,
+                          MessageFlag::AsciiArt);
+    EXPECT_EQ(container.remainingWidth(), 340);
+
+    TextElement art(QString(100, QChar(0x28FF)), MessageElementFlag::Text);
+    art.addToContainer(container, ctx);
+
+    container.endLayout();
+}
+
 class MessageLayoutContainerTest : public ::testing::TestWithParam<TestParam>
 {
 public:

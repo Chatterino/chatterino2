@@ -188,6 +188,10 @@ public:
                                      false};
     EnumSetting<MessageOverflow> messageOverflow = {
         "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
+    BoolSetting wrapAsciiArt = {
+        "/appearance/messages/wrapAsciiArt",
+        false,
+    };
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting fadeMessageHistory = {"/appearance/messages/fadeMessageHistory",

@@ -27,6 +27,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BasicPubSub.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/AsciiArt.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SeventvEventAPI.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BttvLiveUpdates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Updates.cpp
