@@ -7,7 +7,6 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
 
 namespace chatterino::highlights {
 
