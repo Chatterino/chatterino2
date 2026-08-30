@@ -12,9 +12,11 @@
 #include <pajlada/settings.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
+#include <QStringView>
 #include <QUrl>
 
 #include <cstdint>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -43,13 +45,16 @@ public:
     [[nodiscard]] std::pair<bool, HighlightResult> check(
         const HighlightCheck::Params &params) const;
 
+    /// Returns a set of built-in highlight IDs (e.g. {"whispers", "yourusername"})
+    static std::unordered_set<QStringView> billTinHighlights();
+
     /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
     /// This can happen if a user does some manual cursed surgery on their settings.json file.
-    static QSet<QStringView> missingBillTinHighlights();
+    static std::unordered_set<QStringView> missingBillTinHighlights();
 
     /// Given a set of missing highlight IDs, recreates & adds them to the bottom of the user's highlights.
     static void recreateMissingBillTinHighlights(
-        const QSet<QStringView> &missingHighlights);
+        const std::unordered_set<QStringView> &missingHighlights);
 
 private:
     /**
