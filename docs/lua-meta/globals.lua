@@ -876,6 +876,7 @@ c2.MessageElementFlag = {
     HeaderTimestamp = 0,
     AnnouncementHeader = 0,
     SubscriptionHeader = 0,
+    WatchStreakHeader = 0,
     Default = 0,
 }
 

@@ -554,6 +554,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.showSubscriptionHeader)
         ->addTo(layout);
 
+    SettingWidget::checkbox("Show watch streak header", s.showWatchStreakHeader)
+        ->addTo(layout);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
