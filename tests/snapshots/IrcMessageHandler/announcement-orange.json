@@ -196,8 +196,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Announcement",
+            "flags": "Highlighted|Collapsed|Announcement",
             "frozen": false,
+            "highlightColor": "#64e9d200",
             "id": "af285e5c-9eb7-46e9-9f1a-caf0ed541a56",
             "localizedName": "",
             "loginName": "pajlada",

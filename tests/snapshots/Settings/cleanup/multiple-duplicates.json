@@ -1,0 +1,239 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "uncategorizednotification"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "announcements"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
