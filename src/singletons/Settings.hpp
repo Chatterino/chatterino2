@@ -167,6 +167,10 @@ public:
         "/appearance/messages/announcements/showHeader",
         true,
     };
+    BoolSetting showSubscriptionHeader = {
+        "/appearance/messages/subscriptions/showHeader",
+        true,
+    };
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
     BoolSetting hideMessageTimestampsWhenLive = {
