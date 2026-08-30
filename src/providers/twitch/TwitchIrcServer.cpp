@@ -165,13 +165,7 @@ TwitchIrcServer::TwitchIrcServer()
 
     QObject::connect(this->writeConnection_.get(),
                      &Communi::IrcConnection::messageReceived, this,
-                     [this](auto msg) {
-                         this->writeConnectionMessageReceived(msg);
-                     });
-    QObject::connect(this->writeConnection_.get(),
-                     &Communi::IrcConnection::connected, this, [this] {
-                         this->onWriteConnected(this->writeConnection_.get());
-                     });
+                     &TwitchIrcServer::writeConnectionMessageReceived);
     this->signalHolder.managedConnect(
         this->writeConnection_->connectionLost, [this](bool timeout) {
             qCDebug(chatterinoIrc)
@@ -185,22 +179,16 @@ TwitchIrcServer::TwitchIrcServer()
 
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::messageReceived, this,
-                     [this](auto msg) {
-                         this->readConnectionMessageReceived(msg);
-                     });
+                     &TwitchIrcServer::readConnectionMessageReceived);
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived, this,
-                     [this](auto msg) {
-                         this->privateMessageReceived(msg);
-                     });
+                     &TwitchIrcServer::privateMessageReceived);
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::connected, this, [this] {
-                         this->onReadConnected(this->readConnection_.get());
-                     });
+                     &Communi::IrcConnection::connected, this,
+                     &TwitchIrcServer::onReadConnected);
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::disconnected, this, [this] {
-                         this->onDisconnected();
-                     });
+                     &Communi::IrcConnection::disconnected, this,
+                     &TwitchIrcServer::onDisconnected);
     this->signalHolder.managedConnect(
         this->readConnection_->connectionLost, [this](bool timeout) {
             qCDebug(chatterinoIrc)
@@ -356,7 +344,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
     connection->setPort(Env::get().twitchServerPort);
     connection->setSecure(Env::get().twitchServerSecure);
 
-    this->open(type);
+    connection->open();
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
@@ -487,10 +475,8 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     }
 }
 
-void TwitchIrcServer::onReadConnected(IrcConnection *connection)
+void TwitchIrcServer::onReadConnected()
 {
-    (void)connection;
-
     std::vector<ChannelPtr> activeChannels;
     {
         std::lock_guard lock(this->channelMutex);
@@ -545,13 +531,6 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
             chan->addMessage(connectedMsg, MessageContext::Original);
         }
     }
-
-    this->falloffCounter_ = 1;
-}
-
-void TwitchIrcServer::onWriteConnected(IrcConnection *connection)
-{
-    (void)connection;
 }
 
 void TwitchIrcServer::onDisconnected()
@@ -1161,10 +1140,12 @@ void TwitchIrcServer::connect()
 
     this->disconnect();
 
-    this->initializeConnection(this->writeConnection_.get(),
-                               ConnectionType::Write);
-    this->initializeConnection(this->readConnection_.get(),
-                               ConnectionType::Read);
+    {
+        std::scoped_lock l(this->connectionMutex_);
+        initializeConnection(this->writeConnection_.get(),
+                             ConnectionType::Write);
+        initializeConnection(this->readConnection_.get(), ConnectionType::Read);
+    }
 }
 
 void TwitchIrcServer::disconnect()
@@ -1271,20 +1252,6 @@ ChannelPtr TwitchIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
     }
 
     return Channel::getEmpty();
-}
-
-void TwitchIrcServer::open(ConnectionType type)
-{
-    std::lock_guard<std::mutex> lock(this->connectionMutex_);
-
-    if (type == ConnectionType::Write)
-    {
-        this->writeConnection_->open();
-    }
-    if (type == ConnectionType::Read)
-    {
-        this->readConnection_->open();
-    }
 }
 
 }  // namespace chatterino
