@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "pajlada/serialize/common.hpp"
+#include "pajlada/serialize/deserialize.hpp"
+#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -11,68 +14,25 @@
 #include <QColor>
 #include <QString>
 #include <QUrl>
-
-#include <memory>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
 
 namespace chatterino {
 
-class TwitchBadge;
+/// HighlightBadge is how the old highlight system defined a badge highlight
+/// The base struct & serialization is kept for migration from old settings versions.
+struct HighlightBadge {
+    static constexpr QColor FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 
-class HighlightBadge
-{
-public:
-    bool operator==(const HighlightBadge &other) const;
-
-    HighlightBadge(const QString &badgeName, const QString &displayName,
-                   bool showInMentions, bool hasAlert, bool hasSound,
-                   const QString &soundUrl, QColor color);
-
-    HighlightBadge(const QString &badgeName, const QString &displayName,
-                   bool showInMentions, bool hasAlert, bool hasSound,
-                   const QString &soundUrl, std::shared_ptr<QColor> color);
-
-    const QString &badgeName() const;
-    const QString &displayName() const;
-    bool showInMentions() const;
-    bool hasAlert() const;
-    bool hasSound() const;
-    bool isMatch(const TwitchBadge &badge) const;
-
-    /**
-     * @brief Check if this highlight phrase has a custom sound set.
-     *
-     * Note that this method only checks whether the path to the custom sound
-     * is not empty. It does not check whether the file still exists, is a
-     * sound file, or anything else.
-     *
-     * @return true, if the custom sound file path is not empty, false otherwise
-     */
-    bool hasCustomSound() const;
-
-    const QUrl &getSoundUrl() const;
-    const std::shared_ptr<QColor> getColor() const;
-
-    /*
-     * XXX: Use the constexpr constructor here once we are building with
-     * Qt>=5.13.
-     */
-    static QColor FALLBACK_HIGHLIGHT_COLOR;
-
-private:
-    bool compare(const QString &id, const TwitchBadge &badge) const;
-
-    QString badgeName_;
-    QString displayName_;
-    bool showInMentions_;
-    bool hasAlert_;
-    bool hasSound_;
-    QUrl soundUrl_;
-    std::shared_ptr<QColor> color_;
-
-    bool isMulti_;
-    bool hasVersions_;
-    QStringList badges_;
+    QString badgeName;
+    QString displayName;
+    bool showInMentions{false};
+    bool hasAlert{false};
+    bool hasSound{false};
+    QUrl soundUrl;
+    QColor color;
 };
+
 };  // namespace chatterino
 
 namespace pajlada {
@@ -84,14 +44,13 @@ struct Serialize<chatterino::HighlightBadge> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "name", value.badgeName(), a);
-        chatterino::rj::set(ret, "displayName", value.displayName(), a);
-        chatterino::rj::set(ret, "showInMentions", value.showInMentions(), a);
-        chatterino::rj::set(ret, "alert", value.hasAlert(), a);
-        chatterino::rj::set(ret, "sound", value.hasSound(), a);
-        chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
-        chatterino::rj::set(ret, "color",
-                            value.getColor()->name(QColor::HexArgb), a);
+        chatterino::rj::set(ret, "name", value.badgeName, a);
+        chatterino::rj::set(ret, "displayName", value.displayName, a);
+        chatterino::rj::set(ret, "showInMentions", value.showInMentions, a);
+        chatterino::rj::set(ret, "alert", value.hasAlert, a);
+        chatterino::rj::set(ret, "sound", value.hasSound, a);
+        chatterino::rj::set(ret, "soundUrl", value.soundUrl.toString(), a);
+        chatterino::rj::set(ret, "color", value.color.name(QColor::HexArgb), a);
 
         return ret;
     }
@@ -102,38 +61,37 @@ struct Deserialize<chatterino::HighlightBadge> {
     static chatterino::HighlightBadge get(const rapidjson::Value &value,
                                           bool *error)
     {
+        chatterino::HighlightBadge h;
+
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error);
-            return chatterino::HighlightBadge(QString(), QString(), false,
-                                              false, false, "", QColor());
+            return h;
         }
 
-        QString _name;
-        QString _displayName;
-        bool _showInMentions = false;
-        bool _hasAlert = true;
-        bool _hasSound = false;
-        QString _soundUrl;
+        QString iSoundUrl;
         QString encodedColor;
 
-        chatterino::rj::getSafe(value, "name", _name);
-        chatterino::rj::getSafe(value, "displayName", _displayName);
-        chatterino::rj::getSafe(value, "showInMentions", _showInMentions);
-        chatterino::rj::getSafe(value, "alert", _hasAlert);
-        chatterino::rj::getSafe(value, "sound", _hasSound);
-        chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
+        chatterino::rj::getSafe(value, "name", h.badgeName);
+        chatterino::rj::getSafe(value, "displayName", h.displayName);
+        chatterino::rj::getSafe(value, "showInMentions", h.showInMentions);
+        chatterino::rj::getSafe(value, "alert", h.hasAlert);
+        chatterino::rj::getSafe(value, "sound", h.hasSound);
+        chatterino::rj::getSafe(value, "soundUrl", iSoundUrl);
+        h.soundUrl = iSoundUrl;
         chatterino::rj::getSafe(value, "color", encodedColor);
 
-        auto _color = QColor(encodedColor);
-        if (!_color.isValid())
+        auto iColor = QColor(encodedColor);
+        if (!iColor.isValid())
         {
-            _color = chatterino::HighlightBadge::FALLBACK_HIGHLIGHT_COLOR;
+            iColor = chatterino::HighlightBadge::FALLBACK_HIGHLIGHT_COLOR;
+        }
+        else
+        {
+            h.color = iColor;
         }
 
-        return chatterino::HighlightBadge(_name, _displayName, _showInMentions,
-                                          _hasAlert, _hasSound, _soundUrl,
-                                          _color);
+        return h;
     }
 };
 

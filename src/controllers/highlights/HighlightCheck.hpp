@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/lang/expressions/Expression.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -23,11 +24,18 @@ enum class MessageFlag : std::int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct HighlightCheck {
-    using Checker = std::function<std::optional<HighlightResult>(
-        const MessageParseArgs &args,
-        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags,
-        bool self)>;
+    struct Params {
+        const MessageParseArgs &args;
+        const std::vector<TwitchBadge> &twitchBadges;
+        const QString &senderName;
+        const QString &originalMessage;
+        const MessageFlags &messageFlags;
+        bool self;
+        filters::RunContext runContext;
+    };
+
+    using Checker =
+        std::function<std::optional<HighlightResult>(const Params &params)>;
     Checker cb;
 };
 
