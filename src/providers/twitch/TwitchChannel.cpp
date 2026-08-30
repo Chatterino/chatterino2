@@ -120,6 +120,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
+    , mod_(getApp()->getTwitch()->isModeratorIn(name))
     , nextSharedChatSessionProbe_(QDateTime::currentDateTime())
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
