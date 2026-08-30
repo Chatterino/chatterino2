@@ -81,6 +81,8 @@ private:
     void onHealthCheck(const boost::system::error_code &ec);
     void onControlFrame(boost::beast::websocket::frame_type frame_type,
                         std::string_view payload);
+    template <typename Duration>
+    void scheduleHealthCheck(std::chrono::duration<Duration> timeout);
 
     friend Derived;
 

@@ -261,11 +261,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
     this->stream.control_callback([this](auto frame_type, auto payload) {
         this->onControlFrame(frame_type, payload);
     });
-    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
-    this->healthCheckTimer.async_wait(
-        [self{this->shared_from_this()}](auto ec) {
-            self->onHealthCheck(ec);
-        });
+    this->scheduleHealthCheck(HEALTH_CHECK_INTERVAL_LONG);
 }
 
 template <typename Derived, typename Inner>
@@ -291,11 +287,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onHealthCheck(
     // Since we needed to issue a ping check, there is a chance that the
     // connection might be stuck. Use the short check interval so that
     // we can fail quickly and try to recover
-    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_SHORT);
-    this->healthCheckTimer.async_wait(
-        [self{this->shared_from_this()}](auto ec) {
-            self->onHealthCheck(ec);
-        });
+    this->scheduleHealthCheck(HEALTH_CHECK_INTERVAL_SHORT);
 }
 
 template <typename Derived, typename Inner>
@@ -307,7 +299,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onControlFrame(
     if (frame_type == boost::beast::websocket::frame_type::pong)
     {
         this->pingProbesTried = 0;
-        this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
+        this->scheduleHealthCheck(HEALTH_CHECK_INTERVAL_LONG);
     }
 }
 
@@ -343,7 +335,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
 
     // We got data, push the health check back because the socket
     // is obviously alive
-    this->healthCheckTimer.expires_after(HEALTH_CHECK_INTERVAL_LONG);
+    this->scheduleHealthCheck(HEALTH_CHECK_INTERVAL_LONG);
 
     this->stream.async_read(
         this->readBuffer,
@@ -372,6 +364,18 @@ void WebSocketConnectionHelper<Derived, Inner>::onWriteDone(
     }
 
     this->trySend();
+}
+
+template <typename Derived, typename Inner>
+template <typename Duration>
+void WebSocketConnectionHelper<Derived, Inner>::scheduleHealthCheck(
+    std::chrono::duration<Duration> timeout)
+{
+    this->healthCheckTimer.expires_after(timeout);
+    this->healthCheckTimer.async_wait(
+        [self{this->shared_from_this()}](auto ec) {
+            self->onHealthCheck(ec);
+        });
 }
 
 template <typename Derived, typename Inner>
