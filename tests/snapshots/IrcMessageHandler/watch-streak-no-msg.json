@@ -24,7 +24,7 @@
                 {
                     "element": {
                         "color": "System",
-                        "flags": "Timestamp|HeaderTimestamp|WatchStreakHeader",
+                        "flags": "Timestamp",
                         "link": {
                             "type": "None",
                             "value": ""
@@ -38,7 +38,7 @@
                         ]
                     },
                     "exhaustiveFlags": true,
-                    "flags": "Timestamp|HeaderTimestamp|WatchStreakHeader",
+                    "flags": "Timestamp",
                     "format": "",
                     "link": {
                         "type": "None",
@@ -95,9 +95,8 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|Highlighted|Collapsed|WatchStreak",
+            "flags": "System|Collapsed|WatchStreak",
             "frozen": false,
-            "highlightColor": "#460082ff",
             "id": "12265c31-d7c1-4344-9afd-894b3c290bc9",
             "localizedName": "",
             "loginName": "club_reg",
