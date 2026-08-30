@@ -1,0 +1,607 @@
+{
+    "input": {
+        "highlighting": {
+            "alerts": false,
+            "alwaysPlaySound": true,
+            "automod": {
+                "color": "#731f8d2b"
+            },
+            "badges": [
+                {
+                    "alert": false,
+                    "color": "#7f7f3f49",
+                    "displayName": "Admin",
+                    "name": "admin",
+                    "showInMentions": false,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ],
+            "enableSound": false,
+            "enableTaskbarFlashing": false,
+            "firstMessageHighlightColor": "#731f8d2b",
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f8c5459",
+                    "pattern": "зд",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f8c5459",
+                    "pattern": "\\brasmus\\b",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": true,
+                    "color": "#7f8c5459",
+                    "pattern": "(?<!\\#|twitch-|channel:)\\bpajlada\\b(?!\\.se)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "!testmanxd",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "🥧 🪜",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "@warframers",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "𝔤𝔤",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "lolxd123",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#7f00ff44",
+                    "pattern": "viewbotting you",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "⡘⠠⣷⣾⣿⠿⣿⣾⣿⡛⣸⡿⢸",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "kill all",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#64c466ff",
+                    "pattern": "[#forsen] PagChomp NEW GAME",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#64c466ff",
+                    "pattern": "[#forsen] PagChomp NEW TITLE",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                }
+            ],
+            "mentions": false,
+            "redeemedHighlight": {
+                "highlighted": true
+            },
+            "redeemedHighlightColor": "#3cff0000",
+            "selfHighlight": {
+                "enableSound": true,
+                "nameIsHighlightKeyword": false
+            },
+            "selfHighlightSoundUrl": "",
+            "sharedHighlights": [
+                {
+                    "alert": false,
+                    "backgroundColor": "#ff000000",
+                    "caseSensitive": false,
+                    "customSoundURL": "",
+                    "enabled": true,
+                    "id": "subhighlight",
+                    "name": "xd",
+                    "pattern": "asddddd",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": false
+                }
+            ],
+            "subHighlightColor": "#64c466ff",
+            "thread": {
+                "enableSound": false
+            },
+            "useCustomSound": false,
+            "users": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "fffadfadfsdf",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ]
+        }
+    },
+    "output": {
+        "highlighting": {
+            "alerts": false,
+            "alwaysPlaySound": true,
+            "automod": {
+                "color": "#731f8d2b"
+            },
+            "badges": [
+                {
+                    "alert": false,
+                    "color": "#7f7f3f49",
+                    "displayName": "Admin",
+                    "name": "admin",
+                    "showInMentions": false,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ],
+            "enableSound": false,
+            "enableTaskbarFlashing": false,
+            "firstMessageHighlightColor": "#731f8d2b",
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f8c5459",
+                    "pattern": "зд",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f8c5459",
+                    "pattern": "\\brasmus\\b",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": true,
+                    "color": "#7f8c5459",
+                    "pattern": "(?<!\\#|twitch-|channel:)\\bpajlada\\b(?!\\.se)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "!testmanxd",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "🥧 🪜",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "@warframers",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "𝔤𝔤",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "lolxd123",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#7f00ff44",
+                    "pattern": "viewbotting you",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "⡘⠠⣷⣾⣿⠿⣿⣾⣿⡛⣸⡿⢸",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "kill all",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#64c466ff",
+                    "pattern": "[#forsen] PagChomp NEW GAME",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#64c466ff",
+                    "pattern": "[#forsen] PagChomp NEW TITLE",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                }
+            ],
+            "highlights2": [
+                {
+                    "backgroundColor": "#731f8d2b",
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "backgroundColor": "#64c466ff",
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "enabled": false,
+                    "id": "yourusername",
+                    "sound": "001-ping2"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f8c5459",
+                    "caseSensitive": false,
+                    "id": "test-1",
+                    "pattern": "зд",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f8c5459",
+                    "caseSensitive": false,
+                    "id": "test-2",
+                    "pattern": "\\brasmus\\b",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f8c5459",
+                    "caseSensitive": true,
+                    "id": "test-3",
+                    "pattern": "(?<!\\#|twitch-|channel:)\\bpajlada\\b(?!\\.se)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-4",
+                    "pattern": "!testmanxd",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "001-ping2",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-5",
+                    "pattern": "🥧 🪜",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-6",
+                    "pattern": "@warframers",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-7",
+                    "pattern": "𝔤𝔤",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-8",
+                    "pattern": "lolxd123",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#7f00ff44",
+                    "caseSensitive": false,
+                    "id": "test-9",
+                    "pattern": "viewbotting you",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-10",
+                    "pattern": "⡘⠠⣷⣾⣿⠿⣿⣾⣿⡛⣸⡿⢸",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-11",
+                    "pattern": "kill all",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#64c466ff",
+                    "caseSensitive": false,
+                    "id": "test-12",
+                    "pattern": "[#forsen] PagChomp NEW GAME",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "001-ping2",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#64c466ff",
+                    "caseSensitive": false,
+                    "id": "test-13",
+                    "pattern": "[#forsen] PagChomp NEW TITLE",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "001-ping2",
+                    "type": "message"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "id": "test-user-14",
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "user",
+                    "username": "fffadfadfsdf"
+                },
+                {
+                    "id": "subscribedthread",
+                    "sound": ""
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#7f7f3f49",
+                    "badgeName": "admin",
+                    "id": "test-badge-15",
+                    "showInMentions": false,
+                    "sound": "",
+                    "type": "badge"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "backgroundColor": "#3cff0000",
+                    "enabled": true,
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "backgroundColor": "#731f8d2b",
+                    "id": "automodcaught"
+                },
+                {
+                    "backgroundColor": "#731f8d2b",
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "mentions": false,
+            "redeemedHighlight": {
+                "highlighted": true
+            },
+            "redeemedHighlightColor": "#3cff0000",
+            "selfHighlight": {
+                "enableSound": true,
+                "nameIsHighlightKeyword": false
+            },
+            "selfHighlightSoundUrl": "",
+            "sharedHighlights": [
+                {
+                    "alert": false,
+                    "backgroundColor": "#ff000000",
+                    "caseSensitive": false,
+                    "customSoundURL": "",
+                    "enabled": true,
+                    "id": "subhighlight",
+                    "name": "xd",
+                    "pattern": "asddddd",
+                    "playSound": false,
+                    "regex": false,
+                    "showInMentions": false
+                }
+            ],
+            "subHighlightColor": "#64c466ff",
+            "thread": {
+                "enableSound": false
+            },
+            "useCustomSound": false,
+            "users": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "fffadfadfsdf",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": false,
+                    "soundUrl": ""
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
