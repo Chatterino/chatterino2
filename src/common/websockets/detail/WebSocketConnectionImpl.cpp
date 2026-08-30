@@ -336,6 +336,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
     // We got data, push the health check back because the socket
     // is obviously alive
     this->scheduleHealthCheck(HEALTH_CHECK_INTERVAL_LONG);
+    this->pingProbesTried = 0;
 
     this->stream.async_read(
         this->readBuffer,
