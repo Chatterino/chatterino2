@@ -24,6 +24,84 @@
                 {
                     "element": {
                         "color": "System",
+                        "flags": "Timestamp|HeaderTimestamp|SubscriptionHeader",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "23:36"
+                        ]
+                    },
+                    "exhaustiveFlags": true,
+                    "flags": "Timestamp|HeaderTimestamp|SubscriptionHeader",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "23:36:12",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "exhaustiveFlags": true,
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention|SubscriptionHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffff00ff",
+                    "userLoginName": "ronni",
+                    "words": [
+                        "ronni"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "exhaustiveFlags": true,
+                    "flags": "Text|SubscriptionHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "has",
+                        "subscribed",
+                        "for",
+                        "6",
+                        "months!"
+                    ]
+                },
+                {
+                    "exhaustiveFlags": true,
+                    "flags": "SubscriptionHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
+                {
+                    "element": {
+                        "color": "System",
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -150,19 +228,6 @@
                         "it",
                         "up!"
                     ]
-                },
-                {
-                    "background": "#ffa0a0a4",
-                    "flags": "ReplyButton",
-                    "link": {
-                        "type": "ReplyToMessage",
-                        "value": "db25007f-7a18-43eb-9379-80131e44d633"
-                    },
-                    "padding": 2,
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "CircularImageElement",
-                    "url": ""
                 }
             ],
             "externalBadges": [
@@ -186,94 +251,6 @@
             ],
             "userID": "1337",
             "usernameColor": "#ffff00ff"
-        },
-        {
-            "channelName": "",
-            "count": 1,
-            "displayName": "",
-            "elements": [
-                {
-                    "element": {
-                        "color": "System",
-                        "flags": "Timestamp",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "TimestampMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "23:36"
-                        ]
-                    },
-                    "flags": "Timestamp",
-                    "format": "",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "time": "23:36:12",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TimestampElement"
-                },
-                {
-                    "color": "Text",
-                    "fallbackColor": "System",
-                    "flags": "Text|Mention",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "MentionElement",
-                    "userColor": "#ffff00ff",
-                    "userLoginName": "ronni",
-                    "words": [
-                        "ronni"
-                    ]
-                },
-                {
-                    "color": "System",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "has",
-                        "subscribed",
-                        "for",
-                        "6",
-                        "months!"
-                    ]
-                }
-            ],
-            "externalBadges": [
-            ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
-            "frozen": false,
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "ronni has subscribed for 6 months!",
-            "searchText": "ronni has subscribed for 6 months!",
-            "serverReceivedTime": "",
-            "timeoutUser": "",
-            "twitchBadgeInfos": {
-            },
-            "twitchBadges": [
-            ],
-            "userID": "",
-            "usernameColor": "#ff000000"
         }
     ],
     "params": {

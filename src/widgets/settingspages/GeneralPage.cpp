@@ -550,6 +550,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.showAnnouncementHeader)
         ->addTo(layout);
 
+    SettingWidget::checkbox("Show subscription header",
+                            s.showSubscriptionHeader)
+        ->addTo(layout);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},

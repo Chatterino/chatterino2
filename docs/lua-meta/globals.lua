@@ -875,6 +875,7 @@ c2.MessageElementFlag = {
     ReplyButton = 0,
     HeaderTimestamp = 0,
     AnnouncementHeader = 0,
+    SubscriptionHeader = 0,
     Default = 0,
 }
 
