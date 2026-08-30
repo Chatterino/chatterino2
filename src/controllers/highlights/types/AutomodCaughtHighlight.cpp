@@ -6,7 +6,7 @@
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
+#include "messages/MessageFlag.hpp"
 
 namespace chatterino::highlights {
 
@@ -17,8 +17,8 @@ HighlightCheck AutomodCaughtHighlight::buildCheck() const
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
-            // TODO: Since an automod message message always comes in two parts, should be prevent things like sounds & alerts from triggering twice?
-            // Prooooooobably
+            // TODO: This comes through as two messages. We could choose to only forward the sound for one of the messages, but for now I haven't
+            // noticed this being an issue
             if (!p.messageFlags.hasAny({
                     MessageFlag::AutoModOffendingMessage,
                     MessageFlag::AutoModOffendingMessageHeader,
