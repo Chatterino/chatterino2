@@ -1004,7 +1004,8 @@ TEST_F(PluginTest, MessageElementFlag)
                          "SubscriptionHeader=0x10000000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
-                         "Username=0x4";
+                         "Username=0x4,"
+                         "WatchStreakHeader=0x20000000000";
 
     std::string got = (*lua)["out"];
     ASSERT_EQ(got, VALUES);

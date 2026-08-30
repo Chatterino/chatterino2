@@ -2261,9 +2261,67 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags,
                 })
                 ->exhaustiveFlags = true;
         }
-        else if (messageType == "viewermilestone" ||
-                 messageType == "modiversary")
+        else if (messageType == "viewermilestone")
         {
+            this->message().flags.set(MessageFlag::WatchStreak);
+
+            this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time(),
+                    MessageElementFlags{
+                        MessageElementFlag::HeaderTimestamp,
+                        MessageElementFlag::WatchStreakHeader,
+                    })
+                ->exhaustiveFlags = true;
+
+            auto textFlags = hasContent ? MessageElementFlags{
+                            MessageElementFlag::Text,
+                            MessageElementFlag::WatchStreakHeader,
+                        } : MessageElementFlags{
+                            MessageElementFlag::Text,
+                        };
+
+            auto mentionFlags = hasContent ? MessageElementFlags{
+                            MessageElementFlag::Text,
+                            MessageElementFlag::Mention,
+                            MessageElementFlag::WatchStreakHeader,
+                        } : MessageElementFlags{
+                            MessageElementFlag::Text,
+                            MessageElementFlag::Mention,
+                        };
+
+            const auto messageText =
+                parseTagString(tags.getOrEmpty("system-msg"));
+
+            auto displayName = tags.getOrEmpty("display-name");
+            if (displayName.isEmpty())
+            {
+                displayName = this->message_->loginName;
+            }
+            const auto userID = tags.getOrEmpty("user-id");
+            this->appendOrEmplaceTextWithUser(
+                channel, userID, this->message_->loginName, displayName,
+                tags.getOrEmpty("color"), messageText, mentionFlags, textFlags);
+
+            if (hasContent)
+            {
+                this
+                    ->emplace<LinebreakElement>(MessageElementFlags{
+                        MessageElementFlag::WatchStreakHeader,
+                    })
+                    ->exhaustiveFlags = true;
+            }
+            else
+            {
+                this->message_->messageText = messageText;
+                this->message_->searchText = messageText;
+
+                // Message doesn't contain any user input, flag it as a system message
+                this->message().flags.set(MessageFlag::System);
+            }
+        }
+        else if (messageType == "modiversary")
+        {
+            // TODO: Don't label modiversary messages as watch streaks
             this->message().flags.set(MessageFlag::WatchStreak);
         }
         else

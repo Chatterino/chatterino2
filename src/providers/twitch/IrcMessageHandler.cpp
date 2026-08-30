@@ -44,13 +44,12 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 const QSet<QString> SPECIAL_MESSAGE_TYPES{
-    "sub",              //
-    "resub",            // resub messages
-    "bitsbadgetier",    // bits badge upgrade
-    "ritual",           // new viewer ritual
-    "announcement",     // new mod announcement thing
-    "viewermilestone",  // watch streak, but other categories possible in future
-    "modiversary",      // Mod anniversary.
+    "sub",                 //
+    "resub",               // resub messages
+    "bitsbadgetier",       // bits badge upgrade
+    "ritual",              // new viewer ritual
+    "announcement",        // new mod announcement thing
+    "modiversary",         // Mod anniversary.
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
@@ -786,6 +785,16 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 .isSpecial =
                     true,  // TODO: isSpecial should probably be renamed to trimUsername or something
             });
+        return;
+    }
+
+    if (msgType == "viewermilestone")
+    {
+        addMessage(message, sink, channel, content, *getApp()->getTwitch(),
+                   {
+                       .isSub = false,
+                       .isSpecial = true,
+                   });
         return;
     }
 
