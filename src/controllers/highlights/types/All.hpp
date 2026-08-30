@@ -25,6 +25,10 @@
 namespace chatterino::highlights {
 
 // clang-format off
+/// Variant of all highlights.
+///
+/// When you add a new built-in highlight, it must be added to HighlightController::billTinHighlights.
+/// When you add a new user-defined highlight, it must be added to the HighlightControllerTest.BillTinHighlightsHighlightController test.
 using AllHighlights = std::variant<
     YourUsernameHighlight,
     WhispersHighlight,
