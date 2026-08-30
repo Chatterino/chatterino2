@@ -2265,13 +2265,10 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags,
         {
             this->message().flags.set(MessageFlag::WatchStreak);
 
-            this->emplace<TimestampElement>(
-                    this->message().serverReceivedTime.time(),
-                    MessageElementFlags{
-                        MessageElementFlag::HeaderTimestamp,
-                        MessageElementFlag::WatchStreakHeader,
-                    })
-                ->exhaustiveFlags = true;
+            auto timestampFlags = hasContent ? MessageElementFlags{
+                            MessageElementFlag::HeaderTimestamp,
+                            MessageElementFlag::WatchStreakHeader,
+                        } : MessageElementFlags{};
 
             auto textFlags = hasContent ? MessageElementFlags{
                             MessageElementFlag::Text,
@@ -2288,6 +2285,10 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags,
                             MessageElementFlag::Text,
                             MessageElementFlag::Mention,
                         };
+
+            this->emplace<TimestampElement>(
+                    this->message().serverReceivedTime.time(), timestampFlags)
+                ->exhaustiveFlags = true;
 
             const auto messageText =
                 parseTagString(tags.getOrEmpty("system-msg"));
