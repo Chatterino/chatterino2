@@ -526,11 +526,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                                defaultSound.displayName);
                         this->previousSoundIndex = index;
                         w->removeItem(numRows);
-                        return;
                     }
-
-                    auto sound = data.toString();
-                    if (sound.isNull())
+                    else if (auto sound = data.toString(); sound.isNull())
                     {
                         auto fileUrl = QFileDialog::getOpenFileUrl(
                             this, tr("Open Sound"), QUrl(),
@@ -557,12 +554,11 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             QSignalBlocker block(w);
                             w->setCurrentIndex(this->previousSoundIndex);
                         }
-
-                        return;
                     }
-
-                    if (sound.isEmpty())
+                    else
                     {
+                        assert(sound.isEmpty());
+
                         std::visit(
                             [](auto &&h) {
                                 h.outcome.setSound("");
@@ -571,10 +567,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         soundURLLabel->setText("Not playing any sound");
                         this->previousSoundIndex = index;
                         w->removeItem(numRows);
-                        return;
                     }
-
-                    assert(false);
                 });
 
             auto *playSoundLabel = new QLabel("Play sound");

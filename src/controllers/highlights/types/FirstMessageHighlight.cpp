@@ -7,7 +7,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "messages/MessageBuilder.hpp"  // IWYU pragma: keep
+#include "messages/MessageFlag.hpp"
 
 namespace chatterino::highlights {
 
@@ -29,9 +29,6 @@ HighlightCheck FirstMessageHighlight::buildCheck() const
             {
                 return std::nullopt;
             }
-
-            qCInfo(LOG) << "First message highlight triggered:"
-                        << highlight.outcome;
 
             return HighlightResult{
                 .ids = {H::ID.toString()},
