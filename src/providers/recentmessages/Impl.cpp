@@ -95,9 +95,9 @@ QUrl constructRecentMessagesUrl(
 {
     const auto &env = Env::get();
     auto urlTemplate = env.recentMessagesApiUrl;
-    if (urlTemplate.isEmpty() && getSettings()->useCustomRecentMessagesUrl)
+    if (urlTemplate.isEmpty())
     {
-        urlTemplate = getSettings()->recentMessagesUrl.getValue();
+        urlTemplate = getSettings()->messageHistoryUrl.getValue();
     }
     if (urlTemplate.isEmpty())
     {

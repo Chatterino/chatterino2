@@ -1552,16 +1552,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.loadTwitchMessageHistoryOnConnect)
         ->addTo(layout);
 
-    SettingWidget::checkbox("Use custom message history URL",
-                            s.useCustomRecentMessagesUrl)
-        ->addTo(layout);
-
-    SettingWidget::lineEdit("Custom message history URL", s.recentMessagesUrl,
-                            recentmessages::DEFAULT_API_URL.toString())
+    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl)
         ->setTooltip(
             "Use %1 where the channel name should be inserted, for example: " +
             recentmessages::DEFAULT_API_URL.toString())
-        ->conditionallyEnabledBy(s.useCustomRecentMessagesUrl)
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
