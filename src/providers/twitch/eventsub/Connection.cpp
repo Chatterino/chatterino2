@@ -15,6 +15,7 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -248,7 +249,7 @@ void Connection::onAutomodMessageHold(
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
             message, MessageContext::Original);
 
-        if (getSettings()->showAutomodInMentions)
+        if (message->flags.has(MessageFlag::ShowInMentions))
         {
             getApp()->getTwitch()->getMentionsChannel()->addMessage(
                 message, MessageContext::Original);
