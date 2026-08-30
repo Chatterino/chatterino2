@@ -81,8 +81,7 @@ MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
 
 struct HighlightAlert {
-    QUrl customSound;
-    bool playSound = false;
+    QUrl sound;
     bool windowAlert = false;
 };
 class MessageBuilder
@@ -235,9 +234,8 @@ public:
         const QTime &time, const Communi::IrcMessage &ircMessage,
         TwitchChannel *channel);
 
-    static MessagePtrMut makeSubgiftMessage(Communi::TagsRef tags,
-                                            const QTime &time,
-                                            TwitchChannel *channel);
+    static std::pair<MessagePtrMut, HighlightAlert> makeSubgiftMessage(
+        Communi::TagsRef tags, const QTime &time, TwitchChannel *channel);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
 
@@ -314,7 +312,8 @@ public:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     [[nodiscard]] HighlightAlert parseHighlights(Communi::TagsRef tags,
                                                  const QString &originalMessage,
-                                                 const MessageParseArgs &args);
+                                                 const MessageParseArgs &args,
+                                                 Channel *channel);
 
 private:
     void appendChannelName(const Channel *channel);
