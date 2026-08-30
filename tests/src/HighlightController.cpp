@@ -5,13 +5,15 @@
 #include "controllers/highlights/HighlightController.hpp"
 
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/types/WhispersHighlight.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "Test.hpp"
 
@@ -30,7 +32,7 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication(const QString &settingsBody)
-        : mock::BaseApplication(settingsBody)
+        : mock::BaseApplication(settingsBody, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)
     {
     }
@@ -87,7 +89,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7fffffff"
+                "color": "#30000001"
             },
             {
                 "pattern": "testaccount_420",
@@ -97,7 +99,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#6fffffff"
+                "color": "#30000002"
             },
             {
                 "pattern": "gempir",
@@ -107,7 +109,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7ff19900"
+                "color": "#30000003"
             }
         ],
         "alwaysPlaySound": true,
@@ -120,7 +122,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "regex": false,
                 "case": false,
                 "soundUrl": "",
-                "color": "#7f7f3f49"
+                "color": "#10000001"
             }
         ],
         "badges": [
@@ -130,7 +132,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7f427f00"
+                "color": "#20000001"
             },
             {
                 "name": "subscriber",
@@ -138,7 +140,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7f7f3f49"
+                "color": "#20000002"
             },
             {
                 "name": "founder",
@@ -146,7 +148,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": true,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7fe8b7eb"
+                "color": "#20000003"
             },
             {
                 "name": "vip",
@@ -155,7 +157,7 @@ static QString SETTINGS_DEFAULT = R"!(
                 "alert": false,
                 "sound": false,
                 "soundUrl": "",
-                "color": "#7fe8b7ec"
+                "color": "#20000004"
             }
         ],
         "subHighlightColor": "#64ffd641"
@@ -169,11 +171,13 @@ static QString SETTINGS_ANON_EMPTY = R"!(
 struct TestCase {
     // TODO: create one of these from a raw irc message? hmm xD
     struct {
+        QString testName = "Undefined Test Name";
         MessageParseArgs args;
         std::vector<TwitchBadge> badges;
         QString senderName;
         QString originalMessage;
         MessageFlags flags;
+        filters::RunContext runContext;
     } input;
 
     struct {
@@ -204,15 +208,25 @@ protected:
     {
         for (const auto &[input, expected] : tests)
         {
-            auto [isMatch, matchResult] =
-                this->mockApplication->getHighlights()->check(
-                    input.args, input.badges, input.senderName,
-                    input.originalMessage, input.flags);
+            auto [isMatch,
+                  matchResult] = this->mockApplication->getHighlights()->check({
+                .args = input.args,
+                .twitchBadges = input.badges,
+                .senderName = input.senderName,
+                .originalMessage = input.originalMessage,
+                .messageFlags = input.flags,
+                .self = input.senderName == this->mockApplication->getAccounts()
+                                                ->twitch.getCurrent()
+                                                ->getUserName(),
+                .runContext = input.runContext,
+            });
 
             EXPECT_EQ(isMatch, expected.state)
-                << input.senderName << ": " << input.originalMessage;
+                << '[' << input.testName << "] " << input.senderName << ": "
+                << input.originalMessage;
             EXPECT_EQ(matchResult, expected.result)
-                << input.senderName << ": " << input.originalMessage;
+                << '[' << input.testName << "] " << input.senderName << ": "
+                << input.originalMessage;
         }
     }
 
@@ -232,228 +246,275 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
     configure(SETTINGS_DEFAULT, false);
 
+    Message message;
+    message.displayName = "icelys";
+    message.usernameColor = QColor(0xff0000);
+    message.messageText = "hey there :) 2038-01-19 123 456";
+    message.channelName = "forsen";
+    message.twitchBadges = {
+        TwitchBadge("moderator", ""),
+        TwitchBadge("staff", ""),
+    };
+    message.externalBadges = {"frankerfacez:bot"};
+    filters::RunContext ctx{
+        .message = message,
+        .channel = nullptr,
+    };
+
     std::vector<TestCase> tests{
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada",           // sender name
-                "hello!",            // original message
-            },
-            {
-                // expected
-                true,  // state
+            .input =
                 {
-                    false,                                  // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7fffffff"),  // color
-                    false,
+                    .testName = "[User Highlight] Match 001",
+                    .args = MessageParseArgs{},   // no special args
+                    .badges = {},                 // no badges
+                    .senderName = "pajlada",      // sender name
+                    .originalMessage = "hello!",  // original message
+                    .runContext = ctx,
                 },
-            },
+            .expected =
+                {
+                    // expected
+                    .state = true,  // state
+                    .result =
+                        {
+                            .alert = false,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>("#30000001"),
+                            .showInMentions = false,
+                        },
+                },
         },
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada2",          // sender name
-                "hello!",            // original message
-            },
-            {
-                // expected
-                false,                           // state
-                HighlightResult::emptyResult(),  // result
-            },
+            .input =
+                {
+                    .testName = "No Match 001",
+                    .args = MessageParseArgs{},   // no special args
+                    .badges = {},                 // no badges
+                    .senderName = "pajlada2",     // sender name
+                    .originalMessage = "hello!",  // original message
+                    .runContext = ctx,
+                },
+            .expected =
+                {
+                    // expected
+                    .state = false,                            // state
+                    .result = HighlightResult::emptyResult(),  // result
+                },
         },
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
+            .input =
                 {
-                    {
-                        "founder",
-                        "0",
-                    },  // founder badge
+                    .testName = "[Badge Highlight] Match Founder Badge 001",
+                    .args = MessageParseArgs{},
+                    .badges =
+                        {
+                            {
+                                "founder",
+                                "0",
+                            },  // founder badge
+                        },
+                    .senderName = "pajlada22",
+                    .originalMessage = "hello!",
+                    .runContext = ctx,
                 },
-                "pajlada22",  // sender name
-                "hello!",     // original message
-            },
-            {
-                // expected
-                true,  // state
+            .expected =
                 {
-                    true,                                   // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7fe8b7eb"),  // color
-                    false,                                  //showInMentions
+                    .state = true,
+                    .result =
+                        {
+                            .alert = true,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>("#20000003"),
+                            .showInMentions = false,
+                        },
                 },
-            },
         },
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
+            .input =
                 {
-                    {
-                        "founder",
-                        "0",
-                    },  // founder badge
+                    .testName = "[User Highlight + Badge Highlight] Match 001",
+                    .args = MessageParseArgs{},
+                    .badges =
+                        {
+                            {
+                                "founder",
+                                "0",
+                            },  // founder badge
+                        },
+                    .senderName = "pajlada",
+                    .originalMessage = "hello!",
+                    .runContext = ctx,
                 },
-                "pajlada",  // sender name
-                "hello!",   // original message
-            },
-            {
-                // expected
-                true,  // state
+            .expected =
                 {
-                    true,                                   // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7fffffff"),  // color
-                    false,                                  //showInMentions
+                    .state = true,
+                    .result =
+                        {
+                            .alert = true,
+                            .sound = QUrl{},
+                            // Color comes from User Highlight - user highlights, by default, have a higher priority than badge highlights
+                            .color = std::make_shared<QColor>("#30000001"),
+                            .showInMentions = false,
+                        },
                 },
-            },
         },
         {
             // Badge highlight with showInMentions only
-            {
-                // input
-                MessageParseArgs{},  // no special args
+            .input =
                 {
-                    {
-                        "vip",
-                        "0",
-                    },
+                    .testName = "[Badge Highlight] alert disabled, show in "
+                                "mentions enabled",
+                    .args = MessageParseArgs{},  // no special args
+                    .badges =
+                        {
+                            {
+                                "vip",
+                                "0",
+                            },
+                        },
+                    .senderName = "badge",
+                    .originalMessage = "show in mentions only",
+                    .runContext = ctx,
                 },
-                "badge",                  // sender name
-                "show in mentions only",  // original message
-            },
-            {
-                // expected
-                true,  // state
+            .expected =
                 {
-                    false,                                  // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7fe8b7ec"),  // color
-                    true,                                   // showInMentions
+                    .state = true,
+                    .result =
+                        {
+                            .alert = false,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>("#20000004"),
+                            .showInMentions = true,
+                        },
                 },
-            },
         },
         {
             // User mention with showInMentions
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "gempir",            // sender name
-                "a",                 // original message
-            },
-            {
-                // expected
-                true,  // state
+            .input =
                 {
-                    true,                                   // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7ff19900"),  // color
-                    true,                                   // showInMentions
+                    // input
+                    .args = MessageParseArgs{},  // no special args
+                    .badges = {},                // no badges
+                    .senderName = "gempir",      // sender name
+                    .originalMessage = "a",      // original message
+                    .runContext = ctx,
                 },
-            },
+            .expected =
+                {
+                    .state = true,
+                    .result =
+                        {
+                            .alert = true,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>("#30000003"),
+                            .showInMentions = true,
+                        },
+                },
         },
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "a",                 // sender name
-                "!testmanxd",        // original message
-            },
-            {
-                // expected
-                true,  // state
+            .input =
                 {
-                    true,                                   // alert
-                    true,                                   // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#7f7f3f49"),  // color
-                    true,                                   // showInMentions
+                    .testName = "Test A",
+                    .args = MessageParseArgs{},       // no special args
+                    .badges = {},                     // no badges
+                    .senderName = "a",                // sender name
+                    .originalMessage = "!testmanxd",  // original message
+                    .runContext = ctx,
                 },
-            },
+            .expected =
+                {
+                    // expected
+                    .state = true,  // state
+                    .result =
+                        {
+                            .alert = true,
+                            .sound = QUrl{"qrc:/sounds/ping2.wav"},
+                            // !testmanxd message highlight color
+                            .color = std::make_shared<QColor>("#10000001"),
+                            .showInMentions = true,
+                        },
+                },
         },
         {
             // TEST CASE: Message phrase from sender should be ignored (so showInMentions false), but since it's a user highlight, it should set a color
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "testaccount_420",   // sender name
-                "!testmanxd",        // original message
-            },
-            {
-                // expected
-                true,  // state
+            .input =
                 {
-                    false,                                  // alert
-                    false,                                  // playsound
-                    std::nullopt,                           // custom sound url
-                    std::make_shared<QColor>("#6fffffff"),  // color
-                    false,
+                    .testName = "MessageHighlight from sender should be "
+                                "ignored, but UserHighlight should not",
+                    .args = MessageParseArgs{},       // no special args
+                    .badges = {},                     // no badges
+                    .senderName = "testaccount_420",  // sender name
+                    .originalMessage = "!testmanxd",  // original message
+                    .runContext = ctx,
                 },
-            },
+            .expected =
+                {
+                    // expected
+                    .state = true,
+                    .result =
+                        {
+                            .alert = false,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>("#30000002"),
+                            .showInMentions = false,
+                        },
+                },
         },
         {
             // TEST CASE: Whispers that do not hit a highlight phrase should not be added to /mentions
-            {
-                // input
-                .args =
-                    MessageParseArgs{
-                        .isReceivedWhisper = true,
-                    },
-                .senderName = "forsen",
-                .originalMessage = "Hello NymN!",
-            },
-            {
-                // expected
-                .state = true,  // state
-                .result =
-                    {
-                        false,         // alert
-                        false,         // playsound
-                        std::nullopt,  // custom sound url
-                        std::make_shared<QColor>(
-                            HighlightPhrase::
-                                FALLBACK_HIGHLIGHT_COLOR),  // color
-                        false,                              // showInMentions
-                    },
-            },
+            .input =
+                {
+                    // input
+                    .args =
+                        MessageParseArgs{
+                            .isReceivedWhisper = true,
+                        },
+                    .senderName = "forsen",
+                    .originalMessage = "Hello NymN!",
+                    .runContext = ctx,
+                },
+            .expected =
+                {
+                    .state = true,
+                    .result =
+                        {
+                            .alert = false,
+                            .sound = QUrl{},
+                            .color = std::make_shared<QColor>(
+                                highlights::WhispersHighlight::
+                                    BACKGROUND_COLOR_DEFAULT),
+                            .showInMentions = false,
+                        },
+                },
         },
         {
             // TEST CASE: Whispers that do hit a highlight phrase should be added to /mentions
-            {
-                // input
-                .args =
-                    MessageParseArgs{
-                        .isReceivedWhisper = true,
-                    },
-                .senderName = "forsen",
-                .originalMessage = "!testmanxd",
-            },
-            {
-                // expected
-                .state = true,  // state
-                .result =
-                    {
-                        true,          // alert
-                        true,          // playsound
-                        std::nullopt,  // custom sound url
-                        std::make_shared<QColor>("#7f7f3f49"),  // color
-                        true,  // showInMentions
-                    },
-            },
+            .input =
+                {
+                    .testName = "[Whispers Highlight] Match 001",
+                    .args =
+                        MessageParseArgs{
+                            .isReceivedWhisper = true,
+                        },
+                    .senderName = "forsen",
+                    .originalMessage = "!testmanxd",
+                    .runContext = ctx,
+                },
+            .expected =
+                {
+                    // expected
+                    .state = true,  // state
+                    .result =
+                        {
+                            .alert = true,
+                            .sound = QUrl{"qrc:/sounds/ping2.wav"},
+                            .color = std::make_shared<QColor>(
+                                highlights::WhispersHighlight::
+                                    BACKGROUND_COLOR_DEFAULT),
+                            .showInMentions = true,
+                        },
+                },
         },
     };
 
@@ -464,34 +525,53 @@ TEST_F(HighlightControllerTest, AnonEmpty)
 {
     configure(SETTINGS_ANON_EMPTY, true);
 
+    Message message;
+    message.loginName = "pajlada2";
+    message.displayName = "pajlada2";
+    message.usernameColor = QColor(0xff0000);
+    message.messageText = "hello!";
+    message.channelName = "forsen";
+    message.twitchBadges = {};
+    message.externalBadges = {"frankerfacez:bot"};
+    filters::RunContext ctx{
+        .message = message,
+        .channel = nullptr,
+    };
+
     std::vector<TestCase> tests{
         {
-            {
-                // input
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada2",          // sender name
-                "hello!",            // original message
-            },
-            {
-                // expected
-                false,                           // state
-                HighlightResult::emptyResult(),  // result
-            },
+            .input =
+                {
+                    // input
+                    .args = MessageParseArgs{},   // no special args
+                    .badges = {},                 // no badges
+                    .senderName = "pajlada2",     // sender name
+                    .originalMessage = "hello!",  // original message
+                    .runContext = ctx,
+                },
+            .expected =
+                {
+                    // expected
+                    .state = false,                            // state
+                    .result = HighlightResult::emptyResult(),  // result
+                },
         },
         {
             // anonymous default username
-            {
-                MessageParseArgs{},  // no special args
-                {},                  // no badges
-                "pajlada2",          // sender name
-                "justinfan64537",    // original message
-            },
-            {
-                // expected
-                false,                           // state
-                HighlightResult::emptyResult(),  // result
-            },
+            .input =
+                {
+                    .args = MessageParseArgs{},           // no special args
+                    .badges = {},                         // no badges
+                    .senderName = "pajlada2",             // sender name
+                    .originalMessage = "justinfan64537",  // original message
+                    .runContext = ctx,
+                },
+            .expected =
+                {
+                    // expected
+                    .state = false,                            // state
+                    .result = HighlightResult::emptyResult(),  // result
+                },
         },
     };
 

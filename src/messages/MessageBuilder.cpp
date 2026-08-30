@@ -146,26 +146,8 @@ QString formatUpdatedEmoteList(const QString &platform,
     return text;
 }
 
-/**
- * Gets the default sound url if the user set one,
- * or the chatterino default ping sound if no url is set.
- */
-QUrl getFallbackHighlightSound()
-{
-    QString path = getSettings()->pathHighlightSound;
-    bool fileExists =
-        !path.isEmpty() && QFileInfo::exists(path) && QFileInfo(path).isFile();
-
-    if (fileExists)
-    {
-        return QUrl::fromLocalFile(path);
-    }
-
-    return QUrl("qrc:/sounds/ping2.wav");
-}
-
-void actuallyTriggerHighlights(const QString &channelName, bool playSound,
-                               const QUrl &customSoundUrl, bool windowAlert)
+void actuallyTriggerHighlights(const QString &channelName, const QUrl &sound,
+                               bool windowAlert)
 {
     if (getApp()->getStreamerMode()->isEnabled() &&
         getSettings()->streamerModeMuteMentions)
@@ -184,14 +166,9 @@ void actuallyTriggerHighlights(const QString &channelName, bool playSound,
     const bool resolveFocus =
         !hasFocus || getSettings()->highlightAlwaysPlaySound;
 
-    if (playSound && resolveFocus)
+    if (!sound.isEmpty() && resolveFocus)
     {
-        QUrl soundUrl = customSoundUrl;
-        if (soundUrl.isEmpty())
-        {
-            soundUrl = getFallbackHighlightSound();
-        }
-        getApp()->getSound()->play(soundUrl);
+        getApp()->getSound()->play(sound);
     }
 
     if (windowAlert)
@@ -724,9 +701,8 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
     return builder.release();
 }
 
-MessagePtrMut MessageBuilder::makeSubgiftMessage(Communi::TagsRef tags,
-                                                 const QTime &time,
-                                                 TwitchChannel *channel)
+std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeSubgiftMessage(
+    Communi::TagsRef tags, const QTime &time, TwitchChannel *channel)
 {
     auto text = parseTagString(tags.getOrEmpty("system-msg"));
 
@@ -830,13 +806,20 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(Communi::TagsRef tags,
     }
 
     builder->flags.set(MessageFlag::System);
-    builder->flags.set(MessageFlag::DoNotTriggerNotification);
     builder->messageText = text;
     builder->searchText = text;
 
     builder.parseMessageTags(tags, channel, true);
 
-    return builder.release();
+    HighlightAlert highlight = builder.parseHighlights(tags, "", {}, channel);
+    if (tags.has("historical"))
+    {
+        // TODO: This logic should probably move into builder.parseHighlights
+        highlight.sound.clear();
+        highlight.windowAlert = false;
+    }
+
+    return {builder.release(), highlight};
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
@@ -1266,12 +1249,12 @@ void MessageBuilder::appendOrEmplaceSystemTextAndUpdate(const QString &text,
 void MessageBuilder::triggerHighlights(const Channel *channel,
                                        const HighlightAlert &alert)
 {
-    if (!alert.windowAlert && !alert.playSound)
+    if (!alert.windowAlert && alert.sound.isEmpty())
     {
         return;
     }
-    actuallyTriggerHighlights(channel->getName(), alert.playSound,
-                              alert.customSound, alert.windowAlert);
+    actuallyTriggerHighlights(channel->getName(), alert.sound,
+                              alert.windowAlert);
 }
 
 void MessageBuilder::appendChannelPointRewardMessage(
@@ -1957,19 +1940,12 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         }
     }
 
-    // highlighting incoming whispers if requested per setting
-    if (args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
-    {
-        builder->flags.set(MessageFlag::HighlightedWhisper);
-        builder->highlightColor =
-            ColorProvider::instance().color(ColorType::Whisper);
-    }
-
     // highlights
-    HighlightAlert highlight = builder.parseHighlights(tags, content, args);
+    HighlightAlert highlight =
+        builder.parseHighlights(tags, content, args, channel);
     if (tags.has("historical"))
     {
-        highlight.playSound = false;
+        highlight.sound.clear();
         highlight.windowAlert = false;
     }
 
@@ -2625,7 +2601,8 @@ void MessageBuilder::parseThread(const QString &messageContent,
 
 HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
                                                const QString &originalMessage,
-                                               const MessageParseArgs &args)
+                                               const MessageParseArgs &args,
+                                               Channel *channel)
 {
     if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
@@ -2633,10 +2610,21 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
         return {};
     }
 
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     auto badges = parseBadgeTag(tags);
-    auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-        args, badges, this->message().loginName, originalMessage,
-        this->message().flags);
+    auto [highlighted, highlightResult] = getApp()->getHighlights()->check({
+        .args = args,
+        .twitchBadges = badges,
+        .senderName = this->message().loginName,
+        .originalMessage = originalMessage,
+        .messageFlags = this->message().flags,
+        .self = this->message().loginName == currentUser->getUserName(),
+        .runContext =
+            filters::RunContext{
+                .message = this->message(),
+                .channel = channel,
+            },
+    });
 
     if (!highlighted)
     {
@@ -2647,6 +2635,19 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
 
     this->message().flags.set(MessageFlag::Highlighted);
 
+    qInfo() << "XXX: Highlighted by" << highlightResult.ids;
+
+    if (highlightResult.color)
+    {
+        auto color = *highlightResult.color;
+        qInfo() << "XXX: SET HIGHLIGHT COLOR"
+                << color.name(QColor::NameFormat::HexArgb);
+    }
+    else
+    {
+        qInfo() << "XXX: SET HIGHLIGHT COLOR NULL";
+    }
+
     this->message().highlightColor = highlightResult.color;
 
     if (highlightResult.showInMentions)
@@ -2654,16 +2655,8 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
         this->message().flags.set(MessageFlag::ShowInMentions);
     }
 
-    auto customSound = [&] {
-        if (highlightResult.customSoundUrl)
-        {
-            return *highlightResult.customSoundUrl;
-        }
-        return QUrl{};
-    }();
     return {
-        .customSound = customSound,
-        .playSound = highlightResult.playSound,
+        .sound = highlightResult.sound,
         .windowAlert = highlightResult.alert,
     };
 }
