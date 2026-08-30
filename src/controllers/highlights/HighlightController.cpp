@@ -11,10 +11,8 @@
 #include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "controllers/highlights/types/Common.hpp"
-#include "messages/Message.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
-#include "util/Variant.hpp"
 
 namespace chatterino {
 
@@ -54,14 +52,14 @@ void rebuildSharedHighlights(Settings &settings,
     }
 }
 
-/// Recreates the highlight of type T if the highlight's ID is in the missingHighlights set
-template <typename T>
-void recreateIfMissing(const QSet<QStringView> &missingHighlights)
+/// Recreates the highlight of type Highlight if the highlight's ID is in the missingHighlights set
+template <typename Highlight>
+void recreateIfMissing(const std::unordered_set<QStringView> &missingHighlights)
 {
-    if (missingHighlights.contains(T::ID))
+    if (missingHighlights.contains(Highlight::ID))
     {
-        qCInfo(LOG) << "Recreating missing highlight" << T::ID;
-        getSettings()->sharedHighlights.append(T{});
+        qCInfo(LOG) << "Recreating missing highlight" << Highlight::ID;
+        getSettings()->sharedHighlights.append(Highlight{});
     }
 }
 
@@ -169,13 +167,14 @@ std::pair<bool, HighlightResult> HighlightController::check(
     return {highlighted, result};
 }
 
-QSet<QStringView> HighlightController::missingBillTinHighlights()
+std::unordered_set<QStringView> HighlightController::billTinHighlights()
 {
     using namespace chatterino::highlights;
 
-    QSet<QStringView> expectedHighlights{
+    return {
         YourUsernameHighlight::ID,               //
         WhispersHighlight::ID,                   //
+        AnnouncementsHighlight::ID,              //
         SubscriptionsHighlight::ID,              //
         ChannelPointsHighlight::ID,              //
         FirstMessageHighlight::ID,               //
@@ -185,24 +184,30 @@ QSet<QStringView> HighlightController::missingBillTinHighlights()
         YourMessagesHighlight::ID,               //
         UncategorizedNotificationHighlight::ID,  //
     };
+}
+
+std::unordered_set<QStringView> HighlightController::missingBillTinHighlights()
+{
+    auto expectedHighlights = HighlightController::billTinHighlights();
 
     const auto highlights = getSettings()->sharedHighlights.readOnly();
 
     for (const auto &h : *highlights)
     {
-        expectedHighlights.remove(highlights::getID(h));
+        expectedHighlights.erase(highlights::getID(h));
     }
 
     return expectedHighlights;
 }
 
 void HighlightController::recreateMissingBillTinHighlights(
-    const QSet<QStringView> &missingHighlights)
+    const std::unordered_set<QStringView> &missingHighlights)
 {
     using namespace chatterino::highlights;
 
     recreateIfMissing<YourUsernameHighlight>(missingHighlights);
     recreateIfMissing<WhispersHighlight>(missingHighlights);
+    recreateIfMissing<AnnouncementsHighlight>(missingHighlights);
     recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
     recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
     recreateIfMissing<FirstMessageHighlight>(missingHighlights);

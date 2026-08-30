@@ -70,7 +70,7 @@ HighlightingPage::HighlightingPage()
         // MISC
         if (const auto missing =
                 HighlightController::missingBillTinHighlights();
-            !missing.isEmpty())
+            !missing.empty())
         {
             auto missingHighlights =
                 layout.emplace<QHBoxLayout>().withoutMargin();

@@ -6,6 +6,7 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
+#include "controllers/highlights/types/All.hpp"
 #include "controllers/highlights/types/WhispersHighlight.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
@@ -22,6 +23,8 @@
 #include <QFile>
 #include <QString>
 #include <QTemporaryDir>
+
+#include <variant>
 
 using namespace chatterino;
 using ::testing::Exactly;
@@ -168,6 +171,13 @@ static QString SETTINGS_ANON_EMPTY = R"!(
 {
 })!";
 
+static QString SETTINGS_MIGRATED_EMPTY = R"!(
+{
+    "misc": {
+        "settingsVersion": 1
+    }
+})!";
+
 struct TestCase {
     // TODO: create one of these from a raw irc message? hmm xD
     struct {
@@ -241,6 +251,8 @@ protected:
 
     mock::Helix *mockHelix;
 };
+
+namespace chatterino {
 
 TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
@@ -577,3 +589,40 @@ TEST_F(HighlightControllerTest, AnonEmpty)
 
     this->runTests(tests);
 }
+
+TEST_F(HighlightControllerTest, BillTinHighlights)
+{
+    configure(SETTINGS_MIGRATED_EMPTY, true);
+
+    const auto all = std::variant_size_v<highlights::AllHighlights>;
+    const auto billTin = HighlightController::billTinHighlights().size();
+
+    const auto expectedSize = all  //
+                              - 1  // MessageHighlight
+                              - 1  // UserHighlight
+                              - 1  // BadgeHighlight
+                              - 1  // FilterHighlight
+        ;
+
+    ASSERT_EQ(expectedSize, billTin)
+        << "HighlightController::billTinHighlights must include all bill tin "
+           "highlights";
+
+    ASSERT_EQ(getSettings()->sharedHighlights.raw().size(), 0)
+        << "Settings should contain no highlights to start since this is a "
+           "clean config that has skipped migrations";
+
+    auto missing = HighlightController::missingBillTinHighlights();
+
+    ASSERT_EQ(missing.size(), billTin)
+        << "List of missing bill tin highlights should match the list of bill "
+           "tin highlights";
+
+    HighlightController::recreateMissingBillTinHighlights(missing);
+
+    ASSERT_EQ(getSettings()->sharedHighlights.raw().size(), billTin)
+        << "Number of highlights settings should match the list of bill tin "
+           "highlights after recreate has been called";
+}
+
+}  // namespace chatterino
