@@ -127,8 +127,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|FirstMessage",
+            "flags": "Highlighted|Collapsed|FirstMessage",
             "frozen": false,
+            "highlightColor": "#3c487f3f",
             "id": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b",
             "localizedName": "",
             "loginName": "jammehcow",
