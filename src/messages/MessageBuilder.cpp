@@ -2071,6 +2071,43 @@ void MessageBuilder::parseMessageID(Communi::TagsRef tags)
     }
 }
 
+void MessageBuilder::appendOrEmplaceTextWithUser(
+    TwitchChannel *channel, const QString &userID, const QString &userLoginName,
+    const QString &userDisplayName, const QString &userColorString,
+    const QString &messageText, MessageElementFlags mentionFlags,
+    MessageElementFlags textFlags)
+{
+    const auto *userDataController = getApp()->getUserData();
+    assert(userDataController != nullptr);
+
+    auto userColor =
+        twitch::getUserColor({
+                                 .userLogin = userLoginName,
+                                 .userID = userID,
+                                 .userDataController = userDataController,
+                                 .channelChatters = channel,
+                                 .color = QColor::fromString(userColorString),
+                             })
+            .value_or(MessageColor::System);
+
+    const auto textFragments =
+        messageText.split(SPACE_REGEX, Qt::SkipEmptyParts);
+
+    for (const auto &word : textFragments)
+    {
+        if (word == userDisplayName)
+        {
+            this->emplace<MentionElement>(userDisplayName, userLoginName,
+                                          MessageColor::System, userColor,
+                                          mentionFlags)
+                ->exhaustiveFlags = true;
+            continue;
+        }
+        this->appendOrEmplaceText(word, MessageColor::System, textFlags)
+            ->exhaustiveFlags = true;
+    }
+}
+
 void MessageBuilder::parseMessageTags(Communi::TagsRef tags,
                                       TwitchChannel *channel, bool hasContent)
 {
@@ -2165,38 +2202,10 @@ void MessageBuilder::parseMessageTags(Communi::TagsRef tags,
                         displayName = this->message_->loginName;
                     }
                     const auto userID = tags.getOrEmpty("user-id");
-                    const auto *userDataController = getApp()->getUserData();
-                    assert(userDataController != nullptr);
-                    auto userColor =
-                        twitch::getUserColor(
-                            {
-                                .userLogin = this->message_->loginName,
-                                .userID = userID,
-                                .userDataController = userDataController,
-                                .channelChatters = channel,
-                                .color = QColor::fromString(
-                                    tags.getOrEmpty("color")),
-                            })
-                            .value_or(MessageColor::System);
-
-                    const auto textFragments =
-                        messageText.split(SPACE_REGEX, Qt::SkipEmptyParts);
-
-                    for (const auto &word : textFragments)
-                    {
-                        if (word == displayName)
-                        {
-                            this->emplace<MentionElement>(
-                                    displayName, this->message_->loginName,
-                                    MessageColor::System, userColor,
-                                    mentionFlags)
-                                ->exhaustiveFlags = true;
-                            continue;
-                        }
-                        this->appendOrEmplaceText(word, MessageColor::System,
-                                                  textFlags)
-                            ->exhaustiveFlags = true;
-                    }
+                    this->appendOrEmplaceTextWithUser(
+                        channel, userID, this->message_->loginName, displayName,
+                        tags.getOrEmpty("color"), messageText, mentionFlags,
+                        textFlags);
 
                     if (hasContent)
                     {
