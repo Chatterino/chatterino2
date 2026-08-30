@@ -264,7 +264,7 @@
             ],
             "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
-            "highlightColor": "#ff404040",
+            "highlightColor": "#7f404040",
             "id": "automod_af40eeff-3b0d-4099-81ad-bca76c9bc214",
             "localizedName": "",
             "loginName": "pajlada",
