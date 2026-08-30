@@ -27,7 +27,10 @@
 #include "widgets/settingspages/NotificationPage.hpp"
 #include "widgets/settingspages/PluginsPage.hpp"
 
+#include "util/SettingsStylesheet.hpp"
+
 #include <QDialogButtonBox>
+#include <QFile>
 #include <QLineEdit>
 
 using namespace Qt::Literals;
@@ -101,6 +104,8 @@ void SettingsDialog::setSearchPlaceholderText()
 
 void SettingsDialog::initUi()
 {
+    this->stylesheet = loadSettingsStylesheet();
+
     auto outerBox = LayoutCreator<QWidget>(this->getLayoutContainer())
                         .setLayoutType<QVBoxLayout>()
                         .withoutSpacing();
@@ -294,13 +299,14 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     if (this->selectedTab_ != nullptr)
     {
         this->selectedTab_->setSelected(false);
-        this->selectedTab_->setStyleSheet("color: #FFF");
+        this->selectedTab_->setObjectName("");
+        this->selectedTab_->setStyleSheet(this->stylesheet);
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet(
-        "background: #222; color: #4FC3F7;"  // Should this be same as accent color?
-        "/*border: 1px solid #555; border-right: none;*/");
+    tab->setObjectName("active");
+    tab->setStyleSheet(this->stylesheet);
+
     this->selectedTab_ = tab;
     if (byUser)
     {
@@ -332,6 +338,54 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
 
     assert(false);
     return nullptr;
+}
+
+void SettingsDialog::themeChangedEvent()
+{
+    // TODO: This should be common code
+    auto pal = QApplication::palette();
+    if (this->theme->isLightTheme()) {
+        pal.setColor(QPalette::Window, QColor(230, 230, 230));
+        pal.setColor(QPalette::WindowText, Qt::black);
+        pal.setColor(QPalette::Text, Qt::black);
+        pal.setColor(QPalette::Base, QColor("#ddd"));
+        pal.setColor(QPalette::AlternateBase, QColor("#ccc"));
+        pal.setColor(QPalette::ToolTipBase, Qt::black);
+        pal.setColor(QPalette::ToolTipText, Qt::white);
+        pal.setColor(QPalette::Dark, QColor(35, 35, 35));
+        pal.setColor(QPalette::Shadow, QColor(235, 235, 235));
+        pal.setColor(QPalette::Button, QColor(185, 185, 185));
+        pal.setColor(QPalette::ButtonText, Qt::black);
+        pal.setColor(QPalette::Link, QColor(42, 130, 218));
+        pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        pal.setColor(QPalette::HighlightedText, Qt::black);
+    } else {
+        pal.setColor(QPalette::Window, QColor(22, 22, 22));
+        pal.setColor(QPalette::WindowText, Qt::white);
+        pal.setColor(QPalette::Text, Qt::white);
+        pal.setColor(QPalette::Base, QColor("#333"));
+        pal.setColor(QPalette::AlternateBase, QColor("#444"));
+        pal.setColor(QPalette::ToolTipBase, Qt::white);
+        pal.setColor(QPalette::ToolTipText, Qt::black);
+        pal.setColor(QPalette::Dark, QColor(35, 35, 35));
+        pal.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        pal.setColor(QPalette::Button, QColor(70, 70, 70));
+        pal.setColor(QPalette::ButtonText, Qt::white);
+        pal.setColor(QPalette::Link, QColor(42, 130, 218));
+        pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        pal.setColor(QPalette::HighlightedText, Qt::white);
+    }
+
+    QApplication::setPalette(pal);
+
+    this->stylesheet = loadSettingsStylesheet();
+    this->setStyleSheet(this->stylesheet);
+
+    for (auto &tab : this->tabs_)
+    {
+        tab->setStyleSheet(stylesheet);
+        tab->page()->setStyleSheet(stylesheet);
+    }
 }
 
 void SettingsDialog::showDialog(QWidget *parent,

@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+#include "util/SettingsStylesheet.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/TitlebarButton.hpp"
@@ -272,15 +273,11 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     if (this->flags_.has(UseSettingsStylesheet))
     {
-        QFile styleFile(":/qss/settings.qss");
-        if (!styleFile.open(QFile::ReadOnly))
-        {
-            assert(false && "Resources not loaded");
-            qCWarning(chatterinoWidget) << "Resources not loaded";
-        }
-        QString stylesheet = QString::fromUtf8(styleFile.readAll());
+        QString stylesheet = loadSettingsStylesheet();
         this->setStyleSheet(stylesheet);
-        this->overrideBackgroundColor_ = QColor("#111111");
+        this->overrideBackgroundColor_ = getTheme()->isLightTheme()
+            ? QColor("#e6e6e6")
+            : QColor("#333333");
     }
 
     DebugCount::increase(DebugObject::BaseWindow);
@@ -525,7 +522,7 @@ void BaseWindow::themeChangedEvent()
     if (this->hasCustomWindowFrame())
     {
         QPalette palette;
-        palette.setColor(QPalette::Window, QColor(80, 80, 80, 255));
+        //palette.setColor(QPalette::Window, QColor(80, 80, 80, 255));
         palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
 
@@ -545,9 +542,11 @@ void BaseWindow::themeChangedEvent()
     }
     else if (this->flags_.has(UseSettingsStylesheet))
     {
-        QPalette palette;
-        palette.setColor(QPalette::Window, QColor("#111"));
-        this->setPalette(palette);
+        auto stylesheet = loadSettingsStylesheet();
+        this->setStyleSheet(stylesheet);
+        this->overrideBackgroundColor_ = getTheme()->isLightTheme()
+            ? QColor("#e6e6e6")
+            : QColor("#333333");
     }
     else
     {

@@ -19,6 +19,7 @@
 namespace chatterino {
 
 class SettingsDialogTab;
+class Theme;
 
 class SettingsPage : public QFrame
 {
@@ -61,6 +62,9 @@ public:
 protected:
     SettingsDialogTab *tab_{};
     pajlada::Signals::SignalHolder managedConnections_;
+    Theme *theme;
+
+    virtual void themeChangedEvent();
 };
 
 }  // namespace chatterino

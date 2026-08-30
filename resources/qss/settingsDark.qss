@@ -25,13 +25,8 @@ QComboBox QFrame {
     border: 1px solid #66BCFF;
 }
 
-chatterino--SettingsDialog chatterino--SettingsDialogTab {
-    font-family: "Segoe UI";
-    font-size: 14;
-}
-
-chatterino--SettingsPage #generalSettingsScrollContent {
-    background: #222;
+QWidget#generalSettingsScrollContent {
+    background-color: #222;
 }
 
 chatterino--SettingsPage QToolTip {
@@ -70,4 +65,16 @@ chatterino--NavigationLabel {
     font-family: "Segoe UI light";
     font-size: 15px;
     color: #A6DDF4;
+}
+
+chatterino--SettingsDialogTab {
+    font-family: "Segoe UI";
+    font-size: 14;
+}
+
+chatterino--SettingsDialogTab#active {
+    font-family: "Segoe UI";
+    font-size: 14;
+    color: #4FC3F7; /* Should this be same as accent color? */
+    background-color: #333333;
 }

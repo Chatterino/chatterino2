@@ -13,6 +13,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "util/SelfCheck.hpp"
@@ -51,36 +52,52 @@ namespace {
 void installCustomPalette()
 {
     // borrowed from
-    // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
-    auto dark = QApplication::palette();
+    // https://stackoverflow.com/questions/15035767/is-the-qt-5-pal-fusion-theme-available-for-windows
+    auto pal = QApplication::palette();
+    if (getApp()->getThemes()->isLightTheme()) {
+        pal.setColor(QPalette::Window, QColor(230, 230, 230));
+        pal.setColor(QPalette::WindowText, Qt::black);
+        pal.setColor(QPalette::Text, Qt::black);
+        pal.setColor(QPalette::Base, QColor("#ddd"));
+        pal.setColor(QPalette::AlternateBase, QColor("#ccc"));
+        pal.setColor(QPalette::ToolTipBase, Qt::black);
+        pal.setColor(QPalette::ToolTipText, Qt::white);
+        pal.setColor(QPalette::Dark, QColor(35, 35, 35));
+        pal.setColor(QPalette::Shadow, QColor(235, 235, 235));
+        pal.setColor(QPalette::Button, QColor(185, 185, 185));
+        pal.setColor(QPalette::ButtonText, Qt::black);
+        pal.setColor(QPalette::Link, QColor(42, 130, 218));
+        pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        pal.setColor(QPalette::HighlightedText, Qt::black);
+    } else {
+        pal.setColor(QPalette::Window, QColor(22, 22, 22));
+        pal.setColor(QPalette::WindowText, Qt::white);
+        pal.setColor(QPalette::Text, Qt::white);
+        pal.setColor(QPalette::Base, QColor("#333"));
+        pal.setColor(QPalette::AlternateBase, QColor("#444"));
+        pal.setColor(QPalette::ToolTipBase, Qt::white);
+        pal.setColor(QPalette::ToolTipText, Qt::black);
+        pal.setColor(QPalette::Dark, QColor(35, 35, 35));
+        pal.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        pal.setColor(QPalette::Button, QColor(70, 70, 70));
+        pal.setColor(QPalette::ButtonText, Qt::white);
+        pal.setColor(QPalette::Link, QColor(42, 130, 218));
+        pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        pal.setColor(QPalette::HighlightedText, Qt::white);
+    }
 
-    dark.setColor(QPalette::Window, QColor(22, 22, 22));
-    dark.setColor(QPalette::WindowText, Qt::white);
-    dark.setColor(QPalette::Text, Qt::white);
-    dark.setColor(QPalette::Base, QColor("#333"));
-    dark.setColor(QPalette::AlternateBase, QColor("#444"));
-    dark.setColor(QPalette::ToolTipBase, Qt::white);
-    dark.setColor(QPalette::ToolTipText, Qt::black);
-    dark.setColor(QPalette::Dark, QColor(35, 35, 35));
-    dark.setColor(QPalette::Shadow, QColor(20, 20, 20));
-    dark.setColor(QPalette::Button, QColor(70, 70, 70));
-    dark.setColor(QPalette::ButtonText, Qt::white);
-    dark.setColor(QPalette::BrightText, Qt::red);
-    dark.setColor(QPalette::Link, QColor(42, 130, 218));
-    dark.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    dark.setColor(QPalette::HighlightedText, Qt::white);
-    dark.setColor(QPalette::PlaceholderText, QColor(127, 127, 127));
-
-    dark.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-    dark.setColor(QPalette::Disabled, QPalette::HighlightedText,
+    pal.setColor(QPalette::BrightText, Qt::red);
+    pal.setColor(QPalette::PlaceholderText, QColor(127, 127, 127));
+    pal.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    pal.setColor(QPalette::Disabled, QPalette::HighlightedText,
                   QColor(127, 127, 127));
-    dark.setColor(QPalette::Disabled, QPalette::ButtonText,
+    pal.setColor(QPalette::Disabled, QPalette::ButtonText,
                   QColor(127, 127, 127));
-    dark.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-    dark.setColor(QPalette::Disabled, QPalette::WindowText,
+    pal.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    pal.setColor(QPalette::Disabled, QPalette::WindowText,
                   QColor(127, 127, 127));
 
-    QApplication::setPalette(dark);
+    QApplication::setPalette(pal);
 }
 
 void initQt(const Args &args)
@@ -112,8 +129,6 @@ void initQt(const Args &args)
     // Enable mnemonics (menu hotkeys) on macOS - they are disabled by default
     qt_set_sequence_auto_mnemonic(true);
 #endif
-
-    installCustomPalette();
 }
 
 void showLastCrashDialog(const Args &args, const Paths &paths)
@@ -291,6 +306,8 @@ void runGui(QApplication &a, const Modes &modes, const Paths &paths,
 
     Application app(settings, paths, args, updates);
     app.initialize(settings, modes, paths);
+    installCustomPalette();
+
     app.run();
 
     chatterino::NetworkManager::deinit();

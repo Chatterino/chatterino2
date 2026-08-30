@@ -43,8 +43,6 @@ AccountsPage::AccountsPage()
         d.exec();
     });
 
-    view->getTableView()->setStyleSheet("background: #333");
-
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {
     //        this->addButton = buttons->addButton("Add",

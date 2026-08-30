@@ -19,6 +19,8 @@ public:
 private:
     void addLicense(QFormLayout *form, const QString &name_,
                     const QString &website, const QString &licenseLink);
+    void loadLogo();
+    void themeChangedEvent() override;
 
     QLabel *logo_{};
 };

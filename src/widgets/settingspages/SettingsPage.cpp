@@ -5,9 +5,12 @@
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FunctionEventFilter.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
+#include "util/SettingsStylesheet.hpp"
 
 #include <QDebug>
 
@@ -73,7 +76,13 @@ bool filterItemsRec(QObject *object, const QString &query)
 }
 
 SettingsPage::SettingsPage()
+    : theme(getApp()->getThemes())
 {
+    this->managedConnections_.managedConnect(this->theme->updated, [this]() {
+        this->themeChangedEvent();
+
+        this->update();
+    });
 }
 
 bool SettingsPage::filterElements(const QString &query)
@@ -157,6 +166,12 @@ QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting,
                      });
 
     return w;
+}
+
+void SettingsPage::themeChangedEvent()
+{
+    auto stylesheet = loadSettingsStylesheet();
+    this->setStyleSheet(stylesheet);
 }
 
 }  // namespace chatterino

@@ -955,7 +955,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "Using multiple extension IDs from different browsers may cause "
             "issues.");
         note->setWordWrap(true);
-        note->setStyleSheet("color: #bbb");
+        // note->setStyleSheet("color: #bbb");
 
         layout.addWidget(note);
 
@@ -978,7 +978,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #    endif
         );
         note->setWordWrap(true);
-        note->setStyleSheet("color: #bbb");
+        // note->setStyleSheet("color: #bbb");
         layout.addWidget(note);
 
         auto *form = new QFormLayout();
@@ -1018,8 +1018,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                                       auto) mutable {
         QString newPath = getApp()->getPaths().cacheDirectory();
 
+        const auto *theme = getTheme();
+        const auto *linkColor = theme->isLightTheme() ? "#005d81" : "white";
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
-                                R"("><span style="color: white;">)" +
+                                QString(R"("><span style="color: %1;">)")
+                                    .arg(linkColor) +
                                 shortenString(newPath, 50) + "</span></a>";
         cachePathLabel->setText(pathShortened);
         cachePathLabel->setToolTip(newPath);
