@@ -22,7 +22,7 @@ local tests = {
             server_received_time = 123345678,
             highlight_color = "#00ff00",
             elements = {
-                { type = "text", text = "abcde" },
+                { type = "text", text = "abcde", exhaustive_flags = true },
                 { type = "twitch-moderation" },
             },
         })
@@ -47,6 +47,9 @@ local tests = {
         assert(msg.server_received_time == clone.server_received_time)
         assert(msg.highlight_color == clone.highlight_color)
         assert(#msg:elements() == #clone:elements())
+        for i, element in pairs(msg:elements()) do
+            assert(element:to_json() == clone:elements()[i]:to_json())
+        end
     end,
 }
 

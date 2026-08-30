@@ -100,6 +100,30 @@ using TestParam = std::tuple<QString, QString, TextDirection>;
 
 namespace chatterino {
 
+TEST(AsciiArtLayout, LimitsTheMessageWidth)
+{
+    MockApplication mockApplication;
+    MessageLayoutContainer container;
+    MessageLayoutContext ctx{
+        .messageColors = {},
+        .flags = MessageElementFlag::Text,
+        .width = 1000,
+        .scale = 1.0F,
+        .imageScale = 1.0F,
+    };
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale, {});
+
+    EXPECT_GT(container.remainingWidth(), 340);
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale,
+                          MessageFlag::AsciiArt);
+    EXPECT_EQ(container.remainingWidth(), 340);
+
+    TextElement art(QString(100, QChar(0x28FF)), MessageElementFlag::Text);
+    art.addToContainer(container, ctx);
+
+    container.endLayout();
+}
+
 class MessageLayoutContainerTest : public ::testing::TestWithParam<TestParam>
 {
 public:
@@ -244,5 +268,52 @@ INSTANTIATE_TEST_SUITE_P(
             u"@aliens LTR !emote2 !emote1 وحتّ غير LTR text !emote3 !emote4 هو عاد"_s,
             TextDirection::LTR,
         }));
+
+TEST(MessageLayoutContainer, ExhaustiveFlags)
+{
+    MockApplication app;
+
+    MessageLayoutContainer container;
+
+    ImageElement imageElement(Image::getEmpty(), MessageElementFlags{
+                                                     MessageElementFlag::Text,
+                                                 });
+
+    ImageElement imageHeaderElement(Image::getEmpty(),
+                                    MessageElementFlags{
+                                        MessageElementFlag::Text,
+                                        MessageElementFlag::RepliedMessage,
+                                    });
+
+    ASSERT_EQ(container.elements_.size(), 0);
+
+    MessageLayoutContext ctx{
+        .messageColors = {},
+    };
+
+    // No flags matching, nothing was added
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 0);
+
+    ctx.flags = {
+        MessageElementFlag::Text,
+    };
+
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 1);
+
+    imageHeaderElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 2);
+
+    imageElement.exhaustiveFlags = true;
+    imageHeaderElement.exhaustiveFlags = true;
+
+    imageElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 3);
+
+    // This was not added, because ctx.flags only contains Text, not RepliedMessage
+    imageHeaderElement.addToContainer(container, ctx);
+    ASSERT_EQ(container.elements_.size(), 3);
+}
 
 }  // namespace chatterino

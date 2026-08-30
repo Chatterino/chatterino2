@@ -2,10 +2,25 @@
     "input": "@badges=subscriber/0,premium/1;color=#0000FF;display-name=byebyeheart;emotes=;id=fe390424-ab89-4c33-bb5a-53c6e5214b9f;login=byebyeheart;mod=0;msg-id=sub;msg-param-months=0;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=Prime;room-id=39298218;subscriber=0;system-msg=byebyeheart\\sjust\\ssubscribed\\swith\\sTwitch\\sPrime!;tmi-sent-ts=1528190963670;turbo=0;user-id=131956000;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
                 {
                     "element": {
                         "color": "System",
@@ -22,6 +37,7 @@
                             "9:29"
                         ]
                     },
+                    "exhaustiveFlags": true,
                     "flags": "Timestamp",
                     "format": "",
                     "link": {
@@ -35,6 +51,7 @@
                 },
                 {
                     "color": "Text",
+                    "exhaustiveFlags": true,
                     "fallbackColor": "System",
                     "flags": "Text|Mention",
                     "link": {
@@ -53,6 +70,7 @@
                 },
                 {
                     "color": "System",
+                    "exhaustiveFlags": true,
                     "flags": "Text",
                     "link": {
                         "type": "None",
@@ -73,21 +91,22 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|Highlighted|Collapsed|Subscription",
             "frozen": false,
-            "id": "",
+            "highlightColor": "#64c466ff",
+            "id": "fe390424-ab89-4c33-bb5a-53c6e5214b9f",
             "localizedName": "",
-            "loginName": "",
+            "loginName": "byebyeheart",
             "messageText": "byebyeheart just subscribed with Twitch Prime!",
             "searchText": "byebyeheart just subscribed with Twitch Prime!",
-            "serverReceivedTime": "",
+            "serverReceivedTime": "2018-06-05T09:29:23Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
             ],
-            "userID": "",
-            "usernameColor": "#ff000000"
+            "userID": "131956000",
+            "usernameColor": "#ff0000ff"
         }
     ]
 }

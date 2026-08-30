@@ -7,6 +7,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 #include "messages/MessageFlag.hpp"
 
 #include <IrcMessage>
@@ -158,7 +159,9 @@ public:
         return pointer;
     }
 
-    void appendOrEmplaceText(const QString &text, MessageColor color);
+    MessageElement *appendOrEmplaceText(
+        const QString &text, MessageColor color,
+        MessageElementFlags messageFlags = MessageElementFlag::Text);
     void appendOrEmplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
 
@@ -240,7 +243,8 @@ public:
     static MessagePtrMut makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
-        const QTime &time, const Communi::IrcMessage &ircMessage);
+        const QTime &time, const Communi::IrcMessage &ircMessage,
+        TwitchChannel *channel);
 
     static MessagePtrMut makeSubgiftMessage(Communi::TagsRef tags,
                                             const QTime &time,
@@ -271,7 +275,7 @@ private:
     void addTextOrEmote(TextState &state, QString string);
 
     Outcome tryAppendCheermote(TextState &state, const QString &string);
-    Outcome tryAppendEmote(TwitchChannel *twitchChannel, const EmoteName &name);
+    Outcome tryAppendEmote(TwitchChannel *twitchChannel, EmoteNameView name);
 
     bool isEmpty() const;
     MessageElement &back();
@@ -283,8 +287,9 @@ private:
                        TwitchChannel *twitchChannel,
                        bool trimSubscriberUsername);
     void parseMessageID(Communi::TagsRef tags);
-    /// Parses most of them message flags based on the given tags
-    void parseMessageTags(Communi::TagsRef tags);
+    /// Parses most of the message flags based on the given tags
+    void parseMessageTags(Communi::TagsRef tags, TwitchChannel *channel,
+                          bool hasContent);
 
     /// Parses the room-ID this message was received in
     ///
