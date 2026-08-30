@@ -346,6 +346,7 @@ set(SOURCE_FILES
         messages/MessageElement.cpp
         messages/MessageElement.hpp
         messages/MessageFlag.hpp
+        messages/MessageParseArgs.hpp
         messages/MessageSimilarity.cpp
         messages/MessageSimilarity.hpp
         messages/MessageSink.hpp
