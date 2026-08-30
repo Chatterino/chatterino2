@@ -1140,10 +1140,12 @@ void TwitchIrcServer::connect()
 
     this->disconnect();
 
-    this->initializeConnection(this->writeConnection_.get(),
-                               ConnectionType::Write);
-    this->initializeConnection(this->readConnection_.get(),
-                               ConnectionType::Read);
+    {
+        std::scoped_lock l(this->connectionMutex_);
+        initializeConnection(this->writeConnection_.get(),
+                             ConnectionType::Write);
+        initializeConnection(this->readConnection_.get(), ConnectionType::Read);
+    }
 }
 
 void TwitchIrcServer::disconnect()
