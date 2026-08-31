@@ -37,6 +37,11 @@ concept HasDynamicAndCustomizableName =
     HasDynamicDefaultName<T> && HasCustomizableName<T>;
 
 template <typename T>
+concept SupportsErrors = requires(T a) {
+    { a.getError() } -> std::same_as<QString>;
+};
+
+template <typename T>
 concept HasDefaultSound = requires {
     { T::SOUND_DEFAULT } -> std::convertible_to<QStringView>;
 };
@@ -269,6 +274,19 @@ std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h)
     assert(c);
 
     return c;
+}
+
+QString getError(const AllHighlights &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const SupportsErrors auto &h) {
+                              return h.getError();
+                          },
+                          [](const auto & /*h*/) {
+                              return QString{};
+                          },
+                      },
+                      h);
 }
 
 }  // namespace chatterino::highlights
