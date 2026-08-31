@@ -9,6 +9,7 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageFlag.hpp"
+#include "messages/MessageParseArgs.hpp"
 
 #include <IrcMessage>
 #include <IrcTagsRef>
@@ -77,17 +78,6 @@ const ImageUploaderResultTag imageUploaderResultMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
-
-struct MessageParseArgs {
-    bool disablePingSounds = false;
-    bool isReceivedWhisper = false;
-    bool isSentWhisper = false;
-    bool trimSubscriberUsername = false;
-    bool isSubscriptionMessage = false;
-    bool allowIgnore = true;
-    bool isAction = false;
-    QString channelPointRewardId = "";
-};
 
 struct HighlightAlert {
     QUrl customSound;
