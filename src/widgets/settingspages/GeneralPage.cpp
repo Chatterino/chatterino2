@@ -1552,7 +1552,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.loadTwitchMessageHistoryOnConnect)
         ->addTo(layout);
 
-    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl)
+    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl,
+                            recentmessages::DEFAULT_API_URL.toString())
         ->setTooltip(
             "Use %1 where the channel name should be inserted, for example: " +
             recentmessages::DEFAULT_API_URL.toString())
