@@ -97,6 +97,13 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
             this->giveFocus(Qt::MouseFocusReason);
         });
 
+    // Let the parent split handle twitch link actions
+    std::ignore = this->ui_.threadView->openChannelIn.connect(
+        [this](QString channelName, FromTwitchLinkOpenChannelIn openIn) {
+            this->split_->getChannelView().openChannelIn.invoke(channelName,
+                                                                openIn);
+        });
+
     // Create SplitInput with inline replying disabled
     this->ui_.replyInput =
         new SplitInput(this, this->split_, this->ui_.threadView, false);
