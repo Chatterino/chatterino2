@@ -58,6 +58,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/EventSubMessages.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/WebSocketPool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NativeMessaging.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NotificationController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ImageUploader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchChannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchUserColor.cpp
