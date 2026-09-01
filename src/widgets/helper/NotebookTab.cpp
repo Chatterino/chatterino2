@@ -166,7 +166,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
                      });
     this->menu_.addAction(this->highlightNewMessagesAction_);
 
-    this->alwaysShowAction_ = new QAction("Show tab while offline", &this->menu_);
+    this->alwaysShowAction_ =
+        new QAction("Show tab while offline", &this->menu_);
     this->alwaysShowAction_->setToolTip("Show the tab while offline even if "
                                         "\"Only show live tabs\" is selected");
     this->alwaysShowAction_->setCheckable(true);
