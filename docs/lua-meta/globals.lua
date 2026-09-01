@@ -932,6 +932,7 @@ c2.MessageFlag = {
     WatchStreak = 0,
     Announcement = 0,
     UncategorizedNotification = 0,
+    AsciiArt = 0,
 }
 
 -- End src/messages/MessageFlag.hpp
