@@ -25,6 +25,8 @@ jobs:
       - name: Check formatting with Prettier
         run: |
           npx prettier@3.8.1 --write .
+      - name: Generate LuaLS metadata
+        run: python3 scripts/make_luals_meta.py
       - name: Show diff
         run: git --no-pager diff --exit-code --color=never
         shell: bash
