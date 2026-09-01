@@ -135,7 +135,7 @@
                     },
                     "style": "ChatMedium",
                     "tooltip": "",
-                    "trailingSpace": true,
+                    "trailingSpace": false,
                     "type": "TextElement",
                     "words": [
                         "&"
