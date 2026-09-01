@@ -166,7 +166,9 @@ NotebookTab::NotebookTab(Notebook *notebook)
                      });
     this->menu_.addAction(this->highlightNewMessagesAction_);
 
-    this->alwaysShowAction_ = new QAction("Always show Tab", &this->menu_);
+    this->alwaysShowAction_ = new QAction("Show tab while offline", &this->menu_);
+    this->alwaysShowAction_->setToolTip("Show the tab while offline even if "
+                                        "\"Only show live tabs\" is selected");
     this->alwaysShowAction_->setCheckable(true);
     this->alwaysShowAction_->setChecked(this->alwaysShow_);
     QObject::connect(this->alwaysShowAction_, &QAction::triggered,
@@ -175,6 +177,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
                          this->notebook_->refresh();
                      });
     this->menu_.addAction(this->alwaysShowAction_);
+
+    this->menu_.setToolTipsVisible(true);
 
     this->menu_.addSeparator();
 
