@@ -99,7 +99,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
 
     // Let the parent split handle twitch link actions
     std::ignore = this->ui_.threadView->openChannelIn.connect(
-        [this](const QString &channelName, FromTwitchLinkOpenChannelIn openIn) {
+        [this](QString channelName, FromTwitchLinkOpenChannelIn openIn) {
             this->split_->getChannelView().openChannelIn.invoke(
                 std::move(channelName), openIn);
         });
