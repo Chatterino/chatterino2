@@ -71,8 +71,15 @@ const QStringList &getSampleCheerMessages()
 
 const QStringList &getSampleSubMessages()
 {
+    // clang-format off
     static QStringList list{
+        // resub with message
+        R"(@tmi-sent-ts=1787998376753;subscriber=1;mod=1;id=df68336e-aa52-45ff-a217-f87ce45cf1f8;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=moderator/1,subscriber/132,sub-gifter/10;badge-info=subscriber/139;color=#CC44FF;flags=;user-type=mod;emotes=;msg-param-multimonth-duration=18;msg-param-streak-months=139;msg-param-was-gifted=false;msg-param-months=0;msg-param-multimonth-tenure=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol);msg-id=resub;msg-param-cumulative-months=139;msg-param-sub-plan=1000;system-msg=pajlada\ssubscribed\sat\sTier\s1.\sThey've\ssubscribed\sfor\s139\smonths,\scurrently\son\sa\s139\smonth\sstreak!;msg-param-should-share-streak=1 :tmi.twitch.tv USERNOTICE #pajlada :test a b c)",
+
+        // resub with message
         R"(@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=11148817;subscriber=1;system-msg=ronni\shas\ssubscribed\sfor\s6\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!)",
+
+        // subgift
         R"(@badges=staff/1,premium/1;color=#0000FF;display-name=TWW2;emotes=;id=e9176cd8-5e22-4684-ad40-ce53c2561c5e;login=tww2;mod=0;msg-id=subgift;msg-param-months=1;msg-param-recipient-display-name=Mr_Woodchuck;msg-param-recipient-id=89614178;msg-param-recipient-name=mr_woodchuck;msg-param-sub-plan-name=House\sof\sNyoro~n;msg-param-sub-plan=1000;room-id=19571752;subscriber=0;system-msg=TWW2\sgifted\sa\sTier\s1\ssub\sto\sMr_Woodchuck!;tmi-sent-ts=1521159445153;turbo=0;user-id=13405587;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada)",
 
         // hyperbolicxd gifted a sub to quote_if_nam
@@ -82,7 +89,7 @@ const QStringList &getSampleSubMessages()
         R"(@badge-info=subscriber/32;badges=subscriber/3030,sub-gift-leader/2;color=#FF8EA3;display-name=iNatsuFN;emotes=;flags=;id=0d0decbd-b8f4-4e83-9e18-eca9cab69153;login=inatsufn;mod=0;msg-id=subgift;msg-param-gift-months=6;msg-param-goal-contribution-type=SUBS;msg-param-goal-current-contributions=881;msg-param-goal-target-contributions=900;msg-param-goal-user-contributions=1;msg-param-months=16;msg-param-origin-id=2524053421157386961;msg-param-recipient-display-name=kimmi_tm;msg-param-recipient-id=225806893;msg-param-recipient-user-name=kimmi_tm;msg-param-sender-count=334;msg-param-sub-plan-name=Channel\sSubscription\s(mxddy);msg-param-sub-plan=1000;room-id=210915729;subscriber=1;system-msg=iNatsuFN\sgifted\s6\smonths\sof\sTier\s1\sto\skimmi_tm.\sThey've\sgifted\s334\smonths\sin\sthe\schannel!;tmi-sent-ts=1712034497332;user-id=218205938;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #pajlada)",
 
         // multi-month anon sub gift
-        R"(@msg-param-goal-user-contributions=1;system-msg=An\sanonymous\suser\sgifted\sa\sTier\s1\ssub\sto\sMohammadrezaDH!\s;msg-param-goal-current-contributions=2;vip=0;color=;user-id=274598607;mod=0;flags=;msg-param-months=2;historical=1;id=afa2155b-f563-4973-a5c2-e4075882bbfb;msg-param-gift-months=6;msg-id=subgift;badge-info=;msg-param-recipient-user-name=mohammadrezadh;login=ananonymousgifter;room-id=441388138;msg-param-goal-target-contributions=25;rm-received-ts=1712002037736;msg-param-recipient-id=204174899;emotes=;display-name=AnAnonymousGifter;badges=;msg-param-fun-string=FunStringFive;msg-param-goal-contribution-type=NEW_SUB_POINTS;msg-param-origin-id=8862142563198473546;msg-param-recipient-display-name=MohammadrezaDH;msg-param-sub-plan-name=jmarxists;user-type=;subscriber=0;tmi-sent-ts=1712002037615;msg-param-sub-plan=1000;msg-param-goal-description=day\slee\sgoal\s:-) :tmi.twitch.tv USERNOTICE #pajlada)",
+        R"(@msg-param-goal-user-contributions=1;system-msg=An\sanonymous\suser\sgifted\sa\sTier\s1\ssub\sto\sMohammadrezaDH!\s;msg-param-goal-current-contributions=2;vip=0;color=;user-id=274598607;mod=0;flags=;msg-param-months=2;id=afa2155b-f563-4973-a5c2-e4075882bbfb;msg-param-gift-months=6;msg-id=subgift;badge-info=;msg-param-recipient-user-name=mohammadrezadh;login=ananonymousgifter;room-id=441388138;msg-param-goal-target-contributions=25;rm-received-ts=1712002037736;msg-param-recipient-id=204174899;emotes=;display-name=AnAnonymousGifter;badges=;msg-param-fun-string=FunStringFive;msg-param-goal-contribution-type=NEW_SUB_POINTS;msg-param-origin-id=8862142563198473546;msg-param-recipient-display-name=MohammadrezaDH;msg-param-sub-plan-name=jmarxists;user-type=;subscriber=0;tmi-sent-ts=1712002037615;msg-param-sub-plan=1000;msg-param-goal-description=day\slee\sgoal\s:-) :tmi.twitch.tv USERNOTICE #pajlada)",
 
         // multi-month sub gift by broadcaster
         R"(@user-id=35759863;msg-param-origin-id=2862055070165643340;display-name=Lucidfoxx;id=eeb3cdb8-337c-413a-9521-3a884ff78754;msg-param-gift-months=12;msg-param-sub-plan=1000;vip=0;emotes=;badges=broadcaster/1,subscriber/3042,partner/1;msg-param-recipient-user-name=ogprodigy;msg-param-recipient-id=53888434;badge-info=subscriber/71;room-id=35759863;msg-param-recipient-display-name=OGprodigy;msg-param-sub-plan-name=Silver\sPackage;subscriber=1;system-msg=Lucidfoxx\sgifted\sa\sTier\s1\ssub\sto\sOGprodigy!;login=lucidfoxx;msg-param-sender-count=0;user-type=;mod=0;flags=;rm-received-ts=1712803947891;color=#EB078D;msg-param-months=15;tmi-sent-ts=1712803947773;msg-id=subgift :tmi.twitch.tv USERNOTICE #pajlada)",
@@ -114,6 +121,7 @@ const QStringList &getSampleSubMessages()
         // pajlada gifted a sub to rustafur
         R"(@tmi-sent-ts=1751793597378;subscriber=1;id=ac51c358-0525-468f-9e0f-e9f2b7953c29;room-id=11148817;user-id=11148817;login=pajlada;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/114;color=#CC44FF;flags=;user-type=;emotes=;msg-param-sub-plan-name=look\sat\sthose\sshitty\semotes,\srip\s$5\sLUL;msg-param-gift-months=1;system-msg=pajlada\sgifted\sa\sTier\s1\ssub\sto\srustafur!;msg-param-months=6;msg-param-origin-id=4645652708379472175;msg-param-recipient-id=27787997;msg-param-sub-plan=1000;msg-id=subgift;msg-param-recipient-display-name=rustafur;msg-param-recipient-user-name=rustafur;msg-param-community-gift-id=4645652708379472175;msg-param-sender-count=0 :tmi.twitch.tv USERNOTICE #pajlada)",
     };
+    // clang-format on
     return list;
 }
 
@@ -126,6 +134,12 @@ const QStringList &getSampleMiscMessages()
 
         // "first time chat" message
         R"(@badge-info=;badges=glhf-pledge/1;client-nonce=5d2627b0cbe56fa05faf5420def4807d;color=#1E90FF;display-name=oldcoeur;emote-only=1;emotes=84608:0-7;first-msg=1;flags=;id=7412fea4-8683-4cc9-a506-4228127a5c2d;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1623429859222;turbo=0;user-id=139147886;user-type= :oldcoeur!oldcoeur@oldcoeur.tmi.twitch.tv PRIVMSG #pajlada :cmonBruh)",
+
+        // "viewer milestone" / "watch streak" with message
+        R"(@tmi-sent-ts=1787970789336;subscriber=1;id=e077bbc1-5c82-4e99-8301-6fb66ad27134;room-id=11148817;user-id=931203199;login=xoorler;display-name=xoorler;badges=subscriber/24,squirtle/1;badge-info=subscriber/35;color=#B60728;flags=;user-type=;emotes=175766:0-8;msg-param-category=watch-streak;msg-param-id=852beb7e-cf53-449b-a2d5-51f2e0008d79;msg-id=viewermilestone;msg-param-copoReward=450;msg-param-value=5;system-msg=xoorler\swatched\s5\sconsecutive\sstreams\sand\ssparked\sa\swatch\sstreak! :tmi.twitch.tv USERNOTICE #pajlada :forsenWut)",
+
+        // "viewer milestone" / "watch streak" without message
+        R"(@badges=subscriber/3,sub-gifter/5;mod=0;subscriber=1;flags=;color=#BE0000;rm-received-ts=1780143568293;msg-id=viewermilestone;emotes=;msg-param-id=8f04affa-bab5-4d50-81b9-40f97bff86bb;badge-info=subscriber/3;system-msg=club_reg\swatched\s15\sconsecutive\sstreams\sand\ssparked\sa\swatch\sstreak!;id=12265c31-d7c1-4344-9afd-894b3c290bc9;display-name=club_reg;vip=0;user-type=;msg-param-value=15;msg-param-category=watch-streak;msg-param-copoReward=450;login=club_reg;user-id=28392974;tmi-sent-ts=1780143566057;room-id=11148817 :tmi.twitch.tv USERNOTICE #pajlada)",
 
         // Message with founder badge
         R"(@badge-info=founder/72;badges=founder/0,bits/5000;color=#FF0000;display-name=TranRed;emotes=;first-msg=0;flags=;id=7482163f-493d-41d9-b36f-fba50e0701b7;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1641123773885;turbo=0;user-id=57019243;user-type= :tranred!tranred@tranred.tmi.twitch.tv PRIVMSG #pajlada :GFMP pajaE)",

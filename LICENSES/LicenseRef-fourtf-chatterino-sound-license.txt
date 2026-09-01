@@ -1,0 +1,9 @@
+Copyright (c) 2016 fourtf
+
+Permission is granted to use, copy, and distribute this sound effect:
+
+- as part of Chatterino and derivative versions of Chatterino;
+- in recordings, streams, or demonstrations of Chatterino or its derivatives, without attribution;
+- in other software, provided it is clearly identified as the "Chatterino notification sound."
+
+Any other use requires prior permission from the copyright holder.

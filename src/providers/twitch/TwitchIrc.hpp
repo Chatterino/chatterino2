@@ -68,7 +68,7 @@ std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
 ///                      (content)).
 /// @returns A list of emotes and their positions
 std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(Communi::TagsRef tags,
-                                                     const QString &content,
+                                                     QStringView content,
                                                      int messageOffset);
 
 }  // namespace chatterino
