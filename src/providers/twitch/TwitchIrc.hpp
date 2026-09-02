@@ -12,6 +12,7 @@
 #include <QVariantMap>
 
 #include <unordered_map>
+#include <variant>
 
 namespace chatterino {
 
