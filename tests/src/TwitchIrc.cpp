@@ -180,8 +180,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                     4,  // end
                     TwitchEmoteOccurrence{
                         .ptr = twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        .name = EmoteName{"Kappa"},              // name
+                            EmoteId{"25"}, EmoteName{"Kappa"}),
+                        .name = EmoteName{"Kappa"},
                     },
                 }},
             },
@@ -194,8 +194,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                     4,  // end
                     TwitchEmoteOccurrence{
                         .ptr = twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        .name = EmoteName{"Kappa"},              // name
+                            EmoteId{"25"}, EmoteName{"Kappa"}),
+                        .name = EmoteName{"Kappa"},
                     },
                 }},
             },
@@ -208,8 +208,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                     4,  // end
                     TwitchEmoteOccurrence{
                         .ptr = twitchEmotes->getOrCreateEmote(
-                            EmoteId{"1902"}, EmoteName{"Keepo"}),  // ptr
-                        .name = EmoteName{"Keepo"},                // name
+                            EmoteId{"1902"}, EmoteName{"Keepo"}),
+                        .name = EmoteName{"Keepo"},
                     },
                 }},
             },
@@ -223,8 +223,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         4,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                            .name = EmoteName{"Kappa"},              // name
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
                         },
                     },
                     {
@@ -232,8 +232,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         10,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"1902"}, EmoteName{"Keepo"}),  // ptr
-                            .name = EmoteName{"Keepo"},                // name
+                                EmoteId{"1902"}, EmoteName{"Keepo"}),
+                            .name = EmoteName{"Keepo"},
                         },
                     },
                     {
@@ -241,9 +241,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         19,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"305954156"},
-                                EmoteName{"PogChamp"}),     // ptr
-                            .name = EmoteName{"PogChamp"},  // name
+                                EmoteId{"305954156"}, EmoteName{"PogChamp"}),
+                            .name = EmoteName{"PogChamp"},
                         },
                     },
                 },
@@ -258,8 +257,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         4,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                            .name = EmoteName{"Kappa"},              // name
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
                         },
                     },
                     {
@@ -267,8 +266,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         10,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                            .name = EmoteName{"Kappa"},              // name
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
                         },
                     },
                 },
@@ -283,8 +282,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         4,  // end
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                            .name = EmoteName{"Kappa"},              // name
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
                         },
                     },
                     {
@@ -292,8 +291,8 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                         13,  // end - modified due to emoji
                         TwitchEmoteOccurrence{
                             .ptr = twitchEmotes->getOrCreateEmote(
-                                EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                            .name = EmoteName{"Kappa"},              // name
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
                         },
                     },
                 },
@@ -312,9 +311,9 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                     0,  // start
                     0,  // end
                     TwitchEmoteOccurrence{
-                        .ptr = twitchEmotes->getOrCreateEmote(
-                            EmoteId{"84608"}, EmoteName{"f"}),  // ptr
-                        .name = EmoteName{"f"},                 // name
+                        .ptr = twitchEmotes->getOrCreateEmote(EmoteId{"84608"},
+                                                              EmoteName{"f"}),
+                        .name = EmoteName{"f"},
                     },
                 },
             },
@@ -327,9 +326,9 @@ TEST_F(TestTwitchIrc, ParseTwitchSpecials)
                     0,  // start
                     1,  // end
                     TwitchEmoteOccurrence{
-                        .ptr = twitchEmotes->getOrCreateEmote(
-                            EmoteId{"84609"}, EmoteName{"fo"}),  // ptr
-                        .name = EmoteName{"fo"},                 // name
+                        .ptr = twitchEmotes->getOrCreateEmote(EmoteId{"84609"},
+                                                              EmoteName{"fo"}),
+                        .name = EmoteName{"fo"},
                     },
                 },
             },
