@@ -405,10 +405,10 @@ bool doesWordContainATwitchSpecial(
 
     const auto &currentTwitchEmote = *currentTwitchSpecialIt;
 
-    auto wordEnd = cursor + word.length();
-
     // Check if this emote fits within the word boundaries
-    if (currentTwitchEmote.start < cursor || currentTwitchEmote.end > wordEnd)
+    if (currentTwitchEmote.start < cursor ||
+        currentTwitchEmote.start + currentTwitchEmote.length >
+            cursor + word.length())
     {
         // this emote does not fit xd
         return false;

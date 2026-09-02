@@ -67,7 +67,7 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
     auto emoteAt = [&](int at, const QString &name) {
         return TwitchSpecialOccurrence{
             .start = at,
-            .end = static_cast<int>(at + name.size() - 1),
+            .length = static_cast<int>(name.size()),
             .data =
                 TwitchEmoteOccurrence{
                     .ptr = twitchEmotes->getOrCreateEmote(EmoteId{name},
