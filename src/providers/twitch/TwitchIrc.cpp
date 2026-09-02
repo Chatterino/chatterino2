@@ -92,8 +92,8 @@ void appendTwitchEmoteOccurrences(QStringView emote,
             [&](QStringView nameStr) -> std::optional<TwitchEmoteOccurrence> {
                 auto name = EmoteName{nameStr.toString()};
                 auto ptr =
-                    getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
-                        id, name);
+                    app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id,
+                                                                          name);
                 if (!ptr)
                 {
                     qCDebug(chatterinoTwitch) << "Invalid emote:" << id.string;
