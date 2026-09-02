@@ -2083,14 +2083,32 @@ void MessageBuilder::addTwitchGif(const QString &id, QStringView originalText)
 {
     auto original = originalText.toString();
     QString link = u"https://i.giphy.com/" % id % u".webp";
-    auto *el = this->emplace<LinkElement>(
-        LinkElement::Parsed{
-            .lowercase = original,
-            .original = original,
-        },
-        link, MessageElementFlag::Text, MessageColor::Link);
+    if (getSettings()->showTwitchGifs)
+    {
+        ImageSet set{
+            Image::fromUrl(
+                Url{u"https://media4.giphy.com/media/" % id % u"/100.webp"},
+                1.0, {100, 100}),
+            Image::fromUrl(
+                Url{u"https://media4.giphy.com/media/" % id % u"/200.webp"},
+                0.5, {200, 200}),
+        };
+        this->emplace<LinebreakElement>(MessageElementFlag::TwitchGif);
+        this->emplace<ScalingImageElement>(set, MessageElementFlag::TwitchGif)
+            ->setLink(Link{Link::Url, link})
+            ->setTooltip(original.toHtmlEscaped());
+    }
+    else
+    {
+        auto *el = this->emplace<LinkElement>(
+            LinkElement::Parsed{
+                .lowercase = original,
+                .original = original,
+            },
+            link, MessageElementFlag::Text, MessageColor::Link);
 
-    getApp()->getLinkResolver()->resolve(el->linkInfo());
+        getApp()->getLinkResolver()->resolve(el->linkInfo());
+    }
 }
 
 bool MessageBuilder::isEmpty() const

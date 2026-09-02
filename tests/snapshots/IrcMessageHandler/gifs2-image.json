@@ -1,5 +1,5 @@
 {
-    "input": "@badge-info=subscriber/30;badges=broadcaster/1,subscriber/0;color=#033700;display-name=TwitchDev;emotes=;first-msg=0;flags=;gifs=0-33|joSNxeswxuc74Juo8X|https://media4.giphy.com/media/joSNxeswxuc74Juo8X/giphy.gif?cid=095d7a5dzizsiwgabonagkmigggv8v1spfai91ac3x0dsiy0&ep=v1_gifs_trending&rid=giphy.gif&ct=g;id=401abf17-7e99-45d6-9bdf-43934e839327;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1783632907018;turbo=0;user-id=141981764;user-type= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada :[Y A Y Yes GIF by Djemilah Birnie]",
+    "input": "@badge-info=subscriber/30;badges=broadcaster/1,subscriber/0;color=#033700;display-name=TwitchDev;emotes=;first-msg=0;flags=;gifs=7-40|joSNxeswxuc74Juo8X|https://media4.giphy.com/media/joSNxeswxuc74Juo8X/giphy.gif?cid=095d7a5dzizsiwgabonagkmigggv8v1spfai91ac3x0dsiy0&ep=v1_gifs_trending&rid=giphy.gif&ct=g;id=401abf17-7e99-45d6-9bdf-43934e839327;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1783632907018;turbo=0;user-id=141981764;user-type= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada :before [Y A Y Yes GIF by Djemilah Birnie] after",
     "output": [
         {
             "channelName": "pajlada",
@@ -112,21 +112,54 @@
                     ]
                 },
                 {
-                    "color": "Link",
+                    "color": "Text",
                     "flags": "Text",
-                    "link": "https://i.giphy.com/joSNxeswxuc74Juo8X.webp",
-                    "lowercase": [
-                        "[Y A Y Yes GIF by Djemilah Birnie]"
-                    ],
-                    "original": [
-                        "[Y A Y Yes GIF by Djemilah Birnie]"
-                    ],
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
                     "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "before"
+                    ]
+                },
+                {
+                    "flags": "TwitchGif",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
+                {
+                    "flags": "TwitchGif",
+                    "image": "https://media4.giphy.com/media/joSNxeswxuc74Juo8X/100.webp",
+                    "link": {
+                        "type": "Url",
+                        "value": "https://i.giphy.com/joSNxeswxuc74Juo8X.webp"
+                    },
                     "tooltip": "[Y A Y Yes GIF by Djemilah Birnie]",
                     "trailingSpace": true,
-                    "type": "LinkElement",
+                    "type": "ScalingImageElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
                     "words": [
-                        ""
+                        "after"
                     ]
                 },
                 {
@@ -150,8 +183,8 @@
             "id": "401abf17-7e99-45d6-9bdf-43934e839327",
             "localizedName": "",
             "loginName": "twitchdev",
-            "messageText": "[Y A Y Yes GIF by Djemilah Birnie]",
-            "searchText": "twitchdev  twitchdev: [Y A Y Yes GIF by Djemilah Birnie] ",
+            "messageText": "before [Y A Y Yes GIF by Djemilah Birnie] after",
+            "searchText": "twitchdev  twitchdev: before [Y A Y Yes GIF by Djemilah Birnie] after ",
             "serverReceivedTime": "2026-07-09T21:35:07Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
@@ -168,7 +201,7 @@
     "settings": {
         "appearance": {
             "messages": {
-                "showTwitchGifs": false
+                "showTwitchGifs": true
             }
         }
     }
