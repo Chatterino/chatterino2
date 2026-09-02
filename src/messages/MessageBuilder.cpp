@@ -2716,7 +2716,7 @@ void MessageBuilder::addWords(
                                 this->textColor_);
 
                             auto len = emote.name.string.length();
-                            cursor += len;
+                            cursor += static_cast<int>(len);
                             word = word.mid(len);
                         },
                     },
