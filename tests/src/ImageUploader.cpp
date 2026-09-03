@@ -289,7 +289,7 @@ protected:
 
 TEST_F(ImageUploaderTest, ImportClearsMissingOptionalSettings)
 {
-    configure();
+    this->configure();
 
     auto &settings = *getSettings();
     settings.imageUploaderHeaders = "Authorization: Bearer ugandan-key";
