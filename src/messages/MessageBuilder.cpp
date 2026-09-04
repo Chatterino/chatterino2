@@ -607,7 +607,7 @@ void tokenizeWordsWithEmoji(QStringView text,
     tokenizeWords(
         text, emotes,
         variant::Overloaded{
-            [&](const TokenizedText &tok) {
+            [&](TokenizedText tok) {
                 for (const auto &item :
                      getApp()->getEmotes()->getEmojis()->parse(tok.text))
                 {
@@ -2780,7 +2780,7 @@ void MessageBuilder::addWords(
     tokenizeWordsWithEmoji(
         text, twitchSpecials,
         variant::Overloaded{
-            [&](const TokenizedText &tok) {
+            [&](TokenizedText tok) {
                 this->addTextOrEmote(state, tok.text.toString());
             },
             [&](const TokenizedEmoji &tok) {
