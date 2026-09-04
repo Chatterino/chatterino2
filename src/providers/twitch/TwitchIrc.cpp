@@ -42,7 +42,7 @@ void createSpecialOccurrence(QStringView occurrence,
     }
     to -= messageOffset;
     from -= messageOffset;
-    if (to >= codepointToUtf16Idx.size())
+    if (to >= codepointToUtf16Idx.size() - 1)
     {
         qCDebug(chatterinoTwitch)
             << "Out of bounds range:" << occurrence
@@ -51,11 +51,11 @@ void createSpecialOccurrence(QStringView occurrence,
     }
 
     auto start = codepointToUtf16Idx[from];
-    auto end = codepointToUtf16Idx[to];
-    assert(start <= end && end < originalMessage.length() &&
+    auto end = codepointToUtf16Idx[to + 1];
+    assert(start <= end && end <= originalMessage.length() &&
            "Bad codepointToUtf16Idx list");
 
-    auto created = factory(originalMessage.sliced(start, end - start + 1));
+    auto created = factory(originalMessage.sliced(start, end - start));
     if (!created.has_value())
     {
         return;
@@ -63,7 +63,7 @@ void createSpecialOccurrence(QStringView occurrence,
 
     out.emplace_back(TwitchSpecialOccurrence{
         .start = start,
-        .end = end,
+        .length = end - start,
         .data = *std::move(created),
     });
 }
@@ -172,7 +172,7 @@ std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
     QVarLengthArray<uint16_t, 128> codepointToUtf16Idx;
     // We know the maximum length for the message, because
     // `#code-points <= #utf16-code-units` is always true.
-    codepointToUtf16Idx.reserve(content.size());
+    codepointToUtf16Idx.reserve(content.size() + 1);
     for (qsizetype i = 0; i < content.size(); ++i)
     {
         if (!content.at(i).isLowSurrogate())
@@ -180,6 +180,8 @@ std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
             codepointToUtf16Idx.push_back(i);
         }
     }
+    codepointToUtf16Idx.push_back(content.size());
+
     for (const auto emote : emotesTag.tokenize(u'/'))
     {
         appendTwitchEmoteOccurrences(emote, occurrences, codepointToUtf16Idx,

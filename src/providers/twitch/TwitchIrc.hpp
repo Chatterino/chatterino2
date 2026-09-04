@@ -24,8 +24,10 @@ struct TwitchEmoteOccurrence {
 };
 
 struct TwitchSpecialOccurrence {
+    /// Start position in the message (in utf16 units)
     int start;
-    int end;
+    /// Length of the occurrence (in utf16 units)
+    int length;
     std::variant<TwitchEmoteOccurrence> data;
 
     bool operator==(const TwitchSpecialOccurrence &other) const = default;

@@ -230,7 +230,6 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
             if (index >= pos)
             {
                 index += by;
-                item.end += by;
             }
         }
     };
@@ -258,8 +257,7 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
                     }
                     twitchSpecials.push_back(TwitchSpecialOccurrence{
                         .start = static_cast<int>(startIndex + pos),
-                        .end = static_cast<int>(startIndex + pos +
-                                                emote.first.string.length()),
+                        .length = static_cast<int>(emote.first.string.length()),
                         .data =
                             TwitchEmoteOccurrence{
                                 .ptr = emote.second,
@@ -321,7 +319,7 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
             if (match.hasMatch())
             {
                 emote.start = static_cast<int>(from + match.capturedStart());
-                emote.end = static_cast<int>(from + match.capturedEnd());
+                emote.length = static_cast<int>(match.capturedLength());
                 twitchSpecials.push_back(std::move(emote));
             }
         }
