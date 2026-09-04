@@ -391,18 +391,19 @@ std::vector<TwitchBadge> appendSharedChatBadges(
     return appendedBadges;
 }
 
-bool doesWordContainATwitchEmote(
+bool doesWordContainATwitchSpecial(
     int cursor, const QString &word,
-    const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
-    std::vector<TwitchEmoteOccurrence>::const_iterator &currentTwitchEmoteIt)
+    const std::vector<TwitchSpecialOccurrence> &twitchSpecials,
+    std::vector<TwitchSpecialOccurrence>::const_iterator
+        &currentTwitchSpecialIt)
 {
-    if (currentTwitchEmoteIt == twitchEmotes.end())
+    if (currentTwitchSpecialIt == twitchSpecials.end())
     {
         // No emote to add!
         return false;
     }
 
-    const auto &currentTwitchEmote = *currentTwitchEmoteIt;
+    const auto &currentTwitchEmote = *currentTwitchSpecialIt;
 
     auto wordEnd = cursor + word.length();
 
@@ -1795,21 +1796,21 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         }
 
         // Twitch emotes
-        auto twitchEmotes =
-            parseTwitchEmotes(tags, content, static_cast<int>(messageOffset));
+        auto twitchSpecials = parseTwitchOccurrences(
+            tags, content, static_cast<int>(messageOffset));
 
         // This runs through all ignored phrases and runs its replacements on content
         processIgnorePhrases(*getSettings()->ignoredMessages.readOnly(),
-                             content, twitchEmotes);
+                             content, twitchSpecials);
 
-        std::ranges::sort(twitchEmotes, [](const auto &a, const auto &b) {
+        std::ranges::sort(twitchSpecials, [](const auto &a, const auto &b) {
             return a.start < b.start;
         });
         auto uniqueEmotes = std::ranges::unique(
-            twitchEmotes, [](const auto &first, const auto &second) {
+            twitchSpecials, [](const auto &first, const auto &second) {
                 return first.start == second.start;
             });
-        twitchEmotes.erase(uniqueEmotes.begin(), uniqueEmotes.end());
+        twitchSpecials.erase(uniqueEmotes.begin(), uniqueEmotes.end());
 
         if (getSettings()->wrapAsciiArt && isAsciiArt(content))
         {
@@ -1819,7 +1820,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
         // words
         QStringList splits = content.split(' ');
 
-        builder.addWords(splits, twitchEmotes, textState);
+        builder.addWords(splits, twitchSpecials, textState);
 
         QString stylizedUsername =
             stylizeUsername(builder->loginName, builder.message());
@@ -2684,11 +2685,12 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
 
 void MessageBuilder::addWords(
     const QStringList &words,
-    const std::vector<TwitchEmoteOccurrence> &twitchEmotes, TextState &state)
+    const std::vector<TwitchSpecialOccurrence> &twitchSpecials,
+    TextState &state)
 {
     // cursor currently indicates what character index we're currently operating in the full list of words
     int cursor = 0;
-    auto currentTwitchEmoteIt = twitchEmotes.begin();
+    auto currentTwitchSpecialIt = twitchSpecials.begin();
 
     for (auto word : words)
     {
@@ -2698,23 +2700,29 @@ void MessageBuilder::addWords(
             continue;
         }
 
-        while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
-                                           currentTwitchEmoteIt))
+        while (doesWordContainATwitchSpecial(cursor, word, twitchSpecials,
+                                             currentTwitchSpecialIt))
         {
-            const auto &currentTwitchEmote = *currentTwitchEmoteIt;
+            const auto &currentSpecial = *currentTwitchSpecialIt;
 
-            if (currentTwitchEmote.start == cursor)
+            if (currentSpecial.start == cursor)
             {
-                // This emote exists right at the start of the word!
-                this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::Emote,
-                                            this->textColor_);
+                std::visit(
+                    variant::Overloaded{
+                        [&](const TwitchEmoteOccurrence &emote) {
+                            // This emote exists right at the start of the word!
+                            this->emplace<EmoteElement>(
+                                emote.ptr, MessageElementFlag::Emote,
+                                this->textColor_);
 
-                auto len = currentTwitchEmote.name.string.length();
-                cursor += len;
-                word = word.mid(len);
+                            auto len = emote.name.string.length();
+                            cursor += static_cast<int>(len);
+                            word = word.mid(len);
+                        },
+                    },
+                    currentSpecial.data);
 
-                ++currentTwitchEmoteIt;
+                ++currentTwitchSpecialIt;
 
                 if (word.isEmpty())
                 {
@@ -2733,7 +2741,7 @@ void MessageBuilder::addWords(
             // Emote is not at the start
 
             // 1. Add text before the emote
-            QString preText = word.left(currentTwitchEmote.start - cursor);
+            QString preText = word.left(currentSpecial.start - cursor);
             for (auto variant :
                  getApp()->getEmotes()->getEmojis()->parse(preText))
             {
