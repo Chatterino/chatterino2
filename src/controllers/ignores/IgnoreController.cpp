@@ -209,17 +209,19 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
     using SizeType = QString::size_type;
 
     auto removeSpecialsInRange = [&twitchSpecials](SizeType pos, SizeType len) {
-        // all emotes outside the range come before `it`
-        // all emotes in the range start at `it`
-        auto it = std::partition(
-            twitchSpecials.begin(), twitchSpecials.end(),
-            [pos, len](const auto &item) {
-                // returns true for emotes outside the range
-                return !((item.start >= pos) && item.start < (pos + len));
-            });
+        // all specials outside the range come before `it`
+        // all specials in the range start at `it`
+        auto it = std::ranges::partition(twitchSpecials, [&](const auto &item) {
+            // returns true for specials outside the range
+            if (item.start < pos)
+            {
+                return item.start + item.length <= pos;
+            }
+            return item.start >= pos + len;
+        });
         std::vector<TwitchSpecialOccurrence> specialsInRange(
-            it, twitchSpecials.end());
-        twitchSpecials.erase(it, twitchSpecials.end());
+            it.begin(), twitchSpecials.end());
+        twitchSpecials.erase(it.begin(), twitchSpecials.end());
         return specialsInRange;
     };
 

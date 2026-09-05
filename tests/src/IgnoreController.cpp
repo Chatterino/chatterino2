@@ -182,6 +182,48 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
             "fo fo fo fo Kappa",
             {emoteAt(11, "Kappa")},
         },
+        {
+            .phrases = {regularReplace("pp", "p")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo Kapa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("pa", "a")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo Kapa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("Ka", "a")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo appa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("Ka", "a")},
+            .input = "Kappa",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "appa",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("pa", "a")},
+            .input = "Kappa",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "Kapa",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("Word", "wor")},
+            .input = "[Multi Word Emote]",
+            .twitchSpecials = {emoteAt(0, "[Multi Word Emote]")},
+            .expectedMessage = "[Multi wor Emote]",
+            .expectedTwitchSpecials = {},
+        },
     };
 
     for (const auto &test : testCases)
