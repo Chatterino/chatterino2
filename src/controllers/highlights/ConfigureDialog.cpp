@@ -159,6 +159,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 #endif
 
     {
+        auto *lbl = new QLabel("Enabled");
         auto *w = new QCheckBox;
         w->setChecked(highlights::isEnabled(this->data));
 
@@ -170,7 +171,17 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                  },
                                  this->data);
                          });
-        formLayout->addRow("Enabled", w);
+        formLayout->addRow(lbl, w);
+
+        addSettingMenu(lbl, w, [this, w] {
+            std::visit(
+                [](auto &&h) {
+                    h.enabled = std::nullopt;
+                },
+                this->data);
+            QSignalBlocker signalBlocker(w);
+            w->setChecked(highlights::isEnabled(this->data));
+        });
     }
 
     auto *nameWidget = new QLineEdit();
