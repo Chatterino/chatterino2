@@ -7,6 +7,7 @@
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "controllers/highlights/types/Outcome.hpp"
+#include "util/DisplayBadge.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
@@ -21,6 +22,9 @@
 
 namespace chatterino::highlights {
 
+/// List of Twitch badges available for highlight
+const QList<DisplayBadge> &twitchBadges();
+
 /// User-created highlight matching messages based on the message Twitch badges
 struct BadgeHighlight {
     static constexpr QStringView TYPE = u"badge";
@@ -33,17 +37,8 @@ struct BadgeHighlight {
 
     BadgeHighlight(QStringView _id);
 
-    QString getDefaultName() const
-    {
-        return this->displayName;
-    }
-
-    void setDisplayName(const QString &newValue)
-    {
-        this->displayName = newValue;
-    }
-
-    QString displayName;
+    /// Returns the display name of the current `badgeName`
+    QString getDefaultName() const;
 
     QStringView getID() const
     {
@@ -73,7 +68,7 @@ struct BadgeHighlight {
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
 protected:
-    /// Contains the raw badge name
+    /// Contains the raw badge name (e.g. "subscriber")
     QString badgeName;
 
 public:
@@ -130,7 +125,6 @@ struct Serialize<chatterino::highlights::BadgeHighlight> {
         rj::setOptionally(ret, "enabled", value.enabled, a);
 
         rj::setOptionally(ret, "badgeName", value.badgeName, a);
-        rj::setOptionally(ret, "displayName", value.displayName, a);
 
         value.outcome.serialize(ret, a);
 
@@ -169,7 +163,6 @@ struct Deserialize<chatterino::highlights::BadgeHighlight> {
         chatterino::rj::getSafe(value, "enabled", h.enabled);
 
         chatterino::rj::getSafe(value, "badgeName", h.badgeName);
-        chatterino::rj::getSafe(value, "displayName", h.displayName);
 
         h.outcome.deserialize(value);
 

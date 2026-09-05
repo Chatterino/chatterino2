@@ -11,10 +11,43 @@
 
 namespace chatterino::highlights {
 
+const QList<DisplayBadge> &twitchBadges()
+{
+    // Add additional badges for highlights here
+    static const QList<DisplayBadge> availableBadges = {
+        {"Broadcaster", "broadcaster"},
+        {"Admin", "admin"},
+        {"Staff", "staff"},
+        {"Moderator", "moderator"},
+        {"Lead Moderator", "lead_moderator"},
+        {"Verified", "partner"},
+        {"VIP", "vip"},
+        {"Founder", "founder"},
+        {"Subscriber", "subscriber"},
+        {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
+        {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
+    };
+
+    return availableBadges;
+}
+
 BadgeHighlight::BadgeHighlight(QStringView _id)
     : id(_id)
 {
     this->rebuildBadgeCheck();
+}
+
+QString BadgeHighlight::getDefaultName() const
+{
+    for (const auto &badge : twitchBadges())
+    {
+        if (this->badgeName == badge.badgeName())
+        {
+            return badge.displayName();
+        }
+    }
+
+    return {};
 }
 
 HighlightCheck BadgeHighlight::buildCheck() const
@@ -91,8 +124,7 @@ QDebug operator<<(QDebug dbg, const BadgeHighlight &v)
 {
     dbg.nospace() << "BadgeHighlight("
                   << "name:" << v.name << ',' << "badgeName:" << v.badgeName
-                  << ',' << "displayName:" << v.displayName << ','
-                  << "enabled:" << v.enabled << ','
+                  << ',' << "enabled:" << v.enabled << ','
                   << "sound:" << v.outcome.soundURL << ')';
 
     return dbg;
