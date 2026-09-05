@@ -41,7 +41,7 @@ class IgnorePhrase;
 struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
-struct TwitchEmoteOccurrence;
+struct TwitchSpecialOccurrence;
 struct HelixPinnedChatMessage;
 
 namespace linkparser {
@@ -316,8 +316,8 @@ private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 
-    void addWords(const QStringList &words,
-                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
+    void addWords(QStringView text,
+                  const std::vector<TwitchSpecialOccurrence> &twitchSpecials,
                   TextState &state);
 
     void appendTwitchBadges(Communi::TagsRef tags,
