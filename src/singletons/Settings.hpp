@@ -762,6 +762,7 @@ private:
         0,
     };
 
+    /// Migrate settings between versions
     void migrate(bool isTest);
 
     /// Migration 0 -> 1
