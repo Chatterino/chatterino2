@@ -316,7 +316,7 @@ private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 
-    void addWords(const QStringList &words,
+    void addWords(QStringView text,
                   const std::vector<TwitchSpecialOccurrence> &twitchSpecials,
                   TextState &state);
 
