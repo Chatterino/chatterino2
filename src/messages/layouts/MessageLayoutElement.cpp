@@ -194,7 +194,7 @@ int ImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
     if (abs.x() >= this->getRect().center().x())
     {
-        return static_cast<int>(getSelectionIndexCount());
+        return static_cast<int>(this->getSelectionIndexCount());
     }
 
     return 0;
@@ -328,7 +328,7 @@ int LayeredImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
     if (abs.x() >= this->getRect().center().x())
     {
-        return static_cast<int>(getSelectionIndexCount());
+        return static_cast<int>(this->getSelectionIndexCount());
     }
 
     return 0;
@@ -607,7 +607,7 @@ int TextIconLayoutElement::getMouseOverIndex(QPointF abs) const
 {
     if (abs.x() >= this->getRect().center().x())
     {
-        return static_cast<int>(getSelectionIndexCount());
+        return static_cast<int>(this->getSelectionIndexCount());
     }
 
     return 0;
@@ -687,7 +687,7 @@ int ReplyCurveLayoutElement::getMouseOverIndex(QPointF abs) const
 {
     if (abs.x() >= this->getRect().center().x())
     {
-        return static_cast<int>(getSelectionIndexCount());
+        return static_cast<int>(this->getSelectionIndexCount());
     }
 
     return 0;
