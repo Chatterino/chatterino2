@@ -154,8 +154,7 @@ HighlightingWidget::HighlightingWidget()
     addMenu->addAction("Badge highlight", [this, view] {
         auto id = highlights::generateID();
         highlights::BadgeHighlight h{id};
-        h.setBadgeName("broadcaster");
-        h.setDisplayName("Broadcaster");
+        h.setBadgeName(highlights::twitchBadges()[0].badgeName());
         auto vectorIndex = getSettings()->sharedHighlights.append(h);
         this->openConfigureDialog(view, vectorIndex,
                                   ConfigureCloseBehaviour::Remove);
