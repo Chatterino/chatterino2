@@ -2,51 +2,24 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "singletons/Settings.hpp"
+
 #include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/types/All.hpp"
-#include "controllers/highlights/types/YourMessagesHighlight.hpp"
-#include "controllers/ignores/IgnorePhrase.hpp"
-#include "controllers/sound/NullBackend.hpp"
 #include "lib/Snapshot.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
-#include "mocks/BaseApplication.hpp"
-#include "mocks/ChatterinoBadges.hpp"
-#include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/EmoteController.hpp"
-#include "mocks/LinkResolver.hpp"
-#include "mocks/Logging.hpp"
-#include "mocks/TwitchIrcServer.hpp"
-#include "mocks/UserData.hpp"
-#include "providers/bttv/BttvBadges.hpp"
-#include "providers/ffz/FfzBadges.hpp"
-#include "providers/seventv/SeventvBadges.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
+#include "mocks/EmptyApplication.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "Test.hpp"
-#include "util/IrcHelpers.hpp"
-#include "util/VectorMessageSink.hpp"
 
-#include <IrcConnection>
-#include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
-#include <QStringBuilder>
-#include <qtenvironmentvariables.h>
-
-#include <unordered_map>
-#include <vector>
 
 using namespace chatterino;
 using namespace Qt::StringLiterals;
@@ -63,17 +36,40 @@ namespace {
 const bool UPDATE_SNAPSHOTS =
     chatterino::env::readBool("CHATTERINO_UPDATE_TEST_SNAPSHOTS", false);
 
-const QString TEST_CATEGORY = u"Settings"_s;
-
-class MockApplication : public mock::EmptyApplication
+class MigrationApplication : public mock::EmptyApplication
 {
 public:
-    MockApplication(const QString &settingsData)
+    MigrationApplication(const QString &settingsData)
         : mock::EmptyApplication(settingsData)
         , settings(this->modes_, this->args_, this->settingsDir.path(),
                    {
                        .isTest = true,
                        .runMigrations = true,
+                       .runCleanup = false,
+                   })
+        , updates(this->modes_, this->paths_, this->settings)
+    {
+    }
+
+    Updates &getUpdates() override
+    {
+        return this->updates;
+    }
+
+    Settings settings;
+    Updates updates;
+};
+
+class CleanupApplication : public mock::EmptyApplication
+{
+public:
+    CleanupApplication(const QString &settingsData)
+        : mock::EmptyApplication(settingsData)
+        , settings(this->modes_, this->args_, this->settingsDir.path(),
+                   {
+                       .isTest = true,
+                       .runMigrations = true,
+                       .runCleanup = true,
                    })
         , updates(this->modes_, this->paths_, this->settings)
     {
@@ -90,12 +86,14 @@ public:
 
 }  // namespace
 
-class TestSettingsP : public ::testing::TestWithParam<QString>
+class TestSettingsMigration : public ::testing::TestWithParam<QString>
 {
 public:
+    static const QString TEST_CATEGORY;
+
     void SetUp() override
     {
-        auto param = TestSettingsP::GetParam();
+        auto param = TestSettingsMigration::GetParam();
         this->snapshot = testlib::Snapshot::read(TEST_CATEGORY, param);
     }
 
@@ -107,11 +105,34 @@ public:
     std::unique_ptr<testlib::Snapshot> snapshot;
 };
 
-TEST_P(TestSettingsP, Run)
+const QString TestSettingsMigration::TEST_CATEGORY = u"Settings/migration"_s;
+
+class TestSettingsCleanup : public ::testing::TestWithParam<QString>
+{
+public:
+    static const QString TEST_CATEGORY;
+
+    void SetUp() override
+    {
+        auto param = TestSettingsCleanup::GetParam();
+        this->snapshot = testlib::Snapshot::read(TEST_CATEGORY, param);
+    }
+
+    void TearDown() override
+    {
+        this->snapshot.reset();
+    }
+
+    std::unique_ptr<testlib::Snapshot> snapshot;
+};
+
+const QString TestSettingsCleanup::TEST_CATEGORY = u"Settings/cleanup"_s;
+
+TEST_P(TestSettingsMigration, Run)
 {
     QJsonObject got;
 
-    MockApplication app(
+    MigrationApplication app(
         QJsonDocument(this->snapshot->input().toObject()).toJson());
 
     QFile settingsFile(app.settingsDir.filePath("settings.json"));
@@ -132,154 +153,52 @@ TEST_P(TestSettingsP, Run)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    SettingsMigration, TestSettingsP,
-    testing::ValuesIn(testlib::Snapshot::discover(TEST_CATEGORY)));
+INSTANTIATE_TEST_SUITE_P(SettingsMigration, TestSettingsMigration,
+                         testing::ValuesIn(testlib::Snapshot::discover(
+                             TestSettingsMigration::TEST_CATEGORY)));
 
-TEST(TestSettingsP, Integrity)
+TEST(SettingsMigration, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
 
-TEST(Settings, Bing)
+TEST_P(TestSettingsCleanup, Run)
+{
+    QJsonObject got;
+
+    CleanupApplication app(
+        QJsonDocument(this->snapshot->input().toObject()).toJson());
+
+    QFile settingsFile(app.settingsDir.filePath("settings.json"));
+    ASSERT_TRUE(settingsFile.open(QFile::ReadOnly))
+        << "failed to open" << app.settingsDir.filePath("settings.json");
+    auto content = settingsFile.readAll();
+    settingsFile.close();
+
+    got = QJsonDocument::fromJson(content).object();
+
+    if (!snapshot->run(got, UPDATE_SNAPSHOTS))
+    {
+        // The snapshot failed - using ASSERT_EQ here to try to get some better output
+        EXPECT_EQ(QJsonDocument(snapshot->output().toObject()).toJson(),
+                  QJsonDocument(got).toJson())
+            << "Snapshot " << snapshot->name() << " comparison";
+        FAIL() << "Snapshot " << snapshot->name() << " failed";
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(SettingsCleanup, TestSettingsCleanup,
+                         testing::ValuesIn(testlib::Snapshot::discover(
+                             TestSettingsCleanup::TEST_CATEGORY)));
+
+TEST(SettingsCleanup, Integrity)
+{
+    ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST(Settings, DefaultHighlightSerialization)
 {
     using namespace chatterino::highlights;
-
-#if 0
-    {
-        MockApplication app(R"({
-            "misc": {"settingsVersion": 1},
-            "pajlada": {
-              "id": "forsen"
-            }
-        })");
-
-        auto h = app.settings.pajlada.getValue();
-
-        ASSERT_EQ(h.id, "forsen");
-        ASSERT_TRUE(h.name.isNull());
-    }
-
-    {
-        MockApplication app(R"({
-            "pajlada": {
-              "id": "forsen",
-              "name": ""
-            }
-        })");
-
-        auto h = app.settings.pajlada.getValue();
-
-        ASSERT_EQ(h.id, "forsen");
-        ASSERT_FALSE(h.name.isNull());
-        ASSERT_EQ(h.name, "");
-    }
-
-    {
-        MockApplication app(R"({
-            "misc": {"settingsVersion": 1},
-            "pajlada": {
-              "id": "forsen",
-              "name": "fors"
-            }
-        })");
-
-        auto h = app.settings.pajlada.getValue();
-
-        ASSERT_EQ(h.id, "forsen");
-        ASSERT_FALSE(h.name.isNull());
-        ASSERT_EQ(h.name, "fors");
-
-        h.enabled = true;
-
-        app.settings.pajlada = h;
-
-        ASSERT_EQ(app.settings.requestSave(),
-                  pajlada::Settings::SettingManager::SaveResult::Success);
-
-        QFile settingsFile(app.settingsDir.filePath("settings.json"));
-        ASSERT_TRUE(settingsFile.open(QFile::ReadOnly))
-            << "failed to open" << app.settingsDir.filePath("settings.json");
-        auto content = settingsFile.readAll();
-        settingsFile.close();
-
-        auto actual = QJsonDocument::fromJson(content);
-
-        QJsonDocument expected;
-        expected.setObject(QJsonObject{
-            {"misc", QJsonObject{{"settingsVersion", 1}}},
-            {
-                "pajlada",
-                QJsonObject{
-                    {"id", "forsen"},
-                    {"name", "fors"},
-                    {"enabled", true},
-                },
-            },
-        });
-
-        ASSERT_EQ(expected, actual) << "expected:" << expected.toJson()
-                                    << "\nactual:" << actual.toJson();
-    }
-
-    {
-        MockApplication app(R"({
-            "misc": {"settingsVersion": 1},
-            "pajlada2": [
-              {
-                "id": "forsen",
-                "name": "fors"
-              }
-            ]
-        })");
-
-        auto highlights = app.settings.pajlada2.getValue();
-
-        ASSERT_EQ(highlights[0].id, "forsen");
-        ASSERT_FALSE(highlights[0].name.isNull());
-        ASSERT_EQ(highlights[0].name, "fors");
-
-        highlights[0].enabled = true;
-
-        app.settings.pajlada2 = highlights;
-
-        ASSERT_EQ(app.settings.requestSave(),
-                  pajlada::Settings::SettingManager::SaveResult::Success);
-
-        QFile settingsFile(app.settingsDir.filePath("settings.json"));
-        ASSERT_TRUE(settingsFile.open(QFile::ReadOnly))
-            << "failed to open" << app.settingsDir.filePath("settings.json");
-        auto content = settingsFile.readAll();
-        settingsFile.close();
-
-        auto actual = QJsonDocument::fromJson(content);
-
-        QJsonDocument expected;
-        expected.setObject(QJsonObject{
-            {"misc", QJsonObject{{"settingsVersion", 1}}},
-            {
-                "pajlada2",
-                QJsonArray{
-                    QJsonObject{
-                        {"id", "forsen"},
-                        {"name", "fors"},
-                        {"enabled", true},
-                    },
-                },
-            },
-        });
-
-        ASSERT_EQ(expected, actual) << "expected:" << expected.toJson()
-                                    << "\nactual:" << actual.toJson();
-    }
-
-    /*
-    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
-        << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
-        << QJsonDocument(snapshot->output().toObject()).toJson() << "\nbut got\n"
-        << QJsonDocument(got).toJson() << "\ninstead.";
-    */
-#endif
 
     rapidjson::Document d;
     auto &a = d.GetAllocator();

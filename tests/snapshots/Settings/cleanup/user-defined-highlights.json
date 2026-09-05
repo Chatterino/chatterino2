@@ -1,0 +1,104 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "type": "badge",
+                    "name": "broadcaster",
+                    "sound": "003-cat-fox_alex-fx-jump-3"
+                },
+                {
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "type": "badge",
+                    "name": "moderator",
+                    "sound": "003-cat-fox_alex-fx-jump-3"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "type": "badge",
+                    "name": "broadcaster",
+                    "sound": "003-cat-fox_alex-fx-jump-3"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

@@ -118,6 +118,7 @@ constexpr std::optional<std::string_view> qmagicenumDisplayName(
 struct SettingsArgs {
     bool isTest = false;
     bool runMigrations = true;
+    bool runCleanup = true;
 };
 
 class SettingsPrivate;
@@ -770,6 +771,12 @@ private:
     /// This migration takes all of our custom highlight values & turns them into real highlight rows
     /// It also merges messages, user, and badge highlights into a single vector.
     void migrateHighlights(bool isTest);
+
+    /// Run cleanup on existing settings. This could mean removing duplicate values that are not valid.
+    void cleanup();
+
+    /// Returns true if the settings are dirty
+    bool cleanupHighlights();
 
 public:
     SignalVector<highlights::AllHighlights> sharedHighlights;
