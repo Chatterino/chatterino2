@@ -39,7 +39,6 @@ struct AutomodCaughtHighlight {
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
     static constexpr bool ALERT_DEFAULT = false;
-    static constexpr bool SUPPORT_PLAY_SOUND = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(64, 64, 64, 127);
 
     QString name;
