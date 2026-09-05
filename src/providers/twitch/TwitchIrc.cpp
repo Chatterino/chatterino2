@@ -206,16 +206,23 @@ std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
     }
     codepointToUtf16Idx.push_back(content.size());
 
-    for (const auto emote : emotesTag.tokenize(u'/'))
+    if (!emotesTag.isEmpty())
     {
-        appendTwitchEmoteOccurrences(emote, occurrences, codepointToUtf16Idx,
-                                     content, messageOffset);
+        for (const auto emote : emotesTag.tokenize(u'/'))
+        {
+            appendTwitchEmoteOccurrences(emote, occurrences,
+                                         codepointToUtf16Idx, content,
+                                         messageOffset);
+        }
     }
 
-    for (const auto gif : gifsTag.tokenize(u','))
+    if (!gifsTag.isEmpty())
     {
-        appendTwitchGifOccurrence(gif, occurrences, codepointToUtf16Idx,
-                                  content, messageOffset);
+        for (const auto gif : gifsTag.tokenize(u','))
+        {
+            appendTwitchGifOccurrence(gif, occurrences, codepointToUtf16Idx,
+                                      content, messageOffset);
+        }
     }
 
     return occurrences;
