@@ -637,7 +637,7 @@ void Settings::migrateHighlights(bool isTest)
         BadgeHighlight to{generatedId};
 
         to.setBadgeName(from.badgeName);
-        to.setDisplayName(from.displayName);
+        // We discard the old displayName because it can already be calculated based on the badgeName (i.e. "subscriber" -> "Subscriber")
         to.outcome.showInMentions = from.showInMentions;
         to.outcome.alert = from.hasAlert;
         if (from.hasSound)

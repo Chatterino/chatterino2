@@ -67,21 +67,6 @@ concept HasCustomizableName = requires(T a) {
 
 namespace {
 
-// Add additional badges for highlights here
-const QList<DisplayBadge> AVAILABLE_BADGES = {
-    {"Broadcaster", "broadcaster"},
-    {"Admin", "admin"},
-    {"Staff", "staff"},
-    {"Moderator", "moderator"},
-    {"Lead Moderator", "lead_moderator"},
-    {"Verified", "partner"},
-    {"VIP", "vip"},
-    {"Founder", "founder"},
-    {"Subscriber", "subscriber"},
-    {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
-    {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
-};
-
 auto makeCheckbox(bool &value)
 {
     auto *w = new QCheckBox();
@@ -188,12 +173,14 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         formLayout->addRow("Enabled", w);
     }
 
+    auto *nameWidget = new QLineEdit();
+
     {
         auto defaultName = getDefaultName(this->data);
 
         std::visit(variant::Overloaded{
-                       [formLayout, defaultName](HasCustomizableName auto &h) {
-                           auto *w = new QLineEdit();
+                       [formLayout, defaultName,
+                        w{nameWidget}](HasCustomizableName auto &h) {
                            formLayout->addRow("Name", w);
                            w->setPlaceholderText(defaultName);
                            w->setText(h.name);
@@ -228,30 +215,32 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                 formLayout->addRow("Filter", w);
                 formLayout->addRow(errorLabel);
             },
-            [formLayout](BadgeHighlight &h) {
+            [formLayout, nameWidget](BadgeHighlight &h) {
                 auto *w = new QComboBox();
-                for (const auto &item : AVAILABLE_BADGES)
+                for (const auto &item : highlights::twitchBadges())
                 {
                     w->addItem(item.displayName(), item.badgeName());
                 }
 
                 QObject::connect(
                     w, QOverload<int>::of(&QComboBox::currentIndexChanged),
-                    [&h](int index) {
+                    [&h, nameWidget](int index) {
                         std::optional<DisplayBadge> badge;
-                        if (index >= 0 && index < AVAILABLE_BADGES.size())
+                        if (index >= 0 &&
+                            index < highlights::twitchBadges().size())
                         {
-                            badge = AVAILABLE_BADGES[index];
+                            badge = highlights::twitchBadges()[index];
                             h.setBadgeName(badge->badgeName());
-                            h.setDisplayName(badge->displayName());
+                            nameWidget->setPlaceholderText(h.getDefaultName());
                         }
                     });
 
-                w->setCurrentText(h.displayName);
+                w->setCurrentText(h.getDefaultName());
 
                 getApp()->getTwitchBadges()->getBadgeIcons(
-                    AVAILABLE_BADGES, [w](const QString &identifier,
-                                          const std::shared_ptr<QIcon> &icon) {
+                    highlights::twitchBadges(),
+                    [w](const QString &identifier,
+                        const std::shared_ptr<QIcon> &icon) {
                         if (!w)
                         {
                             return;
