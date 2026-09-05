@@ -125,7 +125,7 @@ QDebug operator<<(QDebug dbg, const BadgeHighlight &v)
     dbg.nospace() << "BadgeHighlight("
                   << "name:" << v.name << ',' << "badgeName:" << v.badgeName
                   << ',' << "enabled:" << v.enabled << ','
-                  << "sound:" << v.outcome.soundURL << ')';
+                  << "outcome:" << v.outcome << ')';
 
     return dbg;
 }
