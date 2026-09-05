@@ -11,6 +11,7 @@
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
@@ -735,6 +736,70 @@ void Settings::migrateHighlights(bool isTest)
         UncategorizedNotificationHighlight{});
 }
 
+void Settings::cleanup()
+{
+    qCDebug(LOG) << "Clean up";
+
+    bool dirty = false;
+
+    dirty |= this->cleanupHighlights();
+
+    if (dirty)
+    {
+        // TODO: IS THIS LEGAL?
+        qCInfo(LOG) << "Saving after clean up";
+        this->requestSave();
+    }
+}
+
+bool Settings::cleanupHighlights()
+{
+    // Check for duplicate bill-tin highlights and remove any duplicates that popup
+    // TODO: Should this also create missing highlights?
+
+    qCDebug(LOG) << "Clean up highlights";
+
+    // List of highlight IDs we've already seen.
+    // If a highlight ID has already been seen (i.e. if the user has any duplicate highlights), the latter ones will be removed
+    std::unordered_set<QStringView> seenIDs;
+
+    auto highlights = this->p->sharedHighlightsSetting.getValueCopy();
+    auto highlightsSize = highlights.size();
+
+    int numRemoved = 0;
+
+    for (int i = 0; i < highlightsSize; ++i)
+    {
+        const auto actualIndex = i - numRemoved;
+        const auto &h = highlights[actualIndex];
+        const auto id = highlights::getID(h);
+
+        const auto [_, isNew] = seenIDs.insert(id);
+        if (!isNew)
+        {
+            qCInfo(LOG)
+                << "A built in highlight of type" << id
+                << "already exists, removed the lower priority version.";
+            highlights.erase(highlights.begin() + actualIndex);
+            ++numRemoved;
+        }
+        else
+        {
+            qCInfo(LOG) << "First time encountering highlight" << id;
+        }
+    }
+
+    if (numRemoved > 0)
+    {
+        qCInfo(LOG) << "Highlights were dirty. Built in highlights removed:"
+                    << numRemoved;
+        this->p->sharedHighlightsSetting.setValue(highlights);
+        return true;
+    }
+
+    return false;
+}
+
 bool Settings::isBlacklistedUser(const QString &username)
 {
     auto items = this->blacklistedUsers.readOnly();
@@ -883,6 +948,11 @@ Settings::Settings(const Modes &modes, const Args &args,
     if (settingsArgs.runMigrations)
     {
         this->migrate(settingsArgs.isTest);
+    }
+
+    if (settingsArgs.runCleanup)
+    {
+        this->cleanup();
     }
 
     initializeSignalVector(this->signalHolder, this->p->sharedHighlightsSetting,
