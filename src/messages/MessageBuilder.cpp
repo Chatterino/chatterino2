@@ -939,13 +939,14 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 
 MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
                                const QString &platform, const QString &actor,
-                               const std::vector<QString> &emoteNames)
+                               const std::vector<QString> &emoteNames,
+                               const QDateTime &time)
     : MessageBuilder()
 {
     auto text =
         formatUpdatedEmoteList(platform, emoteNames, true, actor.isEmpty());
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time.time());
     if (!actor.isEmpty())
     {
         this->emplace<TextElement>(actor, MessageElementFlag::Username,
@@ -968,6 +969,7 @@ MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
     this->message().loginName = actor;
     this->message().messageText = finalText;
     this->message().searchText = finalText;
+    this->message().serverReceivedTime = time;
 
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesAdd);
@@ -976,13 +978,14 @@ MessageBuilder::MessageBuilder(LiveUpdatesAddEmoteMessageTag /*unused*/,
 
 MessageBuilder::MessageBuilder(LiveUpdatesRemoveEmoteMessageTag /*unused*/,
                                const QString &platform, const QString &actor,
-                               const std::vector<QString> &emoteNames)
+                               const std::vector<QString> &emoteNames,
+                               const QDateTime &time)
     : MessageBuilder()
 {
     auto text =
         formatUpdatedEmoteList(platform, emoteNames, false, actor.isEmpty());
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time.time());
     if (!actor.isEmpty())
     {
         this->emplace<TextElement>(actor, MessageElementFlag::Username,
@@ -1005,6 +1008,7 @@ MessageBuilder::MessageBuilder(LiveUpdatesRemoveEmoteMessageTag /*unused*/,
     this->message().loginName = actor;
     this->message().messageText = finalText;
     this->message().searchText = finalText;
+    this->message().serverReceivedTime = time;
 
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesRemove);
