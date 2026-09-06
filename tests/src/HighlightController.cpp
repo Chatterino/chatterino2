@@ -598,6 +598,7 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
     const auto billTin = HighlightController::billTinHighlights().size();
 
     const auto expectedSize = all  //
+                              - 1  // InvalidHighlight
                               - 1  // MessageHighlight
                               - 1  // UserHighlight
                               - 1  // BadgeHighlight

@@ -34,4 +34,15 @@ HighlightCheck WatchStreakHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const WatchStreakHighlight &v)
+{
+    dbg.nospace() << "WatchStreakHighlight("         //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

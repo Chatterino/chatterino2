@@ -39,4 +39,15 @@ HighlightCheck AutomodCaughtHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const AutomodCaughtHighlight &v)
+{
+    dbg.nospace() << "AutomodCaughtHighlight("       //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

@@ -12,6 +12,7 @@ struct YourUsernameHighlight;
 struct WhispersHighlight;
 struct AnnouncementsHighlight;
 struct SubscriptionsHighlight;
+struct InvalidHighlight;
 struct ChannelPointsHighlight;
 struct FirstMessageHighlight;
 struct SubscribedThreadHighlight;
@@ -26,6 +27,7 @@ struct UncategorizedNotificationHighlight;
 
 // clang-format off
 using AllHighlights = std::variant<
+    InvalidHighlight,
     YourUsernameHighlight,
     WhispersHighlight,
     AnnouncementsHighlight,

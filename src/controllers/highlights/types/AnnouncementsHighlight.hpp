@@ -11,6 +11,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
+#include <QDebug>
 #include <QStringView>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -42,6 +43,7 @@ struct AnnouncementsHighlight {
     static constexpr QColor BACKGROUND_COLOR_DEFAULT =
         QColor(255, 102, 237, 100);
 
+    QString name;
     std::optional<bool> enabled;
 
     std::optional<bool> overrideColoredAnnouncements;
@@ -49,6 +51,8 @@ struct AnnouncementsHighlight {
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
+
+    friend QDebug operator<<(QDebug dbg, const AnnouncementsHighlight &v);
 };
 
 }  // namespace chatterino::highlights
@@ -65,7 +69,9 @@ struct Serialize<chatterino::highlights::AnnouncementsHighlight> {
         rapidjson::Value ret(rapidjson::kObjectType);
         chatterino::rj::set(ret, "id", H::ID, a);
 
+        chatterino::rj::setOptionally(ret, "name", h.name, a);
         chatterino::rj::setOptionally(ret, "enabled", h.enabled, a);
+
         chatterino::rj::setOptionally(ret, "overrideColoredAnnouncements",
                                       h.overrideColoredAnnouncements, a);
 
@@ -95,7 +101,9 @@ struct Deserialize<chatterino::highlights::AnnouncementsHighlight> {
 
         H h;
 
+        chatterino::rj::getSafe(value, "name", h.name);
         chatterino::rj::getSafe(value, "enabled", h.enabled);
+
         chatterino::rj::getSafe(value, "overrideColoredAnnouncements",
                                 h.overrideColoredAnnouncements);
 

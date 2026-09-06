@@ -34,4 +34,15 @@ HighlightCheck ChannelPointsHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const ChannelPointsHighlight &v)
+{
+    dbg.nospace() << "ChannelPointsHighlight("       //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

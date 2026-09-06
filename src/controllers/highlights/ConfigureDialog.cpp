@@ -158,31 +158,29 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
     }
 #endif
 
-    {
-        auto *lbl = new QLabel("Enabled");
-        auto *w = new QCheckBox;
-        w->setChecked(highlights::isEnabled(this->data));
+    std::visit(variant::Overloaded{
+                   [](InvalidHighlight & /*h*/) {
+                       //
+                   },
+                   [this, formLayout](auto &&h) {
+                       auto *lbl = new QLabel("Enabled");
+                       auto *w = new QCheckBox;
+                       w->setChecked(highlights::isEnabled(this->data));
 
-        QObject::connect(w, &QCheckBox::checkStateChanged,
-                         [&](auto checkstate) {
-                             std::visit(
-                                 [checkstate](auto &&h) {
-                                     h.enabled = checkstate;
-                                 },
-                                 this->data);
-                         });
-        formLayout->addRow(lbl, w);
+                       QObject::connect(w, &QCheckBox::checkStateChanged,
+                                        [&](auto checkstate) {
+                                            h.enabled = checkstate;
+                                        });
+                       formLayout->addRow(lbl, w);
 
-        addSettingMenu(lbl, w, [this, w] {
-            std::visit(
-                [](auto &&h) {
-                    h.enabled = std::nullopt;
-                },
-                this->data);
-            QSignalBlocker signalBlocker(w);
-            w->setChecked(highlights::isEnabled(this->data));
-        });
-    }
+                       addSettingMenu(lbl, w, [this, w, &h] {
+                           h.enabled = std::nullopt;
+                           QSignalBlocker signalBlocker(w);
+                           w->setChecked(highlights::isEnabled(this->data));
+                       });
+                   },
+               },
+               this->data);
 
     auto *nameWidget = new QLineEdit();
 

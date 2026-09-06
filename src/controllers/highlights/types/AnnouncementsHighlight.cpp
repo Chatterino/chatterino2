@@ -78,4 +78,15 @@ HighlightCheck AnnouncementsHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const AnnouncementsHighlight &v)
+{
+    dbg.nospace() << "AnnouncementsHighlight("
+                  << "enabled:" << v.enabled << ','
+                  << "overrideColoredAnnouncements:"
+                  << v.overrideColoredAnnouncements << ','
+                  << "outcome:" << v.outcome << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

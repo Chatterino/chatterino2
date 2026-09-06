@@ -37,4 +37,15 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const YourMessagesHighlight &v)
+{
+    dbg.nospace() << "YourMessagesHighlight("        //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

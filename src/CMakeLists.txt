@@ -214,40 +214,42 @@ set(SOURCE_FILES
         controllers/highlights/Sounds.cpp
         controllers/highlights/types/AllForward.hpp
         controllers/highlights/types/All.hpp
-        controllers/highlights/types/AnnouncementsHighlight.hpp
         controllers/highlights/types/AnnouncementsHighlight.cpp
-        controllers/highlights/types/AutomodCaughtHighlight.hpp
+        controllers/highlights/types/AnnouncementsHighlight.hpp
         controllers/highlights/types/AutomodCaughtHighlight.cpp
-        controllers/highlights/types/ChannelPointsHighlight.hpp
-        controllers/highlights/types/ChannelPointsHighlight.cpp
-        controllers/highlights/types/Common.hpp
-        controllers/highlights/types/Common.cpp
-        controllers/highlights/types/Outcome.hpp
-        controllers/highlights/types/Outcome.cpp
-        controllers/highlights/types/FirstMessageHighlight.hpp
-        controllers/highlights/types/FirstMessageHighlight.cpp
-        controllers/highlights/types/SubscribedThreadHighlight.hpp
-        controllers/highlights/types/SubscribedThreadHighlight.cpp
-        controllers/highlights/types/SubscriptionsHighlight.hpp
-        controllers/highlights/types/SubscriptionsHighlight.cpp
-        controllers/highlights/types/MessageHighlight.hpp
-        controllers/highlights/types/MessageHighlight.cpp
-        controllers/highlights/types/BadgeHighlight.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.hpp
         controllers/highlights/types/BadgeHighlight.cpp
-        controllers/highlights/types/UserHighlight.hpp
-        controllers/highlights/types/UserHighlight.cpp
-        controllers/highlights/types/FilterHighlight.hpp
+        controllers/highlights/types/BadgeHighlight.hpp
+        controllers/highlights/types/ChannelPointsHighlight.cpp
+        controllers/highlights/types/ChannelPointsHighlight.hpp
+        controllers/highlights/types/Common.cpp
+        controllers/highlights/types/Common.hpp
         controllers/highlights/types/FilterHighlight.cpp
-        controllers/highlights/types/UncategorizedNotificationHighlight.hpp
+        controllers/highlights/types/FilterHighlight.hpp
+        controllers/highlights/types/FirstMessageHighlight.cpp
+        controllers/highlights/types/FirstMessageHighlight.hpp
+        controllers/highlights/types/InvalidHighlight.cpp
+        controllers/highlights/types/InvalidHighlight.hpp
+        controllers/highlights/types/MessageHighlight.cpp
+        controllers/highlights/types/MessageHighlight.hpp
+        controllers/highlights/types/Outcome.cpp
+        controllers/highlights/types/Outcome.hpp
+        controllers/highlights/types/SubscribedThreadHighlight.cpp
+        controllers/highlights/types/SubscribedThreadHighlight.hpp
+        controllers/highlights/types/SubscriptionsHighlight.cpp
+        controllers/highlights/types/SubscriptionsHighlight.hpp
         controllers/highlights/types/UncategorizedNotificationHighlight.cpp
-        controllers/highlights/types/WatchStreakHighlight.hpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.hpp
+        controllers/highlights/types/UserHighlight.cpp
+        controllers/highlights/types/UserHighlight.hpp
         controllers/highlights/types/WatchStreakHighlight.cpp
-        controllers/highlights/types/WhispersHighlight.hpp
+        controllers/highlights/types/WatchStreakHighlight.hpp
         controllers/highlights/types/WhispersHighlight.cpp
-        controllers/highlights/types/YourMessagesHighlight.hpp
+        controllers/highlights/types/WhispersHighlight.hpp
         controllers/highlights/types/YourMessagesHighlight.cpp
-        controllers/highlights/types/YourUsernameHighlight.hpp
+        controllers/highlights/types/YourMessagesHighlight.hpp
         controllers/highlights/types/YourUsernameHighlight.cpp
+        controllers/highlights/types/YourUsernameHighlight.hpp
 
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp
