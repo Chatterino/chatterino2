@@ -720,6 +720,8 @@ void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
     // highlighting on new messages
     obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
 
+    obj.insert("alwaysShow", tab->getTab()->alwaysShow());
+
     // splits
     obj.insert("splits2", std::visit(
                               [](auto &&it) {
@@ -845,6 +847,8 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
 
             // highlighting on new messages
             page->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
+
+            page->getTab()->setAlwaysShow(tab.alwaysShow_);
 
             if (tab.rootNode_)
             {

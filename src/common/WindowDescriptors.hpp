@@ -95,6 +95,7 @@ struct TabDescriptor {
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};
+    bool alwaysShow_{false};
 
     std::optional<NodeDescriptor> rootNode_;
 
