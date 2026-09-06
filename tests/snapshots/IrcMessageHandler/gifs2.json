@@ -1,0 +1,198 @@
+{
+    "input": "@badge-info=subscriber/30;badges=broadcaster/1,subscriber/0;color=#033700;display-name=TwitchDev;emotes=;first-msg=0;flags=;gifs=7-40|joSNxeswxuc74Juo8X|https://media4.giphy.com/media/joSNxeswxuc74Juo8X/giphy.gif?cid=095d7a5dzizsiwgabonagkmigggv8v1spfai91ac3x0dsiy0&ep=v1_gifs_trending&rid=giphy.gif&ct=g;id=401abf17-7e99-45d6-9bdf-43934e839327;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1783632907018;turbo=0;user-id=141981764;user-type= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada :before [Y A Y Yes GIF by Djemilah Birnie] after",
+    "output": [
+        {
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "TwitchDev",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "21:35"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "21:35:07",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                        },
+                        "name": "",
+                        "tooltip": "Broadcaster"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Broadcaster",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/3"
+                        },
+                        "name": "",
+                        "tooltip": "Subscriber"
+                    },
+                    "flags": "BadgeSubscription",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Subscriber (30 months)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff033700",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "TwitchDev"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "TwitchDev:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "before"
+                    ]
+                },
+                {
+                    "color": "Link",
+                    "flags": "Text",
+                    "link": "https://i.giphy.com/joSNxeswxuc74Juo8X.webp",
+                    "lowercase": [
+                        "[Y A Y Yes GIF by Djemilah Birnie]"
+                    ],
+                    "original": [
+                        "[Y A Y Yes GIF by Djemilah Birnie]"
+                    ],
+                    "style": "ChatMedium",
+                    "tooltip": "[Y A Y Yes GIF by Djemilah Birnie]",
+                    "trailingSpace": true,
+                    "type": "LinkElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "after"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "401abf17-7e99-45d6-9bdf-43934e839327"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "externalBadges": [
+            ],
+            "flags": "Collapsed",
+            "frozen": false,
+            "id": "401abf17-7e99-45d6-9bdf-43934e839327",
+            "localizedName": "",
+            "loginName": "twitchdev",
+            "messageText": "before [Y A Y Yes GIF by Djemilah Birnie] after",
+            "searchText": "twitchdev  twitchdev: before [Y A Y Yes GIF by Djemilah Birnie] after ",
+            "serverReceivedTime": "2026-07-09T21:35:07Z",
+            "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "30"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber"
+            ],
+            "userID": "141981764",
+            "usernameColor": "#ff033700"
+        }
+    ]
+}

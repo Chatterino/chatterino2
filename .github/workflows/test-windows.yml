@@ -109,7 +109,11 @@ jobs:
       - name: Build
         run: |
           cmake `
-              -G"NMake Makefiles" `
+              -G Ninja `
+              -DCMAKE_CXX_COMPILER=clang-cl `
+              -DCMAKE_C_COMPILER=clang-cl `
+              -DCMAKE_RC_COMPILER=llvm-rc `
+              -DCMAKE_LINKER_TYPE=LLD `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DBUILD_TESTS=On `
               -DBUILD_APP=OFF `
@@ -118,8 +122,7 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_SPELLCHECK=On `
               ..
-          set cl=/MP
-          nmake /S /NOLOGO
+          ninja
         working-directory: build-test
 
       - name: Download and extract Twitch PubSub Server Test
