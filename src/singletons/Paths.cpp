@@ -78,6 +78,11 @@ void Paths::initAppFilePathHash()
 void Paths::initRootDirectory(const Args &args, const Modes &modes)
 {
     this->rootAppDataDirectory = [&]() -> QString {
+        if (!rootAppDataDirectory.isEmpty())
+        {
+            return rootAppDataDirectory;
+        }
+
         // portable
         if (modes.isPortable)
         {
