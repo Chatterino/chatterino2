@@ -1617,29 +1617,46 @@ void SplitNotebook::addCustomButtons()
         },
         this->signalHolder_, false);
 
-    this->signalHolder_.managedConnect(
-        getApp()->getAccounts()->twitch.loginExpired,
-        [this, userBtn, expiredAccountSrc] {
+    auto updateUserButtonExpiry = [this, userBtn, normalAccountSrc,
+                                   expiredAccountSrc] {
+        if (getApp()->getAccounts()->twitch.hasExpiredAccount())
+        {
             userBtn->setSource(expiredAccountSrc);
+            userBtn->setToolTip("A login has expired - click to sign in again");
+
+            // Force the button visible, otherwise a user who hides it would
+            // never find out their login stopped working.
             if (!userBtn->isVisible())
             {
                 userBtn->setVisible(true);
                 this->performLayout();
             }
-        });
+            return;
+        }
+
+        userBtn->setSource(normalAccountSrc);
+        userBtn->setToolTip({});
+
+        auto oldVisibility = userBtn->isVisible();
+        auto newVisibility = !getSettings()->hideUserButton.getValue();
+        userBtn->setVisible(newVisibility);
+        if (oldVisibility != newVisibility)
+        {
+            this->performLayout();
+        }
+    };
 
     this->signalHolder_.managedConnect(
-        getApp()->getAccounts()->twitch.currentUserChanged,
-        [this, userBtn, normalAccountSrc] {
-            userBtn->setSource(normalAccountSrc);
-            auto oldVisibility = userBtn->isVisible();
-            auto newVisibility = !getSettings()->hideUserButton.getValue();
-            userBtn->setVisible(newVisibility);
-            if (oldVisibility != newVisibility)
-            {
-                this->performLayout();
-            }
-        });
+        getApp()->getAccounts()->twitch.loginExpiryChanged,
+        updateUserButtonExpiry);
+
+    // Removing an expired account should clear the warning too
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.userListUpdated,
+        updateUserButtonExpiry);
+
+    // Windows opened after a login expired should show the warning right away
+    updateUserButtonExpiry();
 
     QObject::connect(userBtn, &Button::leftClicked, [this, userBtn] {
         getApp()->getWindows()->showAccountSelectPopup(

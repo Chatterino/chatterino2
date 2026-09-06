@@ -266,6 +266,17 @@
       "additionalProperties": false,
       "properties": {
         "accent": { "$ref": "#/definitions/qt-color" },
+        "accounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "expired": {
+              "$comment": "Marks an account whose login has expired.",
+              "$ref": "#/definitions/qt-color"
+            }
+          },
+          "required": ["expired"]
+        },
         "messages": {
           "type": "object",
           "additionalProperties": false,
@@ -423,6 +434,7 @@
       },
       "required": [
         "accent",
+        "accounts",
         "messages",
         "overlayMessages",
         "scrollbars",

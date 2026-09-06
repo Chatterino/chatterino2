@@ -23,6 +23,8 @@
 
 #include <QStringBuilder>
 
+#include <algorithm>
+
 namespace {
 
 using namespace chatterino;
@@ -408,6 +410,28 @@ bool TwitchAccountManager::isLoggedIn() const
     return !this->currentUser_->isAnon();
 }
 
+void TwitchAccountManager::markCurrentAsExpired()
+{
+    if (!this->isLoggedIn())
+    {
+        return;
+    }
+
+    if (this->getCurrent()->setExpired(true))
+    {
+        this->loginExpiryChanged.invoke();
+    }
+}
+
+bool TwitchAccountManager::hasExpiredAccount() const
+{
+    std::scoped_lock lock(this->mutex_);
+
+    return std::ranges::any_of(this->accounts, [](const auto &account) {
+        return account->isExpired();
+    });
+}
+
 bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
     static const QString accountFormat("/accounts/uid%1");
@@ -451,6 +475,13 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
         if (userUpdated)
         {
+            // A new token means the account was signed in again, so whatever
+            // made us mark it as expired no longer applies.
+            if (previousUser->setExpired(false))
+            {
+                this->loginExpiryChanged.invoke();
+            }
+
             return AddUserResponse::UserValuesUpdated;
         }
         else
