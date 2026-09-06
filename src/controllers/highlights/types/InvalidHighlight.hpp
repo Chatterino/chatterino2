@@ -24,9 +24,9 @@ struct HighlightCheck;
 
 namespace chatterino::highlights {
 
-/// Matches Twitch announcements
+/// This is an invalid highlight - it will never have its check function run.
 ///
-/// Can be further customized to override the colors of colored announcements
+/// It is used to ensure that the variant keeping all possible highlights is default-constructible but with an invalid state (i.e. this highlight type)
 struct InvalidHighlight {
     static constexpr QStringView ID = u"invalid";
     static constexpr QStringView ICON_RESOURCE = u":/buttons/cancel.svg";
