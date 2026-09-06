@@ -48,6 +48,7 @@
 #include "widgets/Window.hpp"
 
 #include <IrcConnection>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -1313,12 +1314,13 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
 void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
                                                      const QString &platform,
                                                      const QString &actor,
-                                                     const QString &emoteName)
+                                                     const QString &emoteName,
+                                                     const QDateTime &now)
 {
     if (this->tryReplaceLastLiveUpdateAddOrRemove(
             isEmoteAdd ? MessageFlag::LiveUpdatesAdd
                        : MessageFlag::LiveUpdatesRemove,
-            platform, actor, emoteName))
+            platform, actor, emoteName, now))
     {
         return;
     }
@@ -1329,13 +1331,13 @@ void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
     if (isEmoteAdd)
     {
         msg = MessageBuilder(liveUpdatesAddEmoteMessage, platform, actor,
-                             this->lastLiveUpdateEmoteNames_)
+                             this->lastLiveUpdateEmoteNames_, now)
                   .release();
     }
     else
     {
         msg = MessageBuilder(liveUpdatesRemoveEmoteMessage, platform, actor,
-                             this->lastLiveUpdateEmoteNames_)
+                             this->lastLiveUpdateEmoteNames_, now)
                   .release();
     }
     this->lastLiveUpdateEmotePlatform_ = platform;
@@ -1346,7 +1348,7 @@ void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
 
 bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     MessageFlag op, const QString &platform, const QString &actor,
-    const QString &emoteName)
+    const QString &emoteName, const QDateTime &now)
 {
     if (this->lastLiveUpdateEmotePlatform_ != platform)
     {
@@ -1354,8 +1356,7 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     }
     auto last = this->lastLiveUpdateMessage_.lock();
     if (!last || !last->flags.has(op) ||
-        last->parseTime < QTime::currentTime().addSecs(-5) ||
-        last->loginName != actor)
+        last->serverReceivedTime < now.addSecs(-5) || last->loginName != actor)
     {
         return false;
     }
@@ -1366,19 +1367,15 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
         if (op == MessageFlag::LiveUpdatesAdd)
         {
             return {
-                liveUpdatesAddEmoteMessage,
-                platform,
-                last->loginName,
-                this->lastLiveUpdateEmoteNames_,
+                liveUpdatesAddEmoteMessage,      platform, last->loginName,
+                this->lastLiveUpdateEmoteNames_, now,
             };
         }
 
         // op == RemoveEmoteMessage
         return {
-            liveUpdatesRemoveEmoteMessage,
-            platform,
-            last->loginName,
-            this->lastLiveUpdateEmoteNames_,
+            liveUpdatesRemoveEmoteMessage,   platform, last->loginName,
+            this->lastLiveUpdateEmoteNames_, now,
         };
     };
 

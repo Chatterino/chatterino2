@@ -101,11 +101,11 @@ public:
                    const QDateTime &time);
 
     MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,
-                   const QString &actor,
-                   const std::vector<QString> &emoteNames);
+                   const QString &actor, const std::vector<QString> &emoteNames,
+                   const QDateTime &time);
     MessageBuilder(LiveUpdatesRemoveEmoteMessageTag, const QString &platform,
-                   const QString &actor,
-                   const std::vector<QString> &emoteNames);
+                   const QString &actor, const std::vector<QString> &emoteNames,
+                   const QDateTime &time);
     MessageBuilder(LiveUpdatesUpdateEmoteMessageTag, const QString &platform,
                    const QString &actor, const QString &emoteName,
                    const QString &oldEmoteName);
