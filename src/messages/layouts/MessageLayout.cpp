@@ -301,7 +301,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
             QRectF{
                 0.0,
                 static_cast<qreal>(ctx.y),
-                this->container_.getWidth() + 64,
+                static_cast<qreal>(ctx.canvasWidth),
                 1.0,
             },
             ctx.messageColors.messageSeperator);

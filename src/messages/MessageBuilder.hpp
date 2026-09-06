@@ -264,6 +264,8 @@ private:
     void addEmoji(const EmotePtr &emote);
     void addTextOrEmote(TextState &state, QString string);
 
+    void addTwitchGif(const QString &id, QStringView originalText);
+
     Outcome tryAppendCheermote(TextState &state, const QString &string);
     Outcome tryAppendEmote(TwitchChannel *twitchChannel, EmoteNameView name);
 
@@ -316,7 +318,7 @@ private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 
-    void addWords(const QStringList &words,
+    void addWords(QStringView text,
                   const std::vector<TwitchSpecialOccurrence> &twitchSpecials,
                   TextState &state);
 

@@ -17,6 +17,7 @@
 namespace {
 
 using namespace chatterino;
+using namespace Qt::Literals;
 
 void createSpecialOccurrence(QStringView occurrence,
                              std::vector<TwitchSpecialOccurrence> &out,
@@ -104,6 +105,29 @@ void appendTwitchEmoteOccurrences(QStringView emote,
     }
 }
 
+void appendTwitchGifOccurrence(QStringView gif,
+                               std::vector<TwitchSpecialOccurrence> &out,
+                               std::span<const uint16_t> codepointToUtf16Idx,
+                               QStringView originalMessage, int messageOffset)
+{
+    // A single entry looks like "<range>|<gifID>|<gifURL>".
+    auto [range, rest] = splitOnce(gif, u'|');
+    auto [id, link] = splitOnce(rest, u'|');
+    if (link.empty())
+    {
+        qCWarning(chatterinoTwitch) << "Invalid gif:" << gif;
+        return;
+    }
+
+    createSpecialOccurrence(
+        range, out, codepointToUtf16Idx, originalMessage, messageOffset,
+        [&](QStringView /* nameStr */) -> std::optional<TwitchGifOccurrence> {
+            return TwitchGifOccurrence{
+                .id = id.toString(),
+            };
+        });
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -158,12 +182,12 @@ std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
 std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
     Communi::TagsRef tags, QStringView content, int messageOffset)
 {
-    // Twitch emotes
     std::vector<TwitchSpecialOccurrence> occurrences;
 
     auto emotesTag = tags.getOrEmpty("emotes");
+    auto gifsTag = tags.getOrEmpty("gifs");
 
-    if (emotesTag.isEmpty() ||
+    if ((gifsTag.isEmpty() && emotesTag.isEmpty()) ||
         content.size() > std::numeric_limits<uint16_t>::max())
     {
         return occurrences;
@@ -182,10 +206,23 @@ std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
     }
     codepointToUtf16Idx.push_back(content.size());
 
-    for (const auto emote : emotesTag.tokenize(u'/'))
+    if (!emotesTag.isEmpty())
     {
-        appendTwitchEmoteOccurrences(emote, occurrences, codepointToUtf16Idx,
-                                     content, messageOffset);
+        for (const auto emote : emotesTag.tokenize(u'/'))
+        {
+            appendTwitchEmoteOccurrences(emote, occurrences,
+                                         codepointToUtf16Idx, content,
+                                         messageOffset);
+        }
+    }
+
+    if (!gifsTag.isEmpty())
+    {
+        for (const auto gif : gifsTag.tokenize(u','))
+        {
+            appendTwitchGifOccurrence(gif, occurrences, codepointToUtf16Idx,
+                                      content, messageOffset);
+        }
     }
 
     return occurrences;
