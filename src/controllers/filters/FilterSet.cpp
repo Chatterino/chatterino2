@@ -22,7 +22,7 @@ FilterSet::FilterSet(const QList<QUuid> &filterIds)
     auto filters = getSettings()->filterRecords.readOnly();
     for (const auto &f : *filters)
     {
-        if (filterIds.contains(f->getId()))
+        if (f->isGlobal() || filterIds.contains(f->getId()))
         {
             this->filters_.insert(f->getId(), f);
         }
@@ -74,7 +74,7 @@ void FilterSet::reloadFilters()
         bool found = false;
         for (const auto &f : *filters)
         {
-            if (f->getId() == key)
+            if (f->isGlobal() || f->getId() == key)
             {
                 found = true;
                 this->filters_.insert(key, f);
