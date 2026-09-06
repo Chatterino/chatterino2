@@ -522,13 +522,18 @@ struct TokenizedEmote {
     EmotePtr emote;
     bool trailingSpace = true;
 };
+struct TokenizedGif {
+    QString id;
+    QStringView originalText;
+};
 struct TokenizedEmoji {
     EmotePtr emote;
 };
 
 /// Tokenizes `text` into words and special Twitch items (emotes).
 ///
-/// `visitor` gets called with one of `TokenizedText`, `TokenizedEmote`.
+/// `visitor` gets called with one of `TokenizedText`, `TokenizedEmote`,
+/// `TokenizedGif`.
 void tokenizeWords(QStringView text,
                    std::span<const TwitchSpecialOccurrence> specials,
                    auto &&visitor)
@@ -562,19 +567,25 @@ void tokenizeWords(QStringView text,
                 assert(false && "faulty tag parsing");
                 return;
             }
+            QStringView originalText(current,
+                                     static_cast<qsizetype>(special.length));
             current += special.length;
 
             // A special item at the end always has a trailing space.
             bool trailingSpace = current == end || *current == ' ';
             std::visit(
-                variant::Overloaded{
-                    [&](const TwitchEmoteOccurrence &emote) {
-                        visitor(TokenizedEmote{
-                            .emote = emote.ptr,
-                            .trailingSpace = trailingSpace,
-                        });
-                    },
-                },
+                variant::Overloaded{[&](const TwitchEmoteOccurrence &emote) {
+                                        visitor(TokenizedEmote{
+                                            .emote = emote.ptr,
+                                            .trailingSpace = trailingSpace,
+                                        });
+                                    },
+                                    [&](const TwitchGifOccurrence &gif) {
+                                        visitor(TokenizedGif{
+                                            .id = gif.id,
+                                            .originalText = originalText,
+                                        });
+                                    }},
                 special.data);
 
             specials = specials.subspan(1);
@@ -599,7 +610,7 @@ void tokenizeWords(QStringView text,
 /// Tokenizes `text` into words, Twitch emotes, and emojis.
 ///
 /// `visitor` gets called with one of `TokenizedText`, `TokenizedEmote`,
-/// `TokenizedEmoji`.
+/// `TokenizedGif`, `TokenizedEmoji`.
 void tokenizeWordsWithEmoji(QStringView text,
                             std::span<const TwitchSpecialOccurrence> emotes,
                             auto &&visitor)
@@ -629,7 +640,9 @@ void tokenizeWordsWithEmoji(QStringView text,
             [&](const TokenizedEmote &emote) {
                 visitor(emote);
             },
-        });
+            [&](const TokenizedGif &gif) {
+                visitor(gif);
+            }});
 }
 
 }  // namespace
@@ -2066,6 +2079,20 @@ void MessageBuilder::addTextOrEmote(TextState &state, QString string)
     this->appendOrEmplaceText(string, textColor);
 }
 
+void MessageBuilder::addTwitchGif(const QString &id, QStringView originalText)
+{
+    auto original = originalText.toString();
+    QString link = u"https://i.giphy.com/" % id % u".webp";
+    auto *el = this->emplace<LinkElement>(
+        LinkElement::Parsed{
+            .lowercase = original,
+            .original = original,
+        },
+        link, MessageElementFlag::Text, MessageColor::Link);
+
+    getApp()->getLinkResolver()->resolve(el->linkInfo());
+}
+
 bool MessageBuilder::isEmpty() const
 {
     return this->message_->elements.empty();
@@ -2790,6 +2817,9 @@ void MessageBuilder::addWords(
                 this->emplace<EmoteElement>(
                         tok.emote, MessageElementFlag::Emote, this->textColor_)
                     ->setTrailingSpace(tok.trailingSpace);
+            },
+            [&](const TokenizedGif &gif) {
+                this->addTwitchGif(gif.id, gif.originalText);
             },
         });
 }
