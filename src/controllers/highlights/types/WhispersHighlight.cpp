@@ -6,7 +6,7 @@
 
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "messages/MessageBuilder.hpp"
+#include "messages/MessageParseArgs.hpp"
 
 namespace chatterino::highlights {
 
@@ -34,6 +34,17 @@ HighlightCheck WhispersHighlight::buildCheck() const
             };
         },
     };
+}
+
+QDebug operator<<(QDebug dbg, const WhispersHighlight &v)
+{
+    dbg.nospace() << "WhispersHighlight("            //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
 }
 
 }  // namespace chatterino::highlights

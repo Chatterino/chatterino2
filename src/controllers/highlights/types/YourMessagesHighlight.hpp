@@ -11,6 +11,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
+#include <QDebug>
 #include <QStringView>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -52,6 +53,8 @@ struct YourMessagesHighlight {
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
+
+    friend QDebug operator<<(QDebug dbg, const YourMessagesHighlight &v);
 };
 
 }  // namespace chatterino::highlights
