@@ -204,10 +204,30 @@ TEST(Settings, DefaultHighlightSerialization)
     auto &a = d.GetAllocator();
 
     {
-        // A default-initialized variant will contain the first
+        // A default-initialized variant will contain the first variant type
         AllHighlights highlight;
         auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
-        ASSERT_EQ(R"({"id":"yourusername"})", rj::stringify(v));
+        ASSERT_EQ(R"({"id":"invalid"})", rj::stringify(v));
+    }
+
+    {
+        // A highlight with an invalid ID will be initialized as an invalid highlight
+        rapidjson::Document d;
+        d.Parse(R"({"id":"nonexistanthighlight"})");
+
+        bool error = false;
+
+        AllHighlights highlight;
+        auto v = pajlada::Deserialize<AllHighlights>::get(d, &error);
+
+        ASSERT_TRUE(error);
+        ASSERT_EQ(v.index(), 0);
+        ASSERT_TRUE(
+            (std::is_same_v<std::variant_alternative_t<0, AllHighlights>,
+                            InvalidHighlight>));
+
+        auto rjv = pajlada::Serialize<AllHighlights>::get(v, a);
+        ASSERT_EQ(R"({"id":"invalid"})", rj::stringify(rjv));
     }
 
     {

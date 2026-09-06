@@ -21,11 +21,11 @@ namespace chatterino::highlights {
 constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
 constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
 
-/// Gets the "type" key from the given object and compares its value with expectedType
-bool matchesType(const rapidjson::Value &obj, QStringView expectedType);
+/// Returns true if the "type" key from the given `object` matches `expectedType`.
+bool matchesType(const rapidjson::Value &object, QStringView expectedType);
 
-/// Gets the "id" key from the given object and compares its value with expectedID
-bool matchesID(const rapidjson::Value &obj, QStringView expectedID);
+/// Returns true if the "id" key from the given `object` matches `expectedID`.
+bool matchesID(const rapidjson::Value &object, QStringView expectedID);
 
 /// Generate a random ID (UUIDv4) for a new highlight
 QString generateID();

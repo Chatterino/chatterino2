@@ -11,6 +11,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
+#include <QDebug>
 #include <QStringView>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -39,18 +40,14 @@ struct FirstMessageHighlight {
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(72, 127, 63, 60);
 
-    // Default state:
-    // Enabled = true
-    // Show in mentions = unavailable (always false)
-    // Flash taskbar = unavailable (always false)
-    // Play sound = false
-
     QString name;
     std::optional<bool> enabled;
 
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
+
+    friend QDebug operator<<(QDebug dbg, const FirstMessageHighlight &v);
 };
 
 }  // namespace chatterino::highlights
