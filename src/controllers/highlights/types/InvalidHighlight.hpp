@@ -16,8 +16,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
-#include <optional>
-
 namespace chatterino {
 
 struct HighlightCheck;
@@ -29,30 +27,24 @@ namespace chatterino::highlights {
 /// Matches Twitch announcements
 ///
 /// Can be further customized to override the colors of colored announcements
-struct AnnouncementsHighlight {
-    static constexpr QStringView ID = u"announcements";
-    static constexpr QStringView ICON_RESOURCE =
-        u":/buttons/settings-darkMode.svg";
+struct InvalidHighlight {
+    static constexpr QStringView ID = u"invalid";
+    static constexpr QStringView ICON_RESOURCE = u":/buttons/cancel.svg";
 
-    static constexpr QStringView DEFAULT_NAME = u"Announcements";
+    static constexpr QStringView DEFAULT_NAME = u"Invalid";
 
-    static constexpr bool ENABLED_BY_DEFAULT = true;
+    static constexpr bool ENABLED_BY_DEFAULT = false;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
     static constexpr bool ALERT_DEFAULT = false;
-    static constexpr bool OVERRIDE_COLORED_ANNOUNCEMENTS_DEFAULT = false;
-    static constexpr QColor BACKGROUND_COLOR_DEFAULT =
-        QColor(255, 102, 237, 100);
-
-    QString name;
-    std::optional<bool> enabled;
-
-    std::optional<bool> overrideColoredAnnouncements;
+    static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(0, 0, 0, 0);
 
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
+    bool isValid();
+
     HighlightCheck buildCheck() const;
 
-    friend QDebug operator<<(QDebug dbg, const AnnouncementsHighlight &v);
+    friend QDebug operator<<(QDebug dbg, const InvalidHighlight &v);
 };
 
 }  // namespace chatterino::highlights
@@ -60,20 +52,14 @@ struct AnnouncementsHighlight {
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::highlights::AnnouncementsHighlight> {
-    using H = chatterino::highlights::AnnouncementsHighlight;
+struct Serialize<chatterino::highlights::InvalidHighlight> {
+    using H = chatterino::highlights::InvalidHighlight;
 
     static rapidjson::Value get(const H &h,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
         chatterino::rj::set(ret, "id", H::ID, a);
-
-        chatterino::rj::setOptionally(ret, "name", h.name, a);
-        chatterino::rj::setOptionally(ret, "enabled", h.enabled, a);
-
-        chatterino::rj::setOptionally(ret, "overrideColoredAnnouncements",
-                                      h.overrideColoredAnnouncements, a);
 
         h.outcome.serialize(ret, a);
 
@@ -82,8 +68,8 @@ struct Serialize<chatterino::highlights::AnnouncementsHighlight> {
 };
 
 template <>
-struct Deserialize<chatterino::highlights::AnnouncementsHighlight> {
-    using H = chatterino::highlights::AnnouncementsHighlight;
+struct Deserialize<chatterino::highlights::InvalidHighlight> {
+    using H = chatterino::highlights::InvalidHighlight;
 
     static H get(const rapidjson::Value &value, bool *error = nullptr)
     {
@@ -100,12 +86,6 @@ struct Deserialize<chatterino::highlights::AnnouncementsHighlight> {
         }
 
         H h;
-
-        chatterino::rj::getSafe(value, "name", h.name);
-        chatterino::rj::getSafe(value, "enabled", h.enabled);
-
-        chatterino::rj::getSafe(value, "overrideColoredAnnouncements",
-                                h.overrideColoredAnnouncements);
 
         h.outcome.deserialize(value);
 

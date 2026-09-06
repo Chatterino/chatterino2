@@ -12,6 +12,7 @@
 
 #include <pajlada/serialize/common.hpp>
 #include <QColor>
+#include <QDebug>
 #include <QStringView>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
@@ -48,6 +49,9 @@ struct UncategorizedNotificationHighlight {
     Outcome outcome{BACKGROUND_COLOR_DEFAULT};
 
     HighlightCheck buildCheck() const;
+
+    friend QDebug operator<<(QDebug dbg,
+                             const UncategorizedNotificationHighlight &v);
 };
 
 }  // namespace chatterino::highlights

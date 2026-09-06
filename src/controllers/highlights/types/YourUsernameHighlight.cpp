@@ -64,4 +64,15 @@ HighlightCheck YourUsernameHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const YourUsernameHighlight &v)
+{
+    dbg.nospace() << "YourUsernameHighlight("        //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

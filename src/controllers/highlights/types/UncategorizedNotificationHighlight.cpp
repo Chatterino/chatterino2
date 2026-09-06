@@ -34,4 +34,15 @@ HighlightCheck UncategorizedNotificationHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const UncategorizedNotificationHighlight &v)
+{
+    dbg.nospace() << "UncategorizedNotificationHighlight("  //
+                  << "name:" << v.name                      //
+                  << ',' << "enabled:" << v.enabled         //
+                  << ',' << "outcome:" << v.outcome         //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

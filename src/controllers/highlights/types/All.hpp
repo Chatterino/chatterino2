@@ -10,6 +10,7 @@
 #include "controllers/highlights/types/ChannelPointsHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/FilterHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/FirstMessageHighlight.hpp"  // IWYU pragma: export
+#include "controllers/highlights/types/InvalidHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/MessageHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscribedThreadHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"  // IWYU pragma: export
@@ -30,6 +31,7 @@ namespace chatterino::highlights {
 /// When you add a new built-in highlight, it must be added to HighlightController::billTinHighlights.
 /// When you add a new user-defined highlight, it must be added to the HighlightControllerTest.BillTinHighlightsHighlightController test.
 using AllHighlights = std::variant<
+    InvalidHighlight,
     YourUsernameHighlight,
     WhispersHighlight,
     AnnouncementsHighlight,

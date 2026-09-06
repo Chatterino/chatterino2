@@ -40,4 +40,15 @@ HighlightCheck SubscribedThreadHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const SubscribedThreadHighlight &v)
+{
+    dbg.nospace() << "SubscribedThreadHighlight("    //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights
