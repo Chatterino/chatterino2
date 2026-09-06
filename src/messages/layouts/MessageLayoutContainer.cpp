@@ -29,7 +29,7 @@ using namespace chatterino;
 constexpr QMargins MARGIN{8, 4, 8, 4};
 constexpr qreal COMPACT_EMOTES_OFFSET = 4;
 /// Target width used to match Twitch's desktop chat layout.
-constexpr qreal ASCII_ART_WIDTH = 340.0;
+constexpr qreal ASCII_ART_WIDTH = 300.0;
 
 int maxUncollapsedLines()
 {
