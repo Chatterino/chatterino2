@@ -124,9 +124,6 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
                                  bool select)
 {
-    // Queue up save because: Tab added
-    getApp()->getWindows()->queueSave();
-
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
@@ -156,14 +153,12 @@ NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
 
     this->performLayout();
     tab->setVisible(this->shouldShowTab(tab));
+    this->afterPageAdded();
     return tab;
 }
 
 void Notebook::removePage(QWidget *page)
 {
-    // Queue up save because: Tab removed
-    getApp()->getWindows()->queueSave();
-
     int removingIndex = this->indexOf(page);
     assert(removingIndex != -1);
 
@@ -208,6 +203,7 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+    this->afterPageRemoved();
 }
 
 void Notebook::duplicatePage(QWidget *page)
@@ -687,12 +683,10 @@ void Notebook::rearrangePage(QWidget *page, int index)
         return;
     }
 
-    // Queue up save because: Tab rearranged
-    getApp()->getWindows()->queueSave();
-
     this->items_.move(this->indexOf(page), index);
 
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 bool Notebook::getAllowUserTabManagement() const
@@ -1353,8 +1347,8 @@ void Notebook::sortTabsAlphabetically()
         return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
     });
 
-    getApp()->getWindows()->queueSave();
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1769,6 +1763,21 @@ void SplitNotebook::setLockNotebookLayout(bool value)
 {
     Notebook::setLockNotebookLayout(value);
     this->sortTabsAlphabeticallyAction_->setEnabled(!value);
+}
+
+void SplitNotebook::afterPageAdded()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageRemoved()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageMoved()
+{
+    getApp()->getWindows()->queueSave();
 }
 
 }  // namespace chatterino
