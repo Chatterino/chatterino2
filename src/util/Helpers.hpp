@@ -63,6 +63,59 @@ std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
 
 }  // namespace helpers::detail
 
+namespace helpers::duplicate_message {
+
+    /**
+     * Normalize a message by removing magic suffix and simplifying.
+     *
+     * @param message The message to normalize.
+     * @return The normalized message.
+     */
+    QString normalizeMessage(const QString &message);
+
+    /**
+     * Returns the positions of spaces in a message, skipping the first space if it's a command.
+     *
+     * @param message The message to analyze.
+     * @return A vector of positions where spaces occur in the message.
+     */
+    QVector<int> getSpacePositions(const QString &message);
+
+    /**
+     * Builds a variant of a duplicate message using double spaces and magic characters.
+     *
+     * @param message Original message
+     * @param spacePositions Positions of spaces in the message
+     * @param spaceMask Mask of spaces to be inserted
+     * @param magicGroup Magic group to be appended (0, 1, or 2)
+     * @return A variant of the original message.
+     */
+    QString buildVariant(const QString &message,
+                         const QVector<int> &spacePositions, uint64_t spaceMask,
+                         uint64_t magicGroup);
+
+    // Computes the next bitmask for generating a duplicate message variant.
+    uint64_t getNextMask(uint64_t currentMask, uint64_t numSpaces);
+
+}  // namespace helpers::duplicate_message
+
+/**
+ * Returns the next combination with the same number of 1 bits.
+ * Used for efficiently generating the next variant within the same grade.
+ *
+ * @param x The current bit pattern
+ * @return The next bit pattern with the same number of 1 bits
+ */
+uint64_t gospersHack(uint64_t x);
+
+/**
+ * Counts the number of set bits in a 64-bit integer.
+ *
+ * @param x The integer to count the set bits in.
+ * @return The number of set bits in the integer.
+ */
+int popCount(uint64_t x);
+
 /**
  * @brief startsWithOrContains is a wrapper for checking
  * whether str1 starts with or contains str2 within itself
