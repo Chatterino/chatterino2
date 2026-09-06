@@ -55,13 +55,11 @@ template <>
 struct Serialize<chatterino::highlights::InvalidHighlight> {
     using H = chatterino::highlights::InvalidHighlight;
 
-    static rapidjson::Value get(const H &h,
+    static rapidjson::Value get(const H & /*h*/,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
         chatterino::rj::set(ret, "id", H::ID, a);
-
-        h.outcome.serialize(ret, a);
 
         return ret;
     }
@@ -85,11 +83,7 @@ struct Deserialize<chatterino::highlights::InvalidHighlight> {
             return {};
         }
 
-        H h;
-
-        h.outcome.deserialize(value);
-
-        return h;
+        return {};
     }
 };
 
