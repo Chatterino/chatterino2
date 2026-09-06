@@ -1637,8 +1637,8 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
                       getApp()->getTwitch()->getMentionsChannel(),
 
         .y = -static_cast<int>(
-            messagesSnapshot[start]->getHeight() *
-            (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))),
+            std::round(messagesSnapshot[start]->getHeight() *
+                       (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
         .messageIndex = start,
         .isLastReadMessage = false,
 
