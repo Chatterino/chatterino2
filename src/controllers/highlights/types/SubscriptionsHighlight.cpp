@@ -34,4 +34,15 @@ HighlightCheck SubscriptionsHighlight::buildCheck() const
     };
 }
 
+QDebug operator<<(QDebug dbg, const SubscriptionsHighlight &v)
+{
+    dbg.nospace() << "SubscriptionsHighlight("       //
+                  << "name:" << v.name               //
+                  << ',' << "enabled:" << v.enabled  //
+                  << ',' << "outcome:" << v.outcome  //
+                  << ')';
+
+    return dbg;
+}
+
 }  // namespace chatterino::highlights

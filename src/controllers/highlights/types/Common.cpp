@@ -4,6 +4,7 @@
 
 #include "controllers/highlights/types/Common.hpp"
 
+#include "common/QLogging.hpp"
 #include "controllers/highlights/types/All.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/Variant.hpp"
@@ -15,6 +16,13 @@
 #include <cassert>
 
 namespace chatterino::highlights {
+
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoHighlights;
+
+}  // namespace
 
 template <typename T>
 concept HasDynamicID = requires(T a) {
@@ -48,17 +56,19 @@ concept HasDefaultSound = requires {
 
 static_assert(HasDefaultSound<YourUsernameHighlight>);
 
-bool matchesType(const rapidjson::Value &obj, QStringView expectedType)
+bool matchesType(const rapidjson::Value &object, QStringView expectedType)
 {
-    assert(obj.IsObject());
+    assert(object.IsObject());
 
-    if (!obj.IsObject())
+    if (!object.IsObject())
     {
+        qCWarning(LOG) << "Error in matchesType, given object is not an object:"
+                       << rj::stringify(object);
         return false;
     }
 
-    auto member = obj.FindMember("type");
-    if (member == obj.MemberEnd())
+    auto member = object.FindMember("type");
+    if (member == object.MemberEnd())
     {
         return false;
     }
@@ -69,18 +79,24 @@ bool matchesType(const rapidjson::Value &obj, QStringView expectedType)
     return actualType == expectedType;
 }
 
-bool matchesID(const rapidjson::Value &obj, QStringView expectedID)
+bool matchesID(const rapidjson::Value &object, QStringView expectedID)
 {
-    assert(obj.IsObject());
+    assert(object.IsObject());
 
-    if (!obj.IsObject())
+    if (!object.IsObject())
     {
+        qCWarning(LOG) << "Error in matchesId, given object is not an object:"
+                       << rj::stringify(object);
         return false;
     }
 
-    auto member = obj.FindMember("id");
-    if (member == obj.MemberEnd())
+    auto member = object.FindMember("id");
+    if (member == object.MemberEnd())
     {
+        // All highlights must contain an id
+        qCWarning(LOG)
+            << "Error in matchesId, object does not contain the id key:"
+            << rj::stringify(object);
         return false;
     }
 
@@ -152,9 +168,14 @@ QString getName(const AllHighlights &h)
 bool isEnabled(const AllHighlights &h)
 {
     return std::visit(
-        [](auto &&h) {
-            using ActualType = std::decay_t<decltype(h)>;
-            return h.enabled.value_or(ActualType::ENABLED_BY_DEFAULT);
+        variant::Overloaded{
+            [](const InvalidHighlight & /*h*/) {
+                return false;
+            },
+            [](const auto &h) {
+                using ActualType = std::decay_t<decltype(h)>;
+                return h.enabled.value_or(ActualType::ENABLED_BY_DEFAULT);
+            },
         },
         h);
 }
