@@ -280,6 +280,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(MEF::Collapsed);
     flags.set(MEF::LowercaseLinks, settings->lowercaseDomains);
     flags.set(MEF::ChannelPointReward);
+    flags.set(MEF::TwitchGif);
 
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);

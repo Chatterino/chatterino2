@@ -194,5 +194,12 @@
             "userID": "141981764",
             "usernameColor": "#ff033700"
         }
-    ]
+    ],
+    "settings": {
+        "appearance": {
+            "messages": {
+                "showTwitchGifs": false
+            }
+        }
+    }
 }

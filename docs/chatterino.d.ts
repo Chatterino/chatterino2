@@ -536,6 +536,7 @@ declare namespace c2 {
         LowercaseLinks = 0,
         RepliedMessage = 0,
         ReplyButton = 0,
+        TwitchGif = 0,
         Default = 0,
     }
 
