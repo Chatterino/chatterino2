@@ -3,6 +3,7 @@ project(chatterino-test)
 option(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN "Use public httpbin for testing network requests" OFF)
 
 set(test_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/ChannelHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/resources/test-resources.qrc
     ${CMAKE_CURRENT_LIST_DIR}/src/Test.hpp
