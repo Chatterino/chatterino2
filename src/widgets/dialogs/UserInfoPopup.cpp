@@ -968,7 +968,7 @@ void UserInfoPopup::updateUserData()
             user.displayName, this->underlyingChannel_->getName()));
         auto createdAt =
             QDateTime::fromString(user.createdAt, Qt::ISODateWithMs);
-        auto createdStr = createdAt.toLocalTime().toString(Qt::ISODate);
+        auto createdStr = createdAt.toLocalTime().date().toString(Qt::ISODate);
         this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(createdStr));
         this->ui_.createdDateLabel->setToolTip(
             formatLongFriendlyDuration(createdAt,
