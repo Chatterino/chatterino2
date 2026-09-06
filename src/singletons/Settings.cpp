@@ -774,6 +774,21 @@ bool Settings::cleanupHighlights()
         const auto &h = highlights[actualIndex];
         const auto id = highlights::getID(h);
 
+        if (id == u"invalid")
+        {
+            qCInfo(LOG) << "Found an invalid highlight at" << i
+                        << "- removing it.";
+            highlights.erase(highlights.begin() + actualIndex);
+            ++numRemoved;
+            continue;
+        }
+
+        std::visit(
+            [i](const auto &asd) {
+                qInfo().nospace() << "XXX: highlight[" << i << "]: " << asd;
+            },
+            h);
+
         const auto [_, isNew] = seenIDs.insert(id);
         if (!isNew)
         {
