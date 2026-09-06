@@ -7,6 +7,7 @@
 #include "mocks/BaseApplication.hpp"
 #include "Test.hpp"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -25,11 +26,19 @@ TEST(ChannelHelpers, DontStackTimeouts)
         bool firstPubSub;
         bool secondPubSub;
     };
-    const Case cases[] = {
-        {"IRC then IRC", false, false},
-        {"EventSub then EventSub", true, true},
-        {"IRC then EventSub", false, true},
-        {"EventSub then IRC", true, false},
+    const std::array cases = {
+        Case{.name = "IRC then IRC",
+             .firstPubSub = false,
+             .secondPubSub = false},
+        Case{.name = "EventSub then EventSub",
+             .firstPubSub = true,
+             .secondPubSub = true},
+        Case{.name = "IRC then EventSub",
+             .firstPubSub = false,
+             .secondPubSub = true},
+        Case{.name = "EventSub then IRC",
+             .firstPubSub = true,
+             .secondPubSub = false},
     };
     for (const auto &test : cases)
     {
@@ -51,10 +60,11 @@ TEST(ChannelHelpers, DontStackTimeouts)
             }
             addOrReplaceChannelTimeout(
                 messages, message, time,
-                [&](auto index, auto /*oldMessage*/, auto replacement) {
+                [&](auto index, const auto & /*oldMessage*/,
+                    const auto &replacement) {
                     messages.at(index) = replacement;
                 },
-                [&](auto added) {
+                [&](const auto &added) {
                     messages.push_back(added);
                 },
                 true);
