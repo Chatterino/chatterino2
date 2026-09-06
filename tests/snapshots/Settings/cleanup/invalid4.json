@@ -1,0 +1,112 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "name": "thisshouldbegone",
+                    "id": "invalid"
+                },
+                {
+                    "name": "a",
+                    "id": "subscriptions"
+                },
+                {
+                    "name": "b",
+                    "id": "whispers"
+                },
+                {
+                    "name": "c",
+                    "id": "announcements"
+                },
+                {
+                    "name": "d",
+                    "id": "yourusername"
+                },
+                {
+                    "name": "e",
+                    "id": "automodcaught"
+                },
+                {
+                    "name": "f",
+                    "id": "yourmessages"
+                },
+                {
+                    "name": "g",
+                    "id": "subscribedthread"
+                },
+                {
+                    "name": "h",
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "name": "i",
+                    "id": "firstmessage"
+                },
+                {
+                    "name": "j",
+                    "id": "watchstreak"
+                },
+                {
+                    "name": "k",
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "name": "a",
+                    "id": "subscriptions"
+                },
+                {
+                    "name": "b",
+                    "id": "whispers"
+                },
+                {
+                    "name": "c",
+                    "id": "announcements"
+                },
+                {
+                    "name": "d",
+                    "id": "yourusername"
+                },
+                {
+                    "name": "e",
+                    "id": "automodcaught"
+                },
+                {
+                    "name": "f",
+                    "id": "yourmessages"
+                },
+                {
+                    "name": "g",
+                    "id": "subscribedthread"
+                },
+                {
+                    "name": "h",
+                    "id": "channelpoints-highlightmymessage"
+                },
+                {
+                    "name": "i",
+                    "id": "firstmessage"
+                },
+                {
+                    "name": "j",
+                    "id": "watchstreak"
+                },
+                {
+                    "name": "k",
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
