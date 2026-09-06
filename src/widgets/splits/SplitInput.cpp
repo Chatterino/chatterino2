@@ -1835,7 +1835,7 @@ void SplitInput::updateSelectedHistorySearchMatch()
         this->historySearchResultIndex)];
 
     this->prevIndex_ = static_cast<int>(current.messageIdx);
-    this->ui_.textEdit->setText(current.message);
+    this->ui_.textEdit->setPlainText(current.message);
 
     this->updateHistorySearchStatus(
         false, QString::number(this->historySearchResults.size() -

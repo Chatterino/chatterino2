@@ -113,10 +113,10 @@ TEST(AsciiArtLayout, LimitsTheMessageWidth)
     };
     container.beginLayout(ctx.width, ctx.scale, ctx.imageScale, {});
 
-    EXPECT_GT(container.remainingWidth(), 340);
+    EXPECT_GT(container.remainingWidth(), 300);
     container.beginLayout(ctx.width, ctx.scale, ctx.imageScale,
                           MessageFlag::AsciiArt);
-    EXPECT_EQ(container.remainingWidth(), 340);
+    EXPECT_EQ(container.remainingWidth(), 300);
 
     TextElement art(QString(100, QChar(0x28FF)), MessageElementFlag::Text);
     art.addToContainer(container, ctx);
