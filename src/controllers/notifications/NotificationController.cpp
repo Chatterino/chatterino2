@@ -20,6 +20,7 @@
 
 #include <QUrl>
 
+#include <cassert>
 #include <ranges>
 
 namespace ranges = std::ranges;
@@ -114,8 +115,22 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 }
 
 void NotificationController::notifyTwitchChannelLive(
-    const NotificationPayload &payload) const
+    const NotificationPayload &payload)
 {
+    assert(!payload.channelId.isEmpty() && !payload.streamId.isEmpty());
+
+    auto [streamIt, inserted] = this->lastNotifiedStreamIds_.try_emplace(
+        payload.channelId, payload.streamId);
+    if (!inserted && streamIt->second == payload.streamId)
+    {
+        return;
+    }
+    if (!inserted)
+    {
+        this->notifyTwitchChannelOffline(payload.channelId);
+        streamIt->second = payload.streamId;
+    }
+
     bool showNotification =
         !(getSettings()->suppressInitialLiveNotification &&
           payload.isInitialUpdate) &&
@@ -272,6 +287,7 @@ void NotificationController::updateFakeChannel(
 
     this->notifyTwitchChannelLive({
         .channelId = stream->userId,
+        .streamId = stream->id,
         .channelName = channelName,
         .displayName = stream->userName,
         .title = stream->title,
