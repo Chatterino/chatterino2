@@ -985,7 +985,7 @@ endif()
 
 if (CHATTERINO_SPELLCHECK)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
-    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC hunspell::hunspell)
 endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)
