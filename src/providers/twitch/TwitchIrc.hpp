@@ -16,6 +16,13 @@
 
 namespace chatterino {
 
+struct TwitchGifOccurrence {
+    /// The giphy ID.
+    QString id;
+
+    bool operator==(const TwitchGifOccurrence &rhs) const = default;
+};
+
 struct TwitchEmoteOccurrence {
     EmotePtr ptr;
     EmoteName name;
@@ -25,10 +32,10 @@ struct TwitchEmoteOccurrence {
 
 struct TwitchSpecialOccurrence {
     /// Start position in the message (in utf16 units)
-    int start;
+    int start = 0;
     /// Length of the occurrence (in utf16 units)
-    int length;
-    std::variant<TwitchEmoteOccurrence> data;
+    int length = 0;
+    std::variant<TwitchEmoteOccurrence, TwitchGifOccurrence> data;
 
     bool operator==(const TwitchSpecialOccurrence &other) const = default;
 };
