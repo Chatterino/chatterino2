@@ -659,19 +659,26 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         qCDebug(chatterinoTwitch).nospace().noquote()
             << "[TwitchChannel " << this->getName() << "] Online";
 
+        QString streamId;
+        QString title;
+        {
+            const auto streamStatus = this->accessStreamStatus();
+            streamId = streamStatus->streamId;
+            title = streamStatus->title;
+        }
         getApp()->getNotifications()->notifyTwitchChannelLive({
             .channelId = this->roomId(),
+            .streamId = streamId,
             .channelName = this->getName(),
             .displayName = this->getDisplayName(),
-            .title = this->accessStreamStatus()->title,
+            .title = title,
             .isInitialUpdate = isInitialUpdate,
         });
 
         // Channel live message
         this->addMessage(
             MessageBuilder::makeLiveMessage(
-                this->getDisplayName(), this->roomId(),
-                this->accessStreamStatus()->title,
+                this->getDisplayName(), this->roomId(), title,
                 {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
             MessageContext::Original);
     }
