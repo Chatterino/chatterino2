@@ -23,22 +23,30 @@ TEST(ChannelHelpers, DontStackTimeouts)
 
     struct Case {
         const char *name;
-        bool firstPubSub;
-        bool secondPubSub;
+        bool firstEventSub;
+        bool secondEventSub;
     };
     const std::array cases = {
-        Case{.name = "IRC then IRC",
-             .firstPubSub = false,
-             .secondPubSub = false},
-        Case{.name = "EventSub then EventSub",
-             .firstPubSub = true,
-             .secondPubSub = true},
-        Case{.name = "IRC then EventSub",
-             .firstPubSub = false,
-             .secondPubSub = true},
-        Case{.name = "EventSub then IRC",
-             .firstPubSub = true,
-             .secondPubSub = false},
+        Case{
+            .name = "IRC then IRC",
+            .firstEventSub = false,
+            .secondEventSub = false,
+        },
+        Case{
+            .name = "EventSub then EventSub",
+            .firstEventSub = true,
+            .secondEventSub = true,
+        },
+        Case{
+            .name = "IRC then EventSub",
+            .firstEventSub = false,
+            .secondEventSub = true,
+        },
+        Case{
+            .name = "EventSub then IRC",
+            .firstEventSub = true,
+            .secondEventSub = false,
+        },
     };
     for (const auto &test : cases)
     {
@@ -48,13 +56,13 @@ TEST(ChannelHelpers, DontStackTimeouts)
         userMessage->serverReceivedTime = time;
         std::vector<MessagePtr> messages{userMessage};
 
-        const auto addTimeout = [&](bool pubSub) {
+        const auto addTimeout = [&](bool eventSub) {
             auto message = std::make_shared<Message>();
             message->timeoutUser = "user";
             message->serverReceivedTime = time;
             message->flags.set(MessageFlag::Timeout,
                                MessageFlag::ModerationAction);
-            if (pubSub)
+            if (eventSub)
             {
                 message->flags.set(MessageFlag::PubSub);
             }
@@ -71,21 +79,25 @@ TEST(ChannelHelpers, DontStackTimeouts)
             return message;
         };
 
-        auto first = addTimeout(test.firstPubSub);
-        auto second = addTimeout(test.secondPubSub);
-        EXPECT_TRUE(userMessage->flags.has(MessageFlag::Disabled));
-        EXPECT_TRUE(userMessage->flags.has(MessageFlag::InvalidReplyTarget));
+        auto first = addTimeout(test.firstEventSub);
+        auto second = addTimeout(test.secondEventSub);
+        // The user's messages are still disabled when stacking is disabled.
+        EXPECT_TRUE(userMessage->flags.hasAll(MessageFlag::Disabled,
+                                              MessageFlag::InvalidReplyTarget));
 
-        if (test.firstPubSub == test.secondPubSub)
+        if (test.firstEventSub == test.secondEventSub)
         {
+            // IRC then IRC and EventSub then EventSub don't stack when stacking is disabled.
             ASSERT_EQ(messages.size(), 3);
             EXPECT_EQ(messages.at(1), first);
             EXPECT_EQ(messages.at(2), second);
         }
         else
         {
+            // The same timeout received through IRC and EventSub is deduplicated.
+            // Both arrival orders keep the EventSub message.
             ASSERT_EQ(messages.size(), 2);
-            EXPECT_EQ(messages.at(1), test.firstPubSub ? first : second);
+            EXPECT_EQ(messages.at(1), test.firstEventSub ? first : second);
         }
     }
 }

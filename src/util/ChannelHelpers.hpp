@@ -93,6 +93,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
             if (timeoutStackStyle == TimeoutStackStyle::DontStack)
             {
+                // Break here rather than at the start so that deduplication can run first.
                 break;
             }
 
