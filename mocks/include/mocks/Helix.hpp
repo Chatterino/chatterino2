@@ -368,7 +368,7 @@ public:
     MOCK_METHOD(
         void, getChatters,
         (QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-         ResultCallback<HelixChatters> successCallback,
+         const QObject *caller, ResultCallback<HelixChatters> successCallback,
          (FailureCallback<HelixGetChattersError, QString> failureCallback)),
         (override));  // getChatters
 
@@ -377,7 +377,7 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getChannelVIPs,
-        (QString broadcasterID,
+        (QString broadcasterID, const QObject *caller,
          ResultCallback<std::vector<HelixVip>> successCallback,
          (FailureCallback<HelixListVIPsError, QString> failureCallback)),
         (override));  // /vips
@@ -397,7 +397,7 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getModerators,
-        (QString broadcasterID, int maxModeratorsToFetch,
+        (QString broadcasterID, int maxModeratorsToFetch, const QObject *caller,
          ResultCallback<std::vector<HelixModerator>> successCallback,
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods
