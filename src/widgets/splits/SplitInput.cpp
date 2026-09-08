@@ -1269,7 +1269,8 @@ void SplitInput::editTextChanged()
 
     if (this->shouldPreventInput(text))
     {
-        this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
+        this->ui_.textEdit->setPlainText(
+            codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).toString());
         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
         return;
     }
@@ -1293,21 +1294,27 @@ void SplitInput::editTextChanged()
                                                true);
     }
 
+    const auto textLength = codepointLength(text);
+
     QList<QTextEdit::ExtraSelection> selections;
-    if (text.length() > 0 &&
+    if (textLength > 0 &&
         getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
         QTextCursor cursor = this->ui_.textEdit->textCursor();
         QTextCharFormat format;
 
-        cursor.setPosition(qMin(text.length(), TWITCH_MESSAGE_LIMIT),
-                           QTextCursor::MoveAnchor);
+        const auto limitPosition = static_cast<int>(
+            textLength > TWITCH_MESSAGE_LIMIT
+                ? codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).size()
+                : text.length());
+
+        cursor.setPosition(limitPosition, QTextCursor::MoveAnchor);
         cursor.movePosition(QTextCursor::Start, QTextCursor::KeepAnchor);
         selections.append({cursor, format});
 
-        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        if (textLength > TWITCH_MESSAGE_LIMIT)
         {
-            cursor.setPosition(TWITCH_MESSAGE_LIMIT, QTextCursor::MoveAnchor);
+            cursor.setPosition(limitPosition, QTextCursor::MoveAnchor);
             cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
             format.setForeground(Qt::red);
             selections.append({cursor, format});
@@ -1344,10 +1351,10 @@ void SplitInput::editTextChanged()
 
     QString labelText;
 
-    if (text.length() > 0 && getSettings()->showMessageLength)
+    if (textLength > 0 && getSettings()->showMessageLength)
     {
-        labelText = QString::number(text.length());
-        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        labelText = QString::number(textLength);
+        if (textLength > TWITCH_MESSAGE_LIMIT)
         {
             this->ui_.textEditLength->setStyleSheet("color: red");
         }
@@ -1574,7 +1581,7 @@ bool SplitInput::shouldPreventInput(const QString &text) const
         return false;
     }
 
-    return text.length() > TWITCH_MESSAGE_LIMIT;
+    return codepointLength(text) > TWITCH_MESSAGE_LIMIT;
 }
 
 int SplitInput::marginForTheme() const
