@@ -1294,6 +1294,22 @@ void SplitInput::editTextChanged()
     }
 
     QList<QTextEdit::ExtraSelection> selections;
+    if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
+    {
+        const auto prefix = "@" + this->replyTarget_->displayName;
+        const auto input = this->ui_.textEdit->toPlainText();
+        if (input == prefix || input.startsWith(prefix + ' '))
+        {
+            QTextCursor cursor(this->ui_.textEdit->document());
+            cursor.setPosition(
+                static_cast<int>(qMin(input.size(), prefix.size() + 1)),
+                QTextCursor::KeepAnchor);
+            QTextCharFormat format;
+            format.setForeground(
+                this->theme->messages.textColors.chatPlaceholder);
+            selections.append({.cursor = cursor, .format = format});
+        }
+    }
     if (text.length() > 0 &&
         getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
@@ -1484,6 +1500,7 @@ void SplitInput::setReply(MessagePtr target)
 
             // Only enable reply label if inline replying
             auto replyPrefix = "@" + this->replyTarget_->displayName;
+            this->ui_.textEdit->setIgnoredCompletionPrefix(replyPrefix + ' ');
             auto plainText = this->ui_.textEdit->toPlainText().trimmed();
 
             // This makes it so if plainText contains "@StreamerFan" and
@@ -1545,6 +1562,7 @@ void SplitInput::clearInput()
 
 void SplitInput::clearReplyTarget()
 {
+    this->ui_.textEdit->setIgnoredCompletionPrefix({});
     this->replyTarget_.reset();
     this->ui_.replyMessage->clearMessage();
     this->ui_.vbox->setSpacing(0);
