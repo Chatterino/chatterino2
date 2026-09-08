@@ -89,18 +89,10 @@ void WindowManager::showSettingsDialog(QWidget *parent,
     }
     else
     {
-        if (parent)
-        {
-            QTimer::singleShot(80ms, parent, [parent, preference] {
-                SettingsDialog::showDialog(parent, preference);
-            });
-        }
-        else
-        {
-            QTimer::singleShot(80ms, this, [preference] {
-                SettingsDialog::showDialog(nullptr, preference);
-            });
-        }
+        auto *mainWindow = &this->getMainWindow();
+        QTimer::singleShot(80ms, mainWindow, [mainWindow, preference] {
+            SettingsDialog::showDialog(mainWindow, preference);
+        });
     }
 }
 
