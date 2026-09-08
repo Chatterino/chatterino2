@@ -1965,8 +1965,8 @@ void Helix::updateChatSettings(
 
 void Helix::onFetchChattersSuccess(
     std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
-    QString moderatorID, size_t maxChattersToFetch, const QObject *caller,
-    ResultCallback<HelixChatters> successCallback,
+    const QString &moderatorID, size_t maxChattersToFetch,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback,
     HelixChatters chatters)
 {
@@ -1990,7 +1990,7 @@ void Helix::onFetchChattersSuccess(
         [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
-                caller, successCallback, failureCallback, chatters);
+                caller, successCallback, failureCallback, std::move(chatters));
         },
         failureCallback);
 }
@@ -1998,7 +1998,7 @@ void Helix::onFetchChattersSuccess(
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::fetchChatters(
     QString broadcasterID, QString moderatorID, int first, QString after,
-    const QObject *caller, ResultCallback<HelixChatters> successCallback,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
     using Error = HelixGetChattersError;
@@ -2080,7 +2080,8 @@ void Helix::fetchChatters(
 
 void Helix::onFetchModeratorsSuccess(
     std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-    QString broadcasterID, size_t maxModeratorsToFetch, const QObject *caller,
+    const QString &broadcasterID, size_t maxModeratorsToFetch,
+    const QObject *caller,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback,
     HelixModerators moderators)
@@ -2114,8 +2115,9 @@ void Helix::onFetchModeratorsSuccess(
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::fetchModerators(
-    QString broadcasterID, int first, QString after, const QObject *caller,
-    ResultCallback<HelixModerators> successCallback,
+    const QString &broadcasterID, int first, const QString &after,
+    const QObject *caller,
+    const ResultCallback<HelixModerators> &successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
     using Error = HelixGetModeratorsError;
@@ -2612,7 +2614,7 @@ void Helix::sendWhisper(
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-    const QObject *caller, ResultCallback<HelixChatters> successCallback,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
     auto finalChatters = std::make_shared<HelixChatters>();
@@ -2623,14 +2625,15 @@ void Helix::getChatters(
         [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
-                caller, successCallback, failureCallback, chatters);
+                caller, successCallback, failureCallback, std::move(chatters));
         },
         failureCallback);
 }
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::getModerators(
-    QString broadcasterID, int maxModeratorsToFetch, const QObject *caller,
+    const QString &broadcasterID, int maxModeratorsToFetch,
+    const QObject *caller,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
@@ -2650,7 +2653,7 @@ void Helix::getModerators(
 // List the VIPs of a channel
 // https://dev.twitch.tv/docs/api/reference#get-vips
 void Helix::getChannelVIPs(
-    QString broadcasterID, const QObject *caller,
+    const QString &broadcasterID, const QObject *caller,
     ResultCallback<std::vector<HelixVip>> successCallback,
     FailureCallback<HelixListVIPsError, QString> failureCallback)
 {
