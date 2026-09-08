@@ -155,8 +155,9 @@ TEST(SplitInput, ReplyCommandCompletion)
     app.commands.items.append(Command{".dotreplycompletion", "test"});
     Split split(nullptr);
     SplitInput input(&split);
-    auto *edit =
-        dynamic_cast<ResizingTextEdit *>(input.findChild<QTextEdit *>());
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
     ASSERT_NE(edit, nullptr);
     mock::MockChannel channel("forsen");
     edit->setCompleter(new QCompleter(channel.completionModel, edit));
@@ -207,8 +208,9 @@ TEST(SplitInput, EmptyReplyUsernameCompletion)
     app.commands.items.append(Command{"/slashreplycompletion", "test"});
     Split split(nullptr);
     SplitInput input(&split);
-    auto *edit =
-        dynamic_cast<ResizingTextEdit *>(input.findChild<QTextEdit *>());
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
     ASSERT_NE(edit, nullptr);
     TwitchChannel channel("forsen");
     edit->setCompleter(new QCompleter(channel.completionModel, edit));
@@ -233,8 +235,9 @@ TEST(SplitInput, ReplyBodyUsernameCompletion)
     MockApplication app;
     Split split(nullptr);
     SplitInput input(&split);
-    auto *edit =
-        dynamic_cast<ResizingTextEdit *>(input.findChild<QTextEdit *>());
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
     ASSERT_NE(edit, nullptr);
     TwitchChannel channel("forsen");
     channel.addRecentChatter("pajlada");
@@ -281,7 +284,8 @@ TEST(SplitInput, ReplyPrefixFormatting)
 
     auto prefixFormatting = [&](const QString &prefix) {
         QList<QTextEdit::ExtraSelection> result;
-        for (const auto &selection : edit->extraSelections())
+        const auto selections = edit->extraSelections();
+        for (const auto &selection : selections)
         {
             if (selection.cursor.selectionStart() == 0 &&
                 selection.cursor.selectionEnd() == prefix.size())
@@ -294,12 +298,13 @@ TEST(SplitInput, ReplyPrefixFormatting)
 
     // Reply prefix is set when replying
     ASSERT_EQ(prefixFormatting("@forsen ").size(), 1);
-    EXPECT_EQ(prefixFormatting("@forsen ").front().cursor.selectedText(),
+    EXPECT_EQ(prefixFormatting("@forsen ").constFirst().cursor.selectedText(),
               "@forsen ");
 
     // Reply prefix uses the theme's placeholder colour
-    EXPECT_EQ(prefixFormatting("@forsen ").front().format.foreground().color(),
-              app.theme.messages.textColors.chatPlaceholder);
+    EXPECT_EQ(
+        prefixFormatting("@forsen ").constFirst().format.foreground().color(),
+        app.theme.messages.textColors.chatPlaceholder);
 
     // The cursor stays in position after the message
     EXPECT_EQ(edit->textCursor().position(), input.getInputText().size());
@@ -309,7 +314,7 @@ TEST(SplitInput, ReplyPrefixFormatting)
     other->displayName = "pajlada";
     input.setReply(other);
     ASSERT_EQ(prefixFormatting("@pajlada ").size(), 1);
-    EXPECT_EQ(prefixFormatting("@pajlada ").front().cursor.selectedText(),
+    EXPECT_EQ(prefixFormatting("@pajlada ").constFirst().cursor.selectedText(),
               "@pajlada ");
 
     // Editing the prefix invalidates it
