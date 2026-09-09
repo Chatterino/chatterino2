@@ -106,9 +106,19 @@ struct HelixGetChannelFollowersResponse {
     int total;
     std::optional<HelixChannelFollower> specifiedFollower;
 
-    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject)
+    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject,
+                                              bool followerSpecified)
         : total(jsonObject.value("total").toInt())
     {
+        if (followerSpecified)
+        {
+            const auto first = jsonObject["data"].toArray().at(0);
+            if (first.isObject())
+            {
+                this->specifiedFollower =
+                    HelixChannelFollower(first.toObject());
+            }
+        }
     }
 };
 

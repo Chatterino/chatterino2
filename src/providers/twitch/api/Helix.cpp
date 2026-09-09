@@ -155,17 +155,8 @@ void Helix::getChannelFollowers(
                 failureCallback("Bad JSON response");
                 return;
             }
-            auto response = HelixGetChannelFollowersResponse(root);
-            if (!userID.isEmpty())
-            {
-                const auto first = root["data"_L1].toArray().at(0);
-                if (first.isObject())
-                {
-                    response.specifiedFollower =
-                        HelixChannelFollower(first.toObject());
-                }
-            }
-            successCallback(response);
+            successCallback(
+                HelixGetChannelFollowersResponse(root, !userID.isEmpty()));
         })
         .onError([failureCallback](auto result) {
             auto root = result.parseJson();
