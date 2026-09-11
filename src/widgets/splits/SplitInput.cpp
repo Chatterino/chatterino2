@@ -286,7 +286,6 @@ void SplitInput::initLayout()
     // reply label stuff
     auto replyWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
-    replyWrapper->setObjectName("replyWrapper");
     replyWrapper->setContentsMargins(0, 0, 1, 1);
 
     auto replyVbox =
@@ -324,7 +323,6 @@ void SplitInput::initLayout()
 
     auto inputWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.inputWrapper);
-    inputWrapper->setObjectName("inputWrapper");
     inputWrapper->setContentsMargins(1, 1, 1, 1);
 
     // hbox for input, right box
@@ -491,16 +489,6 @@ void SplitInput::themeChangedEvent()
 
     // Theme changed, reset current background color
     this->setBackgroundColor(this->theme->splits.input.background);
-
-    const auto borderColor =
-        this->theme->isLightTheme() ? QColor(0xcccccc) : QColor(0x333333);
-    this->ui_.inputWrapper->setStyleSheet(
-        QString("#inputWrapper { border: 1px solid %1; }")
-            .arg(borderColor.name()));
-    this->ui_.replyWrapper->setStyleSheet(
-        QString("#replyWrapper { border: 1px solid %1; }")
-            .arg(borderColor.name()));
-
     this->backgroundColorAnimation.setStartValue(
         this->theme->splits.input.backgroundPulse);
     this->backgroundColorAnimation.setEndValue(
@@ -1407,33 +1395,39 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    QRect baseRect = this->rect();
-    baseRect.setWidth(baseRect.width() - 1);
+    const auto borderColor =
+        this->theme->isLightTheme() ? QColor(0xcccccc) : QColor(0x333333);
 
-    auto *inputWrap = this->ui_.inputWrapper;
-    auto inputBoxRect = inputWrap->geometry();
-    inputBoxRect.setSize(inputBoxRect.size() - QSize{1, 1});
+    const auto drawBorder = [&painter, &borderColor](QRect rect) {
+        if (rect.isEmpty())
+        {
+            return;
+        }
 
-    painter.setBrush({this->backgroundColor()});
-    painter.setPen(Qt::NoPen);
-    painter.drawRect(inputBoxRect);
+        painter.fillRect(rect.left(), rect.top(), rect.width(), 1, borderColor);
+        painter.fillRect(rect.left(), rect.bottom(), rect.width(), 1,
+                         borderColor);
+        painter.fillRect(rect.left(), rect.top(), 1, rect.height(),
+                         borderColor);
+        painter.fillRect(rect.right(), rect.top(), 1, rect.height(),
+                         borderColor);
+    };
+
+    const auto inputBoxRect = this->ui_.inputWrapper->geometry();
+    painter.fillRect(inputBoxRect, this->backgroundColor());
+    drawBorder(inputBoxRect);
 
     if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
-        auto replyRect = this->ui_.replyWrapper->geometry();
-        replyRect.setSize(replyRect.size() - QSize{1, 1});
+        const auto replyRect = this->ui_.replyWrapper->geometry();
+        painter.fillRect(replyRect, this->theme->splits.input.background);
+        drawBorder(replyRect);
 
-        painter.setBrush(this->theme->splits.input.background);
-        painter.setPen(Qt::NoPen);
-        painter.drawRect(replyRect);
-
-        const auto borderColor =
-            this->theme->isLightTheme() ? QColor(0xcccccc) : QColor(0x333333);
         painter.setPen(borderColor);
         QPoint replyLabelBorderStart(
             replyRect.x(),
             replyRect.y() + this->ui_.replyHbox->geometry().height());
-        QPoint replyLabelBorderEnd(replyRect.right(),
+        QPoint replyLabelBorderEnd(replyRect.right() - 1,
                                    replyLabelBorderStart.y());
         painter.drawLine(replyLabelBorderStart, replyLabelBorderEnd);
     }
