@@ -35,7 +35,7 @@ public:
 
     MOCK_METHOD(
         void, getChannelFollowers,
-        (QString broadcasterID,
+        (QString broadcasterID, QString userID,
          ResultCallback<HelixGetChannelFollowersResponse> successCallback,
          std::function<void(QString)> failureCallback),
         (override));
