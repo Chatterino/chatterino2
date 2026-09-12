@@ -130,21 +130,21 @@ TEST(NotificationController, StatusMessagesRespectUsernameStyle)
             .expected = u"chinese_forsen (福森)"_s,
         },
 
-        // Capitalization survives
+        // Case-only display names use the login
         {
             .mode = UsernameDisplayMode::Username,
             .displayName = u"cHiNeSe_FoRsEn"_s,
-            .expected = u"cHiNeSe_FoRsEn"_s,
+            .expected = u"chinese_forsen"_s,
         },
         {
             .mode = UsernameDisplayMode::LocalizedName,
             .displayName = u"cHiNeSe_FoRsEn"_s,
-            .expected = u"cHiNeSe_FoRsEn"_s,
+            .expected = u"chinese_forsen"_s,
         },
         {
             .mode = UsernameDisplayMode::UsernameAndLocalizedName,
             .displayName = u"cHiNeSe_FoRsEn"_s,
-            .expected = u"cHiNeSe_FoRsEn"_s,
+            .expected = u"chinese_forsen"_s,
         },
     }};
 

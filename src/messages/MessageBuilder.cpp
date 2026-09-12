@@ -1363,9 +1363,7 @@ MessagePtr MessageBuilder::makeLiveMessage(const HelixMinimalUser &channel,
     MessageBuilder builder;
 
     const auto channelName =
-        channel.displayName.compare(channel.login, Qt::CaseInsensitive) == 0
-            ? channel.displayName
-            : channel.formatted(getSettings()->usernameDisplayMode.getEnum());
+        channel.formatted(getSettings()->usernameDisplayMode.getEnum());
     builder.emplace<TimestampElement>();
     builder.emplace<MentionElement>(channelName, channel.login,
                                     MessageColor::Text, MessageColor::Text,
@@ -1404,9 +1402,7 @@ MessagePtr MessageBuilder::makeOfflineSystemMessage(
 {
     MessageBuilder builder;
     const auto channelName =
-        channel.displayName.compare(channel.login, Qt::CaseInsensitive) == 0
-            ? channel.displayName
-            : channel.formatted(getSettings()->usernameDisplayMode.getEnum());
+        channel.formatted(getSettings()->usernameDisplayMode.getEnum());
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::System);
     builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
