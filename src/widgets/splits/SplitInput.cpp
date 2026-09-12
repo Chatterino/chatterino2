@@ -1184,10 +1184,10 @@ void SplitInput::insertCompletionText(const QString &input_) const
         if (done)
         {
             auto cursor = edit.textCursor();
-            edit.setPlainText(
-                text.remove(i, position - i + 1).insert(i, input));
+            cursor.setPosition(i);
+            cursor.setPosition(position + 1, QTextCursor::KeepAnchor);
+            cursor.insertText(input);
 
-            cursor.setPosition(i + input.size());
             edit.setTextCursor(cursor);
             break;
         }
