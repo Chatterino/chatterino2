@@ -112,22 +112,25 @@
                     ]
                 },
                 {
-                    "color": "Link",
-                    "flags": "Text",
-                    "link": "https://i.giphy.com/joSNxeswxuc74Juo8X.webp",
-                    "lowercase": [
-                        "[Y A Y Yes GIF by Djemilah Birnie]"
-                    ],
-                    "original": [
-                        "[Y A Y Yes GIF by Djemilah Birnie]"
-                    ],
-                    "style": "ChatMedium",
+                    "flags": "TwitchGif",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
+                {
+                    "flags": "TwitchGif",
+                    "image": "https://media4.giphy.com/media/joSNxeswxuc74Juo8X/100.webp",
+                    "link": {
+                        "type": "Url",
+                        "value": "https://i.giphy.com/joSNxeswxuc74Juo8X.webp"
+                    },
                     "tooltip": "[Y A Y Yes GIF by Djemilah Birnie]",
                     "trailingSpace": true,
-                    "type": "LinkElement",
-                    "words": [
-                        ""
-                    ]
+                    "type": "ScalingImageElement"
                 },
                 {
                     "background": "#ffa0a0a4",
@@ -168,7 +171,7 @@
     "settings": {
         "appearance": {
             "messages": {
-                "showTwitchGifs": false
+                "showTwitchGifs": true
             }
         }
     }

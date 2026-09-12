@@ -609,6 +609,10 @@ void TwitchChannel::updateStreamStatus(
     if (helixStream)
     {
         auto stream = *helixStream;
+        if (!stream.userName.isEmpty())
+        {
+            this->updateDisplayName(stream.userName);
+        }
         {
             auto status = this->streamStatus_.access();
             status->streamId = stream.id;
@@ -655,6 +659,11 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
 {
     // Similar code exists in NotificationController::updateFakeChannel.
     // Since we're a TwitchChannel, we also send a message here.
+    const HelixMinimalUser channel{
+        .id = this->roomId(),
+        .login = this->getName(),
+        .displayName = this->nameOptions.actualDisplayName,
+    };
     if (isLive)
     {
         qCDebug(chatterinoTwitch).nospace().noquote()
@@ -671,7 +680,7 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             .channelId = this->roomId(),
             .streamId = streamId,
             .channelName = this->getName(),
-            .displayName = this->getDisplayName(),
+            .displayName = channel.displayName,
             .title = title,
             .isInitialUpdate = isInitialUpdate,
         });
@@ -679,7 +688,7 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         // Channel live message
         this->addMessage(
             MessageBuilder::makeLiveMessage(
-                this->getDisplayName(), this->roomId(), title,
+                channel, title,
                 {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
             MessageContext::Original);
     }
@@ -689,8 +698,7 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             << "[TwitchChannel " << this->getName() << "] Offline";
 
         // Channel offline message
-        this->addMessage(MessageBuilder::makeOfflineSystemMessage(
-                             this->getDisplayName(), this->roomId()),
+        this->addMessage(MessageBuilder::makeOfflineSystemMessage(channel),
                          MessageContext::Original);
 
         getApp()->getNotifications()->notifyTwitchChannelOffline(

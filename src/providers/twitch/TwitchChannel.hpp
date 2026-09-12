@@ -678,6 +678,7 @@ private:
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
     friend class TwitchChannel_LiveUpdateGrouping_Test;
+    friend class NotificationController_StatusMessagesRespectUsernameStyle_Test;
     friend class ::TestIrcMessageHandlerP;
     friend class ::TestEventSubMessagesP;
 
