@@ -1768,7 +1768,7 @@ void TwitchChannel::refreshChatters()
     getHelix()->getChatters(
         this->roomId(),
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
-        MAX_CHATTERS_TO_FETCH,
+        MAX_CHATTERS_TO_FETCH, nullptr,
         [weak = this->weakFromThis()](const auto &result) {
             if (auto shared = weak.lock())
             {
