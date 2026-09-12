@@ -86,12 +86,39 @@ struct HelixMinimalUser {
     }
 };
 
+struct HelixChannelFollower {
+    QString userId;
+    QString userLogin;
+    QString userName;
+    QDateTime followedAt;
+
+    explicit HelixChannelFollower(const QJsonObject &jsonObject)
+        : userId(jsonObject["user_id"].toString())
+        , userLogin(jsonObject["user_login"].toString())
+        , userName(jsonObject["user_name"].toString())
+        , followedAt(QDateTime::fromString(jsonObject["followed_at"].toString(),
+                                           Qt::ISODate))
+    {
+    }
+};
+
 struct HelixGetChannelFollowersResponse {
     int total;
+    std::optional<HelixChannelFollower> specifiedFollower;
 
-    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject)
+    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject,
+                                              bool followerSpecified)
         : total(jsonObject.value("total").toInt())
     {
+        if (followerSpecified)
+        {
+            const auto first = jsonObject["data"].toArray().at(0);
+            if (first.isObject())
+            {
+                this->specifiedFollower =
+                    HelixChannelFollower(first.toObject());
+            }
+        }
     }
 };
 
@@ -786,7 +813,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     virtual void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) = 0;
 
@@ -1232,7 +1259,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) final;
 

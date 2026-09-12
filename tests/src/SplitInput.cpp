@@ -17,11 +17,15 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "Test.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <QCompleter>
 #include <QDebug>
 #include <QString>
+
+#include <tuple>
 
 using namespace chatterino;
 using ::testing::Exactly;
@@ -70,6 +74,26 @@ public:
     mock::EmoteController emotes;
 };
 
+class TestSplitInput : public SplitInput
+{
+public:
+    using SplitInput::insertCompletionText;
+    using SplitInput::SplitInput;
+
+    void undoInput()
+    {
+        this->ui_.textEdit->undo();
+    }
+};
+
+class SplitInputCompletionTest : public ::testing::Test
+{
+public:
+    MockApplication mockApplication;
+    Split split{nullptr};
+    TestSplitInput input{&this->split};
+};
+
 class SplitInputTest
     : public ::testing::TestWithParam<std::tuple<QString, QString>>
 {
@@ -86,6 +110,50 @@ public:
 };
 
 }  // namespace
+
+TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
+{
+    this->input.insertText("don't ping him :paja");
+    ASSERT_EQ("don't ping him :paja", this->input.getInputText());
+
+    this->input.insertCompletionText("pajaGIGA");
+    ASSERT_EQ("don't ping him pajaGIGA ", this->input.getInputText());
+
+    this->input.undoInput();
+    EXPECT_EQ("don't ping him :paja", this->input.getInputText());
+    this->input.undoInput();
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, UsernameCompletionPreservesUndoHistory)
+{
+    this->input.insertText("boring game @fors");
+    ASSERT_EQ("boring game @fors", this->input.getInputText());
+
+    this->input.insertCompletionText("forsen");
+    ASSERT_EQ("boring game @forsen ", this->input.getInputText());
+
+    this->input.undoInput();
+    EXPECT_EQ("boring game @fors", this->input.getInputText());
+    this->input.undoInput();
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)
+{
+    ResizingTextEdit edit;
+    QCompleter completer;
+    edit.setCompleter(&completer);
+    edit.insertPlainText("UR DONE BA");
+
+    Q_EMIT completer.highlighted(QString("BAND "));
+    ASSERT_EQ("UR DONE BAND ", edit.toPlainText());
+
+    edit.undo();
+    EXPECT_EQ("UR DONE BA", edit.toPlainText());
+    edit.undo();
+    EXPECT_TRUE(edit.toPlainText().isEmpty());
+}
 
 TEST_P(SplitInputTest, Reply)
 {

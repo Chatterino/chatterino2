@@ -1547,7 +1547,7 @@ std::unique_ptr<MessageElement> ScalingImageElement::clone() const
 {
     auto elem =
         std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->cloneFrom(*this);
     return elem;
 }
 
