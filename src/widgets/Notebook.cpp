@@ -34,8 +34,10 @@
 #include <QList>
 #include <QStandardPaths>
 #include <QUuid>
+#include <QWheelEvent>
 #include <QWidget>
 
+#include <cstdlib>
 #include <memory>
 #include <ranges>
 #include <utility>
@@ -1210,6 +1212,43 @@ void Notebook::mousePressEvent(QMouseEvent *event)
         }
         break;
         default:;
+    }
+}
+
+void Notebook::wheelEvent(QWheelEvent *event)
+{
+    if (this->selectedPage_ != nullptr &&
+        this->selectedPage_->geometry().contains(event->position().toPoint()))
+    {
+        event->ignore();
+        return;
+    }
+
+    this->scrollTabs(event);
+}
+
+void Notebook::scrollTabs(QWheelEvent *event)
+{
+    const auto defaultMouseDelta = 120;
+    const auto verticalDelta = event->angleDelta().y();
+    const auto selectTab = [this](int delta) {
+        delta > 0 ? this->selectPreviousTab() : this->selectNextTab();
+    };
+    // If it's true
+    // Then the user uses the trackpad or perhaps the most accurate mouse
+    // Which has small delta.
+    if (std::abs(verticalDelta) < defaultMouseDelta)
+    {
+        this->mouseWheelDelta_ += verticalDelta;
+        if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
+        {
+            selectTab(this->mouseWheelDelta_);
+            this->mouseWheelDelta_ = 0;
+        }
+    }
+    else
+    {
+        selectTab(verticalDelta);
     }
 }
 
