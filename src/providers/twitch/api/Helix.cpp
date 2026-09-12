@@ -133,7 +133,7 @@ void Helix::getUserById(QString userId,
 }
 
 void Helix::getChannelFollowers(
-    QString broadcasterID,
+    QString broadcasterID, QString userID,
     ResultCallback<HelixGetChannelFollowersResponse> successCallback,
     std::function<void(QString)> failureCallback)
 {
@@ -141,17 +141,22 @@ void Helix::getChannelFollowers(
 
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    if (!userID.isEmpty())
+    {
+        urlQuery.addQueryItem("user_id", userID);
+    }
 
     // TODO: set on success and on error
     this->makeGet("channels/followers", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) {
+        .onSuccess([successCallback, failureCallback, userID](auto result) {
             auto root = result.parseJson();
             if (root.empty())
             {
                 failureCallback("Bad JSON response");
                 return;
             }
-            successCallback(HelixGetChannelFollowersResponse(root));
+            successCallback(
+                HelixGetChannelFollowersResponse(root, !userID.isEmpty()));
         })
         .onError([failureCallback](auto result) {
             auto root = result.parseJson();
