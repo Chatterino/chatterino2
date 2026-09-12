@@ -320,7 +320,8 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
             auto match = emoteregex.matchView(midExtendedRef);
             if (match.hasMatch())
             {
-                emote.start = static_cast<int>(from + match.capturedStart());
+                emote.start =
+                    static_cast<int>(wordStart + match.capturedStart());
                 emote.length = static_cast<int>(match.capturedLength());
                 twitchSpecials.push_back(std::move(emote));
             }
