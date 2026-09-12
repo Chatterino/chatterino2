@@ -218,6 +218,13 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
             .expectedTwitchSpecials = {},
         },
         {
+            .phrases = {regularReplace("a foo", "a")},
+            .input = "Kappa foo",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "Kappa",
+            .expectedTwitchSpecials = {emoteAt(0, "Kappa")},
+        },
+        {
             .phrases = {regularReplace("Word", "wor")},
             .input = "[Multi Word Emote]",
             .twitchSpecials = {emoteAt(0, "[Multi Word Emote]")},

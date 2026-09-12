@@ -218,10 +218,13 @@ ChatterListWidget::ChatterListWidget(const TwitchChannel *twitchChannel,
         resultList->show();
     };
 
-    auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
+    auto loadChatters = [twitchChannel, addLabel, chattersList, addUserList,
+                         loadingLabel, performListSearch, formatListItemText,
+                         this](auto modList, auto vipList, bool isBroadcaster) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
             getApp()->getAccounts()->twitch.getCurrent()->getUserId(), 50000,
+            this,
             [=](const auto &chatters) {
                 auto broadcaster = twitchChannel->getName().toLower();
                 QStringList chatterList;
@@ -299,8 +302,9 @@ ChatterListWidget::ChatterListWidget(const TwitchChannel *twitchChannel,
     {
         // Add moderators
         getHelix()->getModerators(
-            twitchChannel->roomId(), 1000,
-            [=](const auto &mods) {
+            twitchChannel->roomId(), 1000, this,
+            [loadChatters, chattersList, formatListItemText, twitchChannel,
+             this](const auto &mods) {
                 QSet<QString> modList;
                 for (const auto &mod : mods)
                 {
@@ -309,7 +313,7 @@ ChatterListWidget::ChatterListWidget(const TwitchChannel *twitchChannel,
 
                 // Add vips
                 getHelix()->getChannelVIPs(
-                    twitchChannel->roomId(),
+                    twitchChannel->roomId(), this,
                     [=](const auto &vips) {
                         QSet<QString> vipList;
                         for (const auto &vip : vips)

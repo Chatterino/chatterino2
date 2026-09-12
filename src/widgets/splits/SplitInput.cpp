@@ -1269,7 +1269,8 @@ void SplitInput::editTextChanged()
 
     if (this->shouldPreventInput(text))
     {
-        this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
+        this->ui_.textEdit->setPlainText(
+            codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).toString());
         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
         return;
     }
@@ -1293,6 +1294,8 @@ void SplitInput::editTextChanged()
                                                true);
     }
 
+    const auto textLength = codepointLength(text);
+
     QList<QTextEdit::ExtraSelection> selections;
     if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
@@ -1310,20 +1313,24 @@ void SplitInput::editTextChanged()
             selections.append({.cursor = cursor, .format = format});
         }
     }
-    if (text.length() > 0 &&
+    if (textLength > 0 &&
         getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
         QTextCursor cursor = this->ui_.textEdit->textCursor();
         QTextCharFormat format;
 
-        cursor.setPosition(qMin(text.length(), TWITCH_MESSAGE_LIMIT),
-                           QTextCursor::MoveAnchor);
+        const auto limitPosition = static_cast<int>(
+            textLength > TWITCH_MESSAGE_LIMIT
+                ? codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).size()
+                : text.length());
+
+        cursor.setPosition(limitPosition, QTextCursor::MoveAnchor);
         cursor.movePosition(QTextCursor::Start, QTextCursor::KeepAnchor);
         selections.append({cursor, format});
 
-        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        if (textLength > TWITCH_MESSAGE_LIMIT)
         {
-            cursor.setPosition(TWITCH_MESSAGE_LIMIT, QTextCursor::MoveAnchor);
+            cursor.setPosition(limitPosition, QTextCursor::MoveAnchor);
             cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
             format.setForeground(Qt::red);
             selections.append({cursor, format});
@@ -1360,10 +1367,10 @@ void SplitInput::editTextChanged()
 
     QString labelText;
 
-    if (text.length() > 0 && getSettings()->showMessageLength)
+    if (textLength > 0 && getSettings()->showMessageLength)
     {
-        labelText = QString::number(text.length());
-        if (text.length() > TWITCH_MESSAGE_LIMIT)
+        labelText = QString::number(textLength);
+        if (textLength > TWITCH_MESSAGE_LIMIT)
         {
             this->ui_.textEditLength->setStyleSheet("color: red");
         }
@@ -1411,33 +1418,39 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    QColor borderColor =
-        this->theme->isLightTheme() ? QColor("#ccc") : QColor("#333");
+    const auto borderColor =
+        this->theme->isLightTheme() ? QColor(0xcccccc) : QColor(0x333333);
 
-    QRect baseRect = this->rect();
-    baseRect.setWidth(baseRect.width() - 1);
+    const auto drawBorder = [&painter, &borderColor](QRect rect) {
+        if (rect.isEmpty())
+        {
+            return;
+        }
 
-    auto *inputWrap = this->ui_.inputWrapper;
-    auto inputBoxRect = inputWrap->geometry();
-    inputBoxRect.setSize(inputBoxRect.size() - QSize{1, 1});
+        painter.fillRect(rect.left(), rect.top(), rect.width(), 1, borderColor);
+        painter.fillRect(rect.left(), rect.bottom(), rect.width(), 1,
+                         borderColor);
+        painter.fillRect(rect.left(), rect.top(), 1, rect.height(),
+                         borderColor);
+        painter.fillRect(rect.right(), rect.top(), 1, rect.height(),
+                         borderColor);
+    };
 
-    painter.setBrush({this->theme->splits.input.background});
-    painter.setPen(borderColor);
-    painter.drawRect(inputBoxRect);
+    const auto inputBoxRect = this->ui_.inputWrapper->geometry();
+    painter.fillRect(inputBoxRect, this->backgroundColor());
+    drawBorder(inputBoxRect);
 
     if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
-        auto replyRect = this->ui_.replyWrapper->geometry();
-        replyRect.setSize(replyRect.size() - QSize{1, 1});
+        const auto replyRect = this->ui_.replyWrapper->geometry();
+        painter.fillRect(replyRect, this->theme->splits.input.background);
+        drawBorder(replyRect);
 
-        painter.setBrush(this->theme->splits.input.background);
         painter.setPen(borderColor);
-        painter.drawRect(replyRect);
-
         QPoint replyLabelBorderStart(
             replyRect.x(),
             replyRect.y() + this->ui_.replyHbox->geometry().height());
-        QPoint replyLabelBorderEnd(replyRect.right(),
+        QPoint replyLabelBorderEnd(replyRect.right() - 1,
                                    replyLabelBorderStart.y());
         painter.drawLine(replyLabelBorderStart, replyLabelBorderEnd);
     }
@@ -1592,7 +1605,7 @@ bool SplitInput::shouldPreventInput(const QString &text) const
         return false;
     }
 
-    return text.length() > TWITCH_MESSAGE_LIMIT;
+    return codepointLength(text) > TWITCH_MESSAGE_LIMIT;
 }
 
 int SplitInput::marginForTheme() const
@@ -1651,6 +1664,7 @@ void SplitInput::setBackgroundColor(QColor newColor)
     this->backgroundColor_ = newColor;
 
     this->updateTextEditPalette();
+    this->update();
 }
 
 std::optional<bool> SplitInput::checkSpellingOverride() const
