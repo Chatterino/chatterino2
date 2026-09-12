@@ -1405,7 +1405,7 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     auto inputBoxRect = inputWrap->geometry();
     inputBoxRect.setSize(inputBoxRect.size() - QSize{1, 1});
 
-    painter.setBrush({this->theme->splits.input.background});
+    painter.setBrush({this->backgroundColor()});
     painter.setPen(borderColor);
     painter.drawRect(inputBoxRect);
 
@@ -1633,6 +1633,7 @@ void SplitInput::setBackgroundColor(QColor newColor)
     this->backgroundColor_ = newColor;
 
     this->updateTextEditPalette();
+    this->update();
 }
 
 std::optional<bool> SplitInput::checkSpellingOverride() const
