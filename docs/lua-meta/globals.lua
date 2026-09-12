@@ -873,6 +873,10 @@ c2.MessageElementFlag = {
     LowercaseLinks = 0,
     RepliedMessage = 0,
     ReplyButton = 0,
+    HeaderTimestamp = 0,
+    AnnouncementHeader = 0,
+    SubscriptionHeader = 0,
+    WatchStreakHeader = 0,
     Default = 0,
 }
 
@@ -928,6 +932,7 @@ c2.MessageFlag = {
     WatchStreak = 0,
     Announcement = 0,
     UncategorizedNotification = 0,
+    AsciiArt = 0,
 }
 
 -- End src/messages/MessageFlag.hpp

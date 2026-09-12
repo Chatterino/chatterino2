@@ -344,21 +344,19 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 
         if (focusPage)
         {
-            if (item->selectedWidget == nullptr)
+            if (item->selectedWidget != nullptr &&
+                containsChild(page, item->selectedWidget))
             {
-                item->page->setFocus();
+                item->selectedWidget->setFocus(Qt::MouseFocusReason);
             }
             else
             {
-                if (containsChild(page, item->selectedWidget))
-                {
-                    item->selectedWidget->setFocus(Qt::MouseFocusReason);
-                }
-                else
+                if (item->selectedWidget != nullptr)
                 {
                     qCDebug(chatterinoWidget) << "Notebook: selected child of "
                                                  "page doesn't exist anymore";
                 }
+                page->setFocus();
             }
         }
     }

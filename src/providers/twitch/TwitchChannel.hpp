@@ -233,10 +233,10 @@ public:
     void markConnected();
 
     // Emotes
-    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> twitchEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> bttvEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> ffzEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> seventvEmote(EmoteNameView name) const;
 
     std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
@@ -512,11 +512,12 @@ private:
      * @param platform The platform the emote was updated on ("7TV", "BTTV", "FFZ")
      * @param actor The actor performing the update (possibly empty)
      * @param emoteName The emote's name
+     * @param now The time the update was received
      */
-    void addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
-                                          const QString &platform,
-                                          const QString &actor,
-                                          const QString &emoteName);
+    void addOrReplaceLiveUpdatesAddRemove(
+        bool isEmoteAdd, const QString &platform, const QString &actor,
+        const QString &emoteName,
+        const QDateTime &now = QDateTime::currentDateTime());
 
     /**
      * Tries to replace the last emote update message.
@@ -531,12 +532,14 @@ private:
      * @param platform The emote platform  ("7TV", "BTTV", "FFZ")
      * @param actor The actor performing the action (possibly empty)
      * @param emoteName The updated emote's name
+     * @param now The time the update was received
      * @return true, if the last message was replaced
      */
     bool tryReplaceLastLiveUpdateAddOrRemove(MessageFlag op,
                                              const QString &platform,
                                              const QString &actor,
-                                             const QString &emoteName);
+                                             const QString &emoteName,
+                                             const QDateTime &now);
 
     void pinOrUpdateMessage(bool update, const QString &messageID,
                             std::optional<std::chrono::seconds> duration,
@@ -674,6 +677,7 @@ private:
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
+    friend class TwitchChannel_LiveUpdateGrouping_Test;
     friend class ::TestIrcMessageHandlerP;
     friend class ::TestEventSubMessagesP;
 

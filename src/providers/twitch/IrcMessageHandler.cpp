@@ -44,14 +44,12 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 const QSet<QString> SPECIAL_MESSAGE_TYPES{
-    "sub",              //
-    "subgift",          //
-    "resub",            // resub messages
-    "bitsbadgetier",    // bits badge upgrade
-    "ritual",           // new viewer ritual
-    "announcement",     // new mod announcement thing
-    "viewermilestone",  // watch streak, but other categories possible in future
-    "modiversary",      // Mod anniversary.
+    "sub",                 //
+    "resub",               // resub messages
+    "bitsbadgetier",       // bits badge upgrade
+    "ritual",              // new viewer ritual
+    "announcement",        // new mod announcement thing
+    "modiversary",         // Mod anniversary.
     "socialsharingbadge",  // social media badge from sharing clips
 };
 
@@ -59,9 +57,8 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
 /// This is duplicated with SUB_MESSAGE_TYPES in MessageBuilder.cpp until the `isSubscriptionMessage` parameter
 /// in `MessageParseArgs` is no longer used for highlights.
 const QSet<QString> SUB_MESSAGE_TYPES{
-    "sub",      //
-    "subgift",  //
-    "resub",    // resub messages
+    "sub",    //
+    "resub",  // resub messages
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -769,6 +766,38 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         return;
     }
 
+    if (msgType == "subgift")
+    {
+        // subgifts are special because they include two users
+        const auto msg = MessageBuilder::makeSubgiftMessage(
+            tags, calculateMessageTime(message).time(), channel);
+
+        sink.addMessage(msg, MessageContext::Original);
+        return;
+    }
+
+    if (SUB_MESSAGE_TYPES.contains(msgType))
+    {
+        addMessage(
+            message, sink, channel, content, *getApp()->getTwitch(),
+            {
+                .isSub = true,
+                .isSpecial =
+                    true,  // TODO: isSpecial should probably be renamed to trimUsername or something
+            });
+        return;
+    }
+
+    if (msgType == "viewermilestone")
+    {
+        addMessage(message, sink, channel, content, *getApp()->getTwitch(),
+                   {
+                       .isSub = false,
+                       .isSpecial = true,
+                   });
+        return;
+    }
+
     // TODO: Why are we ONLY allowing these message types to have an additional message with their content added?
     if (SPECIAL_MESSAGE_TYPES.contains(msgType))
     {
@@ -811,49 +840,13 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         }
         else if (msgType == "announcement")
         {
-            messageText = "Announcement";
-        }
-        else if (msgType == "subgift")
-        {
-            // subgifts are special because they include two users
-            auto msg = MessageBuilder::makeSubgiftMessage(
-                tags, calculateMessageTime(message).time(), channel);
-
-            sink.addMessage(msg, MessageContext::Original);
+            // Early out - announcement headers are added in MessageBuilder
             return;
         }
         else if (msgType == "sub" || msgType == "resub")
         {
-            if (auto tenure = tags.get("msg-param-multimonth-tenure");
-                tenure && tenure->toInt() == 0)
-            {
-                int months =
-                    tags.getOrEmpty("msg-param-multimonth-duration").toInt();
-                if (months > 1)
-                {
-                    int tier =
-                        tags.getOrEmpty("msg-param-sub-plan").toInt() / 1000;
-                    messageText =
-                        QString(
-                            "%1 subscribed at Tier %2 for %3 months in advance")
-                            .arg(tags.getOrEmpty("display-name"),
-                                 QString::number(tier),
-                                 QString::number(months));
-                    if (msgType == "resub")
-                    {
-                        int cumulative =
-                            tags.getOrEmpty("msg-param-cumulative-months")
-                                .toInt();
-                        messageText +=
-                            QString(", reaching %1 months cumulatively so far!")
-                                .arg(QString::number(cumulative));
-                    }
-                    else
-                    {
-                        messageText += "!";
-                    }
-                }
-            }
+            // Early out - sub & resub headers are added in MessageBuilder
+            return;
         }
         else if (msgType == "socialsharingbadge")
         {
@@ -888,7 +881,7 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         auto msg = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
-            calculateMessageTime(message).time(), *message);
+            calculateMessageTime(message).time(), *message, channel);
 
         sink.addMessage(msg, MessageContext::Original);
     }

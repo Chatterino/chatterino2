@@ -86,12 +86,39 @@ struct HelixMinimalUser {
     }
 };
 
+struct HelixChannelFollower {
+    QString userId;
+    QString userLogin;
+    QString userName;
+    QDateTime followedAt;
+
+    explicit HelixChannelFollower(const QJsonObject &jsonObject)
+        : userId(jsonObject["user_id"].toString())
+        , userLogin(jsonObject["user_login"].toString())
+        , userName(jsonObject["user_name"].toString())
+        , followedAt(QDateTime::fromString(jsonObject["followed_at"].toString(),
+                                           Qt::ISODate))
+    {
+    }
+};
+
 struct HelixGetChannelFollowersResponse {
     int total;
+    std::optional<HelixChannelFollower> specifiedFollower;
 
-    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject)
+    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject,
+                                              bool followerSpecified)
         : total(jsonObject.value("total").toInt())
     {
+        if (followerSpecified)
+        {
+            const auto first = jsonObject["data"].toArray().at(0);
+            if (first.isObject())
+            {
+                this->specifiedFollower =
+                    HelixChannelFollower(first.toObject());
+            }
+        }
     }
 };
 
@@ -786,7 +813,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     virtual void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) = 0;
 
@@ -1049,20 +1076,22 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
 
     // Get moderators from the `broadcasterID` channel
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     virtual void getModerators(
-        QString broadcasterID, int maxModeratorsToFetch,
+        const QString &broadcasterID, int maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
-        QString broadcasterID,
+        const QString &broadcasterID, const QObject *caller,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
 
@@ -1230,7 +1259,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) final;
 
@@ -1489,21 +1518,23 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
     // Get moderators from the `broadcasterID` channel
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void getModerators(
-        QString broadcasterID, int maxModeratorsToFetch,
+        const QString &broadcasterID, int maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback)
         final;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
-        QString broadcasterID,
+        const QString &broadcasterID, const QObject *caller,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) final;
 
@@ -1655,8 +1686,9 @@ protected:
     // Recursive boy
     void onFetchChattersSuccess(
         std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
-        QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QString &moderatorID, size_t maxChattersToFetch,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback,
         HelixChatters chatters);
 
@@ -1664,13 +1696,15 @@ protected:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void fetchChatters(
         QString broadcasterID, QString moderatorID, int first, QString after,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback);
 
     // Recursive boy
     void onFetchModeratorsSuccess(
         std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-        QString broadcasterID, size_t maxModeratorsToFetch,
+        const QString &broadcasterID, size_t maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback,
         HelixModerators moderators);
@@ -1678,8 +1712,9 @@ protected:
     // Get moderator list - This method is what actually runs the API request
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void fetchModerators(
-        QString broadcasterID, int first, QString after,
-        ResultCallback<HelixModerators> successCallback,
+        const QString &broadcasterID, int first, const QString &after,
+        const QObject *caller,
+        const ResultCallback<HelixModerators> &successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:

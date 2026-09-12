@@ -80,6 +80,8 @@ enum class MessageFlag : std::int64_t {
     Announcement = (1LL << 44),
     /// Notifications that do not yet have special handling/categorization
     UncategorizedNotification = (1LL << 45),
+    /// The message was detected as ASCII art and has its layout width limited to the default web chat width.
+    AsciiArt = (1LL << 46),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

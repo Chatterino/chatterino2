@@ -112,5 +112,6 @@ Leafyzito | https://github.com/leafyzito | :/avatars/leafyzito.png
 tlos | https://github.com/realtlos | :/avatars/realtlos.jpg
 ArmpitsLover420 | https://github.com/JEC15 | :/avatars/armpitslover420.jpg
 voiceofgrog | https://github.com/voiceofgrog |
+Iore | https://github.com/3r01 | :/avatars/iore.png
 
 # Add yourself to the list above this comment
