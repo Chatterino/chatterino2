@@ -80,7 +80,7 @@ QString chatters(const CommandContext &ctx)
     // Refresh chatter list via helix api for mods
     getHelix()->getChatters(
         ctx.twitchChannel->roomId(),
-        getApp()->getAccounts()->twitch.getCurrent()->getUserId(), 1,
+        getApp()->getAccounts()->twitch.getCurrent()->getUserId(), 1, nullptr,
         [channel{ctx.channel}](auto result) {
             channel->addSystemMessage(QString("Chatter count: %1.")
                                           .arg(localizeNumbers(result.total)));
@@ -110,6 +110,7 @@ QString testChatters(const CommandContext &ctx)
     getHelix()->getChatters(
         ctx.twitchChannel->roomId(),
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(), 5000,
+        nullptr,
         [channel{ctx.channel}, twitchChannel{ctx.twitchChannel}](auto result) {
             QStringList entries;
             for (const auto &username : result.chatters)

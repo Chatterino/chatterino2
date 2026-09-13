@@ -1004,6 +1004,7 @@ TEST_F(PluginTest, MessageElementFlag)
                          "SubscriptionHeader=0x10000000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
+                         "TwitchGif=0x80,"
                          "Username=0x4,"
                          "WatchStreakHeader=0x20000000000";
 

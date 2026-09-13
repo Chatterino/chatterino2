@@ -344,6 +344,25 @@ QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
     return dt;
 }
 
+qsizetype codepointLength(QStringView str)
+{
+    qsizetype length = 0;
+    const QChar *pos = str.begin();
+    const QChar *end = str.end();
+
+    while (pos < end)
+    {
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < end && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        length++;
+    }
+
+    return length;
+}
+
 QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
 {
     if (end <= begin || begin < 0)

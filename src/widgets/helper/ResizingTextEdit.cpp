@@ -64,8 +64,22 @@ bool ResizingTextEdit::isFirstWord() const
 {
     QString plainText = this->toPlainText();
     QString portionBeforeCursor = plainText.left(this->textCursor().position());
+    const auto prefixLength = this->ignoredCompletionPrefix_.size();
+
+    // An empty reply still completes the username in the prefix.
+    if (portionBeforeCursor.size() > prefixLength &&
+        portionBeforeCursor.startsWith(this->ignoredCompletionPrefix_))
+    {
+        portionBeforeCursor.remove(0, prefixLength);
+    }
     return !portionBeforeCursor.contains(' ');
 };
+
+void ResizingTextEdit::setIgnoredCompletionPrefix(const QString &prefix)
+{
+    this->ignoredCompletionPrefix_ = prefix;
+    this->resetCompletion();
+}
 
 int ResizingTextEdit::heightForWidth(int) const
 {

@@ -133,7 +133,7 @@ void Helix::getUserById(QString userId,
 }
 
 void Helix::getChannelFollowers(
-    QString broadcasterID,
+    QString broadcasterID, QString userID,
     ResultCallback<HelixGetChannelFollowersResponse> successCallback,
     std::function<void(QString)> failureCallback)
 {
@@ -141,17 +141,22 @@ void Helix::getChannelFollowers(
 
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    if (!userID.isEmpty())
+    {
+        urlQuery.addQueryItem("user_id", userID);
+    }
 
     // TODO: set on success and on error
     this->makeGet("channels/followers", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) {
+        .onSuccess([successCallback, failureCallback, userID](auto result) {
             auto root = result.parseJson();
             if (root.empty())
             {
                 failureCallback("Bad JSON response");
                 return;
             }
-            successCallback(HelixGetChannelFollowersResponse(root));
+            successCallback(
+                HelixGetChannelFollowersResponse(root, !userID.isEmpty()));
         })
         .onError([failureCallback](auto result) {
             auto root = result.parseJson();
@@ -1965,8 +1970,8 @@ void Helix::updateChatSettings(
 
 void Helix::onFetchChattersSuccess(
     std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
-    QString moderatorID, size_t maxChattersToFetch,
-    ResultCallback<HelixChatters> successCallback,
+    const QString &moderatorID, size_t maxChattersToFetch,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback,
     HelixChatters chatters)
 {
@@ -1986,10 +1991,11 @@ void Helix::onFetchChattersSuccess(
 
     this->fetchChatters(
         broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, chatters.cursor,
+        caller,
         [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
-                successCallback, failureCallback, chatters);
+                caller, successCallback, failureCallback, std::move(chatters));
         },
         failureCallback);
 }
@@ -1997,7 +2003,7 @@ void Helix::onFetchChattersSuccess(
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::fetchChatters(
     QString broadcasterID, QString moderatorID, int first, QString after,
-    ResultCallback<HelixChatters> successCallback,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
     using Error = HelixGetChattersError;
@@ -2014,6 +2020,7 @@ void Helix::fetchChatters(
     }
 
     this->makeGet("chat/chatters", urlQuery)
+        .caller(caller)
         .onSuccess([successCallback](auto result) {
             if (result.status() != 200)
             {
@@ -2078,7 +2085,8 @@ void Helix::fetchChatters(
 
 void Helix::onFetchModeratorsSuccess(
     std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-    QString broadcasterID, size_t maxModeratorsToFetch,
+    const QString &broadcasterID, size_t maxModeratorsToFetch,
+    const QObject *caller,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback,
     HelixModerators moderators)
@@ -2101,9 +2109,10 @@ void Helix::onFetchModeratorsSuccess(
 
     this->fetchModerators(
         broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, moderators.cursor,
+        caller,
         [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
-                finalModerators, broadcasterID, maxModeratorsToFetch,
+                finalModerators, broadcasterID, maxModeratorsToFetch, caller,
                 successCallback, failureCallback, moderators);
         },
         failureCallback);
@@ -2111,8 +2120,9 @@ void Helix::onFetchModeratorsSuccess(
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::fetchModerators(
-    QString broadcasterID, int first, QString after,
-    ResultCallback<HelixModerators> successCallback,
+    const QString &broadcasterID, int first, const QString &after,
+    const QObject *caller,
+    const ResultCallback<HelixModerators> &successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
     using Error = HelixGetModeratorsError;
@@ -2128,6 +2138,7 @@ void Helix::fetchModerators(
     }
 
     this->makeGet("moderation/moderators", urlQuery)
+        .caller(caller)
         .onSuccess([successCallback](auto result) {
             if (result.status() != 200)
             {
@@ -2608,25 +2619,26 @@ void Helix::sendWhisper(
 // https://dev.twitch.tv/docs/api/reference#get-chatters
 void Helix::getChatters(
     QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-    ResultCallback<HelixChatters> successCallback,
+    const QObject *caller, const ResultCallback<HelixChatters> &successCallback,
     FailureCallback<HelixGetChattersError, QString> failureCallback)
 {
     auto finalChatters = std::make_shared<HelixChatters>();
 
     // Initiate the recursive calls
     this->fetchChatters(
-        broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "",
+        broadcasterID, moderatorID, NUM_CHATTERS_TO_FETCH, "", caller,
         [=, this](auto chatters) {
             this->onFetchChattersSuccess(
                 finalChatters, broadcasterID, moderatorID, maxChattersToFetch,
-                successCallback, failureCallback, chatters);
+                caller, successCallback, failureCallback, std::move(chatters));
         },
         failureCallback);
 }
 
 // https://dev.twitch.tv/docs/api/reference#get-moderators
 void Helix::getModerators(
-    QString broadcasterID, int maxModeratorsToFetch,
+    const QString &broadcasterID, int maxModeratorsToFetch,
+    const QObject *caller,
     ResultCallback<std::vector<HelixModerator>> successCallback,
     FailureCallback<HelixGetModeratorsError, QString> failureCallback)
 {
@@ -2634,10 +2646,10 @@ void Helix::getModerators(
 
     // Initiate the recursive calls
     this->fetchModerators(
-        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "",
+        broadcasterID, NUM_MODERATORS_TO_FETCH_PER_REQUEST, "", caller,
         [=, this](auto moderators) {
             this->onFetchModeratorsSuccess(
-                finalModerators, broadcasterID, maxModeratorsToFetch,
+                finalModerators, broadcasterID, maxModeratorsToFetch, caller,
                 successCallback, failureCallback, moderators);
         },
         failureCallback);
@@ -2646,7 +2658,7 @@ void Helix::getModerators(
 // List the VIPs of a channel
 // https://dev.twitch.tv/docs/api/reference#get-vips
 void Helix::getChannelVIPs(
-    QString broadcasterID,
+    const QString &broadcasterID, const QObject *caller,
     ResultCallback<std::vector<HelixVip>> successCallback,
     FailureCallback<HelixListVIPsError, QString> failureCallback)
 {
@@ -2661,6 +2673,7 @@ void Helix::getChannelVIPs(
     urlQuery.addQueryItem("first", "100");
 
     this->makeGet("channels/vips", urlQuery)
+        .caller(caller)
         .header("Content-Type", "application/json")
         .onSuccess([successCallback](auto result) {
             if (result.status() != 200)

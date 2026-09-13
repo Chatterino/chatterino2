@@ -966,12 +966,13 @@ void UserInfoPopup::updateUserData()
 
         this->setWindowTitle(TEXT_TITLE.arg(
             user.displayName, this->underlyingChannel_->getName()));
-        this->ui_.createdDateLabel->setText(
-            TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+        auto createdAt =
+            QDateTime::fromString(user.createdAt, Qt::ISODateWithMs);
+        auto createdStr = createdAt.toLocalTime().date().toString(Qt::ISODate);
+        this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(createdStr));
         this->ui_.createdDateLabel->setToolTip(
-            formatLongFriendlyDuration(
-                QDateTime::fromString(user.createdAt, Qt::ISODateWithMs),
-                QDateTime::currentDateTimeUtc()) +
+            formatLongFriendlyDuration(createdAt,
+                                       QDateTime::currentDateTimeUtc()) +
             u" ago"_s);
         this->ui_.createdDateLabel->setMouseTracking(true);
         this->ui_.userIDLabel->setText(TEXT_USER_ID % user.id);
@@ -988,7 +989,7 @@ void UserInfoPopup::updateUserData()
         }
 
         getHelix()->getChannelFollowers(
-            user.id,
+            user.id, {},
             [this, hack](const auto &followers) {
                 if (!hack.lock())
                 {
@@ -1057,28 +1058,13 @@ void UserInfoPopup::updateUserData()
 
         if (type == Channel::Type::Twitch)
         {
-            // get followage and subage
+            // get subage
             getIvr()->getSubage(
                 this->userName_, this->underlyingChannel_->getName(),
                 [this, hack](const IvrSubage &subageInfo) {
                     if (!hack.lock())
                     {
                         return;
-                    }
-
-                    if (!subageInfo.followingSince.isEmpty())
-                    {
-                        QDateTime followedAt = QDateTime::fromString(
-                            subageInfo.followingSince, Qt::ISODate);
-                        QString followingSince =
-                            followedAt.toString("yyyy-MM-dd");
-                        this->ui_.followageLabel->setText("❤ Following since " +
-                                                          followingSince);
-                        this->ui_.followageLabel->setToolTip(
-                            formatLongFriendlyDuration(
-                                followedAt, QDateTime::currentDateTimeUtc()) +
-                            u" ago"_s);
-                        this->ui_.followageLabel->setMouseTracking(true);
                     }
 
                     if (subageInfo.isSubHidden)
@@ -1101,6 +1087,41 @@ void UserInfoPopup::updateUserData()
                     }
                 },
                 [] {});
+
+            // get followage
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+            if (twitchChannel &&
+                (twitchChannel->isBroadcaster() || twitchChannel->isMod()))
+            {
+                getHelix()->getChannelFollowers(
+                    twitchChannel->roomId(), user.id,
+                    [this, hack](const auto &response) {
+                        if (!hack.lock())
+                        {
+                            return;
+                        }
+                        if (response.specifiedFollower)
+                        {
+                            const auto &followedAt =
+                                response.specifiedFollower->followedAt;
+                            this->ui_.followageLabel->setText(
+                                "❤ Following since " +
+                                followedAt.toLocalTime().date().toString(
+                                    Qt::ISODate));
+                            this->ui_.followageLabel->setToolTip(
+                                formatLongFriendlyDuration(
+                                    followedAt,
+                                    QDateTime::currentDateTimeUtc()) +
+                                u" ago"_s);
+                            this->ui_.followageLabel->setMouseTracking(true);
+                        }
+                    },
+                    [](const auto &errorMessage) {
+                        qCWarning(chatterinoTwitch)
+                            << "Error getting follow age:" << errorMessage;
+                    });
+            }
         }
 
         // get pronouns
