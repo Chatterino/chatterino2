@@ -27,7 +27,15 @@ class NotebookTab : public Button
 public:
     explicit NotebookTab(Notebook *notebook);
 
-    void updateSize();
+    void refreshAndCommitSize(bool notify);
+    void commitSize(bool notify);
+    void refreshSize();
+
+    QSize minimumTabSize() const;
+    int minimumTabWidth() const;
+
+    void queueMove(QPoint to, bool animated);
+    void commitMove();
 
     QWidget *page{};
 
@@ -89,7 +97,6 @@ public:
     void tabSizeChanged();
 
     void growWidth(int width);
-    int normalTabWidth() const;
 
 protected:
     void themeChangedEvent() override;
@@ -162,6 +169,10 @@ private:
     bool isRerun_{};
 
     int growWidth_ = 0;
+    QSize computedMinimumSize;
+
+    QPoint queuedMove;
+    bool queuedMoveAnimated = false;
 
     QMenu menu_;
     QMenu *closeMultipleTabsMenu_{};
