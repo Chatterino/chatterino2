@@ -193,7 +193,6 @@ declare namespace c2 {
     interface Message {
         flags: MessageFlag;
         id: string;
-        parse_time: number;
         search_text: string;
         message_text: string;
         login_name: string;
@@ -218,7 +217,6 @@ declare namespace c2 {
     interface MessageInit {
         flags?: MessageFlag;
         id?: string;
-        parse_time?: number;
         search_text?: string;
         message_text?: string;
         login_name?: string;

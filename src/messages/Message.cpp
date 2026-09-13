@@ -4,7 +4,6 @@
 
 #include "messages/Message.hpp"
 
-#include "Application.hpp"
 #include "common/Literals.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -23,7 +22,6 @@ namespace chatterino {
 using namespace literals;
 
 Message::Message()
-    : parseTime(QTime::currentTime())
 {
     DebugCount::increase(DebugObject::Message);
 }
@@ -112,7 +110,6 @@ std::shared_ptr<Message> Message::clone() const
 {
     auto cloned = std::make_shared<Message>();
     cloned->flags = this->flags;
-    cloned->parseTime = this->parseTime;
     cloned->id = this->id;
     cloned->searchText = this->searchText;
     cloned->messageText = this->messageText;
@@ -206,12 +203,6 @@ QJsonObject Message::toJson() const
     {
         msg["announcementColor"_L1] =
             qmagicenum::enumNameString(this->announcementColor);
-    }
-
-    // XXX: figure out if we can add this in tests
-    if (!getApp()->isTest())
-    {
-        msg["parseTime"_L1] = this->parseTime.toString(Qt::ISODate);
     }
 
     QJsonArray elements;

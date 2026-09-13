@@ -1134,9 +1134,6 @@ TEST_F(PluginTest, MessageModification)
     sol::table tests = lua->script(R"lua(
         return {
             function(msg)
-                msg.parse_time = 1234567
-            end,
-            function(msg)
                 assert(msg.id == "abc")
                 msg.id = "1234"
                 assert(msg.id == "1234")
