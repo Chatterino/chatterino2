@@ -13,6 +13,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "util/Backup.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
@@ -478,7 +479,23 @@ void WindowManager::initialize()
         }
         else
         {
-            windowLayout = this->loadWindowLayoutFromFile();
+            backup::loadWithBackups(
+                backup::FileData{
+                    .fileName = WindowManager::WINDOW_LAYOUT_FILENAME,
+                    .directory = getApp()->getPaths().settingsDirectory,
+                    .fileKind = u"Window layout"_s,
+                    .fileDescription =
+                        u"This file contains the positions of open windows, their tabs and splits."_s,
+                },
+                [&]() -> ExpectedStr<void> {
+                    auto res = this->loadWindowLayoutFromFile();
+                    if (!res)
+                    {
+                        return makeUnexpected(std::move(res).error());
+                    }
+                    windowLayout = *std::move(res);
+                    return {};
+                });
         }
 
         auto desired = this->appArgs.activateChannel;
@@ -755,7 +772,7 @@ void WindowManager::incGeneration()
     this->generation_++;
 }
 
-WindowLayout WindowManager::loadWindowLayoutFromFile() const
+ExpectedStr<WindowLayout> WindowManager::loadWindowLayoutFromFile() const
 {
     return WindowLayout::loadFromFile(this->windowLayoutFilePath);
 }

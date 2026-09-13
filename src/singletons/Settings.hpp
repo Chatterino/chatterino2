@@ -225,6 +225,10 @@ public:
         "/appearance/tabVisibility",
         NotebookTabVisibility::AllTabs,
     };
+    BoolSetting growWrappedNotebookLines = {
+        "/appearance/growWrappedNotebookLines",
+        false,
+    };
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -768,6 +772,7 @@ public:
 
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
+    QStringSetting messageHistoryUrl = {"/misc/twitch/messageHistoryUrl", ""};
     IntSetting twitchMessageHistoryLimit = {
         "/misc/twitch/messageHistoryLimit",
         800,
