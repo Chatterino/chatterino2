@@ -81,7 +81,8 @@
                             "3x": "https://static-cdn.jtvnw.net/emoticons/v2/84608/default/dark/3.0"
                         },
                         "name": "f",
-                        "tooltip": "f<br>Twitch Emote"
+                        "tooltip": "f<br>Twitch Emote",
+                        "id": "84608"
                     },
                     "flags": "EmoteImage|EmoteText",
                     "link": {
