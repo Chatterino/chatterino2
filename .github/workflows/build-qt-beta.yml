@@ -1,0 +1,242 @@
+---
+name: Build with Qt Beta/RC
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Run daily at 2 AM UTC to catch new Qt releases
+    - cron: "0 2 * * *"
+
+concurrency:
+  group: build-qt-beta-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CHATTERINO_REQUIRE_CLEAN_GIT: On
+  CONAN_VERSION: 2.11.0
+
+jobs:
+  detect-latest-qt:
+    name: "Detect Latest Qt Versions"
+    runs-on: ubuntu-latest
+    outputs:
+      qt-versions: ${{ steps.detect.outputs.qt-versions }}
+    steps:
+      - name: Detect available Qt versions
+        id: detect
+        run: |
+          # Use aqt to list available Qt versions including beta/RC
+          pip3 install aqtinstall
+
+          # Get all available Qt versions including beta/RC
+          LATEST_VERSIONS=$(python3 -c "
+          import json
+          import subprocess
+          import re
+
+          try:
+              # Get all available Qt versions
+              result = subprocess.run(['aqt', 'list-qt', 'linux', 'desktop'], capture_output=True, text=True)
+              versions = result.stdout.strip().split('\n')
+              
+              # Filter for recent versions including beta/RC
+              qt_versions = []
+              for version in versions:
+                  # Include stable versions (6.11.0, 6.12.0, etc.)
+                  if re.match(r'6\.(1[1-9]|[2-9]\d)\.\d+', version):
+                      qt_versions.append(version)
+                  # Include beta/RC versions (6.12.0-beta1, 6.12.0-rc1, etc.)
+                  elif re.match(r'6\.(1[1-9]|[2-9]\d)\.\d+-(beta|rc)\d*', version):
+                      qt_versions.append(version)
+              
+              # Sort versions (stable first, then beta/RC)
+              def version_key(v):
+                  parts = v.split('-')
+                  base = list(map(int, parts[0].split('.')))
+                  if len(parts) > 1:  # beta/RC version
+                      return (base, 1, parts[1])  # put after stable
+                  return (base, 0, '')  # stable first
+              
+              qt_versions.sort(key=version_key)
+              latest_versions = qt_versions[:8]  # Take latest 8 versions
+              
+              print(json.dumps(latest_versions))
+          except Exception as e:
+              print('["6.11.0", "6.10.0", "6.9.0"]')  # fallback
+          ")
+
+          echo "qt-versions=$LATEST_VERSIONS" >> "$GITHUB_OUTPUT"
+
+  build-qt-beta:
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
+    needs: detect-latest-qt
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-14]
+        qt-version: ${{ fromJson(needs.detect-latest-qt.outputs.qt-versions) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # ubuntu
+      - name: Install Qt6 (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          mkdir build
+          cd build
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DFORCE_JSON_GENERATION=Off \
+            -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
+            ..
+          make -j"$(nproc)"
+
+      # windows
+      - name: Install Qt6 (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Enable Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Setup sccache (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: hendrikmuhs/ccache-action@v1.2.20
+        with:
+          variant: sccache
+          save: false
+          key: sccache-qt-beta-${{ matrix.os }}-${{ matrix.qt-version }}
+
+      - name: Cache conan packages (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v5
+        with:
+          key: ${{ runner.os }}-conan-qt-beta-${{ hashFiles('**/conanfile.py') }}-QT6
+          path: ~/.conan2/
+
+      - name: Install Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          pip3 install --user "conan==${{ env.CONAN_VERSION }}"
+        shell: powershell
+
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan --version
+          conan profile detect -f
+        shell: powershell
+
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          mkdir build
+          cd build
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=. `
+              -o with_openssl3="True"
+        shell: powershell
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: pwsh
+        run: |
+          cd build
+          cmake `
+              -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DUSE_PRECOMPILED_HEADERS=ON `
+              -DFORCE_JSON_GENERATION=Off `
+              -DCHATTERINO_SPELLCHECK=On `
+              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
+              ..
+          set cl=/MP
+          nmake /S /NOLOGO
+
+      # macos
+      - name: Install Qt6 (macOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtBeta-${{ matrix.qt-version }}
+          modules: qtimageformats
+          version: ${{ matrix.qt-version }}
+
+      - name: Install dependencies (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
+
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_SPELLCHECK=On \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
+
+      - name: Upload build results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-logs-${{ matrix.os }}-qt-${{ matrix.qt-version }}
+          path: |
+            build/compile_commands.json
+            build/CMakeFiles/CMakeError.log
+            build/CMakeFiles/CMakeOutput.log
+          retention-days: 7
+
+  report-results:
+    name: "Report Qt Beta Build Results"
+    needs: [detect-latest-qt, build-qt-beta]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## Qt Beta Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tested Versions**: ${{ needs.detect-latest-qt.outputs.qt-versions }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status**: ${{ needs.build-qt-beta.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow automatically detects and tests with the latest Qt versions to ensure Chatterino remains compatible." >> $GITHUB_STEP_SUMMARY
