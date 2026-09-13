@@ -4,6 +4,10 @@
 
 #include "Test.hpp"
 
+#include <QFile>
+#include <QPixmap>
+#include <QTextStream>
+
 namespace chatterino {
 
 TEST(Contributors, AvatarsReadable)
