@@ -356,6 +356,13 @@ std::optional<WindowLayout> Args::makeCustomChannelLayout(
                 return window.geometry_;
             }
         }
+        else
+        {
+            qCWarning(chatterinoWindowmanager)
+                << "Missing previous main window position as window layout "
+                   "failed to load:"
+                << configLayout.error();
+        }
 
         return QRect(-1, -1, -1, -1);
     }();
