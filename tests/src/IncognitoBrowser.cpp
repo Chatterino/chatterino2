@@ -15,11 +15,16 @@ TEST(IncognitoBrowser, getPrivateSwitch)
     ASSERT_EQ(getPrivateSwitch("firefox.exe"), "-private-window");
     ASSERT_EQ(getPrivateSwitch("firefox"), "-private-window");
     ASSERT_EQ(getPrivateSwitch("firefox-forsen-version"), "-private-window");
+    ASSERT_EQ(getPrivateSwitch("zen.exe"), "-private-window");
 
     ASSERT_EQ(getPrivateSwitch("chrome.exe"), "-incognito");
     ASSERT_EQ(getPrivateSwitch("google-chrome-stable"), "-incognito");
+    ASSERT_EQ(getPrivateSwitch("Google Chrome"), "-incognito");
 
-    ASSERT_EQ(getPrivateSwitch("opera.exe"), "-newprivatetab");
+    ASSERT_EQ(getPrivateSwitch("opera.exe"), "-incognito");
+
+    ASSERT_EQ(getPrivateSwitch("msedge.exe"), "-inprivate");
+    ASSERT_EQ(getPrivateSwitch("Microsoft Edge"), "-inprivate");
 
     ASSERT_EQ(getPrivateSwitch("unsupportedBrowser.exe"), "");
 }

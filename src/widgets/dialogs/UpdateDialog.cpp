@@ -99,9 +99,10 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
         break;
 
         case Updates::MissingPortableUpdater: {
-            this->ui_.label->setText("The portable updater (expected in " %
-                                     Updates::portableUpdaterPath() %
-                                     ") was not found.");
+            this->ui_.label->setText(
+                "The portable updater (expected in " %
+                Updates::portableUpdaterPath(getApp()->getPaths()) %
+                ") was not found.");
         }
         break;
 

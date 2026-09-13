@@ -14,7 +14,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - uses: ZedThree/clang-tidy-review/post@v0.23.1
+      - uses: ZedThree/clang-tidy-review/post@438014136def4cb6242e9d0ef3da1a1cd48fa7ce # v0.23.1
         with:
           lgtm_comment_body: ""
           num_comments_as_exitcode: false

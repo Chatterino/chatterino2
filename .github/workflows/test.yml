@@ -26,9 +26,10 @@ jobs:
     container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Create build directory (Ubuntu)
         run: mkdir build-test
@@ -87,7 +88,7 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         if: github.repository_owner == 'Chatterino'
-        uses: codecov/codecov-action@v7.0.0
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           plugins: gcov

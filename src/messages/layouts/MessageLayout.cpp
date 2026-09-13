@@ -301,7 +301,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
             QRectF{
                 0.0,
                 static_cast<qreal>(ctx.y),
-                this->container_.getWidth() + 64,
+                static_cast<qreal>(ctx.canvasWidth),
                 1.0,
             },
             ctx.messageColors.messageSeperator);
@@ -385,16 +385,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         return ctx.messageColors.regularBg;
     }();
 
-    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        ctx.preferences.enableElevatedMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
-    }
-
-    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             ctx.preferences.enableFirstMessageHighlight)
+    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+        ctx.preferences.enableFirstMessageHighlight)
     {
         backgroundColor = blendColors(
             backgroundColor,

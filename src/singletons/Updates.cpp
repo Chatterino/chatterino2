@@ -206,7 +206,7 @@ void Updates::installUpdates()
                 file.flush();
                 file.close();
 
-                auto updaterPath = Updates::portableUpdaterPath();
+                auto updaterPath = Updates::portableUpdaterPath(this->paths);
                 if (!QFile::exists(updaterPath))
                 {
                     this->setStatus_(MissingPortableUpdater);
@@ -410,9 +410,9 @@ Updates::Status Updates::getStatus() const
     return this->status_;
 }
 
-QString Updates::portableUpdaterPath()
+QString Updates::portableUpdaterPath(const Paths &paths)
 {
-    return combinePath(QCoreApplication::applicationDirPath(),
+    return combinePath(paths.rootAppDataDirectory,
                        "updater.1/ChatterinoUpdater.exe");
 }
 

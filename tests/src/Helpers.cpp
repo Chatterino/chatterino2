@@ -583,6 +583,19 @@ TEST(Helpers, chronoToQDateTime)
               "2025-02-26T12:49:49.131Z");
 }
 
+TEST(Helpers, codepointLength)
+{
+    ASSERT_EQ(codepointLength(u""), 0);
+    ASSERT_EQ(codepointLength(u"abcd"), 4);
+    ASSERT_EQ(codepointLength(u"🦁"), 1);
+    ASSERT_EQ(codepointLength(u"a🍕b"), 3);
+    ASSERT_EQ(codepointLength(u"👁🦁🍕🐔"), 4);
+
+    // Unpaired surrogates still count as one codepoint
+    ASSERT_EQ(codepointLength(u"\xD83E"), 1);
+    ASSERT_EQ(codepointLength(u"\xD83E🐔"), 2);
+}
+
 TEST(Helpers, codepointSlice)
 {
     ASSERT_EQ(codepointSlice(u"", 0, 0), u"");

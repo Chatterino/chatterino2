@@ -122,6 +122,16 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
+void Window::setPopupID(size_t id)
+{
+    this->popupID_ = id;
+}
+
+std::optional<size_t> Window::popupID() const
+{
+    return this->popupID_;
+}
+
 bool Window::event(QEvent *event)
 {
     switch (event->type())
@@ -420,6 +430,16 @@ void Window::addShortcuts()
                          .arg(target);
                  }
              }
+             return "";
+         }},
+        {"selectTabHistoryBack",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryBack(true);
+             return "";
+         }},
+        {"selectTabHistoryForward",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryForward(true);
              return "";
          }},
         {"popup",

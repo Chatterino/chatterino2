@@ -14,6 +14,7 @@
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -44,6 +45,8 @@
 
 #include <cmath>
 
+using namespace Qt::StringLiterals;
+
 namespace {
 
 using namespace chatterino;
@@ -66,7 +69,7 @@ auto formatRoomModeUnclean(
 
     if (modes->r9k)
     {
-        text += "r9k, ";
+        text += "unique, ";
     }
     if (modes->slowMode > 0)
     {
@@ -186,7 +189,7 @@ auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
 }
 
 auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
-                 const QStringList &sharedChatParticipants)
+                 const std::vector<HelixMinimalUser> &sharedChatParticipants)
 {
     auto title = QString();
 
@@ -201,13 +204,21 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings,
     }
     else
     {
-        if (sharedChatParticipants.isEmpty())
+        if (sharedChatParticipants.empty())
         {
             title += " (live)";
         }
         else
         {
-            title += " (live with " + sharedChatParticipants.join(", ") + ")";
+            const auto mode = getSettings()->usernameDisplayMode.getEnum();
+            QStringList names;
+            for (const auto &p : sharedChatParticipants)
+            {
+                auto name = p.formatted(mode);
+                names.push_back(std::move(name));
+            }
+
+            title += " (live with " + names.join(", ") + ")";
         }
     }
 
@@ -462,12 +473,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Popup overlay",
         h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"),
         this->split_, &Split::showOverlayWindow);
-    menu->addAction("Search",
+    menu->addAction(u"Search…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "showSearch"),
                     this->split_, [this] {
                         this->split_->showSearch(true);
                     });
-    menu->addAction("Set filters",
+    menu->addAction(u"Set filters…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"),
                     this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
@@ -709,7 +720,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     this->modeActionSetSub = new QAction("Subscriber only", this);
     this->modeActionSetEmote = new QAction("Emote only", this);
     this->modeActionSetSlow = new QAction("Slow", this);
-    this->modeActionSetR9k = new QAction("R9K", this);
+    this->modeActionSetR9k = new QAction("Unique chat (R9K)", this);
     this->modeActionSetFollowers = new QAction("Followers only", this);
 
     this->modeActionSetFollowers->setCheckable(true);

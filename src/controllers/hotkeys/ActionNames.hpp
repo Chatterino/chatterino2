@@ -336,6 +336,10 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},
+         {"selectTabHistoryBack",
+          ActionDefinition{"Select previous tab from visit history"}},
+         {"selectTabHistoryForward",
+          ActionDefinition{"Select next tab from visit history"}},
          {"setStreamerMode",
           ActionDefinition{
               .displayName = "Set streamer mode",
@@ -355,7 +359,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
                   "Should streamer mode be enabled, disabled, toggled (on/off) "
                   "or set to auto",
           }},
-         {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
+         {"toggleLocalR9K", ActionDefinition{"Toggle local unique chat (R9K)"}},
          {"zoom",
           ActionDefinition{
               .displayName = "Zoom in/out",

@@ -130,10 +130,6 @@ void ColorProvider::initTypeColorMap()
               getSettings()->firstMessageHighlightColor,
               HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR);
 
-    initColor(ColorType::ElevatedMessageHighlight,
-              getSettings()->elevatedMessageHighlightColor,
-              HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
-
     initColor(ColorType::ThreadMessageHighlight,
               getSettings()->threadHighlightColor,
               HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);

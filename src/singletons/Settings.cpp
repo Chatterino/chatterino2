@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -47,6 +48,13 @@ void initializeSignalVector(pajlada::Signals::SignalHolder &signalHolder,
 
 namespace chatterino {
 
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoSettings;
+
+}  // namespace
+
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
 
 void _actuallyRegisterSetting(
@@ -68,6 +76,10 @@ bool Settings::isHighlightedUser(const QString &username)
     }
 
     return false;
+}
+
+void Settings::migrate(bool isTest)
+{
 }
 
 bool Settings::isBlacklistedUser(const QString &username)
@@ -167,6 +179,7 @@ Settings::Settings(const Modes &modes, const Args &args,
 
     if (settingsArgs.isTest)
     {
+        qCInfo(LOG) << "Loading settings from" << settingsPath;
         settingsInstance->load(qPrintable(settingsPath));
     }
     else
@@ -211,6 +224,12 @@ Settings::Settings(const Modes &modes, const Args &args,
             pajlada::Settings::SettingManager::SaveMethod::SaveManually) |
         static_cast<uint64_t>(
             pajlada::Settings::SettingManager::SaveMethod::OnlySaveIfChanged));
+
+    // Run setting migrations
+    if (settingsArgs.runMigrations)
+    {
+        this->migrate(settingsArgs.isTest);
+    }
 
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);

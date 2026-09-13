@@ -15,6 +15,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include <span>
+
+using namespace Qt::Literals;
+
 namespace chatterino {
 
 namespace {
@@ -49,6 +53,16 @@ QList<QUuid> loadFilters(const QJsonValue &val)
     return filterIds;
 }
 
+QJsonArray encodeFilters(std::span<const QUuid> filters)
+{
+    QJsonArray arr;
+    for (const auto &f : filters)
+    {
+        arr.append(f.toString(QUuid::WithoutBraces));
+    }
+    return arr;
+}
+
 }  // namespace
 
 SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
@@ -76,6 +90,29 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     }
 
     return descriptor;
+}
+
+QJsonObject SplitDescriptor::toJson() const
+{
+    QJsonObject obj;
+
+    obj.insert("type", "split");
+    obj.insert("moderationMode", this->moderationMode_);
+
+    QJsonObject data{{"type"_L1, this->type_}};
+    if (!this->channelName_.isEmpty())
+    {
+        data.insert("name"_L1, this->channelName_);
+    }
+    obj.insert("data", data);
+
+    obj.insert("filters", encodeFilters(this->filters_));
+
+    if (this->spellCheckOverride.has_value())
+    {
+        obj["checkSpelling"] = *this->spellCheckOverride;
+    }
+    return obj;
 }
 
 IndirectChannel SplitDescriptor::decodeChannel() const
@@ -127,6 +164,14 @@ SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
     return descriptor;
 }
 
+QJsonObject SplitNodeDescriptor::toJson() const
+{
+    QJsonObject obj = SplitDescriptor::toJson();
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
+    return obj;
+}
+
 ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
     const QJsonObject &root)
 {
@@ -155,6 +200,26 @@ ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
     }
 
     return descriptor;
+}
+
+QJsonObject ContainerNodeDescriptor::toJson() const
+{
+    QJsonObject obj;
+    obj.insert("type", this->vertical_ ? "vertical" : "horizontal");
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
+
+    QJsonArray itemsArr;
+    for (const auto &n : this->items_)
+    {
+        itemsArr.append(std::visit(
+            [](auto &&it) {
+                return it.toJson();
+            },
+            n));
+    }
+    obj.insert("items", itemsArr);
+    return obj;
 }
 
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
@@ -202,7 +267,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     // "deserialize"
     for (const auto windowVal : loadWindowArray(path))
     {
-        QJsonObject windowObj = windowVal.toObject();
+        const QJsonObject windowObj = windowVal.toObject();
 
         WindowDescriptor window;
 
@@ -242,6 +307,13 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             int height = windowObj.value("height").toInt(-1);
 
             window.geometry_ = QRect(x, y, width, height);
+        }
+
+        // Load popup ID
+        auto idVal = windowObj["popupID"];
+        if (idVal.isDouble())
+        {
+            window.popupID = idVal.toInt(1);
         }
 
         bool hasSetASelectedTab = false;
