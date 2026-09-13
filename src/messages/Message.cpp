@@ -123,7 +123,7 @@ std::shared_ptr<Message> Message::clone() const
     cloned->timeoutUser = this->timeoutUser;
     cloned->channelName = this->channelName;
     cloned->usernameColor = this->usernameColor;
-    cloned->serverReceivedTime = this->serverReceivedTime;
+    cloned->timestamp = this->timestamp;
     cloned->twitchBadges = this->twitchBadges;
     cloned->twitchBadgeInfos = this->twitchBadgeInfos;
     cloned->externalBadges = this->externalBadges;
@@ -156,8 +156,7 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
-        {"serverReceivedTime"_L1,
-         this->serverReceivedTime.toString(Qt::ISODate)},
+        {"serverReceivedTime"_L1, this->timestamp.toString(Qt::ISODate)},
         {"frozen"_L1, this->frozen},
     };
 
@@ -238,8 +237,7 @@ Message::ReplyStatus Message::isReplyable() const
                             MessageFlag::Timeout, MessageFlag::Whisper,
                             MessageFlag::ModerationAction,
                             MessageFlag::InvalidReplyTarget}) ||
-        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
-            oneDayInSeconds)
+        this->timestamp.secsTo(QDateTime::currentDateTime()) > oneDayInSeconds)
     {
         messageReplyable = false;
     }

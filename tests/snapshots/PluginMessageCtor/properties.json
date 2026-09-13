@@ -11,7 +11,7 @@
         "  localized_name = 'local',",
         "  user_id = 'user-id',",
         "  username_color = 'blue',",
-        "  server_received_time = 1230000,",
+        "  timestamp = 1230000,",
         "  highlight_color = '#12345678',",
         "  channel_name = 'channel',",
         "  elements = {",

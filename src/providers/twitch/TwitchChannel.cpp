@@ -1363,8 +1363,8 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
         return false;
     }
     auto last = this->lastLiveUpdateMessage_.lock();
-    if (!last || !last->flags.has(op) ||
-        last->serverReceivedTime < now.addSecs(-5) || last->loginName != actor)
+    if (!last || !last->flags.has(op) || last->timestamp < now.addSecs(-5) ||
+        last->loginName != actor)
     {
         return false;
     }

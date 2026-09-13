@@ -53,13 +53,13 @@ TEST(ChannelHelpers, DontStackTimeouts)
         SCOPED_TRACE(test.name);
         auto userMessage = std::make_shared<Message>();
         userMessage->loginName = "user";
-        userMessage->serverReceivedTime = time;
+        userMessage->timestamp = time;
         std::vector<MessagePtr> messages{userMessage};
 
         const auto addTimeout = [&](bool eventSub) {
             auto message = std::make_shared<Message>();
             message->timeoutUser = "user";
-            message->serverReceivedTime = time;
+            message->timestamp = time;
             message->flags.set(MessageFlag::Timeout,
                                MessageFlag::ModerationAction);
             if (eventSub)
