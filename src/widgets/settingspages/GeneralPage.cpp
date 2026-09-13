@@ -237,6 +237,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+    SettingWidget::checkbox("Extend wrapped tabs", s.growWrappedNotebookLines)
+        ->setTooltip("When horizontal tabs are wrapped, extend the line for "
+                     "the whole width of the window.")
+        ->addTo(layout);
 
     layout.addWidget(new FontSettingWidget(s.chatFontFamily, s.chatFontSize,
                                            s.chatFontWeight),

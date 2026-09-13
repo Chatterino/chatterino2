@@ -141,6 +141,8 @@ protected:
     bool getShowTabs() const;
     void setShowTabs(bool value);
 
+    void setGrowWrappedNotebookLines(bool value);
+
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -244,6 +246,7 @@ private:
     int lineOffset_ = 20;
     int mouseWheelDelta_ = 0;
     bool lockNotebookLayout_ = false;
+    bool growWrappedNotebookLines = false;
 
     bool refreshPaused_ = false;
     bool refreshRequested_ = false;

@@ -402,20 +402,7 @@ void NotebookTab::themeChangedEvent()
 
 void NotebookTab::growWidth(int width)
 {
-    if (this->growWidth_ != width)
-    {
-        this->growWidth_ = width;
-        this->updateSize();
-    }
-    else
-    {
-        this->growWidth_ = width;
-    }
-}
-
-int NotebookTab::normalTabWidth() const
-{
-    return this->normalTabWidthForHeight(this->height());
+    this->growWidth_ = width;
 }
 
 int NotebookTab::normalTabWidthForHeight(int height) const
@@ -450,22 +437,57 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     return width;
 }
 
-void NotebookTab::updateSize()
+void NotebookTab::refreshAndCommitSize(bool notify)
+{
+    this->refreshSize();
+    this->commitSize(notify);
+}
+
+void NotebookTab::refreshSize()
 {
     float scale = this->scale();
     auto height = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
     int width = this->normalTabWidthForHeight(height);
+    this->computedMinimumSize = {width, height};
+}
 
-    if (width < this->growWidth_)
+void NotebookTab::commitSize(bool notify)
+{
+    auto size = this->computedMinimumSize;
+    if (size.width() < this->growWidth_)
     {
-        width = this->growWidth_;
+        size.setWidth(this->growWidth_);
     }
 
-    if (this->width() != width || this->height() != height)
+    if (this->size() != size)
     {
-        this->resize(width, height);
-        this->notebook_->refresh();
+        this->resize(size);
+        if (notify)
+        {
+            this->notebook_->refresh();
+        }
     }
+}
+
+QSize NotebookTab::minimumTabSize() const
+{
+    return this->computedMinimumSize;
+}
+
+int NotebookTab::minimumTabWidth() const
+{
+    return this->computedMinimumSize.width();
+}
+
+void NotebookTab::queueMove(QPoint to, bool animated)
+{
+    this->queuedMove = to;
+    this->queuedMoveAnimated = animated;
+}
+
+void NotebookTab::commitMove()
+{
+    this->moveAnimated(this->queuedMove, this->queuedMoveAnimated);
 }
 
 const QString &NotebookTab::getCustomTitle() const
@@ -521,7 +543,7 @@ void NotebookTab::titleUpdated()
     // Queue up save because: Tab title changed
     getApp()->getWindows()->queueSave();
     this->notebook_->refresh();
-    this->updateSize();
+    this->refreshAndCommitSize(true);
     this->update();
 }
 
@@ -837,7 +859,7 @@ QRect NotebookTab::getDesiredRect() const
 
 void NotebookTab::tabSizeChanged()
 {
-    this->updateSize();
+    this->refreshAndCommitSize(true);
     this->update();
 }
 
