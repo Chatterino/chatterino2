@@ -156,7 +156,7 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
-        {"serverReceivedTime"_L1, this->timestamp.toString(Qt::ISODate)},
+        {"timestamp"_L1, this->timestamp.toString(Qt::ISODate)},
         {"frozen"_L1, this->frozen},
     };
 
