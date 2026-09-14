@@ -76,6 +76,8 @@ public:
 
     bool isAlive() const noexcept;
 
+    bool operator==(const PluginWeakRef &other) const noexcept;
+
 private:
     PluginWeakRef(std::weak_ptr<Plugin> weak);
 
