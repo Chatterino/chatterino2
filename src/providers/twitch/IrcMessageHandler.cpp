@@ -769,10 +769,11 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
     if (msgType == "subgift")
     {
         // subgifts are special because they include two users
-        const auto msg = MessageBuilder::makeSubgiftMessage(
+        const auto [msg, alert] = MessageBuilder::makeSubgiftMessage(
             tags, calculateMessageTime(message).time(), channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
         return;
     }
 

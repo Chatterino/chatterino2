@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-License-Identifier: CC0-1.0
+
+version = 1
+
+[[annotations]]
+# Microsoft Fluent Icons
+path = [
+    "checkmark-circle.svg",
+    "checkmark-square.svg",
+    "dismiss-circle.svg",
+    "dismiss-square.svg",
+    "music-note-1.svg",
+    "music-note-2.svg",
+    "speaker-mute.svg",
+]
+SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
+SPDX-License-Identifier = "MIT"

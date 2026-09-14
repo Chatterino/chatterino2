@@ -10,12 +10,13 @@
 #include "singletons/Settings.hpp"
 
 #include <pajlada/settings.hpp>
-#include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
+#include <QStringView>
 #include <QUrl>
 
 #include <cstdint>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -27,6 +28,12 @@ class AccountController;
 enum class MessageFlag : std::int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
+namespace filters {
+
+struct RunContext;
+
+}  // namespace filters
+
 class HighlightController final
 {
 public:
@@ -36,9 +43,18 @@ public:
      * @brief Checks the given message parameters if it matches our internal checks, and returns a result
      **/
     [[nodiscard]] std::pair<bool, HighlightResult> check(
-        const MessageParseArgs &args,
-        const std::vector<TwitchBadge> &twitchBadges, const QString &senderName,
-        const QString &originalMessage, const MessageFlags &messageFlags) const;
+        const HighlightCheck::Params &params) const;
+
+    /// Returns a set of built-in highlight IDs (e.g. {"whispers", "yourusername"})
+    static std::unordered_set<QStringView> billTinHighlights();
+
+    /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
+    /// This can happen if a user does some manual cursed surgery on their settings.json file.
+    static std::unordered_set<QStringView> missingBillTinHighlights();
+
+    /// Given a set of missing highlight IDs, recreates & adds them to the bottom of the user's highlights.
+    static void recreateMissingBillTinHighlights(
+        const std::unordered_set<QStringView> &missingHighlights);
 
 private:
     /**
@@ -50,7 +66,6 @@ private:
 
     UniqueAccess<std::vector<HighlightCheck>> checks_;
 
-    pajlada::SettingListener rebuildListener_;
     pajlada::Signals::SignalHolder signalHolder_;
 };
 

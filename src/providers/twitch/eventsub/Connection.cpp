@@ -15,6 +15,7 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -240,19 +241,32 @@ void Connection::onAutomodMessageHold(
     auto messageText = payload.event.message.text.qt();
     auto userLogin = payload.event.userLogin.qt();
 
-    runInGuiThread([channel, messageText, userLogin, header, body] {
-        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags);
+    filters::RunContext runContext{
+        .message = *body,
+        .channel = channel,
+    };
+
+    runInGuiThread([channel, messageText, userLogin, header, body, runContext] {
+        std::vector<TwitchBadge> twitchBadges;
+
+        auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+        auto [highlighted, highlightResult] = getApp()->getHighlights()->check({
+            .args = {},
+            .twitchBadges = twitchBadges,
+            .senderName = userLogin,
+            .originalMessage = messageText,
+            .messageFlags = body->flags,
+            .self = userLogin == currentUser->getUserName(),
+            .runContext = runContext,
+        });
+
         if (highlighted)
         {
             MessageBuilder::triggerHighlights(
-                channel,
-                {
-                    .customSound =
-                        highlightResult.customSoundUrl.value_or<QUrl>({}),
-                    .playSound = highlightResult.playSound,
-                    .windowAlert = highlightResult.alert,
-                });
+                channel, {
+                             .sound = highlightResult.sound,
+                             .windowAlert = highlightResult.alert,
+                         });
         }
 
         channel->addMessage(header, MessageContext::Original);
@@ -263,13 +277,14 @@ void Connection::onAutomodMessageHold(
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
             body, MessageContext::Original);
 
-        if (getSettings()->showAutomodInMentions)
-        {
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                header, MessageContext::Original);
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                body, MessageContext::Original);
-        }
+        // TODO: Is this extra check here really necessary?
+        // if (getSettings()->showAutomodInMentions)
+        // {
+        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
+        //         header, MessageContext::Original);
+        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
+        //         body, MessageContext::Original);
+        // }
     });
 }
 void Connection::onAutomodMessageUpdate(
