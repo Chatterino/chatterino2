@@ -29,8 +29,12 @@ public:
     SeventvAPI &operator=(SeventvAPI &&) = delete;
 
     void getUserByTwitchID(const QString &twitchID,
-                           SuccessCallback<const QJsonObject &> &&onSuccess,
+                           SuccessCallback<QJsonObject> &&onSuccess,
                            ErrorCallback &&onError);
+    void getUserAndEmoteSetByTwitchID(
+        const QString &twitchID,
+        SuccessCallback<const QJsonObject &> &&onSuccess,
+        ErrorCallback onError);
     void getEmoteSet(const QString &emoteSet,
                      SuccessCallback<const QJsonObject &> &&onSuccess,
                      ErrorCallback &&onError);

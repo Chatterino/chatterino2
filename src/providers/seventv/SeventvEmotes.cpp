@@ -273,7 +273,7 @@ void SeventvEmotes::loadChannelEmotes(
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
 
-    getApp()->getSeventvAPI()->getUserByTwitchID(
+    getApp()->getSeventvAPI()->getUserAndEmoteSetByTwitchID(
         channelId,
         [callback = std::move(callback), channel, channelId,
          manualRefresh](const auto &json) {
