@@ -83,6 +83,12 @@ Plugin::~Plugin()
            "This must be empty or destructor of sol::protected_function would "
            "explode malloc structures later");
 }
+
+lua::PluginWeakRef Plugin::weakRef() const
+{
+    return this->selfRef_.weak();
+}
+
 int Plugin::addTimeout(QTimer *timer)
 {
     this->activeTimeouts.push_back(timer);

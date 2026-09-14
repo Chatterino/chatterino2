@@ -222,6 +222,9 @@ const std::vector<QStringView> AUTH_SCOPES{
 
     u"moderator:read:suspicious_users",  // for channel.suspicious_user.message and channel.suspicious_user.update
 
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+    u"moderator:read:followers",
+
     // https://dev.twitch.tv/docs/api/reference#add-suspicious-status-to-chat-user
     // https://dev.twitch.tv/docs/api/reference#remove-suspicious-status-from-chat-user
     u"moderator:manage:suspicious_users",

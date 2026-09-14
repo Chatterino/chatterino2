@@ -11,7 +11,7 @@
 #include "util/QStringHash.hpp"
 
 #include <QColor>
-#include <QTime>
+#include <QDateTime>
 
 #include <cinttypes>
 #include <memory>
@@ -46,7 +46,6 @@ struct Message {
     // const-correct way to deal with this is.
     // This might bring race conditions with it
     mutable MessageFlags flags;
-    QTime parseTime;
     QString id;
     QString searchText;
     QString messageText;
@@ -123,6 +122,9 @@ struct Message {
     uint32_t bits{0};
 
     HelixAnnouncementColor announcementColor{HelixAnnouncementColor::Primary};
+
+    /// Returns an identical, non-frozen message, independent from this one.
+    std::shared_ptr<Message> clone() const;
 
     QJsonObject toJson() const;
 

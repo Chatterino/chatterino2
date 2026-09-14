@@ -193,7 +193,6 @@ declare namespace c2 {
     interface Message {
         flags: MessageFlag;
         id: string;
-        parse_time: number;
         search_text: string;
         message_text: string;
         login_name: string;
@@ -207,6 +206,7 @@ declare namespace c2 {
         frozen: boolean;
         elements(): MessageElement[];
         append_element(init: MessageElementInit | MessageElement): void;
+        clone(): Message;
     }
 
     interface MessageConstructor {
@@ -217,7 +217,6 @@ declare namespace c2 {
     interface MessageInit {
         flags?: MessageFlag;
         id?: string;
-        parse_time?: number;
         search_text?: string;
         message_text?: string;
         login_name?: string;
@@ -535,6 +534,7 @@ declare namespace c2 {
         LowercaseLinks = 0,
         RepliedMessage = 0,
         ReplyButton = 0,
+        TwitchGif = 0,
         Default = 0,
     }
 
@@ -655,11 +655,23 @@ declare namespace c2 {
         type: WindowType;
     }
 
+    interface ChannelViewContextMenuRequestedArgs {
+        split?: Split;
+        message: Message;
+        message_element: MessageElement;
+        channel?: Channel;
+        menu: Menu;
+    }
+
     class WindowManager {
         main_window: Window;
         last_selected_window: Window;
 
         all(): Window[];
+
+        on_channelview_context_menu_requested(
+            cb: (args: ChannelViewContextMenuRequestedArgs) => void
+        ): ConnectionHandle;
     }
 
     var windows: WindowManager;
@@ -676,6 +688,24 @@ declare namespace c2 {
         static from_unix_seconds(ts: number): DateTime;
         to_unix_milliseconds(): number;
         to_unix_seconds(): number;
+
+        is_local(): boolean;
+        is_utc(): boolean;
+        to_local(): DateTime;
+        to_utc(): DateTime;
+    }
+
+    class Menu {
+        add_action(text: string, cb: () => void): void;
+        insert_action(
+            before: string | number,
+            text: string,
+            cb: () => void
+        ): void;
+        add_menu(text: string): Menu;
+        insert_menu(before: string | number, text: string): Menu;
+        add_separator(): void;
+        insert_separator(before: string | number): void;
     }
 }
 

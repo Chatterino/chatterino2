@@ -9,6 +9,7 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -237,6 +238,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+    SettingWidget::checkbox("Extend wrapped tabs", s.growWrappedNotebookLines)
+        ->setTooltip("When horizontal tabs are wrapped, extend the line for "
+                     "the whole width of the window.")
+        ->addTo(layout);
 
     layout.addWidget(new FontSettingWidget(s.chatFontFamily, s.chatFontSize,
                                            s.chatFontWeight),
@@ -519,6 +524,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.hideMessageTimestampsWhenLive)
         ->addTo(layout);
 
+    SettingWidget::checkbox("Correct ASCII art wrapping", s.wrapAsciiArt)
+        ->setTooltip("Limit the width of messages containing ASCII art to "
+                     "match the width of Twitch web chat.")
+        ->addTo(layout);
+
     layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -537,6 +547,26 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+
+    SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show announcement header",
+                            s.showAnnouncementHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show subscription header",
+                            s.showSubscriptionHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show watch streak header", s.showWatchStreakHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show Twitch GIFs", s.showTwitchGifs)
+        ->setTooltip("Twitch GIFs will be shown inline. When disabled, they're "
+                     "shown as links.")
+        ->addTo(layout);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -1552,6 +1582,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
+        ->addTo(layout);
+
+    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl,
+                            recentmessages::DEFAULT_API_URL.toString())
+        ->setTooltip(
+            "Use %1 where the channel name should be inserted, for example: " +
+            recentmessages::DEFAULT_API_URL.toString())
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
