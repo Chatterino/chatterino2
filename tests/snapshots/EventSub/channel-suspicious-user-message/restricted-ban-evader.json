@@ -95,7 +95,7 @@
             "loginName": "",
             "messageText": "Suspicious User: Restricted. Detected as possible ban evader",
             "searchText": "Suspicious User: Restricted. Detected as possible ban evader",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
@@ -204,7 +204,7 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz: FeelsDankMan",
             "searchText": "nerixyz: FeelsDankMan",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

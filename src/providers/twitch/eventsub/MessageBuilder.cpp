@@ -174,7 +174,7 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
 {
     this->emplace<TimestampElement>(time.time());
     this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
-    this->message().serverReceivedTime = time;
+    this->message().timestamp = time;
 }
 
 EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel)
@@ -625,7 +625,7 @@ MessagePtr makeAutomodHoldMessageHeader(
     const lib::payload::automod_message_hold::v2::Event &event)
 {
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
@@ -676,7 +676,7 @@ MessagePtr makeAutomodHoldMessageBody(
     const lib::payload::automod_message_hold::v2::Event &event)
 {
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
                        MessageFlag::AutoMod,
                        MessageFlag::AutoModOffendingMessage);
@@ -719,7 +719,7 @@ MessagePtr makeSuspiciousUserMessageHeader(
 
     // Builder for low trust user message with explanation
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->flags.set(MessageFlag::LowTrustUsers);
 
     // AutoMod shield badge
@@ -785,7 +785,7 @@ MessagePtr makeSuspiciousUserMessageBody(
 {
     EventSubMessageBuilder builder(channel);
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     if (event.lowTrustStatus == lib::suspicious_users::Status::Restricted)
     {
         builder->flags.set(MessageFlag::RestrictedMessage);
@@ -872,7 +872,7 @@ MessagePtr makeUserMessageHeldMessage(
     QString text("AutoMod: Hey! Your message is being checked by mods and has "
                  "not been sent.");
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
@@ -901,7 +901,7 @@ MessagePtr makeUserMessageUpdateMessage(
 
     QString text("AutoMod: ");
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
