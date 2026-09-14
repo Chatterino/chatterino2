@@ -7,6 +7,7 @@
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QComboBox>
 #include <QFocusEvent>
 #include <QFormLayout>
 #include <QLabel>
@@ -14,6 +15,7 @@
 #include <QRadioButton>
 #include <QTabWidget>
 
+#include <functional>
 #include <optional>
 
 namespace chatterino::detail {
