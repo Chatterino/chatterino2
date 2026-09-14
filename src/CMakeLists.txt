@@ -783,6 +783,8 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/FontSettingWidget.cpp
         widgets/helper/FontSettingWidget.hpp
+        widgets/helper/ForegroundItemDelegate.cpp
+        widgets/helper/ForegroundItemDelegate.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp

@@ -10,6 +10,8 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
+#include "widgets/helper/ForegroundItemDelegate.hpp"
 
 namespace chatterino {
 
@@ -18,33 +20,25 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 {
     auto *app = getApp();
 
-    this->addItem(ANONYMOUS_USERNAME_LABEL);
+    // Keeps the expired marker red while that account is the selected one
+    this->setItemDelegate(new ForegroundItemDelegate(this));
 
-    for (const auto &userName : app->getAccounts()->twitch.getUsernames())
-    {
-        this->addItem(userName);
-    }
+    this->refreshList();
 
     this->managedConnections_.managedConnect(
-        app->getAccounts()->twitch.userListUpdated, [=, this]() {
-            this->blockSignals(true);
-
-            this->clear();
-
-            this->addItem(ANONYMOUS_USERNAME_LABEL);
-
-            for (const auto &userName :
-                 app->getAccounts()->twitch.getUsernames())
-            {
-                this->addItem(userName);
-            }
-
-            this->refreshSelection();
-
-            this->blockSignals(false);
+        app->getAccounts()->twitch.userListUpdated, [this]() {
+            this->refreshList();
         });
 
-    this->refreshSelection();
+    this->managedConnections_.managedConnect(
+        app->getAccounts()->twitch.loginExpiryChanged, [this]() {
+            this->refreshList();
+        });
+
+    // The expired marker is a themed color, so it has to be re-applied
+    this->managedConnections_.managedConnect(getTheme()->updated, [this]() {
+        this->refreshList();
+    });
 
     QObject::connect(this, &QListWidget::clicked, [=, this] {
         if (!this->selectedItems().isEmpty())
@@ -68,6 +62,40 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 void AccountSwitchWidget::refresh()
 {
     this->refreshSelection();
+}
+
+void AccountSwitchWidget::refreshList()
+{
+    this->blockSignals(true);
+
+    this->clear();
+
+    this->addAccountItem(ANONYMOUS_USERNAME_LABEL, false);
+
+    for (const auto &userName : getApp()->getAccounts()->twitch.getUsernames())
+    {
+        auto account =
+            getApp()->getAccounts()->twitch.findUserByUsername(userName);
+        this->addAccountItem(userName, account && account->isExpired());
+    }
+
+    this->refreshSelection();
+
+    this->blockSignals(false);
+}
+
+void AccountSwitchWidget::addAccountItem(const QString &userName, bool expired)
+{
+    auto *item = new QListWidgetItem(userName, this);
+
+    if (expired)
+    {
+        // Only the color marks this - spelling it out would widen the popup
+        // enough to make it scroll for long usernames
+        item->setForeground(getTheme()->accounts.expired);
+        item->setToolTip(
+            "This account's login has expired - sign in again to use it");
+    }
 }
 
 void AccountSwitchWidget::refreshSelection()

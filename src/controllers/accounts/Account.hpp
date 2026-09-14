@@ -17,6 +17,16 @@ public:
     virtual ~Account() = default;
 
     virtual QString toString() const = 0;
+
+    /// Whether this account's credentials are known to have expired.
+    ///
+    /// Providers that can detect this override it; the default is to assume
+    /// the credentials are still good.
+    virtual bool isExpired() const
+    {
+        return false;
+    }
+
     const QString &getCategory() const;
     ProviderId getProviderId() const;
 
