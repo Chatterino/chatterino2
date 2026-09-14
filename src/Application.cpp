@@ -216,7 +216,7 @@ void Application::initialize(Settings &settings, const Modes &modes,
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino",
                                     "Show changelog?",
                                     QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
@@ -295,32 +295,21 @@ void Application::initialize(Settings &settings, const Modes &modes,
     this->initialized = true;
 }
 
-int Application::run()
+void Application::connect()
 {
     assert(this->initialized);
 
     this->twitch->connect();
+}
+
+int Application::run()
+{
+    this->connect();
 
     if (!this->args_.isFramelessEmbed)
     {
         this->windows->getMainWindow().show();
     }
-
-    getSettings()->enableBTTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllBTTVChannelEmotes();
-        },
-        false);
-    getSettings()->enableFFZChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllFFZChannelEmotes();
-        },
-        false);
-    getSettings()->enableSevenTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllSevenTVChannelEmotes();
-        },
-        false);
 
     return QApplication::exec();
 }

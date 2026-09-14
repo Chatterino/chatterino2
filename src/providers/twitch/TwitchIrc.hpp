@@ -12,20 +12,32 @@
 #include <QVariantMap>
 
 #include <unordered_map>
+#include <variant>
 
 namespace chatterino {
 
+struct TwitchGifOccurrence {
+    /// The giphy ID.
+    QString id;
+
+    bool operator==(const TwitchGifOccurrence &rhs) const = default;
+};
+
 struct TwitchEmoteOccurrence {
-    int start;
-    int end;
     EmotePtr ptr;
     EmoteName name;
 
-    bool operator==(const TwitchEmoteOccurrence &other) const
-    {
-        return std::tie(this->start, this->end, this->ptr, this->name) ==
-               std::tie(other.start, other.end, other.ptr, other.name);
-    }
+    bool operator==(const TwitchEmoteOccurrence &rhs) const = default;
+};
+
+struct TwitchSpecialOccurrence {
+    /// Start position in the message (in utf16 units)
+    int start = 0;
+    /// Length of the occurrence (in utf16 units)
+    int length = 0;
+    std::variant<TwitchEmoteOccurrence, TwitchGifOccurrence> data;
+
+    bool operator==(const TwitchSpecialOccurrence &other) const = default;
 };
 
 /// @brief Parses the `badge-info` tag of an IRC message
@@ -55,7 +67,7 @@ std::unordered_map<QString, QString> parseBadgeInfoTag(Communi::TagsRef tags);
 std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
                                        const QString &tagName = "badges");
 
-/// @brief Parses Twitch emotes in an IRC message
+/// @brief Parses special Twitch occurrences (e.g. emotes) in an IRC message
 ///
 /// @param tags The tags of the IRC message
 /// @param content The message text. This might be shortened due to skipping
@@ -66,9 +78,8 @@ std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
 ///                      `content` excludes the first three characters of the
 ///                      original message (`@a foo` (original message) -> `foo`
 ///                      (content)).
-/// @returns A list of emotes and their positions
-std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(Communi::TagsRef tags,
-                                                     const QString &content,
-                                                     int messageOffset);
+/// @returns A list of their positions
+std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
+    Communi::TagsRef tags, QStringView content, int messageOffset);
 
 }  // namespace chatterino

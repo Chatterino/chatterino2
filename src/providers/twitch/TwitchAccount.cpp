@@ -401,7 +401,7 @@ void TwitchAccount::setEmotes(std::shared_ptr<const EmoteMap> emotes)
     *this->emotes_.access() = std::move(emotes);
 }
 
-std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchAccount::twitchEmote(EmoteNameView name) const
 {
     auto emotes = this->emotes_.accessConst();
     auto it = (*emotes)->find(name);

@@ -23,14 +23,15 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.3.1
+        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -41,7 +42,7 @@ jobs:
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.23.1
+        uses: ZedThree/clang-tidy-review@438014136def4cb6242e9d0ef3da1a1cd48fa7ce # v0.23.1
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
@@ -68,4 +69,4 @@ jobs:
             curl, unzip
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.23.1
+        uses: ZedThree/clang-tidy-review/upload@438014136def4cb6242e9d0ef3da1a1cd48fa7ce # v0.23.1

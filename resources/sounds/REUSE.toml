@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+# SPDX-License-Identifier: CC0-1.0
+
+version = 1
+
+[[annotations]]
+path = "ping2.wav"
+SPDX-FileCopyrightText = "Copyright (c) 2016 fourtf"
+SPDX-License-Identifier = "LicenseRef-fourtf-chatterino-sound-license"

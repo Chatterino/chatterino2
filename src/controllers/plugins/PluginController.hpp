@@ -9,6 +9,7 @@
 #    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "util/FunctionRef.hpp"
 
 #    include <pajlada/signals/signal.hpp>
 #    include <QDir>
@@ -51,8 +52,11 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
-    // TODO: make a function that iterates plugins that aren't errored/enabled
-    const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
+    /// Run `cb` on every loaded plugin, including those with load errors
+    void forEachPlugin(
+        FunctionRef<void(const std::unique_ptr<Plugin> &)>) const;
+
+    const std::map<QString, AnyPlugin> &allPlugins() const;
 
     /**
      * @brief Reload plugin given by id
@@ -112,7 +116,7 @@ private:
 
     void queueChangeNotification();
 
-    std::map<QString, std::unique_ptr<Plugin>> plugins_;
+    std::map<QString, AnyPlugin> plugins_;
     WebSocketPool webSocketPool_;
 
     /// (pluginID, providerID) => [channelName => channel]

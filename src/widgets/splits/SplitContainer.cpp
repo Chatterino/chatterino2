@@ -1222,7 +1222,7 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
 {
     assert(this->type_ == Type::Split);
 
-    if (this->parent_ == nullptr)
+    if (this->parent_ == nullptr || this->parent_->children_.empty())
     {
         this->type_ = Type::EmptyRoot;
         this->split_ = nullptr;
@@ -1280,7 +1280,10 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
                     ? SplitDirection::Below
                     : SplitDirection::Right;
             siblings.erase(it);
-            position.relativeNode_ = siblings.back().get();
+            if (!siblings.empty())
+            {
+                position.relativeNode_ = siblings.back().get();
+            }
         }
         else
         {

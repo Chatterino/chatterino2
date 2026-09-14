@@ -111,7 +111,7 @@ public:
     void setEmotes(std::shared_ptr<const EmoteMap> emotes);
 
     /// Return the emote by emote name if the account has access to the emote
-    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> twitchEmote(EmoteNameView name) const;
 
     /// Once emotes are reloaded, TwitchAccountManager::emotesReloaded is
     /// invoked with @a caller and an optional error.

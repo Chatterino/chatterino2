@@ -283,6 +283,8 @@ set(SOURCE_FILES
         controllers/plugins/api/JSONParse.hpp
         controllers/plugins/api/JSONStringify.cpp
         controllers/plugins/api/JSONStringify.hpp
+        controllers/plugins/api/Menu.cpp
+        controllers/plugins/api/Menu.hpp
         controllers/plugins/api/Message.cpp
         controllers/plugins/api/Message.hpp
         controllers/plugins/api/WebSocket.cpp
@@ -329,6 +331,8 @@ set(SOURCE_FILES
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
+        messages/AsciiArt.cpp
+        messages/AsciiArt.hpp
         messages/Emote.cpp
         messages/Emote.hpp
         messages/Image.cpp
@@ -346,6 +350,7 @@ set(SOURCE_FILES
         messages/MessageElement.cpp
         messages/MessageElement.hpp
         messages/MessageFlag.hpp
+        messages/MessageParseArgs.hpp
         messages/MessageSimilarity.cpp
         messages/MessageSimilarity.hpp
         messages/MessageSink.hpp
@@ -786,6 +791,8 @@ set(SOURCE_FILES
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
+        widgets/helper/LiveIndicator.cpp
+        widgets/helper/LiveIndicator.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
         widgets/helper/NotebookTab.cpp
@@ -804,8 +811,8 @@ set(SOURCE_FILES
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/LiveIndicator.cpp
-        widgets/helper/LiveIndicator.hpp
+        widgets/helper/SvgWidget.cpp
+        widgets/helper/SvgWidget.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
         widgets/helper/TrimRegExpValidator.cpp
@@ -963,7 +970,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
-        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
@@ -983,7 +989,7 @@ endif()
 
 if (CHATTERINO_SPELLCHECK)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
-    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC hunspell::hunspell)
 endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)

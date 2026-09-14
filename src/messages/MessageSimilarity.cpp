@@ -68,7 +68,7 @@ float inMessages(const MessagePtr &msg, const T &messages)
          messages | std::views::reverse |
              std::views::take(getSettings()->hideSimilarMaxMessagesToCheck))
     {
-        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+        if (prevMsg->serverReceivedTime.secsTo(msg->serverReceivedTime) >=
             getSettings()->hideSimilarMaxDelay)
         {
             break;
