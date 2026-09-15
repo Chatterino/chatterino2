@@ -113,6 +113,23 @@ void InputCompletionPopup::setInputAction(ActionCallback callback)
     this->callback_ = std::move(callback);
 }
 
+std::optional<std::pair<QStringList, int>>
+    InputCompletionPopup::selectedCommandCompletions() const
+{
+    if (this->currentKind_ != CompletionKind::Command)
+    {
+        return std::nullopt;
+    }
+
+    const auto index = this->ui_.listView->currentIndex().row();
+    auto completions = this->model_.completionTexts(MAX_ENTRY_COUNT);
+    if (index < 0 || index >= completions.size())
+    {
+        return std::nullopt;
+    }
+    return std::pair{std::move(completions), index};
+}
+
 bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
 {
     return this->ui_.listView->eventFilter(watched, event);

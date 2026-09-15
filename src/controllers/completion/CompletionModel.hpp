@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 namespace chatterino {
 
@@ -41,6 +42,8 @@ public:
     /// @param query Completion query
     /// @param maxCount Maximum number of results. Zero indicates unlimited.
     void updateResults(const QString &query, size_t maxCount = 0);
+
+    QStringList completionTexts(size_t maxCount = 0) const;
 
 private:
     std::unique_ptr<completion::Source> source_{};

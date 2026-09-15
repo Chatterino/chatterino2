@@ -270,7 +270,7 @@ TEST(CommandSource, DuplicateCommandsAppearOnce)
     EXPECT_EQ(model.rowCount(), 1);
 }
 
-TEST_F(CommandPopupFixture, TabAcceptsSelectedCommand)
+TEST_F(CommandPopupFixture, TabAcceptsAndCyclesItsSelections)
 {
     this->app.commands.items.append(Command{"/zzpopupfirst", "test"});
     this->app.commands.items.append(Command{"/zzpopupsecond", "test"});
@@ -290,6 +290,12 @@ TEST_F(CommandPopupFixture, TabAcceptsSelectedCommand)
 
     this->pressTab();
     EXPECT_FALSE(popup->isVisible());
+    EXPECT_EQ(this->input.getInputText(), "/zzpopupsecond ");
+
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "/zzpopupfirst ");
+
+    this->pressTab();
     EXPECT_EQ(this->input.getInputText(), "/zzpopupsecond ");
 }
 
