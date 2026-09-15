@@ -253,6 +253,14 @@ EmotePtr EmoteElement::getEmote() const
     return this->emote_;
 }
 
+bool EmoteElement::isIgnored() const
+{
+    const auto flags = this->getFlags();
+    return flags.has(MessageElementFlag::EmoteImage) &&
+           !flags.has(MessageElementFlag::AlwaysShow) &&
+           getSettings()->isEmoteIgnored(this->emote_->name.string);
+}
+
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
@@ -261,7 +269,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         return;
     }
 
-    if (ctx.flags.has(MessageElementFlag::EmoteImage))
+    const bool ignored = this->isIgnored();
+    if (ctx.flags.has(MessageElementFlag::EmoteImage) && !ignored)
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -287,7 +296,15 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
     auto textCtx = ctx;
     textCtx.flags = MessageElementFlag::Misc;
-    this->textElement_->addToContainer(container, textCtx);
+    this->textElement_->setTrailingSpace(this->hasTrailingSpace());
+    if (ignored)
+    {
+        this->textElement_->addToContainer(container, textCtx, *this);
+    }
+    else
+    {
+        this->textElement_->addToContainer(container, textCtx);
+    }
 }
 
 MessageLayoutElement *EmoteElement::makeImageLayoutElement(
@@ -742,6 +759,13 @@ TextElement::TextElement(TextElement::CloneConstructorTag /*hack*/,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  const MessageLayoutContext &ctx)
 {
+    this->addToContainer(container, ctx, *this);
+}
+
+void TextElement::addToContainer(MessageLayoutContainer &container,
+                                 const MessageLayoutContext &ctx,
+                                 MessageElement &creator)
+{
     auto *app = getApp();
 
     if (this->matchesFlags(ctx.flags))
@@ -759,7 +783,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 app->getThemes()->normalizeColor(color);
 
                 auto *e = new TextLayoutElement(
-                    *this, text, QSizeF(width, metrics.height()), color,
+                    creator, text, QSizeF(width, metrics.height()), color,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);

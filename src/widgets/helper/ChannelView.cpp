@@ -83,8 +83,43 @@ using namespace chatterino;
 
 constexpr int SCROLLBAR_PADDING = 8;
 
+void addIgnoreEmoteAction(QMenu *menu, const Emote &emote, QStringView kind)
+{
+    if (kind == u"emote" && !emote.name.string.isEmpty())
+    {
+        const auto name = emote.name.string;
+        const auto entries = getSettings()->ignoredEmotes.readOnly();
+        const bool ignoredByRegex =
+            std::ranges::any_of(*entries, [&name](const auto &entry) {
+                return entry.regex && entry.isMatch(name);
+            });
+
+        if (ignoredByRegex)
+        {
+            menu->addAction("Ignored by regex")->setEnabled(false);
+        }
+        else
+        {
+            const bool ignored =
+                std::ranges::any_of(*entries, [&name](const auto &entry) {
+                    return !entry.regex && entry.pattern == name;
+                });
+            auto *action = menu->addAction("Ignore emote");
+            action->setCheckable(true);
+            action->setChecked(ignored);
+            QObject::connect(
+                action, &QAction::triggered, menu, [name](bool checked) {
+                    getSettings()->setEmoteNameIgnored(name, checked);
+                });
+        }
+        menu->addSeparator();
+    }
+}
+
 void addEmoteContextMenuItems(QMenu *menu, const Emote &emote, QStringView kind)
 {
+    addIgnoreEmoteAction(menu, emote, kind);
+
     auto *openAction = menu->addAction("&Open");
     auto *openMenu = new QMenu(menu);
     openAction->setMenu(openMenu);
@@ -164,18 +199,30 @@ void addImageContextMenuItems(QMenu *menu,
         if (const auto *emoteElement =
                 dynamic_cast<const EmoteElement *>(&creator))
         {
-            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), u"emote");
+            const QStringView kind =
+                creatorFlags.has(MessageElementFlag::EmojiImage) ? u"emoji"
+                                                                 : u"emote";
+            addEmoteContextMenuItems(menu, *emoteElement->getEmote(), kind);
         }
         else if (const auto *layeredElement =
                      dynamic_cast<const LayeredEmoteElement *>(&creator))
         {
             // Give each emote its own submenu
+            const auto &layers = layeredElement->getEmotes();
+            if (!layers.empty() &&
+                layers.back().flags.has(MessageElementFlag::EmoteImage))
+            {
+                addIgnoreEmoteAction(menu, *layers.back().ptr, u"emote");
+            }
             for (auto &emote : layeredElement->getUniqueEmotes())
             {
                 auto *emoteAction = menu->addAction(emote.ptr->name.string);
                 auto *emoteMenu = new QMenu(menu);
                 emoteAction->setMenu(emoteMenu);
-                addEmoteContextMenuItems(emoteMenu, *emote.ptr, u"emote");
+                const QStringView kind =
+                    emote.flags.has(MessageElementFlag::EmojiImage) ? u"emoji"
+                                                                    : u"emote";
+                addEmoteContextMenuItems(emoteMenu, *emote.ptr, kind);
             }
         }
     }
