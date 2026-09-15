@@ -1077,7 +1077,8 @@ void SplitInput::updateCompletionPopup()
     bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc != nullptr && getSettings()->showUsernameCompletionMenu;
-    bool showCommandCompletion = channel->isTwitchChannel();
+    bool showCommandCompletion =
+        channel->isTwitchChannel() && getSettings()->showCommandCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion &&
         !showCommandCompletion)
     {

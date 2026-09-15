@@ -299,6 +299,19 @@ TEST_F(CommandPopupFixture, TabAcceptsAndCyclesItsSelections)
     EXPECT_EQ(this->input.getInputText(), "/zzpopupsecond ");
 }
 
+TEST_F(CommandPopupFixture, DisabledPopupKeepsTabCompletion)
+{
+    this->app.settings.showCommandCompletionMenu = false;
+    this->app.commands.items.append(Command{"/zzpopupfirst", "test"});
+    this->setChannel(std::make_shared<TwitchChannel>("forsen"));
+
+    this->input.insertText("/zzpopup");
+    EXPECT_EQ(this->popup(), nullptr);
+
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "/zzpopupfirst ");
+}
+
 TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)
 {
     ResizingTextEdit edit;
