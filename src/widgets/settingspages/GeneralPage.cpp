@@ -1484,6 +1484,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.showUsernameCompletionMenu)
         ->addTo(layout);
 
+    SettingWidget::checkbox("Show command autocompletion popup menu",
+                            s.showCommandCompletionMenu)
+        ->addTo(layout);
+
     SettingWidget::checkbox("Always include broadcaster in user completions",
                             s.alwaysIncludeBroadcasterInUserCompletions)
         ->setTooltip(
