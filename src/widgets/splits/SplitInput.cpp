@@ -1066,7 +1066,9 @@ void SplitInput::updateCompletionPopup()
     bool showEmoteCompletion = getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc != nullptr && getSettings()->showUsernameCompletionMenu;
-    if (!showEmoteCompletion && !showUsernameCompletion)
+    bool showCommandCompletion = channel->isTwitchChannel();
+    if (!showEmoteCompletion && !showUsernameCompletion &&
+        !showCommandCompletion)
     {
         this->hideCompletionPopup();
         return;
@@ -1082,6 +1084,19 @@ void SplitInput::updateCompletionPopup()
     {
         this->hideCompletionPopup();
         return;
+    }
+
+    if (showCommandCompletion && edit.isFirstWord())
+    {
+        const auto wordStart = text.lastIndexOf(' ', position) + 1;
+        if (wordStart < text.size() &&
+            (text[wordStart] == '/' || text[wordStart] == '.'))
+        {
+            this->showCompletionPopup(
+                text.mid(wordStart, position - wordStart + 1),
+                CompletionKind::Command);
+            return;
+        }
     }
 
     for (int i = std::clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
@@ -1166,6 +1181,7 @@ void SplitInput::insertCompletionText(const QString &input_) const
 
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
+    const auto wordStart = text.lastIndexOf(' ', position) + 1;
 
     for (int i = std::clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
@@ -1180,6 +1196,11 @@ void SplitInput::insertCompletionText(const QString &input_) const
                 formatUserMention(input_, edit.isFirstWord(),
                                   getSettings()->mentionUsersWithComma);
             input = "@" + userMention + " ";
+            done = true;
+        }
+        else if (i == wordStart && (text[i] == '/' || text[i] == '.') &&
+                 edit.isFirstWord())
+        {
             done = true;
         }
 

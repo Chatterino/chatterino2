@@ -8,6 +8,8 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/completion/sources/CommandSource.hpp"
+#include "controllers/completion/strategies/CommandStrategy.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/plugins/PluginController.hpp"
@@ -18,6 +20,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -25,7 +28,10 @@
 #include "singletons/WindowManager.hpp"
 #include "Test.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/listview/GenericListModel.hpp"
+#include "widgets/listview/GenericListView.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -152,6 +158,51 @@ public:
     SplitInput input;
 };
 
+class CommandPopupFixture : public ::testing::Test
+{
+public:
+    CommandPopupFixture()
+        : input(this->split.getInput())
+    {
+    }
+
+    void setChannel(ChannelPtr channel)
+    {
+        this->split.setChannel(IndirectChannel(std::move(channel)));
+        this->split.show();
+    }
+
+    ResizingTextEdit *edit()
+    {
+        auto *textEdit = this->input.findChild<QTextEdit *>();
+        // NOLINTNEXTLINE(clazy-unneeded-cast)
+        return dynamic_cast<ResizingTextEdit *>(textEdit);
+    }
+
+    InputCompletionPopup *popup()
+    {
+        const auto children = this->input.findChildren<QWidget *>();
+        for (auto *child : children)
+        {
+            if (auto *result = dynamic_cast<InputCompletionPopup *>(child))
+            {
+                return result;
+            }
+        }
+        return nullptr;
+    }
+
+    void pressTab()
+    {
+        QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier, "\t");
+        QApplication::sendEvent(this->edit(), &tab);
+    }
+
+    MockApplication app;
+    Split split{nullptr};
+    SplitInput &input;
+};
+
 }  // namespace
 
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
@@ -180,6 +231,66 @@ TEST_F(SplitInputCompletionTest, UsernameCompletionPreservesUndoHistory)
     EXPECT_EQ("boring game @fors", this->input.getInputText());
     this->input.undoInput();
     EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST(CommandSource, DotPrefixSelectsSlashCommand)
+{
+    MockApplication app;
+    app.commands.items.append(Command{"/zzpopupcommand", "test"});
+
+    QString selected;
+    completion::CommandSource source(
+        std::make_unique<completion::CommandStrategy>(true),
+        [&selected](const QString &value) {
+            selected = value;
+        });
+    source.update(".zzpopupcommand");
+    GenericListModel model;
+    source.addToListModel(model);
+
+    ASSERT_EQ(model.rowCount(), 1);
+    auto *item = GenericListItem::fromVariant(
+        model.data(model.index(0, 0), Qt::DisplayRole));
+    ASSERT_NE(item, nullptr);
+    item->action();
+    EXPECT_EQ(selected, "/zzpopupcommand");
+}
+
+TEST(CommandSource, DuplicateCommandsAppearOnce)
+{
+    MockApplication app;
+    app.commands.items.append(Command{"/zzpopupcommand", "test"});
+    app.commands.items.append(Command{"/zzpopupcommand", "test"});
+    completion::CommandSource source(
+        std::make_unique<completion::CommandStrategy>(true));
+    source.update("/zzpopupcommand");
+    GenericListModel model;
+    source.addToListModel(model);
+
+    EXPECT_EQ(model.rowCount(), 1);
+}
+
+TEST_F(CommandPopupFixture, TabAcceptsSelectedCommand)
+{
+    this->app.commands.items.append(Command{"/zzpopupfirst", "test"});
+    this->app.commands.items.append(Command{"/zzpopupsecond", "test"});
+    this->setChannel(std::make_shared<TwitchChannel>("forsen"));
+    auto *edit = this->edit();
+    ASSERT_NE(edit, nullptr);
+
+    this->input.insertText("/zzpopup");
+    auto *popup = this->popup();
+    ASSERT_NE(popup, nullptr);
+    ASSERT_TRUE(popup->isVisible());
+
+    auto *list = popup->findChild<GenericListView *>();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(1, 0));
+
+    this->pressTab();
+    EXPECT_FALSE(popup->isVisible());
+    EXPECT_EQ(this->input.getInputText(), "/zzpopupsecond ");
 }
 
 TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)

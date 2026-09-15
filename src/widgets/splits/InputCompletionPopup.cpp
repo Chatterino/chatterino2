@@ -4,9 +4,11 @@
 
 #include "widgets/splits/InputCompletionPopup.hpp"
 
+#include "controllers/completion/sources/CommandSource.hpp"
 #include "controllers/completion/sources/UserSource.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
+#include "controllers/completion/strategies/CommandStrategy.hpp"
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -81,6 +83,10 @@ std::unique_ptr<completion::Source> InputCompletionPopup::getSource() const
             return std::make_unique<completion::UserSource>(
                 this->currentChannel_.get(),
                 std::make_unique<completion::ClassicUserStrategy>(),
+                this->callback_);
+        case CompletionKind::Command:
+            return std::make_unique<completion::CommandSource>(
+                std::make_unique<completion::CommandStrategy>(true),
                 this->callback_);
         default:
             return nullptr;

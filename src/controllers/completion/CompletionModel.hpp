@@ -19,6 +19,7 @@ class Source;
 enum class CompletionKind {
     Emote,
     User,
+    Command,
 };
 
 /// @brief CompletionModel is a GenericListModel intended to provide completion
