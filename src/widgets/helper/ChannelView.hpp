@@ -24,6 +24,7 @@
 #include <QWheelEvent>
 #include <QWidget>
 
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -59,7 +60,7 @@ enum class PauseReason {
     KeyboardModifier,
 };
 
-enum class ReplyTargetDirection {
+enum class ReplyTargetDirection : std::uint8_t {
     Older,
     Newer,
 };
