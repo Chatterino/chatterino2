@@ -11,6 +11,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/plugins/PluginController.hpp"
+#include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/EmoteController.hpp"
@@ -28,6 +29,7 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -139,13 +141,16 @@ public:
     TestSplitInput input{&this->split};
 };
 
-std::shared_ptr<Message> makeReplyableMessage(QString id, QString user)
+std::shared_ptr<Message> makeReplyableMessage(QString id, QString user,
+                                              const QString &text = "message")
 {
     auto message = std::make_shared<Message>();
     message->id = std::move(id);
     message->loginName = user;
     message->displayName = std::move(user);
     message->serverReceivedTime = QDateTime::currentDateTime();
+    message->elements.emplace_back(
+        std::make_unique<TextElement>(text, MessageElementFlag::Text));
     return message;
 }
 
@@ -182,24 +187,126 @@ TEST_F(SplitInputCompletionTest, SelectReplyTarget)
     auto &view = this->split.getChannelView();
     auto &input = this->split.getInput();
 
-    // Start with the newest replyable message.
-    view.selectReplyTarget(nullptr, ReplyTargetDirection::Older);
+    // Pressing older without an active reply selects the newest message.
+    view.navigateReplyTarget(nullptr, ReplyTargetDirection::Older);
     EXPECT_EQ(input.getInputText(), "@newer ");
 
     // Skip messages that cannot be replied to.
-    view.selectReplyTarget(newer, ReplyTargetDirection::Older);
+    view.navigateReplyTarget(newer, ReplyTargetDirection::Older);
     EXPECT_EQ(input.getInputText(), "@older ");
 
-    // Stay on the oldest replyable message.
-    view.selectReplyTarget(older, ReplyTargetDirection::Older);
+    // Pressing older at the oldest message does nothing.
+    view.navigateReplyTarget(older, ReplyTargetDirection::Older);
     EXPECT_EQ(input.getInputText(), "@older ");
 
-    view.selectReplyTarget(older, ReplyTargetDirection::Newer);
+    // Pressing newer selects the next replyable message.
+    view.navigateReplyTarget(older, ReplyTargetDirection::Newer);
     EXPECT_EQ(input.getInputText(), "@newer ");
 
     // Moving past the newest replyable message clears the reply.
-    view.selectReplyTarget(newer, ReplyTargetDirection::Newer);
+    view.navigateReplyTarget(newer, ReplyTargetDirection::Newer);
     EXPECT_TRUE(input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, ReplyTargetScrolling)
+{
+    auto channel = std::make_shared<TwitchChannel>("test");
+    this->split.setChannel(IndirectChannel{channel});
+    this->split.resize(500, 300);
+    this->split.show();
+    auto &view = this->split.getChannelView();
+    view.resize(500, 250);
+    view.show();
+
+    std::vector<MessagePtr> messages;
+    for (int i = 0; i < 30; ++i)
+    {
+        auto message = makeReplyableMessage(QString::number(i), "user");
+        messages.push_back(message);
+        channel->addMessage(message, MessageContext::Repost);
+    }
+    QApplication::processEvents();
+
+    auto &scrollbar = view.getScrollBar();
+    ASSERT_GT(scrollbar.getPageSize(), 0);
+    scrollbar.scrollToBottom();
+
+    // Navigate far enough back to scroll away from the latest messages.
+    view.navigateReplyTarget(nullptr, ReplyTargetDirection::Older);
+    for (int i = 29; i > 19; --i)
+    {
+        view.navigateReplyTarget(messages[i], ReplyTargetDirection::Older);
+        QApplication::processEvents();
+        QApplication::processEvents();
+    }
+
+    ASSERT_LT(scrollbar.getDesiredValue(), scrollbar.getBottom());
+
+    // Moving towards newer messages scrolls only far enough to reveal them.
+    bool adjustedScroll = false;
+    for (int i = 19; i < 29; ++i)
+    {
+        const auto previousScroll = scrollbar.getDesiredValue();
+        view.navigateReplyTarget(messages[i], ReplyTargetDirection::Newer);
+        QApplication::processEvents();
+        QApplication::processEvents();
+
+        if (scrollbar.getDesiredValue() > previousScroll)
+        {
+            adjustedScroll = true;
+            EXPECT_LT(scrollbar.getDesiredValue(), i + 1);
+        }
+    }
+    EXPECT_TRUE(adjustedScroll);
+
+    // Cancelling after navigating from the bottom returns to the bottom.
+    this->split.getInput().setReply(nullptr);
+    QApplication::processEvents();
+    EXPECT_GE(scrollbar.getDesiredValue(), scrollbar.getBottom());
+
+    // We do not force the view back to the selected target if the user
+    // manually scrolls away
+    view.navigateReplyTarget(nullptr, ReplyTargetDirection::Older);
+    QApplication::processEvents();
+    scrollbar.scrollToTop();
+    QApplication::processEvents();
+    QApplication::processEvents();
+    EXPECT_EQ(scrollbar.getDesiredValue(), scrollbar.getMinimum());
+
+    // After manually scrolling, cancelling the reply does not
+    // return the view to the bottom
+    this->split.getInput().setReply(nullptr);
+    QApplication::processEvents();
+    EXPECT_EQ(scrollbar.getDesiredValue(), scrollbar.getMinimum());
+}
+
+TEST_F(SplitInputCompletionTest, OversizedReplyTargetAlignsToTop)
+{
+    auto channel = std::make_shared<TwitchChannel>("test");
+    this->split.setChannel(IndirectChannel{channel});
+    this->split.resize(500, 300);
+    this->split.show();
+    auto &view = this->split.getChannelView();
+    view.resize(500, 100);
+    view.show();
+
+    const auto oversized = makeReplyableMessage(
+        "1", "oversized", QString("forsen ").repeated(200));
+    const auto newer = makeReplyableMessage("2", "newer");
+    channel->addMessage(oversized, MessageContext::Repost);
+    channel->addMessage(newer, MessageContext::Repost);
+    QApplication::processEvents();
+
+    auto &scrollbar = view.getScrollBar();
+    scrollbar.scrollToBottom();
+
+    // An oversized target cannot be fully shown, so align it to the top.
+    view.navigateReplyTarget(nullptr, ReplyTargetDirection::Older);
+    view.navigateReplyTarget(newer, ReplyTargetDirection::Older);
+    QApplication::processEvents();
+    QApplication::processEvents();
+
+    EXPECT_EQ(scrollbar.getDesiredValue(), scrollbar.getMinimum());
 }
 
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
