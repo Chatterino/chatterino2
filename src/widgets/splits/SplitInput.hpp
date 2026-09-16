@@ -34,6 +34,7 @@ class ChannelView;
 class SvgButton;
 class SpellCheckHighlighter;
 enum class CompletionKind;
+enum class ReplyTargetDirection;
 
 class SplitInput : public BaseWidget
 {
@@ -132,6 +133,7 @@ protected:
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
+    void selectReplyTarget(ReplyTargetDirection direction);
     void clearReplyTarget();
 
     void updateCancelReplyButton();

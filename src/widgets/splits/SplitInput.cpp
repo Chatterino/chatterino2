@@ -739,6 +739,27 @@ void SplitInput::addShortcuts()
              this->stopHistorySearchIfNecessary();
              return this->handleSendMessage(arguments);
          }},
+        {"selectReplyTarget",
+         [this](const std::vector<QString> &arguments) -> QString {
+             if (arguments.size() != 1)
+             {
+                 return "selectReplyTarget action requires one argument: "
+                        "older or newer";
+             }
+             if (arguments[0] == "older")
+             {
+                 this->selectReplyTarget(ReplyTargetDirection::Older);
+             }
+             else if (arguments[0] == "newer")
+             {
+                 this->selectReplyTarget(ReplyTargetDirection::Newer);
+             }
+             else
+             {
+                 return "Unknown reply target direction. Use older or newer";
+             }
+             return {};
+         }},
         {"previousMessage",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
@@ -1585,6 +1606,11 @@ void SplitInput::clearReplyTarget()
     {
         this->setMaximumHeight(this->scaledMaxHeight());
     }
+}
+
+void SplitInput::selectReplyTarget(ReplyTargetDirection direction)
+{
+    this->channelView_->selectReplyTarget(this->replyTarget_, direction);
 }
 
 bool SplitInput::shouldPreventInput(const QString &text) const

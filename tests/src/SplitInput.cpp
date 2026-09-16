@@ -18,12 +18,14 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "Test.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
@@ -137,6 +139,16 @@ public:
     TestSplitInput input{&this->split};
 };
 
+std::shared_ptr<Message> makeReplyableMessage(QString id, QString user)
+{
+    auto message = std::make_shared<Message>();
+    message->id = std::move(id);
+    message->loginName = user;
+    message->displayName = std::move(user);
+    message->serverReceivedTime = QDateTime::currentDateTime();
+    return message;
+}
+
 class SplitInputTest
     : public ::testing::TestWithParam<std::tuple<QString, QString>>
 {
@@ -153,6 +165,42 @@ public:
 };
 
 }  // namespace
+
+TEST_F(SplitInputCompletionTest, SelectReplyTarget)
+{
+    auto channel = std::make_shared<TwitchChannel>("test");
+    this->split.setChannel(IndirectChannel{channel});
+
+    const auto older = makeReplyableMessage("1", "older");
+    auto notReplyable = makeReplyableMessage("2", "system");
+    notReplyable->flags.set(MessageFlag::System);
+    const auto newer = makeReplyableMessage("3", "newer");
+    channel->addMessage(older, MessageContext::Repost);
+    channel->addMessage(notReplyable, MessageContext::Repost);
+    channel->addMessage(newer, MessageContext::Repost);
+
+    auto &view = this->split.getChannelView();
+    auto &input = this->split.getInput();
+
+    // Start with the newest replyable message.
+    view.selectReplyTarget(nullptr, ReplyTargetDirection::Older);
+    EXPECT_EQ(input.getInputText(), "@newer ");
+
+    // Skip messages that cannot be replied to.
+    view.selectReplyTarget(newer, ReplyTargetDirection::Older);
+    EXPECT_EQ(input.getInputText(), "@older ");
+
+    // Stay on the oldest replyable message.
+    view.selectReplyTarget(older, ReplyTargetDirection::Older);
+    EXPECT_EQ(input.getInputText(), "@older ");
+
+    view.selectReplyTarget(older, ReplyTargetDirection::Newer);
+    EXPECT_EQ(input.getInputText(), "@newer ");
+
+    // Moving past the newest replyable message clears the reply.
+    view.selectReplyTarget(newer, ReplyTargetDirection::Newer);
+    EXPECT_TRUE(input.getInputText().isEmpty());
+}
 
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
 {

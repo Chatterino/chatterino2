@@ -59,6 +59,11 @@ enum class PauseReason {
     KeyboardModifier,
 };
 
+enum class ReplyTargetDirection {
+    Older,
+    Newer,
+};
+
 enum class FromTwitchLinkOpenChannelIn {
     Split,
     Tab,
@@ -131,6 +136,9 @@ public:
      * @return <code>true</code> if the message was found and highlighted.
      */
     bool scrollToMessageId(const QString &id);
+
+    void selectReplyTarget(const MessagePtr &current,
+                           ReplyTargetDirection direction);
 
     /// Pausing
     bool pausable() const;

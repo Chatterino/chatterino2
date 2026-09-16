@@ -3396,6 +3396,65 @@ void ChannelView::setInputReply(const MessagePtr &message)
     this->split_->setInputReply(message);
 }
 
+void ChannelView::selectReplyTarget(const MessagePtr &current,
+                                    ReplyTargetDirection direction)
+{
+    if (!this->canReplyToMessages() || this->split_ == nullptr)
+    {
+        return;
+    }
+
+    auto &messages = this->getMessagesSnapshot();
+    const auto isReplyable = [](const MessageLayoutPtr &layout) {
+        const auto status = layout->getMessagePtr()->isReplyable();
+        return status == Message::ReplyStatus::Replyable ||
+               status == Message::ReplyStatus::ReplyableWithThread;
+    };
+    const auto currentIt = std::ranges::find_if(
+        messages, [&current](const MessageLayoutPtr &layout) {
+            return layout->getMessagePtr() == current;
+        });
+    const auto selectTarget = [this,
+                               &messages](const MessageLayoutPtr &target) {
+        this->setInputReply(target->getMessagePtr());
+
+        if (!this->messagesOnScreen_.contains(target))
+        {
+            const auto index = static_cast<size_t>(std::distance(
+                messages.begin(), std::ranges::find(messages, target)));
+            this->scrollBar_->setDesiredValue(this->scrollBar_->getMinimum() +
+                                              static_cast<qreal>(index));
+        }
+    };
+
+    if (direction == ReplyTargetDirection::Older)
+    {
+        const auto begin = std::make_reverse_iterator(currentIt);
+        const auto target = std::find_if(begin, messages.rend(), isReplyable);
+        if (target != messages.rend())
+        {
+            selectTarget(*target);
+        }
+        return;
+    }
+
+    if (current == nullptr)
+    {
+        return;
+    }
+    if (currentIt != messages.end())
+    {
+        const auto target =
+            std::find_if(std::next(currentIt), messages.end(), isReplyable);
+        if (target != messages.end())
+        {
+            selectTarget(*target);
+            return;
+        }
+    }
+    this->split_->setInputReply(nullptr);
+}
+
 void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 {
     if (message == nullptr || message->replyThread == nullptr)
