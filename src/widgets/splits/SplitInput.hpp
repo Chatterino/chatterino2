@@ -17,6 +17,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include <cstdint>
 #include <memory>
 
 class QMimeData;
@@ -34,7 +35,7 @@ class ChannelView;
 class SvgButton;
 class SpellCheckHighlighter;
 enum class CompletionKind;
-enum class ReplyTargetDirection;
+enum class ReplyTargetDirection : std::uint8_t;
 
 class SplitInput : public BaseWidget
 {
