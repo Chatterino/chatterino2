@@ -1502,6 +1502,7 @@ void SplitInput::setReply(MessagePtr target)
 
         if (this->enableInlineReplying_)
         {
+            this->channelView_->setActiveReplyTarget(this->replyTarget_);
             this->ui_.replyMessage->setWidth(this->replyMessageWidth());
             this->ui_.replyMessage->setMessage(this->replyTarget_);
 
@@ -1579,6 +1580,7 @@ void SplitInput::clearReplyTarget()
 {
     this->ui_.textEdit->setIgnoredCompletionPrefix({});
     this->replyTarget_.reset();
+    this->channelView_->setActiveReplyTarget(nullptr);
     this->ui_.replyMessage->clearMessage();
     this->ui_.vbox->setSpacing(0);
     if (!this->isHidden())

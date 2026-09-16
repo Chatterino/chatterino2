@@ -694,9 +694,11 @@ void ChannelView::performLayout(bool causedByScrollbar, bool disableAnimation)
     /// Get messages and check if there are at least 1
     const auto &messages = this->getMessagesSnapshot();
 
+    // Keep the active reply target in place while new messages arrive.
     this->showingLatestMessages_ =
-        this->scrollBar_->isAtBottom() ||
-        (!this->scrollBar_->isVisible() && !causedByScrollbar);
+        this->activeReplyTarget_ == nullptr &&
+        (this->scrollBar_->isAtBottom() ||
+         (!this->scrollBar_->isVisible() && !causedByScrollbar));
 
     /// Layout visible messages
     this->layoutVisibleMessages(messages);
@@ -1562,6 +1564,58 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
     }
 }
 
+void ChannelView::setActiveReplyTarget(const MessagePtr &target)
+{
+    if (this->activeReplyTarget_ == target)
+    {
+        return;
+    }
+
+    this->activeReplyTarget_ = target;
+    this->queueUpdate();
+
+    if (target != nullptr)
+    {
+        // Wait for the reply preview to resize the view.
+        QTimer::singleShot(0, this, [this, target] {
+            if (this->activeReplyTarget_ == target)
+            {
+                this->ensureActiveReplyTargetVisible();
+            }
+        });
+    }
+}
+
+void ChannelView::ensureActiveReplyTargetVisible()
+{
+    const auto &messages = this->getMessagesSnapshot();
+    const auto target =
+        std::ranges::find_if(messages, [this](const MessageLayoutPtr &layout) {
+            return layout->getMessagePtr() == this->activeReplyTarget_;
+        });
+    if (target == messages.end())
+    {
+        return;
+    }
+
+    const auto targetIndex =
+        static_cast<qreal>(std::distance(messages.begin(), target));
+    const auto firstVisible = this->scrollBar_->getRelativeCurrentValue();
+    const auto lastVisible = firstVisible + this->scrollBar_->getPageSize();
+
+    if (targetIndex < firstVisible)
+    {
+        this->scrollBar_->setDesiredValue(this->scrollBar_->getMinimum() +
+                                          targetIndex);
+    }
+    else if (targetIndex + 1 > lastVisible)
+    {
+        this->scrollBar_->setDesiredValue(this->scrollBar_->getMinimum() +
+                                          targetIndex + 1 -
+                                          this->scrollBar_->getPageSize());
+    }
+}
+
 void ChannelView::paintEvent(QPaintEvent *event)
 {
     //    BenchmarkGuard benchmark("paint");
@@ -1704,6 +1758,21 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
                 {
                     this->highlightedMessage_ = nullptr;
                 }
+            }
+
+            if (layout->getMessagePtr() == this->activeReplyTarget_)
+            {
+                const auto penWidth = std::max(1.0, 2.0 * this->scale());
+                painter.save();
+                painter.setPen(QPen(this->theme->accent, penWidth));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawRect(QRectF{
+                    penWidth / 2,
+                    ctx.y + (penWidth / 2),
+                    layout->getWidth() - penWidth,
+                    layout->getHeight() - penWidth,
+                });
+                painter.restore();
             }
         }
 

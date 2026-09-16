@@ -132,6 +132,8 @@ public:
      */
     bool scrollToMessageId(const QString &id);
 
+    void setActiveReplyTarget(const MessagePtr &target);
+
     /// Pausing
     bool pausable() const;
     void setPausable(bool value);
@@ -302,6 +304,7 @@ private:
     void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
     void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool disableAnimation);
+    void ensureActiveReplyTargetVisible();
 
     void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
@@ -432,6 +435,8 @@ private:
     QPointF lastMiddlePressPosition_;
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
+
+    MessagePtr activeReplyTarget_;
 
     // We're only interested in the pointer, not the contents
     MessageLayout *highlightedMessage_ = nullptr;
