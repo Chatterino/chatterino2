@@ -16,6 +16,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/SvgWidget.hpp"
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
@@ -25,6 +26,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPalette>
 #include <QPersistentModelIndex>
 #include <QPointer>
 #include <QPushButton>
@@ -34,6 +36,7 @@
 
 #include <functional>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -368,6 +371,101 @@ void replaceNickname(const QPersistentModelIndex &index, NicknamesModel *model,
     }
 }
 
+void checkNicknameDuplicates(EditableModelView *view, NicknamesModel *model,
+                             QLabel *duplicateWarning)
+{
+    struct UsernameEntry {
+        QString username;
+        int row;
+        bool caseSensitive;
+        bool twitchUser;
+    };
+    std::vector<UsernameEntry> usernames;
+    std::vector<bool> duplicateUsernames(model->rowCount(QModelIndex{}), false);
+    const auto warningColor =
+        view->getTableView()->palette().color(QPalette::Link);
+    const auto disabledColor =
+        QApplication::palette().color(QPalette::Disabled, QPalette::Text);
+
+    for (int row = 0; row < model->rowCount(QModelIndex{}); ++row)
+    {
+        const auto entry = model->entryAt(row);
+        if (!entry)
+        {
+            continue;
+        }
+        model->getItem(row, 1)->setData(
+            entry->type == NicknameEntryType::TwitchAccount ? disabledColor
+                                                            : QVariant{},
+            Qt::ForegroundRole);
+        model->getItem(row, 2)->setData(
+            entry->type == NicknameEntryType::TwitchAccount ? disabledColor
+                                                            : QVariant{},
+            Qt::ForegroundRole);
+
+        if (entry->type == NicknameEntryType::TwitchAccount)
+        {
+            if (!entry->username.isEmpty())
+            {
+                usernames.push_back({
+                    .username = entry->username,
+                    .row = row,
+                    .caseSensitive = false,
+                    .twitchUser = true,
+                });
+            }
+        }
+        else if (entry->type == NicknameEntryType::Username)
+        {
+            const auto username = entry->username.trimmed();
+            if (username.isEmpty())
+            {
+                continue;
+            }
+            usernames.push_back({
+                .username = username,
+                .row = row,
+                .caseSensitive = entry->caseSensitive,
+                .twitchUser = false,
+            });
+        }
+    }
+
+    bool foundDuplicate = false;
+    for (size_t i = 0; i < usernames.size(); ++i)
+    {
+        for (size_t j = i + 1; j < usernames.size(); ++j)
+        {
+            if (usernames[i].twitchUser && usernames[j].twitchUser)
+            {
+                continue;
+            }
+            const auto sensitivity =
+                usernames[i].caseSensitive && usernames[j].caseSensitive
+                    ? Qt::CaseSensitive
+                    : Qt::CaseInsensitive;
+            if (usernames[i].username.compare(usernames[j].username,
+                                              sensitivity) == 0)
+            {
+                duplicateUsernames[usernames[i].row] = true;
+                duplicateUsernames[usernames[j].row] = true;
+            }
+        }
+    }
+    for (size_t row = 0; row < duplicateUsernames.size(); ++row)
+    {
+        if (duplicateUsernames[row])
+        {
+            foundDuplicate = true;
+            model->getItem(static_cast<int>(row), 1)
+                ->setData(warningColor, Qt::ForegroundRole);
+        }
+    }
+
+    duplicateWarning->setVisible(foundDuplicate);
+    view->getTableView()->viewport()->update();
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -423,6 +521,29 @@ NicknamesPage::NicknamesPage()
                          });
                      });
     view->addRegexHelpLink();
+
+    auto *duplicateWarning =
+        layout
+            .emplace<QLabel>("There are overlapping nickname entries. Only "
+                             "the first matching entry will be used.")
+            .getElement();
+    auto warningPalette = duplicateWarning->palette();
+    warningPalette.setColor(
+        QPalette::WindowText,
+        view->getTableView()->palette().color(QPalette::Link));
+    duplicateWarning->setPalette(warningPalette);
+    duplicateWarning->setWordWrap(true);
+
+    const auto checkDuplicates = [view, model, duplicateWarning] {
+        checkNicknameDuplicates(view, model, duplicateWarning);
+    };
+    QObject::connect(model, &QAbstractItemModel::rowsInserted, this,
+                     checkDuplicates);
+    QObject::connect(model, &QAbstractItemModel::rowsRemoved, this,
+                     checkDuplicates);
+    QObject::connect(model, &QAbstractItemModel::dataChanged, this,
+                     checkDuplicates);
+    checkDuplicates();
 
     std::ignore = view->addButtonPressed.connect([this, model] {
         auto *dialog =
