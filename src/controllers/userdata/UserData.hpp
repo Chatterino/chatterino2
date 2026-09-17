@@ -22,10 +22,13 @@ namespace chatterino {
 struct UserData {
     std::optional<QColor> color{std::nullopt};
     QString notes;
+    QString nickname;
+    QString lastSeenUsername;
 
     bool isEmpty() const
     {
-        return !this->color.has_value() && this->notes.isEmpty();
+        return !this->color.has_value() && this->notes.isEmpty() &&
+               this->nickname.isEmpty();
     }
 };
 
@@ -50,6 +53,11 @@ struct Serialize<chatterino::UserData> {
         {
             chatterino::rj::set(obj, "notes",
                                 value.notes.toUtf8().toStdString(), a);
+        }
+        if (!value.nickname.isEmpty())
+        {
+            chatterino::rj::set(obj, "nickname", value.nickname, a);
+            chatterino::rj::set(obj, "username", value.lastSeenUsername, a);
         }
         return obj;
     }
@@ -83,6 +91,9 @@ struct Deserialize<chatterino::UserData> {
         {
             user.notes = notes;
         }
+
+        chatterino::rj::getSafe(value, "nickname", user.nickname);
+        chatterino::rj::getSafe(value, "username", user.lastSeenUsername);
 
         return user;
     }

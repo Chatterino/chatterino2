@@ -40,6 +40,8 @@ using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
 
+class IUserDataController;
+
 class Args;
 class Modes;
 
@@ -926,7 +928,9 @@ public:
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
-    std::optional<QString> matchNickname(const QString &username);
+    std::optional<QString> matchNickname(
+        const QString &username, const QString &userID = {},
+        const IUserDataController *userData = nullptr);
     void mute(const QString &channelName);
     void unmute(const QString &channelName);
 

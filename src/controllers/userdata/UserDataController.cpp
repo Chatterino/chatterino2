@@ -133,6 +133,80 @@ void UserDataController::setUserNotes(const QString &userID,
     this->update(std::move(users), std::move(lock));
 }
 
+void UserDataController::setUserNickname(const QString &userID,
+                                         const QString &username,
+                                         const QString &nickname)
+{
+    if (userID.isEmpty())
+    {
+        return;
+    }
+
+    std::unique_lock lock(this->usersMutex);
+    const auto trimmedNickname = nickname.trimmed();
+    const auto current = this->users.find(userID);
+    if (current == this->users.end() && trimmedNickname.isEmpty())
+    {
+        return;
+    }
+    if (current != this->users.end())
+    {
+        const bool nicknameUnchanged =
+            current->second.nickname == trimmedNickname;
+        const bool usernameNeedsUpdate =
+            !trimmedNickname.isEmpty() && !username.isEmpty() &&
+            current->second.lastSeenUsername != username;
+        if (nicknameUnchanged && !usernameNeedsUpdate)
+        {
+            return;
+        }
+    }
+
+    auto users = this->users;
+    auto &user = users[userID];
+    user.nickname = trimmedNickname;
+    if (trimmedNickname.isEmpty())
+    {
+        user.lastSeenUsername.clear();
+    }
+    else if (!username.isEmpty())
+    {
+        user.lastSeenUsername = username;
+    }
+    this->update(std::move(users), std::move(lock));
+}
+
+void UserDataController::updateLastSeenUsername(const QString &userID,
+                                                const QString &username)
+{
+    if (userID.isEmpty() || username.isEmpty())
+    {
+        return;
+    }
+
+    {
+        std::shared_lock lock(this->usersMutex);
+        const auto current = this->users.find(userID);
+        if (current == this->users.end() ||
+            current->second.nickname.isEmpty() ||
+            current->second.lastSeenUsername == username)
+        {
+            return;
+        }
+    }
+
+    std::unique_lock lock(this->usersMutex);
+    auto users = this->users;
+    const auto current = users.find(userID);
+    if (current == users.end() || current->second.nickname.isEmpty() ||
+        current->second.lastSeenUsername == username)
+    {
+        return;
+    }
+    users[userID].lastSeenUsername = username;
+    this->update(std::move(users), std::move(lock));
+}
+
 pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
 {
     return this->userDataUpdated_;
