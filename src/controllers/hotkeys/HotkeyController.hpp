@@ -9,11 +9,18 @@
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QKeySequence>
+#include <QString>
 
+#include <functional>
+#include <map>
+#include <memory>
 #include <optional>
 #include <set>
+#include <vector>
 
-class QShortcut;
+class QObject;
+class QWidget;
 
 namespace chatterino {
 
@@ -50,9 +57,9 @@ public:
     HotkeyController();
     HotkeyModel *createModel(QObject *parent);
 
-    std::vector<QShortcut *> shortcutsForCategory(HotkeyCategory category,
-                                                  HotkeyMap actionMap,
-                                                  QWidget *parent);
+    std::vector<QObject *> shortcutsForCategory(HotkeyCategory category,
+                                                HotkeyMap actionMap,
+                                                QWidget *parent);
 
     void save();
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
@@ -156,17 +163,6 @@ private:
      **/
     static void showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                 QString warning);
-    /**
-     * @brief finds a Hotkey matching category, action and arguments.
-     * Accepted if and only if the category matches, the action matches and arguments match.
-     * When arguments is present, contents of arguments must match the checked hotkey, otherwise arguments are ignored.
-     * For example:
-     * - std::nullopt (or {}) will match any hotkey satisfying category, action values,
-     * - {{"foo", "bar"}} will only match a hotkey that has these arguments and these arguments only
-     */
-    std::shared_ptr<Hotkey> findLike(
-        HotkeyCategory category, const QString &action,
-        const std::optional<std::vector<QString>> &arguments = {}) const;
 
     friend class KeyboardSettingsPage;
 
