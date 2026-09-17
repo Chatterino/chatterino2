@@ -601,7 +601,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            return this->execCustomCommand(words, it.value(), dryRun, channel);
+            return this->execCustomCommand(words.mid(i + 1), it.value(), dryRun,
+                                           channel);
         }
     }
 
