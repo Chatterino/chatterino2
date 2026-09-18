@@ -1994,11 +1994,6 @@ void MessageBuilder::addTextOrEmote(TextState &state, QString string)
         return;
     }
 
-    // TODO: Implement ignored emotes
-    // Format of ignored emotes:
-    // Emote name: "forsenPuke" - if string in ignoredEmotes
-    // Will match emote regardless of source (i.e. bttv, ffz)
-    // Emote source + name: "bttv:nyanPls"
     if (this->tryAppendEmote(state.twitchChannel, EmoteNameView{string}))
     {
         // Successfully appended an emote
@@ -2783,12 +2778,19 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
         return Failure;
     }
 
+    if (getSettings()->isEmoteIgnored(emote->name.string))
+    {
+        this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+                                    this->textColor_);
+        return Success;
+    }
+
     if (emote->zeroWidth && getSettings()->enableZeroWidthEmotes &&
         !this->isEmpty())
     {
         // Attempt to merge current zero-width emote into any previous emotes
         auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
-        if (asEmote)
+        if (asEmote != nullptr && !asEmote->isIgnored())
         {
             // Make sure to access asEmote before taking ownership when releasing
             auto baseEmote = asEmote->getEmote();

@@ -12,6 +12,7 @@
 #include "lib/Snapshot.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
@@ -666,6 +667,118 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST(IrcMessageHandler, IgnoredEmoteBreaksLayeringInNewMessages)
+{
+    MockApplication app(u"{}"_s);
+    app.settings.enableZeroWidthEmotes = true;
+    app.settings.setEmoteNameIgnored("Van0", true);
+
+    auto channel = std::make_shared<TwitchChannel>(u"iore"_s);
+    channel->setSeventvEmotes(makeEmotes(Emote{
+        .name = {u"Van0"_s},
+        .zeroWidth = true,
+    }));
+    app.bttvEmotes.setEmotes(makeEmotes(Emote{
+        .name = {u"cvMask"_s},
+        .zeroWidth = true,
+    }));
+    app.seventvEmotes.setGlobalEmotes(makeEmotes(Emote{
+        .name = {u"PETPET"_s},
+        .zeroWidth = true,
+    }));
+
+    std::unique_ptr<Communi::IrcMessage> irc(Communi::IrcMessage::fromData(
+        "@badge-info=subscriber/15;badges=broadcaster/1,subscriber/0;"
+        "color=#FFFFFF;display-name=Iore;emotes=521050:0-6;first-msg=0;"
+        "flags;id=e4351385-bb12-4545-a634-b5a05abe58ff;mod=0;"
+        "returning-chatter=0;room-id=903177799;subscriber=1;"
+        "tmi-sent-ts=1789458562018;turbo=0;user-id=903177799;"
+        "user-type :iore!iore@iore.tmi.twitch.tv PRIVMSG #iore "
+        ":forsenE Van0 cvMask PETPET",
+        nullptr));
+    ASSERT_NE(irc, nullptr);
+    VectorMessageSink sink;
+    IrcMessageHandler::parseMessageInto(irc.get(), sink, channel.get());
+
+    ASSERT_EQ(sink.messages().size(), 1);
+    std::vector<const MessageElement *> emoteElements;
+    for (const auto &element : sink.messages().front()->elements)
+    {
+        if (dynamic_cast<const EmoteElement *>(element.get()) != nullptr ||
+            dynamic_cast<const LayeredEmoteElement *>(element.get()) != nullptr)
+        {
+            emoteElements.push_back(element.get());
+        }
+    }
+    ASSERT_EQ(emoteElements.size(), 3);
+
+    const auto *base = dynamic_cast<const EmoteElement *>(emoteElements[0]);
+    ASSERT_NE(base, nullptr);
+    EXPECT_EQ(base->getEmote()->name.string, u"forsenE"_s);
+
+    // The ignored Van0 emote stays separate from the layer.
+    const auto *ignored = dynamic_cast<const EmoteElement *>(emoteElements[1]);
+    ASSERT_NE(ignored, nullptr);
+    EXPECT_EQ(ignored->getEmote()->name.string, u"Van0"_s);
+
+    // The remaining zero-width emotes still form a layer.
+    const auto *layers =
+        dynamic_cast<const LayeredEmoteElement *>(emoteElements[2]);
+    ASSERT_NE(layers, nullptr);
+    ASSERT_EQ(layers->getEmotes().size(), 2);
+    EXPECT_EQ(layers->getEmotes()[0].ptr->name.string, u"cvMask"_s);
+    EXPECT_EQ(layers->getEmotes()[1].ptr->name.string, u"PETPET"_s);
+}
+
+TEST(IrcMessageHandler, EmojiMatchingEmoteIgnoreStillLayers)
+{
+    MockApplication app(u"{}"_s);
+    app.settings.enableZeroWidthEmotes = true;
+    app.settings.ignoredEmotes.append(IgnoredEmote{u"^[^A-Za-z0-9_]"_s, true});
+    // The rule matches the emoji name, but not the zero-width emote.
+    ASSERT_TRUE(app.settings.isEmoteIgnored(u"😀"_s));
+    ASSERT_FALSE(app.settings.isEmoteIgnored(u"cvMask"_s));
+
+    auto channel = std::make_shared<TwitchChannel>(u"iore"_s);
+    app.bttvEmotes.setEmotes(makeEmotes(Emote{
+        .name = {u"cvMask"_s},
+        .zeroWidth = true,
+    }));
+
+    const auto input =
+        u"@badge-info=subscriber/15;badges=broadcaster/1,subscriber/0;"
+        "color=#FFFFFF;display-name=Iore;emotes=521050:0-6;first-msg=0;"
+        "flags;id=e4351385-bb12-4545-a634-b5a05abe58ff;mod=0;"
+        "returning-chatter=0;room-id=903177799;subscriber=1;"
+        "tmi-sent-ts=1789458562018;turbo=0;user-id=903177799;"
+        "user-type :iore!iore@iore.tmi.twitch.tv PRIVMSG #iore "
+        ":forsenE 😀 cvMask"_s.toUtf8();
+    std::unique_ptr<Communi::IrcMessage> irc(
+        Communi::IrcMessage::fromData(input, nullptr));
+    ASSERT_NE(irc, nullptr);
+    VectorMessageSink sink;
+    IrcMessageHandler::parseMessageInto(irc.get(), sink, channel.get());
+
+    ASSERT_EQ(sink.messages().size(), 1);
+    const LayeredEmoteElement *layers = nullptr;
+    for (const auto &element : sink.messages().front()->elements)
+    {
+        if (const auto *layer =
+                dynamic_cast<const LayeredEmoteElement *>(element.get()))
+        {
+            layers = layer;
+            break;
+        }
+    }
+    // Matching an ignore rule does not stop an emoji from being a layer base.
+    ASSERT_NE(layers, nullptr);
+    ASSERT_EQ(layers->getEmotes().size(), 2);
+    EXPECT_TRUE(
+        layers->getEmotes()[0].flags.has(MessageElementFlag::EmojiImage));
+    EXPECT_EQ(layers->getEmotes()[0].ptr->name.string, u"😀"_s);
+    EXPECT_EQ(layers->getEmotes()[1].ptr->name.string, u"cvMask"_s);
 }
 
 TEST_P(TestIrcMessageHandlerP, CloneElements)
