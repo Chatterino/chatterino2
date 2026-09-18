@@ -739,6 +739,29 @@ void SplitInput::addShortcuts()
              this->stopHistorySearchIfNecessary();
              return this->handleSendMessage(arguments);
          }},
+        {"selectReplyTarget",
+         [this](const std::vector<QString> &arguments) -> QString {
+             if (arguments.size() != 1)
+             {
+                 return "selectReplyTarget action requires one argument: "
+                        "older or newer";
+             }
+             if (arguments[0] == "older")
+             {
+                 this->channelView_->navigateReplyTarget(
+                     this->replyTarget_, ReplyTargetDirection::Older);
+             }
+             else if (arguments[0] == "newer")
+             {
+                 this->channelView_->navigateReplyTarget(
+                     this->replyTarget_, ReplyTargetDirection::Newer);
+             }
+             else
+             {
+                 return "Unknown reply target direction. Use older or newer";
+             }
+             return {};
+         }},
         {"previousMessage",
          [this](const std::vector<QString> &arguments) -> QString {
              (void)arguments;
@@ -1579,6 +1602,7 @@ void SplitInput::clearReplyTarget()
 {
     this->ui_.textEdit->setIgnoredCompletionPrefix({});
     this->replyTarget_.reset();
+    this->channelView_->clearReplyNavigationTarget();
     this->ui_.replyMessage->clearMessage();
     this->ui_.vbox->setSpacing(0);
     if (!this->isHidden())
