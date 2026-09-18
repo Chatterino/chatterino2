@@ -4,6 +4,9 @@
 
 #include "controllers/plugins/PluginRef.hpp"
 
+#include "util/WeakPtrHelpers.hpp"
+
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "Application.hpp"
@@ -63,6 +66,11 @@ PluginRef PluginWeakRef::strong() const noexcept
 bool PluginWeakRef::isAlive() const noexcept
 {
     return !this->weak.expired();
+}
+
+bool PluginWeakRef::operator==(const PluginWeakRef &rhs) const noexcept
+{
+    return weakOwnerEquals(this->weak, rhs.weak);
 }
 
 }  // namespace chatterino::lua

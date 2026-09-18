@@ -76,6 +76,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ColorInput.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helix.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/controllers/plugins/PluginTestApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/controllers/plugins/LuaUtilitiesTest.cpp
     # Add your new file above this line!
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
@@ -144,6 +146,7 @@ endif()
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     AUTORCC ON
+    AUTOMOC ON
     )
 
 if (CHATTERINO_STATIC_QT_BUILD)
