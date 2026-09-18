@@ -101,7 +101,7 @@ public:
         Node *getParent() const;
         qreal getHorizontalFlex() const;
         qreal getVerticalFlex() const;
-        const std::vector<std::shared_ptr<Node>> &getChildren();
+        const std::vector<std::shared_ptr<Node>> &getChildren() const;
 
     private:
         bool isOrContainsNode(Node *_node);
@@ -222,6 +222,7 @@ public:
 
     NotebookTab *getTab() const;
     Node *getBaseNode();
+    const Node *getBaseNode() const;
 
     void setTab(NotebookTab *tab);
     void hideResizeHandles();
