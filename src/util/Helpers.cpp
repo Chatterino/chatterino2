@@ -190,6 +190,11 @@ QString shortenString(const QString &str, unsigned maxWidth)
 
 QString kFormatNumbers(const int &number)
 {
+    if (number < 1000)
+    {
+        return QString::number(number);
+    }
+
     return QString("%1K").arg(number / 1000);
 }
 
