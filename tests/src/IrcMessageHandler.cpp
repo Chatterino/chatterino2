@@ -12,6 +12,7 @@
 #include "lib/Snapshot.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
@@ -701,4 +702,64 @@ TEST_P(TestIrcMessageHandlerP, CloneElements)
                 << QJsonDocument(clonedObj).toJson();
         }
     }
+}
+
+TEST(IrcMessageHandler, NicknamesByUserID)
+{
+    MockApplication app{QString::fromUtf8(SETTINGS_DEFAULT)};
+    auto channel = std::make_shared<TwitchChannel>("pajlada");
+    app.userData.setUserNickname("11148817", "pajlada_old", "Pie Ladder");
+    int userDataUpdates = 0;
+    std::ignore = app.userData.userDataUpdated().connect([&userDataUpdates] {
+        ++userDataUpdates;
+    });
+
+    std::unique_ptr<Communi::IrcMessage> ircMessage{
+        Communi::IrcMessage::fromData(
+            "@badge-info=subscriber/129;badges=broadcaster/1,subscriber/3072,"
+            "partner/1;color=#CC44FF;display-name=PAJLADA;emotes;first-msg=0;"
+            "flags;id=31a0d143-a302-4693-a6a1-b5552136c22f;mod=0;"
+            "returning-chatter=0;room-id=11148817;subscriber=1;"
+            "tmi-sent-ts=1789541984910;turbo=0;user-id=11148817;user-type "
+            ":pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ppHop",
+            nullptr)};
+    ASSERT_NE(ircMessage, nullptr);
+
+    VectorMessageSink sink;
+    IrcMessageHandler::parseMessageInto(ircMessage.get(), sink, channel.get());
+    ASSERT_EQ(sink.messages().size(), 1);
+
+    const auto &message = sink.messages().front();
+    EXPECT_EQ(message->userID, "11148817");
+    EXPECT_EQ(message->loginName, "pajlada");
+    EXPECT_EQ(message->displayName, "PAJLADA");
+    EXPECT_EQ(message->messageText, "ppHop");
+
+    // The nickname is included in the message's search text.
+    EXPECT_TRUE(message->searchText.startsWith("Pie Ladder "));
+
+    // The username element displays the nickname.
+    const TextElement *username = nullptr;
+    for (const auto &element : message->elements)
+    {
+        if (element->getFlags().has(MessageElementFlag::Username))
+        {
+            username = dynamic_cast<const TextElement *>(element.get());
+            break;
+        }
+    }
+    ASSERT_NE(username, nullptr);
+    EXPECT_EQ(username->words(), (QStringList{"Pie", "Ladder:"}));
+
+    // Clicking the nickname opens the account's usercard.
+    EXPECT_EQ(username->getLink().type, Link::UserInfo);
+    EXPECT_EQ(username->getLink().value, "PAJLADA");
+
+    // The stored username is updated.
+    const auto userData = app.userData.getUser("11148817");
+    ASSERT_TRUE(userData);
+    EXPECT_EQ(userData.value_or(UserData{}).lastSeenUsername, "pajlada");
+
+    // The update is emitted once.
+    EXPECT_EQ(userDataUpdates, 1);
 }

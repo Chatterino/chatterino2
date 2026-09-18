@@ -228,9 +228,12 @@ void EditableModelView::moveRow(int dir)
         return;
     }
 
-    this->model_->moveRows(this->model_->index(row, 0), row, selected.size(),
-                           this->model_->index(row + dir, 0), row + dir);
-    this->tableView_->selectRow(row + dir);
+    if (this->model_->moveRows(this->model_->index(row, 0), row,
+                               static_cast<int>(selected.size()),
+                               this->model_->index(row + dir, 0), row + dir))
+    {
+        this->tableView_->selectRow(row + dir);
+    }
 }
 
 }  // namespace chatterino
