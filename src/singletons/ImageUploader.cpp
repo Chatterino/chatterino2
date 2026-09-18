@@ -25,6 +25,7 @@
 #include <QMutex>
 #include <QPointer>
 #include <QSaveFile>
+#include <QtEndian>
 
 #include <utility>
 
@@ -32,6 +33,75 @@ namespace {
 
 // Delay between uploads in milliseconds
 constexpr int UPLOAD_DELAY = 2000;
+
+bool isAnimatedPng(QFile &file)
+{
+    // An APNG has an 8 byte acTL chunk before the first IDAT chunk
+    // https://www.w3.org/TR/png-3/#structure
+    // https://www.w3.org/TR/png-3/#acTL-chunk
+    constexpr QByteArrayView signature{"\x89PNG\r\n\x1a\n", 8};
+    if (file.read(signature.size()) != signature)
+    {
+        return false;
+    }
+
+    // Read each chunk's length and type, skip its data
+    while (file.size() - file.pos() >= 12)
+    {
+        const auto header = file.read(8);
+        if (header.size() != 8)
+        {
+            return false;
+        }
+        const auto length = qFromBigEndian<quint32>(header.constData());
+        if (length > file.size() - file.pos() - 4)
+        {
+            return false;
+        }
+        const auto type = QByteArrayView{header}.sliced(4, 4);
+        if (type == "acTL")
+        {
+            return length == 8;
+        }
+        if (type == "IDAT" || type == "IEND")
+        {
+            return false;
+        }
+        if (!file.seek(file.pos() + length + 4))
+        {
+            return false;
+        }
+    }
+    return false;
+}
+
+bool isAnimatedWebp(QByteArrayView data)
+{
+    // Extended WebPs have a VP8X chunk after a 12 byte WebP header
+    // The animation flag is bit 1 of the first byte in the VP8X data
+    // https://developers.google.com/speed/webp/docs/riff_container#extended_file_format
+    constexpr qsizetype flagsOffset = 20;
+    constexpr quint32 vp8xDataSize = 10;
+    constexpr uchar animationFlag = 0x02;
+
+    if (data.size() <= flagsOffset)
+    {
+        return false;
+    }
+    if (data.first(4) != "RIFF" || data.sliced(8, 4) != "WEBP")
+    {
+        return false;
+    }
+    if (data.sliced(12, 4) != "VP8X")
+    {
+        return false;
+    }
+    if (qFromLittleEndian<quint32>(data.data() + 16) != vp8xDataSize)
+    {
+        return false;
+    }
+    return (static_cast<uchar>(data[flagsOffset]) & animationFlag) != 0;
+}
 
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
@@ -306,6 +376,36 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         {
             QString localPath = path.toLocalFile();
             QMimeType mime = mimeDb.mimeTypeForUrl(path);
+            // .apng files are not always reported as image/png.
+            if (mime.inherits("image/png") ||
+                localPath.endsWith(".apng", Qt::CaseInsensitive))
+            {
+                QFile file(localPath);
+                if (!file.open(QIODevice::ReadOnly))
+                {
+                    return {{}, "Failed to open file :("};
+                }
+                if (isAnimatedPng(file))
+                {
+                    file.seek(0);
+                    images.push({file.readAll(), "apng", localPath});
+                    continue;
+                }
+            }
+            if (mime.inherits("image/webp"))
+            {
+                QFile file(localPath);
+                if (!file.open(QIODevice::ReadOnly))
+                {
+                    return {{}, "Failed to open file :("};
+                }
+                if (isAnimatedWebp(file.read(21)))
+                {
+                    file.seek(0);
+                    images.push({file.readAll(), "webp", localPath});
+                    continue;
+                }
+            }
             if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
             {
                 QImage img = QImage(localPath);
@@ -346,6 +446,22 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
     auto tryUploadDirectly =
         [&]() -> std::pair<std::queue<RawImageData>, QString> {
         std::queue<RawImageData> images;
+
+        if (source->hasFormat("image/apng"))
+        {
+            images.push({source->data("image/apng"), "apng", ""});
+            return {images, {}};
+        }
+
+        if (source->hasFormat("image/webp"))
+        {
+            auto data = source->data("image/webp");
+            if (isAnimatedWebp(data))
+            {
+                images.push({std::move(data), "webp", ""});
+                return {images, {}};
+            }
+        }
 
         if (source->hasFormat("image/png"))
         {

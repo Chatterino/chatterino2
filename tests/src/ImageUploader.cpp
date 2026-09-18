@@ -10,11 +10,15 @@
 #include "Test.hpp"
 #include "util/ImageUploader.hpp"
 
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QMimeData>
 #include <QString>
+#include <QTemporaryDir>
+#include <QUrl>
 
 #include <utility>
 #include <vector>
@@ -23,7 +27,124 @@ namespace {
 
 constexpr bool UPDATE_SNAPSHOTS = false;
 
+// Two 2x2 APNG frames
+const auto ANIMATED_PNG_HEX =
+    "89504E470D0A1A0A0000000D4948445200000002000000020802000000FDD49A73"
+    "00000009704859730000000100000001004F25C4D6000000086163544C00000002"
+    "00000000F38D93700000001A6663544C00000000000000020000000200000000"
+    "00000000000100020000E6478DB80000001049444154789C63F8CBC000440C"
+    "100A001FAE03F5F6182A590000001A6663544C000000010000000100000001"
+    "0000000000000000000100020000CF1F8BBC000000106664415400000002789C"
+    "63F8CBC0000002FB00FE6E73CC340000000049454E44AE426082";
+
+// Two 2x2 WebP frames
+const auto ANIMATED_WEBP_HEX =
+    "52494646C000000057454250565038580A00000002000000010000010000"
+    "414E494D06000000FFFFFFFF0000414E4D464800000000000000000001"
+    "0000010000640000025650382030000000D001009D012A020002000200"
+    "3425A00274BA01F80003B000FEF0C40BFF20B96175C8D7FF203FE407"
+    "FC80FFF8F2000000414E4D464400000000000000000001000001000064"
+    "000000565038202C0000009401009D012A0200020000003425A00274BA"
+    "00039800FEF9936FFF901FFF901FFF901FFF203FE2177B203000";
+const auto STATIC_WEBP_HEX =
+    "524946463C000000574542505650382030000000D001009D012A020002"
+    "0002003425A00274BA01F80003B000FEF0C40BFF20B96175C8D7FF"
+    "203FE407FC80FFF8F2000000";
+
+class AnimatedImageUploaderTest : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        ASSERT_TRUE(this->directory_.isValid());
+    }
+
+    auto imagesFromFile(const QString &name, const QByteArray &data)
+    {
+        const auto path = this->directory_.filePath(name);
+        QFile file(path);
+        EXPECT_TRUE(file.open(QIODevice::WriteOnly));
+        EXPECT_EQ(file.write(data), data.size());
+        file.close();
+
+        QMimeData mimeData;
+        mimeData.setUrls({QUrl::fromLocalFile(path)});
+        return this->uploader_.getImages(&mimeData);
+    }
+
+    auto imagesFromClipboard(const char *mime, const QByteArray &data)
+    {
+        QMimeData mimeData;
+        mimeData.setData(mime, data);
+        return this->uploader_.getImages(&mimeData);
+    }
+
+    QTemporaryDir directory_;
+    chatterino::ImageUploader uploader_;
+};
+
 }  // namespace
+
+TEST_F(AnimatedImageUploaderTest, KeepsAnimatedPngFile)
+{
+    const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
+    auto [images, error] = this->imagesFromFile("animated.png", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "apng");
+}
+
+TEST_F(AnimatedImageUploaderTest, KeepsAnimatedApngFile)
+{
+    const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
+    auto [images, error] = this->imagesFromFile("animated.apng", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "apng");
+}
+
+TEST_F(AnimatedImageUploaderTest, KeepsAnimatedWebpFile)
+{
+    const auto data = QByteArray::fromHex(ANIMATED_WEBP_HEX);
+    auto [images, error] = this->imagesFromFile("animated.webp", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "webp");
+}
+
+TEST_F(AnimatedImageUploaderTest, ConvertsStaticWebpFile)
+{
+    const auto data = QByteArray::fromHex(STATIC_WEBP_HEX);
+    auto [images, error] = this->imagesFromFile("static.webp", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().format, "png");
+    EXPECT_TRUE(images.front().data.startsWith(
+        QByteArray::fromHex("89504E470D0A1A0A")));
+}
+
+TEST_F(AnimatedImageUploaderTest, KeepsAnimatedPngFromClipboard)
+{
+    const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
+    auto [images, error] = this->imagesFromClipboard("image/apng", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "apng");
+}
+
+TEST_F(AnimatedImageUploaderTest, KeepsAnimatedWebpFromClipboard)
+{
+    const auto data = QByteArray::fromHex(ANIMATED_WEBP_HEX);
+    auto [images, error] = this->imagesFromClipboard("image/webp", data);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "webp");
+}
 
 namespace chatterino::imageuploader::detail {
 
