@@ -1017,16 +1017,24 @@ void SplitInput::installTextEditEvents()
                 cursor.setPosition(static_cast<int>(word.end() - text.begin()),
                                    QTextCursor::KeepAnchor);
 
+                auto *firstAction = menu->actions().value(0);
                 auto suggestions =
                     getApp()->getSpellChecker()->suggestions(word.toString());
                 for (const auto &sugg :
                      suggestions | std::views::take(nSuggestions))
                 {
                     auto qSugg = QString::fromStdString(sugg);
-                    menu->addAction(qSugg, [this, qSugg, cursor]() mutable {
-                        cursor.insertText(qSugg);
-                        this->ui_.textEdit->setTextCursor(cursor);
-                    });
+                    menu->insertAction(
+                        firstAction,
+                        menu->addAction(qSugg, [this, qSugg, cursor]() mutable {
+                            cursor.insertText(qSugg);
+                            this->ui_.textEdit->setTextCursor(cursor);
+                        }));
+                }
+
+                if (!suggestions.empty())
+                {
+                    menu->insertSeparator(firstAction);
                 }
             }
 #else
