@@ -34,6 +34,13 @@ TEST(Nickname, UserNicknameSerialization)
     EXPECT_EQ(restored.lastSeenUsername, "pajlada");
 }
 
+TEST(Nickname, RegexCanRemoveText)
+{
+    Nickname nickname{"lol$", {}, true, false};
+
+    EXPECT_EQ(nickname.match("forsenlol"), "forsen");
+}
+
 TEST(Nickname, LegacyRulesOverrideAccountNickname)
 {
     mock::BaseApplication app;
