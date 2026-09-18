@@ -4,10 +4,10 @@
 
 #include "widgets/settingspages/NicknamesPage.hpp"
 
+#include "Application.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/nicknames/NicknamesModel.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -26,38 +26,46 @@ NicknamesPage::NicknamesPage()
         "filters."
         "\nWith those features you will still need to use the user's original "
         "name.");
-    EditableModelView *view =
-        layout
-            .emplace<EditableModelView>(
-                (new NicknamesModel(nullptr))
-                    ->initialized(&getSettings()->nicknames))
-            .getElement();
+    layout.emplace<QLabel>(
+        "Twitch account entries match by User ID. Legacy username and regex "
+        "entries match by name."
+        "\nTwitch account entries cannot be reordered.");
+
+    auto *model = new NicknamesModel(getApp()->getUserData(), nullptr);
+    model->initialize(&getSettings()->nicknames);
+    auto *view = layout.emplace<EditableModelView>(model).getElement();
     this->view_ = view;
 
-    view->setTitles({"Username", "Nickname", "Enable regex", "Case-sensitive"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Fixed);
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        1, QHeaderView::Stretch);
+    view->setTitles({"Match on", "Username / pattern", "User ID", "Nickname",
+                     "Case-sensitive"});
+    view->getTableView()->setDragDropMode(QAbstractItemView::NoDragDrop);
+    auto *header = view->getTableView()->horizontalHeader();
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(1, QHeaderView::Stretch);
+    header->setSectionResizeMode(3, QHeaderView::Stretch);
+    QObject::connect(model, &QAbstractItemModel::rowsInserted, view,
+                     [table = view->getTableView()] {
+                         // ResizeToContents can retain widths calculated for
+                         // the empty table, so recalculate the content-sized
+                         // columns after rows are inserted.
+                         QTimer::singleShot(0, table, [table] {
+                             table->resizeColumnToContents(0);
+                             table->resizeColumnToContents(2);
+                             table->resizeColumnToContents(4);
+                         });
+                     });
+    view->addRegexHelpLink();
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([] {
         getSettings()->nicknames.append(
             Nickname{"Username", "Nickname", false, false});
     });
-
-    QTimer::singleShot(1, [view] {
-        view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 200);
-    });
 }
 
 bool NicknamesPage::filterElements(const QString &query)
 {
-    std::array fields{0, 1};
-
+    std::array fields{0, 1, 2, 3};
     return this->view_->filterSearchResults(query, fields);
 }
 

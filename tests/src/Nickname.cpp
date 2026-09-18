@@ -4,9 +4,15 @@
 
 #include "controllers/nicknames/Nickname.hpp"
 
+#include "controllers/nicknames/NicknamesModel.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/UserData.hpp"
 #include "Test.hpp"
+
+#include <QApplication>
+#include <QLineEdit>
+#include <QPointer>
+#include <QTableView>
 
 using namespace chatterino;
 
@@ -58,4 +64,91 @@ TEST(Nickname, LegacyRulesOverrideAccountNickname)
     EXPECT_FALSE(userData.getUser("11148817"));
     EXPECT_EQ(app.settings.matchNickname("pajlada2", "11148817", &userData),
               "paja");
+}
+
+TEST(Nickname, UsernameUpdatePreservesActiveEditor)
+{
+    mock::BaseApplication app;
+    mock::UserDataController userData;
+    userData.setUserNickname("11148817", "pajlada_old", "Pie Ladder");
+    NicknamesModel model{&userData, nullptr};
+    model.initialize(&app.settings.nicknames);
+    QTableView view;
+    view.setModel(&model);
+    view.show();
+
+    // Start editing the nickname before the last seen username is updated.
+    const auto row = model.rowCount({}) - 1;
+    const auto nicknameIndex = model.index(row, 3);
+    view.edit(nicknameIndex);
+    QApplication::processEvents();
+    QPointer<QLineEdit> editor = view.findChild<QLineEdit *>();
+    ASSERT_FALSE(editor.isNull());
+    editor->setText("unfinished nickname");
+
+    userData.updateLastSeenUsername("11148817", "pajlada");
+    QApplication::processEvents();
+
+    // The unfinished nickname remains in the editor.
+    ASSERT_FALSE(editor.isNull());
+    EXPECT_EQ(editor->text(), "unfinished nickname");
+
+    // The new username is displayed in the row.
+    EXPECT_EQ(model.data(model.index(row, 1), Qt::DisplayRole), "pajlada");
+}
+
+TEST(Nickname, AccountRowsUseUserData)
+{
+    mock::BaseApplication app;
+    mock::UserDataController userData;
+    const auto legacyEntries = app.settings.nicknames.raw().size();
+    userData.setUserNickname("11148817", "pajlada", "Pie Ladder");
+    NicknamesModel model{&userData, nullptr};
+    model.initialize(&app.settings.nicknames);
+    QTableView view;
+    view.setModel(&model);
+    view.show();
+    QApplication::processEvents();
+    const auto row = model.rowCount({}) - 1;
+
+    int dataChanged = 0;
+    QObject::connect(&model, &QAbstractItemModel::dataChanged, [&dataChanged] {
+        ++dataChanged;
+    });
+
+    // Editing an account row updates the stored nickname.
+    ASSERT_TRUE(model.setData(model.index(row, 3), "paja", Qt::EditRole));
+    const auto updated = userData.getUser("11148817");
+    ASSERT_TRUE(updated);
+    EXPECT_EQ(updated.value_or(UserData{}).nickname, "paja");
+
+    // Model observers are notified of the edit.
+    EXPECT_GT(dataChanged, 0);
+
+    // Removing the account row clears the stored nickname.
+    ASSERT_TRUE(model.removeRow(row));
+    QApplication::processEvents();
+    EXPECT_FALSE(userData.getUser("11148817"));
+
+    // The removed row disappears from the table.
+    EXPECT_EQ(model.rowCount({}), static_cast<int>(legacyEntries));
+}
+
+TEST(Nickname, InlineEditUpdatesOriginalEntry)
+{
+    mock::BaseApplication app;
+    mock::UserDataController userData;
+    app.settings.nicknames.append(
+        Nickname{"pajlada", "Pie Ladder", false, false});
+    NicknamesModel model{&userData, nullptr};
+    model.initialize(&app.settings.nicknames);
+    const auto row = model.rowCount({}) - 1;
+
+    // Editing a legacy row updates the original nickname entry.
+    ASSERT_TRUE(model.setData(model.index(row, 1), "pajlada2", Qt::EditRole));
+
+    const auto entry = model.entryAt(row);
+    ASSERT_TRUE(entry.has_value());
+    EXPECT_EQ(entry.value_or(NicknameEntry{}).username, "pajlada2");
+    EXPECT_EQ(app.settings.nicknames.readOnly()->back().name(), "pajlada2");
 }
