@@ -10,7 +10,9 @@
 #include "Test.hpp"
 #include "util/ImageUploader.hpp"
 
+#include <QBuffer>
 #include <QFile>
+#include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -18,6 +20,7 @@
 #include <QMimeData>
 #include <QString>
 #include <QTemporaryDir>
+#include <QtEndian>
 #include <QUrl>
 
 #include <utility>
@@ -51,7 +54,55 @@ const auto STATIC_WEBP_HEX =
     "0002003425A00274BA01F80003B000FEF0C40BFF20B96175C8D7FF"
     "203FE407FC80FFF8F2000000";
 
-class AnimatedImageUploaderTest : public ::testing::Test
+// EXIF with the image description set to "forsen"
+const auto PNG_EXIF_CHUNK_HEX =
+    "00000021655849664D4D002A000000080001010E0002000000070000001A000000"
+    "00666F7273656E00F4C0B558";
+const auto WEBP_EXIF_CHUNK_HEX =
+    "45584946270000004578696600004D4D002A000000080001010E000200000007"
+    "0000001A00000000666F7273656E0000";
+const auto JPEG_EXIF_SEGMENT_HEX =
+    "FFE100294578696600004D4D002A000000080001010E0002000000070000001A"
+    "00000000666F7273656E00";
+
+QByteArray makeImage(const char *format)
+{
+    QImage image{1, 1, QImage::Format_RGB32};
+    image.fill(Qt::red);
+
+    QByteArray data;
+    QBuffer buffer{&data};
+    EXPECT_TRUE(buffer.open(QIODevice::WriteOnly));
+    EXPECT_TRUE(image.save(&buffer, format));
+    return data;
+}
+
+QByteArray addExifToPng(QByteArray data)
+{
+    data.insert(data.size() - 12, QByteArray::fromHex(PNG_EXIF_CHUNK_HEX));
+    return data;
+}
+
+QByteArray addExifToWebp(QByteArray data)
+{
+    if (QByteArrayView{data}.sliced(12, 4) != "VP8X")
+    {
+        data.insert(
+            12, QByteArray::fromHex("565038580A00000000000000010000010000"));
+    }
+    data[20] = static_cast<char>(static_cast<uchar>(data[20]) | 0x08);
+    data.append(QByteArray::fromHex(WEBP_EXIF_CHUNK_HEX));
+    qToLittleEndian(static_cast<quint32>(data.size() - 8), data.data() + 4);
+    return data;
+}
+
+QByteArray addExifToJpeg(QByteArray data)
+{
+    data.insert(2, QByteArray::fromHex(JPEG_EXIF_SEGMENT_HEX));
+    return data;
+}
+
+class ImageUploaderInputTest : public ::testing::Test
 {
 protected:
     void SetUp() override
@@ -85,17 +136,22 @@ protected:
 
 }  // namespace
 
-TEST_F(AnimatedImageUploaderTest, KeepsAnimatedPngFile)
+TEST_F(ImageUploaderInputTest, StripsExifFromAnimatedPngFile)
 {
     const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
-    auto [images, error] = this->imagesFromFile("animated.png", data);
+    const auto withExif = addExifToPng(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromFile("animated.png", withExif);
     ASSERT_TRUE(error.isEmpty()) << error.toStdString();
     ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the animation.
     EXPECT_EQ(images.front().data, data);
     EXPECT_EQ(images.front().format, "apng");
 }
 
-TEST_F(AnimatedImageUploaderTest, KeepsAnimatedApngFile)
+TEST_F(ImageUploaderInputTest, KeepsAnimatedApngFile)
 {
     const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
     auto [images, error] = this->imagesFromFile("animated.apng", data);
@@ -105,45 +161,129 @@ TEST_F(AnimatedImageUploaderTest, KeepsAnimatedApngFile)
     EXPECT_EQ(images.front().format, "apng");
 }
 
-TEST_F(AnimatedImageUploaderTest, KeepsAnimatedWebpFile)
+TEST_F(ImageUploaderInputTest, StripsExifFromAnimatedWebpFile)
 {
     const auto data = QByteArray::fromHex(ANIMATED_WEBP_HEX);
-    auto [images, error] = this->imagesFromFile("animated.webp", data);
+    const auto withExif = addExifToWebp(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromFile("animated.webp", withExif);
     ASSERT_TRUE(error.isEmpty()) << error.toStdString();
     ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the animation.
     EXPECT_EQ(images.front().data, data);
     EXPECT_EQ(images.front().format, "webp");
 }
 
-TEST_F(AnimatedImageUploaderTest, ConvertsStaticWebpFile)
+TEST_F(ImageUploaderInputTest, StripsExifWhenEncodingStaticWebpFile)
 {
     const auto data = QByteArray::fromHex(STATIC_WEBP_HEX);
-    auto [images, error] = this->imagesFromFile("static.webp", data);
+    const auto withExif = addExifToWebp(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+    ASSERT_FALSE(QImage::fromData(withExif, "WEBP").isNull());
+
+    auto [images, error] = this->imagesFromFile("static.webp", withExif);
     ASSERT_TRUE(error.isEmpty()) << error.toStdString();
     ASSERT_EQ(images.size(), 1);
+
+    // Static WebP files are re-encoded as PNG without EXIF.
     EXPECT_EQ(images.front().format, "png");
-    EXPECT_TRUE(images.front().data.startsWith(
-        QByteArray::fromHex("89504E470D0A1A0A")));
+    EXPECT_FALSE(images.front().data.contains("forsen"));
+    EXPECT_FALSE(QImage::fromData(images.front().data, "PNG").isNull());
 }
 
-TEST_F(AnimatedImageUploaderTest, KeepsAnimatedPngFromClipboard)
+TEST_F(ImageUploaderInputTest, StripsExifFromAnimatedPngClipboard)
 {
     const auto data = QByteArray::fromHex(ANIMATED_PNG_HEX);
-    auto [images, error] = this->imagesFromClipboard("image/apng", data);
+    const auto withExif = addExifToPng(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromClipboard("image/apng", withExif);
     ASSERT_TRUE(error.isEmpty()) << error.toStdString();
     ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the animation.
     EXPECT_EQ(images.front().data, data);
     EXPECT_EQ(images.front().format, "apng");
 }
 
-TEST_F(AnimatedImageUploaderTest, KeepsAnimatedWebpFromClipboard)
+TEST_F(ImageUploaderInputTest, StripsExifFromAnimatedWebpClipboard)
 {
     const auto data = QByteArray::fromHex(ANIMATED_WEBP_HEX);
-    auto [images, error] = this->imagesFromClipboard("image/webp", data);
+    const auto withExif = addExifToWebp(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromClipboard("image/webp", withExif);
     ASSERT_TRUE(error.isEmpty()) << error.toStdString();
     ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the animation.
     EXPECT_EQ(images.front().data, data);
     EXPECT_EQ(images.front().format, "webp");
+}
+
+TEST_F(ImageUploaderInputTest, StripsExifWhenEncodingJpegFile)
+{
+    const auto jpeg = makeImage("JPEG");
+    const auto withExif = addExifToJpeg(jpeg);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromFile("image.jpg", withExif);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+
+    // JPEG files are re-encoded as PNG without EXIF.
+    EXPECT_EQ(images.front().format, "png");
+    EXPECT_FALSE(images.front().data.contains("forsen"));
+    EXPECT_FALSE(QImage::fromData(images.front().data, "PNG").isNull());
+}
+
+TEST_F(ImageUploaderInputTest, StripsExifWhenEncodingPngFile)
+{
+    const auto png = makeImage("PNG");
+    const auto withExif = addExifToPng(png);
+    ASSERT_TRUE(withExif.contains("forsen"));
+    ASSERT_FALSE(QImage::fromData(withExif, "PNG").isNull());
+
+    auto [images, error] = this->imagesFromFile("image.png", withExif);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+
+    // PNG files are re-encoded without EXIF.
+    EXPECT_EQ(images.front().format, "png");
+    EXPECT_FALSE(images.front().data.contains("forsen"));
+    EXPECT_FALSE(QImage::fromData(images.front().data, "PNG").isNull());
+}
+
+TEST_F(ImageUploaderInputTest, StripsExifFromJpegClipboard)
+{
+    const auto data = makeImage("JPEG");
+    const auto withExif = addExifToJpeg(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromClipboard("image/jpeg", withExif);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the image.
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "jpeg");
+}
+
+TEST_F(ImageUploaderInputTest, StripsExifFromPngClipboard)
+{
+    const auto data = makeImage("PNG");
+    const auto withExif = addExifToPng(data);
+    ASSERT_TRUE(withExif.contains("forsen"));
+
+    auto [images, error] = this->imagesFromClipboard("image/png", withExif);
+    ASSERT_TRUE(error.isEmpty()) << error.toStdString();
+    ASSERT_EQ(images.size(), 1);
+
+    // EXIF is removed without re-encoding the image.
+    EXPECT_EQ(images.front().data, data);
+    EXPECT_EQ(images.front().format, "png");
 }
 
 namespace chatterino::imageuploader::detail {

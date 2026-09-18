@@ -103,6 +103,179 @@ bool isAnimatedWebp(QByteArrayView data)
     return (static_cast<uchar>(data[flagsOffset]) & animationFlag) != 0;
 }
 
+std::optional<QByteArray> stripPngExif(QByteArrayView data)
+{
+    // PNG stores EXIF in an eXIf chunk. The other chunks can be copied without
+    // recalculating their CRCs.
+    // https://www.w3.org/TR/png-3/#eXIf-chunk
+    constexpr QByteArrayView signature{"\x89PNG\r\n\x1a\n", 8};
+    if (!data.startsWith(signature))
+    {
+        return std::nullopt;
+    }
+
+    QByteArray stripped;
+    stripped.reserve(data.size());
+    stripped.append(signature);
+
+    // Copy every complete chunk except eXIf.
+    auto offset = signature.size();
+    while (offset < data.size())
+    {
+        const auto remaining = data.size() - offset;
+        if (remaining < 12)
+        {
+            return std::nullopt;
+        }
+
+        const auto length = qFromBigEndian<quint32>(data.data() + offset);
+        if (length > remaining - 12)
+        {
+            return std::nullopt;
+        }
+
+        const auto chunkSize = static_cast<qsizetype>(length) + 12;
+        const auto type = data.sliced(offset + 4, 4);
+        if (type != "eXIf")
+        {
+            stripped.append(data.sliced(offset, chunkSize));
+        }
+        offset += chunkSize;
+    }
+
+    return stripped;
+}
+
+std::optional<QByteArray> stripWebpExif(QByteArrayView data)
+{
+    // WebP stores EXIF in a RIFF chunk. Removing it also requires updating the
+    // RIFF size and the EXIF flag in VP8X.
+    // https://developers.google.com/speed/webp/docs/riff_container#metadata
+    constexpr qsizetype headerSize = 12;
+    constexpr qsizetype flagsOffset = 20;
+    constexpr uchar exifFlag = 0x08;
+
+    if (data.size() < headerSize || data.first(4) != "RIFF" ||
+        data.sliced(8, 4) != "WEBP" ||
+        qFromLittleEndian<quint32>(data.data() + 4) != data.size() - 8)
+    {
+        return std::nullopt;
+    }
+
+    QByteArray stripped;
+    stripped.reserve(data.size());
+    stripped.append(data.first(headerSize));
+
+    // RIFF chunks are padded to an even size.
+    auto offset = headerSize;
+    while (offset < data.size())
+    {
+        const auto remaining = data.size() - offset;
+        if (remaining < 8)
+        {
+            return std::nullopt;
+        }
+
+        const auto length =
+            qFromLittleEndian<quint32>(data.data() + offset + 4);
+        const auto chunkSize =
+            static_cast<qsizetype>(length) + 8 + (length & 1U);
+        if (chunkSize > remaining)
+        {
+            return std::nullopt;
+        }
+
+        if (data.sliced(offset, 4) != "EXIF")
+        {
+            stripped.append(data.sliced(offset, chunkSize));
+        }
+        offset += chunkSize;
+    }
+
+    // Clear the EXIF flag and update the size after removing the chunk.
+    if (stripped.size() <= flagsOffset ||
+        QByteArrayView{stripped}.sliced(12, 4) != "VP8X")
+    {
+        return std::nullopt;
+    }
+
+    stripped[flagsOffset] = static_cast<char>(
+        static_cast<uchar>(stripped[flagsOffset]) & ~exifFlag);
+    qToLittleEndian(static_cast<quint32>(stripped.size() - 8),
+                    stripped.data() + 4);
+    return stripped;
+}
+
+std::optional<QByteArray> stripJpegExif(QByteArrayView data)
+{
+    // JPEG stores EXIF in APP1 segments before the image data.
+    // We only strip the APP1 segments with EXIF data.
+    constexpr QByteArrayView startOfImage{"\xFF\xD8", 2};
+    constexpr QByteArrayView exifHeader{"Exif\0\0", 6};
+    if (!data.startsWith(startOfImage))
+    {
+        return std::nullopt;
+    }
+
+    QByteArray stripped;
+    stripped.reserve(data.size());
+    stripped.append(startOfImage);
+
+    // Copy each marker segment except EXIF APP1 segments.
+    auto offset = startOfImage.size();
+    while (offset < data.size())
+    {
+        const auto markerStart = offset;
+        while (offset < data.size() && static_cast<uchar>(data[offset]) == 0xFF)
+        {
+            ++offset;
+        }
+        if (offset >= data.size())
+        {
+            return std::nullopt;
+        }
+
+        const auto marker = static_cast<uchar>(data[offset++]);
+        if (marker == 0xDA)
+        {
+            // EXIF cannot appear in the compressed image data.
+            stripped.append(data.sliced(markerStart));
+            return stripped;
+        }
+        if (marker == 0xD9)
+        {
+            stripped.append(data.sliced(markerStart, offset - markerStart));
+            return offset == data.size() ? std::optional{stripped}
+                                         : std::nullopt;
+        }
+        if (marker == 0x01 || (marker >= 0xD0 && marker <= 0xD8))
+        {
+            stripped.append(data.sliced(markerStart, offset - markerStart));
+            continue;
+        }
+        if (data.size() - offset < 2)
+        {
+            return std::nullopt;
+        }
+
+        const auto length = qFromBigEndian<quint16>(data.data() + offset);
+        if (length < 2 || length > data.size() - offset)
+        {
+            return std::nullopt;
+        }
+
+        const auto payload = data.sliced(offset + 2, length - 2);
+        if (marker != 0xE1 || !payload.startsWith(exifHeader))
+        {
+            stripped.append(
+                data.sliced(markerStart, offset + length - markerStart));
+        }
+        offset += length;
+    }
+
+    return std::nullopt;
+}
+
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
     QByteArray imageData;
@@ -388,7 +561,12 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
                 if (isAnimatedPng(file))
                 {
                     file.seek(0);
-                    images.push({file.readAll(), "apng", localPath});
+                    auto data = stripPngExif(file.readAll());
+                    if (!data)
+                    {
+                        return {{}, "Failed to read image :("};
+                    }
+                    images.push({std::move(*data), "apng", localPath});
                     continue;
                 }
             }
@@ -402,7 +580,12 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
                 if (isAnimatedWebp(file.read(21)))
                 {
                     file.seek(0);
-                    images.push({file.readAll(), "webp", localPath});
+                    auto data = stripWebpExif(file.readAll());
+                    if (!data)
+                    {
+                        return {{}, "Failed to read image :("};
+                    }
+                    images.push({std::move(*data), "webp", localPath});
                     continue;
                 }
             }
@@ -449,7 +632,12 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
 
         if (source->hasFormat("image/apng"))
         {
-            images.push({source->data("image/apng"), "apng", ""});
+            auto data = stripPngExif(source->data("image/apng"));
+            if (!data)
+            {
+                return {{}, "Failed to read image :("};
+            }
+            images.push({std::move(*data), "apng", ""});
             return {images, {}};
         }
 
@@ -458,7 +646,12 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
             auto data = source->data("image/webp");
             if (isAnimatedWebp(data))
             {
-                images.push({std::move(data), "webp", ""});
+                auto stripped = stripWebpExif(data);
+                if (!stripped)
+                {
+                    return {{}, "Failed to read image :("};
+                }
+                images.push({std::move(*stripped), "webp", ""});
                 return {images, {}};
             }
         }
@@ -466,13 +659,23 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         if (source->hasFormat("image/png"))
         {
             // the path to file is not present every time, thus the filePath is empty
-            images.push({source->data("image/png"), "png", ""});
+            auto data = stripPngExif(source->data("image/png"));
+            if (!data)
+            {
+                return {{}, "Failed to read image :("};
+            }
+            images.push({std::move(*data), "png", ""});
             return {images, {}};
         }
 
         if (source->hasFormat("image/jpeg"))
         {
-            images.push({source->data("image/jpeg"), "jpeg", ""});
+            auto data = stripJpegExif(source->data("image/jpeg"));
+            if (!data)
+            {
+                return {{}, "Failed to read image :("};
+            }
+            images.push({std::move(*data), "jpeg", ""});
             return {images, {}};
         }
 
