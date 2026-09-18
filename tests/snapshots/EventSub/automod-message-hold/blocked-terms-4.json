@@ -199,7 +199,7 @@
             "loginName": "automod",
             "messageText": "AutoMod: Held a message for reason: matches 3 blocked terms \"blockedterm\", \"🍋‍🟩\", \"🍩\". Allow will post it in chat. Allow Deny",
             "searchText": "AutoMod: Held a message for reason: matches 3 blocked terms \"blockedterm\", \"🍋‍🟩\", \"🍩\". Allow will post it in chat. Allow Deny",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
@@ -314,7 +314,7 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz: 😂  😂 🍋‍🟩 blockedterm 😂 🍩",
             "searchText": "nerixyz: 😂  😂 🍋‍🟩 blockedterm 😂 🍩",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

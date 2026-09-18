@@ -103,7 +103,7 @@ public:
 
     void addSystemMessage(const QString &contents);
 
-    /// Inserts the given messages in order by Message::serverReceivedTime.
+    /// Inserts the given messages in order by Message::timestamp.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
     void addOrReplaceTimeout(MessagePtr message, const QDateTime &now) final;
