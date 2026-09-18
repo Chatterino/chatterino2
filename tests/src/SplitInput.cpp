@@ -11,6 +11,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/plugins/PluginController.hpp"
+#include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/EmoteController.hpp"
@@ -18,6 +19,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -25,14 +27,19 @@
 #include "singletons/WindowManager.hpp"
 #include "Test.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/listview/GenericListView.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
 #include <QCompleter>
 #include <QDebug>
+#include <QKeyEvent>
 #include <QString>
 
+#include <initializer_list>
 #include <tuple>
 
 using namespace chatterino;
@@ -152,6 +159,88 @@ public:
     SplitInput input;
 };
 
+class PopupCycleFixture : public ::testing::Test
+{
+public:
+    PopupCycleFixture()
+        : input(this->split.getInput())
+    {
+    }
+
+    void setChannel(ChannelPtr channel)
+    {
+        this->split.setChannel(IndirectChannel(std::move(channel)));
+        this->split.show();
+    }
+
+    void setChatters(std::initializer_list<QString> names)
+    {
+        auto channel = std::make_shared<TwitchChannel>("forsen");
+        for (const auto &name : names)
+        {
+            channel->addRecentChatter(name);
+        }
+        this->setChannel(channel);
+    }
+
+    void setEmotes(std::initializer_list<QString> names, bool zeroWidth = false)
+    {
+        auto emotes = std::make_shared<EmoteMap>();
+        for (const auto &name : names)
+        {
+            auto emote = std::make_shared<Emote>();
+            emote->name = EmoteName{name};
+            emote->zeroWidth = zeroWidth;
+            emotes->emplace(emote->name, std::move(emote));
+        }
+        auto channel = std::make_shared<TwitchChannel>("forsen");
+        channel->setBttvEmotes(std::move(emotes));
+        this->setChannel(channel);
+    }
+
+    ResizingTextEdit *edit()
+    {
+        auto *textEdit = this->input.findChild<QTextEdit *>();
+        // NOLINTNEXTLINE(clazy-unneeded-cast)
+        return dynamic_cast<ResizingTextEdit *>(textEdit);
+    }
+
+    InputCompletionPopup *popup()
+    {
+        const auto children = this->input.findChildren<QWidget *>();
+        for (auto *child : children)
+        {
+            if (auto *result = dynamic_cast<InputCompletionPopup *>(child))
+            {
+                return result;
+            }
+        }
+        return nullptr;
+    }
+
+    GenericListView *list()
+    {
+        auto *result = this->popup();
+        return result ? result->findChild<GenericListView *>() : nullptr;
+    }
+
+    void pressTab()
+    {
+        QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier, "\t");
+        QApplication::sendEvent(this->edit(), &tab);
+    }
+
+    void pressBacktab()
+    {
+        QKeyEvent backtab(QEvent::KeyPress, Qt::Key_Backtab, Qt::ShiftModifier);
+        QApplication::sendEvent(this->edit(), &backtab);
+    }
+
+    MockApplication app;
+    Split split{nullptr};
+    SplitInput &input;
+};
+
 }  // namespace
 
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
@@ -180,6 +269,139 @@ TEST_F(SplitInputCompletionTest, UsernameCompletionPreservesUndoHistory)
     EXPECT_EQ("boring game @fors", this->input.getInputText());
     this->input.undoInput();
     EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(PopupCycleFixture, UsernameSelectionCyclesWithTab)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    ASSERT_NE(this->edit(), nullptr);
+
+    this->input.insertText("@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_TRUE(this->popup()->isVisible());
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(1, 0));
+    const auto *selected = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(list->currentIndex().data()));
+    ASSERT_NE(selected, nullptr);
+    const auto selectedText = "@" + selected->insertionText() + ", ";
+
+    // The first tab accepts the selected username
+    this->pressTab();
+    const auto first = this->input.getInputText();
+    EXPECT_EQ(first, selectedText);
+
+    // Further tabs cycle through the popup usernames
+    this->pressTab();
+    const auto second = this->input.getInputText();
+    EXPECT_TRUE(second == "@zzpopupfirst, " || second == "@zzpopupsecond, ");
+    EXPECT_NE(second, first);
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), first);
+    this->pressBacktab();
+    EXPECT_EQ(this->input.getInputText(), second);
+}
+
+TEST_F(PopupCycleFixture, EnterAcceptanceCyclesWithTab)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    this->input.insertText("@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(1, 0));
+
+    // Enter accepts the popup item and tab continues through its list
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, "\r");
+    QApplication::sendEvent(this->edit(), &enter);
+    const auto first = this->input.getInputText();
+    EXPECT_TRUE(first == "@zzpopupfirst, " || first == "@zzpopupsecond, ");
+    this->pressTab();
+    EXPECT_NE(this->input.getInputText(), first);
+}
+
+TEST_F(PopupCycleFixture, OneCharacterSelectionCyclesAfterClick)
+{
+    this->setEmotes({"⚽", "⚽more"}, true);
+    this->input.insertText(":~⚽");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    const auto *first = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(list->model()->index(0, 0).data()));
+    ASSERT_NE(first, nullptr);
+    const auto selection = list->model()->index(
+        first->insertionText() == QString::fromUtf8("⚽") ? 0 : 1, 0);
+    const auto *selected = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(selection.data()));
+    ASSERT_NE(selected, nullptr);
+    ASSERT_EQ(selected->insertionText(), QString::fromUtf8("⚽"));
+
+    // Clicking a one-character result still allows tab to choose the next
+    list->setCurrentIndex(selection);
+    Q_EMIT list->clicked(selection);
+    EXPECT_EQ(this->input.getInputText(), QString::fromUtf8("⚽ "));
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), QString::fromUtf8("⚽more "));
+}
+
+TEST_F(PopupCycleFixture, CompletionAfterNewlineKeepsPreviousLine)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    this->input.insertText("previous\n@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(0, 0));
+
+    // Cycling a completion on a new line keeps the text before the newline
+    this->pressTab();
+    const auto first = this->input.getInputText();
+    ASSERT_TRUE(first.startsWith("previous\n@"));
+    this->pressTab();
+    const auto second = this->input.getInputText();
+    EXPECT_TRUE(second.startsWith("previous\n@"));
+    EXPECT_NE(second, first);
+}
+
+TEST_F(PopupCycleFixture, DuplicateEmoteNamesCycleOnce)
+{
+    this->setEmotes({"zzdupone", "zzduptwo"});
+    auto duplicate = std::make_shared<Emote>();
+    duplicate->name = EmoteName{"zzdupone"};
+    auto globalEmotes = std::make_shared<EmoteMap>();
+    globalEmotes->emplace(duplicate->name, duplicate);
+    this->app.bttv.setEmotes(std::move(globalEmotes));
+
+    this->input.insertText(":zzdup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    // The same emote name appears in both the channel and global results
+    ASSERT_EQ(list->model()->rowCount(), 3);
+
+    int lastDuplicateRow = -1;
+    int duplicateCount = 0;
+    for (int row = 0; row < list->model()->rowCount(); ++row)
+    {
+        const auto *item = dynamic_cast<const InputCompletionItem *>(
+            GenericListItem::fromVariant(list->model()->index(row, 0).data()));
+        ASSERT_NE(item, nullptr);
+        if (item->insertionText() == "zzdupone")
+        {
+            lastDuplicateRow = row;
+            ++duplicateCount;
+        }
+    }
+    ASSERT_EQ(duplicateCount, 2);
+    ASSERT_GE(lastDuplicateRow, 0);
+    list->setCurrentIndex(list->model()->index(lastDuplicateRow, 0));
+
+    // Selecting a duplicate skips the other copy on the next tab
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "zzdupone ");
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "zzduptwo ");
 }
 
 TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)
