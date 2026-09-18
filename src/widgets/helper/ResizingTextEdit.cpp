@@ -229,7 +229,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    if (!event->text().isEmpty())
+    if (!event->text().isEmpty() && event->key() != Qt::Key_Tab &&
+        event->key() != Qt::Key_Backtab)
     {
         this->completionInProgress_ = false;
     }
@@ -262,6 +263,7 @@ void ResizingTextEdit::focusOutEvent(QFocusEvent *event)
 
 void ResizingTextEdit::setCompleter(QCompleter *c)
 {
+    this->completionInProgress_ = false;
     if (this->completer_)
     {
         QObject::disconnect(this->completer_, nullptr, this, nullptr);
@@ -287,6 +289,29 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
 void ResizingTextEdit::resetCompletion()
 {
     this->completionInProgress_ = false;
+}
+
+bool ResizingTextEdit::isCompletionInProgress() const
+{
+    return this->completionInProgress_;
+}
+
+void ResizingTextEdit::continueCompletion(const QStringList &completions,
+                                          int currentRow)
+{
+    if (!this->completer_ || completions.isEmpty())
+    {
+        return;
+    }
+
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *model = dynamic_cast<TabCompletionModel *>(this->completer_->model());
+    assert(model != nullptr);
+    model->setStringList(completions);
+    this->completer_->setModel(model);
+    this->completer_->setCompletionPrefix({});
+    this->completer_->setCurrentRow(currentRow);
+    this->completionInProgress_ = true;
 }
 
 void ResizingTextEdit::insertCompletion(const QString &completion)

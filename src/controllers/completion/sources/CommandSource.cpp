@@ -17,19 +17,29 @@ namespace {
 
 void addCommand(const QString &command, std::vector<CommandItem> &out)
 {
+    CommandItem item;
     if (command.startsWith('/') || command.startsWith('.'))
     {
-        out.push_back({
+        item = {
             .name = command.mid(1),
             .prefix = command.at(0),
-        });
+        };
     }
     else
     {
-        out.push_back({
+        item = {
             .name = command,
             .prefix = "",
+        };
+    }
+
+    const auto duplicate =
+        std::ranges::find_if(out, [&item](const auto &existing) {
+            return existing.name == item.name && existing.prefix == item.prefix;
         });
+    if (duplicate == out.end())
+    {
+        out.push_back(std::move(item));
     }
 }
 
@@ -55,11 +65,11 @@ void CommandSource::update(const QString &query)
 void CommandSource::addToListModel(GenericListModel &model,
                                    size_t maxCount) const
 {
-    addVecToListModel(this->output_, model, maxCount,
-                      [this](const CommandItem &command) {
-                          return std::make_unique<InputCompletionItem>(
-                              nullptr, command.name, this->callback_);
-                      });
+    addVecToListModel(
+        this->output_, model, maxCount, [this](const CommandItem &command) {
+            return std::make_unique<InputCompletionItem>(
+                nullptr, command.prefix + command.name, this->callback_);
+        });
 }
 
 void CommandSource::addToStringList(QStringList &list, size_t maxCount,
