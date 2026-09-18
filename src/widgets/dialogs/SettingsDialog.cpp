@@ -431,6 +431,14 @@ void SettingsDialog::showEvent(QShowEvent *e)
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {
+    for (auto *tab : this->tabs_)
+    {
+        if (auto *page = tab->pageIfLoaded())
+        {
+            page->onSettingsDialogAccepted();
+        }
+    }
+
     if (!getApp()->getArgs().dontSaveSettings)
     {
         getApp()->getCommands()->save();
@@ -443,6 +451,14 @@ void SettingsDialog::onOkClicked()
 
 void SettingsDialog::onCancelClicked()
 {
+    for (auto *tab : this->tabs_)
+    {
+        if (auto *page = tab->pageIfLoaded())
+        {
+            page->onSettingsDialogRejected();
+        }
+    }
+
     getSettings()->restoreSnapshot();
 
     this->close();

@@ -8,6 +8,7 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/UserData.hpp"
 #include "Test.hpp"
+#include "widgets/settingspages/NicknamesPage.hpp"
 
 #include <QApplication>
 #include <QLineEdit>
@@ -15,6 +16,21 @@
 #include <QTableView>
 
 using namespace chatterino;
+
+namespace {
+
+class NicknameApplication : public mock::BaseApplication
+{
+public:
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
+
+    mock::UserDataController userData;
+};
+
+}  // namespace
 
 TEST(Nickname, UserNicknameSerialization)
 {
@@ -139,6 +155,68 @@ TEST(Nickname, AccountRowsUseUserData)
 
     // The removed row disappears from the table.
     EXPECT_EQ(model.rowCount({}), static_cast<int>(legacyEntries));
+}
+
+TEST(Nickname, CancelRestoresAccountNickname)
+{
+    NicknameApplication app;
+    const auto legacyEntries = app.settings.nicknames.raw().size();
+    app.userData.setUserNickname("11148817", "pajlada", "Pie Ladder");
+    app.userData.setUserNotes("11148817", "old note");
+    NicknamesPage page;
+    auto *table = page.findChild<QTableView *>();
+    ASSERT_NE(table, nullptr);
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *model = dynamic_cast<NicknamesModel *>(table->model());
+    ASSERT_NE(model, nullptr);
+    const auto row = model->rowCount({}) - 1;
+
+    ASSERT_TRUE(model->removeRow(row));
+    app.settings.nicknames.append(Nickname{"pajlada", "paja", false, false});
+    app.userData.setUserNotes("11148817", "new note");
+
+    // Cancelling restores the account nickname.
+    page.onSettingsDialogRejected();
+    const auto restored = app.userData.getUser("11148817");
+    ASSERT_TRUE(restored);
+    const auto restoredData = restored.value_or(UserData{});
+    EXPECT_EQ(restoredData.nickname, "Pie Ladder");
+
+    // The account row is restored in the table.
+    EXPECT_EQ(model->rowCount({}), row + 1);
+
+    // The added legacy entry is removed.
+    EXPECT_EQ(app.settings.nicknames.raw().size(), legacyEntries);
+
+    // Unrelated user data is left unchanged.
+    EXPECT_EQ(restoredData.notes, "new note");
+}
+
+TEST(Nickname, CancelRestoresLegacyNickname)
+{
+    NicknameApplication app;
+    const auto legacyEntries = app.settings.nicknames.raw().size();
+    app.settings.nicknames.append(
+        Nickname{"pajlada", "Pie Ladder", false, false});
+    NicknamesPage page;
+    auto *table = page.findChild<QTableView *>();
+    ASSERT_NE(table, nullptr);
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *model = dynamic_cast<NicknamesModel *>(table->model());
+    ASSERT_NE(model, nullptr);
+
+    model->setAccountNickname("11148817", "pajlada", "paja");
+    app.settings.nicknames.removeAt(static_cast<int>(legacyEntries));
+
+    // Cancelling removes the new account nickname.
+    page.onSettingsDialogRejected();
+    EXPECT_FALSE(app.userData.getUser("11148817"));
+
+    // The removed legacy entry is restored.
+    ASSERT_EQ(app.settings.nicknames.raw().size(), legacyEntries + 1);
+    EXPECT_EQ(app.settings.nicknames.readOnly()->back().name(), "pajlada");
+    EXPECT_EQ(app.settings.nicknames.readOnly()->back().replace(),
+              "Pie Ladder");
 }
 
 TEST(Nickname, InlineEditUpdatesOriginalEntry)

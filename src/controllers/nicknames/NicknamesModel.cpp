@@ -40,9 +40,12 @@ void setDisabledText(QStandardItem *item)
 
 }  // namespace
 
-NicknamesModel::NicknamesModel(IUserDataController *userData, QObject *parent)
+NicknamesModel::NicknamesModel(
+    IUserDataController *userData, QObject *parent,
+    std::function<void(const QString &)> accountNicknameChanging)
     : SignalVectorModel<Nickname>(5, parent)
     , userData_(userData)
+    , accountNicknameChanging_(std::move(accountNicknameChanging))
 {
     this->signalHolder_.managedConnect(userData->userDataUpdated(), [this] {
         this->refreshAccountRows();
@@ -53,6 +56,10 @@ void NicknamesModel::setAccountNickname(const QString &userID,
                                         const QString &username,
                                         const QString &nickname)
 {
+    if (this->accountNicknameChanging_)
+    {
+        this->accountNicknameChanging_(userID);
+    }
     this->userData_->setUserNickname(userID, username, nickname);
 }
 

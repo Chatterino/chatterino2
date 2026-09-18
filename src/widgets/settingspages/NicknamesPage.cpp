@@ -374,6 +374,16 @@ namespace chatterino {
 
 NicknamesPage::NicknamesPage()
 {
+    this->rememberLegacyNicknames();
+    this->managedConnections_.managedConnect(
+        getSettings()->nicknames.itemInserted, [this](const auto &) {
+            this->legacyNicknamesChanged_ = true;
+        });
+    this->managedConnections_.managedConnect(
+        getSettings()->nicknames.itemRemoved, [this](const auto &) {
+            this->legacyNicknamesChanged_ = true;
+        });
+
     LayoutCreator<NicknamesPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
@@ -387,7 +397,10 @@ NicknamesPage::NicknamesPage()
         "entries match by name."
         "\nTwitch account entries cannot be reordered.");
 
-    auto *model = new NicknamesModel(getApp()->getUserData(), nullptr);
+    auto *model = new NicknamesModel(getApp()->getUserData(), nullptr,
+                                     [this](const QString &userID) {
+                                         this->rememberAccountNickname(userID);
+                                     });
     model->initialize(&getSettings()->nicknames);
     auto *view = layout.emplace<EditableModelView>(model).getElement();
     this->view_ = view;
@@ -451,6 +464,70 @@ bool NicknamesPage::filterElements(const QString &query)
 {
     std::array fields{0, 1, 2, 3};
     return this->view_->filterSearchResults(query, fields);
+}
+
+void NicknamesPage::onShow()
+{
+    this->originalAccountNicknames_.clear();
+    this->rememberLegacyNicknames();
+}
+
+void NicknamesPage::onSettingsDialogAccepted()
+{
+    this->originalAccountNicknames_.clear();
+    this->rememberLegacyNicknames();
+}
+
+void NicknamesPage::onSettingsDialogRejected()
+{
+    auto originals = std::exchange(this->originalAccountNicknames_, {});
+    for (auto it = originals.cbegin(); it != originals.cend(); ++it)
+    {
+        if (*it && !(*it)->nickname.isEmpty())
+        {
+            getApp()->getUserData()->setUserNickname(
+                it.key(), (*it)->lastSeenUsername, (*it)->nickname);
+        }
+        else
+        {
+            getApp()->getUserData()->setUserNickname(it.key(), {}, {});
+        }
+    }
+    this->restoreLegacyNicknames();
+}
+
+void NicknamesPage::rememberAccountNickname(const QString &userID)
+{
+    if (!this->originalAccountNicknames_.contains(userID))
+    {
+        this->originalAccountNicknames_.insert(
+            userID, getApp()->getUserData()->getUser(userID));
+    }
+}
+
+void NicknamesPage::rememberLegacyNicknames()
+{
+    this->originalLegacyNicknames_ = getSettings()->nicknames.raw();
+    this->legacyNicknamesChanged_ = false;
+}
+
+void NicknamesPage::restoreLegacyNicknames()
+{
+    if (!this->legacyNicknamesChanged_)
+    {
+        return;
+    }
+
+    auto &nicknames = getSettings()->nicknames;
+    while (!nicknames.raw().empty())
+    {
+        nicknames.removeAt(static_cast<int>(nicknames.raw().size()) - 1);
+    }
+    for (const auto &nickname : this->originalLegacyNicknames_)
+    {
+        nicknames.append(nickname);
+    }
+    this->legacyNicknamesChanged_ = false;
 }
 
 }  // namespace chatterino

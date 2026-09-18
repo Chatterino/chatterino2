@@ -58,6 +58,14 @@ public:
     {
     }
 
+    virtual void onSettingsDialogAccepted()
+    {
+    }
+
+    virtual void onSettingsDialogRejected()
+    {
+    }
+
 protected:
     SettingsDialogTab *tab_{};
     pajlada::Signals::SignalHolder managedConnections_;

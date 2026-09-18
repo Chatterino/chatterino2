@@ -11,6 +11,7 @@
 #include <QObject>
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -36,7 +37,9 @@ struct NicknameEntry {
 class NicknamesModel : public SignalVectorModel<Nickname>
 {
 public:
-    NicknamesModel(IUserDataController *userData, QObject *parent);
+    NicknamesModel(
+        IUserDataController *userData, QObject *parent,
+        std::function<void(const QString &)> accountNicknameChanging = {});
     std::optional<NicknameEntry> entryAt(int row) const;
     void setAccountNickname(const QString &userID, const QString &username,
                             const QString &nickname);
@@ -68,6 +71,7 @@ private:
     void updateAccountRow(int row, const QString &userID, const UserData &data);
 
     IUserDataController *userData_{};
+    std::function<void(const QString &)> accountNicknameChanging_;
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<QString> accountUserIDs_;
 };
