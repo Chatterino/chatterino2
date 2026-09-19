@@ -26,7 +26,6 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
             // User wants NO color, should fall through: std::shared_ptr<QColor> = std::shared_ptr<QColor>({}) // invalid QColor
 
             return HighlightResult{
-                .ids = {H::ID.toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
                 .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),

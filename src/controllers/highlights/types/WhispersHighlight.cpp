@@ -25,7 +25,6 @@ HighlightCheck WhispersHighlight::buildCheck() const
             std::shared_ptr<QColor> backgroundColor;
 
             return HighlightResult{
-                .ids = {H::ID.toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
                 .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
