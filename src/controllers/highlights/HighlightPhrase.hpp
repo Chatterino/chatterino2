@@ -5,13 +5,13 @@
 #pragma once
 
 #include "controllers/highlights/types/MessageHighlight.hpp"
-#include "pajlada/serialize/common.hpp"
-#include "pajlada/serialize/deserialize.hpp"
-#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/serialize.hpp>
+#include <pajlada/serialize/common.hpp>
+#include <pajlada/serialize/deserialize.hpp>
+#include <pajlada/serialize/serialize.hpp>
 #include <QColor>
 #include <QString>
 #include <QUrl>
