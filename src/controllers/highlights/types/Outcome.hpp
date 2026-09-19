@@ -19,8 +19,10 @@
 namespace chatterino::highlights {
 
 struct Outcome {
-    explicit Outcome(const QColor &defaultBackgroundColor_)
+    explicit Outcome(const QColor &defaultBackgroundColor_,
+                     QStringView defaultSound_ = {})
         : defaultBackgroundColor(defaultBackgroundColor_)
+        , defaultSound(defaultSound_)
     {
         *this->resolvedBackgroundColor = this->defaultBackgroundColor;
     }
@@ -33,23 +35,22 @@ struct Outcome {
     /// On macOS, this will make Chatterino bounce in the taskbar.
     std::optional<bool> alert;
 
-    /// Play a sound when this highlight is triggered.
-    /// A null sound means whatever the default sound is should be played (controlled by the highlight)
-    /// An empty string means no sound is played
-    /// A string matching one of our built-in sounds means it will play the given resource
-    /// An absolute file URL, probably prefixed with file:/// meaning it will play a custom sound
+    /// The user-configured string for of the sound that will be played.
+    /// A null sound means whatever the highlight-controlled default sound will be played.
+    /// An empty string means no sound is played.
+    /// A string matching one of our built-in sounds (e.g. "001-ping2") means it will play the given resource.
+    /// An absolute file URL, probably prefixed with file:/// means it will play the custom sound at that path.
     QString sound;
 
     void setSound(const QString &newSound);
 
+    /// Contains the URL that should actually be played when a highlight is triggered, or invalid/empty if no sound should be played.
     /// Transient. Not stored as-is in the JSON.
     QUrl soundURL;
 
     /*
     std::optional<int> volume;
     */
-
-    QUrl getSoundURLWithDefault(const QStringView &defaultSound) const;
 
     void setBackgroundColor(const std::optional<QColor> &color)
     {
@@ -80,6 +81,9 @@ struct Outcome {
 
     // This should be set during initialization
     QColor defaultBackgroundColor;
+
+    // This should be set during initialization
+    QStringView defaultSound;
 
     /// The background color to apply to the message.
     /// If the pointer is unset, use the highlight's default color

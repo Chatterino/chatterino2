@@ -71,6 +71,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightSounds.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightCommon.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightOutcome.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ColorInput.cpp
     # Add your new file above this line!

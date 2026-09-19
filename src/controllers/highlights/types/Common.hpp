@@ -38,10 +38,18 @@ QString getName(const AllHighlights &h);
 
 bool isEnabled(const AllHighlights &h);
 
-/// Get the configured sound string - same as stored in the settings
-/// TODO: This currently does not take into consideration the default sound
+/// Get the configured sound string - same as stored in the settings.
+/// If a default sound is enabled, and no string is configured, it returns the default sound string.
 QString getSound(const AllHighlights &h);
 
+/// Gets the raw string the user has configured as the sound for the highlight.
+QString getSoundWithoutDefault(const AllHighlights &h);
+
+/// Returns the default sound of the highlight, as defined by the `SOUND_DEFAULT` static string.
+QStringView getDefaultSound(const AllHighlights &h);
+
+/// Gets the resolved URL for the sound that should play when this highlight is triggered.
+/// This takes the default sound of the highlight into consideration if the user has not configured any sound.
 QUrl getSoundURL(const AllHighlights &h);
 
 bool shouldShowInMentions(const AllHighlights &h);
@@ -50,12 +58,7 @@ bool shouldAlert(const AllHighlights &h);
 
 bool shouldPlaySound(const AllHighlights &h);
 
-bool willPlayCustomSound(const AllHighlights &h);
-
 QIcon getIcon(const AllHighlights &h);
-
-/// Returns the default sound of the highlight, as defined by the `SOUND_DEFAULT` static string.
-QStringView getDefaultSound(const AllHighlights &h);
 
 /// Get the background color defined for the highlight, or its default value
 std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h);

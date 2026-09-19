@@ -199,6 +199,15 @@ QString getSound(const AllHighlights &h)
                       h);
 }
 
+QString getSoundWithoutDefault(const AllHighlights &h)
+{
+    return std::visit(
+        [](auto &&h) {
+            return h.outcome.sound;
+        },
+        h);
+}
+
 QStringView getDefaultSound(const AllHighlights &h)
 {
     return std::visit(variant::Overloaded{
@@ -208,7 +217,7 @@ QStringView getDefaultSound(const AllHighlights &h)
 
                               return ActualType::SOUND_DEFAULT;
                           },
-                          [](auto &&h) {
+                          [](auto && /*h*/) {
                               return QStringView{};
                           },
                       },
@@ -247,30 +256,11 @@ bool shouldAlert(const AllHighlights &h)
 
 bool shouldPlaySound(const AllHighlights &h)
 {
-    return false;
-    /* TODO
     return std::visit(
         [](auto &&h) {
-            using ActualType = std::decay_t<decltype(h)>;
-            return h.outcome.playSound.value_or(ActualType::PLAY_SOUND_DEFAULT);
+            return !h.outcome.soundURL.isEmpty();
         },
         h);
-        */
-}
-
-bool willPlayCustomSound(const AllHighlights &h)
-{
-    return false;
-    /* TODO
-    return std::visit(
-        [](auto &&h) {
-            using ActualType = std::decay_t<decltype(h)>;
-            return h.outcome.playSound.value_or(
-                       ActualType::PLAY_SOUND_DEFAULT) &&
-                   !h.outcome.customSoundURL.isEmpty();
-        },
-        h);
-        */
 }
 
 QIcon getIcon(const AllHighlights &h)
