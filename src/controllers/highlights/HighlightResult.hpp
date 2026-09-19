@@ -9,7 +9,6 @@
 #include <QUrl>
 
 #include <memory>
-#include <optional>
 #include <ostream>
 
 namespace chatterino {
@@ -19,9 +18,6 @@ struct HighlightResult {
      * @brief Construct an empty HighlightResult with all side-effects disabled
      **/
     static HighlightResult emptyResult();
-
-    // XXX TODO TEMP TEMPORARY ID OF HIGHLIGHT THAT TRIGGERED THE HIGHLIGHT :-)
-    QStringList ids;
 
     /**
      * @brief true if highlight should trigger the taskbar to flash
@@ -35,7 +31,7 @@ struct HighlightResult {
     /**
      * @brief set if highlight should set a background color
      **/
-    std::shared_ptr<QColor> color{};
+    std::shared_ptr<QColor> color;
 
     /**
      * @brief true if highlight should show message in the /mentions split
