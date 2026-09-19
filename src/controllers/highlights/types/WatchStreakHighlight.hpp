@@ -38,18 +38,8 @@ struct WatchStreakHighlight {
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
-    // TODO: Should we disable setting of the "show in mentions" somehow cuz it's not supported?
-    static constexpr bool SUPPORT_SHOW_IN_MENTIONS = false;
     static constexpr bool ALERT_DEFAULT = false;
-    // TODO: does not support flash taskbar
-    static constexpr bool SUPPORT_ALERT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(0, 130, 255, 70);
-
-    // Default state:
-    // Enabled = true
-    // Show in mentions = unavailable (always false)
-    // Flash taskbar = unavailable (always false)
-    // Play sound = false
 
     QString name;
     std::optional<bool> enabled;
