@@ -66,4 +66,7 @@ std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h);
 /// If there's an error, the returned QString will return a message the user can read.
 QString getError(const AllHighlights &h);
 
+/// Returns true of the given highlight is user-defined
+bool isUserDefined(const AllHighlights &h);
+
 }  // namespace chatterino::highlights
