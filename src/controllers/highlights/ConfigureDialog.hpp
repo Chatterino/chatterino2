@@ -18,7 +18,7 @@ class ConfigureDialog : public BasePopup
 public:
     ConfigureDialog(AllHighlights _data, QWidget *parent);
 
-    Q_SIGNAL void confirmed(AllHighlights data);
+    Q_SIGNAL void confirmed(chatterino::highlights::AllHighlights data);
 
 private:
     AllHighlights data;
