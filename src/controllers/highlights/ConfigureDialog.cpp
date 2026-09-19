@@ -471,6 +471,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             auto *w = new QComboBox();
             auto currentSound = highlights::getSound(this->data);
             auto *soundURLLabel = new QLabel;
+            auto *testSound = new QPushButton("Test sound");
 
             w->addItem("None", u""_s);  // empty string = disable sound
             for (const auto &[soundID, defaultSound] :
@@ -487,6 +488,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             {
                 w->setCurrentText("None");
                 soundURLLabel->setText("Not playing any sound");
+                testSound->setEnabled(false);
             }
             else
             {
@@ -509,7 +511,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
             QObject::connect(
                 w, QOverload<int>::of(&QComboBox::currentIndexChanged),
-                [this, numRows, w, soundURLLabel](int index) {
+                [this, numRows, w, soundURLLabel, testSound](int index) {
                     auto data = w->currentData();
                     if (data.canConvert<highlights::DefaultSound>())
                     {
@@ -524,6 +526,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                                defaultSound.displayName);
                         this->previousSoundIndex = index;
                         w->removeItem(numRows);
+                        testSound->setEnabled(true);
                     }
                     else if (auto sound = data.toString(); sound.isNull())
                     {
@@ -546,6 +549,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             w->removeItem(numRows);
                             w->addItem(fileUrl.fileName());
                             w->setCurrentIndex(numRows);
+                            testSound->setEnabled(true);
                         }
                         else
                         {
@@ -565,6 +569,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         soundURLLabel->setText("Not playing any sound");
                         this->previousSoundIndex = index;
                         w->removeItem(numRows);
+                        testSound->setEnabled(false);
                     }
                 });
 
@@ -624,15 +629,14 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             });
             */
 
-            auto *test = new QPushButton("Test playsound");
-            QObject::connect(test, &QPushButton::pressed, this, [this] {
+            QObject::connect(testSound, &QPushButton::pressed, this, [this] {
                 std::visit(
                     [](auto &&h) {
                         getApp()->getSound()->play(h.outcome.soundURL);
                     },
                     this->data);
             });
-            l->addRow(test);
+            l->addRow(testSound);
         }
 
         group->setLayout(l);
