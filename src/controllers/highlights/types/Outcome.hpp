@@ -51,7 +51,7 @@ struct Outcome {
 
     QUrl getSoundURLWithDefault(const QStringView &defaultSound) const;
 
-    void setBackgroundColor(std::optional<QColor> color)
+    void setBackgroundColor(const std::optional<QColor> &color)
     {
         this->backgroundColor = color;
 
