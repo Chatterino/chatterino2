@@ -145,7 +145,7 @@ TEST_P(TestSettingsMigration, Run)
 
     if (!snapshot->run(got, UPDATE_SNAPSHOTS))
     {
-        // The snapshot failed - using ASSERT_EQ here to try to get some better output
+        // The snapshot failed - using EXPECT_EQ here to try to get some better output
         EXPECT_EQ(QJsonDocument(snapshot->output().toObject()).toJson(),
                   QJsonDocument(got).toJson())
             << "Snapshot " << snapshot->name() << " comparison";
@@ -179,7 +179,7 @@ TEST_P(TestSettingsCleanup, Run)
 
     if (!snapshot->run(got, UPDATE_SNAPSHOTS))
     {
-        // The snapshot failed - using ASSERT_EQ here to try to get some better output
+        // The snapshot failed - using EXPECT_EQ here to try to get some better output
         EXPECT_EQ(QJsonDocument(snapshot->output().toObject()).toJson(),
                   QJsonDocument(got).toJson())
             << "Snapshot " << snapshot->name() << " comparison";
