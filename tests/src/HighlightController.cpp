@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "controllers/highlights/types/WhispersHighlight.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
@@ -621,9 +622,24 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
 
     HighlightController::recreateMissingBillTinHighlights(missing);
 
-    ASSERT_EQ(getSettings()->sharedHighlights.raw().size(), billTin)
+    const auto &hs = getSettings()->sharedHighlights.raw();
+    ASSERT_EQ(hs.size(), billTin)
         << "Number of highlights settings should match the list of bill tin "
            "highlights after recreate has been called";
+
+    ASSERT_EQ(highlights::getID(hs[0]), highlights::SubscriptionsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[1]), highlights::WhispersHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[2]), highlights::AnnouncementsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[3]), highlights::YourUsernameHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[4]), highlights::AutomodCaughtHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[5]), highlights::YourMessagesHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[6]),
+              highlights::SubscribedThreadHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[7]), highlights::ChannelPointsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[8]), highlights::FirstMessageHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[9]), highlights::WatchStreakHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[10]),
+              highlights::UncategorizedNotificationHighlight::ID);
 }
 
 }  // namespace chatterino
