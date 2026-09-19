@@ -69,14 +69,8 @@ HighlightCheck MessageHighlight::buildCheck() const
 
             if (!highlight.isMatch(p.originalMessage))
             {
-                qCDebug(LOG)
-                    << "NO MATCH - compared with highlight" << highlight;
                 return std::nullopt;
             }
-
-            qCDebug(LOG) << "MATCH - compared with highlight" << highlight
-                         << highlight.outcome.sound
-                         << highlight.outcome.soundURL;
 
             return HighlightResult{
                 .ids = {highlight.getID().toString()},

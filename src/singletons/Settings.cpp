@@ -296,9 +296,11 @@ void Settings::migrate(bool isTest)
 
     auto currentVersion = this->settingsVersion.getValue();
 
+    qCDebug(LOG) << "Migrating settings from" << currentVersion;
+
     if (currentVersion < 1)
     {
-        qCInfo(LOG) << "Migrating highlights";
+        qCInfo(LOG) << "Migrating highlights from" << currentVersion;
         this->migrateHighlights(isTest);
         currentVersion = 1;
         ranMigration = true;
@@ -308,9 +310,21 @@ void Settings::migrate(bool isTest)
 
     if (ranMigration)
     {
-        // TODO: IS THIS LEGAL?
         qCInfo(LOG) << "Saving settings after migrations";
-        this->requestSave();
+        auto res = this->requestSave();
+
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                qCWarning(LOG) << "Failed saving settings after migration";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                qCDebug(LOG) << "Succcessfully saved settings after migration";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                qCInfo(LOG) << "Skipped saving settings after migration";
+                break;
+        }
     }
 }
 
@@ -746,9 +760,21 @@ void Settings::cleanup()
 
     if (dirty)
     {
-        // TODO: IS THIS LEGAL?
         qCInfo(LOG) << "Saving after clean up";
-        this->requestSave();
+        auto res = this->requestSave();
+
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                qCWarning(LOG) << "Failed saving settings after cleanup";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                qCDebug(LOG) << "Succcessfully saved settings after cleanup";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                qCInfo(LOG) << "Skipped saving settings after cleanup";
+                break;
+        }
     }
 }
 
