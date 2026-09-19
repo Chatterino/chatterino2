@@ -34,6 +34,8 @@ bool MessageHighlight::isRegex() const
 void MessageHighlight::setRegex(std::optional<bool> newValue)
 {
     this->regex = newValue;
+
+    this->rebuildInternalRegularExpression();
 }
 
 bool MessageHighlight::isCaseSensitive() const
