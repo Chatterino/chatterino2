@@ -205,16 +205,17 @@ void HighlightController::recreateMissingBillTinHighlights(
 {
     using namespace chatterino::highlights;
 
-    recreateIfMissing<YourUsernameHighlight>(missingHighlights);
+    // The order here should as-closely-as-possible match the default order as set in the Settings migration.
+    recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
     recreateIfMissing<WhispersHighlight>(missingHighlights);
     recreateIfMissing<AnnouncementsHighlight>(missingHighlights);
-    recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
+    recreateIfMissing<YourUsernameHighlight>(missingHighlights);
+    recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
+    recreateIfMissing<YourMessagesHighlight>(missingHighlights);
+    recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
     recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
     recreateIfMissing<FirstMessageHighlight>(missingHighlights);
-    recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
-    recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
     recreateIfMissing<WatchStreakHighlight>(missingHighlights);
-    recreateIfMissing<YourMessagesHighlight>(missingHighlights);
     recreateIfMissing<UncategorizedNotificationHighlight>(missingHighlights);
 }
 
