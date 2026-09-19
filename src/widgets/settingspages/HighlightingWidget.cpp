@@ -96,7 +96,7 @@ HighlightingWidget::HighlightingWidget()
 
     view->setShowGrid(false);
 
-    QObject::connect(view, &QTableView::doubleClicked,
+    QObject::connect(view, &QTableView::doubleClicked, this,
                      [this, view](const QModelIndex &clicked) {
                          qCDebug(LOG) << "Double-clicked row";
                          this->openConfigureDialog(
