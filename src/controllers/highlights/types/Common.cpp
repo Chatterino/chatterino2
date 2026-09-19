@@ -310,4 +310,26 @@ QString getError(const AllHighlights &h)
                       h);
 }
 
+bool isUserDefined(const AllHighlights &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const highlights::MessageHighlight &) {
+                              return true;
+                          },
+                          [](const highlights::UserHighlight &) {
+                              return true;
+                          },
+                          [](const highlights::BadgeHighlight &) {
+                              return true;
+                          },
+                          [](const highlights::FilterHighlight &) {
+                              return true;
+                          },
+                          [](const auto &) {
+                              return false;
+                          },
+                      },
+                      h);
+}
+
 }  // namespace chatterino::highlights

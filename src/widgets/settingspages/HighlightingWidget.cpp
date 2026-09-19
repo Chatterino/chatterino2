@@ -11,17 +11,15 @@
 #include "singletons/Settings.hpp"
 #include "util/Variant.hpp"
 
-#include <qabstractitemview.h>
-#include <qboxlayout.h>
-#include <qheaderview.h>
-#include <qlabel.h>
-#include <qmenu.h>
-#include <qnamespace.h>
-#include <qpushbutton.h>
-#include <qstringlistmodel.h>
-#include <qtableview.h>
-#include <qtoolbutton.h>
+#include <QAbstractItemView>
+#include <QBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QMenu>
+#include <QPushButton>
+#include <QTableView>
 
+#include <array>
 #include <random>
 
 namespace chatterino {
@@ -34,11 +32,20 @@ namespace {
 const auto &LOG = chatterinoHighlights;
 
 /// Tips that will be randomized once on launch and shown at the top of the settings highlights page
-const std::vector<QStringView> TIPS{
+const constexpr std::array<QStringView, 3> TIPS{
     uR"(Filter highlights are handy for advanced highlights.)",
     uR"(User highlights highlights any message from the given user.)",
     uR"(You can edit a highlight by double-clicking it.)",
 };
+
+QStringView randomTip()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(0,
+                                            static_cast<int>(TIPS.size()) - 1);
+    return TIPS.at(distrib(gen));
+}
 
 void moveRow(QTableView *tableView, int dir)
 {
@@ -80,20 +87,15 @@ HighlightingWidget::HighlightingWidget()
     model->initialize(&getSettings()->sharedHighlights);
 
     auto *view = new QTableView(this);
-    // view->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
     view->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
     view->setEditTriggers(QAbstractItemView::NoEditTriggers);
     view->setModel(model);
     // Disallow navigating between tabs or rows with tab
     view->setTabKeyNavigation(false);
-    // view->setStyleSheet("*{color: red;} QTableView::item:focus{color: blue;}");
-    // view->setCornerButtonEnabled(true);
     view->verticalHeader()->hide();
     view->horizontalHeader()->hide();
-    //
     view->setMouseTracking(true);
-
     view->setShowGrid(false);
 
     QObject::connect(view, &QTableView::doubleClicked, this,
@@ -104,9 +106,6 @@ HighlightingWidget::HighlightingWidget()
                          return;
                      });
 
-    // view->resizeColumnsToContents();
-
-    // view->horizontalHeader()->setStretchLastSection(true);
     view->horizontalHeader()->setSectionResizeMode(
         highlights::Model::Column::Enabled, QHeaderView::ResizeToContents);
     view->horizontalHeader()->setSectionResizeMode(
@@ -117,15 +116,8 @@ HighlightingWidget::HighlightingWidget()
     auto *hints = new QHBoxLayout;
     layout->addLayout(hints);
 
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(
-            0, static_cast<int>(TIPS.size()) - 1);
-        auto tip = TIPS.at(distrib(gen));
-        hints->addWidget(
-            new QLabel("Highlights are evaluated from top to bottom. " % tip));
-    }
+    hints->addWidget(new QLabel(
+        "Highlights are evaluated from top to bottom. " % randomTip()));
 
     auto *buttons = new QHBoxLayout();
     layout->addLayout(buttons);
@@ -188,7 +180,6 @@ HighlightingWidget::HighlightingWidget()
     });
     edit->setEnabled(false);
 
-    // move up
     auto *moveUp = new QPushButton("Move up");
     buttons->addWidget(moveUp);
     QObject::connect(moveUp, &QPushButton::clicked, this, [view] {
@@ -196,7 +187,6 @@ HighlightingWidget::HighlightingWidget()
     });
     moveUp->setEnabled(false);
 
-    // move down
     auto *moveDown = new QPushButton("Move down");
     buttons->addWidget(moveDown);
     QObject::connect(moveDown, &QPushButton::clicked, this, [view] {
@@ -240,25 +230,8 @@ HighlightingWidget::HighlightingWidget()
                         .data(highlights::Model::DATA_ROLE)
                         .value<highlights::AllHighlights>();
 
-                auto removable =
-                    std::visit(variant::Overloaded{
-                                   [](const highlights::MessageHighlight &) {
-                                       return true;
-                                   },
-                                   [](const highlights::UserHighlight &) {
-                                       return true;
-                                   },
-                                   [](const highlights::BadgeHighlight &) {
-                                       return true;
-                                   },
-                                   [](const highlights::FilterHighlight &) {
-                                       return true;
-                                   },
-                                   [](const auto &) {
-                                       return false;
-                                   },
-                               },
-                               data);
+                // Only user-defined highlights (e.g. Message Highlights) are removable.
+                auto removable = highlights::isUserDefined(data);
                 remove->setDisabled(!removable);
 
                 if (selectedItem.row() == 0)
@@ -317,6 +290,11 @@ void HighlightingWidget::openConfigureDialog(
                     .value<highlights::AllHighlights>();
 
     auto id = highlights::getID(data);
+
+    if (this->configureCloseBehaviour == ConfigureCloseBehaviour::Remove)
+    {
+        assert(highlights::isUserDefined(data));
+    }
 
     this->configureDialog = new highlights::ConfigureDialog(data, this);
     QObject::connect(
