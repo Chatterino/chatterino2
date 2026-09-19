@@ -332,9 +332,6 @@ void Settings::migrateHighlights(bool isTest)
 {
     using namespace chatterino::highlights;
 
-    // TODO: This is not necessary in release - remove this
-    this->p->sharedHighlightsSetting.setValue({});
-
     // this migration ID is used for tests to provide a stable "uuid" replacement for created user defined highlights,
     // and also to provide some output to the user in their logs for how many highlights were migrated
     int migrationID = 0;

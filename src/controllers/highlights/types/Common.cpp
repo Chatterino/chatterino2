@@ -31,7 +31,6 @@ concept HasDynamicID = requires(T a) {
 
 template <typename T>
 concept HasDynamicDefaultName = requires(T a) {
-    // TODO: QStringView
     { a.getDefaultName() } -> std::same_as<QString>;
 };
 
