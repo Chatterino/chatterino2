@@ -809,12 +809,6 @@ bool Settings::cleanupHighlights()
             continue;
         }
 
-        std::visit(
-            [i](const auto &asd) {
-                qInfo().nospace() << "XXX: highlight[" << i << "]: " << asd;
-            },
-            h);
-
         const auto [_, isNew] = seenIDs.insert(id);
         if (!isNew)
         {
