@@ -13,6 +13,7 @@ path = [
     "music-note-1.svg",
     "music-note-2.svg",
     "speaker-mute.svg",
+    "shield.svg",
 ]
 SPDX-FileCopyrightText = "Copyright (c) 2020 Microsoft Corporation"
 SPDX-License-Identifier = "MIT"
