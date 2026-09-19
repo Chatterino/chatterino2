@@ -6,11 +6,11 @@
 
 #include "controllers/highlights/types/Common.hpp"
 #include "controllers/highlights/types/Outcome.hpp"
-#include "pajlada/serialize/deserialize.hpp"
-#include "pajlada/serialize/serialize.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
+#include <pajlada/serialize/deserialize.hpp>
+#include <pajlada/serialize/serialize.hpp>
 #include <QDebug>
 #include <QStringView>
 #include <rapidjson/document.h>
