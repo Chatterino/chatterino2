@@ -668,6 +668,10 @@ MessagePtr makeAutomodHoldMessageHeader(
         u"AutoMod: Held a message for reason: " % reason %
         u". Allow will post it in chat. Allow Deny");
 
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    builder.parseHighlights(tags, {}, {}, channel);
+
     return builder.release();
 }
 
@@ -707,6 +711,10 @@ MessagePtr makeAutomodHoldMessageBody(
 
     builder.setMessageAndSearchText(displayName % u": " %
                                     event.message.text.qt());
+
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    builder.parseHighlights(tags, {}, {}, channel);
 
     return builder.release();
 }
