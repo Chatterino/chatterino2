@@ -10,13 +10,13 @@
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "controllers/highlights/types/WhispersHighlight.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "messages/MessageBuilder.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchBadge.hpp"  // for Badge
+#include "providers/twitch/TwitchBadge.hpp"
 #include "Test.hpp"
 
 #include <QDebug>
@@ -279,16 +279,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             .input =
                 {
                     .testName = "[User Highlight] Match 001",
-                    .args = MessageParseArgs{},   // no special args
-                    .badges = {},                 // no badges
-                    .senderName = "pajlada",      // sender name
-                    .originalMessage = "hello!",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "pajlada",
+                    .originalMessage = "hello!",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
                             .alert = false,
@@ -302,17 +301,16 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             .input =
                 {
                     .testName = "No Match 001",
-                    .args = MessageParseArgs{},   // no special args
-                    .badges = {},                 // no badges
-                    .senderName = "pajlada2",     // sender name
-                    .originalMessage = "hello!",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "pajlada2",
+                    .originalMessage = "hello!",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = false,                            // state
-                    .result = HighlightResult::emptyResult(),  // result
+                    .state = false,
+                    .result = HighlightResult::emptyResult(),
                 },
         },
         {
@@ -325,7 +323,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                             {
                                 "founder",
                                 "0",
-                            },  // founder badge
+                            },
                         },
                     .senderName = "pajlada22",
                     .originalMessage = "hello!",
@@ -353,7 +351,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                             {
                                 "founder",
                                 "0",
-                            },  // founder badge
+                            },
                         },
                     .senderName = "pajlada",
                     .originalMessage = "hello!",
@@ -378,7 +376,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                 {
                     .testName = "[Badge Highlight] alert disabled, show in "
                                 "mentions enabled",
-                    .args = MessageParseArgs{},  // no special args
+                    .args = MessageParseArgs{},
                     .badges =
                         {
                             {
@@ -406,11 +404,10 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             // User mention with showInMentions
             .input =
                 {
-                    // input
-                    .args = MessageParseArgs{},  // no special args
-                    .badges = {},                // no badges
-                    .senderName = "gempir",      // sender name
-                    .originalMessage = "a",      // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "gempir",
+                    .originalMessage = "a",
                     .runContext = ctx,
                 },
             .expected =
@@ -429,16 +426,15 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             .input =
                 {
                     .testName = "Test A",
-                    .args = MessageParseArgs{},       // no special args
-                    .badges = {},                     // no badges
-                    .senderName = "a",                // sender name
-                    .originalMessage = "!testmanxd",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "a",
+                    .originalMessage = "!testmanxd",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
                             .alert = true,
@@ -455,15 +451,14 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                 {
                     .testName = "MessageHighlight from sender should be "
                                 "ignored, but UserHighlight should not",
-                    .args = MessageParseArgs{},       // no special args
-                    .badges = {},                     // no badges
-                    .senderName = "testaccount_420",  // sender name
-                    .originalMessage = "!testmanxd",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "testaccount_420",
+                    .originalMessage = "!testmanxd",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
                     .state = true,
                     .result =
                         {
@@ -478,7 +473,6 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
             // TEST CASE: Whispers that do not hit a highlight phrase should not be added to /mentions
             .input =
                 {
-                    // input
                     .args =
                         MessageParseArgs{
                             .isReceivedWhisper = true,
@@ -516,8 +510,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
                 },
             .expected =
                 {
-                    // expected
-                    .state = true,  // state
+                    .state = true,
                     .result =
                         {
                             .alert = true,
@@ -555,35 +548,32 @@ TEST_F(HighlightControllerTest, AnonEmpty)
         {
             .input =
                 {
-                    // input
-                    .args = MessageParseArgs{},   // no special args
-                    .badges = {},                 // no badges
-                    .senderName = "pajlada2",     // sender name
-                    .originalMessage = "hello!",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "pajlada2",
+                    .originalMessage = "hello!",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = false,                            // state
-                    .result = HighlightResult::emptyResult(),  // result
+                    .state = false,
+                    .result = HighlightResult::emptyResult(),
                 },
         },
         {
             // anonymous default username
             .input =
                 {
-                    .args = MessageParseArgs{},           // no special args
-                    .badges = {},                         // no badges
-                    .senderName = "pajlada2",             // sender name
-                    .originalMessage = "justinfan64537",  // original message
+                    .args = MessageParseArgs{},
+                    .badges = {},
+                    .senderName = "pajlada2",
+                    .originalMessage = "justinfan64537",
                     .runContext = ctx,
                 },
             .expected =
                 {
-                    // expected
-                    .state = false,                            // state
-                    .result = HighlightResult::emptyResult(),  // result
+                    .state = false,
+                    .result = HighlightResult::emptyResult(),
                 },
         },
     };
