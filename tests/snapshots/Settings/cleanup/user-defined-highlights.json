@@ -34,15 +34,15 @@
                 },
                 {
                     "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
-                    "type": "badge",
                     "name": "broadcaster",
-                    "sound": "003-cat-fox_alex-fx-jump-3"
+                    "sound": "003-cat-fox_alex-fx-jump-3",
+                    "type": "badge"
                 },
                 {
                     "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
-                    "type": "badge",
                     "name": "moderator",
-                    "sound": "003-cat-fox_alex-fx-jump-3"
+                    "sound": "003-cat-fox_alex-fx-jump-3",
+                    "type": "badge"
                 },
                 {
                     "id": "uncategorizednotification"
@@ -88,9 +88,9 @@
                 },
                 {
                     "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
-                    "type": "badge",
                     "name": "broadcaster",
-                    "sound": "003-cat-fox_alex-fx-jump-3"
+                    "sound": "003-cat-fox_alex-fx-jump-3",
+                    "type": "badge"
                 },
                 {
                     "id": "uncategorizednotification"

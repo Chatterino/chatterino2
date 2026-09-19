@@ -3,52 +3,52 @@
         "highlighting": {
             "highlights2": [
                 {
-                    "name": "a",
-                    "id": "subscriptions"
+                    "id": "subscriptions",
+                    "name": "a"
                 },
                 {
-                    "name": "b",
-                    "id": "whispers"
+                    "id": "whispers",
+                    "name": "b"
                 },
                 {
-                    "name": "c",
-                    "id": "announcements"
+                    "id": "announcements",
+                    "name": "c"
                 },
                 {
-                    "name": "d",
-                    "id": "yourusername"
+                    "id": "yourusername",
+                    "name": "d"
                 },
                 {
-                    "name": "e",
-                    "id": "automodcaught"
+                    "id": "automodcaught",
+                    "name": "e"
                 },
                 {
-                    "name": "f",
-                    "id": "yourmessages"
+                    "id": "yourmessages",
+                    "name": "f"
                 },
                 {
-                    "name": "g",
-                    "id": "subscribedthread"
+                    "id": "subscribedthread",
+                    "name": "g"
                 },
                 {
-                    "name": "h",
-                    "id": "channelpoints-highlightmymessage"
+                    "id": "channelpoints-highlightmymessage",
+                    "name": "h"
                 },
                 {
-                    "name": "i",
-                    "id": "firstmessage"
+                    "id": "firstmessage",
+                    "name": "i"
                 },
                 {
-                    "name": "j",
-                    "id": "watchstreak"
+                    "id": "watchstreak",
+                    "name": "j"
                 },
                 {
-                    "name": "k",
-                    "id": "uncategorizednotification"
+                    "id": "uncategorizednotification",
+                    "name": "k"
                 },
                 {
-                    "name": "thisshouldbegone",
-                    "id": "invalid"
+                    "id": "invalid",
+                    "name": "thisshouldbegone"
                 }
             ]
         },
@@ -60,48 +60,48 @@
         "highlighting": {
             "highlights2": [
                 {
-                    "name": "a",
-                    "id": "subscriptions"
+                    "id": "subscriptions",
+                    "name": "a"
                 },
                 {
-                    "name": "b",
-                    "id": "whispers"
+                    "id": "whispers",
+                    "name": "b"
                 },
                 {
-                    "name": "c",
-                    "id": "announcements"
+                    "id": "announcements",
+                    "name": "c"
                 },
                 {
-                    "name": "d",
-                    "id": "yourusername"
+                    "id": "yourusername",
+                    "name": "d"
                 },
                 {
-                    "name": "e",
-                    "id": "automodcaught"
+                    "id": "automodcaught",
+                    "name": "e"
                 },
                 {
-                    "name": "f",
-                    "id": "yourmessages"
+                    "id": "yourmessages",
+                    "name": "f"
                 },
                 {
-                    "name": "g",
-                    "id": "subscribedthread"
+                    "id": "subscribedthread",
+                    "name": "g"
                 },
                 {
-                    "name": "h",
-                    "id": "channelpoints-highlightmymessage"
+                    "id": "channelpoints-highlightmymessage",
+                    "name": "h"
                 },
                 {
-                    "name": "i",
-                    "id": "firstmessage"
+                    "id": "firstmessage",
+                    "name": "i"
                 },
                 {
-                    "name": "j",
-                    "id": "watchstreak"
+                    "id": "watchstreak",
+                    "name": "j"
                 },
                 {
-                    "name": "k",
-                    "id": "uncategorizednotification"
+                    "id": "uncategorizednotification",
+                    "name": "k"
                 }
             ]
         },
