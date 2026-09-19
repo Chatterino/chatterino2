@@ -9,7 +9,6 @@ namespace chatterino {
 HighlightResult HighlightResult::emptyResult()
 {
     return {
-        .ids = {},
         .alert = false,
         .sound = {},
         .color = nullptr,
@@ -63,8 +62,7 @@ bool HighlightResult::full() const
 
 std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
 {
-    os << "IDs: " << result.ids.join(',').toStdString()
-       << ", Alert: " << (result.alert ? "Yes" : "No") << ", "
+    os << "Alert: " << (result.alert ? "Yes" : "No") << ", "
        << "Play sound: " << result.sound.toString().toStdString() << ", "
        << "Color: "
        << (result.color

@@ -118,9 +118,6 @@ std::pair<bool, HighlightResult> HighlightController::check(
         {
             highlighted = true;
 
-            // TODO TEMP XD
-            result.ids.append(checkResult->ids);
-
             if (checkResult->alert)
             {
                 if (!result.alert)
