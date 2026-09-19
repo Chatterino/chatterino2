@@ -277,14 +277,16 @@ void Connection::onAutomodMessageHold(
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
             body, MessageContext::Original);
 
-        // TODO: Is this extra check here really necessary?
-        // if (getSettings()->showAutomodInMentions)
-        // {
-        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
-        //         header, MessageContext::Original);
-        //     getApp()->getTwitch()->getMentionsChannel()->addMessage(
-        //         body, MessageContext::Original);
-        // }
+        if (header->flags.has(MessageFlag::ShowInMentions))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                header, MessageContext::Original);
+        }
+        if (body->flags.has(MessageFlag::ShowInMentions))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                body, MessageContext::Original);
+        }
     });
 }
 void Connection::onAutomodMessageUpdate(
