@@ -123,12 +123,9 @@ QDebug operator<<(QDebug dbg, const Outcome &v)
 
 void Outcome::updateSoundURL()
 {
-    qInfo() << "XXX: Resolving sound URL" << this->sound;
-    // TODO: Do we resolve the sound here?
     const auto &billtin = defaultSounds();
     if (this->sound.isNull())
     {
-        qInfo() << "XXX: is clear!";
         this->soundURL.clear();
     }
     else
@@ -137,18 +134,9 @@ void Outcome::updateSoundURL()
         if (defaultSound.has_value())
         {
             this->soundURL = defaultSound->resourcePath;
-            qInfo() << "XXX: resolved to default sound!" << this->soundURL
-                    << defaultSound->resourcePath;
-
-            QUrl xd1(":/sounds/ping2.wav");
-            qInfo() << "XXX: xd1" << xd1 << xd1.toString() << xd1.toLocalFile();
-            QUrl xd2("qrc:/sounds/ping2.wav");
-            qInfo() << "XXX: xd2" << xd2 << xd2.toString(QUrl::RemoveScheme)
-                    << xd2.toLocalFile();
         }
         else
         {
-            qInfo() << "XXX: did not resolve to default sound";
             this->soundURL = this->sound;
         }
     }

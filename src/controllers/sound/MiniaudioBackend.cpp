@@ -268,7 +268,6 @@ MiniaudioBackend::~MiniaudioBackend()
 
 void MiniaudioBackend::play(const QUrl &sound)
 {
-    qInfo() << "XXX: Playing sound:" << sound;
     if (this->state != State::Initialized)
     {
         qCWarning(chatterinoSound) << "Can't play sound, sound controller "
@@ -277,7 +276,6 @@ void MiniaudioBackend::play(const QUrl &sound)
     }
 
     boost::asio::post(this->ioContext, [this, sound] {
-        qCDebug(chatterinoSound) << "a";
         static size_t i = 0;
 
         this->tgPlay.guard();
@@ -289,7 +287,6 @@ void MiniaudioBackend::play(const QUrl &sound)
             return;
         }
 
-        qCDebug(chatterinoSound) << "Starting engine";
         auto result = ma_engine_start(this->engine.get());
         if (result != MA_SUCCESS)
         {
@@ -297,10 +294,8 @@ void MiniaudioBackend::play(const QUrl &sound)
             return;
         }
 
-        qCDebug(chatterinoSound) << "hmm" << sound;
         if (sound.isLocalFile())
         {
-            qCInfo(chatterinoSound) << "Playing local file" << sound;
             auto soundPath = sound.toLocalFile();
             result = ma_engine_play_sound(this->engine.get(),
                                           qPrintable(soundPath), nullptr);
@@ -312,12 +307,9 @@ void MiniaudioBackend::play(const QUrl &sound)
         }
         else
         {
-            qCDebug(chatterinoSound) << "look for default pingsound" << sound;
             const auto defaultSoundIt = this->defaultPingSounds.find(sound);
             if (defaultSoundIt != this->defaultPingSounds.end())
             {
-                qCInfo(chatterinoSound)
-                    << "Found default ping sound for" << sound;
                 // Play default sound, loaded from our resources in the constructor
                 auto &snd = defaultSoundIt->second.sounds[++i % NUM_SOUNDS];
                 ma_sound_seek_to_pcm_frame(snd.get(), 0);
@@ -325,7 +317,7 @@ void MiniaudioBackend::play(const QUrl &sound)
                 if (result != MA_SUCCESS)
                 {
                     qCWarning(chatterinoSound)
-                        << "Failed to play default ping" << result;
+                        << "Failed to play default ping" << sound << result;
                 }
             }
             else
