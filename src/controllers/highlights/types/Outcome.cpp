@@ -24,21 +24,6 @@ void Outcome::setSound(const QString &newSound)
     this->updateSoundURL();
 }
 
-QUrl Outcome::getSoundURLWithDefault(const QStringView &defaultSound) const
-{
-    if (this->sound.isNull())
-    {
-        auto defaultSoundURL = resolveDefaultSound(defaultSound);
-        if (defaultSoundURL.has_value())
-        {
-            return QUrl{defaultSoundURL->resourcePath};
-        }
-        return {};
-    }
-
-    return this->soundURL;
-}
-
 std::shared_ptr<QColor> Outcome::getBackgroundColorWithDefault(
     const QColor &defaultColor) const
 {
@@ -126,7 +111,19 @@ void Outcome::updateSoundURL()
     const auto &billtin = defaultSounds();
     if (this->sound.isNull())
     {
-        this->soundURL.clear();
+        if (!this->defaultSound.isEmpty())
+        {
+            auto defaultSoundURL = resolveDefaultSound(this->defaultSound);
+            assert(defaultSoundURL.has_value());
+            if (defaultSoundURL.has_value())
+            {
+                this->soundURL = QUrl{defaultSoundURL->resourcePath};
+            }
+        }
+        else
+        {
+            this->soundURL.clear();
+        }
     }
     else
     {
