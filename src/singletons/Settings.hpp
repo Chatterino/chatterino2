@@ -751,7 +751,6 @@ public:
 #endif
 
 private:
-    // TODO: is this the correct name? should i name it differently?
     ChatterinoSetting<std::vector<HighlightBlacklistUser>>
         blacklistedUsersSetting = {"/highlighting/blacklist"};
     ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
