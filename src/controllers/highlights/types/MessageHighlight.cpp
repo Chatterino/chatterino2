@@ -73,7 +73,6 @@ HighlightCheck MessageHighlight::buildCheck() const
             }
 
             return HighlightResult{
-                .ids = {highlight.getID().toString()},
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
                 .sound = highlight.outcome.soundURL,
                 .color = highlight.outcome.getBackgroundColor(),
