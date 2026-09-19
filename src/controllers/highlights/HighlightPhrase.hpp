@@ -23,17 +23,6 @@ namespace chatterino {
 /// HighlightPhrase is how the old highlight system defined a message and user highlight
 /// The base struct & serialization is kept for migration from old settings versions.
 struct HighlightPhrase {
-    static constexpr QColor FALLBACK_ANNOUNCEMENT_HIGHLIGHT_COLOR =
-        QColor(255, 102, 237, 100);
-    static constexpr QColor ANNOUNCEMENT_BLUE_HIGHLIGHT_COLOR =
-        QColor(102, 148, 255, 100);
-    static constexpr QColor ANNOUNCEMENT_GREEN_HIGHLIGHT_COLOR =
-        QColor(96, 255, 96, 100);
-    static constexpr QColor ANNOUNCEMENT_ORANGE_HIGHLIGHT_COLOR =
-        QColor(233, 210, 0, 100);
-    static constexpr QColor ANNOUNCEMENT_PURPLE_HIGHLIGHT_COLOR =
-        QColor(255, 102, 237, 100);
-
     QString pattern;
     bool showInMentions{false};
     bool hasAlert{false};
