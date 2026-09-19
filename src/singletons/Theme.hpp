@@ -88,6 +88,12 @@ public:
         QColor text;
     } window;
 
+    /// ACCOUNTS
+    struct {
+        /// Marks an account whose login has expired
+        QColor expired;
+    } accounts;
+
     /// TABS
     struct {
         TabColors regular;

@@ -893,7 +893,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
     if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
     {
-        getApp()->getAccounts()->twitch.loginExpired.invoke();
+        getApp()->getAccounts()->twitch.markCurrentAsExpired();
     }
 
     QString channelName;
