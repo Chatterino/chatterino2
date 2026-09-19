@@ -142,15 +142,15 @@ HighlightingWidget::HighlightingWidget()
             this->openConfigureDialog(view, vectorIndex,
                                       ConfigureCloseBehaviour::Remove);
         });
-    // TODO: Find a good badge icon
-    addMenu->addAction("Badge highlight", this, [this, view] {
-        auto id = highlights::generateID();
-        highlights::BadgeHighlight h{id};
-        h.setBadgeName(highlights::twitchBadges()[0].badgeName());
-        auto vectorIndex = getSettings()->sharedHighlights.append(h);
-        this->openConfigureDialog(view, vectorIndex,
-                                  ConfigureCloseBehaviour::Remove);
-    });
+    addMenu->addAction(
+        QIcon{":/buttons/shield.svg"}, "Badge highlight", this, [this, view] {
+            auto id = highlights::generateID();
+            highlights::BadgeHighlight h{id};
+            h.setBadgeName(highlights::twitchBadges()[0].badgeName());
+            auto vectorIndex = getSettings()->sharedHighlights.append(h);
+            this->openConfigureDialog(view, vectorIndex,
+                                      ConfigureCloseBehaviour::Remove);
+        });
     addMenu->addAction(
         QIcon{":/settings/filters.svg"}, "Filter highlight", this,
         [this, view] {
