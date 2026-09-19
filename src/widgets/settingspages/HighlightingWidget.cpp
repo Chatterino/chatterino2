@@ -34,7 +34,7 @@ const auto &LOG = chatterinoHighlights;
 /// Tips that will be randomized once on launch and shown at the top of the settings highlights page
 const constexpr std::array<QStringView, 3> TIPS{
     uR"(Filter highlights are handy for advanced highlights.)",
-    uR"(User highlights highlights any message from the given user.)",
+    uR"(User highlights highlight any message from the given user.)",
     uR"(You can edit a highlight by double-clicking it.)",
 };
 
