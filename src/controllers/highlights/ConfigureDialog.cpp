@@ -314,7 +314,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                        auto *lbl = new QLabel("Regex");
                        auto *w = new QCheckBox;
                        w->setChecked(h.isRegex());
-                       QObject::connect(w, &QCheckBox::checkStateChanged,
+                       QObject::connect(w, &QCheckBox::checkStateChanged, this,
                                         [&](auto checkstate) {
                                             h.setRegex(checkstate);
                                         });

@@ -86,8 +86,8 @@ HighlightController::HighlightController(Settings &settings,
 
     this->signalHolder_.managedConnect(
         getSettings()->sharedHighlights.delayedItemsChanged, [this, &settings] {
-            qCInfo(chatterinoHighlights)
-                << "XXX: Rebuild checks because shared highlights changed";
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because shared highlights changed";
             this->rebuildChecks(settings);
         });
 
