@@ -25,13 +25,7 @@ HighlightCheck YourMessagesHighlight::buildCheck() const
             // User has not defined a color, should use default: std::shared_ptr<QColor> = {}; // unset shared ptr
             // User wants NO color, should fall through: std::shared_ptr<QColor> = std::shared_ptr<QColor>({}) // invalid QColor
 
-            return HighlightResult{
-                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .sound = highlight.outcome.getSoundURL(),
-                .color = highlight.outcome.getBackgroundColor(),
-                .showInMentions = highlight.outcome.showInMentions.value_or(
-                    H::SHOW_IN_MENTIONS_DEFAULT),
-            };
+            return highlight.outcome.makeSimpleResult<H>();
         },
     };
 }

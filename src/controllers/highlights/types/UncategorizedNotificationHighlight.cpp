@@ -22,13 +22,7 @@ HighlightCheck UncategorizedNotificationHighlight::buildCheck() const
                 return std::nullopt;
             }
 
-            return HighlightResult{
-                .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .sound = highlight.outcome.getSoundURL(),
-                .color = highlight.outcome.getBackgroundColor(),
-                .showInMentions = highlight.outcome.showInMentions.value_or(
-                    H::SHOW_IN_MENTIONS_DEFAULT),
-            };
+            return highlight.outcome.makeSimpleResult<H>();
         },
     };
 }

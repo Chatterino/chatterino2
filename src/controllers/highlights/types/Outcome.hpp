@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/Concepts.hpp"
 
 #include <QColor>
@@ -29,6 +30,18 @@ struct Outcome {
             return Outcome(H::BACKGROUND_COLOR_DEFAULT, H::SOUND_DEFAULT);
         }
         return Outcome(H::BACKGROUND_COLOR_DEFAULT);
+    }
+
+    template <typename H>
+    HighlightResult makeSimpleResult() const
+    {
+        return HighlightResult{
+            .alert = this->alert.value_or(H::ALERT_DEFAULT),
+            .sound = this->getSoundURL(),
+            .color = this->getBackgroundColor(),
+            .showInMentions =
+                this->showInMentions.value_or(H::SHOW_IN_MENTIONS_DEFAULT),
+        };
     }
 
     /// Whether to add the matching message to the /mentions channel
