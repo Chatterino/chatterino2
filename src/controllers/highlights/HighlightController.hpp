@@ -56,6 +56,10 @@ public:
     static void recreateMissingBillTinHighlights(
         const std::unordered_set<QStringView> &missingHighlights);
 
+    /// Special case where we want to be able to check if the Subscribed Thread highlight is enabled
+    /// Whenever highlights are rebuilt, this variable might change.
+    bool isSubscribedThreadHighlightEnabled = false;
+
 private:
     /**
      * @brief rebuildChecks is called whenever some outside variable has been changed and our checks need to be updated
