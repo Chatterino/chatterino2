@@ -356,6 +356,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         h.outcome.showInMentions = std::nullopt;
                     },
                     this->data);
+
+                QSignalBlocker block(w);
                 w->setChecked(shouldShowInMentions(this->data));
             });
         }
@@ -381,6 +383,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         h.outcome.alert = std::nullopt;
                     },
                     this->data);
+
+                QSignalBlocker block(w);
                 w->setChecked(shouldAlert(this->data));
             });
         }
