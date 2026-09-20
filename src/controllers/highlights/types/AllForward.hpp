@@ -30,7 +30,6 @@ struct UncategorizedNotificationHighlight;
 ///
 /// When you add a new built-in highlight, it must be added to HighlightController::billTinHighlights and HighlightController::recreateMissingBillTinHighlights. Ensure the order of the latter makes sense. The BillTinHighlights test in HighlightController will also need to be updated.
 /// When you add a new user-defined highlight, it must be added to the HighlightControllerTest.BillTinHighlightsHighlightController test, and to the highlights/types/Common.cpp isUserDefined function.
-/// This variant must be kept in-sync with the one in All.hpp
 using AllHighlights = std::variant<
     InvalidHighlight,
     YourUsernameHighlight,
