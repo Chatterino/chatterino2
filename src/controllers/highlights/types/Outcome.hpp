@@ -44,9 +44,8 @@ struct Outcome {
 
     void setSound(const QString &newSound);
 
-    /// Contains the URL that should actually be played when a highlight is triggered, or invalid/empty if no sound should be played.
-    /// Transient. Not stored as-is in the JSON.
-    QUrl soundURL;
+    /// Returns the URL that should actually be played when a highlight is triggered, or invalid/empty if no sound should be played.
+    QUrl getSoundURL() const;
 
     /*
     std::optional<int> volume;
@@ -107,6 +106,10 @@ private:
         std::make_shared<QColor>();
 
     void updateSoundURL();
+
+    /// Contains the URL that should actually be played when a highlight is triggered, or invalid/empty if no sound should be played.
+    /// Transient. Not stored as-is in the JSON.
+    QUrl soundURL;
 };
 
 }  // namespace chatterino::highlights

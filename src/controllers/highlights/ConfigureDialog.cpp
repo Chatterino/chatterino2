@@ -628,7 +628,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
             QObject::connect(testSound, &QPushButton::pressed, this, [this] {
                 std::visit(
                     [](auto &&h) {
-                        getApp()->getSound()->play(h.outcome.soundURL);
+                        getApp()->getSound()->play(h.outcome.getSoundURL());
                     },
                     this->data);
             });
