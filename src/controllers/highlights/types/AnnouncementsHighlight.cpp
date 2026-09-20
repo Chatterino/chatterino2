@@ -66,6 +66,7 @@ HighlightCheck AnnouncementsHighlight::buildCheck() const
                 }
             }
 
+            // Because the highlight color depends on tags in the message itself, we cannot use Outcome::makeSimpleResult
             return HighlightResult{
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
                 .sound = highlight.outcome.getSoundURL(),
