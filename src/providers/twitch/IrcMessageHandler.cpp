@@ -880,11 +880,12 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 })
                 .value_or(MessageColor::System);
 
-        auto msg = MessageBuilder::makeSystemMessageWithUser(
+        auto [msg, alert] = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
             calculateMessageTime(message).time(), *message, channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
     }
 }
 
