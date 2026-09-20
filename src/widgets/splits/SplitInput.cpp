@@ -763,6 +763,7 @@ void SplitInput::addShortcuts()
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              cursor.movePosition(QTextCursor::End);
              this->ui_.textEdit->setTextCursor(cursor);
+             this->hideCompletionPopup();
 
              return "";
          }},
@@ -815,6 +816,7 @@ void SplitInput::addShortcuts()
                  QTextCursor cursor = this->ui_.textEdit->textCursor();
                  cursor.movePosition(QTextCursor::End);
                  this->ui_.textEdit->setTextCursor(cursor);
+                 this->hideCompletionPopup();
              }
              return "";
          }},

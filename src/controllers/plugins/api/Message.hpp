@@ -177,7 +177,6 @@ function c2.MessageElementBase:add_flags(flags) end
 ---A chat message
 ---@class c2.Message
 ---@field flags c2.MessageFlag The message's flags
----@field parse_time number Time the message was parsed (in milliseconds since epoch)
 ---@field id string The message ID
 ---@field search_text string Text to check when searching for messages
 ---@field message_text string Text content of this message (used for filters for example)
@@ -211,7 +210,6 @@ function c2.Message:clone() end
 ---@class MessageInit
 ---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
 ---@field id? string The (ideally unique) message ID
----@field parse_time? number Time the message was parsed (in milliseconds since epoch)
 ---@field search_text? string Text to that is compared when searching for messages
 ---@field message_text? string The message text (used for filters for example)
 ---@field login_name? string The login name of the sender

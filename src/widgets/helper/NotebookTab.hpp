@@ -158,7 +158,6 @@ private:
     bool mouseOverX_{};
     bool mouseDownX_{};
     bool isInLastRow_{};
-    int mouseWheelDelta_ = 0;
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
 
     HighlightState highlightState_ = HighlightState::None;

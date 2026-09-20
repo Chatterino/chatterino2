@@ -10,7 +10,6 @@ local tests = {
         local msg = c2.Message.new({
             flags = c2.MessageFlag.DoNotTriggerNotification,
             id = "123",
-            parse_time = 12345678,
             search_text = "search",
             message_text = "message text",
             login_name = "login",
@@ -35,7 +34,6 @@ local tests = {
         assert(msg ~= clone)
         assert(msg.flags == clone.flags)
         assert(msg.id == clone.id)
-        assert(msg.parse_time == clone.parse_time)
         assert(msg.search_text == clone.search_text)
         assert(msg.message_text == clone.message_text)
         assert(msg.login_name == clone.login_name)

@@ -106,6 +106,8 @@ public:
      **/
     void selectPreviousTab(bool focusPage = true, bool recordInHistory = true);
 
+    void scrollTabs(QWheelEvent *event);
+
     /**
      * @brief Selects the last visible tab. 
      **/
@@ -144,7 +146,18 @@ protected:
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *) override;
+
+    virtual void afterPageAdded()
+    {
+    }
+    virtual void afterPageRemoved()
+    {
+    }
+    virtual void afterPageMoved()
+    {
+    }
 
     DrawnButton *addButton_;
 
@@ -241,6 +254,7 @@ private:
     bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
+    int mouseWheelDelta_ = 0;
     bool lockNotebookLayout_ = false;
     bool growWrappedNotebookLines = false;
 
@@ -285,6 +299,10 @@ public:
 
 protected:
     void showEvent(QShowEvent *event) override;
+
+    void afterPageAdded() override;
+    void afterPageRemoved() override;
+    void afterPageMoved() override;
 
 private:
     QAction *sortTabsAlphabeticallyAction_;

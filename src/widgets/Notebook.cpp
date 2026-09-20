@@ -34,8 +34,10 @@
 #include <QList>
 #include <QStandardPaths>
 #include <QUuid>
+#include <QWheelEvent>
 #include <QWidget>
 
+#include <cstdlib>
 #include <memory>
 #include <ranges>
 #include <utility>
@@ -124,9 +126,6 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
                                  bool select)
 {
-    // Queue up save because: Tab added
-    getApp()->getWindows()->queueSave();
-
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
@@ -156,14 +155,12 @@ NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
 
     this->performLayout();
     tab->setVisible(this->shouldShowTab(tab));
+    this->afterPageAdded();
     return tab;
 }
 
 void Notebook::removePage(QWidget *page)
 {
-    // Queue up save because: Tab removed
-    getApp()->getWindows()->queueSave();
-
     int removingIndex = this->indexOf(page);
     assert(removingIndex != -1);
 
@@ -208,6 +205,7 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+    this->afterPageRemoved();
 }
 
 void Notebook::duplicatePage(QWidget *page)
@@ -687,12 +685,10 @@ void Notebook::rearrangePage(QWidget *page, int index)
         return;
     }
 
-    // Queue up save because: Tab rearranged
-    getApp()->getWindows()->queueSave();
-
     this->items_.move(this->indexOf(page), index);
 
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 bool Notebook::getAllowUserTabManagement() const
@@ -857,15 +853,16 @@ void Notebook::performLayout(bool animated)
 
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
+    const auto spacing = static_cast<int>(2 * this->scale());
     const LayoutContext ctx{
-        .left = static_cast<int>(2 * this->scale()),
-        .right = this->width(),
+        .left = spacing,
+        .right = this->width() - spacing,
         .bottom = this->height(),
         .scale = scale,
         .tabHeight = tabHeight,
         .minimumTabAreaSpace = static_cast<int>(tabHeight * 0.5),
         .addButtonWidth = this->showAddButton_ ? tabHeight : 0,
-        .lineThickness = static_cast<int>(2 * scale),
+        .lineThickness = spacing,
         .tabSpacer = std::max(1, static_cast<int>(scale)),
         .buttonWidth = tabHeight,
         .buttonHeight = tabHeight - 1,
@@ -926,12 +923,12 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
     if (this->showTabs_)
     {
         auto layoutWrappedLine = [&](std::span<Item> line, int x, const int y,
-                                     int notebookWidth, int accumulatedWidth) {
+                                     int accumulatedWidth) {
             if (line.empty() || !this->growWrappedNotebookLines)
             {
                 return;
             }
-            int widthPerItem = (notebookWidth - x - accumulatedWidth) /
+            int widthPerItem = (ctx.right - x - accumulatedWidth) /
                                static_cast<int>(line.size());
 
             for (Item &item : line.subspan(0, line.size() - 1))
@@ -944,7 +941,7 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
 
             Item &lastItem = line.back();
             // The last item gets all the breadcrumbs from rounding down.
-            int lastItemWidth = notebookWidth - x;
+            int lastItemWidth = ctx.right - x;
             lastItem.tab->growWidth(lastItemWidth);
             lastItem.tab->queueMove(QPoint(x, y), animated);
         };
@@ -958,13 +955,13 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
             auto isLast = &item == &ctx.items.back();
 
             auto fitsInLine = ((isLast ? ctx.addButtonWidth : 0) + x +
-                               item.tab->minimumTabWidth()) <= this->width();
+                               item.tab->minimumTabWidth()) <= ctx.right;
 
             if (!isFirst && !fitsInLine)
             {
                 int accumulatedWidth = x - rowXStart;
                 layoutWrappedLine({rowStart, &item}, rowXStart, y,
-                                  this->width(), accumulatedWidth);
+                                  accumulatedWidth);
                 y += item.tab->height() * reverse;
                 x = ctx.left;
                 rowXStart = x;
@@ -1144,7 +1141,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
             {
                 if (isRight)
                 {
-                    int distanceFromRight = this->width() - x;
+                    int distanceFromRight = ctx.right - x;
                     largestWidth = std::max(
                         largestWidth, consumedButtonWidths - distanceFromRight);
                 }
@@ -1157,7 +1154,11 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
 
             if (isRight)
             {
-                x -= largestWidth + ctx.lineThickness;
+                x -= largestWidth;
+                if (col != 0)
+                {
+                    x -= ctx.lineThickness;
+                }
             }
 
             for (int i = tabStart; i < tabEnd; i++)
@@ -1247,6 +1248,43 @@ void Notebook::mousePressEvent(QMouseEvent *event)
         }
         break;
         default:;
+    }
+}
+
+void Notebook::wheelEvent(QWheelEvent *event)
+{
+    if (this->selectedPage_ != nullptr &&
+        this->selectedPage_->geometry().contains(event->position().toPoint()))
+    {
+        event->ignore();
+        return;
+    }
+
+    this->scrollTabs(event);
+}
+
+void Notebook::scrollTabs(QWheelEvent *event)
+{
+    const auto defaultMouseDelta = 120;
+    const auto verticalDelta = event->angleDelta().y();
+    const auto selectTab = [this](int delta) {
+        delta > 0 ? this->selectPreviousTab() : this->selectNextTab();
+    };
+    // If it's true
+    // Then the user uses the trackpad or perhaps the most accurate mouse
+    // Which has small delta.
+    if (std::abs(verticalDelta) < defaultMouseDelta)
+    {
+        this->mouseWheelDelta_ += verticalDelta;
+        if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
+        {
+            selectTab(this->mouseWheelDelta_);
+            this->mouseWheelDelta_ = 0;
+        }
+    }
+    else
+    {
+        selectTab(verticalDelta);
     }
 }
 
@@ -1390,8 +1428,8 @@ void Notebook::sortTabsAlphabetically()
         return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
     });
 
-    getApp()->getWindows()->queueSave();
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1812,6 +1850,21 @@ void SplitNotebook::setLockNotebookLayout(bool value)
 {
     Notebook::setLockNotebookLayout(value);
     this->sortTabsAlphabeticallyAction_->setEnabled(!value);
+}
+
+void SplitNotebook::afterPageAdded()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageRemoved()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageMoved()
+{
+    getApp()->getWindows()->queueSave();
 }
 
 }  // namespace chatterino
