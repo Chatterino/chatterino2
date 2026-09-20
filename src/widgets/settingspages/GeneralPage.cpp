@@ -959,15 +959,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "to point your browser extension to this copy of Chatterino. "
             "You may manually register it below.");
         layout.addButton("Register browser integration", [this] {
-            if (registerNmHost(getApp()->getPaths()))
+            const auto result = registerNmHost(getApp()->getPaths());
+            if (result)
             {
                 QMessageBox::information(this, "Registration Successful",
                                          "Browser integration registered.");
             }
             else
             {
-                QMessageBox::warning(this, "Registration Failed",
-                                     "Failed to register browser integration.");
+                QMessageBox::warning(
+                    this, "Registration Failed",
+                    "Failed to register browser integration:\n" +
+                        result.error());
             }
         });
     }
