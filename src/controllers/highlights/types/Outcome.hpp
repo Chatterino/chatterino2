@@ -82,17 +82,6 @@ struct Outcome {
         return this->resolvedBackgroundColor;
     }
 
-    // This should be set during initialization
-    QColor defaultBackgroundColor;
-
-    // This should be set during initialization
-    QStringView defaultSound;
-
-    /// The background color to apply to the message.
-    /// If the pointer is unset, use the highlight's default color
-    /// If the pointer is valid, but the QColor is invalid: Don't apply a background color
-    std::optional<QColor> backgroundColor;
-
     std::shared_ptr<QColor> getBackgroundColorWithDefault(
         const QColor &defaultColor) const;
 
@@ -122,6 +111,17 @@ private:
     /// Contains the URL that should actually be played when a highlight is triggered, or invalid/empty if no sound should be played.
     /// Transient. Not stored as-is in the JSON.
     QUrl soundURL;
+
+    // This should be set during initialization
+    QColor defaultBackgroundColor;
+
+    // This should be set during initialization
+    QStringView defaultSound;
+
+    /// The background color to apply to the message.
+    /// If the pointer is unset, use the highlight's default color
+    /// If the pointer is valid, but the QColor is invalid: Don't apply a background color
+    std::optional<QColor> backgroundColor;
 };
 
 }  // namespace chatterino::highlights
