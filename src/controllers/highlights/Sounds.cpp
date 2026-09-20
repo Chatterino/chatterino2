@@ -38,6 +38,14 @@ const boost::container::flat_map<QString, DefaultSound> &defaultSounds()
                         "qrc:/sounds/cat-fox_alex-8bit-fx-jump-3.wav",
                 },
             },
+            {
+                "004-yfjesse-notification",
+                DefaultSound{
+                    .id = "004-yfjesse-notification",
+                    .displayName = "yfjesse Notification",
+                    .resourcePath = "qrc:/sounds/yfjesse-notification.wav",
+                },
+            },
         },
     };
 
