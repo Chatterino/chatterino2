@@ -668,10 +668,12 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
-MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
-    const QString &text, const QString &loginName, const QString &displayName,
-    const MessageColor &userColor, const QTime &time,
-    const Communi::IrcMessage &ircMessage, TwitchChannel *channel)
+std::pair<MessagePtrMut, HighlightAlert>
+    MessageBuilder::makeSystemMessageWithUser(
+        const QString &text, const QString &loginName,
+        const QString &displayName, const MessageColor &userColor,
+        const QTime &time, const Communi::IrcMessage &ircMessage,
+        TwitchChannel *channel)
 {
     MessageBuilder builder;
     builder.emplace<TimestampElement>(time);
@@ -698,7 +700,15 @@ MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
 
     builder.parseMessageTags(tags, channel, true);
 
-    return builder.release();
+    HighlightAlert highlight = builder.parseHighlights(tags, text, {}, channel);
+    if (tags.has("historical"))
+    {
+        // TODO: This logic should probably move into builder.parseHighlights
+        highlight.sound.clear();
+        highlight.windowAlert = false;
+    }
+
+    return {builder.release(), highlight};
 }
 
 std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeSubgiftMessage(
