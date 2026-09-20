@@ -41,12 +41,6 @@ struct SubscribedThreadHighlight {
     static constexpr QStringView SOUND_DEFAULT = u"001-ping2";
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(143, 48, 24, 60);
 
-    // Default state:
-    // Enabled = true
-    // Show in mentions = true
-    // Flash taskbar = true
-    // Play sound = true
-
     QString name;
     std::optional<bool> enabled;
 
