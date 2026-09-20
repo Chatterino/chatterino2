@@ -224,6 +224,7 @@ set(SOURCE_FILES
         controllers/highlights/types/ChannelPointsHighlight.hpp
         controllers/highlights/types/Common.cpp
         controllers/highlights/types/Common.hpp
+        controllers/highlights/types/Concepts.hpp
         controllers/highlights/types/FilterHighlight.cpp
         controllers/highlights/types/FilterHighlight.hpp
         controllers/highlights/types/FirstMessageHighlight.cpp

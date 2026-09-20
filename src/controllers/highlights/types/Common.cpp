@@ -6,6 +6,7 @@
 
 #include "common/QLogging.hpp"
 #include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/Concepts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/Variant.hpp"
 
@@ -23,35 +24,6 @@ namespace {
 const auto &LOG = chatterinoHighlights;
 
 }  // namespace
-
-template <typename T>
-concept HasDynamicID = requires(T a) {
-    { a.getID() } -> std::same_as<QStringView>;
-};
-
-template <typename T>
-concept HasDynamicDefaultName = requires(T a) {
-    { a.getDefaultName() } -> std::same_as<QString>;
-};
-
-template <typename T>
-concept HasCustomizableName = requires(T a) {
-    { a.name } -> std::convertible_to<QString>;
-};
-
-template <typename T>
-concept HasDynamicAndCustomizableName =
-    HasDynamicDefaultName<T> && HasCustomizableName<T>;
-
-template <typename T>
-concept SupportsErrors = requires(T a) {
-    { a.getError() } -> std::same_as<QString>;
-};
-
-template <typename T>
-concept HasDefaultSound = requires {
-    { T::SOUND_DEFAULT } -> std::convertible_to<QStringView>;
-};
 
 static_assert(HasDefaultSound<YourUsernameHighlight>);
 

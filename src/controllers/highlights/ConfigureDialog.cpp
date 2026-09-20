@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/Concepts.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/DisplayBadge.hpp"
@@ -32,38 +33,6 @@
 using namespace Qt::StringLiterals;
 
 namespace chatterino::highlights {
-
-template <typename T>
-concept SupportsCaseSensitivity = requires(T a) {
-    { a.isCaseSensitive() } -> std::same_as<bool>;
-    { a.setCaseSensitive(true) };
-};
-
-template <typename T>
-concept SupportsRegex = requires(T a) {
-    { a.isRegex() } -> std::same_as<bool>;
-    { a.setRegex(true) };
-};
-
-template <typename T>
-concept SupportsDefaultName = requires(T a) {
-    { a.getDefaultName() } -> std::same_as<QString>;
-};
-
-template <typename T>
-concept SupportsGetID = requires(T a) {
-    { a.getID() } -> std::same_as<QStringView>;
-};
-
-template <typename T>
-concept HasDescription = requires {
-    { T::DESCRIPTION } -> std::convertible_to<QStringView>;
-};
-
-template <typename T>
-concept HasCustomizableName = requires(T a) {
-    { a.name } -> std::convertible_to<QString>;
-};
 
 namespace {
 
