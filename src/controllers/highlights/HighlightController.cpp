@@ -114,7 +114,7 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
     for (const auto &check : *checks)
     {
-        if (auto checkResult = check.cb(params); checkResult)
+        if (auto checkResult = check.cb(params))
         {
             highlighted = true;
 
