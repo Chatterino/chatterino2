@@ -29,17 +29,6 @@ QUrl Outcome::getSoundURL() const
     return this->soundURL;
 }
 
-std::shared_ptr<QColor> Outcome::getBackgroundColorWithDefault(
-    const QColor &defaultColor) const
-{
-    if (!this->resolvedBackgroundColor)
-    {
-        return std::make_shared<QColor>(defaultColor);
-    }
-
-    return this->resolvedBackgroundColor;
-}
-
 void Outcome::serialize(rapidjson::Value &ret,
                         rapidjson::Document::AllocatorType &a) const
 {

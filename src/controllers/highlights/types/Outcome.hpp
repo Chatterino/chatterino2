@@ -82,9 +82,6 @@ struct Outcome {
         return this->resolvedBackgroundColor;
     }
 
-    std::shared_ptr<QColor> getBackgroundColorWithDefault(
-        const QColor &defaultColor) const;
-
     bool operator==(const Outcome &other) const = default;
 
     void serialize(rapidjson::Value &ret,
