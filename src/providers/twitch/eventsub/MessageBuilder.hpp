@@ -16,6 +16,7 @@
 #include <QDateTime>
 
 #include <concepts>
+#include <utility>
 
 namespace chatterino::eventsub::detail {
 
@@ -165,11 +166,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UnbanRequest &action);
 
-MessagePtr makeAutomodHoldMessageHeader(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::automod_message_hold::v2::Event &event);
-
-MessagePtr makeAutomodHoldMessageBody(
+std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event);
 

@@ -620,21 +620,22 @@ void makeModerateMessage(
     builder.setMessageAndSearchText(text);
 }
 
-MessagePtr makeAutomodHoldMessageHeader(
+std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event)
 {
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
     builder->id = u"automod_" % event.messageID.qt();
-    builder->loginName = u"automod"_s;
-    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->serverReceivedTime = time;
     builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
                        MessageFlag::AutoMod,
-                       MessageFlag::AutoModOffendingMessageHeader);
+                       MessageFlag::AutoModOffendingMessageHeader,
+                       MessageFlag::AutoModOffendingMessage);
     builder->flags.set(
         MessageFlag::AutoModBlockedTerm,
         std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
+
+    builder->channelName = event.broadcasterUserLogin.qt();
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),
@@ -642,6 +643,7 @@ MessagePtr makeAutomodHoldMessageHeader(
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
                                  QColor(0, 0, 255), FontStyle::ChatMediumBold);
+
     // AutoMod header message
     auto reason = std::visit(
         [&](const auto &r) {
@@ -663,29 +665,8 @@ MessagePtr makeAutomodHoldMessageHeader(
                               MessageColor(QColor(255, 0, 0)),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModDeny, event.messageID.qt()});
+    builder.emplace<LinebreakElement>(MessageElementFlag::Text);
 
-    builder.setMessageAndSearchText(
-        u"AutoMod: Held a message for reason: " % reason %
-        u". Allow will post it in chat. Allow Deny");
-
-    return builder.release();
-}
-
-MessagePtr makeAutomodHoldMessageBody(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::automod_message_hold::v2::Event &event)
-{
-    EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
-                       MessageFlag::AutoMod,
-                       MessageFlag::AutoModOffendingMessage);
-    builder->flags.set(
-        MessageFlag::AutoModBlockedTerm,
-        std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
-
-    // Builder for offender's message
-    builder->channelName = event.broadcasterUserLogin.qt();
     builder
         .emplace<TextElement>(u'#' + event.broadcasterUserLogin.qt(),
                               MessageElementFlag::ChannelName,
@@ -705,10 +686,17 @@ MessagePtr makeAutomodHoldMessageBody(
     builder.emplace<TextElement>(event.message.text.qt(),
                                  MessageElementFlag::Text, MessageColor::Text);
 
-    builder.setMessageAndSearchText(displayName % u": " %
-                                    event.message.text.qt());
+    builder.setMessageAndSearchText(
+        u"AutoMod: Held a message for reason: " % reason %
+        u". Allow will post it in chat. Allow Deny " % displayName % u": " %
+        event.message.text.qt());
 
-    return builder.release();
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    auto highlights =
+        builder.parseHighlights(tags, event.message.text.qt(), {});
+
+    return {builder.release(), highlights};
 }
 
 MessagePtr makeSuspiciousUserMessageHeader(
