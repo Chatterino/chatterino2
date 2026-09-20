@@ -38,7 +38,7 @@ struct InvalidHighlight {
     static constexpr bool ALERT_DEFAULT = false;
     static constexpr QColor BACKGROUND_COLOR_DEFAULT = QColor(0, 0, 0, 0);
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<InvalidHighlight>();
 
     bool isValid();
 

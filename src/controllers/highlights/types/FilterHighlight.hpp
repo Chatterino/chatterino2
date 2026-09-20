@@ -72,7 +72,7 @@ struct FilterHighlight {
 
     std::shared_ptr<filters::Filter> filter;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<FilterHighlight>();
 
     HighlightCheck buildCheck() const;
 

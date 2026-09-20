@@ -82,7 +82,7 @@ struct MessageHighlight {
     std::optional<bool> regex;
     std::optional<bool> caseSensitive;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<MessageHighlight>();
 
 public:
     HighlightCheck buildCheck() const;

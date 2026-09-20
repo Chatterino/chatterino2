@@ -67,7 +67,7 @@ struct BadgeHighlight {
 
     std::optional<bool> enabled;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<BadgeHighlight>();
 
 protected:
     /// Contains the raw badge name (e.g. "subscriber")

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "controllers/highlights/types/Concepts.hpp"
+
 #include <QColor>
 #include <QDebug>
 #include <QString>
@@ -19,12 +21,14 @@
 namespace chatterino::highlights {
 
 struct Outcome {
-    explicit Outcome(const QColor &defaultBackgroundColor_,
-                     QStringView defaultSound_ = {})
-        : defaultBackgroundColor(defaultBackgroundColor_)
-        , defaultSound(defaultSound_)
+    template <typename H>
+    static Outcome create()
     {
-        *this->resolvedBackgroundColor = this->defaultBackgroundColor;
+        if constexpr (HasDefaultSound<H>)
+        {
+            return Outcome(H::BACKGROUND_COLOR_DEFAULT, H::SOUND_DEFAULT);
+        }
+        return Outcome(H::BACKGROUND_COLOR_DEFAULT);
     }
 
     /// Whether to add the matching message to the /mentions channel
@@ -102,6 +106,14 @@ struct Outcome {
     friend QDebug operator<<(QDebug dbg, const Outcome &v);
 
 private:
+    explicit Outcome(const QColor &defaultBackgroundColor_,
+                     QStringView defaultSound_ = {})
+        : defaultBackgroundColor(defaultBackgroundColor_)
+        , defaultSound(defaultSound_)
+    {
+        *this->resolvedBackgroundColor = this->defaultBackgroundColor;
+    }
+
     std::shared_ptr<QColor> resolvedBackgroundColor =
         std::make_shared<QColor>();
 
