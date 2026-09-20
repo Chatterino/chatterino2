@@ -205,13 +205,13 @@ set(SOURCE_FILES
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
-        controllers/highlights/Model.cpp
-        controllers/highlights/Model.hpp
         controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
-        controllers/highlights/Sounds.hpp
+        controllers/highlights/Model.cpp
+        controllers/highlights/Model.hpp
         controllers/highlights/Sounds.cpp
+        controllers/highlights/Sounds.hpp
         controllers/highlights/types/AllForward.hpp
         controllers/highlights/types/All.hpp
         controllers/highlights/types/AnnouncementsHighlight.cpp
