@@ -149,6 +149,16 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *) override;
 
+    virtual void afterPageAdded()
+    {
+    }
+    virtual void afterPageRemoved()
+    {
+    }
+    virtual void afterPageMoved()
+    {
+    }
+
     DrawnButton *addButton_;
 
     template <typename T>
@@ -289,6 +299,10 @@ public:
 
 protected:
     void showEvent(QShowEvent *event) override;
+
+    void afterPageAdded() override;
+    void afterPageRemoved() override;
+    void afterPageMoved() override;
 
 private:
     QAction *sortTabsAlphabeticallyAction_;
