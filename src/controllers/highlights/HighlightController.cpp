@@ -11,6 +11,7 @@
 #include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
 #include "controllers/highlights/types/Common.hpp"
+#include "controllers/highlights/types/SubscribedThreadHighlight.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
 
@@ -26,9 +27,11 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoHighlights;
 
-void rebuildSharedHighlights(Settings &settings,
+bool rebuildSharedHighlights(Settings &settings,
                              std::vector<HighlightCheck> &checks)
 {
+    bool isSubscribedThreadHighlightEnabled = false;
+
     auto highlights = settings.sharedHighlights.readOnly();
 
     for (const auto &highlight : *highlights)
@@ -40,6 +43,10 @@ void rebuildSharedHighlights(Settings &settings,
             continue;
         }
 
+        isSubscribedThreadHighlightEnabled |=
+            highlights::getID(highlight) ==
+            highlights::SubscribedThreadHighlight::ID;
+
         std::visit(
             [&checks](auto &&h) {
                 auto check = h.buildCheck();
@@ -50,6 +57,8 @@ void rebuildSharedHighlights(Settings &settings,
             },
             highlight);
     }
+
+    return isSubscribedThreadHighlightEnabled;
 }
 
 /// Recreates the highlight of type Highlight if the highlight's ID is in the missingHighlights set
@@ -100,7 +109,8 @@ void HighlightController::rebuildChecks(Settings &settings)
     auto checks = this->checks_.access();
     checks->clear();
 
-    rebuildSharedHighlights(settings, *checks);
+    this->isSubscribedThreadHighlightEnabled =
+        rebuildSharedHighlights(settings, *checks);
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
