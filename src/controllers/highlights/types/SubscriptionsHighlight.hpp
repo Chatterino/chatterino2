@@ -41,14 +41,6 @@ struct SubscriptionsHighlight {
     static constexpr QColor BACKGROUND_COLOR_DEFAULT =
         QColor(196, 102, 255, 100);
 
-    SubscriptionsHighlight() = default;
-
-    // Default state:
-    // Enabled = true
-    // Show in mentions = unavailable (always false)
-    // Flash taskbar = false
-    // Play sound = false
-
     QString name;
     std::optional<bool> enabled;
 
