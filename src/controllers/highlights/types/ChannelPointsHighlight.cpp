@@ -17,12 +17,15 @@ HighlightCheck ChannelPointsHighlight::buildCheck() const
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
-            if (!p.messageFlags.has(MessageFlag::RedeemedHighlight))
+            if (p.messageFlags.hasAny({
+                    MessageFlag::RedeemedHighlight,
+                    MessageFlag::RedeemedChannelPointReward,
+                }))
             {
-                return std::nullopt;
+                return highlight.outcome.makeSimpleResult<H>();
             }
 
-            return highlight.outcome.makeSimpleResult<H>();
+            return std::nullopt;
         },
     };
 }
