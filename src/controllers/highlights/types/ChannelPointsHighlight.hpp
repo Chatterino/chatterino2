@@ -33,8 +33,7 @@ struct ChannelPointsHighlight {
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
-    static constexpr QStringView DEFAULT_NAME =
-        u"Highlights redeemed with Channel Points";
+    static constexpr QStringView DEFAULT_NAME = u"Channel Points Redemptions";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;
