@@ -50,7 +50,7 @@ struct UncategorizedNotificationHighlight {
     QString name;
     std::optional<bool> enabled;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<UncategorizedNotificationHighlight>();
 
     HighlightCheck buildCheck() const;
 

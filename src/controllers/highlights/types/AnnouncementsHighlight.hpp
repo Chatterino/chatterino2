@@ -48,7 +48,7 @@ struct AnnouncementsHighlight {
 
     std::optional<bool> overrideColoredAnnouncements;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<AnnouncementsHighlight>();
 
     HighlightCheck buildCheck() const;
 
