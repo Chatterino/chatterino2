@@ -33,6 +33,10 @@ struct UncategorizedNotificationHighlight {
     static constexpr QStringView ID = u"uncategorizednotification";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
+    static constexpr QStringView DESCRIPTION =
+        u"Any notification that isn't categorized,<br />or too rare to have "
+        u"its own category.<br />Examples include subscription upgrades from "
+        u"Prime subs.";
 
     static constexpr QStringView DEFAULT_NAME = u"Uncategorized Notification";
 
