@@ -466,8 +466,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
         }
 
         {
-            // SOUND V2
-
             auto *w = new QComboBox();
             auto currentSound = highlights::getSound(this->data);
             auto *soundURLLabel = new QLabel;
@@ -536,7 +534,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         if (fileUrl.isValid())
                         {
                             this->previousSoundIndex = index;
-                            // soundURLLabel->setText(fileUrl.toLocalFile());
                             std::visit(
                                 [fileUrl](auto &&h) {
                                     h.outcome.setSound(fileUrl.toString());
@@ -544,7 +541,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                                 this->data);
                             soundURLLabel->setText(u"Playing custom " %
                                                    fileUrl.toString());
-                            // w->setCurrentText("AAAAAAAAA");
                             QSignalBlocker block(w);
                             w->removeItem(numRows);
                             w->addItem(fileUrl.fileName());
