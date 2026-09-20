@@ -234,41 +234,24 @@ void Connection::onAutomodMessageHold(
     }
 
     auto time = chronoToQDateTime(metadata.messageTimestamp);
-    auto header = makeAutomodHoldMessageHeader(channel, time, payload.event);
-    auto body = makeAutomodHoldMessageBody(channel, time, payload.event);
+    auto [message, messageAlert] =
+        makeAutomodHoldMessage(channel, time, payload.event);
 
     auto messageText = payload.event.message.text.qt();
     auto userLogin = payload.event.userLogin.qt();
 
-    runInGuiThread([channel, messageText, userLogin, header, body] {
-        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags);
-        if (highlighted)
-        {
-            MessageBuilder::triggerHighlights(
-                channel,
-                {
-                    .customSound =
-                        highlightResult.customSoundUrl.value_or<QUrl>({}),
-                    .playSound = highlightResult.playSound,
-                    .windowAlert = highlightResult.alert,
-                });
-        }
+    runInGuiThread([channel, messageText, userLogin, message, messageAlert] {
+        MessageBuilder::triggerHighlights(channel, messageAlert);
 
-        channel->addMessage(header, MessageContext::Original);
-        channel->addMessage(body, MessageContext::Original);
+        channel->addMessage(message, MessageContext::Original);
 
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
-            header, MessageContext::Original);
-        getApp()->getTwitch()->getAutomodChannel()->addMessage(
-            body, MessageContext::Original);
+            message, MessageContext::Original);
 
         if (getSettings()->showAutomodInMentions)
         {
             getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                header, MessageContext::Original);
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                body, MessageContext::Original);
+                message, MessageContext::Original);
         }
     });
 }
