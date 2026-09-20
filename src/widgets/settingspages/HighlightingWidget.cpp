@@ -133,7 +133,7 @@ HighlightingWidget::HighlightingWidget()
     auto *add = new QPushButton("Add");
     auto *addMenu = new QMenu;
     addMenu->addAction(
-        QIcon{":/buttons/text.svg"}, "Message highlight", [this, view] {
+        QIcon{":/buttons/text.svg"}, "Message highlight", this, [this, view] {
             auto id = highlights::generateID();
             highlights::MessageHighlight h{id};
             h.setPattern("my phrase");
@@ -142,7 +142,7 @@ HighlightingWidget::HighlightingWidget()
                                       ConfigureCloseBehaviour::Remove);
         });
     addMenu->addAction(
-        QIcon{":/settings/accounts.svg"}, "User highlight", [this, view] {
+        QIcon{":/settings/accounts.svg"}, "User highlight", this, [this, view] {
             auto id = highlights::generateID();
             highlights::UserHighlight h{id};
             h.setUsername("highlighted user");
@@ -151,7 +151,7 @@ HighlightingWidget::HighlightingWidget()
                                       ConfigureCloseBehaviour::Remove);
         });
     // TODO: Find a good badge icon
-    addMenu->addAction("Badge highlight", [this, view] {
+    addMenu->addAction("Badge highlight", this, [this, view] {
         auto id = highlights::generateID();
         highlights::BadgeHighlight h{id};
         h.setBadgeName(highlights::twitchBadges()[0].badgeName());
@@ -160,7 +160,8 @@ HighlightingWidget::HighlightingWidget()
                                   ConfigureCloseBehaviour::Remove);
     });
     addMenu->addAction(
-        QIcon{":/settings/filters.svg"}, "Filter highlight", [this, view] {
+        QIcon{":/settings/filters.svg"}, "Filter highlight", this,
+        [this, view] {
             auto id = highlights::generateID();
             highlights::FilterHighlight h{id};
             h.setFilterText("message.content contains \"my phrase\"");
