@@ -40,7 +40,7 @@ HighlightCheck FilterHighlight::buildCheck() const
 
             return HighlightResult{
                 .alert = highlight.outcome.alert.value_or(H::ALERT_DEFAULT),
-                .sound = highlight.outcome.soundURL,
+                .sound = highlight.outcome.getSoundURL(),
                 .color = highlight.outcome.getBackgroundColor(),
                 .showInMentions = highlight.outcome.showInMentions.value_or(
                     H::SHOW_IN_MENTIONS_DEFAULT),
@@ -75,7 +75,7 @@ QDebug operator<<(QDebug dbg, const FilterHighlight &v)
     dbg.nospace() << "FilterHighlight("
                   << "name:" << v.name << ',' << "pattern:" << v.filterText
                   << ',' << "enabled:" << v.enabled << ','
-                  << "sound:" << v.outcome.soundURL << ')';
+                  << "outcome:" << v.outcome << ')';
 
     return dbg;
 }

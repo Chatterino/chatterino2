@@ -228,7 +228,7 @@ QUrl getSoundURL(const AllHighlights &h)
 {
     return std::visit(
         [](auto &&h) {
-            return h.outcome.soundURL;
+            return h.outcome.getSoundURL();
         },
         h);
 }
@@ -258,7 +258,7 @@ bool shouldPlaySound(const AllHighlights &h)
 {
     return std::visit(
         [](auto &&h) {
-            return !h.outcome.soundURL.isEmpty();
+            return !h.outcome.getSoundURL().isEmpty();
         },
         h);
 }
