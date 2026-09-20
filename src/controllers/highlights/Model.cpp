@@ -11,16 +11,18 @@
 #include "util/StandardItemHelper.hpp"
 
 #include <QPalette>
+#include <QPointer>
 
 namespace chatterino::highlights {
 
-namespace {
-
-void updateRow(const AllHighlights &highlight,
-               std::vector<QStandardItem *> &row)
+Model::Model(QObject *parent)
+    : SignalVectorModel<AllHighlights>(Column::COUNT, parent)
 {
-    using Column = Model::Column;
+}
 
+void Model::updateRow(const AllHighlights &highlight,
+                      std::vector<QStandardItem *> &row)
+{
     QIcon enabledIcon{":/buttons/checkmark-square.svg"};
     QIcon disabledIcon{":/buttons/dismiss-square.svg"};
 
@@ -86,8 +88,13 @@ void updateRow(const AllHighlights &highlight,
     {
         getApp()->getTwitchBadges()->getBadgeIcon(
             h->getBadgeName(),
-            [row](const QString &name, const std::shared_ptr<QIcon> &icon) {
+            [model = QPointer(this), row](const QString &name,
+                                          const std::shared_ptr<QIcon> &icon) {
                 (void)name;  // unused
+                if (!model)
+                {
+                    return;
+                }
                 row[Column::Name]->setData(*icon, Qt::DecorationRole);
             });
     }
@@ -97,13 +104,6 @@ void updateRow(const AllHighlights &highlight,
     row[Column::Sound]->setData(soundIcon, Qt::DecorationRole);
 }
 
-}  // namespace
-
-Model::Model(QObject *parent)
-    : SignalVectorModel<AllHighlights>(Column::COUNT, parent)
-{
-}
-
 AllHighlights Model::getItemFromRow(std::vector<QStandardItem *> &row,
                                     const AllHighlights &original)
 {
@@ -111,7 +111,7 @@ AllHighlights Model::getItemFromRow(std::vector<QStandardItem *> &row,
 
     auto item = get<AllHighlights>(row[Column::Enabled]->data(DATA_ROLE));
 
-    updateRow(item, row);
+    this->updateRow(item, row);
 
     return item;
 }
@@ -122,7 +122,7 @@ void Model::getRowFromItem(const AllHighlights &item,
     row[Column::Enabled]->setData(QVariant::fromValue(item), DATA_ROLE);
     row[Column::Enabled]->setData(QVariant::fromValue(getID(item)), ID_ROLE);
 
-    updateRow(item, row);
+    this->updateRow(item, row);
 }
 
 }  // namespace chatterino::highlights

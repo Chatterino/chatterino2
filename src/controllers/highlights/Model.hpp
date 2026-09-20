@@ -33,6 +33,10 @@ public:
     };
 
 protected:
+    /// Update the given `row` based on the data in the given `highlight`
+    void updateRow(const AllHighlights &highlight,
+                   std::vector<QStandardItem *> &row);
+
     // turn a vector item into a model row
     AllHighlights getItemFromRow(std::vector<QStandardItem *> &row,
                                  const AllHighlights &original) override;
