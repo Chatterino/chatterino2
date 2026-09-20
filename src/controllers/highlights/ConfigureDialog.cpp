@@ -424,6 +424,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                         h.outcome.setBackgroundColor(std::nullopt);
                     },
                     this->data);
+
+                QSignalBlocker block(w);
                 w->setColor(*getBackgroundColor(this->data));
             });
 
