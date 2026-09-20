@@ -228,7 +228,7 @@ public:
         const std::shared_ptr<MessageThread> &thread = {},
         const MessagePtr &parent = {});
 
-    static MessagePtrMut makeSystemMessageWithUser(
+    static std::pair<MessagePtrMut, HighlightAlert> makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
         const QTime &time, const Communi::IrcMessage &ircMessage,
