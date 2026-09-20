@@ -42,44 +42,40 @@ struct ImageInput {
 };
 
 struct SupportedFormat {
-    const char *mime;
-    const char *name;
-    const char *extension{};
+    QString mime;
+    QString format;
 };
 
-constexpr std::array SUPPORTED_FORMATS{
+const std::array SUPPORTED_FORMATS{
     SupportedFormat{
         .mime = "image/apng",
-        .name = "apng",
-        .extension = ".apng",
+        .format = "apng",
     },
     SupportedFormat{
         .mime = "image/png",
-        .name = "png",
+        .format = "png",
     },
     SupportedFormat{
         .mime = "image/jpeg",
-        .name = "jpeg",
+        .format = "jpeg",
     },
     SupportedFormat{
         .mime = "image/gif",
-        .name = "gif",
+        .format = "gif",
     },
     SupportedFormat{
         .mime = "image/webp",
-        .name = "webp",
+        .format = "webp",
     },
 };
 
-QString uploadFormat(const QMimeType &mime, const QString &filePath = {})
+QString uploadFormat(const QMimeType &mime)
 {
     for (const auto &format : SUPPORTED_FORMATS)
     {
-        if (mime.inherits(format.mime) ||
-            (format.extension != nullptr &&
-             filePath.endsWith(format.extension, Qt::CaseInsensitive)))
+        if (mime.inherits(format.mime))
         {
-            return format.name;
+            return format.format;
         }
     }
     return {};
@@ -358,7 +354,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         {
             QString localPath = path.toLocalFile();
             QMimeType mime = mimeDb.mimeTypeForUrl(path);
-            const auto format = uploadFormat(mime, localPath);
+            const auto format = uploadFormat(mime);
             if (!mime.name().startsWith("image") && format.isEmpty())
             {
                 continue;
@@ -398,7 +394,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
             {
                 images.push({
                     .data = source->data(format.mime),
-                    .format = format.name,
+                    .format = format.format,
                 });
                 return {images, {}};
             }
