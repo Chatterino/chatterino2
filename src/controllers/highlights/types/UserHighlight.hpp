@@ -90,11 +90,6 @@ protected:
     {
         return !this->getUsername().isEmpty();
     }
-
-    bool isMatch(const QString &subject) const
-    {
-        return this->username.compare(subject, Qt::CaseInsensitive) == 0;
-    }
 };
 
 }  // namespace chatterino::highlights
