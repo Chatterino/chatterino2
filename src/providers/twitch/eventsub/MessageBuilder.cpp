@@ -686,8 +686,10 @@ std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     builder.emplace<TextElement>(event.message.text.qt(),
                                  MessageElementFlag::Text, MessageColor::Text);
 
-    builder.setMessageAndSearchText(displayName % u": " %
-                                    event.message.text.qt());
+    builder.setMessageAndSearchText(
+        u"AutoMod: Held a message for reason: " % reason %
+        u". Allow will post it in chat. Allow Deny " % displayName % u": " %
+        event.message.text.qt());
 
     QVariantMap tagsMap;
     Communi::TagsRef tags(tagsMap);

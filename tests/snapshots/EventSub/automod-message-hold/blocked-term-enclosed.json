@@ -249,8 +249,8 @@
             "id": "automod_0cbb6e48-1606-46c6-b1ac-c97626e1c5cb",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: 😂 😂 🍋‍🟩blockedterm😂",
-            "searchText": "nerixyz: 😂 😂 🍋‍🟩blockedterm😂",
+            "messageText": "AutoMod: Held a message for reason: matches 1 blocked term \"🍋‍🟩blockedterm😂\". Allow will post it in chat. Allow Deny nerixyz: 😂 😂 🍋‍🟩blockedterm😂",
+            "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"🍋‍🟩blockedterm😂\". Allow will post it in chat. Allow Deny nerixyz: 😂 😂 🍋‍🟩blockedterm😂",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {

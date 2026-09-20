@@ -235,8 +235,8 @@
             "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
             "localizedName": "",
             "loginName": "testaccount_420",
-            "messageText": "testaccount_420(테스트계정420): ass",
-            "searchText": "testaccount_420(테스트계정420): ass",
+            "messageText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny testaccount_420(테스트계정420): ass",
+            "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny testaccount_420(테스트계정420): ass",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {

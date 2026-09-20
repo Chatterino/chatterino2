@@ -275,8 +275,8 @@
             "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: ass",
-            "searchText": "nerixyz: ass",
+            "messageText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny nerixyz: ass",
+            "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny nerixyz: ass",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {

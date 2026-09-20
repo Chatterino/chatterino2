@@ -268,8 +268,8 @@
             "id": "automod_af40eeff-3b0d-4099-81ad-bca76c9bc214",
             "localizedName": "",
             "loginName": "pajlada",
-            "messageText": "pajlada: foo cmonBruh bar",
-            "searchText": "pajlada: foo cmonBruh bar",
+            "messageText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny pajlada: foo cmonBruh bar",
+            "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"cmonBruh\". Allow will post it in chat. Allow Deny pajlada: foo cmonBruh bar",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
