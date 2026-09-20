@@ -24,6 +24,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPointer>
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QSlider>
@@ -217,8 +218,8 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
 
                 getApp()->getTwitchBadges()->getBadgeIcons(
                     highlights::twitchBadges(),
-                    [w](const QString &identifier,
-                        const std::shared_ptr<QIcon> &icon) {
+                    [w = QPointer(w)](const QString &identifier,
+                                      const std::shared_ptr<QIcon> &icon) {
                         if (!w)
                         {
                             return;
