@@ -406,6 +406,9 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             w->setColor(selected);
                             std::visit(
                                 [selected](auto &&h) {
+                                    // TODO: This directly sets the background color and is applied immediately.
+                                    // If a user clicks cancel, that color they set is still retained.
+                                    // We need to figure out a way to fix this.
                                     h.outcome.setBackgroundColor(selected);
                                 },
                                 this->data);
