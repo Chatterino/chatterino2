@@ -62,7 +62,7 @@ struct UserHighlight {
 
     std::optional<bool> enabled;
 
-    Outcome outcome{BACKGROUND_COLOR_DEFAULT};
+    Outcome outcome = Outcome::create<UserHighlight>();
 
 protected:
     /// Contains the username to match on (e.g. "forsen" or "spaenny")
