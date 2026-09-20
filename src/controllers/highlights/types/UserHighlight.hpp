@@ -10,13 +10,9 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize/common.hpp>
-#include <qcolor.h>
-#include <qdebug.h>
-#include <qnamespace.h>
-#include <qpixmap.h>
-#include <qregularexpression.h>
+#include <QColor>
+#include <QDebug>
 #include <QStringView>
-#include <qurl.h>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
