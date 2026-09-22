@@ -1558,6 +1558,45 @@ std::unique_ptr<MessageElement> ScalingImageElement::clone() const
     return elem;
 }
 
+TwitchGifElement::TwitchGifElement(ImageSet images, QString copyText)
+    : ScalingImageElement(std::move(images), MessageElementFlag::TwitchGif,
+                          std::move(copyText))
+{
+}
+
+void TwitchGifElement::addToContainer(MessageLayoutContainer &container,
+                                      const MessageLayoutContext &ctx)
+{
+    if (!this->matchesFlags(ctx.flags))
+    {
+        return;
+    }
+
+    const auto scale = getSettings()->twitchGifScale.getValue();
+    const auto &image =
+        this->images().getImageOrLoaded(container.getImageScale() * scale);
+    if (image->isEmpty())
+    {
+        return;
+    }
+
+    auto size = image->size() * container.getScale() * scale;
+    if (size.width() > container.remainingWidth())
+    {
+        size *= container.remainingWidth() / size.width();
+    }
+
+    container.addElement(new ImageLayoutElement(*this, image, size));
+}
+
+std::unique_ptr<MessageElement> TwitchGifElement::clone() const
+{
+    auto elem =
+        std::make_unique<TwitchGifElement>(this->images(), this->copyText());
+    elem->cloneFrom(*this);
+    return elem;
+}
+
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
 {
