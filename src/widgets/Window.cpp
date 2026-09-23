@@ -30,6 +30,7 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/FollowedChannelsWindow.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
@@ -559,6 +560,18 @@ void Window::addShortcuts()
          [this](std::vector<QString>) -> QString {
              auto *quickSwitcher = new QuickSwitcherPopup(this);
              quickSwitcher->show();
+             return "";
+         }},
+        {"openFollowedChannels",
+         [this](const std::vector<QString> &) -> QString {
+             auto *window = this->findChild<FollowedChannelsWindow *>();
+             if (window == nullptr)
+             {
+                 window = new FollowedChannelsWindow(this);
+             }
+             window->show();
+             window->raise();
+             window->activateWindow();
              return "";
          }},
         {"quit",

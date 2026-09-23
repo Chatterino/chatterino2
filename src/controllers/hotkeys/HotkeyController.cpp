@@ -550,6 +550,10 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(), "open quick switcher");
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+L"), "openFollowedChannels",
+                            std::vector<QString>(), "open followed channels");
+
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
                             {"toggle"}, "toggle tab visibility");
     }
