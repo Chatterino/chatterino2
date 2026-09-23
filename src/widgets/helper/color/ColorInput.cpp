@@ -33,7 +33,7 @@ QColor parseHexColor(const QString &text)
         QStringView v(text);
         v.chop(1);
         QColor col(v);
-        col.setAlpha(alphaHex);
+        col.setAlpha(alphaHex * 17);
         return col;
     }
     QColor col(text);
