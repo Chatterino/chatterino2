@@ -123,6 +123,18 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
+void Window::showFollowedChannels()
+{
+    auto *window = this->findChild<FollowedChannelsWindow *>();
+    if (window == nullptr)
+    {
+        window = new FollowedChannelsWindow(this);
+    }
+    window->show();
+    window->raise();
+    window->activateWindow();
+}
+
 void Window::setPopupID(size_t id)
 {
     this->popupID_ = id;
@@ -564,14 +576,7 @@ void Window::addShortcuts()
          }},
         {"openFollowedChannels",
          [this](const std::vector<QString> &) -> QString {
-             auto *window = this->findChild<FollowedChannelsWindow *>();
-             if (window == nullptr)
-             {
-                 window = new FollowedChannelsWindow(this);
-             }
-             window->show();
-             window->raise();
-             window->activateWindow();
+             this->showFollowedChannels();
              return "";
          }},
         {"quit",
