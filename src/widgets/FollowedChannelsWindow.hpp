@@ -14,12 +14,13 @@ class QCheckBox;
 class QLabel;
 class QLineEdit;
 class QPoint;
-class QSortFilterProxyModel;
 class QStandardItemModel;
 class QTableView;
 class QTimer;
 
 namespace chatterino {
+
+class FollowedChannelsFilterModel;
 
 class FollowedChannelsWindow : public BasePopup
 {
@@ -34,7 +35,8 @@ private:
     void load();
     void loadFollowedChannels(const QString &userID);
     void loadFollowedStreams(const QString &userID);
-    void updateList(bool preserveViewport = true);
+    void updateList();
+    void updateStatus();
     static void openChannelInNewTab(const QString &channelLogin);
     static void openChannelInNewSplit(const QString &channelLogin);
     void showContextMenu(QPoint position);
@@ -44,7 +46,7 @@ private:
     QCheckBox *showOffline_{};
     QLabel *status_{};
     QStandardItemModel *model_{};
-    QSortFilterProxyModel *proxyModel_{};
+    FollowedChannelsFilterModel *proxyModel_{};
     QTableView *list_{};
     QTimer *refreshTimer_{};
     QTimer *followedChannelsRefreshTimer_{};

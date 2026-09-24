@@ -26,12 +26,13 @@
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDesktopServices>
+#include <QHash>
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
 #include <QPointer>
-#include <QScrollBar>
+#include <QSet>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QTableView>
@@ -40,6 +41,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <vector>
 
@@ -49,6 +51,9 @@ namespace {
 
 constexpr auto CHANNEL_LOGIN_ROLE = Qt::UserRole;
 constexpr auto SORT_ROLE = Qt::UserRole + 1;
+constexpr auto CHANNEL_ID_ROLE = Qt::UserRole + 2;
+constexpr auto LIVE_ROLE = Qt::UserRole + 3;
+constexpr std::array SEARCH_COLUMNS{0, 3, 4};
 
 qint64 uptimeSeconds(const QString &startedAt)
 {
@@ -76,6 +81,85 @@ QString formatUptime(const QString &startedAt)
 
 }  // namespace
 
+class FollowedChannelsFilterModel final : public QSortFilterProxyModel
+{
+public:
+    explicit FollowedChannelsFilterModel(QObject *parent)
+        : QSortFilterProxyModel(parent)
+    {
+    }
+
+    void setQuery(const QString &query)
+    {
+        const auto trimmed = query.trimmed();
+        if (this->query_ == trimmed)
+        {
+            return;
+        }
+        this->query_ = trimmed;
+        this->invalidateFilter();
+    }
+
+    void setShowOffline(bool showOffline)
+    {
+        if (this->showOffline_ == showOffline)
+        {
+            return;
+        }
+        this->showOffline_ = showOffline;
+        this->invalidateFilter();
+    }
+
+protected:
+    bool filterAcceptsRow(int sourceRow,
+                          const QModelIndex &sourceParent) const override
+    {
+        const auto first =
+            this->sourceModel()->index(sourceRow, 0, sourceParent);
+        if (!this->showOffline_ && !first.data(LIVE_ROLE).toBool())
+        {
+            return false;
+        }
+        if (this->query_.isEmpty())
+        {
+            return true;
+        }
+        if (first.data(CHANNEL_LOGIN_ROLE)
+                .toString()
+                .contains(this->query_, Qt::CaseInsensitive))
+        {
+            return true;
+        }
+        return std::ranges::any_of(SEARCH_COLUMNS, [&](int column) {
+            return this->sourceModel()
+                ->index(sourceRow, column, sourceParent)
+                .data(Qt::DisplayRole)
+                .toString()
+                .contains(this->query_, Qt::CaseInsensitive);
+        });
+    }
+
+    bool lessThan(const QModelIndex &left,
+                  const QModelIndex &right) const override
+    {
+        if (left.data(this->sortRole()) != right.data(this->sortRole()))
+        {
+            return QSortFilterProxyModel::lessThan(left, right);
+        }
+
+        const auto leftName = left.sibling(left.row(), 0).data().toString();
+        const auto rightName = right.sibling(right.row(), 0).data().toString();
+        const auto comparison =
+            leftName.compare(rightName, Qt::CaseInsensitive);
+        return this->sortOrder() == Qt::AscendingOrder ? comparison < 0
+                                                       : comparison > 0;
+    }
+
+private:
+    QString query_;
+    bool showOffline_{true};
+};
+
 FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
     : BasePopup({BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave,
                  BaseWindow::ClearBuffersOnDpiChange},
@@ -84,7 +168,7 @@ FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
     , showOffline_(new QCheckBox("Show offline channels", this))
     , status_(new QLabel(this))
     , model_(new QStandardItemModel(this))
-    , proxyModel_(new QSortFilterProxyModel(this))
+    , proxyModel_(new FollowedChannelsFilterModel(this))
     , list_(new QTableView(this))
     , refreshTimer_(new QTimer(this))
     , followedChannelsRefreshTimer_(new QTimer(this))
@@ -121,12 +205,16 @@ FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
     layout->addWidget(this->status_);
     layout->addWidget(this->list_);
 
-    QObject::connect(this->search_, &QLineEdit::textChanged, this, [this] {
-        this->updateList(false);
-    });
-    QObject::connect(this->showOffline_, &QCheckBox::toggled, this, [this] {
-        this->updateList(false);
-    });
+    QObject::connect(this->search_, &QLineEdit::textChanged, this,
+                     [this](const QString &query) {
+                         this->proxyModel_->setQuery(query);
+                         this->updateStatus();
+                     });
+    QObject::connect(this->showOffline_, &QCheckBox::toggled, this,
+                     [this](bool showOffline) {
+                         this->proxyModel_->setShowOffline(showOffline);
+                         this->updateStatus();
+                     });
     QObject::connect(this->list_, &QAbstractItemView::activated, this,
                      [](const QModelIndex &index) {
                          FollowedChannelsWindow::openChannelInNewTab(
@@ -293,17 +381,8 @@ void FollowedChannelsWindow::loadFollowedStreams(const QString &userID)
         std::move(token));
 }
 
-void FollowedChannelsWindow::updateList(bool preserveViewport)
+void FollowedChannelsWindow::updateList()
 {
-    const auto selectedChannel = this->selectedChannel();
-    const auto verticalScroll = this->list_->verticalScrollBar()->value();
-    const auto horizontalScroll = this->list_->horizontalScrollBar()->value();
-    const auto autoScroll = this->list_->hasAutoScroll();
-    if (preserveViewport)
-    {
-        this->list_->setAutoScroll(false);
-    }
-
     struct Entry {
         QString id;
         QString login;
@@ -317,48 +396,29 @@ void FollowedChannelsWindow::updateList(bool preserveViewport)
     {
         entries.push_back({id, stream.userLogin, stream.userName, &stream});
     }
-    if (this->showOffline_->isChecked())
+    for (const auto &[id, channel] : this->followedChannels_)
     {
-        for (const auto &[id, channel] : this->followedChannels_)
+        if (!this->streams_.contains(id))
         {
-            if (!this->streams_.contains(id))
-            {
-                entries.push_back({id, channel.broadcasterLogin,
-                                   channel.broadcasterName, nullptr});
-            }
+            entries.push_back({id, channel.broadcasterLogin,
+                               channel.broadcasterName, nullptr});
         }
     }
 
-    std::ranges::sort(entries, [](const auto &left, const auto &right) {
-        if ((left.stream != nullptr) != (right.stream != nullptr))
-        {
-            return left.stream != nullptr;
-        }
-        if (left.stream != nullptr &&
-            left.stream->viewerCount != right.stream->viewerCount)
-        {
-            return left.stream->viewerCount > right.stream->viewerCount;
-        }
-        return left.name.compare(right.name, Qt::CaseInsensitive) < 0;
-    });
+    QHash<QString, QStandardItem *> existingRows;
+    for (int row = 0; row < this->model_->rowCount(); ++row)
+    {
+        auto *item = this->model_->item(row, 0);
+        existingRows.insert(item->data(CHANNEL_ID_ROLE).toString(), item);
+    }
 
-    const auto query = this->search_->text().trimmed();
-    this->model_->removeRows(0, this->model_->rowCount());
+    QSet<QString> currentIDs;
     QList<QStandardItem *> items;
     items.reserve(this->model_->columnCount());
     for (const auto &entry : entries)
     {
+        currentIDs.insert(entry.id);
         const auto *stream = entry.stream;
-        if (!query.isEmpty() &&
-            !entry.name.contains(query, Qt::CaseInsensitive) &&
-            !entry.login.contains(query, Qt::CaseInsensitive) &&
-            (stream == nullptr ||
-             (!stream->gameName.contains(query, Qt::CaseInsensitive) &&
-              !stream->title.contains(query, Qt::CaseInsensitive))))
-        {
-            continue;
-        }
-
         QStringList columns{entry.name, {}, {}, {}, {}};
         QList<QVariant> sortValues{entry.name.toCaseFolded(), -1, -1, {}, {}};
         if (stream != nullptr)
@@ -373,43 +433,57 @@ void FollowedChannelsWindow::updateList(bool preserveViewport)
             sortValues[4] = stream->title.toCaseFolded();
         }
 
-        items.clear();
+        const auto existing = existingRows.find(entry.id);
+        if (existing == existingRows.end())
+        {
+            items.clear();
+            for (int column = 0; column < columns.size(); ++column)
+            {
+                auto *item = new QStandardItem;
+                item->setEditable(false);
+                items.append(item);
+            }
+            this->model_->appendRow(items);
+        }
+        const auto row = existing == existingRows.end()
+                             ? this->model_->rowCount() - 1
+                             : existing.value()->row();
         for (int column = 0; column < columns.size(); ++column)
         {
-            auto *item = new QStandardItem(columns[column]);
-            item->setEditable(false);
+            auto *item = this->model_->item(row, column);
+            item->setText(columns[column]);
             item->setData(sortValues[column], SORT_ROLE);
             if (stream == nullptr)
             {
                 item->setForeground(
                     this->palette().color(QPalette::Disabled, QPalette::Text));
             }
-            items.append(item);
-        }
-        items[0]->setData(entry.login, CHANNEL_LOGIN_ROLE);
-        this->model_->appendRow(items);
-    }
-
-    if (!selectedChannel.isEmpty())
-    {
-        for (int row = 0; row < this->proxyModel_->rowCount(); ++row)
-        {
-            const auto index = this->proxyModel_->index(row, 0);
-            if (index.data(CHANNEL_LOGIN_ROLE).toString() == selectedChannel)
+            else
             {
-                this->list_->setCurrentIndex(index);
-                break;
+                item->setData(QVariant{}, Qt::ForegroundRole);
             }
         }
+        auto *first = this->model_->item(row, 0);
+        first->setData(entry.id, CHANNEL_ID_ROLE);
+        first->setData(entry.login, CHANNEL_LOGIN_ROLE);
+        first->setData(stream != nullptr, LIVE_ROLE);
     }
 
-    if (preserveViewport)
+    for (int row = this->model_->rowCount() - 1; row >= 0; --row)
     {
-        this->list_->setAutoScroll(autoScroll);
-        this->list_->verticalScrollBar()->setValue(verticalScroll);
-        this->list_->horizontalScrollBar()->setValue(horizontalScroll);
+        if (!currentIDs.contains(
+                this->model_->item(row, 0)->data(CHANNEL_ID_ROLE).toString()))
+        {
+            this->model_->removeRow(row);
+        }
     }
 
+    this->updateStatus();
+}
+
+void FollowedChannelsWindow::updateStatus()
+{
+    const auto query = this->search_->text().trimmed();
     const auto account = getApp()->getAccounts()->twitch.getCurrent();
     if (account->isAnon())
     {
@@ -431,7 +505,7 @@ void FollowedChannelsWindow::updateList(bool preserveViewport)
     {
         this->status_->setText("Loading followed channels...");
     }
-    else if (this->model_->rowCount() == 0)
+    else if (this->proxyModel_->rowCount() == 0)
     {
         if (!query.isEmpty())
         {
