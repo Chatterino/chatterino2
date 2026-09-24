@@ -11,7 +11,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/Helpers.hpp"
@@ -160,7 +159,7 @@ private:
     bool showOffline_{true};
 };
 
-FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
+FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
     : BasePopup({BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave,
                  BaseWindow::ClearBuffersOnDpiChange},
                 parent)
@@ -172,6 +171,7 @@ FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
     , list_(new QTableView(this))
     , refreshTimer_(new QTimer(this))
     , followedChannelsRefreshTimer_(new QTimer(this))
+    , window_(parent)
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle("Followed Channels");
@@ -216,11 +216,10 @@ FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
                          this->updateStatus();
                      });
     QObject::connect(this->list_, &QAbstractItemView::activated, this,
-                     [](const QModelIndex &index) {
-                         FollowedChannelsWindow::openChannelInNewTab(
-                             index.sibling(index.row(), 0)
-                                 .data(CHANNEL_LOGIN_ROLE)
-                                 .toString());
+                     [this](const QModelIndex &index) {
+                         this->openChannelInNewTab(index.sibling(index.row(), 0)
+                                                       .data(CHANNEL_LOGIN_ROLE)
+                                                       .toString());
                      });
     QObject::connect(this->list_, &QTableView::customContextMenuRequested, this,
                      &FollowedChannelsWindow::showContextMenu);
@@ -534,8 +533,7 @@ void FollowedChannelsWindow::openChannelInNewTab(const QString &channelLogin)
         return;
     }
 
-    auto *window = getApp()->getWindows()->getLastSelectedWindow();
-    auto *tab = window->getNotebook().addPage(true);
+    auto *tab = this->window_->getNotebook().addPage(true);
     tab->appendNewSplit(false)->setChannel(
         getApp()->getTwitch()->getOrAddChannel(channelLogin));
 }
@@ -547,8 +545,7 @@ void FollowedChannelsWindow::openChannelInNewSplit(const QString &channelLogin)
         return;
     }
 
-    auto *window = getApp()->getWindows()->getLastSelectedWindow();
-    window->getNotebook()
+    this->window_->getNotebook()
         .getOrAddSelectedPage()
         ->appendNewSplit(false)
         ->setChannel(getApp()->getTwitch()->getOrAddChannel(channelLogin));
@@ -588,11 +585,11 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
         crossPlatformCopy(url);
     });
     menu.addSeparator();
-    menu.addAction("&Open in new split", this, [channel] {
-        FollowedChannelsWindow::openChannelInNewSplit(channel);
+    menu.addAction("&Open in new split", this, [this, channel] {
+        this->openChannelInNewSplit(channel);
     });
-    menu.addAction("Open in new &tab", this, [channel] {
-        FollowedChannelsWindow::openChannelInNewTab(channel);
+    menu.addAction("Open in new &tab", this, [this, channel] {
+        this->openChannelInNewTab(channel);
     });
     menu.addSeparator();
     menu.addAction("Open player in &browser", this, [channel] {

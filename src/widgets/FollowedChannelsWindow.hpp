@@ -21,13 +21,14 @@ class QTimer;
 namespace chatterino {
 
 class FollowedChannelsFilterModel;
+class Window;
 
 class FollowedChannelsWindow : public BasePopup
 {
     Q_OBJECT
 
 public:
-    explicit FollowedChannelsWindow(QWidget *parent = nullptr);
+    explicit FollowedChannelsWindow(Window *parent);
 
 private:
     void addShortcuts() override;
@@ -37,8 +38,8 @@ private:
     void loadFollowedStreams(const QString &userID);
     void updateList();
     void updateStatus();
-    static void openChannelInNewTab(const QString &channelLogin);
-    static void openChannelInNewSplit(const QString &channelLogin);
+    void openChannelInNewTab(const QString &channelLogin);
+    void openChannelInNewSplit(const QString &channelLogin);
     void showContextMenu(QPoint position);
     QString selectedChannel() const;
 
@@ -50,6 +51,7 @@ private:
     QTableView *list_{};
     QTimer *refreshTimer_{};
     QTimer *followedChannelsRefreshTimer_{};
+    Window *window_{};
 
     std::map<QString, HelixFollowedChannel> followedChannels_;
     std::map<QString, HelixFollowedChannel> pendingFollowedChannels_;
