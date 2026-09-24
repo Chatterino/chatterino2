@@ -1053,6 +1053,16 @@ TEST(Commands, E2E)
     getApp()->getCommands()->execCommand(
         "/unban --channel id:11148817 --channel testaccount_420 forsen",
         channel, false);
+
+    // pin command preserves quotes in message text
+    EXPECT_CALL(mockHelix, sendChatMessage(_, _, _))
+        .WillOnce(
+            [](const HelixSendMessageArgs &args, const auto &, const auto &) {
+                EXPECT_EQ(args.message, R"(LULW "WE")");
+                EXPECT_TRUE(args.pin);
+            });
+
+    getApp()->getCommands()->execCommand(R"(/pin LULW "WE")", channel, false);
 }
 
 }  // namespace chatterino
