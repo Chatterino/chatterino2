@@ -23,12 +23,10 @@
 #include "widgets/Window.hpp"
 
 #include <QAbstractItemView>
-#include <QApplication>
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QHeaderView>
-#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
@@ -165,26 +163,8 @@ FollowedChannelsWindow::FollowedChannelsWindow(QWidget *parent)
 
     this->refreshTimer_->start(std::chrono::minutes(1));
     this->followedChannelsRefreshTimer_->start(std::chrono::minutes(5));
-    qApp->installEventFilter(this);
     this->addShortcuts();
     this->load();
-}
-
-bool FollowedChannelsWindow::eventFilter(QObject *watched, QEvent *event)
-{
-    if (this->isActiveWindow() &&
-        QApplication::activePopupWidget() == nullptr &&
-        event->type() == QEvent::KeyPress)
-    {
-        const auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
-        if (keyEvent != nullptr && keyEvent->key() == Qt::Key_Escape &&
-            keyEvent->modifiers() == Qt::NoModifier)
-        {
-            this->close();
-            return true;
-        }
-    }
-    return BasePopup::eventFilter(watched, event);
 }
 
 void FollowedChannelsWindow::addShortcuts()

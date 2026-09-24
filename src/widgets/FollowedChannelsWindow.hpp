@@ -29,7 +29,6 @@ public:
     explicit FollowedChannelsWindow(QWidget *parent = nullptr);
 
 private:
-    bool eventFilter(QObject *watched, QEvent *event) override;
     void addShortcuts() override;
     void themeChangedEvent() override;
     void load();
