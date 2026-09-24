@@ -160,9 +160,10 @@ private:
 };
 
 FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
-    : BasePopup({BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave,
-                 BaseWindow::ClearBuffersOnDpiChange},
-                parent)
+    : BasePopup(
+          {BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave,
+           BaseWindow::ClearBuffersOnDpiChange, BaseWindow::BoundsCheckOnShow},
+          parent)
     , search_(new QLineEdit(this))
     , showOffline_(new QCheckBox("Show offline channels", this))
     , status_(new QLabel(this))
@@ -571,28 +572,29 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
     }
 
     const auto url = "https://twitch.tv/" + channel;
-    QMenu menu(this);
-    menu.addAction("&Open link", this, [url] {
+    auto *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->addAction("&Open link", this, [url] {
         QDesktopServices::openUrl(QUrl(url));
     });
     if (supportsIncognitoLinks())
     {
-        menu.addAction("Open link &incognito", this, [url] {
+        menu->addAction("Open link &incognito", this, [url] {
             openLinkIncognito(url);
         });
     }
-    menu.addAction("&Copy link", this, [url] {
+    menu->addAction("&Copy link", this, [url] {
         crossPlatformCopy(url);
     });
-    menu.addSeparator();
-    menu.addAction("&Open in new split", this, [this, channel] {
+    menu->addSeparator();
+    menu->addAction("&Open in new split", this, [this, channel] {
         this->openChannelInNewSplit(channel);
     });
-    menu.addAction("Open in new &tab", this, [this, channel] {
+    menu->addAction("Open in new &tab", this, [this, channel] {
         this->openChannelInNewTab(channel);
     });
-    menu.addSeparator();
-    menu.addAction("Open player in &browser", this, [channel] {
+    menu->addSeparator();
+    menu->addAction("Open player in &browser", this, [channel] {
         const auto playerUrl = TWITCH_PLAYER_URL.arg(channel);
         if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
         {
@@ -603,16 +605,16 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
             QDesktopServices::openUrl(QUrl(playerUrl));
         }
     });
-    menu.addAction("Open in &streamlink", this, [channel] {
+    menu->addAction("Open in &streamlink", this, [channel] {
         openStreamlinkForChannelOrUrl(channel);
     });
     if (!getSettings()->customURIScheme.getValue().isEmpty())
     {
-        menu.addAction("Open in custom &player", this, [channel] {
+        menu->addAction("Open in custom &player", this, [channel] {
             openInCustomPlayer(channel);
         });
     }
-    menu.exec(this->list_->viewport()->mapToGlobal(position));
+    menu->popup(this->list_->viewport()->mapToGlobal(position));
 }
 
 }  // namespace chatterino
