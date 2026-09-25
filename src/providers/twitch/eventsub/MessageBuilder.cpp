@@ -53,6 +53,12 @@ QString stringifyAutomodReason(const lib::automod::AutomodReason &reason,
     return reason.category.qt() % u" level " % QString::number(reason.level);
 }
 
+QString stringifyAutomodReason(const std::string &reason,
+                               QStringView /* message */)
+{
+    return QString::fromStdString(reason).replace(u'_', u' ');
+}
+
 QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
                                QStringView message)
 {
