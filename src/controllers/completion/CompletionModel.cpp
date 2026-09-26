@@ -35,4 +35,14 @@ void CompletionModel::updateResults(const QString &query, size_t maxCount)
     }
 }
 
+QStringList CompletionModel::completionTexts(size_t maxCount) const
+{
+    QStringList results;
+    if (this->source_)
+    {
+        this->source_->addToStringList(results, maxCount, false);
+    }
+    return results;
+}
+
 }  // namespace chatterino
