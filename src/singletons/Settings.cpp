@@ -531,6 +531,17 @@ void Settings::migrateHighlights(bool isTest)
     }
 
     {
+        LowTrustUserHighlight h;
+
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
         YourMessagesHighlight h;
 
         if (const auto &s = this->p->enableSelfMessageHighlight;

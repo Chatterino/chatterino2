@@ -12,6 +12,7 @@
 #include "controllers/highlights/types/FilterHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/FirstMessageHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/InvalidHighlight.hpp"  // IWYU pragma: export
+#include "controllers/highlights/types/LowTrustUserHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/MessageHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscribedThreadHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"  // IWYU pragma: export

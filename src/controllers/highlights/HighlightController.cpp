@@ -9,9 +9,9 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/All.hpp"
 #include "controllers/highlights/types/Common.hpp"
-#include "controllers/highlights/types/SubscribedThreadHighlight.hpp"
+#include "controllers/highlights/types/LowTrustUserHighlight.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
 
@@ -189,6 +189,7 @@ std::unordered_set<QStringView> HighlightController::billTinHighlights()
         AutomodCaughtHighlight::ID,              //
         WatchStreakHighlight::ID,                //
         YourMessagesHighlight::ID,               //
+        LowTrustUserHighlight::ID,               //
         UncategorizedNotificationHighlight::ID,  //
     };
 }
@@ -218,6 +219,7 @@ void HighlightController::recreateMissingBillTinHighlights(
     recreateIfMissing<AnnouncementsHighlight>(missingHighlights);
     recreateIfMissing<YourUsernameHighlight>(missingHighlights);
     recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
+    recreateIfMissing<LowTrustUserHighlight>(missingHighlights);
     recreateIfMissing<YourMessagesHighlight>(missingHighlights);
     recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
     recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
