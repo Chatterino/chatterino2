@@ -215,6 +215,25 @@ TEST_P(SplitInputTest, Reply)
                                 << expected << "', but got '" << actual << "'";
 }
 
+TEST(SplitInput, EscapeCancelsReply)
+{
+    MockApplication app;
+    Split split(nullptr);
+    SplitInput input(&split);
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+    input.insertText("FeelsWeirdMan");
+    ASSERT_EQ(input.getInputText(), "@forsen FeelsWeirdMan");
+
+    QKeyEvent escape(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QApplication::sendEvent(edit, &escape);
+    EXPECT_EQ(input.getInputText(), "FeelsWeirdMan");
+}
+
 TEST(SplitInput, ReplyCommandCompletion)
 {
     MockApplication app;
