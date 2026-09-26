@@ -5,8 +5,8 @@
 #pragma once
 
 #include "controllers/hotkeys/HotkeyCategory.hpp"
+#include "controllers/hotkeys/HotkeySequence.hpp"
 
-#include <QKeySequence>
 #include <QString>
 
 #include <vector>
@@ -16,7 +16,7 @@ namespace chatterino {
 class Hotkey
 {
 public:
-    Hotkey(HotkeyCategory category, QKeySequence keySequence, QString action,
+    Hotkey(HotkeyCategory category, HotkeySequence sequence, QString action,
            std::vector<QString> arguments, QString name);
     virtual ~Hotkey() = default;
 
@@ -75,15 +75,20 @@ public:
     QString getCategory() const;
 
     /**
-     * @brief Returns the programmating key sequence of the hotkey
+     * @brief Returns the keyboard sequence of the hotkey
      *
-     * The actual key codes required for the hotkey to trigger specifically on e.g CTRL+F5
+     * Empty when this hotkey is bound to a mouse button.
      */
-    const QKeySequence &keySequence() const;
+    QKeySequence keySequence() const;
+
+    /**
+     * @brief Returns the keyboard or mouse sequence of the hotkey
+     */
+    const HotkeySequence &sequence() const;
 
 private:
     HotkeyCategory category_;
-    QKeySequence keySequence_;
+    HotkeySequence sequence_;
     QString action_;
     std::vector<QString> arguments_;
     QString name_;
