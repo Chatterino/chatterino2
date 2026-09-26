@@ -774,6 +774,13 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
 
         sink.addMessage(msg, MessageContext::Original);
         MessageBuilder::triggerHighlights(channel, alert);
+
+        if (msg->flags.has(MessageFlag::ShowInMentions) &&
+            sink.sinkTraits().has(MessageSinkTrait::AddMentionsToGlobalChannel))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                msg, MessageContext::Original);
+        }
         return;
     }
 
