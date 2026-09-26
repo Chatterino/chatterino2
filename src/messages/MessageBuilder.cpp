@@ -1339,14 +1339,20 @@ void MessageBuilder::appendChannelPointRewardMessage(
     this->message().reward = std::make_shared<ChannelPointReward>(reward);
 }
 
-MessagePtr MessageBuilder::makeChannelPointRewardMessage(
-    const ChannelPointReward &reward, bool isMod, bool isBroadcaster)
+std::pair<MessagePtr, HighlightAlert>
+    MessageBuilder::makeChannelPointRewardMessage(
+        const ChannelPointReward &reward, bool isMod, bool isBroadcaster,
+        Channel *channel)
 {
     MessageBuilder builder;
 
     builder.appendChannelPointRewardMessage(reward, isMod, isBroadcaster);
 
-    return builder.release();
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    auto highlights = builder.parseHighlights(tags, "", {}, channel);
+
+    return {builder.release(), HighlightAlert{}};
 }
 
 MessagePtr MessageBuilder::makeLiveMessage(const HelixMinimalUser &channel,

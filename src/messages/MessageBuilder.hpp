@@ -167,8 +167,9 @@ public:
     void appendChannelPointRewardMessage(const ChannelPointReward &reward,
                                          bool isMod, bool isBroadcaster);
 
-    static MessagePtr makeChannelPointRewardMessage(
-        const ChannelPointReward &reward, bool isMod, bool isBroadcaster);
+    static std::pair<MessagePtr, HighlightAlert> makeChannelPointRewardMessage(
+        const ChannelPointReward &reward, bool isMod, bool isBroadcaster,
+        Channel *channel);
 
     /// Make a "CHANNEL_NAME has gone live!" message
     static MessagePtr makeLiveMessage(const HelixMinimalUser &channel,
