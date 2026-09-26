@@ -203,9 +203,12 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1)
     {
+        QString channelName;
+        trimChannelName(message->parameter(0), channelName);
+
         return ClearChatMessage{
             .message = MessageBuilder::makeClearChatMessage(
-                calculateMessageTime(message), {}),
+                calculateMessageTime(message), {}, channelName),
             .disableAllMessages = true,
         };
     }
@@ -223,6 +226,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
                        calculateMessageTime(message))
             .release();
+    trimChannelName(message->parameter(0), timeoutMsg->channelName);
 
     return ClearChatMessage{.message = timeoutMsg,
                             .disableAllMessages = false,

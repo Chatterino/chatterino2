@@ -2,7 +2,7 @@
     "input": "@target-user-id=141981764;ban-duration=600;historical=1;room-id=111448817;rm-received-ts=1736968967915;tmi-sent-ts=1736968967813 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -207,7 +207,7 @@
             "usernameColor": "#ffff0000"
         },
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -293,7 +293,7 @@
             "usernameColor": "#ff000000"
         },
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
