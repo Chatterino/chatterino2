@@ -48,6 +48,7 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QMetaEnum>
 #include <QNetworkAccessManager>
@@ -422,6 +423,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             .assign(&this->ui_.ignoreHighlights);
         // visibility of this is updated in setData
 
+        user.emplace<LabelButton>("Nickname", this)
+            .assign(&this->ui_.nicknameEdit);
+        this->ui_.nicknameEdit->setEnabled(false);
+
         user.emplace<LabelButton>("Add notes", this)
             .assign(&this->ui_.notesAdd);
         auto usercard = user.emplace<LabelButton>("Usercard", this)
@@ -775,6 +780,43 @@ void UserInfoPopup::installEvents()
             }
         });
 
+    // nickname
+    const auto editNickname = [this] {
+        if (this->userId_.isEmpty())
+        {
+            return;
+        }
+
+        auto *userData = getApp()->getUserData();
+        const auto data = userData->getUser(this->userId_);
+        auto *dialog = new QInputDialog(this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setWindowTitle(QString("Nickname for %1")
+                                   .arg(this->userName_.isEmpty()
+                                            ? this->userId_
+                                            : this->userName_));
+        dialog->setLabelText("Nickname (empty to remove):");
+        dialog->setTextValue(data ? data->nickname : QString{});
+
+        // Keep the usercard open while the editor has focus.
+        const bool wasPinned = this->ensurePinned();
+        QObject::connect(dialog, &QInputDialog::textValueSelected, dialog,
+                         [userID = this->userId_,
+                          username = this->userName_](const QString &nickname) {
+                             getApp()->getUserData()->setUserNickname(
+                                 userID, username, nickname);
+                         });
+        QObject::connect(dialog, &QDialog::finished, this, [this, wasPinned] {
+            if (wasPinned)
+            {
+                this->togglePinned();
+            }
+        });
+        dialog->open();
+    };
+    QObject::connect(this->ui_.nicknameEdit, &LabelButton::clicked, this,
+                     editNickname);
+
     // user notes
     QObject::connect(
         this->ui_.notesAdd, &LabelButton::clicked, [this]() mutable {
@@ -830,7 +872,9 @@ void UserInfoPopup::setData(const QString &name,
     else
     {
         this->userName_ = name;
+        this->userId_.clear();
     }
+    this->ui_.nicknameEdit->setEnabled(!this->userId_.isEmpty());
 
     this->channel_ = openingChannel;
 
@@ -947,6 +991,7 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = user.id;
         this->updateNotes();
+        this->ui_.nicknameEdit->setEnabled(true);
         this->avatarUrl_ = user.profileImageUrl;
 
         // copyable button for login name of users with a localized username

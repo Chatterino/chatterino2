@@ -241,7 +241,10 @@ QString stylizeUsername(const QString &username, const Message &message)
         break;
     }
 
-    if (auto nicknameText = getSettings()->matchNickname(usernameText))
+    auto *userData = getApp()->getUserData();
+    userData->updateLastSeenUsername(message.userID, message.loginName);
+    if (auto nicknameText = getSettings()->matchNickname(
+            usernameText, message.userID, userData))
     {
         usernameText = *nicknameText;
     }
