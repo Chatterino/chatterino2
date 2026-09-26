@@ -23,6 +23,7 @@ struct MessageHighlight;
 struct FilterHighlight;
 struct UserHighlight;
 struct BadgeHighlight;
+struct LowTrustUserHighlight;
 struct UncategorizedNotificationHighlight;
 
 // clang-format off
@@ -46,6 +47,7 @@ using AllHighlights = std::variant<
     UserHighlight,
     BadgeHighlight,
     FilterHighlight,
+    LowTrustUserHighlight,
     UncategorizedNotificationHighlight
     >;
 // clang-format on
