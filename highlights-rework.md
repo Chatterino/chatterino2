@@ -1,6 +1,7 @@
 NOTE: Should we add an option for highlights to short-circuit, meaning no further highlights should be executed?
 NOTE: Add some more debug-entries
 NOTE: When adding a highlight under Settings -> Highlights -> Add, there's no icon for the "Badge highlight". In the model/list itself, we use whatever Twitch badge exists, but I'd prefer to use a generic badge in the Add menu.
+NOTE: When enabling sounds for channel point redemptions - if a redemption requires input, the sound will trigger twice.
 
 BREAKING(?) changes!!:
 
