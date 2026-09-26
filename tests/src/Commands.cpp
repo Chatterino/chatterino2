@@ -1063,41 +1063,37 @@ TEST(Commands, E2E)
             });
 
     getApp()->getCommands()->execCommand(R"(/pin LULW "WE")", channel, false);
-    EXPECT_CALL(mockHelix, sendChatMessage(_, _, _))
-        .Times(3)
-        .WillRepeatedly([](const HelixSendMessageArgs &args,
-                           const auto &success, const auto &) {
-            EXPECT_EQ(args.message, R"(LULW "WE")");
-            EXPECT_TRUE(args.pin);
-            QJsonObject response;
-            response["message_id"] = "test-pin";
-            response["is_sent"] = true;
-            success(HelixSentMessage{response});
-        });
+
+    const auto checkTextWithDuration = [&](const QString &command,
+                                           std::chrono::seconds duration) {
+        EXPECT_CALL(mockHelix, sendChatMessage(_, _, _))
+            .WillOnce([](const HelixSendMessageArgs &args, const auto &success,
+                         const auto &) {
+                EXPECT_EQ(args.message, R"(LULW "WE")");
+                EXPECT_TRUE(args.pin);
+                QJsonObject response;
+                response["message_id"] = "test-pin";
+                response["is_sent"] = true;
+                success(HelixSentMessage{response});
+            });
+        EXPECT_CALL(mockHelix,
+                    updatePinnedChatMessage(
+                        QString("11148817"), QString("117166826"),
+                        QString("test-pin"), std::optional{duration}, _, _));
+        getApp()->getCommands()->execCommand(command, channel, false);
+    };
 
     // Duration before the text keeps the quotes and sets the duration
-    EXPECT_CALL(mockHelix, updatePinnedChatMessage(
-                               QString("11148817"), QString("117166826"),
-                               QString("test-pin"),
-                               std::optional<std::chrono::seconds>{60}, _, _));
-    getApp()->getCommands()->execCommand(R"(/pin --duration 60 LULW "WE")",
-                                         channel, false);
+    checkTextWithDuration(R"(/pin --duration 60 LULW "WE")",
+                          std::chrono::seconds{60});
 
     // Duration after the text keeps the quotes and sets the duration
-    EXPECT_CALL(mockHelix, updatePinnedChatMessage(
-                               QString("11148817"), QString("117166826"),
-                               QString("test-pin"),
-                               std::optional<std::chrono::seconds>{120}, _, _));
-    getApp()->getCommands()->execCommand(R"(/pin LULW "WE" --duration 120)",
-                                         channel, false);
+    checkTextWithDuration(R"(/pin LULW "WE" --duration 120)",
+                          std::chrono::seconds{120});
 
     // The short duration option also keeps the quotes
-    EXPECT_CALL(mockHelix, updatePinnedChatMessage(
-                               QString("11148817"), QString("117166826"),
-                               QString("test-pin"),
-                               std::optional<std::chrono::seconds>{180}, _, _));
-    getApp()->getCommands()->execCommand(R"(/pin -d 180 LULW "WE")", channel,
-                                         false);
+    checkTextWithDuration(R"(/pin -d 180 LULW "WE")",
+                          std::chrono::seconds{180});
 
     // Pinning an existing message accepts duration before its ID
     EXPECT_CALL(mockHelix,
