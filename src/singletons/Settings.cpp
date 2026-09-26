@@ -14,7 +14,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/Sounds.hpp"
-#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/All.hpp"
 #include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -337,6 +337,50 @@ void Settings::migrateHighlights(bool isTest)
     int migrationID = 0;
 
     {
+        FirstMessageHighlight h;
+
+        if (const auto &s = this->p->enableFirstMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->firstMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        WatchStreakHighlight h;
+
+        if (const auto &s = this->p->enableWatchStreakHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->watchStreakHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
         SubscriptionsHighlight h;
 
         if (const auto &s = this->p->enableSubHighlight; s.hasValueBeenSet())
@@ -386,37 +430,6 @@ void Settings::migrateHighlights(bool isTest)
         if (const auto &s = this->p->whisperHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
-        }
-
-        this->p->sharedHighlightsSetting.push_back(h);
-    }
-
-    {
-        AnnouncementsHighlight h;
-
-        if (const auto &s = this->p->enableAnnouncementHighlight;
-            s.hasValueBeenSet())
-        {
-            h.enabled = s.getValue();
-        }
-
-        // Did not support "show in mentions" - no setting to migrate
-        // Did not support "flash taskbar" - no setting to migrate
-        // Did not support "enable regex" - no setting to migrate
-        // Did not support "case-sensitive" - no setting to migrate
-        // Did not support "play sound" - no setting to migrate
-        // Did not support "custom sound" - no setting to migrate
-
-        if (const auto &s = this->p->announcementHighlightColor;
-            s.hasValueBeenSet())
-        {
-            h.outcome.setBackgroundColor(s.getValue());
-        }
-
-        if (const auto &s = this->p->enableColoredAnnouncementHighlight;
-            s.hasValueBeenSet())
-        {
-            h.overrideColoredAnnouncements = !s.getValue();
         }
 
         this->p->sharedHighlightsSetting.push_back(h);
@@ -497,48 +510,6 @@ void Settings::migrateHighlights(bool isTest)
         }
 
         this->p->sharedHighlightsSetting.push_back(to);
-    }
-
-    {
-        AutomodCaughtHighlight h;
-
-        if (const auto &s = this->p->enableAutomodHighlight;
-            s.hasValueBeenSet())
-        {
-            h.enabled = s.getValue();
-        }
-
-        if (const auto &s = this->p->showAutomodInMentions; s.hasValueBeenSet())
-        {
-            h.outcome.showInMentions = s.getValue();
-        }
-
-        if (const auto &s = this->p->enableAutomodHighlightTaskbar;
-            s.hasValueBeenSet())
-        {
-            h.outcome.alert = s.getValue();
-        }
-
-        migrateSound(this->p->enableAutomodHighlightSound,
-                     this->p->automodHighlightSoundUrl, h.outcome);
-
-        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
-        {
-            h.outcome.setBackgroundColor(s.getValue());
-        }
-
-        this->p->sharedHighlightsSetting.push_back(h);
-    }
-
-    {
-        LowTrustUserHighlight h;
-
-        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
-        {
-            h.outcome.setBackgroundColor(s.getValue());
-        }
-
-        this->p->sharedHighlightsSetting.push_back(h);
     }
 
     {
@@ -689,6 +660,37 @@ void Settings::migrateHighlights(bool isTest)
     }
 
     {
+        AnnouncementsHighlight h;
+
+        if (const auto &s = this->p->enableAnnouncementHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "enable regex" - no setting to migrate
+        // Did not support "case-sensitive" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+        // Did not support "custom sound" - no setting to migrate
+
+        if (const auto &s = this->p->announcementHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        if (const auto &s = this->p->enableColoredAnnouncementHighlight;
+            s.hasValueBeenSet())
+        {
+            h.overrideColoredAnnouncements = !s.getValue();
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
         ChannelPointsHighlight h;
 
         if (const auto &s = this->p->enableRedeemedHighlight;
@@ -711,20 +713,29 @@ void Settings::migrateHighlights(bool isTest)
     }
 
     {
-        FirstMessageHighlight h;
+        AutomodCaughtHighlight h;
 
-        if (const auto &s = this->p->enableFirstMessageHighlight;
+        if (const auto &s = this->p->enableAutomodHighlight;
             s.hasValueBeenSet())
         {
             h.enabled = s.getValue();
         }
 
-        // Did not support "show in mentions" - no setting to migrate
-        // Did not support "flash taskbar" - no setting to migrate
-        // Did not support "play sound" - no setting to migrate
+        if (const auto &s = this->p->showAutomodInMentions; s.hasValueBeenSet())
+        {
+            h.outcome.showInMentions = s.getValue();
+        }
 
-        if (const auto &s = this->p->firstMessageHighlightColor;
+        if (const auto &s = this->p->enableAutomodHighlightTaskbar;
             s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableAutomodHighlightSound,
+                     this->p->automodHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -733,20 +744,9 @@ void Settings::migrateHighlights(bool isTest)
     }
 
     {
-        WatchStreakHighlight h;
+        LowTrustUserHighlight h;
 
-        if (const auto &s = this->p->enableWatchStreakHighlight;
-            s.hasValueBeenSet())
-        {
-            h.enabled = s.getValue();
-        }
-
-        // Did not support "show in mentions" - no setting to migrate
-        // Did not support "flash taskbar" - no setting to migrate
-        // Did not support "play sound" - no setting to migrate
-
-        if (const auto &s = this->p->watchStreakHighlightColor;
-            s.hasValueBeenSet())
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
         }
@@ -754,8 +754,11 @@ void Settings::migrateHighlights(bool isTest)
         this->p->sharedHighlightsSetting.push_back(h);
     }
 
-    this->p->sharedHighlightsSetting.push_back(
-        UncategorizedNotificationHighlight{});
+    {
+        UncategorizedNotificationHighlight h;
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
 }
 
 void Settings::cleanup()
