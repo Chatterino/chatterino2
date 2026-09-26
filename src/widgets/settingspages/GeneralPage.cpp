@@ -27,6 +27,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -530,7 +531,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "match the width of Twitch web chat.")
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
+    auto *timestampFormatDropdown = layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
@@ -548,6 +549,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    timestampFormatDropdown->completer()->setCaseSensitivity(Qt::CaseSensitive);
 
     SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
         ->addTo(layout);
