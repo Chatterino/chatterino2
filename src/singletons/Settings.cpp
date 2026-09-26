@@ -11,7 +11,11 @@
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/Sounds.hpp"
+#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
@@ -53,7 +57,230 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoSettings;
 
+void migrateSound(const BoolSetting &enableSoundSetting,
+                  const QStringSetting &customSoundSetting,
+                  highlights::Outcome &outcome)
+{
+    if (enableSoundSetting.hasValueBeenSet())
+    {
+        if (!enableSoundSetting.getValue())
+        {
+            outcome.setSound("");
+        }
+        else
+        {
+            const auto &customSoundURL = customSoundSetting.getValue();
+            if (customSoundURL.isEmpty())
+            {
+                // Default ping sound
+                outcome.setSound("001-ping2");
+                assert(
+                    highlights::resolveDefaultSound(outcome.sound).has_value());
+            }
+            else
+            {
+                outcome.setSound(customSoundURL);
+            }
+        }
+    }
+}
+
 }  // namespace
+
+class SettingsPrivate
+{
+public:
+    ChatterinoSetting<std::vector<highlights::AllHighlights>>
+        sharedHighlightsSetting = {
+            "/highlighting/highlights2",
+    };
+
+    /// Old version 0 message highlights
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
+        {
+            "/highlighting/highlights",
+    };
+    /// Old version 0 user highlights
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedUsersSetting = {
+        "/highlighting/users",
+    };
+    /// Old version 0 badge highlights
+    ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
+        "/highlighting/badges",
+    };
+
+    BoolSetting enableSelfHighlight = {
+        "/highlighting/selfHighlight/nameIsHighlightKeyword",
+        true,
+    };
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions",
+        true,
+    };
+    BoolSetting enableSelfHighlightSound = {
+        "/highlighting/selfHighlight/enableSound",
+        true,
+    };
+    BoolSetting enableSelfHighlightTaskbar = {
+        "/highlighting/selfHighlight/enableTaskbarFlashing",
+        true,
+    };
+    QStringSetting selfHighlightSoundUrl = {
+        "/highlighting/selfHighlightSoundUrl",
+        "",
+    };
+    QStringSetting selfHighlightColor = {
+        "/highlighting/selfHighlightColor",
+        "",
+    };
+
+    BoolSetting enableSelfMessageHighlight = {
+        "/highlighting/selfMessageHighlight/enabled",
+        false,
+    };
+    BoolSetting showSelfMessageHighlightInMentions = {
+        "/highlighting/selfMessageHighlight/showInMentions",
+        false,
+    };
+    QStringSetting selfMessageHighlightColor = {
+        "/highlighting/selfMessageHighlight/color",
+        "",
+    };
+
+    BoolSetting enableWhisperHighlight = {
+        "/highlighting/whisperHighlight/whispersHighlighted",
+        true,
+    };
+    BoolSetting enableWhisperHighlightSound = {
+        "/highlighting/whisperHighlight/enableSound",
+        false,
+    };
+    BoolSetting enableWhisperHighlightTaskbar = {
+        "/highlighting/whisperHighlight/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting whisperHighlightSoundUrl = {
+        "/highlighting/whisperHighlightSoundUrl",
+        "",
+    };
+    QStringSetting whisperHighlightColor = {
+        "/highlighting/whisperHighlightColor",
+        "",
+    };
+
+    BoolSetting enableAnnouncementHighlight = {
+        "/highlighting/announcement/enabled",
+        true,
+    };
+    QStringSetting announcementHighlightColor = {
+        "/highlighting/announcement/color",
+        "",
+    };
+
+    BoolSetting enableColoredAnnouncementHighlight = {
+        "/highlighting/announcement/coloredAnnouncement/enabled",
+        true,
+    };
+
+    BoolSetting enableRedeemedHighlight = {
+        "/highlighting/redeemedHighlight/highlighted",
+        true,
+    };
+    QStringSetting redeemedHighlightColor = {
+        "/highlighting/redeemedHighlightColor",
+        "",
+    };
+
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted",
+        true,
+    };
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor",
+        "",
+    };
+
+    BoolSetting enableSubHighlight = {
+        "/highlighting/subHighlight/subsHighlighted",
+        true,
+    };
+    BoolSetting enableSubHighlightSound = {
+        "/highlighting/subHighlight/enableSound",
+        false,
+    };
+    BoolSetting enableSubHighlightTaskbar = {
+        "/highlighting/subHighlight/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting subHighlightSoundUrl = {
+        "/highlighting/subHighlightSoundUrl",
+        "",
+    };
+
+    QStringSetting subHighlightColor = {
+        "/highlighting/subHighlightColor",
+        "",
+    };
+
+    BoolSetting enableThreadHighlight = {
+        "/highlighting/thread/nameIsHighlightKeyword",
+        true,
+    };
+    BoolSetting showThreadHighlightInMentions = {
+        "/highlighting/thread/showSelfHighlightInMentions",
+        true,
+    };
+    BoolSetting enableThreadHighlightSound = {
+        "/highlighting/thread/enableSound",
+        true,
+    };
+    BoolSetting enableThreadHighlightTaskbar = {
+        "/highlighting/thread/enableTaskbarFlashing",
+        true,
+    };
+    QStringSetting threadHighlightSoundUrl = {
+        "/highlighting/threadHighlightSoundUrl",
+        "",
+    };
+    QStringSetting threadHighlightColor = {
+        "/highlighting/threadHighlightColor",
+        "",
+    };
+
+    BoolSetting enableAutomodHighlight = {
+        "/highlighting/automod/enabled",
+        true,
+    };
+    BoolSetting showAutomodInMentions = {
+        "/highlighting/automod/showInMentions",
+        false,
+    };
+    BoolSetting enableAutomodHighlightSound = {
+        "/highlighting/automod/enableSound",
+        false,
+    };
+    BoolSetting enableAutomodHighlightTaskbar = {
+        "/highlighting/automod/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting automodHighlightSoundUrl = {
+        "/highlighting/automod/soundUrl",
+        "",
+    };
+    QStringSetting automodHighlightColor = {
+        "/highlighting/automod/color",
+        "",
+    };
+
+    BoolSetting enableWatchStreakHighlight = {
+        "/highlighting/watchStreak/enabled",
+        true,
+    };
+    QStringSetting watchStreakHighlightColor = {
+        "/highlighting/watchStreak/color",
+        "",
+    };
+};
 
 std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
 
@@ -63,23 +290,560 @@ void _actuallyRegisterSetting(
     _settings.push_back(std::move(setting));
 }
 
-bool Settings::isHighlightedUser(const QString &username)
+void Settings::migrate(bool isTest)
 {
-    auto items = this->highlightedUsers.readOnly();
+    bool ranMigration = false;
 
-    for (const auto &highlightedUser : *items)
+    auto currentVersion = this->settingsVersion.getValue();
+
+    qCDebug(LOG) << "Migrating settings from" << currentVersion;
+
+    if (currentVersion < 1)
     {
-        if (highlightedUser.isMatch(username))
+        qCInfo(LOG) << "Migrating highlights from" << currentVersion;
+        this->migrateHighlights(isTest);
+        currentVersion = 1;
+        ranMigration = true;
+    }
+
+    this->settingsVersion.setValue(currentVersion);
+
+    if (ranMigration)
+    {
+        qCInfo(LOG) << "Saving settings after migrations";
+        auto res = this->requestSave();
+
+        switch (res)
         {
-            return true;
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                qCWarning(LOG) << "Failed saving settings after migration";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                qCDebug(LOG) << "Succcessfully saved settings after migration";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                qCInfo(LOG) << "Skipped saving settings after migration";
+                break;
+        }
+    }
+}
+
+void Settings::migrateHighlights(bool isTest)
+{
+    using namespace chatterino::highlights;
+
+    // this migration ID is used for tests to provide a stable "uuid" replacement for created user defined highlights,
+    // and also to provide some output to the user in their logs for how many highlights were migrated
+    int migrationID = 0;
+
+    {
+        FirstMessageHighlight h;
+
+        if (const auto &s = this->p->enableFirstMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->firstMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        WatchStreakHighlight h;
+
+        if (const auto &s = this->p->enableWatchStreakHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->watchStreakHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        SubscriptionsHighlight h;
+
+        if (const auto &s = this->p->enableSubHighlight; s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+
+        if (const auto &s = this->p->enableSubHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableSubHighlightSound,
+                     this->p->subHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->subHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        WhispersHighlight h;
+
+        if (const auto &s = this->p->enableWhisperHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+
+        if (const auto &s = this->p->enableWhisperHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableWhisperHighlightSound,
+                     this->p->whisperHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->whisperHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        YourUsernameHighlight h;
+
+        if (const auto &s = this->p->enableSelfHighlight; s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        if (const auto &s = this->p->showSelfHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.outcome.showInMentions = s.getValue();
+        }
+
+        if (const auto &s = this->p->enableSelfHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableSelfHighlightSound,
+                     this->p->selfHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->selfHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    for (const auto &from : this->p->highlightedMessagesSetting.getValue())
+    {
+        auto generatedId = [&] {
+            migrationID += 1;
+
+            if (isTest)
+            {
+                return QString("test-%1").arg(migrationID);
+            }
+
+            auto v4Uuid = QUuid::createUuid();
+            return v4Uuid.toString(QUuid::StringFormat::WithoutBraces);
+        }();
+
+        MessageHighlight to{generatedId};
+
+        to.setPattern(from.pattern);
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        to.setRegex(from.isRegex);
+        to.setCaseSensitive(from.isCaseSensitive);
+        if (from.hasSound)
+        {
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("001-ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
+        }
+        if (auto fromColor = from.color; fromColor.isValid())
+        {
+            to.outcome.setBackgroundColor(fromColor);
+        }
+
+        this->p->sharedHighlightsSetting.push_back(to);
+    }
+
+    {
+        YourMessagesHighlight h;
+
+        if (const auto &s = this->p->enableSelfMessageHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        if (const auto &s = this->p->showSelfMessageHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.outcome.showInMentions = s.getValue();
+        }
+
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->selfMessageHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    for (const auto &from : this->p->highlightedUsersSetting.getValue())
+    {
+        auto generatedId = [&] {
+            migrationID += 1;
+
+            if (isTest)
+            {
+                return QString("test-user-%1").arg(migrationID);
+            }
+
+            auto v4Uuid = QUuid::createUuid();
+            return v4Uuid.toString(QUuid::StringFormat::WithoutBraces);
+        }();
+
+        UserHighlight to{generatedId};
+
+        to.setUsername(from.pattern);
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        if (from.hasSound)
+        {
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("001-ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
+        }
+        if (auto fromColor = from.color; fromColor.isValid())
+        {
+            to.outcome.setBackgroundColor(fromColor);
+        }
+
+        this->p->sharedHighlightsSetting.push_back(to);
+    }
+
+    {
+        SubscribedThreadHighlight h;
+
+        if (const auto &s = this->p->enableThreadHighlight; s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        if (const auto &s = this->p->showThreadHighlightInMentions;
+            s.hasValueBeenSet())
+        {
+            h.outcome.showInMentions = s.getValue();
+        }
+
+        if (const auto &s = this->p->enableThreadHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableThreadHighlightSound,
+                     this->p->threadHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->threadHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    for (const auto &from : this->p->highlightedBadgesSetting.getValue())
+    {
+        auto generatedId = [&] {
+            migrationID += 1;
+
+            if (isTest)
+            {
+                return QString("test-badge-%1").arg(migrationID);
+            }
+
+            auto v4Uuid = QUuid::createUuid();
+            return v4Uuid.toString(QUuid::StringFormat::WithoutBraces);
+        }();
+
+        BadgeHighlight to{generatedId};
+
+        to.setBadgeName(from.badgeName);
+        // We discard the old displayName because it can already be calculated based on the badgeName (i.e. "subscriber" -> "Subscriber")
+        to.outcome.showInMentions = from.showInMentions;
+        to.outcome.alert = from.hasAlert;
+        if (from.hasSound)
+        {
+            if (!from.soundUrl.isEmpty())
+            {
+                to.outcome.setSound(from.soundUrl.toString());
+            }
+            else
+            {
+                to.outcome.setSound("001-ping2");
+                assert(highlights::resolveDefaultSound(to.outcome.sound)
+                           .has_value());
+            }
+        }
+        else
+        {
+            to.outcome.setSound("");
+        }
+        if (auto fromColor = from.color; fromColor.isValid())
+        {
+            to.outcome.setBackgroundColor(fromColor);
+        }
+
+        this->p->sharedHighlightsSetting.push_back(to);
+    }
+
+    {
+        AnnouncementsHighlight h;
+
+        if (const auto &s = this->p->enableAnnouncementHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "enable regex" - no setting to migrate
+        // Did not support "case-sensitive" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+        // Did not support "custom sound" - no setting to migrate
+
+        if (const auto &s = this->p->announcementHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        if (const auto &s = this->p->enableColoredAnnouncementHighlight;
+            s.hasValueBeenSet())
+        {
+            h.overrideColoredAnnouncements = !s.getValue();
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        ChannelPointsHighlight h;
+
+        if (const auto &s = this->p->enableRedeemedHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Did not support "show in mentions" - no setting to migrate
+        // Did not support "flash taskbar" - no setting to migrate
+        // Did not support "play sound" - no setting to migrate
+
+        if (const auto &s = this->p->redeemedHighlightColor;
+            s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        AutomodCaughtHighlight h;
+
+        if (const auto &s = this->p->enableAutomodHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        if (const auto &s = this->p->showAutomodInMentions; s.hasValueBeenSet())
+        {
+            h.outcome.showInMentions = s.getValue();
+        }
+
+        if (const auto &s = this->p->enableAutomodHighlightTaskbar;
+            s.hasValueBeenSet())
+        {
+            h.outcome.alert = s.getValue();
+        }
+
+        migrateSound(this->p->enableAutomodHighlightSound,
+                     this->p->automodHighlightSoundUrl, h.outcome);
+
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        LowTrustUserHighlight h;
+
+        if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
+        {
+            h.outcome.setBackgroundColor(s.getValue());
+        }
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+
+    {
+        UncategorizedNotificationHighlight h;
+
+        this->p->sharedHighlightsSetting.push_back(h);
+    }
+}
+
+void Settings::cleanup()
+{
+    qCDebug(LOG) << "Clean up";
+
+    bool dirty = false;
+
+    dirty |= this->cleanupHighlights();
+
+    if (dirty)
+    {
+        qCInfo(LOG) << "Saving after clean up";
+        auto res = this->requestSave();
+
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                qCWarning(LOG) << "Failed saving settings after cleanup";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                qCDebug(LOG) << "Succcessfully saved settings after cleanup";
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                qCInfo(LOG) << "Skipped saving settings after cleanup";
+                break;
+        }
+    }
+}
+
+bool Settings::cleanupHighlights()
+{
+    // Check for duplicate bill-tin highlights and remove any duplicates that popup
+    // TODO: Should this also create missing highlights?
+
+    qCDebug(LOG) << "Clean up highlights";
+
+    // List of highlight IDs we've already seen.
+    // If a highlight ID has already been seen (i.e. if the user has any duplicate highlights), the latter ones will be removed
+    std::unordered_set<QStringView> seenIDs;
+
+    auto highlights = this->p->sharedHighlightsSetting.getValueCopy();
+    auto highlightsSize = highlights.size();
+
+    int numRemoved = 0;
+
+    for (int i = 0; i < highlightsSize; ++i)
+    {
+        const auto actualIndex = i - numRemoved;
+        const auto &h = highlights[actualIndex];
+        const auto id = highlights::getID(h);
+
+        if (id == u"invalid")
+        {
+            qCInfo(LOG) << "Found an invalid highlight at" << i
+                        << "- removing it.";
+            highlights.erase(highlights.begin() + actualIndex);
+            ++numRemoved;
+            continue;
+        }
+
+        const auto [_, isNew] = seenIDs.insert(id);
+        if (!isNew)
+        {
+            qCInfo(LOG)
+                << "A built in highlight of type" << id
+                << "already exists, removed the lower priority version.";
+            highlights.erase(highlights.begin() + actualIndex);
+            ++numRemoved;
+        }
+        else
+        {
+            qCInfo(LOG) << "First time encountering highlight" << id;
         }
     }
 
-    return false;
-}
+    if (numRemoved > 0)
+    {
+        qCInfo(LOG) << "Highlights were dirty. Built in highlights removed:"
+                    << numRemoved;
+        this->p->sharedHighlightsSetting.setValue(highlights);
+        return true;
+    }
 
-void Settings::migrate(bool isTest)
-{
+    return false;
 }
 
 bool Settings::isBlacklistedUser(const QString &username)
@@ -171,6 +935,7 @@ Settings::Settings(const Modes &modes, const Args &args,
     , createShortcutForToasts(
           "/notifications/createShortcutForToasts",
           (modes.isPortable || modes.isExternallyPackaged) ? false : true)
+    , p(std::make_unique<SettingsPrivate>())
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
@@ -231,12 +996,13 @@ Settings::Settings(const Modes &modes, const Args &args,
         this->migrate(settingsArgs.isTest);
     }
 
-    initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
-                           this->highlightedMessages);
-    initializeSignalVector(this->signalHolder, this->highlightedUsersSetting,
-                           this->highlightedUsers);
-    initializeSignalVector(this->signalHolder, this->highlightedBadgesSetting,
-                           this->highlightedBadges);
+    if (settingsArgs.runCleanup)
+    {
+        this->cleanup();
+    }
+
+    initializeSignalVector(this->signalHolder, this->p->sharedHighlightsSetting,
+                           this->sharedHighlights);
     initializeSignalVector(this->signalHolder, this->blacklistedUsersSetting,
                            this->blacklistedUsers);
     initializeSignalVector(this->signalHolder, this->ignoredMessagesSetting,
