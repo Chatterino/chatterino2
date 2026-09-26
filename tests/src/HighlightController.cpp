@@ -618,20 +618,20 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
         << "Number of highlights settings should match the list of bill tin "
            "highlights after recreate has been called";
 
-    ASSERT_EQ(highlights::getID(hs[0]), highlights::SubscriptionsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[1]), highlights::WhispersHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[2]), highlights::AnnouncementsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[3]), highlights::YourUsernameHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[4]), highlights::AutomodCaughtHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[5]), highlights::LowTrustUserHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[6]), highlights::YourMessagesHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[7]),
-              highlights::SubscribedThreadHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[8]), highlights::ChannelPointsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[9]), highlights::FirstMessageHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[10]), highlights::WatchStreakHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[11]),
-              highlights::UncategorizedNotificationHighlight::ID);
+    // clang-format off
+    ASSERT_EQ(highlights::getID(hs[0]),  highlights::FirstMessageHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[1]),  highlights::WatchStreakHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[2]),  highlights::SubscriptionsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[3]),  highlights::WhispersHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[4]),  highlights::YourUsernameHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[5]),  highlights::YourMessagesHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[6]),  highlights::SubscribedThreadHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[7]),  highlights::AnnouncementsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[8]),  highlights::ChannelPointsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[9]),  highlights::AutomodCaughtHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[10]), highlights::LowTrustUserHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[11]), highlights::UncategorizedNotificationHighlight::ID);
+    // clang-format on
 }
 
 }  // namespace chatterino
