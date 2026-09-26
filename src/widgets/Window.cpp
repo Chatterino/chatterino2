@@ -374,8 +374,7 @@ void Window::addShortcuts()
     HotkeyController::HotkeyMap actions{
         {"openSettings",  // Open settings
          [this](std::vector<QString>) -> QString {
-             SettingsDialog::showDialog(this,
-                                        SettingsDialogPreference::Highlights);
+             SettingsDialog::showDialog(this);
              return "";
          }},
         {"openAccountSelector",  // Open account selector
