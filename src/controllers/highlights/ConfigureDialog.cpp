@@ -630,7 +630,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                      &BasePopup::close);
     dialogLayout->addWidget(buttonBox, 0, Qt::AlignRight);
 
-    this->setLayout(dialogLayout);
+    this->getLayoutContainer()->setLayout(dialogLayout);
 }
 
 }  // namespace chatterino::highlights
