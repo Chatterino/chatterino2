@@ -260,7 +260,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else
     {
-        EVENTSUB_BAIL_HERE(error::Kind::UnknownVariant);
+        reason.emplace<std::string>(reasonTag);
     }
 
     return Event{
