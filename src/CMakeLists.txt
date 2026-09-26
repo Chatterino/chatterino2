@@ -872,6 +872,8 @@ set(SOURCE_FILES
         widgets/splits/InputHighlighter.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
+        widgets/splits/SplitBanner.cpp
+        widgets/splits/SplitBanner.hpp
         widgets/splits/SplitCommon.hpp
         widgets/splits/SplitContainer.cpp
         widgets/splits/SplitContainer.hpp
