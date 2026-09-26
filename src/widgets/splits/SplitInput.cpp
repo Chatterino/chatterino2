@@ -330,12 +330,26 @@ void SplitInput::initLayout()
         inputWrapper.setLayoutType<QHBoxLayout>().withoutMargin().assign(
             &this->ui_.inputHbox);
 
+    LayoutCreator<QHBoxLayout> inputLayout(new QHBoxLayout);
+    inputLayout->setSpacing(0);
+    hboxLayout->addLayout(inputLayout.getElement());
+
+    auto prefix =
+        inputLayout.emplace<QLabel>().assign(&this->ui_.replyPrefixLabel);
+    prefix->setTextFormat(Qt::PlainText);
+    prefix->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    prefix->hide();
+
     // input
     auto textEdit =
-        hboxLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
+        inputLayout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
     textEdit->setFrameStyle(QFrame::NoFrame);
+    prefix->setContentsMargins(
+        static_cast<int>(textEdit->document()->documentMargin()),
+        static_cast<int>(textEdit->document()->documentMargin()), 0, 0);
+    prefix->setBuddy(textEdit.getElement());
 
     auto *shortcutFilter = new CmdDeleteKeyFilter(this);
     textEdit->installEventFilter(shortcutFilter);
@@ -1268,11 +1282,15 @@ void SplitInput::editTextChanged()
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
+    const auto prefixLength =
+        codepointLength(this->ui_.replyPrefixLabel->text()) +
+        (this->ui_.replyPrefixLabel->text().isEmpty() ? 0 : 1);
+    const auto bodyLimit = TWITCH_MESSAGE_LIMIT - prefixLength;
 
-    if (this->shouldPreventInput(text))
+    if (this->shouldPreventInput(text, bodyLimit))
     {
         this->ui_.textEdit->setPlainText(
-            codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).toString());
+            codepointSlice(text, 0, bodyLimit).toString());
         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
         return;
     }
@@ -1296,7 +1314,7 @@ void SplitInput::editTextChanged()
                                                true);
     }
 
-    const auto textLength = codepointLength(text);
+    const auto textLength = codepointLength(text) + prefixLength;
 
     QList<QTextEdit::ExtraSelection> selections;
     if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
@@ -1321,10 +1339,10 @@ void SplitInput::editTextChanged()
         QTextCursor cursor = this->ui_.textEdit->textCursor();
         QTextCharFormat format;
 
-        const auto limitPosition = static_cast<int>(
-            textLength > TWITCH_MESSAGE_LIMIT
-                ? codepointSlice(text, 0, TWITCH_MESSAGE_LIMIT).size()
-                : text.length());
+        const auto limitPosition =
+            static_cast<int>(textLength > TWITCH_MESSAGE_LIMIT
+                                 ? codepointSlice(text, 0, bodyLimit).size()
+                                 : text.length());
 
         cursor.setPosition(limitPosition, QTextCursor::MoveAnchor);
         cursor.movePosition(QTextCursor::Start, QTextCursor::KeepAnchor);
@@ -1556,6 +1574,15 @@ void SplitInput::setReply(MessagePtr target)
             this->clearReplyTarget();
         }
     }
+
+    if (!this->enableInlineReplying_)
+    {
+        this->ui_.replyPrefixLabel->setText(
+            this->replyTarget_ ? "@" + this->replyTarget_->displayName
+                               : QString{});
+        this->ui_.replyPrefixLabel->setVisible(this->replyTarget_ != nullptr);
+        this->editTextChanged();
+    }
 }
 
 void SplitInput::setPlaceholderText(const QString &text)
@@ -1587,7 +1614,8 @@ void SplitInput::clearReplyTarget()
     }
 }
 
-bool SplitInput::shouldPreventInput(const QString &text) const
+bool SplitInput::shouldPreventInput(const QString &text,
+                                    qsizetype bodyLimit) const
 {
     if (getSettings()->messageOverflow.getValue() != MessageOverflow::Prevent)
     {
@@ -1607,7 +1635,7 @@ bool SplitInput::shouldPreventInput(const QString &text) const
         return false;
     }
 
-    return codepointLength(text) > TWITCH_MESSAGE_LIMIT;
+    return codepointLength(text) > bodyLimit;
 }
 
 int SplitInput::marginForTheme() const
@@ -1654,6 +1682,9 @@ void SplitInput::updateTextEditPalette()
     p.setBrush(QPalette::Base, this->backgroundColor());
 
     this->ui_.textEdit->setPalette(p);
+    p.setColor(QPalette::WindowText,
+               this->theme->messages.textColors.chatPlaceholder);
+    this->ui_.replyPrefixLabel->setPalette(p);
 }
 
 QColor SplitInput::backgroundColor() const
@@ -1708,6 +1739,7 @@ void SplitInput::updateFonts()
     auto *app = getApp();
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+    this->ui_.replyPrefixLabel->setFont(this->ui_.textEdit->font());
 
     // NOTE: We're using TimestampMedium here to get a font that uses the tnum font feature,
     // meaning numbers get equal width & don't bounce around while the user is typing.

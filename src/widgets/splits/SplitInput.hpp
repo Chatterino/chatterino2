@@ -142,7 +142,7 @@ protected:
 
     // Returns true if the channel this input is connected to is a Twitch channel,
     // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
-    bool shouldPreventInput(const QString &text) const;
+    bool shouldPreventInput(const QString &text, qsizetype bodyLimit) const;
 
     int marginForTheme() const;
 
@@ -170,6 +170,7 @@ protected:
         // input widgets
         QWidget *inputWrapper;
         QHBoxLayout *inputHbox;
+        QLabel *replyPrefixLabel;
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
         LabelButton *sendButton;
