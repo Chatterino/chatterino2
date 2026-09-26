@@ -44,6 +44,19 @@ public:
 
     QString toString() const override;
 
+    /// Whether Twitch has rejected this account's OAuth token.
+    ///
+    /// This is not persisted - it's detected at runtime from an IRC
+    /// "Login authentication failed" notice or a 401 from Helix, and cleared
+    /// once the account is signed in again.
+    bool isExpired() const override;
+
+    /// Updates whether this account's token is known to be expired.
+    /// Returns true if the value changed, otherwise false.
+    ///
+    /// Prefer going through TwitchAccountManager, which also notifies the UI.
+    bool setExpired(bool expired);
+
     const QString &getUserName() const;
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
@@ -123,6 +136,7 @@ private:
     QString userName_;
     QString userId_;
     const bool isAnon_;
+    bool expired_ = false;
     Atomic<QColor> color_;
 
     QStringList userstateEmoteSets_;
