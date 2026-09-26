@@ -512,7 +512,6 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             tr("Audio Files (*.mp3 *.wav)"));
                         if (fileUrl.isValid())
                         {
-                            this->previousSoundIndex = index;
                             std::visit(
                                 [fileUrl](auto &&h) {
                                     h.outcome.setSound(fileUrl.toString());
@@ -525,6 +524,7 @@ ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
                             w->addItem(fileUrl.fileName());
                             w->setCurrentIndex(numRows);
                             testSound->setEnabled(true);
+                            this->previousSoundIndex = numRows;
                         }
                         else
                         {
