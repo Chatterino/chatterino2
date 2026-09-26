@@ -68,7 +68,7 @@ void UnixSignalHandler::fired(int signal)
     }
 
     char a = 1;
-    ::write(cls->fd[0], &a, sizeof(a));
+    [[maybe_unused]] auto r = ::write(cls->fd[0], &a, sizeof(a));
 }
 
 void UnixSignalHandler::handleSignal()
@@ -76,7 +76,7 @@ void UnixSignalHandler::handleSignal()
     this->socketNotifier->setEnabled(false);
 
     char tmp{};
-    ::read(this->fd[1], &tmp, sizeof(tmp));
+    [[maybe_unused]] auto r = ::read(this->fd[1], &tmp, sizeof(tmp));
 
     this->socketNotifier->setEnabled(true);
 
