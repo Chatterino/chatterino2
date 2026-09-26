@@ -799,6 +799,11 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return this->baseNode_.get();
 }
 
+const SplitContainer::Node *SplitContainer::getBaseNode() const
+{
+    return this->baseNode_.get();
+}
+
 NodeDescriptor SplitContainer::buildDescriptor() const
 {
     return this->buildDescriptorRecursively(this->baseNode_.get());
@@ -1051,7 +1056,7 @@ qreal SplitContainer::Node::getVerticalFlex() const
 }
 
 const std::vector<std::shared_ptr<SplitContainer::Node>> &
-    SplitContainer::Node::getChildren()
+    SplitContainer::Node::getChildren() const
 {
     return this->children_;
 }
