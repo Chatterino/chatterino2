@@ -29,7 +29,7 @@ namespace chatterino::highlights {
 
 /// Messages that are highlighted with the channel points reward "Highlight My Message"
 struct ChannelPointsHighlight {
-    static constexpr QStringView ID = u"channelpoints-highlightmymessage";
+    static constexpr QStringView ID = u"channelpoints";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
