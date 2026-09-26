@@ -108,6 +108,22 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
+void TwitchAccount::addWhisperUser(const QString &user)
+{
+    assertInGuiThread();
+
+    if (!user.isEmpty())
+    {
+        this->whisperUsers_.insert(user.toLower());
+    }
+}
+
+const std::unordered_set<QString> &TwitchAccount::whisperUsers() const
+{
+    assertInGuiThread();
+    return this->whisperUsers_;
+}
+
 void TwitchAccount::loadBlocks()
 {
     assertInGuiThread();
