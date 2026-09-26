@@ -5,15 +5,25 @@
 #include "controllers/highlights/Model.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "common/SignalVectorModel.hpp"
 #include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
+#include "util/PostToThread.hpp"
 #include "util/StandardItemHelper.hpp"
 
 #include <QPalette>
 #include <QPointer>
 
 namespace chatterino::highlights {
+
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoHighlights;
+
+}  // namespace
 
 Model::Model(QObject *parent)
     : SignalVectorModel<AllHighlights>(Column::COUNT, parent)
@@ -88,14 +98,33 @@ void Model::updateRow(const AllHighlights &highlight,
     {
         getApp()->getTwitchBadges()->getBadgeIcon(
             h->getBadgeName(),
-            [model = QPointer(this), row](const QString &name,
-                                          const std::shared_ptr<QIcon> &icon) {
+            [model = QPointer(this), id = h->getID()](
+                const QString &name, const std::shared_ptr<QIcon> &icon) {
                 (void)name;  // unused
-                if (!model)
-                {
-                    return;
-                }
-                row[Column::Name]->setData(*icon, Qt::DecorationRole);
+
+                runInGuiThread([model, id, icon] {
+                    if (!model)
+                    {
+                        return;
+                    }
+
+                    auto matches = model->match(
+                        model->index(0, highlights::Model::Column::Enabled),
+                        highlights::Model::ID_ROLE, QVariant::fromValue(id), 1,
+                        Qt::MatchExactly | Qt::MatchWrap);
+                    if (matches.isEmpty())
+                    {
+                        qCWarning(LOG)
+                            << "Attempted to set badge icon for" << id
+                            << "but it is missing. Was it removed?";
+                        return;
+                    }
+                    auto matchingCell = matches.first();
+                    assert(matchingCell.isValid());
+                    auto nameCell = matchingCell.siblingAtColumn(Column::Name);
+                    assert(nameCell.isValid());
+                    model->setData(nameCell, *icon, Qt::DecorationRole);
+                });
             });
     }
 
