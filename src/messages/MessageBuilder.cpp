@@ -2102,7 +2102,7 @@ void MessageBuilder::addTwitchGif(const QString &id, QStringView originalText)
         this->emplace<ScalingImageElement>(set, MessageElementFlag::TwitchGif,
                                            original)
             ->setLink(Link{Link::Url, link})
-            ->setTooltip(original.toHtmlEscaped());
+            ->setTooltip(u"<span>" % original.toHtmlEscaped() % u"</span>");
     }
     else
     {
