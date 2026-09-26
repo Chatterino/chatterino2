@@ -774,6 +774,17 @@ private:
     QString copyText_;
 };
 
+class TwitchGifElement : public ScalingImageElement
+{
+public:
+    TwitchGifElement(ImageSet images, QString copyText);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        const MessageLayoutContext &ctx) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
+};
+
 class ReplyCurveElement : public MessageElement
 {
 public:
