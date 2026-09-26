@@ -17,8 +17,6 @@ NOTE: If a user happens to have duplicate built-in highlights, should we clean t
 TODO:
 
 - Test more migration scenarios
-- Check out the color picker dialog to see how it's doing. Can we still populate it with colors from user-defined highlights?
-- How do we know to show the checkbox in a reply thread popup? Normally it's only enabled if the "subscribed thread" highlight is enabled. We could have a custom solution where HighlightController stores some custom value for it whenever a "rebuild" happens?
 - Delete this file
 
 # FUTURE
