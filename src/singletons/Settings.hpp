@@ -16,6 +16,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/ignores/IgnoredEmote.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -893,6 +894,8 @@ private:
         blacklistedUsersSetting = {"/highlighting/blacklist"};
     ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
         "/ignore/phrases"};
+    ChatterinoSetting<std::vector<IgnoredEmote>> ignoredEmotesSetting = {
+        "/ignore/emotes"};
     ChatterinoSetting<std::vector<QString>> mutedChannelsSetting = {
         "/pings/muted"};
     ChatterinoSetting<std::vector<FilterRecordPtr>> filterRecordsSetting = {
@@ -917,6 +920,7 @@ public:
     SignalVector<HighlightBadge> highlightedBadges;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
+    SignalVector<IgnoredEmote> ignoredEmotes;
     SignalVector<FilterRecordPtr> filterRecords;
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
@@ -924,6 +928,8 @@ public:
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
+    bool isEmoteIgnored(const QString &name);
+    void setEmoteNameIgnored(const QString &name, bool ignored);
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
     std::optional<QString> matchNickname(const QString &username);

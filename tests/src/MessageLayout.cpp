@@ -6,6 +6,8 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -94,4 +96,92 @@ TEST(TextElement, BasicCase)
 
     EXPECT_EQ(wordStart, 0);
     EXPECT_EQ(wordEnd, 3);
+}
+
+TEST(EmoteElement, ToggleIgnoreInExistingMessage)
+{
+    MockApplication app;
+    QPixmap pixmap(20, 20);
+    pixmap.fill(Qt::red);
+    auto emote = std::make_shared<Emote>();
+    emote->name = EmoteName{"forsenE"};
+    emote->tooltip = Tooltip{"forsenE"};
+    emote->images.setImage1(Image::fromResourcePixmap(pixmap));
+    MessageBuilder builder;
+    auto *source =
+        builder.emplace<EmoteElement>(emote, MessageElementFlag::Emote);
+    source->setLink({Link::InsertText, "forsenE"});
+    source->setTrailingSpace(false);
+    builder.emplace<TextElement>("!", MessageElementFlag::Text);
+    MessageLayout layout(builder.release());
+    MessageColors colors;
+    const auto relayout = [&] {
+        layout.flags.set(MessageLayoutFlag::RequiresLayout);
+        layout.layout(
+            {
+                .messageColors = colors,
+                .flags = MessageElementFlags{MessageElementFlag::EmoteImage,
+                                             MessageElementFlag::Text},
+                .width = WIDTH,
+                .scale = 1,
+                .imageScale = 1,
+            },
+            false);
+        return layout.getElementAt(QPoint(WIDTH / 20, layout.getHeight() / 2));
+    };
+
+    ASSERT_NE(dynamic_cast<const ImageLayoutElement *>(relayout()), nullptr);
+    app.settings.setEmoteNameIgnored("forsenE", true);
+    const auto *text = relayout();
+    // Ignoring an emote already in chat renders it as text.
+    ASSERT_NE(dynamic_cast<const TextLayoutElement *>(text), nullptr);
+    EXPECT_FALSE(text->isImage());
+    // The text keeps the emote's tooltip and insertion link.
+    EXPECT_EQ(&text->getCreator(), source);
+    EXPECT_EQ(text->getCreator().getTooltip(), "forsenE");
+    EXPECT_EQ(text->getLink().type, Link::InsertText);
+    EXPECT_EQ(text->getText(), "forsenE");
+    // The replacement keeps the emote adjacent to the following text.
+    EXPECT_FALSE(text->hasTrailingSpace());
+    QString copied;
+    layout.addSelectionText(copied);
+    EXPECT_EQ(copied, "forsenE!");
+    // The text retains the emote's flags for context actions.
+    EXPECT_TRUE(text->getFlags().has(MessageElementFlag::EmoteImage));
+
+    app.settings.setEmoteNameIgnored("forsenE", false);
+    // Removing the ignore renders the image again.
+    EXPECT_NE(dynamic_cast<const ImageLayoutElement *>(relayout()), nullptr);
+
+    // Ignored emotes remain images in the picker.
+    source->addFlags(MessageElementFlag::AlwaysShow);
+    app.settings.setEmoteNameIgnored("forsenE", true);
+    EXPECT_NE(dynamic_cast<const ImageLayoutElement *>(relayout()), nullptr);
+}
+
+TEST(EmoteElement, UnavailableImageUsesTextLayout)
+{
+    MockApplication app;
+    auto emote = std::make_shared<Emote>();
+    emote->name = EmoteName{"forsenE"};
+    MessageBuilder builder;
+    builder.emplace<EmoteElement>(emote, MessageElementFlag::Emote);
+    MessageLayout layout(builder.release());
+    MessageColors colors;
+    layout.layout(
+        {
+            .messageColors = colors,
+            .flags = MessageElementFlag::EmoteImage,
+            .width = WIDTH,
+            .scale = 1,
+            .imageScale = 1,
+        },
+        false);
+
+    const auto *element =
+        layout.getElementAt(QPoint(WIDTH / 20, layout.getHeight() / 2));
+    // An unavailable image uses the ordinary text fallback.
+    ASSERT_NE(dynamic_cast<const TextLayoutElement *>(element), nullptr);
+    EXPECT_FALSE(element->isImage());
+    EXPECT_FALSE(element->getFlags().has(MessageElementFlag::EmoteImage));
 }
