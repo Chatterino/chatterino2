@@ -231,6 +231,8 @@ set(SOURCE_FILES
         controllers/highlights/types/FirstMessageHighlight.hpp
         controllers/highlights/types/InvalidHighlight.cpp
         controllers/highlights/types/InvalidHighlight.hpp
+        controllers/highlights/types/LowTrustUserHighlight.cpp
+        controllers/highlights/types/LowTrustUserHighlight.hpp
         controllers/highlights/types/MessageHighlight.cpp
         controllers/highlights/types/MessageHighlight.hpp
         controllers/highlights/types/Outcome.cpp
