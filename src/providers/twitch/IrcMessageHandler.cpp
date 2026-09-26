@@ -394,12 +394,16 @@ void IrcMessageHandler::parsePrivMessageInto(
     TwitchChannel *channel)
 {
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
-    if (message->tag("user-id") == currentUser->getUserId())
+    auto isCurrentUser = message->tag("user-id") == currentUser->getUserId();
+    auto shouldUpdateChannelFromMessage =
+        isCurrentUser &&
+        sink.sinkTraits().has(MessageSinkTrait::UpdateCurrentUserState);
+
+    if (shouldUpdateChannelFromMessage)
     {
         auto badgesTag = message->tag("badges");
         if (badgesTag.isValid())
         {
-            // TODO: We should not update mod or vip status from recent messages
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
@@ -407,19 +411,16 @@ void IrcMessageHandler::parsePrivMessageInto(
             channel->setStaff(parsedBadges.contains("staff"));
         }
 
-        if (!channel->isLoadingRecentMessages())
-        {
-            // Clear the send wait timer when we are able to send a message
-            channel->setSendWait(0);
+        // Clear the send wait timer when we are able to send a message
+        channel->setSendWait(0);
 
-            // Update send wait timer with slow mode timeout if this user is not a mod or vip.
-            if (!channel->hasHighRateLimit())
+        // Update send wait timer with slow mode timeout if this user is not a mod or vip.
+        if (!channel->hasHighRateLimit())
+        {
+            auto roomModes = *channel->accessRoomModes();
+            if (roomModes.slowMode > 0)
             {
-                auto roomModes = *channel->accessRoomModes();
-                if (roomModes.slowMode > 0)
-                {
-                    channel->setSendWait(roomModes.slowMode);
-                }
+                channel->setSendWait(roomModes.slowMode);
             }
         }
     }
