@@ -35,6 +35,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDrag>
 #include <QHBoxLayout>
@@ -461,6 +462,16 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Change channel",
         h->getDisplaySequence(HotkeyCategory::Split, "changeChannel"),
         this->split_, &Split::changeChannel);
+    menu->addAction(
+        "Followed channels",
+        h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
+        this, [this] {
+            auto *window = dynamic_cast<Window *>(this->window());
+            if (window != nullptr)
+            {
+                window->showFollowedChannels();
+            }
+        });
     menu->addAction("Close",
                     h->getDisplaySequence(HotkeyCategory::Split, "delete"),
                     this->split_, &Split::deleteFromContainer);
