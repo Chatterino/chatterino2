@@ -119,7 +119,7 @@
                 {
                     "backgroundColor": "#44444444",
                     "enabled": true,
-                    "id": "channelpoints-highlightmymessage"
+                    "id": "channelpoints"
                 },
                 {
                     "alert": false,

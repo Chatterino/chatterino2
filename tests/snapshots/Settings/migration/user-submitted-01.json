@@ -162,21 +162,6 @@
                 "nameIsHighlightKeyword": false
             },
             "selfHighlightSoundUrl": "",
-            "sharedHighlights": [
-                {
-                    "alert": false,
-                    "backgroundColor": "#ff000000",
-                    "caseSensitive": false,
-                    "customSoundURL": "",
-                    "enabled": true,
-                    "id": "subhighlight",
-                    "name": "xd",
-                    "pattern": "asddddd",
-                    "playSound": false,
-                    "regex": false,
-                    "showInMentions": false
-                }
-            ],
             "subHighlightColor": "#64c466ff",
             "thread": {
                 "enableSound": false
@@ -543,7 +528,7 @@
                 {
                     "backgroundColor": "#3cff0000",
                     "enabled": true,
-                    "id": "channelpoints-highlightmymessage"
+                    "id": "channelpoints"
                 },
                 {
                     "backgroundColor": "#731f8d2b",
@@ -567,21 +552,6 @@
                 "nameIsHighlightKeyword": false
             },
             "selfHighlightSoundUrl": "",
-            "sharedHighlights": [
-                {
-                    "alert": false,
-                    "backgroundColor": "#ff000000",
-                    "caseSensitive": false,
-                    "customSoundURL": "",
-                    "enabled": true,
-                    "id": "subhighlight",
-                    "name": "xd",
-                    "pattern": "asddddd",
-                    "playSound": false,
-                    "regex": false,
-                    "showInMentions": false
-                }
-            ],
             "subHighlightColor": "#64c466ff",
             "thread": {
                 "enableSound": false
