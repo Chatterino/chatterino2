@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/LowTrustUserHighlight.hpp"
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "controllers/highlights/types/WhispersHighlight.hpp"
 #include "messages/Message.hpp"
@@ -622,13 +623,14 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
     ASSERT_EQ(highlights::getID(hs[2]), highlights::AnnouncementsHighlight::ID);
     ASSERT_EQ(highlights::getID(hs[3]), highlights::YourUsernameHighlight::ID);
     ASSERT_EQ(highlights::getID(hs[4]), highlights::AutomodCaughtHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[5]), highlights::YourMessagesHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[6]),
+    ASSERT_EQ(highlights::getID(hs[5]), highlights::LowTrustUserHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[6]), highlights::YourMessagesHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[7]),
               highlights::SubscribedThreadHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[7]), highlights::ChannelPointsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[8]), highlights::FirstMessageHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[9]), highlights::WatchStreakHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[10]),
+    ASSERT_EQ(highlights::getID(hs[8]), highlights::ChannelPointsHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[9]), highlights::FirstMessageHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[10]), highlights::WatchStreakHighlight::ID);
+    ASSERT_EQ(highlights::getID(hs[11]),
               highlights::UncategorizedNotificationHighlight::ID);
 }
 
