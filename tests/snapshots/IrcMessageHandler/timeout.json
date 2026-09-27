@@ -2,7 +2,7 @@
     "input": "@tmi-sent-ts=1729628658012;rm-received-ts=1729628658106;historical=1;ban-duration=1;room-id=11148817;target-user-id=129546453 :tmi.twitch.tv CLEARCHAT #pajlada nerixyz",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [

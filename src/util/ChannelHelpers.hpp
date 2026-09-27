@@ -203,7 +203,8 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
         uint32_t count = s->count + 1;
 
         auto replacement = MessageBuilder::makeClearChatMessage(
-            message->serverReceivedTime, message->timeoutUser, count);
+            message->serverReceivedTime, message->timeoutUser,
+            message->channelName, count);
         replacement->flags = message->flags;
 
         replaceMessage(i, s, replacement);
