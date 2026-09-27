@@ -5,7 +5,7 @@
 #include "controllers/highlights/types/Common.hpp"
 
 #include "common/QLogging.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/Concepts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/Variant.hpp"
@@ -82,7 +82,7 @@ QString generateID()
     return QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces);
 }
 
-QStringView getID(const AllHighlights &h)
+QStringView getID(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const HasDynamicID auto &h) {
@@ -96,7 +96,7 @@ QStringView getID(const AllHighlights &h)
                       h);
 }
 
-QString getDefaultName(const AllHighlights &h)
+QString getDefaultName(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const HasDynamicDefaultName auto &h) {
@@ -110,7 +110,7 @@ QString getDefaultName(const AllHighlights &h)
                       h);
 }
 
-QString getName(const AllHighlights &h)
+QString getName(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const HasDynamicAndCustomizableName auto &h) {
@@ -136,7 +136,7 @@ QString getName(const AllHighlights &h)
                       h);
 }
 
-bool isEnabled(const AllHighlights &h)
+bool isEnabled(const AnyHighlight &h)
 {
     return std::visit(
         variant::Overloaded{
@@ -151,7 +151,7 @@ bool isEnabled(const AllHighlights &h)
         h);
 }
 
-QString getSound(const AllHighlights &h)
+QString getSound(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const HasDefaultSound auto &h) {
@@ -171,7 +171,7 @@ QString getSound(const AllHighlights &h)
                       h);
 }
 
-QString getSoundWithoutDefault(const AllHighlights &h)
+QString getSoundWithoutDefault(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -180,7 +180,7 @@ QString getSoundWithoutDefault(const AllHighlights &h)
         h);
 }
 
-QStringView getDefaultSound(const AllHighlights &h)
+QStringView getDefaultSound(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const HasDefaultSound auto &h) {
@@ -196,7 +196,7 @@ QStringView getDefaultSound(const AllHighlights &h)
                       h);
 }
 
-QUrl getSoundURL(const AllHighlights &h)
+QUrl getSoundURL(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -205,7 +205,7 @@ QUrl getSoundURL(const AllHighlights &h)
         h);
 }
 
-bool shouldShowInMentions(const AllHighlights &h)
+bool shouldShowInMentions(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -216,7 +216,7 @@ bool shouldShowInMentions(const AllHighlights &h)
         h);
 }
 
-bool shouldAlert(const AllHighlights &h)
+bool shouldAlert(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -226,7 +226,7 @@ bool shouldAlert(const AllHighlights &h)
         h);
 }
 
-bool shouldPlaySound(const AllHighlights &h)
+bool shouldPlaySound(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -235,7 +235,7 @@ bool shouldPlaySound(const AllHighlights &h)
         h);
 }
 
-QIcon getIcon(const AllHighlights &h)
+QIcon getIcon(const AnyHighlight &h)
 {
     return std::visit(
         [](auto &&h) {
@@ -245,7 +245,7 @@ QIcon getIcon(const AllHighlights &h)
         h);
 }
 
-std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h)
+std::shared_ptr<QColor> getBackgroundColor(const AnyHighlight &h)
 {
     auto c = std::visit(
         [](auto &&h) {
@@ -258,7 +258,7 @@ std::shared_ptr<QColor> getBackgroundColor(const AllHighlights &h)
     return c;
 }
 
-QString getError(const AllHighlights &h)
+QString getError(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const SupportsErrors auto &h) {
@@ -271,7 +271,7 @@ QString getError(const AllHighlights &h)
                       h);
 }
 
-bool isUserDefined(const AllHighlights &h)
+bool isUserDefined(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
                           [](const highlights::MessageHighlight &) {

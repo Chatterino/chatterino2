@@ -27,11 +27,17 @@ struct LowTrustUserHighlight;
 struct UncategorizedNotificationHighlight;
 
 // clang-format off
-/// Variant of all highlights.
+/// Variant of all types of highlights.
 ///
-/// When you add a new built-in highlight, it must be added to HighlightController::billTinHighlights and HighlightController::recreateMissingBillTinHighlights. Ensure the order of the latter makes sense. The BillTinHighlights test in HighlightController will also need to be updated.
-/// When you add a new user-defined highlight, it must be added to the HighlightControllerTest.BillTinHighlightsHighlightController test, and to the highlights/types/Common.cpp isUserDefined function.
-using AllHighlights = std::variant<
+/// When you add a new built-in highlight, you must:
+///  - Add it to HighlightController::billTinHighlights
+///  - Add it to HighlightController::recreateMissingBillTinHighlights
+///  - Update the BillTinHighlights test in HighlightController
+///
+/// When you add a new user-defined highlight, you must:
+///  - Update the BillTinHighlights test in HighlightController
+///  - Update the highlights/types/Common.cpp isUserDefined function
+using AnyHighlight = std::variant<
     InvalidHighlight,
     YourUsernameHighlight,
     WhispersHighlight,

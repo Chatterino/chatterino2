@@ -9,7 +9,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "controllers/highlights/types/LowTrustUserHighlight.hpp"
 #include "providers/twitch/TwitchAccount.hpp"  // IWYU pragma: keep

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "widgets/BasePopup.hpp"
 
 #include <QWidget>
@@ -16,12 +16,12 @@ class ConfigureDialog : public BasePopup
     Q_OBJECT
 
 public:
-    ConfigureDialog(AllHighlights _data, QWidget *parent);
+    ConfigureDialog(AnyHighlight _data, QWidget *parent);
 
-    Q_SIGNAL void confirmed(chatterino::highlights::AllHighlights data);
+    Q_SIGNAL void confirmed(chatterino::highlights::AnyHighlight data);
 
 private:
-    AllHighlights data;
+    AnyHighlight data;
     int previousSoundIndex;
 };
 
