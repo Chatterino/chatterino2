@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "controllers/highlights/Sounds.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "Test.hpp"
 
@@ -23,7 +23,7 @@ TEST(HighlightOutcome, MessageDefault)
     d.Parse(R"({"id":"test-01", "type":"message"})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 
@@ -44,7 +44,7 @@ TEST(HighlightOutcome, MessageCustomSound)
         R"({"id":"test-01", "type":"message", "sound":"file:///home/pajlada/Audio/karl kons oh oh no no.mp3"})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 
@@ -67,7 +67,7 @@ TEST(HighlightOutcome, SubscribedThreadDefault)
     d.Parse(R"({"id":"subscribedthread"})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 
@@ -89,7 +89,7 @@ TEST(HighlightOutcome, SubscribedThreadDisabledSound)
     d.Parse(R"({"id":"subscribedthread", "sound":""})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 
@@ -109,7 +109,7 @@ TEST(HighlightOutcome, SubscribedThreadOtherBuiltInSound)
         R"({"id":"subscribedthread", "sound":"002-sadiquecat-c4-harmonic"})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 
@@ -130,7 +130,7 @@ TEST(HighlightOutcome, SubscribedThreadCustomSound)
         R"({"id":"subscribedthread", "sound":"file:///home/pajlada/Audio/karl kons oh oh no no.mp3"})");
 
     bool error = false;
-    auto h = pajlada::Deserialize<AllHighlights>::get(d, &error);
+    auto h = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
     ASSERT_FALSE(error);
 

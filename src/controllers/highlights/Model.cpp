@@ -7,7 +7,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/SignalVectorModel.hpp"
-#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "util/PostToThread.hpp"
@@ -26,11 +26,11 @@ const auto &LOG = chatterinoHighlights;
 }  // namespace
 
 Model::Model(QObject *parent)
-    : SignalVectorModel<AllHighlights>(Column::COUNT, parent)
+    : SignalVectorModel<AnyHighlight>(Column::COUNT, parent)
 {
 }
 
-void Model::updateRow(const AllHighlights &highlight,
+void Model::updateRow(const AnyHighlight &highlight,
                       std::vector<QStandardItem *> &row)
 {
     QIcon enabledIcon{":/buttons/checkmark-square.svg"};
@@ -133,19 +133,19 @@ void Model::updateRow(const AllHighlights &highlight,
     row[Column::Sound]->setData(soundIcon, Qt::DecorationRole);
 }
 
-AllHighlights Model::getItemFromRow(std::vector<QStandardItem *> &row,
-                                    const AllHighlights &original)
+AnyHighlight Model::getItemFromRow(std::vector<QStandardItem *> &row,
+                                   const AnyHighlight &original)
 {
     (void)original;  // unused
 
-    auto item = get<AllHighlights>(row[Column::Enabled]->data(DATA_ROLE));
+    auto item = get<AnyHighlight>(row[Column::Enabled]->data(DATA_ROLE));
 
     this->updateRow(item, row);
 
     return item;
 }
 
-void Model::getRowFromItem(const AllHighlights &item,
+void Model::getRowFromItem(const AnyHighlight &item,
                            std::vector<QStandardItem *> &row)
 {
     row[Column::Enabled]->setData(QVariant::fromValue(item), DATA_ROLE);

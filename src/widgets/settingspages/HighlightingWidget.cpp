@@ -7,7 +7,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/highlights/ConfigureDialog.hpp"
 #include "controllers/highlights/Model.hpp"
-#include "controllers/highlights/types/All.hpp"  // IWYU pragma: keep
+#include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
 #include "util/Variant.hpp"
 
@@ -228,7 +228,7 @@ HighlightingWidget::HighlightingWidget()
                     selectedItem
                         .siblingAtColumn(highlights::Model::Column::Enabled)
                         .data(highlights::Model::DATA_ROLE)
-                        .value<highlights::AllHighlights>();
+                        .value<highlights::AnyHighlight>();
 
                 // Only user-defined highlights (e.g. Message Highlights) are removable.
                 auto removable = highlights::isUserDefined(data);
@@ -287,7 +287,7 @@ void HighlightingWidget::openConfigureDialog(
 
     auto data = index.siblingAtColumn(highlights::Model::Column::Enabled)
                     .data(highlights::Model::DATA_ROLE)
-                    .value<highlights::AllHighlights>();
+                    .value<highlights::AnyHighlight>();
 
     auto id = highlights::getID(data);
 
@@ -319,7 +319,7 @@ void HighlightingWidget::openConfigureDialog(
 
     QObject::connect(
         this->configureDialog, &highlights::ConfigureDialog::confirmed, this,
-        [this, view, id](const highlights::AllHighlights &data) {
+        [this, view, id](const highlights::AnyHighlight &data) {
             // override close behaviour if user clicked ok
             this->configureCloseBehaviour = ConfigureCloseBehaviour::Cancel;
 

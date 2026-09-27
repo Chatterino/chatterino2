@@ -73,7 +73,7 @@ void addSettingMenu(QWidget *lbl, QWidget *w,
 
 }  // namespace
 
-ConfigureDialog::ConfigureDialog(AllHighlights _data, QWidget *parent)
+ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
     : BasePopup(
           {
               BaseWindow::EnableCustomFrame,

@@ -212,8 +212,8 @@ set(SOURCE_FILES
         controllers/highlights/Model.hpp
         controllers/highlights/Sounds.cpp
         controllers/highlights/Sounds.hpp
-        controllers/highlights/types/AllForward.hpp
-        controllers/highlights/types/All.hpp
+        controllers/highlights/types/AnyHighlightForward.hpp
+        controllers/highlights/types/AnyHighlight.hpp
         controllers/highlights/types/AnnouncementsHighlight.cpp
         controllers/highlights/types/AnnouncementsHighlight.hpp
         controllers/highlights/types/AutomodCaughtHighlight.cpp

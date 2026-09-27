@@ -14,7 +14,7 @@
 #include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
-#include "controllers/highlights/types/AllForward.hpp"
+#include "controllers/highlights/types/AnyHighlightForward.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -787,7 +787,7 @@ private:
     bool cleanupHighlights();
 
 public:
-    SignalVector<highlights::AllHighlights> sharedHighlights;
+    SignalVector<highlights::AnyHighlight> sharedHighlights;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
     SignalVector<FilterRecordPtr> filterRecords;

@@ -6,7 +6,7 @@
 
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/LowTrustUserHighlight.hpp"
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "controllers/highlights/types/WhispersHighlight.hpp"
@@ -586,7 +586,7 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
 {
     configure(SETTINGS_MIGRATED_EMPTY, true);
 
-    const auto all = std::variant_size_v<highlights::AllHighlights>;
+    const auto all = std::variant_size_v<highlights::AnyHighlight>;
     const auto billTin = HighlightController::billTinHighlights().size();
 
     const auto expectedSize = all  //

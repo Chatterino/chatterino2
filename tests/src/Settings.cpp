@@ -6,7 +6,7 @@
 
 #include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "lib/Snapshot.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
@@ -205,8 +205,8 @@ TEST(Settings, DefaultHighlightSerialization)
 
     {
         // A default-initialized variant will contain the first variant type
-        AllHighlights highlight;
-        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        AnyHighlight highlight;
+        auto v = pajlada::Serialize<AnyHighlight>::get(highlight, a);
         ASSERT_EQ(R"({"id":"invalid"})", rj::stringify(v));
     }
 
@@ -217,39 +217,38 @@ TEST(Settings, DefaultHighlightSerialization)
 
         bool error = false;
 
-        AllHighlights highlight;
-        auto v = pajlada::Deserialize<AllHighlights>::get(d, &error);
+        AnyHighlight highlight;
+        auto v = pajlada::Deserialize<AnyHighlight>::get(d, &error);
 
         ASSERT_TRUE(error);
         ASSERT_EQ(v.index(), 0);
-        ASSERT_TRUE(
-            (std::is_same_v<std::variant_alternative_t<0, AllHighlights>,
-                            InvalidHighlight>));
+        ASSERT_TRUE((std::is_same_v<std::variant_alternative_t<0, AnyHighlight>,
+                                    InvalidHighlight>));
 
-        auto rjv = pajlada::Serialize<AllHighlights>::get(v, a);
+        auto rjv = pajlada::Serialize<AnyHighlight>::get(v, a);
         ASSERT_EQ(R"({"id":"invalid"})", rj::stringify(rjv));
     }
 
     {
         // Should be the same as a default-initialized variant
-        AllHighlights highlight = YourUsernameHighlight();
-        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        AnyHighlight highlight = YourUsernameHighlight();
+        auto v = pajlada::Serialize<AnyHighlight>::get(highlight, a);
         ASSERT_EQ(R"({"id":"yourusername"})", rj::stringify(v));
     }
 
     {
-        AllHighlights highlight = AutomodCaughtHighlight();
-        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        AnyHighlight highlight = AutomodCaughtHighlight();
+        auto v = pajlada::Serialize<AnyHighlight>::get(highlight, a);
         ASSERT_EQ(R"({"id":"automodcaught"})", rj::stringify(v));
     }
 
     {
-        AllHighlights highlight = MessageHighlight(u"test");
-        auto v = pajlada::Serialize<AllHighlights>::get(highlight, a);
+        AnyHighlight highlight = MessageHighlight(u"test");
+        auto v = pajlada::Serialize<AnyHighlight>::get(highlight, a);
         ASSERT_EQ(R"({"id":"test","type":"message"})", rj::stringify(v));
 
         bool error = false;
-        AllHighlights out = pajlada::Deserialize<AllHighlights>::get(v, &error);
+        AnyHighlight out = pajlada::Deserialize<AnyHighlight>::get(v, &error);
         ASSERT_FALSE(error);
         ASSERT_EQ(highlight.index(), out.index());
     }
