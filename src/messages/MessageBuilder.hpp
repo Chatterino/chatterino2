@@ -246,6 +246,7 @@ public:
     /// @param count How many times this message has been received already
     static MessagePtrMut makeClearChatMessage(const QDateTime &now,
                                               const QString &actor,
+                                              const QString &channelName,
                                               uint32_t count = 1);
 
     static MessagePtrMut makePinSuccessMessage(QString text, const QString &id);
