@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "Test.hpp"
 

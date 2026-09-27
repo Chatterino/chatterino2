@@ -14,7 +14,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/highlights/Sounds.hpp"
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/YourMessagesHighlight.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -90,7 +90,7 @@ void migrateSound(const BoolSetting &enableSoundSetting,
 class SettingsPrivate
 {
 public:
-    ChatterinoSetting<std::vector<highlights::AllHighlights>>
+    ChatterinoSetting<std::vector<highlights::AnyHighlight>>
         sharedHighlightsSetting = {
             "/highlighting/highlights2",
     };

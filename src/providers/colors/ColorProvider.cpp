@@ -4,7 +4,7 @@
 
 #include "providers/colors/ColorProvider.hpp"
 
-#include "controllers/highlights/types/All.hpp"
+#include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/SubscriptionsHighlight.hpp"
 #include "singletons/Settings.hpp"
 
