@@ -746,6 +746,14 @@ void Settings::migrateHighlights(bool isTest)
     {
         LowTrustUserHighlight h;
 
+        // Use enabled state from "automod highlight" as they were the same before
+        if (const auto &s = this->p->enableAutomodHighlight;
+            s.hasValueBeenSet())
+        {
+            h.enabled = s.getValue();
+        }
+
+        // Use color from "automod highlight" as they were the same before
         if (const auto &s = this->p->automodHighlightColor; s.hasValueBeenSet())
         {
             h.outcome.setBackgroundColor(s.getValue());
