@@ -131,6 +131,7 @@
                 },
                 {
                     "backgroundColor": "#88888888",
+                    "enabled": true,
                     "id": "lowtrustuser"
                 },
                 {
