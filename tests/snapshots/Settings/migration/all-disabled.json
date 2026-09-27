@@ -1,0 +1,122 @@
+{
+    "input": {
+        "highlighting": {
+            "announcement": {
+                "coloredAnnouncement": {
+                    "enabled": false
+                },
+                "enabled": false
+            },
+            "automod": {
+                "enabled": false
+            },
+            "firstMessageHighlight": {
+                "highlighted": false
+            },
+            "redeemedHighlight": {
+                "highlighted": false
+            },
+            "selfHighlight": {
+                "nameIsHighlightKeyword": false
+            },
+            "subHighlight": {
+                "subsHighlighted": false
+            },
+            "thread": {
+                "nameIsHighlightKeyword": false
+            },
+            "watchStreak": {
+                "enabled": false
+            },
+            "whisperHighlight": {
+                "whispersHighlighted": false
+            }
+        }
+    },
+    "output": {
+        "highlighting": {
+            "announcement": {
+                "coloredAnnouncement": {
+                    "enabled": false
+                },
+                "enabled": false
+            },
+            "automod": {
+                "enabled": false
+            },
+            "firstMessageHighlight": {
+                "highlighted": false
+            },
+            "highlights2": [
+                {
+                    "enabled": false,
+                    "id": "firstmessage"
+                },
+                {
+                    "enabled": false,
+                    "id": "watchstreak"
+                },
+                {
+                    "enabled": false,
+                    "id": "subscriptions"
+                },
+                {
+                    "enabled": false,
+                    "id": "whispers"
+                },
+                {
+                    "enabled": false,
+                    "id": "yourusername"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "enabled": false,
+                    "id": "subscribedthread"
+                },
+                {
+                    "enabled": false,
+                    "id": "announcements",
+                    "overrideColoredAnnouncements": true
+                },
+                {
+                    "enabled": false,
+                    "id": "channelpoints"
+                },
+                {
+                    "enabled": false,
+                    "id": "automodcaught"
+                },
+                {
+                    "enabled": false,
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "redeemedHighlight": {
+                "highlighted": false
+            },
+            "selfHighlight": {
+                "nameIsHighlightKeyword": false
+            },
+            "subHighlight": {
+                "subsHighlighted": false
+            },
+            "thread": {
+                "nameIsHighlightKeyword": false
+            },
+            "watchStreak": {
+                "enabled": false
+            },
+            "whisperHighlight": {
+                "whispersHighlighted": false
+            }
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
