@@ -17,6 +17,7 @@
 
 namespace chatterino {
 
+/// Removes duplicate messages by pointer equality or ID, does not preserve order
 inline void deduplicateMessages(std::vector<MessagePtr> &messages)
 {
     std::ranges::sort(messages, [](const MessagePtr &a, const MessagePtr &b) {
