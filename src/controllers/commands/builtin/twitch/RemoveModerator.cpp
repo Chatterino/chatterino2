@@ -56,7 +56,8 @@ QString removeModerator(const CommandContext &ctx)
                     channel->addSystemMessage(
                         QString("You have removed %1 as a moderator of "
                                 "this channel.")
-                            .arg(targetUser.displayName));
+                            .arg(targetUser.displayName),
+                        targetUser.login);
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage =

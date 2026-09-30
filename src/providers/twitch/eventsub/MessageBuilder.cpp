@@ -224,6 +224,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Vip &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -239,6 +240,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unvip &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -253,6 +255,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Warn &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     builder->flags.set(MessageFlag::ModerationAction);
     QString text;
 
@@ -538,6 +541,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Mod &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -553,6 +557,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unmod &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -597,6 +602,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UnbanRequest &action)
 {
+    builder->noticeTarget = action.userLogin.qt();
     builder->flags.set(MessageFlag::ModerationAction);
 
     QString text;
