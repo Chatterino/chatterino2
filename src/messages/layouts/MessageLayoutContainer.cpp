@@ -183,6 +183,19 @@ void MessageLayoutContainer::breakLine()
                   2;
     }
 
+    // offset timestamp by margin
+    bool lineHasRewardText = false;
+    for (size_t i = this->lineStart_; i < this->elements_.size(); i++)
+    {
+        const auto flags = this->elements_.at(i)->getCreator().getFlags();
+        if (flags.has(MessageElementFlag::ChannelPointReward) &&
+            flags.hasNone({MessageElementFlag::EmoteImage}))
+        {
+            lineHasRewardText = true;
+            break;
+        }
+    }
+
     for (size_t i = this->lineStart_; i < this->elements_.size(); i++)
     {
         MessageLayoutElement *element = this->elements_.at(i).get();
@@ -196,6 +209,11 @@ void MessageLayoutContainer::breakLine()
         if (isCompactEmote)
         {
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
+        }
+        if (lineHasRewardText &&
+            element->getCreator().getFlags().has(MessageElementFlag::Timestamp))
+        {
+            yExtra -= MARGIN.top() * this->scale_;
         }
 
         element->setPosition(QPointF{
