@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountModel.hpp"
 
 #include "controllers/accounts/Account.hpp"
+#include "singletons/Theme.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
@@ -27,6 +28,39 @@ void AccountModel::getRowFromItem(const std::shared_ptr<Account> &item,
 {
     setStringItem(row[0], item->toString(), false);
     row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
+
+    if (item->isExpired())
+    {
+        row[0]->setData(item->toString() + " (expired)", Qt::DisplayRole);
+        row[0]->setData(getTheme()->accounts.expired, Qt::ForegroundRole);
+        row[0]->setData(
+            "This account's login has expired - sign in again to use it",
+            Qt::ToolTipRole);
+    }
+    else
+    {
+        row[0]->setData({}, Qt::ForegroundRole);
+        row[0]->setData({}, Qt::ToolTipRole);
+    }
+}
+
+void AccountModel::refreshExpiredState()
+{
+    int rowIndex = 0;
+    for (const auto &row : this->rows())
+    {
+        if (!row.isCustomRow && row.original)
+        {
+            // A copy of the pointers is enough - the items they point at are
+            // the ones the model reads from
+            auto items = row.items;
+            this->getRowFromItem(*row.original, items);
+
+            auto index = this->index(rowIndex, 0);
+            this->dataChanged(index, index);
+        }
+        rowIndex++;
+    }
 }
 
 int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
