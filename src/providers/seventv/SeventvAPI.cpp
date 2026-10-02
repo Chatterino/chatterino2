@@ -21,21 +21,50 @@ const QString API_URL_PRESENCES = u"https://7tv.io/v3/users/%1/presences"_s;
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 namespace chatterino {
 
-void SeventvAPI::getUserByTwitchID(
-    const QString &twitchID, SuccessCallback<const QJsonObject &> &&onSuccess,
-    ErrorCallback &&onError)
+void SeventvAPI::getUserByTwitchID(const QString &twitchID,
+                                   SuccessCallback<QJsonObject> &&onSuccess,
+                                   ErrorCallback &&onError)
 {
     NetworkRequest(API_URL_USER.arg(twitchID), NetworkRequestType::Get)
         .timeout(20000)
+        // 7TV might remove the `emote_set` from the response here. Clients are
+        // expected to use `emote_set_id`. To account for older versions, there
+        // may be a User-Agent check. We'd get the old behavior. To get the new
+        // one, we set this to signal that we can handle this.
+        .header("X-7tv-Missing-EmoteSet-Aware", "1")
         .onSuccess(
             [callback = std::move(onSuccess)](const NetworkResult &result) {
-                auto json = result.parseJson();
-                callback(json);
+                callback(result.parseJson());
             })
         .onError([callback = std::move(onError)](const NetworkResult &result) {
             callback(result);
         })
         .execute();
+}
+
+void SeventvAPI::getUserAndEmoteSetByTwitchID(
+    const QString &twitchID, SuccessCallback<const QJsonObject &> &&onSuccess,
+    ErrorCallback onError)
+{
+    auto successCb = [this, onSuccess = std::move(onSuccess),
+                      onError = onError](QJsonObject res) mutable {
+        auto emoteSetID = res.value("emote_set_id");
+        auto emoteSet = res.value("emote_set");
+        if (emoteSet.isObject() || !emoteSetID.isString())
+        {
+            onSuccess(res);
+            return;
+        }
+        this->getEmoteSet(
+            emoteSetID.toString(),
+            [onSuccess = std::move(onSuccess),
+             full = std::move(res)](const QJsonObject &emoteSet) mutable {
+                full.insert("emote_set", emoteSet);
+                onSuccess(full);
+            },
+            std::move(onError));
+    };
+    this->getUserByTwitchID(twitchID, std::move(successCb), std::move(onError));
 }
 
 void SeventvAPI::getEmoteSet(const QString &emoteSet,
