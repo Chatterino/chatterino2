@@ -123,24 +123,23 @@ QStringView getHighlightTypeName(const AnyHighlight &h)
 QString getName(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
-                          [](const HasDynamicAndCustomizableName auto &h) {
+                          [](const InvalidHighlight & /*h*/) {
+                              return QString{};
+                          },
+                          [](const HasDynamicDefaultName auto &h) {
                               if (h.name.isEmpty())
                               {
                                   return h.getDefaultName();
                               }
                               return h.name;
                           },
-                          [](const HasCustomizableName auto &h) {
+                          [](const auto &h) {
                               if (h.name.isEmpty())
                               {
                                   using ActualType = std::decay_t<decltype(h)>;
                                   return ActualType::DEFAULT_NAME.toString();
                               }
                               return h.name;
-                          },
-                          [](const auto &h) {
-                              using ActualType = std::decay_t<decltype(h)>;
-                              return ActualType::DEFAULT_NAME.toString();
                           },
                       },
                       h);
