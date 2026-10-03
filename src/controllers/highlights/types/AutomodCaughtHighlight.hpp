@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/types/Common.hpp"
 #include "controllers/highlights/types/Outcome.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -18,12 +19,6 @@
 
 #include <cassert>
 #include <optional>
-
-namespace chatterino {
-
-struct HighlightCheck;
-
-}  // namespace chatterino
 
 namespace chatterino::highlights {
 

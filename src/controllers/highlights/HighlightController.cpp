@@ -49,8 +49,9 @@ bool rebuildSharedHighlights(Settings &settings,
 
         std::visit(
             [&checks](auto &&h) {
+                // buildCheck may return an empty function if its parameters were invalid (e.g. if a badge highlight has an invalid badge)
                 auto check = h.buildCheck();
-                if (check.cb)
+                if (check)
                 {
                     checks.emplace_back(std::move(check));
                 }
@@ -114,7 +115,7 @@ void HighlightController::rebuildChecks(Settings &settings)
 }
 
 std::pair<bool, HighlightResult> HighlightController::check(
-    const HighlightCheck::Params &params) const
+    const HighlightCheckParams &params) const
 {
     bool highlighted = false;
     auto result = HighlightResult::emptyResult();
@@ -124,7 +125,7 @@ std::pair<bool, HighlightResult> HighlightController::check(
 
     for (const auto &check : *checks)
     {
-        if (auto checkResult = check.cb(params))
+        if (auto checkResult = check(params))
         {
             highlighted = true;
 

@@ -43,7 +43,7 @@ public:
      * @brief Checks the given message parameters if it matches our internal checks, and returns a result
      **/
     [[nodiscard]] std::pair<bool, HighlightResult> check(
-        const HighlightCheck::Params &params) const;
+        const HighlightCheckParams &params) const;
 
     /// Returns a set of built-in highlight IDs (e.g. {"whispers", "yourusername"})
     static std::unordered_set<QStringView> billTinHighlights();

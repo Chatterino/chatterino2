@@ -52,7 +52,7 @@ void MessageHighlight::setCaseSensitive(std::optional<bool> newValue)
 HighlightCheck MessageHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
-    using Params = HighlightCheck::Params;
+    using Params = HighlightCheckParams;
 
     if (!this->isValid())
     {
