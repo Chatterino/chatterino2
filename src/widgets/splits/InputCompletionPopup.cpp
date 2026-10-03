@@ -4,9 +4,11 @@
 
 #include "widgets/splits/InputCompletionPopup.hpp"
 
+#include "controllers/completion/sources/CommandSource.hpp"
 #include "controllers/completion/sources/UserSource.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
+#include "controllers/completion/strategies/CommandStrategy.hpp"
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -82,6 +84,10 @@ std::unique_ptr<completion::Source> InputCompletionPopup::getSource() const
                 this->currentChannel_.get(),
                 std::make_unique<completion::ClassicUserStrategy>(),
                 this->callback_);
+        case CompletionKind::Command:
+            return std::make_unique<completion::CommandSource>(
+                std::make_unique<completion::CommandStrategy>(true),
+                this->callback_);
         default:
             return nullptr;
     }
@@ -105,6 +111,23 @@ void InputCompletionPopup::endCompletion()
 void InputCompletionPopup::setInputAction(ActionCallback callback)
 {
     this->callback_ = std::move(callback);
+}
+
+std::optional<std::pair<QStringList, int>>
+    InputCompletionPopup::selectedCommandCompletions() const
+{
+    if (this->currentKind_ != CompletionKind::Command)
+    {
+        return std::nullopt;
+    }
+
+    const auto index = this->ui_.listView->currentIndex().row();
+    auto completions = this->model_.completionTexts(MAX_ENTRY_COUNT);
+    if (index < 0 || index >= completions.size())
+    {
+        return std::nullopt;
+    }
+    return std::pair{std::move(completions), index};
 }
 
 bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
