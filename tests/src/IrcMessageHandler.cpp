@@ -668,6 +668,46 @@ TEST(TestIrcMessageHandlerP, Integrity)
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
 
+TEST(IrcMessageHandler, RecentMessagesDoNotUpdateCurrentUserState)
+{
+    MockApplication app(QString::fromUtf8(SETTINGS_DEFAULT));
+    initializeHelix(&app.helix);
+    auto &accounts = app.getAccounts()->twitch;
+    accounts.accounts.append(
+        std::make_shared<TwitchAccount>("forsenwiki", "", "", "405330073"));
+    accounts.load();
+    accounts.currentUsername = "forsenwiki";
+    ASSERT_EQ(accounts.getCurrent()->getUserId(), "405330073");
+
+    auto channel = std::make_shared<TwitchChannel>("pajlada");
+    ASSERT_FALSE(channel->isVip());
+    const QByteArray data =
+        "@tmi-sent-ts=1790452460376;id=863f60c5-3de6-4ecf-b2ff-20cdd85c12e9;"
+        "room-id=11148817;user-id=405330073;display-name=forsenWiki;"
+        "badges=vip/1;badge-info=;flags=;user-type=;emotes= "
+        ":forsenwiki!forsenwiki@forsenwiki.tmi.twitch.tv "
+        "PRIVMSG #pajlada :peepoZ";
+
+    // A message that isn't from a live sink does not set vip status
+    auto *historyMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(historyMessage, nullptr);
+    VectorMessageSink historySink({}, MessageFlag::RecentMessage);
+    IrcMessageHandler::parseMessageInto(historyMessage, historySink,
+                                        channel.get());
+    delete historyMessage;
+    ASSERT_EQ(historySink.messages().size(), 1);
+    EXPECT_FALSE(channel->isVip());
+
+    // The same message parsed from a live sink sets vip status
+    auto *liveMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(liveMessage, nullptr);
+    VectorMessageSink liveSink(channel->sinkTraits());
+    IrcMessageHandler::parseMessageInto(liveMessage, liveSink, channel.get());
+    delete liveMessage;
+    ASSERT_EQ(liveSink.messages().size(), 1);
+    EXPECT_TRUE(channel->isVip());
+}
+
 TEST_P(TestIrcMessageHandlerP, CloneElements)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
