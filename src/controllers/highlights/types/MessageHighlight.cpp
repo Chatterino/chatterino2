@@ -79,7 +79,6 @@ HighlightCheck MessageHighlight::buildCheck() const
 
 void MessageHighlight::rebuildInternalRegularExpression()
 {
-    // TODO: this is inflexible
     if (this->isRegex())
     {
         this->regexPattern.setPattern(this->getPattern());
