@@ -31,7 +31,7 @@ struct BadgeHighlight {
     static constexpr QStringView TYPE_NAME = u"Badge";
 
     /// This icon is temporary, and overridden in the highlighting model
-    static constexpr QStringView ICON_RESOURCE = u":/buttons/reloadDark.svg";
+    static constexpr QStringView ICON_RESOURCE = u":/buttons/shield.svg";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = true;
