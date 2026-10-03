@@ -9,6 +9,7 @@
 #include "controllers/highlights/Model.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
+#include "widgets/helper/TableStyles.hpp"
 
 #include <QAbstractItemView>
 #include <QBoxLayout>
@@ -95,6 +96,12 @@ HighlightingWidget::HighlightingWidget()
     view->horizontalHeader()->hide();
     view->setMouseTracking(true);
     view->setShowGrid(false);
+
+    view->setDragDropMode(QTableView::DragDropMode::InternalMove);
+    view->setDragDropOverwriteMode(false);
+    view->setDefaultDropAction(Qt::DropAction::MoveAction);
+
+    TableRowDragStyle::applyTo(view);
 
     QObject::connect(view, &QTableView::doubleClicked, this,
                      [this, view](const QModelIndex &clicked) {
