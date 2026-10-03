@@ -28,6 +28,7 @@ namespace chatterino::highlights {
 /// User-created highlight matching messages based on whether the filter is matched on the message
 struct FilterHighlight {
     static constexpr QStringView TYPE = u"filter";
+    static constexpr QStringView TYPE_NAME = u"Filter";
     static constexpr QStringView ICON_RESOURCE = u":/settings/filters.svg";
     static constexpr QStringView DESCRIPTION =
         u"Filters allow you to create more complex "

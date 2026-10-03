@@ -31,6 +31,7 @@ namespace chatterino::highlights {
 /// Can be further customized to override the colors of colored announcements
 struct AnnouncementsHighlight {
     static constexpr QStringView ID = u"announcements";
+    static constexpr QStringView TYPE_NAME = u"Announcements";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

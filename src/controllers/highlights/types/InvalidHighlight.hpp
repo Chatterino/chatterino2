@@ -29,6 +29,7 @@ namespace chatterino::highlights {
 /// It is used to ensure that the variant keeping all possible highlights is default-constructible but with an invalid state (i.e. this highlight type)
 struct InvalidHighlight {
     static constexpr QStringView ID = u"invalid";
+    static constexpr QStringView TYPE_NAME = u"Invalid";
     static constexpr QStringView ICON_RESOURCE = u":/buttons/cancel.svg";
 
     static constexpr QStringView DEFAULT_NAME = u"Invalid";

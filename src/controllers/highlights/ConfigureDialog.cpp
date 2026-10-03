@@ -84,12 +84,22 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
           parent)
     , data(std::move(_data))
 {
-    this->setWindowTitle(u"Chatterino - Highlight editor"_s);
+    auto t = getHighlightTypeName(this->data) % u" highlight";
+    this->setWindowTitle(u"Chatterino - Editing " % t);
     this->setAttribute(Qt::WA_DeleteOnClose);
 
     this->resize(515, 500);
 
     auto *dialogLayout = new QVBoxLayout;
+
+    auto *w = new QLabel(t);
+    QFont f = w->font();
+    f.setBold(true);
+    w->setFont(f);
+    w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    w->setMargin(10);
+
+    dialogLayout->addWidget(w);
 
     std::visit(variant::Overloaded{
                    [dialogLayout](HasDescription auto &h) {

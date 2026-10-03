@@ -26,6 +26,7 @@ namespace chatterino::highlights {
 /// User-created highlight matching messages based on the message text contents
 struct MessageHighlight {
     static constexpr QStringView TYPE = u"message";
+    static constexpr QStringView TYPE_NAME = u"Message";
     static constexpr QStringView ICON_RESOURCE = u":/buttons/text.svg";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;

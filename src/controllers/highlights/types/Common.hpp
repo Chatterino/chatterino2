@@ -34,6 +34,9 @@ QStringView getID(const AnyHighlight &h);
 
 QString getDefaultName(const AnyHighlight &h);
 
+/// Returns the highlight type name (i.e. "Message highlight" for the MessageHighlight type);
+QStringView getHighlightTypeName(const AnyHighlight &h);
+
 QString getName(const AnyHighlight &h);
 
 bool isEnabled(const AnyHighlight &h);
