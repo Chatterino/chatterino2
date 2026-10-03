@@ -15,7 +15,7 @@ namespace chatterino::highlights {
 HighlightCheck YourUsernameHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
-    using Params = HighlightCheck::Params;
+    using Params = HighlightCheckParams;
 
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
 

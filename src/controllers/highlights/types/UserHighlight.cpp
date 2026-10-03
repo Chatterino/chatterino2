@@ -17,7 +17,7 @@ UserHighlight::UserHighlight(QStringView _id)
 HighlightCheck UserHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
-    using Params = HighlightCheck::Params;
+    using Params = HighlightCheckParams;
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
