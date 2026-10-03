@@ -32,7 +32,8 @@ ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const
 
 bool ScrollbarHighlight::isNull() const
 {
-    return this->style_ == Style::None || !this->color_;
+    return this->style_ == Style::None || !this->color_ ||
+           !this->color_->isValid();
 }
 
 }  // namespace chatterino
