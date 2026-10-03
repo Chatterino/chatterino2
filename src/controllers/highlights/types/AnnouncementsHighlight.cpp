@@ -22,7 +22,7 @@ const auto PURPLE = std::make_shared<QColor>(QColor(255, 102, 237, 100));
 HighlightCheck AnnouncementsHighlight::buildCheck() const
 {
     using H = std::remove_pointer_t<decltype(this)>;
-    using Params = HighlightCheck::Params;
+    using Params = HighlightCheckParams;
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
