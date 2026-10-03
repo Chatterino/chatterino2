@@ -568,6 +568,31 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "shown as links.")
         ->addTo(layout);
 
+    auto *twitchGifSize = layout.addDropdown<float>(
+        "Twitch GIF size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.4x (Twitch)", "1.5x", "2x"},
+        s.twitchGifScale,
+        [](auto value) {
+            if (value == 1)
+            {
+                return QString("Default");
+            }
+            if (qFuzzyCompare(value, 1.4F))
+            {
+                return QString("1.4x (Twitch)");
+            }
+            return QString::number(value) + "x";
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        });
+    twitchGifSize->setEnabled(s.showTwitchGifs);
+    s.showTwitchGifs.connect(
+        [twitchGifSize](bool enabled) {
+            twitchGifSize->setEnabled(enabled);
+        },
+        this->managedConnections_);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},

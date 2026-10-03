@@ -193,7 +193,18 @@ bool ImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
         {
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
+            const bool smooth =
+                this->getFlags().has(MessageElementFlag::TwitchGif);
+            if (smooth)
+            {
+                painter.save();
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+            }
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            if (smooth)
+            {
+                painter.restore();
+            }
             return true;
         }
     }
