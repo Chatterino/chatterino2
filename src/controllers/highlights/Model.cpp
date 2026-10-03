@@ -94,6 +94,7 @@ void Model::updateRow(const AnyHighlight &highlight,
 
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
 
+    /*
     if (const auto *h = std::get_if<BadgeHighlight>(&highlight))
     {
         // TODO: If the badge fails to load, it would be nice if the loading icon could be replaced with an error icon of some kind
@@ -101,6 +102,7 @@ void Model::updateRow(const AnyHighlight &highlight,
             h->getBadgeName(),
             [model = QPointer(this), id = h->getID()](
                 const QString &name, const std::shared_ptr<QIcon> &icon) {
+                NOTE!!!!!!!!! This code doesn't work, it can override highlights that come after it.
                 (void)name;  // unused
 
                 runInGuiThread([model, id, icon] {
@@ -128,6 +130,7 @@ void Model::updateRow(const AnyHighlight &highlight,
                 });
             });
     }
+    */
 
     setStringItem(row[Column::Name], getName(highlight), false);
     setStringItem(row[Column::Sound], "");  // TODO: include full URL?
