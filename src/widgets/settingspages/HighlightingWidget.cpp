@@ -9,7 +9,6 @@
 #include "controllers/highlights/Model.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "singletons/Settings.hpp"
-#include "util/Variant.hpp"
 
 #include <QAbstractItemView>
 #include <QBoxLayout>
@@ -83,7 +82,6 @@ HighlightingWidget::HighlightingWidget()
     auto *layout = new QVBoxLayout(this);
 
     auto *model = new highlights::Model(this);
-    model->setObjectName("New Highlight Model");
     model->initialize(&getSettings()->sharedHighlights);
 
     auto *view = new QTableView(this);
