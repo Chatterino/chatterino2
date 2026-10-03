@@ -28,6 +28,7 @@ const QList<DisplayBadge> &twitchBadges();
 /// User-created highlight matching messages based on the message Twitch badges
 struct BadgeHighlight {
     static constexpr QStringView TYPE = u"badge";
+    static constexpr QStringView TYPE_NAME = u"Badge";
 
     /// This icon is temporary, and overridden in the highlighting model
     static constexpr QStringView ICON_RESOURCE = u":/buttons/reloadDark.svg";

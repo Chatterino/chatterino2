@@ -31,6 +31,7 @@ namespace chatterino::highlights {
 /// Matches any Twitch message with the watch streak tag
 struct WatchStreakHighlight {
     static constexpr QStringView ID = u"watchstreak";
+    static constexpr QStringView TYPE_NAME = u"Watch Streak";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

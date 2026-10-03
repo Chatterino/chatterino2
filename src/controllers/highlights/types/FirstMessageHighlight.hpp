@@ -30,6 +30,7 @@ namespace chatterino::highlights {
 /// Matches Twitch messages that come with the "first time message" tag
 struct FirstMessageHighlight {
     static constexpr QStringView ID = u"firstmessage";
+    static constexpr QStringView TYPE_NAME = u"First message";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

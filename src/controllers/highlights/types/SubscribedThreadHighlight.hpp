@@ -30,6 +30,7 @@ namespace chatterino::highlights {
 /// Matches messages in a Twitch reply thread that the user is subscribed to
 struct SubscribedThreadHighlight {
     static constexpr QStringView ID = u"subscribedthread";
+    static constexpr QStringView TYPE_NAME = u"Subscribed thread";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

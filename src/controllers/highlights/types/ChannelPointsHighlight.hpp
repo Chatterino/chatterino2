@@ -30,10 +30,11 @@ namespace chatterino::highlights {
 /// Messages that are highlighted with the channel points reward "Highlight My Message"
 struct ChannelPointsHighlight {
     static constexpr QStringView ID = u"channelpoints";
+    static constexpr QStringView TYPE_NAME = u"Channel point redemption";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 
-    static constexpr QStringView DEFAULT_NAME = u"Channel Points Redemptions";
+    static constexpr QStringView DEFAULT_NAME = u"Channel Point Redemptions";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;
     static constexpr bool SHOW_IN_MENTIONS_DEFAULT = false;

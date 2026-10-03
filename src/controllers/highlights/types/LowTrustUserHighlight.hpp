@@ -30,6 +30,7 @@ namespace chatterino::highlights {
 /// Matches messages that are sent by a user who has been marked as "Low trust" via Twitch's Monitored & Suspicious flag.
 struct LowTrustUserHighlight {
     static constexpr QStringView ID = u"lowtrustuser";
+    static constexpr QStringView TYPE_NAME = u"Low trust user";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

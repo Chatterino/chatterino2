@@ -29,6 +29,7 @@ namespace chatterino::highlights {
 /// Highlights that matches the currently logged in user's username
 struct YourUsernameHighlight {
     static constexpr QStringView ID = u"yourusername";
+    static constexpr QStringView TYPE_NAME = u"Your username";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

@@ -26,6 +26,7 @@ namespace chatterino::highlights {
 /// User-created highlight matching messages based on the sender's username
 struct UserHighlight {
     static constexpr QStringView TYPE = u"user";
+    static constexpr QStringView TYPE_NAME = u"User";
     static constexpr QStringView ICON_RESOURCE = u":/settings/accounts.svg";
 
     static constexpr bool ENABLED_BY_DEFAULT = true;

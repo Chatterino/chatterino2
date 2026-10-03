@@ -31,6 +31,7 @@ namespace chatterino::highlights {
 /// Matches any special "notifications" that aren't already categorized
 struct UncategorizedNotificationHighlight {
     static constexpr QStringView ID = u"uncategorizednotification";
+    static constexpr QStringView TYPE_NAME = u"Uncategorized notification";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
     static constexpr QStringView DESCRIPTION =

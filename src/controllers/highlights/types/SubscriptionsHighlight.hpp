@@ -30,6 +30,7 @@ namespace chatterino::highlights {
 /// Matches Twitch subscription messages (i.e. first-time subscriptions, resubscriptions, and gift subscriptions)
 struct SubscriptionsHighlight {
     static constexpr QStringView ID = u"subscriptions";
+    static constexpr QStringView TYPE_NAME = u"Subscriptions";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

@@ -29,6 +29,7 @@ namespace chatterino::highlights {
 /// Matches whipers that are shown inline
 struct WhispersHighlight {
     static constexpr QStringView ID = u"whispers";
+    static constexpr QStringView TYPE_NAME = u"Inline whisper";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
     static constexpr QStringView DESCRIPTION =
