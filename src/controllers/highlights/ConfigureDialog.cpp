@@ -168,8 +168,10 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
         auto defaultName = getDefaultName(this->data);
 
         std::visit(variant::Overloaded{
-                       [formLayout, defaultName,
-                        w{nameWidget}](HasCustomizableName auto &h) {
+                       [](InvalidHighlight & /*h*/) {
+                           //
+                       },
+                       [formLayout, defaultName, w{nameWidget}](auto &&h) {
                            formLayout->addRow("Name", w);
                            w->setPlaceholderText(defaultName);
                            w->setText(h.name);
@@ -178,12 +180,6 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
                                             [&](const auto &newText) {
                                                 h.name = newText;
                                             });
-                       },
-                       [formLayout](auto &&h) {
-                           using ActualType = std::decay_t<decltype(h)>;
-                           formLayout->addRow(
-                               "Name",
-                               new QLabel(ActualType::DEFAULT_NAME.toString()));
                        },
                    },
                    this->data);
