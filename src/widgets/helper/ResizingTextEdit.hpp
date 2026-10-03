@@ -7,6 +7,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <QCompleter>
 #include <QKeyEvent>
+#include <QStringList>
 #include <QTextEdit>
 
 namespace chatterino {
@@ -35,6 +36,8 @@ public:
      * See `completionInProgress_`.
      */
     void resetCompletion();
+    bool isCompletionInProgress() const;
+    void continueCompletion(const QStringList &completions, int currentRow);
 
 protected:
     int heightForWidth(int) const override;

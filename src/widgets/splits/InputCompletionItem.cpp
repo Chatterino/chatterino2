@@ -18,18 +18,16 @@ InputCompletionItem::InputCompletionItem(const EmotePtr &emote,
 {
 }
 
+QString InputCompletionItem::insertionText() const
+{
+    return this->emote_ ? this->emote_->name.string : this->text_;
+}
+
 void InputCompletionItem::action()
 {
     if (this->action_)
     {
-        if (this->emote_)
-        {
-            this->action_(this->emote_->name.string);
-        }
-        else
-        {
-            this->action_(this->text_);
-        }
+        this->action_(this->insertionText());
     }
 }
 
