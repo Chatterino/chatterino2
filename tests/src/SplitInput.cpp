@@ -18,6 +18,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -26,6 +27,7 @@
 #include "Test.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -127,6 +129,16 @@ public:
     {
         this->ui_.textEdit->undo();
     }
+
+    bool completionPopupBlocksSendShortcut(const QString &text)
+    {
+        this->showCompletionPopup(text, CompletionKind::User);
+        QKeyEvent event(QEvent::ShortcutOverride, Qt::Key_Return,
+                        Qt::NoModifier);
+        event.ignore();
+        this->eventFilter(this, &event);
+        return event.isAccepted();
+    }
 };
 
 class SplitInputCompletionTest : public ::testing::Test
@@ -180,6 +192,19 @@ TEST_F(SplitInputCompletionTest, UsernameCompletionPreservesUndoHistory)
     EXPECT_EQ("boring game @fors", this->input.getInputText());
     this->input.undoInput();
     EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, EmptyPopupDoesNotBlockSendShortcut)
+{
+    auto channel = std::make_shared<TwitchChannel>("forsen");
+    channel->addRecentChatter("pajlada");
+    this->split.setChannel(IndirectChannel{channel});
+
+    // An empty completion popup does not block the send shortcut.
+    EXPECT_FALSE(this->input.completionPopupBlocksSendShortcut("@nothing"));
+
+    // A matching completion still takes priority over sending.
+    EXPECT_TRUE(this->input.completionPopupBlocksSendShortcut("@paj"));
 }
 
 TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)

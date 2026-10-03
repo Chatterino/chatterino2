@@ -13,6 +13,8 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
 
+#include <QKeyEvent>
+
 namespace chatterino {
 
 InputCompletionPopup::InputCompletionPopup(QWidget *parent)
@@ -107,8 +109,24 @@ void InputCompletionPopup::setInputAction(ActionCallback callback)
     this->callback_ = std::move(callback);
 }
 
+bool InputCompletionPopup::hasCompletions() const
+{
+    return this->model_.rowCount() != 0;
+}
+
 bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
 {
+    if (event->type() == QEvent::KeyPress)
+    {
+        const auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        assert(keyEvent != nullptr);
+        if ((keyEvent->key() == Qt::Key_Enter ||
+             keyEvent->key() == Qt::Key_Return) &&
+            !this->hasCompletions())
+        {
+            return BasePopup::eventFilter(watched, event);
+        }
+    }
     return this->ui_.listView->eventFilter(watched, event);
 }
 
