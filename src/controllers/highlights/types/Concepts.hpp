@@ -22,15 +22,6 @@ concept HasDynamicDefaultName = requires(T a) {
 };
 
 template <typename T>
-concept HasCustomizableName = requires(T a) {
-    { a.name } -> std::convertible_to<QString>;
-};
-
-template <typename T>
-concept HasDynamicAndCustomizableName =
-    HasDynamicDefaultName<T> && HasCustomizableName<T>;
-
-template <typename T>
 concept SupportsErrors = requires(T a) {
     { a.getError() } -> std::same_as<QString>;
 };
