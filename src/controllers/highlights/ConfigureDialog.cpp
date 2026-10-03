@@ -226,6 +226,7 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
 
                 w->setCurrentText(h.getDefaultName());
 
+                // TODO: If a badge fails to load, it would be nice if we could use an error icon of some kind
                 getApp()->getTwitchBadges()->getBadgeIcons(
                     highlights::twitchBadges(),
                     [w = QPointer(w)](const QString &identifier,
