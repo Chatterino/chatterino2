@@ -9,10 +9,9 @@
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/filters/FilterRecord.hpp"
-#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightController.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/highlights/Legacy.hpp"
 #include "controllers/highlights/Sounds.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"
 #include "controllers/highlights/types/YourMessagesHighlight.hpp"
@@ -96,17 +95,19 @@ public:
     };
 
     /// Old version 0 message highlights
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
-        {
+    ChatterinoSetting<std::vector<highlights::legacy::HighlightPhrase>>
+        highlightedMessagesSetting = {
             "/highlighting/highlights",
     };
     /// Old version 0 user highlights
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedUsersSetting = {
-        "/highlighting/users",
+    ChatterinoSetting<std::vector<highlights::legacy::HighlightPhrase>>
+        highlightedUsersSetting = {
+            "/highlighting/users",
     };
     /// Old version 0 badge highlights
-    ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
-        "/highlighting/badges",
+    ChatterinoSetting<std::vector<highlights::legacy::HighlightBadge>>
+        highlightedBadgesSetting = {
+            "/highlighting/badges",
     };
 
     BoolSetting enableSelfHighlight = {
