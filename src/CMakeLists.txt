@@ -199,15 +199,14 @@ set(SOURCE_FILES
 
         controllers/highlights/ConfigureDialog.cpp
         controllers/highlights/ConfigureDialog.hpp
-        controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
-        controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
+        controllers/highlights/Legacy.hpp
         controllers/highlights/Model.cpp
         controllers/highlights/Model.hpp
         controllers/highlights/Sounds.cpp
