@@ -10,6 +10,7 @@ const boost::container::flat_map<QString, DefaultSound> &defaultSounds()
 {
     // If you add a new built-in sound here, double-check its licensing and attribute it
     // in the about page if necessary.
+    // These sounds should be RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, stereo 44100 Hz
     static boost::container::flat_map<QString, DefaultSound> data{
         boost::container::ordered_unique_range_t{},
         {
