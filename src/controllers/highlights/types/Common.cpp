@@ -33,7 +33,7 @@ bool matchesType(const rapidjson::Value &object, QStringView expectedType)
 
     if (!object.IsObject())
     {
-        qCWarning(LOG) << "Error in matchesType, given object is not an object:"
+        qCWarning(LOG) << "Error in matchesType, given value is not an object:"
                        << rj::stringify(object);
         return false;
     }
@@ -56,7 +56,7 @@ bool matchesID(const rapidjson::Value &object, QStringView expectedID)
 
     if (!object.IsObject())
     {
-        qCWarning(LOG) << "Error in matchesId, given object is not an object:"
+        qCWarning(LOG) << "Error in matchesId, given value is not an object:"
                        << rj::stringify(object);
         return false;
     }
