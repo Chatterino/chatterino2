@@ -105,7 +105,11 @@ HighlightingWidget::HighlightingWidget()
                      });
 
     view->horizontalHeader()->setSectionResizeMode(
-        highlights::Model::Column::Enabled, QHeaderView::ResizeToContents);
+        highlights::Model::Column::Enabled, QHeaderView::Fixed);
+    view->horizontalHeader()->resizeSection(
+        highlights::Model::Column::Enabled,
+        view->horizontalHeader()->fontMetrics().horizontalAdvance("Disabled") +
+            45);  // magic number to ensure we're wide enough with text + icon. might not work super well on other platforms / DPIs? idk!
     view->horizontalHeader()->setSectionResizeMode(
         highlights::Model::Column::Sound, QHeaderView::ResizeToContents);
     view->horizontalHeader()->setSectionResizeMode(
