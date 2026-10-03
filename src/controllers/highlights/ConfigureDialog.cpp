@@ -343,7 +343,7 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
     dialogLayout->addLayout(formLayout);
 
     {
-        auto *group = new QGroupBox("Side effects");
+        auto *group = new QGroupBox("When highlight matches:");
 
         auto *l = new QFormLayout;
         {
