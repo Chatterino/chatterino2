@@ -7,7 +7,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/highlights/Sounds.hpp"
 #include "debug/Benchmark.hpp"
-#include "util/QMagicEnum.hpp"
 #include "util/RenameThread.hpp"
 
 #include <boost/asio.hpp>
@@ -156,14 +155,13 @@ MiniaudioBackend::MiniaudioBackend(bool keepEngineAlive_)
 
             auto decoderConfig =
                 ma_decoder_config_init(ma_format_f32, 0, 44100);
-            // This must match the encoding format of our default ping sound
             decoderConfig.encodingFormat = ma_encoding_format_wav;
 
             for (const auto &[_, defaultSound] : highlights::defaultSounds())
             {
                 BuiltInSound bis;
 
-                /// Load default sound
+                // Load the sound from the resource path
                 QFile defaultPingFile(defaultSound.resourcePath.sliced(3));
                 if (!defaultPingFile.open(QIODevice::ReadOnly))
                 {
@@ -205,8 +203,12 @@ MiniaudioBackend::MiniaudioBackend(bool keepEngineAlive_)
                         return;
                     }
 
+                    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
+                    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                     bis.decoders[i] = std::move(dec);
                     bis.sounds[i] = std::move(snd);
+                    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                    // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
                 }
 
                 this->defaultPingSounds[defaultSound.resourcePath] =
@@ -311,6 +313,7 @@ void MiniaudioBackend::play(const QUrl &sound)
             if (defaultSoundIt != this->defaultPingSounds.end())
             {
                 // Play default sound, loaded from our resources in the constructor
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 auto &snd = defaultSoundIt->second.sounds[++i % NUM_SOUNDS];
                 ma_sound_seek_to_pcm_frame(snd.get(), 0);
                 result = ma_sound_start(snd.get());
