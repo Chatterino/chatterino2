@@ -9,6 +9,8 @@
 
 #include <concepts>
 
+// TODO: add comments to the concepts (and review which are necessary)
+
 namespace chatterino::highlights {
 
 template <typename T>
