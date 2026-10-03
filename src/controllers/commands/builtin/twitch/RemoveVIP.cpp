@@ -57,7 +57,8 @@ QString removeVIP(const CommandContext &ctx)
                 [channel, targetUser] {
                     channel->addSystemMessage(
                         QString("You have removed %1 as a VIP of this channel.")
-                            .arg(targetUser.displayName));
+                            .arg(targetUser.displayName),
+                        targetUser.login);
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage = QString("Failed to remove VIP - ");
