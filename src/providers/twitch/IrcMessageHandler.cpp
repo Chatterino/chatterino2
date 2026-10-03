@@ -682,6 +682,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     MessageBuilder::triggerHighlights(c, alert);
 
     getApp()->getTwitch()->setLastUserThatWhisperedMe(message->loginName);
+    getApp()->getAccounts()->twitch.getCurrent()->addWhisperUser(
+        message->loginName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {

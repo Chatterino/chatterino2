@@ -224,7 +224,8 @@ QString sendWhisper(const CommandContext &ctx)
              words{ctx.words}](const auto &targetUser) {
                 getHelix()->sendWhisper(
                     currentUser->getUserId(), targetUser.id, message,
-                    [words] {
+                    [currentUser, targetUser, words] {
+                        currentUser->addWhisperUser(targetUser.login);
                         appendWhisperMessageWordsLocally(words);
                     },
                     [channel, target, targetUser](auto error, auto message) {
