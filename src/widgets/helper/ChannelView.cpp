@@ -287,6 +287,50 @@ float getTooltipScale(EmoteTooltipScale emoteTooltipScale)
     }
 }
 
+MessagePtr findReplyTargetInDirection(
+    const std::vector<MessageLayoutPtr> &messages, const MessagePtr &current,
+    ReplyTargetDirection direction)
+{
+    const auto isReplyable = [](const MessageLayoutPtr &layout) {
+        const auto status = layout->getMessagePtr()->isReplyable();
+        return status == Message::ReplyStatus::Replyable ||
+               status == Message::ReplyStatus::ReplyableWithThread;
+    };
+
+    if (current == nullptr)
+    {
+        if (direction == ReplyTargetDirection::Newer)
+        {
+            return nullptr;
+        }
+        const auto target = std::ranges::find_if(messages.rbegin(),
+                                                 messages.rend(), isReplyable);
+        return target == messages.rend() ? nullptr : (*target)->getMessagePtr();
+    }
+
+    const auto currentIt =
+        std::ranges::find_if(messages.rbegin(), messages.rend(),
+                             [&current](const MessageLayoutPtr &layout) {
+                                 return layout->getMessagePtr() == current;
+                             });
+    if (direction == ReplyTargetDirection::Older)
+    {
+        const auto begin = currentIt == messages.rend() ? messages.rbegin()
+                                                        : std::next(currentIt);
+        const auto target =
+            std::ranges::find_if(begin, messages.rend(), isReplyable);
+        return target == messages.rend() ? nullptr : (*target)->getMessagePtr();
+    }
+
+    if (currentIt == messages.rend())
+    {
+        return nullptr;
+    }
+    const auto target =
+        std::ranges::find_if(currentIt.base(), messages.end(), isReplyable);
+    return target == messages.end() ? nullptr : (*target)->getMessagePtr();
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -407,6 +451,10 @@ void ChannelView::initializeScrollbar()
         {
             this->layoutQueued_ = true;
         }
+    });
+
+    std::ignore = this->scrollBar_->getDesiredValueChanged().connect([this] {
+        this->updateReplyNavigationScrollState();
     });
 }
 
@@ -697,6 +745,12 @@ void ChannelView::performLayout(bool causedByScrollbar, bool disableAnimation)
     this->showingLatestMessages_ =
         this->scrollBar_->isAtBottom() ||
         (!this->scrollBar_->isVisible() && !causedByScrollbar);
+
+    // Do not follow new messages while navigating reply targets
+    if (this->replyNavigationTarget_ != nullptr)
+    {
+        this->showingLatestMessages_ = false;
+    }
 
     /// Layout visible messages
     this->layoutVisibleMessages(messages);
@@ -1562,6 +1616,97 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
     }
 }
 
+void ChannelView::setReplyNavigationTarget(const MessagePtr &target)
+{
+    if (this->replyNavigationTarget_ == target)
+    {
+        return;
+    }
+
+    const bool returnToLatestMessages =
+        target == nullptr && this->replyNavigationTarget_ != nullptr &&
+        this->returnToLatestMessagesAfterReplyNavigation_;
+    ++this->replyNavigationRevealGeneration_;
+    this->replyNavigationTarget_ = target;
+    this->revealReplyNavigationTarget_ = target != nullptr;
+    this->queueUpdate();
+
+    if (target == nullptr)
+    {
+        this->returnToLatestMessagesAfterReplyNavigation_ = false;
+        if (returnToLatestMessages)
+        {
+            QTimer::singleShot(0, this, [this] {
+                if (this->replyNavigationTarget_ == nullptr)
+                {
+                    this->scrollBar_->scrollToBottom(
+                        getSettings()
+                            ->enableSmoothScrollingNewMessages.getValue());
+                }
+            });
+        }
+        return;
+    }
+}
+
+void ChannelView::clearReplyNavigationTarget()
+{
+    this->setReplyNavigationTarget(nullptr);
+}
+
+void ChannelView::updateReplyNavigationScrollState()
+{
+    if (this->replyNavigationTarget_ == nullptr ||
+        this->scrollingToReplyNavigationTarget_)
+    {
+        return;
+    }
+
+    ++this->replyNavigationRevealGeneration_;
+    this->revealReplyNavigationTarget_ = false;
+    this->returnToLatestMessagesAfterReplyNavigation_ =
+        this->scrollBar_->getDesiredValue() >= this->scrollBar_->getBottom();
+}
+
+qreal ChannelView::scrollPositionForReplyTarget(
+    const std::vector<MessageLayoutPtr> &messages, size_t targetIndex,
+    int visibleHeight)
+{
+    auto remainingHeight = visibleHeight;
+    while (targetIndex > 0)
+    {
+        const auto height = std::max(1, messages[targetIndex]->getHeight());
+        if (remainingHeight < height)
+        {
+            break;
+        }
+        remainingHeight -= height;
+        --targetIndex;
+    }
+
+    const auto height = std::max(1, messages[targetIndex]->getHeight());
+    const auto fraction = std::clamp(
+        1.0 - (static_cast<qreal>(remainingHeight) / height), 0.0, 1.0);
+    return this->scrollBar_->getMinimum() + static_cast<qreal>(targetIndex) +
+           fraction;
+}
+
+void ChannelView::queueReplyNavigationTargetScroll(qreal position)
+{
+    this->revealReplyNavigationTarget_ = false;
+    const auto generation = ++this->replyNavigationRevealGeneration_;
+    QTimer::singleShot(0, this, [this, generation, position] {
+        if (this->replyNavigationTarget_ == nullptr ||
+            generation != this->replyNavigationRevealGeneration_)
+        {
+            return;
+        }
+        this->scrollingToReplyNavigationTarget_ = true;
+        this->scrollBar_->setDesiredValue(position);
+        this->scrollingToReplyNavigationTarget_ = false;
+    });
+}
+
 void ChannelView::paintEvent(QPaintEvent *event)
 {
     //    BenchmarkGuard benchmark("paint");
@@ -1645,6 +1790,8 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
 
     };
     bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
+    bool replyNavigationTargetFound = false;
+    std::optional<qreal> replyNavigationTargetScrollPosition;
 
     // using QRect here, because we can only request updates with a rect
     QRect animationArea;
@@ -1655,6 +1802,33 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
     for (; ctx.messageIndex < messagesSnapshot.size(); ++ctx.messageIndex)
     {
         MessageLayout *layout = messagesSnapshot[ctx.messageIndex].get();
+
+        // If we have selected a new reply target with reply navigation hotkeys,
+        // check whether it needs to be revealed
+        if (this->revealReplyNavigationTarget_ &&
+            layout->getMessagePtr() == this->replyNavigationTarget_)
+        {
+            replyNavigationTargetFound = true;
+            const auto visibleBottom = this->goToBottom_->isVisible()
+                                           ? this->goToBottom_->geometry().top()
+                                           : this->height();
+            const auto targetHeight = layout->getHeight();
+
+            // Align targets above the view and oversized targets to the top.
+            if (ctx.y < 0 || (targetHeight > visibleBottom && ctx.y != 0))
+            {
+                replyNavigationTargetScrollPosition =
+                    this->scrollBar_->getMinimum() +
+                    static_cast<qreal>(ctx.messageIndex);
+            }
+            else if (targetHeight <= visibleBottom &&
+                     ctx.y + targetHeight > visibleBottom)
+            {
+                replyNavigationTargetScrollPosition =
+                    this->scrollPositionForReplyTarget(
+                        messagesSnapshot, ctx.messageIndex, visibleBottom);
+            }
+        }
 
         if (showLastMessageIndicator)
         {
@@ -1704,6 +1878,22 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
                 {
                     this->highlightedMessage_ = nullptr;
                 }
+            }
+
+            // Outline the target selected through reply hotkey navigation
+            if (layout->getMessagePtr() == this->replyNavigationTarget_)
+            {
+                const auto penWidth = std::max(1.0, 2.0 * this->scale());
+                painter.save();
+                painter.setPen(QPen(this->theme->accent, penWidth));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawRect(QRectF{
+                    penWidth / 2,
+                    ctx.y + (penWidth / 2),
+                    layout->getWidth() - penWidth,
+                    layout->getHeight() - penWidth,
+                });
+                painter.restore();
             }
         }
 
@@ -1767,6 +1957,36 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
         if (layout.get() == end)
         {
             break;
+        }
+    }
+
+    // If we have a reply navigation target to reveal, do it after drawing so
+    // the scrollbar is not changed while iterating over message layouts
+    if (!this->revealReplyNavigationTarget_)
+    {
+        return;
+    }
+
+    this->revealReplyNavigationTarget_ = false;
+    if (replyNavigationTargetScrollPosition)
+    {
+        this->queueReplyNavigationTargetScroll(
+            *replyNavigationTargetScrollPosition);
+    }
+    else if (this->replyNavigationTarget_ != nullptr &&
+             !replyNavigationTargetFound)
+    {
+        // The target is outside the drawn range, so align it to the top
+        const auto target = std::ranges::find_if(
+            messagesSnapshot, [this](const MessageLayoutPtr &layout) {
+                return layout->getMessagePtr() == this->replyNavigationTarget_;
+            });
+        if (target != messagesSnapshot.end())
+        {
+            const auto targetIndex = static_cast<qreal>(
+                std::distance(messagesSnapshot.begin(), target));
+            this->queueReplyNavigationTargetScroll(
+                this->scrollBar_->getMinimum() + targetIndex);
         }
     }
 }
@@ -3369,6 +3589,14 @@ void ChannelView::setInputReply(const MessagePtr &message)
 {
     assertInGuiThread();
 
+    // Replies selected without the navigation hotkeys do not keep the
+    // keyboard-selected target active.
+    ++this->replyNavigationRevealGeneration_;
+    this->replyNavigationTarget_.reset();
+    this->revealReplyNavigationTarget_ = false;
+    this->returnToLatestMessagesAfterReplyNavigation_ = false;
+    this->queueUpdate();
+
     if (message == nullptr || this->split_ == nullptr)
     {
         return;
@@ -3394,6 +3622,39 @@ void ChannelView::setInputReply(const MessagePtr &message)
     }
 
     this->split_->setInputReply(message);
+}
+
+void ChannelView::navigateReplyTarget(const MessagePtr &current,
+                                      ReplyTargetDirection direction)
+{
+    if (!this->canReplyToMessages() || this->split_ == nullptr)
+    {
+        return;
+    }
+
+    const auto target = findReplyTargetInDirection(this->getMessagesSnapshot(),
+                                                   current, direction);
+    if (target != nullptr)
+    {
+        const bool returnToLatestMessages =
+            this->replyNavigationTarget_ != nullptr
+                ? this->returnToLatestMessagesAfterReplyNavigation_
+                : this->scrollBar_->getDesiredValue() >=
+                          this->scrollBar_->getBottom() ||
+                      !this->scrollBar_->isVisible();
+
+        this->setInputReply(target);
+        this->setReplyNavigationTarget(target);
+        this->returnToLatestMessagesAfterReplyNavigation_ =
+            returnToLatestMessages;
+        return;
+    }
+
+    if (direction == ReplyTargetDirection::Newer && current != nullptr)
+    {
+        this->split_->setInputReply(nullptr);
+        this->clearReplyNavigationTarget();
+    }
 }
 
 void ChannelView::showReplyThreadPopup(const MessagePtr &message)
