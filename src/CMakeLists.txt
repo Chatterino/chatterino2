@@ -228,6 +228,9 @@ set(SOURCE_FILES
 
         controllers/ignores/IgnoreController.cpp
         controllers/ignores/IgnoreController.hpp
+        controllers/ignores/IgnoredEmote.hpp
+        controllers/ignores/IgnoredEmoteModel.cpp
+        controllers/ignores/IgnoredEmoteModel.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
         controllers/ignores/IgnorePhrase.cpp

@@ -74,6 +74,10 @@ public:
     Link getLink() const;
     const QString &getText() const;
     FlagsEnum<MessageElementFlag> getFlags() const;
+    virtual bool isImage() const
+    {
+        return false;
+    }
 
     int getWordId() const;
     void setWordId(int wordId);
@@ -104,6 +108,10 @@ class ImageLayoutElement : public MessageLayoutElement
 {
 public:
     ImageLayoutElement(MessageElement &creator, ImagePtr image, QSizeF size);
+    bool isImage() const override
+    {
+        return true;
+    }
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -123,6 +131,10 @@ public:
     LayeredImageLayoutElement(MessageElement &creator,
                               std::vector<ImagePtr> images,
                               std::vector<QSizeF> sizes, QSizeF largestSize);
+    bool isImage() const override
+    {
+        return true;
+    }
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
