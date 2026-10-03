@@ -32,6 +32,7 @@ namespace chatterino::highlights {
 /// It highlights both the header (i.e. the Allow and Deny portion), and the sender + contents messages
 struct AutomodCaughtHighlight {
     static constexpr QStringView ID = u"automodcaught";
+    static constexpr QStringView TYPE_NAME = u"AutoMod Caught Message";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

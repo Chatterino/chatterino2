@@ -29,6 +29,7 @@ namespace chatterino::highlights {
 /// Matches messages that the current user sent
 struct YourMessagesHighlight {
     static constexpr QStringView ID = u"yourmessages";
+    static constexpr QStringView TYPE_NAME = u"Your message";
     static constexpr QStringView ICON_RESOURCE =
         u":/buttons/settings-darkMode.svg";
 

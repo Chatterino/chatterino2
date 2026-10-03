@@ -110,6 +110,16 @@ QString getDefaultName(const AnyHighlight &h)
                       h);
 }
 
+QStringView getHighlightTypeName(const AnyHighlight &h)
+{
+    return std::visit(
+        [](auto &&h) {
+            using ActualType = std::decay_t<decltype(h)>;
+            return ActualType::TYPE_NAME;
+        },
+        h);
+}
+
 QString getName(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{

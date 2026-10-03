@@ -67,4 +67,9 @@ concept HasDescription = requires {
     { T::DESCRIPTION } -> std::convertible_to<QStringView>;
 };
 
+template <typename T>
+concept HasTypeName = requires {
+    { T::TYPE_NAME } -> std::same_as<QStringView>;
+};
+
 }  // namespace chatterino::highlights
