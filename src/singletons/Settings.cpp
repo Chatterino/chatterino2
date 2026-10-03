@@ -833,7 +833,7 @@ bool Settings::cleanupHighlights()
         if (!isNew)
         {
             qCInfo(LOG)
-                << "A built in highlight of type" << id
+                << "A built in highlight with ID" << id
                 << "already exists, removed the lower priority version.";
             highlights.erase(highlights.begin() + actualIndex);
             ++numRemoved;
