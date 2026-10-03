@@ -38,7 +38,7 @@ class Modes;
 using ChannelPtr = std::shared_ptr<Channel>;
 
 void registerNmHost(Modes modes, const Paths &paths);
-bool registerNmHost(const Paths &paths);
+ExpectedStr<void> registerNmHost(const Paths &paths);
 std::string &getNmQueueName(const Paths &paths);
 
 Atomic<std::optional<QString>> &nmIpcError();
