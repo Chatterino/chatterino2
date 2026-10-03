@@ -96,6 +96,7 @@ void Model::updateRow(const AnyHighlight &highlight,
 
     if (const auto *h = std::get_if<BadgeHighlight>(&highlight))
     {
+        // TODO: If the badge fails to load, it would be nice if the loading icon could be replaced with an error icon of some kind
         getApp()->getTwitchBadges()->getBadgeIcon(
             h->getBadgeName(),
             [model = QPointer(this), id = h->getID()](
