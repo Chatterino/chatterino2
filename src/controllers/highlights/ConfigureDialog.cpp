@@ -436,6 +436,7 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
                 w->setColor(*getBackgroundColor(this->data));
             });
 
+            // TODO: It would be cool to surface this better, and show that the background is actually disabled in the color widget in a nicer way.
             auto *disableBackgroundColor =
                 new QAction("Disable background color");
             QObject::connect(disableBackgroundColor, &QAction::triggered,
