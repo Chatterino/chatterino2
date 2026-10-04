@@ -7,6 +7,7 @@
 #include "common/FlagsEnum.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "singletons/Settings.hpp"
 
 #include <pajlada/settings.hpp>
