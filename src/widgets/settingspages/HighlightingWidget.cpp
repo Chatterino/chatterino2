@@ -111,6 +111,16 @@ HighlightingWidget::HighlightingWidget()
                          return;
                      });
 
+    QObject::connect(model, &QAbstractItemModel::dataChanged, this,
+                     [view](QModelIndex index) {
+                         // TODO: this sucks, but it ensures the full row is updated when another cell is changed
+                         for (int i = 0; i < highlights::Model::Column::COUNT;
+                              ++i)
+                         {
+                             view->update(index.siblingAtColumn(i));
+                         }
+                     });
+
     view->horizontalHeader()->setSectionResizeMode(
         highlights::Model::Column::Enabled, QHeaderView::Fixed);
     view->horizontalHeader()->resizeSection(
