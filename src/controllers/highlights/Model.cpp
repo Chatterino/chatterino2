@@ -146,7 +146,9 @@ void Model::updateRow(const AnyHighlight &highlight,
 }
 
 AnyHighlight Model::getItemFromRow(std::vector<QStandardItem *> &row,
-                                   const AnyHighlight &original)
+                                   const AnyHighlight &original,
+                                   std::optional<QModelIndex> index,
+                                   std::optional<int> role)
 {
     (void)original;  // unused
 
