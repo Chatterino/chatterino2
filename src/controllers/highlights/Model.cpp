@@ -8,6 +8,7 @@
 #include "common/SignalVectorModel.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "util/StandardItemHelper.hpp"
+#include "util/Variant.hpp"
 
 #include <QPalette>
 #include <QPointer>
@@ -31,9 +32,6 @@ Model::Model(QObject *parent)
 void Model::updateRow(const AnyHighlight &highlight,
                       std::vector<QStandardItem *> &row)
 {
-    QIcon enabledIcon{":/buttons/checkmark-square.svg"};
-    QIcon disabledIcon{":/buttons/dismiss-square.svg"};
-
     auto soundIcon = [highlight] {
         if (shouldPlaySound(highlight))
         {
@@ -58,7 +56,6 @@ void Model::updateRow(const AnyHighlight &highlight,
         row[Column::Name]->setData(f, Qt::FontRole);
 
         row[Column::Enabled]->setData("Error", Qt::EditRole);
-        row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
     }
     else
     {
@@ -76,7 +73,6 @@ void Model::updateRow(const AnyHighlight &highlight,
             // Undim name
             const auto &b = palette.text();
             row[Column::Name]->setData(b, Qt::ForegroundRole);
-            row[Column::Enabled]->setData(enabledIcon, Qt::DecorationRole);
         }
         else
         {
@@ -86,9 +82,12 @@ void Model::updateRow(const AnyHighlight &highlight,
             // Dim name
             const auto &b = palette.placeholderText();
             row[Column::Name]->setData(b, Qt::ForegroundRole);
-            row[Column::Enabled]->setData(disabledIcon, Qt::DecorationRole);
         }
     }
+
+    row[Column::Enabled]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable |
+                                   Qt::ItemIsUserCheckable);
+    row[Column::Enabled]->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
 
     auto backgroundColor = highlights::getBackgroundColor(highlight);
     if (backgroundColor && backgroundColor->isValid())
@@ -153,6 +152,22 @@ AnyHighlight Model::getItemFromRow(std::vector<QStandardItem *> &row,
     (void)original;  // unused
 
     auto item = get<AnyHighlight>(row[Column::Enabled]->data(DATA_ROLE));
+
+    if (role.has_value() && role.value() == Qt::CheckStateRole &&
+        index.has_value() && index.value().column() == Column::Enabled)
+    {
+        auto checkstate =
+            row[Column::Enabled]->data(Qt::CheckStateRole).toBool();
+        std::visit(variant::Overloaded{
+                       [](InvalidHighlight & /*h*/) {
+                           //
+                       },
+                       [checkstate](auto &&h) {
+                           h.enabled = checkstate;
+                       },
+                   },
+                   item);
+    }
 
     this->updateRow(item, row);
 
