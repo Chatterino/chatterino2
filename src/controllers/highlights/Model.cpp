@@ -4,13 +4,9 @@
 
 #include "controllers/highlights/Model.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/SignalVectorModel.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
-#include "debug/AssertInGuiThread.hpp"
-#include "providers/twitch/TwitchBadges.hpp"
-#include "util/PostToThread.hpp"
 #include "util/StandardItemHelper.hpp"
 
 #include <QPalette>
