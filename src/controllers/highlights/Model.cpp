@@ -26,6 +26,8 @@ Model::Model(QObject *parent)
 {
 }
 
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Model::updateRow(const AnyHighlight &highlight,
                       std::vector<QStandardItem *> &row)
 {
@@ -153,5 +155,6 @@ void Model::getRowFromItem(const AnyHighlight &item,
 
     this->updateRow(item, row);
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
 }  // namespace chatterino::highlights
