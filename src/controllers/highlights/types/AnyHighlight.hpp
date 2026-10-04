@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "controllers/highlights/types/AnyHighlightForward.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/AnnouncementsHighlight.hpp"  // IWYU pragma: export
+#include "controllers/highlights/types/AnyHighlightForward.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/AutomodCaughtHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/BadgeHighlight.hpp"  // IWYU pragma: export
 #include "controllers/highlights/types/ChannelPointsHighlight.hpp"  // IWYU pragma: export
