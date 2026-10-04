@@ -90,6 +90,16 @@ void Model::updateRow(const AnyHighlight &highlight,
         }
     }
 
+    auto backgroundColor = highlights::getBackgroundColor(highlight);
+    if (backgroundColor && backgroundColor->isValid())
+    {
+        row[Column::Sound]->setData(*backgroundColor, Qt::BackgroundRole);
+    }
+    else
+    {
+        row[Column::Sound]->setData(QVariant(), Qt::BackgroundRole);
+    }
+
     row[Column::Name]->setData(getIcon(highlight), Qt::DecorationRole);
 
     /*
