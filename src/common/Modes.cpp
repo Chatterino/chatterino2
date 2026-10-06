@@ -39,4 +39,10 @@ Modes::Modes(const Args &args)
     }
 }
 
+Modes::Modes(Init init)
+    : isPortable(init.isPortable)
+    , isExternallyPackaged(init.isExternallyPackaged)
+{
+}
+
 }  // namespace chatterino
