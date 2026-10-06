@@ -2760,7 +2760,8 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
                                    MessageElementFlag::Username, selfMsgColor,
-                                   FontStyle::ChatMediumBold);
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserWhisper, currentUser->getUserName()});
     }
     else
     {
