@@ -98,7 +98,8 @@
                             "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
                         },
                         "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
+                        "tooltip": "Kappa<br>Twitch Emote",
+                        "id": "25"
                     },
                     "flags": "EmoteImage|EmoteText",
                     "link": {
@@ -149,7 +150,8 @@
                             "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
                         },
                         "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
+                        "tooltip": "Kappa<br>Twitch Emote",
+                        "id": "25"
                     },
                     "flags": "EmoteImage|EmoteText",
                     "link": {
