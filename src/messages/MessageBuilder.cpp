@@ -1640,10 +1640,12 @@ MessagePtrMut MessageBuilder::makeMissingScopesMessage(
 
 MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
                                                    const QString &actor,
+                                                   const QString &channelName,
                                                    uint32_t count)
 {
     MessageBuilder builder;
     builder.emplace<TimestampElement>(now.time());
+    builder->channelName = channelName;
     builder->count = count;
     builder->serverReceivedTime = now;
     builder.message().flags.set(
@@ -2099,7 +2101,8 @@ void MessageBuilder::addTwitchGif(const QString &id, QStringView originalText)
                 0.5, {200, 200}),
         };
         this->emplace<LinebreakElement>(MessageElementFlag::TwitchGif);
-        this->emplace<ScalingImageElement>(set, MessageElementFlag::TwitchGif)
+        this->emplace<ScalingImageElement>(set, MessageElementFlag::TwitchGif,
+                                           original)
             ->setLink(Link{Link::Url, link})
             ->setTooltip(original.toHtmlEscaped());
     }

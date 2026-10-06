@@ -1,15 +1,6 @@
 {
     "input": {
-        "automod": {
-            "boundaries": [
-                {
-                    "end_pos": 2,
-                    "start_pos": 0
-                }
-            ],
-            "category": "swearing",
-            "level": 4
-        },
+        "automod": null,
         "blocked_term": null,
         "broadcaster_user_id": "11148817",
         "broadcaster_user_login": "pajlada",
@@ -20,17 +11,17 @@
                 {
                     "cheermote": null,
                     "emote": null,
-                    "text": "ass",
+                    "text": "https://example.com",
                     "type": "text"
                 }
             ],
-            "text": "ass"
+            "text": "https://example.com"
         },
         "message_id": "19d067ff-89b5-4790-a720-97599894eb6b",
-        "reason": "automod",
-        "user_id": "117166826",
-        "user_login": "testaccount_420",
-        "user_name": "테스트계정420"
+        "reason": "blocked_link",
+        "user_id": "129546453",
+        "user_login": "nerixyz",
+        "user_name": "nerixyz"
     },
     "output": [
         {
@@ -88,9 +79,8 @@
                         "message",
                         "for",
                         "reason:",
-                        "swearing",
-                        "level",
-                        "4.",
+                        "blocked",
+                        "link.",
                         "Allow",
                         "will",
                         "post",
@@ -206,9 +196,9 @@
                     "trailingSpace": true,
                     "type": "MentionElement",
                     "userColor": "Text",
-                    "userLoginName": "testaccount_420",
+                    "userLoginName": "nerixyz",
                     "words": [
-                        "testaccount_420(테스트계정420):"
+                        "nerixyz:"
                     ]
                 },
                 {
@@ -223,7 +213,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "ass"
+                        "https://example.com"
                     ]
                 }
             ],
@@ -234,9 +224,9 @@
             "highlightColor": "#ff404040",
             "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
             "localizedName": "",
-            "loginName": "testaccount_420",
-            "messageText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny testaccount_420(테스트계정420): ass",
-            "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny testaccount_420(테스트계정420): ass",
+            "loginName": "nerixyz",
+            "messageText": "AutoMod: Held a message for reason: blocked link. Allow will post it in chat. Allow Deny nerixyz: https://example.com",
+            "searchText": "AutoMod: Held a message for reason: blocked link. Allow will post it in chat. Allow Deny nerixyz: https://example.com",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {

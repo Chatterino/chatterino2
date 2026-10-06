@@ -51,7 +51,8 @@ TEST_F(NativeMessagingFixture, writeManifestToSubDirNotCreated)
     ASSERT_EQ(writeManifestTo(this->dir.path(), "native-messaging-hosts",
                               "test.json", QJsonDocument())
                   .error(),
-              WriteManifestError::FailedToCreateDirectory);
+              QString("Failed to create native-messaging-hosts in %1")
+                  .arg(this->dir.path()));
 }
 
 TEST_F(NativeMessagingFixture, writeManifestToWindowsCurrentDir)

@@ -147,6 +147,16 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
             str += ' ';
         }
     }
+    else if (const auto *imageElement =
+                 dynamic_cast<ScalingImageElement *>(&this->getCreator()))
+    {
+        str += imageElement->copyText();
+        if (!imageElement->copyText().isEmpty() && this->hasTrailingSpace() &&
+            to >= 2)
+        {
+            str += ' ';
+        }
+    }
 }
 
 size_t ImageLayoutElement::getSelectionIndexCount() const

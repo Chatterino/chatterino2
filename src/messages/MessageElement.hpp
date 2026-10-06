@@ -756,12 +756,14 @@ class ScalingImageElement : public MessageElement
 public:
     static constexpr std::string_view TYPE = "scaling-image";
 
-    ScalingImageElement(ImageSet images, MessageElementFlags flags);
+    ScalingImageElement(ImageSet images, MessageElementFlags flags,
+                        QString copyText = {});
 
     void addToContainer(MessageLayoutContainer &container,
                         const MessageLayoutContext &ctx) override;
 
     const ImageSet &images() const;
+    const QString &copyText() const;
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
@@ -769,6 +771,7 @@ public:
 
 private:
     ImageSet images_;
+    QString copyText_;
 };
 
 class ReplyCurveElement : public MessageElement

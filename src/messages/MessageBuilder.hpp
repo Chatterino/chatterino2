@@ -246,6 +246,7 @@ public:
     /// @param count How many times this message has been received already
     static MessagePtrMut makeClearChatMessage(const QDateTime &now,
                                               const QString &actor,
+                                              const QString &channelName,
                                               uint32_t count = 1);
 
     static MessagePtrMut makePinSuccessMessage(QString text, const QString &id);
@@ -309,11 +310,14 @@ private:
                      const Channel *channel,
                      const std::shared_ptr<MessageThread> &thread,
                      const MessagePtr &parent);
-    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
-    HighlightAlert parseHighlights(Communi::TagsRef tags,
-                                   const QString &originalMessage,
-                                   const MessageParseArgs &args);
 
+public:
+    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
+    [[nodiscard]] HighlightAlert parseHighlights(Communi::TagsRef tags,
+                                                 const QString &originalMessage,
+                                                 const MessageParseArgs &args);
+
+private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 

@@ -17,7 +17,6 @@
 
 #include <controllers/commands/builtin/twitch/Pin.hpp>
 #include <QCommandLineParser>
-#include <QProcess>
 
 namespace {
 
@@ -128,7 +127,7 @@ ExpectedStr<Action> parseAction(const CommandContext &ctx)
     QCommandLineOption durationOption(QStringList{u"d"_s, u"duration"_s}, {},
                                       u"duration"_s);
     parser.addOptions({idOption, durationOption});
-    parser.parse(QProcess::splitCommand(ctx.words.join(" ")));
+    parser.parse(ctx.words);
 
     std::optional<std::chrono::seconds> duration;
     auto durationText = parser.value(durationOption);
