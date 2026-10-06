@@ -6,6 +6,8 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 namespace chatterino {
 
 class AccountSwitchWidget;
@@ -14,6 +16,9 @@ class AccountsPage : public SettingsPage
 {
 public:
     AccountsPage();
+
+private:
+    pajlada::Signals::SignalHolder signalHolder_;
 };
 
 }  // namespace chatterino
