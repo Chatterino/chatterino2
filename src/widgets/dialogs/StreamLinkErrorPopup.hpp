@@ -16,10 +16,8 @@ namespace chatterino {
 class StreamLinkErrorPopup : public BasePopup
 {
 public:
-    StreamLinkErrorPopup(const QString &url, const QString &standardOutput,
-                         const QString &standardError);
-    static void showError(const QString &url, const QString &standardOutput,
-                          const QString &standardError);
+    StreamLinkErrorPopup(const QString &url, const QString &errorMessage);
+    static void showError(const QString &url, const QString &errorMessage);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -29,11 +27,8 @@ private:
 
     struct {
         QVBoxLayout *vbox;
-        QLabel *infoLabel;
-        QLabel *stdoutLabel;
-        QTextEdit *stdoutTextEdit;
-        QLabel *stderrLabel;
-        QTextEdit *stderrTextEdit;
+        QLabel *label;
+        QTextEdit *textEdit;
         QDialogButtonBox *buttonBox;
     } ui_{};
 };

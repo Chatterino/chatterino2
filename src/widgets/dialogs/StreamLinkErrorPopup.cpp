@@ -8,27 +8,10 @@
 #include "singletons/WindowManager.hpp"
 #include "widgets/Window.hpp"
 
-namespace {
-
-class ErrorTextView : public QTextEdit
-{
-public:
-    ErrorTextView(const QString &errorMessage, QWidget *parent)
-        : QTextEdit(parent)
-    {
-        this->setPlainText(errorMessage);
-        this->setReadOnly(true);
-        this->setLineWrapMode(QTextEdit::NoWrap);
-    }
-};
-
-}  // namespace
-
 namespace chatterino {
 
 StreamLinkErrorPopup::StreamLinkErrorPopup(const QString &url,
-                                           const QString &standardOutput,
-                                           const QString &standardError)
+                                           const QString &errorMessage)
     : BasePopup(
           {
               BaseWindow::DisableLayoutSave,
@@ -37,35 +20,30 @@ StreamLinkErrorPopup::StreamLinkErrorPopup(const QString &url,
           static_cast<QWidget *>(&getApp()->getWindows()->getMainWindow()))
 {
     this->ui_.vbox = new QVBoxLayout(this);
-    this->ui_.infoLabel = new QLabel(
+    this->ui_.label = new QLabel(
         QString("<b>Streamlink encountered an error while opening %1</b>")
             .arg(url),
         this);
-    this->ui_.stdoutLabel = new QLabel("Standard Output:", this);
-    this->ui_.stdoutTextEdit = new ErrorTextView(standardOutput, this);
-    this->ui_.stderrLabel = new QLabel("Standard Error:", this);
-    this->ui_.stderrTextEdit = new ErrorTextView(standardError, this);
+    this->ui_.textEdit = new QTextEdit(this);
+    this->ui_.textEdit->setPlainText(errorMessage);
+    this->ui_.textEdit->setReadOnly(true);
+    this->ui_.textEdit->setLineWrapMode(QTextEdit::NoWrap);
     this->ui_.buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
 
     QObject::connect(this->ui_.buttonBox, &QDialogButtonBox::accepted, this,
                      &StreamLinkErrorPopup::okButtonClicked);
 
-    this->ui_.vbox->addWidget(this->ui_.infoLabel);
-    this->ui_.vbox->addWidget(this->ui_.stdoutLabel);
-    this->ui_.vbox->addWidget(this->ui_.stdoutTextEdit);
-    this->ui_.vbox->addWidget(this->ui_.stderrLabel);
-    this->ui_.vbox->addWidget(this->ui_.stderrTextEdit);
+    this->ui_.vbox->addWidget(this->ui_.label);
+    this->ui_.vbox->addWidget(this->ui_.textEdit);
     this->ui_.vbox->addWidget(this->ui_.buttonBox);
 
     this->setLayout(this->ui_.vbox);
 }
 
 void StreamLinkErrorPopup::showError(const QString &url,
-                                     const QString &standardOutput,
-                                     const QString &standardError)
+                                     const QString &errorMessage)
 {
-    auto *instance =
-        new StreamLinkErrorPopup(url, standardOutput, standardError);
+    auto *instance = new StreamLinkErrorPopup(url, errorMessage);
 
     instance->window()->setWindowTitle("Chatterino - streamlink error");
     instance->setAttribute(Qt::WA_DeleteOnClose, true);

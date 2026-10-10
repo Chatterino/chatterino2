@@ -27,10 +27,9 @@ namespace {
 
 using namespace chatterino;
 
-void showStreamLinkError(const QString &url, const QString &standardOutput,
-                         const QString &standardError)
+void showStreamLinkError(const QString &url, const QString &output)
 {
-    StreamLinkErrorPopup::showError(url, standardOutput, standardError);
+    StreamLinkErrorPopup::showError(url, output);
 }
 
 QString getStreamlinkPath()
@@ -79,6 +78,8 @@ QProcess *createStreamlinkProcess()
         p->setProgram(path);
     }
 
+    p->setProcessChannelMode(QProcess::MergedChannels);
+
     QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
         if (err == QProcess::FailedToStart)
         {
@@ -122,13 +123,11 @@ void getStreamQualities(const QString &channelURL,
                 qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
             }
-            QString standardOutput = QString(p->readAllStandardOutput());
-            QString lastLine =
-                standardOutput.trimmed().split('\n').last().trimmed();
+            QString output = QString(p->readAllStandardOutput());
+            QString lastLine = output.trimmed().split('\n').last().trimmed();
             if (!lastLine.startsWith("Available streams: "))
             {
-                showStreamLinkError(channelURL, standardOutput,
-                                    p->readAllStandardError());
+                showStreamLinkError(channelURL, output);
                 return;
             }
 
@@ -181,8 +180,7 @@ void openStreamlink(const QString &url, const QString &quality,
                          if (exitCode != 0)
                          {
                              showStreamLinkError(url,
-                                                 proc->readAllStandardOutput(),
-                                                 proc->readAllStandardError());
+                                                 proc->readAllStandardOutput());
                          }
                      });
 
