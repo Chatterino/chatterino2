@@ -1,6 +1,6 @@
 {
     "input": {
-        "action": "unmod",
+        "action": "unvip",
         "automod_terms": null,
         "ban": null,
         "broadcaster_user_id": "11148817",
@@ -25,14 +25,14 @@
         "timeout": null,
         "unban": null,
         "unban_request": null,
-        "unmod": {
+        "unmod": null,
+        "unraid": null,
+        "untimeout": null,
+        "unvip": {
             "user_id": "22484632",
             "user_login": "forsen",
             "user_name": "forsen"
         },
-        "unraid": null,
-        "untimeout": null,
-        "unvip": null,
         "vip": null,
         "warn": null
     },
@@ -99,7 +99,8 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "unmodded"
+                        "has",
+                        "removed"
                     ]
                 },
                 {
@@ -112,7 +113,7 @@
                     },
                     "style": "ChatMedium",
                     "tooltip": "",
-                    "trailingSpace": false,
+                    "trailingSpace": true,
                     "type": "MentionElement",
                     "userColor": "System",
                     "userLoginName": "forsen",
@@ -132,7 +133,12 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "."
+                        "as",
+                        "a",
+                        "VIP",
+                        "of",
+                        "this",
+                        "channel."
                     ]
                 }
             ],
@@ -143,9 +149,9 @@
             "id": "",
             "localizedName": "",
             "loginName": "uint128",
-            "messageText": "uint128 unmodded forsen. ",
+            "messageText": "uint128 has removed forsen as a VIP of this channel. ",
             "noticeTarget": "forsen",
-            "searchText": "uint128 unmodded forsen. ",
+            "searchText": "uint128 has removed forsen as a VIP of this channel. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
