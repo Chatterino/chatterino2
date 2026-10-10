@@ -170,11 +170,7 @@ std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event);
 
-MessagePtr makeSuspiciousUserMessageHeader(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::channel_suspicious_user_message::v1::Event &event);
-
-MessagePtr makeSuspiciousUserMessageBody(
+std::pair<MessagePtr, HighlightAlert> makeSuspiciousUserMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::channel_suspicious_user_message::v1::Event &event);
 

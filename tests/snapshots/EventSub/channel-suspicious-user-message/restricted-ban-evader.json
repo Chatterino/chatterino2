@@ -84,31 +84,17 @@
                         "ban",
                         "evader"
                     ]
-                }
-            ],
-            "externalBadges": [
-            ],
-            "flags": "LowTrustUsers|RestrictedMessage|EventSub",
-            "frozen": true,
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "Suspicious User: Restricted. Detected as possible ban evader",
-            "searchText": "Suspicious User: Restricted. Detected as possible ban evader",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
-            "twitchBadgeInfos": {
-            },
-            "twitchBadges": [
-            ],
-            "userID": "",
-            "usernameColor": "#ff000000"
-        },
-        {
-            "channelName": "pajlada",
-            "count": 1,
-            "displayName": "",
-            "elements": [
+                },
+                {
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -202,8 +188,8 @@
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: FeelsDankMan",
-            "searchText": "nerixyz: FeelsDankMan",
+            "messageText": "Suspicious User: Restricted. Detected as possible ban evader nerixyz: FeelsDankMan",
+            "searchText": "Suspicious User: Restricted. Detected as possible ban evader nerixyz: FeelsDankMan",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
