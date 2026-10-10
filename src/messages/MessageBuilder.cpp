@@ -2677,11 +2677,6 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
 
     this->message().flags.set(MessageFlag::Highlighted);
 
-    if (highlightResult.color)
-    {
-        auto color = *highlightResult.color;
-    }
-
     this->message().highlightColor = highlightResult.color;
 
     if (highlightResult.showInMentions)

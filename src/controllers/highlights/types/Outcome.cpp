@@ -102,7 +102,6 @@ QDebug operator<<(QDebug dbg, const Outcome &v)
 
 void Outcome::updateSoundURL()
 {
-    const auto &billtin = defaultSounds();
     if (this->sound.isNull())
     {
         if (!this->defaultSound.isEmpty())

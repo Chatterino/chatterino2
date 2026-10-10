@@ -4,7 +4,6 @@
 
 #include "controllers/highlights/types/MessageHighlight.hpp"
 
-#include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 
@@ -12,13 +11,6 @@
 #include <QStringBuilder>
 
 namespace chatterino::highlights {
-
-namespace {
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-const auto &LOG = chatterinoHighlights;
-
-}  // namespace
 
 MessageHighlight::MessageHighlight(QStringView _id)
     : id(_id)
