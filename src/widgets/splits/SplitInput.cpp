@@ -964,6 +964,14 @@ void SplitInput::installTextEditEvents()
                 }
             }
 
+            if (event->key() == Qt::Key_Escape && this->enableInlineReplying_ &&
+                this->replyTarget_ != nullptr)
+            {
+                this->setReply(nullptr);
+                event->accept();
+                return;
+            }
+
             // One of the last remaining of it's kind, the copy shortcut.
             // For some bizarre reason Qt doesn't want this key be rebound.
             // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
