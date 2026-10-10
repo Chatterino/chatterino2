@@ -80,7 +80,7 @@ HighlightingPage::HighlightingPage()
                             .getElement();
             auto *btn =
                 missingHighlights
-                    .emplace<QPushButton>("Recreate built-in highlights")
+                    .emplace<QPushButton>("Add missing built-in highlights")
                     .getElement();
             QObject::connect(btn, &QPushButton::clicked, [lbl, btn, missing] {
                 HighlightController::recreateMissingBillTinHighlights(missing);
