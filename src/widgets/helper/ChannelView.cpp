@@ -2039,10 +2039,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     const auto *emoteElement = dynamic_cast<const EmoteElement *>(element);
     const auto *layeredEmoteElement =
         dynamic_cast<const LayeredEmoteElement *>(element);
-    bool isNotEmote = emoteElement == nullptr && layeredEmoteElement == nullptr;
+    const auto *scalingImageElement =
+        dynamic_cast<const ScalingImageElement *>(element);
+    bool isEmoteOrTwitchGif =
+        emoteElement != nullptr || layeredEmoteElement != nullptr ||
+        (scalingImageElement != nullptr &&
+         element->getFlags().has(MessageElementFlag::TwitchGif));
 
     if (element->getTooltip().isEmpty() ||
-        (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
+        (isLinkValid && !isEmoteOrTwitchGif && !getSettings()->linkInfoTooltip))
     {
         this->tooltipWidget_->hide();
     }
