@@ -810,39 +810,26 @@ bool Settings::cleanupHighlights()
     std::unordered_set<QStringView> seenIDs;
 
     auto highlights = this->p->sharedHighlightsSetting.getValueCopy();
-    auto highlightsSize = highlights.size();
 
-    int numRemoved = 0;
-
-    for (int i = 0; i < highlightsSize; ++i)
-    {
-        const auto actualIndex = i - numRemoved;
-        const auto &h = highlights[actualIndex];
+    auto numRemoved = std::erase_if(highlights, [&seenIDs](const auto &h) {
         const auto id = highlights::getID(h);
 
         if (id == u"invalid")
         {
-            qCInfo(LOG) << "Found an invalid highlight at" << i
-                        << "- removing it.";
-            highlights.erase(highlights.begin() + actualIndex);
-            ++numRemoved;
-            continue;
+            qCWarning(LOG) << "Found an invalid highlight, removing it.";
+            return true;
         }
 
         const auto [_, isNew] = seenIDs.insert(id);
         if (!isNew)
         {
-            qCInfo(LOG)
-                << "A built in highlight with ID" << id
-                << "already exists, removed the lower priority version.";
-            highlights.erase(highlights.begin() + actualIndex);
-            ++numRemoved;
+            qCWarning(LOG) << "A highlight with ID" << id
+                           << "already exists, removing this duplicate.";
+            return true;
         }
-        else
-        {
-            qCInfo(LOG) << "First time encountering highlight" << id;
-        }
-    }
+
+        return false;
+    });
 
     if (numRemoved > 0)
     {
