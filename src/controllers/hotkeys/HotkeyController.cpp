@@ -481,6 +481,12 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
                             QKeySequence("Down"), "nextMessage",
                             std::vector<QString>(), "next message");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
+                            QKeySequence("Ctrl+Up"), "selectReplyTarget",
+                            {"older"}, "select older reply target");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
+                            QKeySequence("Ctrl+Down"), "selectReplyTarget",
+                            {"newer"}, "select newer reply target");
     }
 
     // window
