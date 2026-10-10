@@ -244,8 +244,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|SharedMessage|Announcement",
+            "flags": "Highlighted|Collapsed|SharedMessage|Announcement",
             "frozen": false,
+            "highlightColor": "#64ff66ed",
             "id": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22",
             "localizedName": "",
             "loginName": "lahoooo",

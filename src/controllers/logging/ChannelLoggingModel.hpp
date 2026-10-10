@@ -23,7 +23,9 @@ class ChannelLoggingModel : public SignalVectorModel<ChannelLog>
 protected:
     // turn a vector item into a model row
     ChannelLog getItemFromRow(std::vector<QStandardItem *> &row,
-                              const ChannelLog &original) override;
+                              const ChannelLog &original,
+                              std::optional<QModelIndex> index,
+                              std::optional<int> role) override;
 
     // turns a row in the model into a vector item
     void getRowFromItem(const ChannelLog &item,

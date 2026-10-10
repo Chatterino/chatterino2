@@ -181,8 +181,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|LowTrustUsers|RestrictedMessage|EventSub",
+            "flags": "Highlighted|PubSub|LowTrustUsers|RestrictedMessage|EventSub",
             "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

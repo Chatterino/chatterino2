@@ -1,0 +1,250 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "alert": false,
+                    "backgroundColor": "none",
+                    "enabled": true,
+                    "id": "d21cf26e-6277-4ed9-a28e-15447c1f687f",
+                    "showInMentions": false,
+                    "sound": "file:///home/pajlada/Audio/duck-quack.wav",
+                    "type": "user",
+                    "username": "you_got_duckED"
+                },
+                {
+                    "id": "lowtrustuser",
+                    "sound": "file:///home/pajlada/Audio/karl kons oh oh no no.mp3"
+                },
+                {
+                    "id": "yourusername",
+                    "sound": "004-yfjesse-notification"
+                },
+                {
+                    "alert": true,
+                    "id": "subscriptions",
+                    "showInMentions": true,
+                    "sound": "004-yfjesse-notification"
+                },
+                {
+                    "alert": false,
+                    "id": "whispers"
+                },
+                {
+                    "backgroundColor": "none",
+                    "enabled": true,
+                    "id": "announcements",
+                    "overrideColoredAnnouncements": false,
+                    "showInMentions": true,
+                    "sound": "001-ping2"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e06f1445",
+                    "caseSensitive": false,
+                    "id": "2c8b92db-487f-4859-9873-af2b1905b9d8",
+                    "pattern": "badge",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e0801952",
+                    "caseSensitive": false,
+                    "id": "5f5bb4d0-58a3-4cc7-91ea-fa5aade6374e",
+                    "pattern": "my phrase",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "file:///home/pajlada/Audio/duck-quack.wav",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#649900ff",
+                    "caseSensitive": false,
+                    "id": "217db041-c00c-4963-b97c-00702c3d8488",
+                    "pattern": "sebastian",
+                    "regex": false,
+                    "showInMentions": true,
+                    "type": "message"
+                },
+                {
+                    "backgroundColor": "#ba2c7194",
+                    "enabled": true,
+                    "id": "automodcaught",
+                    "showInMentions": false,
+                    "sound": "001-ping2"
+                },
+                {
+                    "backgroundColor": "#e06f1445",
+                    "enabled": false,
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e06f1445",
+                    "id": "c35b5a8a-07f3-4a85-9765-88a28eefe10c",
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "user",
+                    "username": "highlighted user"
+                },
+                {
+                    "backgroundColor": "#b27c1900",
+                    "id": "subscribedthread"
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#e06f1445",
+                    "badgeName": "partner",
+                    "enabled": true,
+                    "id": "232f495c-c7cf-48b5-8f4b-657bc09550ea",
+                    "showInMentions": false,
+                    "sound": "",
+                    "type": "badge"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "alert": false,
+                    "backgroundColor": "none",
+                    "enabled": true,
+                    "id": "d21cf26e-6277-4ed9-a28e-15447c1f687f",
+                    "showInMentions": false,
+                    "sound": "file:///home/pajlada/Audio/duck-quack.wav",
+                    "type": "user",
+                    "username": "you_got_duckED"
+                },
+                {
+                    "id": "lowtrustuser",
+                    "sound": "file:///home/pajlada/Audio/karl kons oh oh no no.mp3"
+                },
+                {
+                    "id": "yourusername",
+                    "sound": "004-yfjesse-notification"
+                },
+                {
+                    "alert": true,
+                    "id": "subscriptions",
+                    "showInMentions": true,
+                    "sound": "004-yfjesse-notification"
+                },
+                {
+                    "alert": false,
+                    "id": "whispers"
+                },
+                {
+                    "backgroundColor": "none",
+                    "enabled": true,
+                    "id": "announcements",
+                    "overrideColoredAnnouncements": false,
+                    "showInMentions": true,
+                    "sound": "001-ping2"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e06f1445",
+                    "caseSensitive": false,
+                    "id": "2c8b92db-487f-4859-9873-af2b1905b9d8",
+                    "pattern": "badge",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e0801952",
+                    "caseSensitive": false,
+                    "id": "5f5bb4d0-58a3-4cc7-91ea-fa5aade6374e",
+                    "pattern": "my phrase",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "file:///home/pajlada/Audio/duck-quack.wav",
+                    "type": "message"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#649900ff",
+                    "caseSensitive": false,
+                    "id": "217db041-c00c-4963-b97c-00702c3d8488",
+                    "pattern": "sebastian",
+                    "regex": false,
+                    "showInMentions": true,
+                    "type": "message"
+                },
+                {
+                    "backgroundColor": "#ba2c7194",
+                    "enabled": true,
+                    "id": "automodcaught",
+                    "showInMentions": false,
+                    "sound": "001-ping2"
+                },
+                {
+                    "backgroundColor": "#e06f1445",
+                    "enabled": false,
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#e06f1445",
+                    "id": "c35b5a8a-07f3-4a85-9765-88a28eefe10c",
+                    "showInMentions": true,
+                    "sound": "",
+                    "type": "user",
+                    "username": "highlighted user"
+                },
+                {
+                    "backgroundColor": "#b27c1900",
+                    "id": "subscribedthread"
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#e06f1445",
+                    "badgeName": "partner",
+                    "enabled": true,
+                    "id": "232f495c-c7cf-48b5-8f4b-657bc09550ea",
+                    "showInMentions": false,
+                    "sound": "",
+                    "type": "badge"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

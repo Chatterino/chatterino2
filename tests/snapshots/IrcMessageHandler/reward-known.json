@@ -199,8 +199,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|RedeemedChannelPointReward",
+            "flags": "Highlighted|Collapsed|RedeemedChannelPointReward",
             "frozen": false,
+            "highlightColor": "#3c1c7e8d",
             "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
             "localizedName": "",
             "loginName": "nerixyz",

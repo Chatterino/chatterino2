@@ -1,0 +1,110 @@
+{
+    "input": {
+        "highlighting": {
+            "automod": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "showInMentions": false
+            },
+            "selfHighlight": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "showSelfHighlightInMentions": true
+            },
+            "subHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false
+            },
+            "thread": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "showSelfHighlightInMentions": true
+            },
+            "whisperHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false
+            }
+        }
+    },
+    "output": {
+        "highlighting": {
+            "automod": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false,
+                "showInMentions": false
+            },
+            "highlights2": [
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "alert": false,
+                    "id": "subscriptions",
+                    "sound": ""
+                },
+                {
+                    "alert": false,
+                    "id": "whispers",
+                    "sound": ""
+                },
+                {
+                    "alert": true,
+                    "id": "yourusername",
+                    "showInMentions": true,
+                    "sound": "001-ping2"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "alert": true,
+                    "id": "subscribedthread",
+                    "showInMentions": true,
+                    "sound": "001-ping2"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "alert": false,
+                    "id": "automodcaught",
+                    "showInMentions": false,
+                    "sound": ""
+                },
+                {
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "selfHighlight": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "showSelfHighlightInMentions": true
+            },
+            "subHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false
+            },
+            "thread": {
+                "enableSound": true,
+                "enableTaskbarFlashing": true,
+                "showSelfHighlightInMentions": true
+            },
+            "whisperHighlight": {
+                "enableSound": false,
+                "enableTaskbarFlashing": false
+            }
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
