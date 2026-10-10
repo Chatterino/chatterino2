@@ -6,8 +6,10 @@
 
 #include "widgets/BasePopup.hpp"
 
+#include <QDialogButtonBox>
 #include <QLabel>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 namespace chatterino {
 
