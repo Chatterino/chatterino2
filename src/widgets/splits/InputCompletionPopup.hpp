@@ -33,6 +33,8 @@ public:
     void updateCompletion(const QString &text, CompletionKind kind,
                           ChannelPtr channel);
 
+    bool hasCompletions() const;
+
     void setInputAction(ActionCallback callback);
 
     bool eventFilter(QObject *watched, QEvent *event) override;
