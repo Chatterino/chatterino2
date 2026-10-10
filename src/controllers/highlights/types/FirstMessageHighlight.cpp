@@ -4,19 +4,11 @@
 
 #include "controllers/highlights/types/FirstMessageHighlight.hpp"
 
-#include "common/QLogging.hpp"
 #include "controllers/highlights/HighlightCheck.hpp"
 #include "controllers/highlights/HighlightResult.hpp"
 #include "messages/MessageFlag.hpp"
 
 namespace chatterino::highlights {
-
-namespace {
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-const auto &LOG = chatterinoHighlights;
-
-}  // namespace
 
 HighlightCheck FirstMessageHighlight::buildCheck() const
 {

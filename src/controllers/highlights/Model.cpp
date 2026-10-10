@@ -4,7 +4,6 @@
 
 #include "controllers/highlights/Model.hpp"
 
-#include "common/QLogging.hpp"
 #include "common/SignalVectorModel.hpp"
 #include "controllers/highlights/types/AnyHighlight.hpp"  // IWYU pragma: keep
 #include "util/StandardItemHelper.hpp"
@@ -14,13 +13,6 @@
 #include <QPointer>
 
 namespace chatterino::highlights {
-
-namespace {
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-const auto &LOG = chatterinoHighlights;
-
-}  // namespace
 
 Model::Model(QObject *parent)
     : SignalVectorModel<AnyHighlight>(Column::COUNT, parent)
