@@ -37,27 +37,6 @@ namespace chatterino::highlights {
 
 namespace {
 
-auto makeCheckbox(bool &value)
-{
-    auto *w = new QCheckBox();
-    w->setChecked(value);
-
-    QObject::connect(w, &QCheckBox::checkStateChanged, [&](auto checkstate) {
-        value = checkstate == Qt::CheckState::Checked;
-    });
-    return w;
-}
-
-auto makeLineEdit(QString &value)
-{
-    auto *w = new QLineEdit();
-    w->setText(value);
-    QObject::connect(w, &QLineEdit::textChanged, [&](const auto &newText) {
-        value = newText;
-    });
-    return w;
-}
-
 template <typename ResetToDefaultFunctor>
 void addSettingMenu(QWidget *lbl, QWidget *w,
                     ResetToDefaultFunctor handleResetToDefault)
