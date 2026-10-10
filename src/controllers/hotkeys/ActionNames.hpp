@@ -312,6 +312,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"newTab", ActionDefinition{"Create a new tab"}},
          {"openSettings", ActionDefinition{"Open settings"}},
          {"openAccountSelector", ActionDefinition{"Open account selector"}},
+         {"openFollowedChannels",
+          ActionDefinition{.displayName = "Open followed channels"}},
          {"openTab",
           ActionDefinition{
               "Select tab",
