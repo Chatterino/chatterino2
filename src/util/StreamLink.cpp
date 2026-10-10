@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/dialogs/StreamLinkErrorPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
@@ -25,6 +26,11 @@
 namespace {
 
 using namespace chatterino;
+
+void showStreamLinkError(const QString &url, const QString &output)
+{
+    StreamLinkErrorPopup::showError(url, output);
+}
 
 QString getStreamlinkPath()
 {
@@ -72,6 +78,8 @@ QProcess *createStreamlinkProcess()
         p->setProgram(path);
     }
 
+    p->setProcessChannelMode(QProcess::MergedChannels);
+
     QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
         if (err == QProcess::FailedToStart)
         {
@@ -115,43 +123,46 @@ void getStreamQualities(const QString &channelURL,
                 qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
             }
-            QString lastLine = QString(p->readAllStandardOutput());
-            lastLine = lastLine.trimmed().split('\n').last().trimmed();
-            if (lastLine.startsWith("Available streams: "))
+            QString output = QString(p->readAllStandardOutput());
+            QString lastLine = output.trimmed().split('\n').last().trimmed();
+            if (!lastLine.startsWith("Available streams: "))
             {
-                QStringList options;
-                QStringList split =
-                    lastLine.right(lastLine.length() - 19).split(", ");
-
-                for (auto i = split.length() - 1; i >= 0; i--)
-                {
-                    QString option = split.at(i);
-                    if (option == "best)")
-                    {
-                        // As it turns out, sometimes, one quality option can
-                        // be the best and worst quality at the same time.
-                        // Since we start loop from the end, we can check
-                        // that and act accordingly
-                        option = split.at(--i);
-                        // "900p60 (worst"
-                        options << option.left(option.length() - 7);
-                    }
-                    else if (option.endsWith(" (worst)"))
-                    {
-                        options << option.left(option.length() - 8);
-                    }
-                    else if (option.endsWith(" (best)"))
-                    {
-                        options << option.left(option.length() - 7);
-                    }
-                    else
-                    {
-                        options << option;
-                    }
-                }
-
-                cb(options);
+                showStreamLinkError(channelURL, output);
+                return;
             }
+
+            QStringList options;
+            QStringList split =
+                lastLine.right(lastLine.length() - 19).split(", ");
+
+            for (auto i = split.length() - 1; i >= 0; i--)
+            {
+                QString option = split.at(i);
+                if (option == "best)")
+                {
+                    // As it turns out, sometimes, one quality option can
+                    // be the best and worst quality at the same time.
+                    // Since we start loop from the end, we can check
+                    // that and act accordingly
+                    option = split.at(--i);
+                    // "900p60 (worst"
+                    options << option.left(option.length() - 7);
+                }
+                else if (option.endsWith(" (worst)"))
+                {
+                    options << option.left(option.length() - 8);
+                }
+                else if (option.endsWith(" (best)"))
+                {
+                    options << option.left(option.length() - 7);
+                }
+                else
+                {
+                    options << option;
+                }
+            }
+
+            cb(options);
         });
 
     p->setArguments(p->arguments() +
@@ -164,6 +175,15 @@ void openStreamlink(const QString &url, const QString &quality,
                     QStringList extraArguments)
 {
     auto *proc = createStreamlinkProcess();
+    QObject::connect(proc, (&QProcess::finished),
+                     [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
+                         if (exitCode != 0)
+                         {
+                             showStreamLinkError(url,
+                                                 proc->readAllStandardOutput());
+                         }
+                     });
+
     auto arguments = proc->arguments()
                      << std::move(extraArguments) << url << quality;
 
