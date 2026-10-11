@@ -105,7 +105,6 @@ HighlightingWidget::HighlightingWidget()
 
     QObject::connect(view, &QTableView::doubleClicked, this,
                      [this, view](const QModelIndex &clicked) {
-                         qCDebug(LOG) << "Double-clicked row";
                          this->openConfigureDialog(
                              view, clicked, ConfigureCloseBehaviour::Cancel);
                          return;
@@ -231,13 +230,10 @@ HighlightingWidget::HighlightingWidget()
 
     QObject::connect(
         view->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-        [=](const auto &selected, const auto &deselected) {
+        [=]() {
             auto selection = view->selectionModel()->selection();
             if (!selection.isEmpty())
             {
-                qCDebug(LOG)
-                    << "Model selection changed " << selected << deselected;
-
                 edit->setDisabled(false);
 
                 QModelIndex selectedItem = selection.indexes().at(0);
@@ -273,8 +269,6 @@ HighlightingWidget::HighlightingWidget()
             }
             else
             {
-                qCDebug(LOG) << "Model selection removed"
-                             << view->selectionModel()->selection();
                 edit->setDisabled(true);
                 moveUp->setDisabled(true);
                 moveDown->setDisabled(true);
