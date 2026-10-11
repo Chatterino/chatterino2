@@ -17,8 +17,6 @@ HighlightCheck AutomodCaughtHighlight::buildCheck() const
 
     return {
         [highlight = *this](const Params &p) -> std::optional<HighlightResult> {
-            // TODO: This comes through as two messages. We could choose to only forward the sound for one of the messages, but for now I haven't
-            // noticed this being an issue
             if (!p.messageFlags.hasAny({
                     MessageFlag::AutoModOffendingMessage,
                     MessageFlag::AutoModOffendingMessageHeader,
