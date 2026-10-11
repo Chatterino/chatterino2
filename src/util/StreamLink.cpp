@@ -175,7 +175,7 @@ void openStreamlink(const QString &url, const QString &quality,
                     QStringList extraArguments)
 {
     auto *proc = createStreamlinkProcess();
-    QObject::connect(proc, (&QProcess::finished),
+    QObject::connect(proc, &QProcess::finished,
                      [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
                          if (exitCode != 0)
                          {
