@@ -391,6 +391,7 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
                                 this->data);
                         }
                     });
+                dialog->setWindowModality(Qt::WindowModality::WindowModal);
                 dialog->show();
             });
             l->addRow(lbl, w);
