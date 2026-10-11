@@ -82,31 +82,17 @@
                     "words": [
                         "Restricted"
                     ]
-                }
-            ],
-            "externalBadges": [
-            ],
-            "flags": "LowTrustUsers|RestrictedMessage|EventSub",
-            "frozen": true,
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "Suspicious User: Restricted",
-            "searchText": "Suspicious User: Restricted",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
-            "twitchBadgeInfos": {
-            },
-            "twitchBadges": [
-            ],
-            "userID": "",
-            "usernameColor": "#ff000000"
-        },
-        {
-            "channelName": "pajlada",
-            "count": 1,
-            "displayName": "",
-            "elements": [
+                },
+                {
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -200,8 +186,8 @@
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: Kappa",
-            "searchText": "nerixyz: Kappa",
+            "messageText": "Suspicious User: Restricted nerixyz: Kappa",
+            "searchText": "Suspicious User: Restricted nerixyz: Kappa",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
