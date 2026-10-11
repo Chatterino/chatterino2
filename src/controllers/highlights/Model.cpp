@@ -159,6 +159,9 @@ AnyHighlight Model::getItemFromRow(std::vector<QStandardItem *> &row,
                        },
                    },
                    item);
+
+        // Since the enabled flag is updated, force update DATA
+        row[Column::Enabled]->setData(QVariant::fromValue(item), DATA_ROLE);
     }
 
     this->updateRow(item, row);
