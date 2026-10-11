@@ -64,6 +64,8 @@ private:
 
     std::optional<CompletionKind> currentKind_{};
     ChannelPtr currentChannel_{};
+
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

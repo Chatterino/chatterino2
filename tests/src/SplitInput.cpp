@@ -159,6 +159,10 @@ public:
     SplitInput input;
 };
 
+}  // namespace
+
+namespace chatterino {
+
 class PopupCycleFixture : public ::testing::Test
 {
 public:
@@ -198,30 +202,20 @@ public:
         this->setChannel(channel);
     }
 
-    ResizingTextEdit *edit()
+    ResizingTextEdit *edit() const
     {
-        auto *textEdit = this->input.findChild<QTextEdit *>();
-        // NOLINTNEXTLINE(clazy-unneeded-cast)
-        return dynamic_cast<ResizingTextEdit *>(textEdit);
+        return this->input.ui_.textEdit;
     }
 
     InputCompletionPopup *popup()
     {
-        const auto children = this->input.findChildren<QWidget *>();
-        for (auto *child : children)
-        {
-            if (auto *result = dynamic_cast<InputCompletionPopup *>(child))
-            {
-                return result;
-            }
-        }
-        return nullptr;
+        return this->input.inputCompletionPopup_;
     }
 
     GenericListView *list()
     {
         auto *result = this->popup();
-        return result ? result->findChild<GenericListView *>() : nullptr;
+        return result ? result->ui_.listView : nullptr;
     }
 
     void pressTab()
@@ -241,7 +235,7 @@ public:
     SplitInput &input;
 };
 
-}  // namespace
+}  // namespace chatterino
 
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
 {
