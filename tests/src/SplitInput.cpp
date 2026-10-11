@@ -218,13 +218,13 @@ public:
         return result ? result->ui_.listView : nullptr;
     }
 
-    void pressTab()
+    void pressTab() const
     {
         QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier, "\t");
         QApplication::sendEvent(this->edit(), &tab);
     }
 
-    void pressBacktab()
+    void pressBacktab() const
     {
         QKeyEvent backtab(QEvent::KeyPress, Qt::Key_Backtab, Qt::ShiftModifier);
         QApplication::sendEvent(this->edit(), &backtab);
