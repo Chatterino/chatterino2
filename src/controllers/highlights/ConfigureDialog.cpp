@@ -102,18 +102,7 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
 #ifndef NDEBUG
     {
         // When in debug mode, we also show the highlights ID. Not sure if that can be handy for everyone
-        auto value = std::visit(variant::Overloaded{
-                                    [](SupportsGetID auto &h) {
-                                        return h.getID();
-                                    },
-                                    [](auto &&h) {
-                                        using ActualType =
-                                            std::decay_t<decltype(h)>;
-                                        return ActualType::ID;
-                                    },
-                                },
-                                this->data);
-        auto *w = new QLabel(value.toString());
+        auto *w = new QLabel(getID(this->data).toString());
         w->setTextInteractionFlags(Qt::TextSelectableByMouse);
         formLayout->addRow("ID", w);
     }

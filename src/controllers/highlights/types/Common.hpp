@@ -18,6 +18,8 @@ class QColor;
 
 namespace chatterino::highlights {
 
+// TODO: add comments to every function here, and review which are necessary
+
 constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
 constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
 
@@ -30,6 +32,9 @@ bool matchesID(const rapidjson::Value &object, QStringView expectedID);
 /// Generate a random ID (UUIDv4) for a new highlight
 QString generateID();
 
+/// Returns the ID of the highlight.
+/// For built-in highlights, this ID describes the type of highlight this is (e.g. "announcements").
+/// For user-defined highlights, this ID is a UUIDv4 for uniqueness.
 QStringView getID(const AnyHighlight &h);
 
 QString getDefaultName(const AnyHighlight &h);
