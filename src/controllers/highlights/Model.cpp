@@ -132,7 +132,7 @@ void Model::updateRow(const AnyHighlight &highlight,
     */
 
     setStringItem(row[Column::Name], getName(highlight), false);
-    setStringItem(row[Column::Sound], "");  // TODO: include full URL?
+    setStringItem(row[Column::Sound], "");
     row[Column::Sound]->setData(soundIcon, Qt::DecorationRole);
 }
 
