@@ -717,11 +717,13 @@ TEST(IrcMessageHandler, IgnoredEmoteBreaksLayeringInNewMessages)
     const auto *base = dynamic_cast<const EmoteElement *>(emoteElements[0]);
     ASSERT_NE(base, nullptr);
     EXPECT_EQ(base->getEmote()->name.string, u"forsenE"_s);
+    EXPECT_FALSE(base->isIgnored());
 
     // The ignored Van0 emote stays separate from the layer.
     const auto *ignored = dynamic_cast<const EmoteElement *>(emoteElements[1]);
     ASSERT_NE(ignored, nullptr);
     EXPECT_EQ(ignored->getEmote()->name.string, u"Van0"_s);
+    EXPECT_TRUE(ignored->isIgnored());
 
     // The remaining zero-width emotes still form a layer.
     const auto *layers =

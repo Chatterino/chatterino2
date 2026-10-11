@@ -535,7 +535,8 @@ public:
     static constexpr std::string_view TYPE = "emote";
 
     EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
-                 const MessageColor &textElementColor = MessageColor::Text);
+                 const MessageColor &textElementColor = MessageColor::Text,
+                 bool ignored = false);
 
     void addToContainer(MessageLayoutContainer &container,
                         const MessageLayoutContext &ctx) override;
@@ -556,6 +557,7 @@ private:
     std::unique_ptr<TextElement> textElement_;
     MessageColor textColor_;
     bool usingFallbackColor_ = false;
+    bool ignored_;
 
     EmotePtr emote_;
 };

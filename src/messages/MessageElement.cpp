@@ -240,9 +240,10 @@ std::unique_ptr<MessageElement> CircularImageElement::clone() const
 
 // EMOTE
 EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
-                           const MessageColor &textElementColor)
+                           const MessageColor &textElementColor, bool ignored)
     : MessageElement(flags)
     , textColor_(textElementColor)
+    , ignored_(ignored)
     , emote_(emote)
 {
     this->setTooltip(emote->tooltip.string);
@@ -255,10 +256,8 @@ EmotePtr EmoteElement::getEmote() const
 
 bool EmoteElement::isIgnored() const
 {
-    const auto flags = this->getFlags();
-    return flags.has(MessageElementFlag::EmoteImage) &&
-           !flags.has(MessageElementFlag::AlwaysShow) &&
-           getSettings()->isEmoteIgnored(this->emote_->name.string);
+    return this->ignored_ &&
+           !this->getFlags().has(MessageElementFlag::AlwaysShow);
 }
 
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
@@ -350,8 +349,8 @@ std::string_view EmoteElement::type() const
 
 std::unique_ptr<MessageElement> EmoteElement::clone() const
 {
-    auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
-                                               this->textColor_);
+    auto elem = std::make_unique<EmoteElement>(
+        this->emote_, this->getFlags(), this->textColor_, this->ignored_);
     elem->cloneFrom(*this);
     return elem;
 }

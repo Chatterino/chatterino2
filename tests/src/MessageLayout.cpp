@@ -98,9 +98,10 @@ TEST(TextElement, BasicCase)
     EXPECT_EQ(wordEnd, 3);
 }
 
-TEST(EmoteElement, ToggleIgnoreInExistingMessage)
+TEST(EmoteElement, IgnoredEmoteUsesTextLayout)
 {
     MockApplication app;
+    app.settings.setEmoteNameIgnored("forsenE", true);
     QPixmap pixmap(20, 20);
     pixmap.fill(Qt::red);
     auto emote = std::make_shared<Emote>();
@@ -108,8 +109,8 @@ TEST(EmoteElement, ToggleIgnoreInExistingMessage)
     emote->tooltip = Tooltip{"forsenE"};
     emote->images.setImage1(Image::fromResourcePixmap(pixmap));
     MessageBuilder builder;
-    auto *source =
-        builder.emplace<EmoteElement>(emote, MessageElementFlag::Emote);
+    auto *source = builder.emplace<EmoteElement>(
+        emote, MessageElementFlag::Emote, MessageColor::Text, true);
     source->setLink({Link::InsertText, "forsenE"});
     source->setTrailingSpace(false);
     builder.emplace<TextElement>("!", MessageElementFlag::Text);
@@ -130,10 +131,8 @@ TEST(EmoteElement, ToggleIgnoreInExistingMessage)
         return layout.getElementAt(QPoint(WIDTH / 20, layout.getHeight() / 2));
     };
 
-    ASSERT_NE(dynamic_cast<const ImageLayoutElement *>(relayout()), nullptr);
-    app.settings.setEmoteNameIgnored("forsenE", true);
     const auto *text = relayout();
-    // Ignoring an emote already in chat renders it as text.
+    // Ignored emotes render as text
     ASSERT_NE(dynamic_cast<const TextLayoutElement *>(text), nullptr);
     EXPECT_FALSE(text->isImage());
     // The text keeps the emote's tooltip and insertion link.
@@ -148,10 +147,6 @@ TEST(EmoteElement, ToggleIgnoreInExistingMessage)
     EXPECT_EQ(copied, "forsenE!");
     // The text retains the emote's flags for context actions.
     EXPECT_TRUE(text->getFlags().has(MessageElementFlag::EmoteImage));
-
-    app.settings.setEmoteNameIgnored("forsenE", false);
-    // Removing the ignore renders the image again.
-    EXPECT_NE(dynamic_cast<const ImageLayoutElement *>(relayout()), nullptr);
 
     // Ignored emotes remain images in the picker.
     source->addFlags(MessageElementFlag::AlwaysShow);
