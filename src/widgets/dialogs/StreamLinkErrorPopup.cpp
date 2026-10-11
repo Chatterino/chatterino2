@@ -17,7 +17,7 @@ StreamLinkErrorPopup::StreamLinkErrorPopup(const QString &url,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
           },
-          static_cast<QWidget *>(&getApp()->getWindows()->getMainWindow()))
+          &getApp()->getWindows()->getMainWindow())
 {
     this->ui_.vbox = new QVBoxLayout(this);
     this->ui_.label = new QLabel(
