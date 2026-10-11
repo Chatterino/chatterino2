@@ -63,9 +63,11 @@ ConfigureDialog::ConfigureDialog(AnyHighlight _data, QWidget *parent)
           parent)
     , data(std::move(_data))
 {
+    assert(parent != nullptr);
     auto t = getHighlightTypeName(this->data) % u" highlight";
     this->setWindowTitle(u"Chatterino - Editing " % t);
     this->setAttribute(Qt::WA_DeleteOnClose);
+    this->setWindowModality(Qt::WindowModality::WindowModal);
 
     this->resize(515, 500);
 
