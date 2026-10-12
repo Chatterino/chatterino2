@@ -110,7 +110,7 @@ TEST(EmoteElement, IgnoredEmoteUsesTextLayout)
     emote->images.setImage1(Image::fromResourcePixmap(pixmap));
     MessageBuilder builder;
     auto *source = builder.emplace<EmoteElement>(
-        emote, MessageElementFlag::Emote, MessageColor::Text, true);
+        emote, MessageElementFlag::Text, MessageColor::Text, true);
     source->setLink({Link::InsertText, "forsenE"});
     source->setTrailingSpace(false);
     builder.emplace<TextElement>("!", MessageElementFlag::Text);
@@ -145,8 +145,8 @@ TEST(EmoteElement, IgnoredEmoteUsesTextLayout)
     QString copied;
     layout.addSelectionText(copied);
     EXPECT_EQ(copied, "forsenE!");
-    // The text retains the emote's flags for context actions.
-    EXPECT_TRUE(text->getFlags().has(MessageElementFlag::EmoteImage));
+    EXPECT_TRUE(text->getFlags().has(MessageElementFlag::Text));
+    EXPECT_FALSE(text->getFlags().has(MessageElementFlag::EmoteImage));
 
     // Ignored emotes remain images in the picker.
     source->addFlags(MessageElementFlag::AlwaysShow);

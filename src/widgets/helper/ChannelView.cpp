@@ -193,11 +193,12 @@ void addImageContextMenuItems(QMenu *menu,
     }
 
     // Emote actions
+    const auto *emoteElement = dynamic_cast<const EmoteElement *>(&creator);
     if (creatorFlags.hasAny(
-            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}))
+            {MessageElementFlag::EmoteImage, MessageElementFlag::EmojiImage}) ||
+        (emoteElement != nullptr && emoteElement->isIgnored()))
     {
-        if (const auto *emoteElement =
-                dynamic_cast<const EmoteElement *>(&creator))
+        if (emoteElement != nullptr)
         {
             const QStringView kind =
                 creatorFlags.has(MessageElementFlag::EmojiImage) ? u"emoji"

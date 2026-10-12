@@ -2783,7 +2783,7 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
 
     if (getSettings()->isEmoteIgnored(emote->name.string))
     {
-        this->emplace<EmoteElement>(emote, MessageElementFlag::Emote,
+        this->emplace<EmoteElement>(emote, MessageElementFlag::Text,
                                     this->textColor_, true);
         return Success;
     }
@@ -2842,9 +2842,12 @@ void MessageBuilder::addWords(
                 this->addEmoji(tok.emote);
             },
             [&](const TokenizedEmote &tok) {
-                this->emplace<EmoteElement>(
-                        tok.emote, MessageElementFlag::Emote, this->textColor_,
-                        getSettings()->isEmoteIgnored(tok.emote->name.string))
+                const bool ignored =
+                    getSettings()->isEmoteIgnored(tok.emote->name.string);
+                this->emplace<EmoteElement>(tok.emote,
+                                            ignored ? MessageElementFlag::Text
+                                                    : MessageElementFlag::Emote,
+                                            this->textColor_, ignored)
                     ->setTrailingSpace(tok.trailingSpace);
             },
             [&](const TokenizedGif &gif) {
