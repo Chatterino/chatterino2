@@ -225,6 +225,10 @@ set(SOURCE_FILES
         controllers/hotkeys/HotkeyHelpers.hpp
         controllers/hotkeys/HotkeyModel.cpp
         controllers/hotkeys/HotkeyModel.hpp
+        controllers/hotkeys/HotkeySequence.cpp
+        controllers/hotkeys/HotkeySequence.hpp
+        controllers/hotkeys/MouseShortcut.cpp
+        controllers/hotkeys/MouseShortcut.hpp
 
         controllers/ignores/IgnoreController.cpp
         controllers/ignores/IgnoreController.hpp
@@ -783,6 +787,8 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/FontSettingWidget.cpp
         widgets/helper/FontSettingWidget.hpp
+        widgets/helper/HotkeySequenceEdit.cpp
+        widgets/helper/HotkeySequenceEdit.hpp
         widgets/helper/IconDelegate.cpp
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
