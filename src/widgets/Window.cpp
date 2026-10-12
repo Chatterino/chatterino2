@@ -25,6 +25,7 @@
 #include "widgets/buttons/InitUpdateButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/buttons/TitlebarButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
@@ -232,7 +233,11 @@ void Window::addCustomTitlebarButtons()
         TitleBarButtonStyle::Settings);
 
     // updates
-    auto *update = this->addTitleBarButton<PixmapButton>([] {});
+    auto *update = this->addTitleBarButton<SvgButton>(
+        [] {}, SvgButton::Src{
+                   .dark = ":/buttons/update-darkMode.svg",
+                   .light = ":/buttons/update-lightMode.svg",
+               });
 
     initUpdateButton(*update, [] {}, this->signalHolder_);
 
