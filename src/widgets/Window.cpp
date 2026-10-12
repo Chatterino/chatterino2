@@ -236,7 +236,11 @@ void Window::addCustomTitlebarButtons()
     settings->setPadding({3, 3});
 
     // updates
-    auto *update = this->addTitleBarButton<PixmapButton>([] {});
+    auto *update = this->addTitleBarButton<SvgButton>(
+        [] {}, SvgButton::Src{
+                   .dark = ":/buttons/update-darkMode.svg",
+                   .light = ":/buttons/update-lightMode.svg",
+               });
 
     initUpdateButton(*update, [] {}, this->signalHolder_);
 
