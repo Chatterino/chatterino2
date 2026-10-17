@@ -308,12 +308,19 @@ void Connection::onChannelSuspiciousUserMessage(
     }
 
     auto time = chronoToQDateTime(metadata.messageTimestamp);
-    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
-    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+    auto [message, messageAlert] =
+        makeSuspiciousUserMessage(channel, time, payload.event);
 
-    runInGuiThread([channel, header, body] {
-        channel->addMessage(header, MessageContext::Original);
-        channel->addMessage(body, MessageContext::Original);
+    runInGuiThread([channel, message, messageAlert] {
+        MessageBuilder::triggerHighlights(channel, messageAlert);
+
+        channel->addMessage(message, MessageContext::Original);
+
+        if (message->flags.has(MessageFlag::ShowInMentions))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                message, MessageContext::Original);
+        }
     });
 }
 

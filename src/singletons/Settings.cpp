@@ -42,6 +42,21 @@ void initializeSignalVector(pajlada::Signals::SignalHolder &signalHolder,
     signalHolder.managedConnect(vec.delayedItemsChanged, [&] {
         setting.setValue(vec.raw());
     });
+
+    setting.connect(
+        [&](const auto &v, const auto &args) {
+            if (args.source == pajlada::Settings::SignalArgs::Source::External)
+            {
+                // Settings::restoreSnapshot was called, revert signal vector data
+                vec.clear();
+                const auto &oldVec = v;
+                for (auto &&item : oldVec)
+                {
+                    vec.append(item);
+                }
+            }
+        },
+        signalHolder, false);
 }
 
 }  // namespace
@@ -210,6 +225,10 @@ Settings::Settings(const Modes &modes, const Args &args,
                         return makeUnexpected("Failed to seek in file");
                     case LoadError::JSONParseError:
                         return makeUnexpected("File contained malformed JSON");
+                    case LoadError::SavingFromTemporaryFileFailed:
+                        return makeUnexpected(
+                            u"Failed to save '" % settingsPath %
+                            u"' with settings from .tmp file");
                 }
                 assert(false);
                 return makeUnexpected("Unknown error");
@@ -343,6 +362,8 @@ void Settings::restoreSnapshot()
         }
 
         pajlada::Settings::SignalArgs args;
+        // NOTE: The settings library doesn't allow for custom sources. Preferably, we'd be able to provide something like a custom enum here and be explicit that this is from a "restore snapshot" event.
+        args.source = pajlada::Settings::SignalArgs::Source::External;
         args.compareBeforeSet = true;
 
         setting->marshalJSON(snapshot[path], std::move(args));

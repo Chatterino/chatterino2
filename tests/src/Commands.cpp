@@ -1053,6 +1053,148 @@ TEST(Commands, E2E)
     getApp()->getCommands()->execCommand(
         "/unban --channel id:11148817 --channel testaccount_420 forsen",
         channel, false);
+
+    // pin command preserves quotes in message text
+    EXPECT_CALL(mockHelix, sendChatMessage(_, _, _))
+        .WillOnce(
+            [](const HelixSendMessageArgs &args, const auto &, const auto &) {
+                EXPECT_EQ(args.message, R"(LULW "WE")");
+                EXPECT_TRUE(args.pin);
+            });
+
+    getApp()->getCommands()->execCommand(R"(/pin LULW "WE")", channel, false);
+
+    const auto checkTextWithDuration = [&](const QString &command,
+                                           std::chrono::seconds duration) {
+        EXPECT_CALL(mockHelix, sendChatMessage(_, _, _))
+            .WillOnce([](const HelixSendMessageArgs &args, const auto &success,
+                         const auto &) {
+                EXPECT_EQ(args.message, R"(LULW "WE")");
+                EXPECT_TRUE(args.pin);
+                QJsonObject response;
+                response["message_id"] = "test-pin";
+                response["is_sent"] = true;
+                success(HelixSentMessage{response});
+            });
+        EXPECT_CALL(mockHelix,
+                    updatePinnedChatMessage(
+                        QString("11148817"), QString("117166826"),
+                        QString("test-pin"), std::optional{duration}, _, _));
+        getApp()->getCommands()->execCommand(command, channel, false);
+    };
+
+    // Duration before the text keeps the quotes and sets the duration
+    checkTextWithDuration(R"(/pin --duration 60 LULW "WE")",
+                          std::chrono::seconds{60});
+
+    // Duration after the text keeps the quotes and sets the duration
+    checkTextWithDuration(R"(/pin LULW "WE" --duration 120)",
+                          std::chrono::seconds{120});
+
+    // The short duration option also keeps the quotes
+    checkTextWithDuration(R"(/pin -d 180 LULW "WE")",
+                          std::chrono::seconds{180});
+
+    // Pinning an existing message accepts duration before its ID
+    EXPECT_CALL(mockHelix,
+                pinChatMessage(QString("11148817"), QString("117166826"),
+                               QString("existing-before"),
+                               std::optional<std::chrono::seconds>{60}, _, _));
+    getApp()->getCommands()->execCommand(
+        "/pin --duration 60 --id existing-before", channel, false);
+
+    // Pinning an existing message also accepts duration after its ID
+    EXPECT_CALL(mockHelix,
+                pinChatMessage(QString("11148817"), QString("117166826"),
+                               QString("existing-after"),
+                               std::optional<std::chrono::seconds>{120}, _, _));
+    getApp()->getCommands()->execCommand(
+        "/pin --id existing-after --duration 120", channel, false);
+}
+
+TEST(Commands, customCommands)
+{
+    MockApplication app;
+    std::shared_ptr<TwitchChannel> channel =
+        std::make_shared<TwitchChannel>("forsen");
+
+    struct Case {
+        Command command;
+        std::unordered_map<QString, QString> context;
+        QStringList words;
+        QString expected;
+    };
+
+    std::vector<Case> cases{
+        {
+            .command = Command("/cmd", "simple custom command"),
+            .context = {},
+            .words = {"/cmd", "ignored", "words"},
+            .expected = "simple custom command",
+        },
+        {
+            .command = Command(
+                "/cmd", "channel name: {channel.name} {channel.name;xd}"),
+            .context = {},
+            .words = {},
+            .expected = "channel name: forsen forsen",
+        },
+        {
+            .command = Command("/cmd", "msg id: {msg.id}"),
+            .context = {},
+            .words = {},
+            .expected = "msg id: ",
+        },
+        {
+            .command = Command("/cmd", "msg id2: {msg.id;lol xd}"),
+            .context = {},
+            .words = {},
+            .expected = "msg id2: lol xd",
+        },
+        {
+            .command =
+                Command("/cmd", "context: {ctx;123} and {second-ctx;alt}"),
+            .context =
+                {
+                    {"ctx", "test"},
+                    {"second-ctx", ""},
+                },
+            .words = {},
+            .expected = "context: test and alt",
+        },
+        {
+            .command = Command("/cmd", "fallback: {non-existing-var} {0}"),
+            .context = {},
+            .words = {"/cmd", "ignored"},
+            .expected = "fallback: {non-existing-var} {0}",
+        },
+        {
+            .command = Command("/cmd", "one {1} two {2}three {3}"),
+            .context = {},
+            .words = {"/cmd", "a", "b"},
+            .expected = "one a two bthree ",
+        },
+        {
+            .command = Command("/cmd", "{2+} xd {1+} {3} word {4+} 123"),
+            .context = {},
+            .words = {"/cmd", "test1", "test2", "test3"},
+            .expected = "test2 test3 xd test1 test2 test3 test3 word  123",
+        },
+        {
+            .command = Command("/cmd", "{2} literally {{1}"),
+            .context = {},
+            .words = {"/cmd", "xd", "test"},
+            .expected = "test literally {1}",
+        },
+    };
+
+    for (size_t i = 0; i < cases.size(); i++)
+    {
+        const auto &c = cases.at(i);
+        auto got = app.getCommands()->execCustomCommand(
+            c.words, c.command, false, channel, nullptr, c.context);
+        ASSERT_EQ(got, c.expected) << "index=" << i;
+    }
 }
 
 }  // namespace chatterino
