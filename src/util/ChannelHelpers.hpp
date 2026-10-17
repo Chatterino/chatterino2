@@ -11,7 +11,43 @@
 
 #include <QDateTime>
 
+#include <algorithm>
+#include <functional>
+#include <vector>
+
 namespace chatterino {
+
+/// Removes duplicate messages by pointer equality or ID, does not preserve order
+inline void deduplicateMessages(std::vector<MessagePtr> &messages)
+{
+    std::ranges::sort(messages, [](const MessagePtr &a, const MessagePtr &b) {
+        const bool aHasId = a->id != nullptr;
+        const bool bHasId = b->id != nullptr;
+        if (aHasId != bHasId)
+        {
+            return aHasId > bHasId;
+        }
+        if (aHasId)
+        {
+            return a->id > b->id;
+        }
+        return std::less<const Message *>{}(a.get(), b.get());
+    });
+
+    auto duplicates = std::ranges::unique(
+        messages, [](const MessagePtr &a, const MessagePtr &b) {
+            // a message can appear in multiple splits and may not have an ID,
+            // so check for pointer equality
+            if (a == b)
+            {
+                return true;
+            }
+
+            return (a->id != nullptr) && (b->id != nullptr) && a->id == b->id;
+        });
+
+    messages.erase(duplicates.begin(), duplicates.end());
+}
 
 /// Adds a timeout or replaces a previous one sent in the last 20 messages and in the last 5s.
 /// This function accepts any buffer to store the messsages in.

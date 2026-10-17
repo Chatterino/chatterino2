@@ -1218,6 +1218,8 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
             this->ui_.avatarButton->setPixmap(QPixmap());
         }
     });
+    QObject::connect(reply, &QNetworkReply::finished, reply,
+                     &QObject::deleteLater);
 }
 
 void UserInfoPopup::updateNotes()
