@@ -19,6 +19,9 @@ class AccountModel : public SignalVectorModel<std::shared_ptr<Account>>
 public:
     AccountModel(QObject *parent);
 
+    /// Re-reads the expired state of every account and updates the rows
+    void refreshExpiredState();
+
 protected:
     // turn a vector item into a model row
     std::shared_ptr<Account> getItemFromRow(

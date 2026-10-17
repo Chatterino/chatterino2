@@ -8,9 +8,11 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/accounts/AccountModel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/LoginDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/helper/ForegroundItemDelegate.hpp"
 
 #include <QDialogButtonBox>
 #include <QHeaderView>
@@ -28,14 +30,27 @@ AccountsPage::AccountsPage()
     LayoutCreator<AccountsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
+    auto *model = app->getAccounts()->createModel(nullptr);
+
     EditableModelView *view =
-        layout
-            .emplace<EditableModelView>(
-                app->getAccounts()->createModel(nullptr), false)
-            .getElement();
+        layout.emplace<EditableModelView>(model, false).getElement();
+
+    this->signalHolder_.managedConnect(
+        app->getAccounts()->twitch.loginExpiryChanged, [model] {
+            model->refreshExpiredState();
+        });
+
+    // The expired marker is a themed color, so it has to be re-applied
+    this->signalHolder_.managedConnect(getTheme()->updated, [model] {
+        model->refreshExpiredState();
+    });
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+
+    // Keeps the expired marker red while that account's row is selected
+    view->getTableView()->setItemDelegate(
+        new ForegroundItemDelegate(view->getTableView()));
 
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([this] {

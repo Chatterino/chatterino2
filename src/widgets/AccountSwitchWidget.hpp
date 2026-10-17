@@ -20,6 +20,9 @@ public:
     void refresh();
 
 private:
+    /// Rebuilds the list from the current accounts, marking expired ones
+    void refreshList();
+    void addAccountItem(const QString &userName, bool expired);
     void refreshSelection();
 
     pajlada::Signals::SignalHolder managedConnections_;
