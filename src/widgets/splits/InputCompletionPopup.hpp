@@ -12,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace chatterino {
@@ -36,6 +37,9 @@ public:
     bool hasCompletions() const;
 
     void setInputAction(ActionCallback callback);
+
+    std::optional<std::pair<QStringList, int>> selectedCompletions(
+        bool isFirstWord) const;
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -62,6 +66,8 @@ private:
 
     std::optional<CompletionKind> currentKind_{};
     ChannelPtr currentChannel_{};
+
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

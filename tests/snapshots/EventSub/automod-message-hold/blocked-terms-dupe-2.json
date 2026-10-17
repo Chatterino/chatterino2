@@ -334,31 +334,17 @@
                         "",
                         "Deny"
                     ]
-                }
-            ],
-            "externalBadges": [
-            ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
-            "frozen": true,
-            "id": "automod_62e2a830-f05b-43e6-8fbd-6cab264ab2a7",
-            "localizedName": "",
-            "loginName": "automod",
-            "messageText": "AutoMod: Held a message for reason: matches 2 blocked terms \"blockedterm1\", \"CMONBRUH\". Allow will post it in chat. Allow Deny",
-            "searchText": "AutoMod: Held a message for reason: matches 2 blocked terms \"blockedterm1\", \"CMONBRUH\". Allow will post it in chat. Allow Deny",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
-            "twitchBadgeInfos": {
-            },
-            "twitchBadges": [
-            ],
-            "userID": "",
-            "usernameColor": "#ff000000"
-        },
-        {
-            "channelName": "pajlada",
-            "count": 1,
-            "displayName": "",
-            "elements": [
+                },
+                {
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -457,13 +443,14 @@
             ],
             "externalBadges": [
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
-            "id": "",
+            "highlightColor": "#ff404040",
+            "id": "automod_62e2a830-f05b-43e6-8fbd-6cab264ab2a7",
             "localizedName": "",
             "loginName": "pajlada",
-            "messageText": "pajlada: CMONBRUH cmonBruh CMONbruh NaM FootBall 😂 foo blockedterm1 cmonBruh cmonbruh blockedterm1",
-            "searchText": "pajlada: CMONBRUH cmonBruh CMONbruh NaM FootBall 😂 foo blockedterm1 cmonBruh cmonbruh blockedterm1",
+            "messageText": "AutoMod: Held a message for reason: matches 2 blocked terms \"blockedterm1\", \"CMONBRUH\". Allow will post it in chat. Allow Deny pajlada: CMONBRUH cmonBruh CMONbruh NaM FootBall 😂 foo blockedterm1 cmonBruh cmonbruh blockedterm1",
+            "searchText": "AutoMod: Held a message for reason: matches 2 blocked terms \"blockedterm1\", \"CMONBRUH\". Allow will post it in chat. Allow Deny pajlada: CMONBRUH cmonBruh CMONbruh NaM FootBall 😂 foo blockedterm1 cmonBruh cmonbruh blockedterm1",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
