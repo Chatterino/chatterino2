@@ -270,7 +270,8 @@ public:
                   const QModelIndex &destinationParent,
                   int destinationChild) override
     {
-        if (count != 1)
+        if (count != 1 || !sourceParent.isValid() ||
+            !destinationParent.isValid())
         {
             return false;
         }
