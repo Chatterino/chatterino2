@@ -904,6 +904,19 @@ void UserInfoPopup::updateLatestMessages()
                         this->updateLatestMessages();
                     }
                 }));
+
+    this->replaceConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            this->underlyingChannel_->messageReplaced.connect(
+                [this](auto, const auto &message, const auto &replacement) {
+                    if (!checkMessageUserName(this->userName_, replacement))
+                    {
+                        return;
+                    }
+
+                    this->ui_.latestMessages->channel()->replaceMessage(
+                        message, replacement);
+                }));
 }
 
 void UserInfoPopup::updateUserData()
