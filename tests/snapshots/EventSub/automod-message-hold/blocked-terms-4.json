@@ -295,7 +295,7 @@
             ],
             "flags": "Highlighted|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "frozen": true,
-            "highlightColor": "#ff404040",
+            "highlightColor": "#7f404040",
             "id": "automod_45a63ca1-1b0c-46ef-9075-d112f9a9f376",
             "localizedName": "",
             "loginName": "nerixyz",

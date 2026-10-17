@@ -1583,14 +1583,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
-                     "/whispers.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Highlight received inline whispers",
-                            s.highlightInlineWhispers)
-        ->setTooltip(
-            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-            "whispers inline\" is disabled, this setting will do nothing.")
+                     "/whispers.\nHighlighting of this is now controlled in "
+                     "the Highlights page.")
         ->addTo(layout);
 
     SettingWidget::checkbox(

@@ -1,0 +1,111 @@
+{
+    "input": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "badgeName": "broadcaster",
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "name": "broadcaster",
+                    "sound": "003-cat-fox_alex-fx-jump-3",
+                    "type": "badge"
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#ffffffff",
+                    "badgeName": "moderator",
+                    "enabled": false,
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "name": "moderator",
+                    "showInMentions": false,
+                    "sound": "file:///etc/forsen.mp3",
+                    "type": "badge"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "badgeName": "broadcaster",
+                    "id": "8dae323f-fc79-4a18-94e7-01423ed0d612",
+                    "name": "broadcaster",
+                    "sound": "003-cat-fox_alex-fx-jump-3",
+                    "type": "badge"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
