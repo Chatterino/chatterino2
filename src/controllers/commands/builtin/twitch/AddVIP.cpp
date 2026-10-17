@@ -54,7 +54,8 @@ QString addVIP(const CommandContext &ctx)
                 [channel, targetUser] {
                     channel->addSystemMessage(
                         QString("You have added %1 as a VIP of this channel.")
-                            .arg(targetUser.displayName));
+                            .arg(targetUser.displayName),
+                        targetUser.login);
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage = QString("Failed to add VIP - ");

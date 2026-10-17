@@ -118,6 +118,7 @@ std::shared_ptr<Message> Message::clone() const
     cloned->localizedName = this->localizedName;
     cloned->userID = this->userID;
     cloned->timeoutUser = this->timeoutUser;
+    cloned->noticeTarget = this->noticeTarget;
     cloned->channelName = this->channelName;
     cloned->usernameColor = this->usernameColor;
     cloned->serverReceivedTime = this->serverReceivedTime;
@@ -157,6 +158,11 @@ QJsonObject Message::toJson() const
          this->serverReceivedTime.toString(Qt::ISODate)},
         {"frozen"_L1, this->frozen},
     };
+
+    if (!this->noticeTarget.isEmpty())
+    {
+        msg["noticeTarget"_L1] = this->noticeTarget;
+    }
 
     QJsonArray twitchBadges;
     for (const auto &badge : this->twitchBadges)
