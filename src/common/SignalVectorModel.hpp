@@ -97,6 +97,22 @@ public:
             }
         });
 
+        this->signalHolder.managedConnect(vec->itemsCleared, [this]() {
+            // NOTE: When a row is normally removed, we call `afterRemoved`.
+            // We don't call that here, so don't use clear if you use rely on `afterRemoved` being called.
+
+            this->beginResetModel();
+            for (const auto &row : this->rows_)
+            {
+                for (auto *item : row.items)
+                {
+                    delete item;
+                }
+            }
+            this->rows_.clear();
+            this->endResetModel();
+        });
+
         this->afterInit();
     }
 
@@ -270,7 +286,8 @@ public:
                   const QModelIndex &destinationParent,
                   int destinationChild) override
     {
-        if (count != 1)
+        if (count != 1 || !sourceParent.isValid() ||
+            !destinationParent.isValid())
         {
             return false;
         }
