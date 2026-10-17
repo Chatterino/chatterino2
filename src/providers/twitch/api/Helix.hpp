@@ -1151,6 +1151,22 @@ public:
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+    virtual void getFollowedChannels(
+        QString userID,
+        const ResultCallback<std::vector<HelixFollowedChannel>,
+                             HelixPaginationState> &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-streams
+    virtual void getFollowedStreams(
+        QString userID,
+        const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+            &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) = 0;
+
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     virtual void createPoll(QString broadcasterID, QString title,
                             QStringList choices, std::chrono::seconds duration,
@@ -1591,6 +1607,20 @@ public:
         QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
+
+    void getFollowedChannels(
+        QString userID,
+        const ResultCallback<std::vector<HelixFollowedChannel>,
+                             HelixPaginationState> &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) final;
+
+    void getFollowedStreams(
+        QString userID,
+        const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+            &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) final;
 
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     void createPoll(QString broadcasterID, QString title, QStringList choices,

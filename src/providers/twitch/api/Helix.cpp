@@ -3348,6 +3348,70 @@ void Helix::getFollowedChannel(
         .execute();
 }
 
+void Helix::getFollowedChannels(
+    QString userID,
+    const ResultCallback<std::vector<HelixFollowedChannel>,
+                         HelixPaginationState> &pageCallback,
+    const FailureCallback<QString> &failureCallback, CancellationToken &&token)
+{
+    QUrlQuery query{
+        {u"user_id"_s, userID},
+        {u"first"_s, u"100"_s},
+    };
+
+    this->paginate(
+        u"channels/followed"_s, query,
+        [pageCallback](const QJsonObject &json, const auto &state) {
+            const auto data = json["data"_L1].toArray();
+            std::vector<HelixFollowedChannel> channels;
+            channels.reserve(data.size());
+            for (const auto &channel : data)
+            {
+                channels.emplace_back(channel.toObject());
+            }
+            pageCallback(channels, state);
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            const auto message =
+                result.parseJson().value("message"_L1).toString();
+            failureCallback(message.isEmpty() ? result.formatError() : message);
+        },
+        std::move(token));
+}
+
+void Helix::getFollowedStreams(
+    QString userID,
+    const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+        &pageCallback,
+    const FailureCallback<QString> &failureCallback, CancellationToken &&token)
+{
+    QUrlQuery query{
+        {u"user_id"_s, userID},
+        {u"first"_s, u"100"_s},
+    };
+
+    this->paginate(
+        u"streams/followed"_s, query,
+        [pageCallback](const QJsonObject &json, const auto &state) {
+            const auto data = json["data"_L1].toArray();
+            std::vector<HelixStream> streams;
+            streams.reserve(data.size());
+            for (const auto &stream : data)
+            {
+                streams.emplace_back(stream.toObject());
+            }
+            pageCallback(streams, state);
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            const auto message =
+                result.parseJson().value("message"_L1).toString();
+            failureCallback(message.isEmpty() ? result.formatError() : message);
+        },
+        std::move(token));
+}
+
 void Helix::createPoll(QString broadcasterID, QString title,
                        QStringList choices, const std::chrono::seconds duration,
                        const int pointsPerVote,
