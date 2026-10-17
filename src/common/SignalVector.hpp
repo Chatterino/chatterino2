@@ -100,9 +100,10 @@ public:
             this->items_.insert(this->items_.begin() + index, item);
         }
 
+        this->updateReadOnly();
         SignalVectorItemEvent<T> args{item, index, caller};
         this->itemInserted.invoke(args);
-        this->itemsChanged_();
+        this->scheduleItemsChanged();
 
         return index;
     }
@@ -141,10 +142,11 @@ public:
         T item = this->items_[index];
         this->items_.erase(this->items_.begin() + index);
 
+        this->updateReadOnly();
         SignalVectorItemEvent<T> args{item, index, caller};
         this->itemRemoved.invoke(args);
 
-        this->itemsChanged_();
+        this->scheduleItemsChanged();
     }
 
     bool removeFirstMatching(auto &&matcher, void *caller = nullptr)
@@ -157,10 +159,11 @@ public:
             if (matcher(item))
             {
                 this->items_.erase(this->items_.begin() + index);
+                this->updateReadOnly();
                 SignalVectorItemEvent<T> args{item, static_cast<int>(index),
                                               caller};
                 this->itemRemoved.invoke(args);
-                this->itemsChanged_();
+                this->scheduleItemsChanged();
                 return true;
             }
         }
@@ -219,16 +222,17 @@ public:
     }
 
 private:
-    void itemsChanged_()
+    void updateReadOnly()
     {
-        // emit delayed event
+        this->readOnly_ = std::make_shared<const std::vector<T>>(this->items_);
+    }
+
+    void scheduleItemsChanged()
+    {
         if (!this->itemsChangedTimer_.isActive())
         {
             this->itemsChangedTimer_.start();
         }
-
-        // update concurrent version
-        this->readOnly_ = std::make_shared<const std::vector<T>>(this->items_);
     }
 
     std::vector<T> items_;
