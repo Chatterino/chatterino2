@@ -26,12 +26,60 @@
 #include <QPointer>
 #include <QSaveFile>
 
+#include <array>
 #include <utility>
 
 namespace {
 
 // Delay between uploads in milliseconds
 constexpr int UPLOAD_DELAY = 2000;
+
+struct ImageInput {
+    QByteArray data;
+    QImage image;
+    QString format;
+    QString filePath;
+};
+
+struct SupportedFormat {
+    QString mime;
+    QString format;
+};
+
+const std::array SUPPORTED_FORMATS{
+    SupportedFormat{
+        .mime = "image/apng",
+        .format = "apng",
+    },
+    SupportedFormat{
+        .mime = "image/png",
+        .format = "png",
+    },
+    SupportedFormat{
+        .mime = "image/jpeg",
+        .format = "jpeg",
+    },
+    SupportedFormat{
+        .mime = "image/gif",
+        .format = "gif",
+    },
+    SupportedFormat{
+        .mime = "image/webp",
+        .format = "webp",
+    },
+};
+
+QString uploadFormat(const QMimeType &mime)
+{
+    for (const auto &format : SUPPORTED_FORMATS)
+    {
+        if (mime.inherits(format.mime))
+        {
+            return format.format;
+        }
+    }
+    return {};
+}
 
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
@@ -290,14 +338,14 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
 {
     BenchmarkGuard benchmarkGuard("ImageUploader::getImages");
 
-    auto tryUploadFromUrls =
-        [&]() -> std::pair<std::queue<RawImageData>, QString> {
+    auto getImagesFromUrls =
+        [&]() -> std::pair<std::queue<ImageInput>, QString> {
         if (!source->hasUrls())
         {
             return {{}, {}};
         }
 
-        std::queue<RawImageData> images;
+        std::queue<ImageInput> images;
 
         auto mimeDb = QMimeDatabase();
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
@@ -306,97 +354,120 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         {
             QString localPath = path.toLocalFile();
             QMimeType mime = mimeDb.mimeTypeForUrl(path);
-            if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
+            const auto format = uploadFormat(mime);
+            if (!mime.name().startsWith("image") && format.isEmpty())
             {
-                QImage img = QImage(localPath);
-                if (img.isNull())
-                {
-                    return {{}, "Couldn't load image :("};
-                }
+                continue;
+            }
 
-                auto imageData = convertToPng(img);
-                if (!imageData)
-                {
-                    return {
-                        {},
-                        QString("Cannot upload file: %1. Couldn't convert "
-                                "image to png.")
-                            .arg(localPath),
-                    };
-                }
-                images.push({*imageData, "png", localPath});
-            }
-            else if (mime.inherits("image/gif"))
+            if (format.isEmpty())
             {
-                QFile file(localPath);
-                bool isOkay = file.open(QIODevice::ReadOnly);
-                if (!isOkay)
-                {
-                    return {{}, "Failed to open file :("};
-                }
-                // file.readAll() => might be a bit big but it /should/ work
-                images.push({file.readAll(), "gif", localPath});
-                file.close();
+                images.push({
+                    .image = QImage(localPath),
+                    .filePath = localPath,
+                });
+                continue;
             }
+
+            QFile file(localPath);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                return {{}, "Failed to open file :("};
+            }
+            images.push({
+                .data = file.readAll(),
+                .format = format,
+                .filePath = localPath,
+            });
         }
 
         return {images, {}};
     };
 
-    auto tryUploadDirectly =
-        [&]() -> std::pair<std::queue<RawImageData>, QString> {
-        std::queue<RawImageData> images;
+    auto getImagesDirectly =
+        [&]() -> std::pair<std::queue<ImageInput>, QString> {
+        std::queue<ImageInput> images;
 
-        if (source->hasFormat("image/png"))
+        for (const auto &format : SUPPORTED_FORMATS)
         {
-            // the path to file is not present every time, thus the filePath is empty
-            images.push({source->data("image/png"), "png", ""});
-            return {images, {}};
+            if (source->hasFormat(format.mime))
+            {
+                images.push({
+                    .data = source->data(format.mime),
+                    .format = format.format,
+                });
+                return {images, {}};
+            }
         }
 
-        if (source->hasFormat("image/jpeg"))
+        if (source->hasImage())
         {
-            images.push({source->data("image/jpeg"), "jpeg", ""});
-            return {images, {}};
+            images.push({
+                .image = qvariant_cast<QImage>(source->imageData()),
+            });
         }
-
-        if (source->hasFormat("image/gif"))
-        {
-            images.push({source->data("image/gif"), "gif", ""});
-            return {images, {}};
-        }
-
-        // not PNG, try loading it into QImage and save it to a PNG.
-        auto image = qvariant_cast<QImage>(source->imageData());
-        auto imageData = convertToPng(image);
-        if (imageData)
-        {
-            images.push({*imageData, "png", ""});
-            return {images, {}};
-        }
-
-        // No direct upload happenned
-        return {{}, "Cannot upload file, failed to convert to png."};
+        return {images, images.empty()
+                            ? "Cannot upload file, failed to convert to png."
+                            : QString{}};
     };
 
-    const auto [urlImageData, urlError] = tryUploadFromUrls();
-
-    if (!urlImageData.empty())
+    auto [inputImages, urlError] = getImagesFromUrls();
+    QString directError;
+    if (inputImages.empty())
     {
-        return {urlImageData, {}};
+        auto directImages = getImagesDirectly();
+        inputImages = std::move(directImages.first);
+        directError = std::move(directImages.second);
     }
 
-    const auto [directImageData, directError] = tryUploadDirectly();
-    if (!directImageData.empty())
+    if (inputImages.empty())
     {
-        return {directImageData, {}};
+        return {{}, urlError + directError};
     }
 
-    return {
-        {},
-        // TODO: verify that this looks ok xd
-        urlError + directError,
-    };
+    std::queue<RawImageData> images;
+    while (!inputImages.empty())
+    {
+        auto input = std::move(inputImages.front());
+        inputImages.pop();
+
+        if (!input.format.isEmpty())
+        {
+            images.push({std::move(input.data), std::move(input.format),
+                         std::move(input.filePath)});
+            continue;
+        }
+
+        if (input.image.isNull())
+        {
+            input.image = QImage::fromData(input.data);
+        }
+        if (input.image.isNull())
+        {
+            return {{},
+                    input.filePath.isEmpty()
+                        ? "Cannot upload file, failed to convert to png."
+                        : "Couldn't load image :("};
+        }
+
+        auto imageData = convertToPng(input.image);
+        if (!imageData)
+        {
+            if (!input.filePath.isEmpty())
+            {
+                return {
+                    {},
+                    QString("Cannot upload file: %1. Couldn't convert image "
+                            "to png.")
+                        .arg(input.filePath),
+                };
+            }
+            return {{}, "Cannot upload file, failed to convert to png."};
+        }
+        images.push({*imageData, "png", std::move(input.filePath)});
+    }
+
+    return {images, {}};
 }
 
 void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
