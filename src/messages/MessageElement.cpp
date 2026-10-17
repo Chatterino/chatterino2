@@ -240,9 +240,10 @@ std::unique_ptr<MessageElement> CircularImageElement::clone() const
 
 // EMOTE
 EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
-                           const MessageColor &textElementColor)
+                           const MessageColor &textElementColor, bool ignored)
     : MessageElement(flags)
     , textColor_(textElementColor)
+    , ignored_(ignored)
     , emote_(emote)
 {
     this->setTooltip(emote->tooltip.string);
@@ -253,6 +254,12 @@ EmotePtr EmoteElement::getEmote() const
     return this->emote_;
 }
 
+bool EmoteElement::isIgnored() const
+{
+    return this->ignored_ &&
+           !this->getFlags().has(MessageElementFlag::AlwaysShow);
+}
+
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
@@ -261,7 +268,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         return;
     }
 
-    if (ctx.flags.has(MessageElementFlag::EmoteImage))
+    const bool ignored = this->isIgnored();
+    if (ctx.flags.has(MessageElementFlag::EmoteImage) && !ignored)
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -287,7 +295,15 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
     auto textCtx = ctx;
     textCtx.flags = MessageElementFlag::Misc;
-    this->textElement_->addToContainer(container, textCtx);
+    this->textElement_->setTrailingSpace(this->hasTrailingSpace());
+    if (ignored)
+    {
+        this->textElement_->addToContainer(container, textCtx, *this);
+    }
+    else
+    {
+        this->textElement_->addToContainer(container, textCtx);
+    }
 }
 
 MessageLayoutElement *EmoteElement::makeImageLayoutElement(
@@ -333,8 +349,8 @@ std::string_view EmoteElement::type() const
 
 std::unique_ptr<MessageElement> EmoteElement::clone() const
 {
-    auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
-                                               this->textColor_);
+    auto elem = std::make_unique<EmoteElement>(
+        this->emote_, this->getFlags(), this->textColor_, this->ignored_);
     elem->cloneFrom(*this);
     return elem;
 }
@@ -742,6 +758,13 @@ TextElement::TextElement(TextElement::CloneConstructorTag /*hack*/,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  const MessageLayoutContext &ctx)
 {
+    this->addToContainer(container, ctx, *this);
+}
+
+void TextElement::addToContainer(MessageLayoutContainer &container,
+                                 const MessageLayoutContext &ctx,
+                                 MessageElement &creator)
+{
     auto *app = getApp();
 
     if (this->matchesFlags(ctx.flags))
@@ -759,7 +782,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 app->getThemes()->normalizeColor(color);
 
                 auto *e = new TextLayoutElement(
-                    *this, text, QSizeF(width, metrics.height()), color,
+                    creator, text, QSizeF(width, metrics.height()), color,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
