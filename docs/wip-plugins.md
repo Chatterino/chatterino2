@@ -522,6 +522,138 @@ Check if the channel has any messages.
 
 Count the number of messages in this channel.
 
+#### Channel Providers
+
+Channel providers allow plugins to manage channels.
+The creation of these channels is user-initiated, so plugins only declare the "interface" for a channel.
+When setting a channel for a split, users can choose the provider.
+
+Chatterino mainly interacts with the provider via callbacks.
+
+Channels must have a unique name per provider. Chatterino will deduplicate channels based on the name.
+They are saved with `{plugin, provider, name, arguments}`. `arguments` are the user provided inputs.
+
+Because plugins can come and go while Chatterino is running, they can either be
+adopted (associated with a plugin + provider) or orphaned.
+
+When a plugin unloads or when Chatterino starts, all created channels are orphaned.
+Once the owning plugin calls `c2.register_channel_provider`, previously orphaned channels are adopted by calling `create`.
+Note that before this, no plugin owns the orphaned channels.
+
+##### `c2.register_channel_provider(init)`
+
+Register a channel provider. Channel providers are unique per plugin (through their ID).
+`init` is a table with the following fields:
+
+- `id` (`string`) A per-plugin unique ID for this provider.
+- `display_name` (`string`) A name for this provider shown to users.
+- `description` (`string?`) Description for what this provider does.
+- `arguments` ([`ChannelProviderArgumentSpec[]`](#channelproviderargumentspec)) A list of arguments users must provide to create this channel. These are used to create a UI for users.
+- `callbacks` ([`ChannelProviderCallbacks`](#channelprovidercallbacks))
+
+##### `ChannelProviderCallbacks`
+
+Callbacks for managing channels of a provider.
+A table with the following fields:
+
+- `get_name` (`fun(arguments: table<string, any>): string`) Before creating a channel, this is called with the user provided arguments based on the specification given when the provider was registered. This should return the name of the channel to be created. Afterwards, `create` is called with the new channel.
+- `create` (`fun(channel: c2.Channel, args: {arguments: table<string, any>}): CustomChannel`) Create a custom channel given the specification from the user. See [CustomChannel](#customchannel).
+
+When the user requests to create a channel the following happens:
+
+1. `get_name` is called with the user-provided arguments.
+2. If a channel with this combination of {plugin, provider, name} exists. Use that.
+3. A new channel is created. `create` is called with this channel.
+
+The first step is skipped if the channel is loaded from a save, as the channel name is already known.
+
+##### `ChannelProviderArgumentSpec`
+
+Description for a form field. Currently, only `text` arguments can be declared.
+
+A table with the following mandatory fields:
+
+- `id` (`string`)
+- `display_name` (`string`)
+- `tooltip` (`string?`)
+- `kind` (`"text"`)
+
+**`text`**
+
+A text box. Additional fields:
+
+- `placeholder` (`string?`)
+- `default` (`string?`)
+
+##### `CustomChannel`
+
+An interface for the plugin local state for a custom/plugin channel.
+This provides both state as well as callbacks for Chatterino to notify the plugin about events.
+Callbacks are queried once when the channel is created. Any changes to the fields are not visible.
+
+When storing state, prefer names with underscores (e.g. `_name`) to avoid collisions in the future.
+
+The following (optional) methods can be specified:
+
+- `on_send_message` (`fun(self, msg: string)`) Callback when a message is sent.
+- `on_destroyed` (`fun(self)`) Callback when the channel is destroyed (e.g. because the user closed the split).
+
+##### Example
+
+```lua
+c2.register_channel_provider({
+	id = "my-provider",
+	display_name = "A Provider",
+	description = "Echos messages you send as system messages.",
+	arguments = {
+		{
+			id = "name", -- This will create the "name" property in `arguments`.
+			display_name = "Channel Name",
+			tooltip = "The name of this channel.",
+			kind = "text",
+			placeholder = "Name",
+			default = "AwesomeChannel",
+		},
+	},
+	callbacks = {
+		---Get the name for this channel. Most of the time, this will only echo
+		---an argument back. But you might do some normalization here.
+		---
+		---If you're using LuaLS, the type annotations should be inferred.
+		---@param arguments table<string, string>
+		---@return string
+		get_name = function(arguments)
+			return arguments.name
+		end,
+
+		---Create an instance of the channel.
+		---
+		---If you're using LuaLS, the type annotations should be inferred.
+		---@param channel c2.Channel
+		---@param args {arguments: table<string, string>}
+		---@return CustomChannel
+		create = function(channel, args)
+			---Useful to specify the @class type if you're using LuaLS.
+			---@class CustomChannel
+			local cc = { _chan = channel, _name = args.arguments.name }
+
+			---Optional
+			---@param msg string
+			function cc:on_send_message(msg)
+				self._chan:add_system_message("Sent '" .. msg .. "' in " .. cc._name)
+			end
+
+			---Optional
+			function cc:on_destroy()
+				print(cc._name .. " was destroyed - close WebSockets or similar here.")
+			end
+
+			return cc
+		end,
+	},
+})
+```
+
 #### `HTTPMethod` enum
 
 This table describes HTTP methods available to Lua Plugins. The values behind

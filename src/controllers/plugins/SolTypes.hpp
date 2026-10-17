@@ -177,6 +177,18 @@ void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
     hasValueOrLog(res, context, plugin);
 }
 
+template <typename T>
+T requiredGet(const sol::table &tbl, auto &&key)
+{
+    auto v = tbl.get<sol::optional<T>>(std::forward<decltype(key)>(key));
+    if (!v)
+    {
+        throw std::runtime_error(std::string{"Missing required property: "} +
+                                 key);
+    }
+    return *std::move(v);
+}
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #    define SOL_STACK_FUNCTIONS(TYPE)                                 \
         bool sol_lua_check(                                           \
@@ -202,6 +214,10 @@ SOL_STACK_FUNCTIONS(QStringList)
 SOL_STACK_FUNCTIONS(QByteArray)
 SOL_STACK_FUNCTIONS(QSize)
 SOL_STACK_FUNCTIONS(QSizeF)
+
+SOL_STACK_FUNCTIONS(QJsonObject)
+SOL_STACK_FUNCTIONS(QJsonArray)
+SOL_STACK_FUNCTIONS(QJsonValue)
 
 #    undef SOL_STACK_FUNCTIONS
 
