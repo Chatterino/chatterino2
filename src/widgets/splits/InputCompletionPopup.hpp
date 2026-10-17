@@ -12,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace chatterino {
@@ -34,6 +35,9 @@ public:
                           ChannelPtr channel);
 
     void setInputAction(ActionCallback callback);
+
+    std::optional<std::pair<QStringList, int>> selectedCommandCompletions()
+        const;
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
