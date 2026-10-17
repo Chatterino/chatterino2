@@ -256,6 +256,20 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"previousMessage",
           ActionDefinition{"Choose previously sent message"}},
          {"redo", ActionDefinition{"Redo"}},
+         {"selectReplyTarget",
+          ActionDefinition{
+              .displayName = "Select message to reply to",
+              .argumentDescription = "<direction: older or newer>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Older", {"older"}},
+                  {"Newer", {"newer"}},
+              },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover =
+                  "Which direction to select a message from?",
+          }},
          {"selectAll", ActionDefinition{"Select all"}},
          {"selectWord", ActionDefinition{"Select word"}},
          {"sendMessage",

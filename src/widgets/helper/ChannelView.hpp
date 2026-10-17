@@ -24,6 +24,7 @@
 #include <QWheelEvent>
 #include <QWidget>
 
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -57,6 +58,11 @@ enum class PauseReason {
     Selection,
     DoubleClick,
     KeyboardModifier,
+};
+
+enum class ReplyTargetDirection : std::uint8_t {
+    Older,
+    Newer,
 };
 
 enum class FromTwitchLinkOpenChannelIn {
@@ -131,6 +137,16 @@ public:
      * @return <code>true</code> if the message was found and highlighted.
      */
     bool scrollToMessageId(const QString &id);
+
+    /// Navigate to the next replyable message in `direction`.
+    ///
+    /// This is used for hotkey navigation. It sets the normal reply target and
+    /// also tracks it for the navigation outline and scrolling.
+    void navigateReplyTarget(const MessagePtr &current,
+                             ReplyTargetDirection direction);
+
+    /// Clear the outline and scrolling state used by reply hotkey navigation.
+    void clearReplyNavigationTarget();
 
     /// Pausing
     bool pausable() const;
@@ -302,6 +318,28 @@ private:
     void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
     void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool disableAnimation);
+    /// Return the scroll position which places the bottom of the target at the
+    /// bottom of the visible message area.
+    qreal scrollPositionForReplyTarget(
+        const std::vector<MessageLayoutPtr> &messages, size_t targetIndex,
+        int visibleHeight);
+
+    /// Set the target used by reply hotkey navigation.
+    ///
+    /// Clearing the target returns to the bottom if navigation started there
+    /// and the user has not scrolled away.
+    void setReplyNavigationTarget(const MessagePtr &target);
+
+    /// Queue scrolling until drawing has finished.
+    ///
+    /// The scroll is cancelled if the target or scrollbar changes first.
+    void queueReplyNavigationTargetScroll(qreal position);
+
+    /// Update reply navigation after the scrollbar changes.
+    ///
+    /// This cancels any queued reveal and records whether cancelling should
+    /// return to the bottom.
+    void updateReplyNavigationScrollState();
 
     void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
@@ -432,6 +470,12 @@ private:
     QPointF lastMiddlePressPosition_;
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
+
+    MessagePtr replyNavigationTarget_;
+    bool returnToLatestMessagesAfterReplyNavigation_ = false;
+    bool revealReplyNavigationTarget_ = false;
+    size_t replyNavigationRevealGeneration_ = 0;
+    bool scrollingToReplyNavigationTarget_ = false;
 
     // We're only interested in the pointer, not the contents
     MessageLayout *highlightedMessage_ = nullptr;
