@@ -9,6 +9,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "messages/Emote.hpp"
@@ -222,6 +223,11 @@ public:
         return this->input.inputCompletionPopup_;
     }
 
+    void showUserPopup(const QString &text)
+    {
+        this->input.showCompletionPopup(text, CompletionKind::User);
+    }
+
     GenericListView *list()
     {
         auto *result = this->popup();
@@ -286,6 +292,63 @@ TEST_F(SplitInputCompletionTest, EmptyPopupDoesNotBlockSendShortcut)
 
     // A matching completion still takes priority over sending.
     EXPECT_TRUE(this->input.completionPopupBlocksSendShortcut("@paj"));
+}
+
+TEST_F(PopupCycleFixture, CustomSendShortcutWorksWithEmptyPopup)
+{
+    class RecordingChannel : public mock::MockChannel
+    {
+    public:
+        RecordingChannel()
+            : mock::MockChannel("forsen")
+        {
+        }
+
+        void sendMessage(const QString &message) override
+        {
+            this->sentMessages.append(message);
+        }
+
+        QStringList sentMessages;
+    };
+
+    this->app.hotkeys.replaceHotkey(
+        "send message",
+        std::make_shared<Hotkey>(HotkeyCategory::SplitInput, QKeySequence("F6"),
+                                 "sendMessage", std::vector<QString>{},
+                                 "send message"));
+    this->app.hotkeys.onItemsUpdated.invoke();
+    auto channel = std::make_shared<RecordingChannel>();
+    this->setChannel(channel);
+    QApplication::setActiveWindow(&this->split);
+    this->edit()->setFocus();
+    QApplication::processEvents();
+    ASSERT_TRUE(this->edit()->hasFocus());
+
+    const auto pressSend = [this] {
+        QKeyEvent press(QEvent::KeyPress, Qt::Key_F6, Qt::NoModifier);
+        QApplication::sendEvent(this->edit(), &press);
+        QKeyEvent release(QEvent::KeyRelease, Qt::Key_F6, Qt::NoModifier);
+        QApplication::sendEvent(this->edit(), &release);
+        QApplication::processEvents();
+    };
+
+    // The custom binding sends normally without a popup
+    this->input.insertText("hello");
+    pressSend();
+    ASSERT_EQ(channel->sentMessages, QStringList{"hello"});
+    ASSERT_TRUE(this->input.getInputText().isEmpty());
+
+    // An empty popup doesn't block the custom send binding
+    this->input.insertText("@zznothingmatches");
+    this->showUserPopup("@zznothingmatches");
+    ASSERT_NE(this->popup(), nullptr);
+    ASSERT_TRUE(this->popup()->isVisible());
+    ASSERT_EQ(this->list()->model()->rowCount(), 0);
+    pressSend();
+    EXPECT_EQ(channel->sentMessages,
+              (QStringList{"hello", "@zznothingmatches"}));
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
 }
 
 TEST_F(PopupCycleFixture, UsernameSelectionCyclesWithTab)
