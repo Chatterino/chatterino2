@@ -816,7 +816,7 @@ void Settings::cleanup()
 bool Settings::cleanupHighlights()
 {
     // Check for duplicate bill-tin highlights and remove any duplicates that popup
-    // TODO: Should this also create missing highlights?
+    // TODO: This should automatically create any missing highlights.
 
     qCDebug(LOG) << "Clean up highlights";
 
