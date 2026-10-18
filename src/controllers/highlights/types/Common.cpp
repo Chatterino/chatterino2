@@ -180,15 +180,6 @@ QString getSound(const AnyHighlight &h)
                       h);
 }
 
-QString getSoundWithoutDefault(const AnyHighlight &h)
-{
-    return std::visit(
-        [](auto &&h) {
-            return h.outcome.sound;
-        },
-        h);
-}
-
 QStringView getDefaultSound(const AnyHighlight &h)
 {
     return std::visit(variant::Overloaded{
@@ -203,15 +194,6 @@ QStringView getDefaultSound(const AnyHighlight &h)
                           },
                       },
                       h);
-}
-
-QUrl getSoundURL(const AnyHighlight &h)
-{
-    return std::visit(
-        [](auto &&h) {
-            return h.outcome.getSoundURL();
-        },
-        h);
 }
 
 bool shouldShowInMentions(const AnyHighlight &h)

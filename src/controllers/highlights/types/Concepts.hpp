@@ -11,8 +11,6 @@
 
 namespace chatterino::highlights {
 
-// TODO: Review where these concepts are being used to see if they should be using the Common.cpp functions instead
-
 /// Checks if the given highlight has a dynamic ID (i.e. if it's user-defined).
 template <typename T>
 concept HasDynamicID = requires(T a) {

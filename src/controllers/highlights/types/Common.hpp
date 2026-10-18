@@ -18,8 +18,6 @@ class QColor;
 
 namespace chatterino::highlights {
 
-// TODO: add comments to every function here, and review which are necessary
-
 constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
 constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
 
@@ -37,35 +35,35 @@ QString generateID();
 /// For user-defined highlights, this ID is a UUIDv4 for uniqueness.
 QStringView getID(const AnyHighlight &h);
 
+/// Returns the default name of the highlight.
 QString getDefaultName(const AnyHighlight &h);
 
 /// Returns the highlight type name (i.e. "Message highlight" for the MessageHighlight type);
 QStringView getHighlightTypeName(const AnyHighlight &h);
 
+/// Returns the user-defined name of the highlight, or, if no user-defined name is specified, its default name.
 QString getName(const AnyHighlight &h);
 
+/// Returns true if the highlight is enabled.
 bool isEnabled(const AnyHighlight &h);
 
 /// Get the configured sound string - same as stored in the settings.
 /// If a default sound is enabled, and no string is configured, it returns the default sound string.
 QString getSound(const AnyHighlight &h);
 
-/// Gets the raw string the user has configured as the sound for the highlight.
-QString getSoundWithoutDefault(const AnyHighlight &h);
-
 /// Returns the default sound of the highlight, as defined by the `SOUND_DEFAULT` static string.
 QStringView getDefaultSound(const AnyHighlight &h);
 
-/// Gets the resolved URL for the sound that should play when this highlight is triggered.
-/// This takes the default sound of the highlight into consideration if the user has not configured any sound.
-QUrl getSoundURL(const AnyHighlight &h);
-
+/// Returns true if the message should show up in the /mentions channel if the highlight is triggered.
 bool shouldShowInMentions(const AnyHighlight &h);
 
+/// Returns true if the highlight should trigger a window alert.
 bool shouldAlert(const AnyHighlight &h);
 
+/// Returns true if the highlight will play any sound when triggered.
 bool shouldPlaySound(const AnyHighlight &h);
 
+/// Returns the icon for the highlight.
 QIcon getIcon(const AnyHighlight &h);
 
 /// Get the background color defined for the highlight, or its default value
