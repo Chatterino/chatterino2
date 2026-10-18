@@ -343,6 +343,10 @@ TEST_F(PopupCycleFixture, CustomSendShortcutWorksWithEmptyPopup)
     this->input.insertText("@zznothingmatches");
     this->showUserPopup("@zznothingmatches");
     ASSERT_NE(this->popup(), nullptr);
+    QApplication::setActiveWindow(&this->split);
+    this->edit()->setFocus();
+    this->popup()->show();
+    ASSERT_TRUE(this->edit()->hasFocus());
     ASSERT_TRUE(this->popup()->isVisible());
     ASSERT_EQ(this->list()->model()->rowCount(), 0);
     pressSend();
