@@ -36,8 +36,9 @@ namespace {
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication(const QString &settingsBody)
-        : mock::BaseApplication(settingsBody, /*runMigrations*/ true)
+    MockApplication(const QString &settingsBody, bool runMigrations,
+                    bool runCleanup)
+        : mock::BaseApplication(settingsBody, runMigrations, runCleanup)
         , highlights(this->settings, &this->accounts)
     {
     }
@@ -201,10 +202,12 @@ struct TestCase {
 class HighlightControllerTest : public ::testing::Test
 {
 protected:
-    void configure(const QString &settings, bool isAnon)
+    void configure(const QString &settings, bool isAnon, bool runMigrations,
+                   bool runCleanup)
     {
         // Write default settings to the mock settings json file
-        this->mockApplication = std::make_unique<MockApplication>(settings);
+        this->mockApplication = std::make_unique<MockApplication>(
+            settings, runMigrations, runCleanup);
 
         this->mockHelix = new mock::Helix;
 
@@ -258,7 +261,7 @@ namespace chatterino {
 
 TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
-    configure(SETTINGS_DEFAULT, false);
+    configure(SETTINGS_DEFAULT, false, true, true);
 
     Message message;
     message.displayName = "icelys";
@@ -530,7 +533,7 @@ TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 
 TEST_F(HighlightControllerTest, AnonEmpty)
 {
-    configure(SETTINGS_ANON_EMPTY, true);
+    configure(SETTINGS_ANON_EMPTY, true, true, true);
 
     Message message;
     message.loginName = "pajlada2";
@@ -584,7 +587,8 @@ TEST_F(HighlightControllerTest, AnonEmpty)
 
 TEST_F(HighlightControllerTest, BillTinHighlights)
 {
-    configure(SETTINGS_MIGRATED_EMPTY, true);
+    // We explicitly don't run the cleanup call automatically here
+    configure(SETTINGS_MIGRATED_EMPTY, true, false, false);
 
     const auto all = std::variant_size_v<highlights::AnyHighlight>;
     const auto billTin = HighlightController::billTinHighlights().size();
@@ -605,33 +609,16 @@ TEST_F(HighlightControllerTest, BillTinHighlights)
         << "Settings should contain no highlights to start since this is a "
            "clean config that has skipped migrations";
 
-    auto missing = HighlightController::missingBillTinHighlights();
+    auto missing = getSettings()->missingBillTinHighlights();
 
     ASSERT_EQ(missing.size(), billTin)
         << "List of missing bill tin highlights should match the list of bill "
            "tin highlights";
 
-    HighlightController::recreateMissingBillTinHighlights(missing);
+    getSettings()->cleanup();
 
-    const auto &hs = getSettings()->sharedHighlights.raw();
-    ASSERT_EQ(hs.size(), billTin)
-        << "Number of highlights settings should match the list of bill tin "
-           "highlights after recreate has been called";
-
-    // clang-format off
-    ASSERT_EQ(highlights::getID(hs[0]),  highlights::FirstMessageHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[1]),  highlights::WatchStreakHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[2]),  highlights::SubscriptionsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[3]),  highlights::WhispersHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[4]),  highlights::YourUsernameHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[5]),  highlights::YourMessagesHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[6]),  highlights::SubscribedThreadHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[7]),  highlights::AnnouncementsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[8]),  highlights::ChannelPointsHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[9]),  highlights::AutomodCaughtHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[10]), highlights::LowTrustUserHighlight::ID);
-    ASSERT_EQ(highlights::getID(hs[11]), highlights::UncategorizedNotificationHighlight::ID);
-    // clang-format on
+    ASSERT_EQ(getSettings()->missingBillTinHighlights().size(), 0)
+        << "No bill-tin highlights should be missing after cleanup is called";
 }
 
 }  // namespace chatterino

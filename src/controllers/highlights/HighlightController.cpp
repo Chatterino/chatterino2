@@ -62,17 +62,6 @@ bool rebuildSharedHighlights(Settings &settings,
     return isSubscribedThreadHighlightEnabled;
 }
 
-/// Recreates the highlight of type Highlight if the highlight's ID is in the missingHighlights set
-template <typename Highlight>
-void recreateIfMissing(const std::unordered_set<QStringView> &missingHighlights)
-{
-    if (missingHighlights.contains(Highlight::ID))
-    {
-        qCInfo(LOG) << "Recreating missing highlight" << Highlight::ID;
-        getSettings()->sharedHighlights.append(Highlight{});
-    }
-}
-
 }  // namespace
 
 HighlightController::HighlightController(Settings &settings,
@@ -82,22 +71,19 @@ HighlightController::HighlightController(Settings &settings,
 
     this->signalHolder_.managedConnect(
         accounts->twitch.currentUserChanged, [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because user swapped accounts";
+            qCDebug(LOG) << "Rebuild checks because user swapped accounts";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
         accounts->twitch.currentUserNameChanged, [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because user name changed";
+            qCDebug(LOG) << "Rebuild checks because user name changed";
             this->rebuildChecks(settings);
         });
 
     this->signalHolder_.managedConnect(
         getSettings()->sharedHighlights.delayedItemsChanged, [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because shared highlights changed";
+            qCDebug(LOG) << "Rebuild checks because shared highlights changed";
             this->rebuildChecks(settings);
         });
 
@@ -193,40 +179,6 @@ std::unordered_set<QStringView> HighlightController::billTinHighlights()
         LowTrustUserHighlight::ID,               //
         UncategorizedNotificationHighlight::ID,  //
     };
-}
-
-std::unordered_set<QStringView> HighlightController::missingBillTinHighlights()
-{
-    auto expectedHighlights = HighlightController::billTinHighlights();
-
-    const auto highlights = getSettings()->sharedHighlights.readOnly();
-
-    for (const auto &h : *highlights)
-    {
-        expectedHighlights.erase(highlights::getID(h));
-    }
-
-    return expectedHighlights;
-}
-
-void HighlightController::recreateMissingBillTinHighlights(
-    const std::unordered_set<QStringView> &missingHighlights)
-{
-    using namespace chatterino::highlights;
-
-    // The order here should as-closely-as-possible match the default order as set in the Settings migration.
-    recreateIfMissing<FirstMessageHighlight>(missingHighlights);
-    recreateIfMissing<WatchStreakHighlight>(missingHighlights);
-    recreateIfMissing<SubscriptionsHighlight>(missingHighlights);
-    recreateIfMissing<WhispersHighlight>(missingHighlights);
-    recreateIfMissing<YourUsernameHighlight>(missingHighlights);
-    recreateIfMissing<YourMessagesHighlight>(missingHighlights);
-    recreateIfMissing<SubscribedThreadHighlight>(missingHighlights);
-    recreateIfMissing<AnnouncementsHighlight>(missingHighlights);
-    recreateIfMissing<ChannelPointsHighlight>(missingHighlights);
-    recreateIfMissing<AutomodCaughtHighlight>(missingHighlights);
-    recreateIfMissing<LowTrustUserHighlight>(missingHighlights);
-    recreateIfMissing<UncategorizedNotificationHighlight>(missingHighlights);
 }
 
 }  // namespace chatterino

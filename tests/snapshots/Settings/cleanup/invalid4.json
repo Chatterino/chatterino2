@@ -102,6 +102,9 @@
                 {
                     "id": "uncategorizednotification",
                     "name": "k"
+                },
+                {
+                    "id": "lowtrustuser"
                 }
             ]
         },

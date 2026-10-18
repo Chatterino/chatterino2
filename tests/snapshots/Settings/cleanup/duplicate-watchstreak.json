@@ -79,6 +79,9 @@
                 },
                 {
                     "id": "uncategorizednotification"
+                },
+                {
+                    "id": "lowtrustuser"
                 }
             ]
         },

@@ -63,12 +63,12 @@ public:
 class CleanupApplication : public mock::EmptyApplication
 {
 public:
-    CleanupApplication(const QString &settingsData)
+    CleanupApplication(const QString &settingsData, bool runMigrations)
         : mock::EmptyApplication(settingsData)
         , settings(this->modes_, this->args_, this->settingsDir.path(),
                    {
                        .isTest = true,
-                       .runMigrations = true,
+                       .runMigrations = runMigrations,
                        .runCleanup = true,
                    })
         , updates(this->modes_, this->paths_, this->settings)
@@ -166,8 +166,11 @@ TEST_P(TestSettingsCleanup, Run)
 {
     QJsonObject got;
 
+    auto runMigrations = this->snapshot->param("runMigrations").toBool(true);
+
     CleanupApplication app(
-        QJsonDocument(this->snapshot->input().toObject()).toJson());
+        QJsonDocument(this->snapshot->input().toObject()).toJson(),
+        runMigrations);
 
     QFile settingsFile(app.settingsDir.filePath("settings.json"));
     ASSERT_TRUE(settingsFile.open(QFile::ReadOnly))

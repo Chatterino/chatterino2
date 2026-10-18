@@ -31,8 +31,8 @@ struct UncategorizedNotificationHighlight;
 ///
 /// When you add a new built-in highlight, you must:
 ///  - Add it to HighlightController::billTinHighlights
-///  - Add it to HighlightController::recreateMissingBillTinHighlights
-///  - Update the BillTinHighlights test in HighlightController
+///  - Add it to Settings::recreateMissingHighlights
+///  - Confirm the `missing-built-in.json` snapshot test is updated with your new highlight
 ///
 /// When you add a new user-defined highlight, you must:
 ///  - Update the BillTinHighlights test in HighlightController

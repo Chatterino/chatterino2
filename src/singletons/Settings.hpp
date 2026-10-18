@@ -31,11 +31,17 @@
 #include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/settings/settingmanager.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QStringView>
 
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
+
+#if __has_include(<gtest/gtest_prod.h>)
+#    include <gtest/gtest_prod.h>
+#endif
 
 using TimeoutButton = std::pair<QString, int>;
 
@@ -783,8 +789,19 @@ private:
     /// Run cleanup on existing settings. This could mean removing duplicate values that are not valid.
     void cleanup();
 
-    /// Returns true if the settings are dirty
+    /// Delete any duplicate or invalid highlights.
+    ///
+    /// Returns true if any changes were made.
     bool cleanupHighlights();
+
+    /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
+    /// This can happen if a user does some manual cursed surgery on their settings.json file.
+    std::unordered_set<QStringView> missingBillTinHighlights();
+
+    /// Recreates any missing built-in highlights.
+    ///
+    /// Returns true if any changes were made.
+    bool recreateMissingHighlights();
 
 public:
     SignalVector<highlights::AnyHighlight> sharedHighlights;
@@ -810,6 +827,12 @@ private:
     pajlada::Signals::SignalHolder signalHolder;
 
     std::unique_ptr<SettingsPrivate> p;
+
+#ifdef FRIEND_TEST
+    friend class HighlightControllerTest;
+
+    FRIEND_TEST(HighlightControllerTest, BillTinHighlights);
+#endif
 };
 
 Settings *getSettings();

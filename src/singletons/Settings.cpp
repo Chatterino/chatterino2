@@ -792,6 +792,7 @@ void Settings::cleanup()
     bool dirty = false;
 
     dirty |= this->cleanupHighlights();
+    dirty |= this->recreateMissingHighlights();
 
     if (dirty)
     {
@@ -815,9 +816,6 @@ void Settings::cleanup()
 
 bool Settings::cleanupHighlights()
 {
-    // Check for duplicate bill-tin highlights and remove any duplicates that popup
-    // TODO: This should automatically create any missing highlights.
-
     qCDebug(LOG) << "Clean up highlights";
 
     // List of highlight IDs we've already seen.
@@ -855,6 +853,126 @@ bool Settings::cleanupHighlights()
     }
 
     return false;
+}
+
+std::unordered_set<QStringView> Settings::missingBillTinHighlights()
+{
+    auto expectedHighlights = HighlightController::billTinHighlights();
+
+    const auto &highlights = this->p->sharedHighlightsSetting.getValue();
+
+    for (const auto &h : highlights)
+    {
+        expectedHighlights.erase(highlights::getID(h));
+    }
+
+    return expectedHighlights;
+}
+
+bool Settings::recreateMissingHighlights()
+{
+    using namespace chatterino::highlights;
+
+    qCDebug(LOG) << "Check for missing built-in highlights";
+
+    bool dirty = false;
+
+    if (const auto missing = this->missingBillTinHighlights(); !missing.empty())
+    {
+        // The order here should as-closely-as-possible match the default order as set in the Settings migration.
+        if (missing.contains(FirstMessageHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << FirstMessageHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(FirstMessageHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(WatchStreakHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << WatchStreakHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(WatchStreakHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(SubscriptionsHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << SubscriptionsHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                SubscriptionsHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(WhispersHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << WhispersHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(WhispersHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(YourUsernameHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << YourUsernameHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(YourUsernameHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(YourMessagesHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << YourMessagesHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(YourMessagesHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(SubscribedThreadHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << SubscribedThreadHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                SubscribedThreadHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(AnnouncementsHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << AnnouncementsHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                AnnouncementsHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(ChannelPointsHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << ChannelPointsHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                ChannelPointsHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(AutomodCaughtHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << AutomodCaughtHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                AutomodCaughtHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(LowTrustUserHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << LowTrustUserHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(LowTrustUserHighlight{});
+            dirty |= true;
+        }
+        if (missing.contains(UncategorizedNotificationHighlight::ID))
+        {
+            qCInfo(LOG) << "Recreating missing highlight"
+                        << UncategorizedNotificationHighlight::TYPE_NAME;
+            this->p->sharedHighlightsSetting.push_back(
+                UncategorizedNotificationHighlight{});
+            dirty |= true;
+        }
+    }
+
+    return dirty;
 }
 
 bool Settings::isBlacklistedUser(const QString &username)

@@ -30,9 +30,7 @@ TEST(HighlightOutcome, MessageDefault)
     ASSERT_TRUE(std::holds_alternative<MessageHighlight>(h));
 
     // No sound is configured
-    ASSERT_TRUE(getSoundWithoutDefault(h).isEmpty());
     ASSERT_TRUE(getSound(h).isEmpty());
-    ASSERT_TRUE(getSoundURL(h).isEmpty());
 
     ASSERT_FALSE(shouldPlaySound(h));
 }
@@ -53,10 +51,6 @@ TEST(HighlightOutcome, MessageCustomSound)
     // User has changed to a custom sound
     ASSERT_EQ(getSound(h),
               u"file:///home/pajlada/Audio/karl kons oh oh no no.mp3");
-    ASSERT_EQ(getSoundWithoutDefault(h),
-              u"file:///home/pajlada/Audio/karl kons oh oh no no.mp3");
-    ASSERT_EQ(getSoundURL(h),
-              QUrl{"file:///home/pajlada/Audio/karl kons oh oh no no.mp3"});
 
     ASSERT_TRUE(shouldPlaySound(h));
 }
@@ -74,11 +68,8 @@ TEST(HighlightOutcome, SubscribedThreadDefault)
     ASSERT_TRUE(std::holds_alternative<SubscribedThreadHighlight>(h));
 
     // No sound is configured, but it has a default sound
-    ASSERT_EQ(getSoundWithoutDefault(h), QString());
     ASSERT_EQ(getSound(h), SubscribedThreadHighlight::SOUND_DEFAULT);
-    ASSERT_FALSE(getSoundURL(h).isEmpty());
-    ASSERT_EQ(getSoundURL(h).toString(),
-              defaultSounds().at("001-ping2").resourcePath);
+    ASSERT_EQ(getDefaultSound(h), defaultSounds().at("001-ping2").id);
 
     ASSERT_TRUE(shouldPlaySound(h));
 }
@@ -97,7 +88,6 @@ TEST(HighlightOutcome, SubscribedThreadDisabledSound)
 
     // User has explicitly disabled the sound
     ASSERT_EQ(getSound(h), QString(""));
-    ASSERT_TRUE(getSoundURL(h).isEmpty());
 
     ASSERT_FALSE(shouldPlaySound(h));
 }
@@ -117,8 +107,6 @@ TEST(HighlightOutcome, SubscribedThreadOtherBuiltInSound)
 
     // User has changed to a different built-in sound
     ASSERT_EQ(getSound(h), u"002-sadiquecat-c4-harmonic");
-    ASSERT_EQ(getSoundWithoutDefault(h), u"002-sadiquecat-c4-harmonic");
-    ASSERT_EQ(getSoundURL(h), QUrl{"qrc:/sounds/sadiquecat-c4-harmonic.wav"});
 
     ASSERT_TRUE(shouldPlaySound(h));
 }
@@ -139,10 +127,6 @@ TEST(HighlightOutcome, SubscribedThreadCustomSound)
     // User has changed to a custom sound
     ASSERT_EQ(getSound(h),
               u"file:///home/pajlada/Audio/karl kons oh oh no no.mp3");
-    ASSERT_EQ(getSoundWithoutDefault(h),
-              u"file:///home/pajlada/Audio/karl kons oh oh no no.mp3");
-    ASSERT_EQ(getSoundURL(h),
-              QUrl{"file:///home/pajlada/Audio/karl kons oh oh no no.mp3"});
 
     ASSERT_TRUE(shouldPlaySound(h));
 }

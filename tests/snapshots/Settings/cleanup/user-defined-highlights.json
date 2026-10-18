@@ -101,6 +101,9 @@
                 },
                 {
                     "id": "uncategorizednotification"
+                },
+                {
+                    "id": "lowtrustuser"
                 }
             ]
         },

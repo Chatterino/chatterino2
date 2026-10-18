@@ -49,14 +49,6 @@ public:
     /// Returns a set of built-in highlight IDs (e.g. {"whispers", "yourusername"})
     static std::unordered_set<QStringView> billTinHighlights();
 
-    /// Return a set of built-in highlight IDs (e.g. {"whispers", "yourusername"}) that are missing from the user's list of highlights.
-    /// This can happen if a user does some manual cursed surgery on their settings.json file.
-    static std::unordered_set<QStringView> missingBillTinHighlights();
-
-    /// Given a set of missing highlight IDs, recreates & adds them to the bottom of the user's highlights.
-    static void recreateMissingBillTinHighlights(
-        const std::unordered_set<QStringView> &missingHighlights);
-
     /// Special case where we want to be able to check if the Subscribed Thread highlight is enabled
     /// Whenever highlights are rebuilt, this variable might change.
     bool isSubscribedThreadHighlightEnabled = false;
