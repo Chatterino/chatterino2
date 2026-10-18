@@ -199,6 +199,8 @@ struct TestCase {
     } expected;
 };
 
+namespace chatterino {
+
 class HighlightControllerTest : public ::testing::Test
 {
 protected:
@@ -256,8 +258,6 @@ protected:
 
     mock::Helix *mockHelix;
 };
-
-namespace chatterino {
 
 TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
