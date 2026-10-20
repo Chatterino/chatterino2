@@ -27,6 +27,10 @@
 
 #include <functional>
 
+#ifdef Q_OS_MACOS
+#    include "util/MacOsHelpers.h"
+#endif
+
 #ifdef USEWINSDK
 #    include <dwmapi.h>
 #    include <shellapi.h>
@@ -809,6 +813,14 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+#ifdef Q_OS_MACOS
+    // elevated window levels default to hiding in Mission Control unless explicitly managed
+    if (this->isTopMost())
+    {
+        setMacOSWindowManaged(*this);
+    }
+#endif
+
 #ifdef Q_OS_WIN
     if (this->flags_.has(BoundsCheckOnShow))
     {
