@@ -448,6 +448,10 @@ void BaseWindow::setTopMost(bool topMost)
     }
 #endif
 
+#ifdef Q_OS_MACOS
+    this->setMacOSWindowManagedIfTopMost(topMost);
+#endif
+
     this->topMostChanged(this->isTopMost_);
 }
 
@@ -472,6 +476,20 @@ void BaseWindow::tryApplyTopMost()
 
     ::SetWindowPos(*hwnd, this->isTopMost_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+#endif
+
+#ifdef Q_OS_MACOS
+// On macOS, if a window is elevated to the top, it will not show up in
+// things like Mission Control anymore by default, which is not really
+// expected behavior for the main application window, even if always on top.
+// This manually tells macOS that we want this window to still be managed.
+void BaseWindow::setMacOSWindowManagedIfTopMost(bool topMost)
+{
+    if (topMost)
+    {
+        setMacOSWindowManaged(*this);
+    }
 }
 #endif
 
@@ -814,11 +832,7 @@ void BaseWindow::closeEvent(QCloseEvent *)
 void BaseWindow::showEvent(QShowEvent *)
 {
 #ifdef Q_OS_MACOS
-    // elevated window levels default to hiding in Mission Control unless explicitly managed
-    if (this->isTopMost())
-    {
-        setMacOSWindowManaged(*this);
-    }
+    this->setMacOSWindowManagedIfTopMost(this->isTopMost());
 #endif
 
 #ifdef Q_OS_WIN
