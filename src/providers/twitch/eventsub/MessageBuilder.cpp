@@ -700,7 +700,7 @@ std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     QVariantMap tagsMap;
     Communi::TagsRef tags(tagsMap);
     auto highlights =
-        builder.parseHighlights(tags, event.message.text.qt(), {});
+        builder.parseHighlights(tags, event.message.text.qt(), {}, channel);
 
     return {builder.release(), highlights};
 }
@@ -796,7 +796,7 @@ std::pair<MessagePtr, HighlightAlert> makeSuspiciousUserMessage(
     QVariantMap tagsMap;
     Communi::TagsRef tags(tagsMap);
     auto highlights =
-        builder.parseHighlights(tags, event.message.text.qt(), {});
+        builder.parseHighlights(tags, event.message.text.qt(), {}, channel);
 
     return {builder.release(), highlights};
 }
