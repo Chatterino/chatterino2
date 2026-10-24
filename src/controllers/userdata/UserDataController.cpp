@@ -133,6 +133,20 @@ void UserDataController::setUserNotes(const QString &userID,
     this->update(std::move(users), std::move(lock));
 }
 
+void UserDataController::setUserAlias(const QString &userID,
+                                      const QString &alias)
+{
+    if (userID.isEmpty())
+    {
+        return;
+    }
+
+    std::unique_lock lock(this->usersMutex);
+    auto users = this->users;
+    users[userID].alias = alias.trimmed();
+    this->update(std::move(users), std::move(lock));
+}
+
 pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
 {
     return this->userDataUpdated_;
