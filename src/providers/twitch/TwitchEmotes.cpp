@@ -473,6 +473,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
                                    baseSize * (1.0 / emote3xScaleFactor)),
                 },
             .tooltip = Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
+            .id = EmoteId{id},
         });
     }
 

@@ -71,7 +71,8 @@
                             "3x": "https://static-cdn.jtvnw.net/emoticons/v2/42/default/dark/3.0"
                         },
                         "name": "MyBitsEmote",
-                        "tooltip": "MyBitsEmote<br>Twitch Emote"
+                        "tooltip": "MyBitsEmote<br>Twitch Emote",
+                        "id": "42"
                     },
                     "flags": "ChannelPointReward",
                     "link": {
