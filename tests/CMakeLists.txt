@@ -13,7 +13,6 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkResult.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
@@ -70,7 +69,12 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/BalancedResolverResults.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilSerializeList.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Aliases.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightSounds.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightCommon.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/HighlightOutcome.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelHelpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ColorInput.cpp
     # Add your new file above this line!
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
@@ -148,4 +152,6 @@ if (CHATTERINO_STATIC_QT_BUILD)
     )
 endif ()
 
-gtest_discover_tests(${PROJECT_NAME})
+gtest_discover_tests(${PROJECT_NAME}
+    DISCOVERY_MODE PRE_TEST
+)

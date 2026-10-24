@@ -10,6 +10,7 @@
 #include <QStandardItemModel>
 #include <QTimer>
 
+#include <cstddef>
 #include <vector>
 
 namespace chatterino {
@@ -27,6 +28,7 @@ class SignalVector
 public:
     pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemInserted;
     pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemRemoved;
+    pajlada::Signals::NoArgSignal itemsCleared;
     pajlada::Signals::NoArgSignal delayedItemsChanged;
 
     SignalVector()
@@ -106,6 +108,19 @@ public:
         return index;
     }
 
+    /// Clear all the items in this vector.
+    ///
+    /// Don't call this if your model implements custom rows / rely on `afterRemoved` being called when rows are removed.
+    /// This may only be called from the GUI thread.
+    void clear()
+    {
+        assertInGuiThread();
+
+        this->items_.clear();
+        this->itemsCleared.invoke();
+        this->itemsChanged_();
+    }
+
     /// This may only be called from the GUI thread.
     ///
     ///	@param item
@@ -154,6 +169,19 @@ public:
         }
 
         return false;
+    }
+
+    /// Run the given function on each item in the vector
+    ///
+    /// This may only be called from the GUI thread.
+    void forEach(auto &&fn)
+    {
+        assertInGuiThread();
+
+        for (auto &item : this->items_)
+        {
+            fn(item);
+        }
     }
 
     const std::vector<T> &raw() const
