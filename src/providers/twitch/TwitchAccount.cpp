@@ -380,7 +380,7 @@ void TwitchAccount::loadSeventvUserID()
 
     seventv->getUserByTwitchID(
         this->getUserId(),
-        [this](const auto &json) {
+        [this](const auto &json, const auto & /*raw*/) {
             const auto id = json["user"]["id"].toString();
             if (!id.isEmpty())
             {
