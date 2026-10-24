@@ -9,6 +9,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -26,6 +27,7 @@
 #include "Test.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -219,7 +221,7 @@ TEST(SplitInput, EscapeCancelsReply)
 {
     MockApplication app;
     Split split(nullptr);
-    SplitInput input(&split);
+    auto &input = split.getInput();
     auto *edit = input.findChild<QTextEdit *>();
     ASSERT_NE(edit, nullptr);
 
@@ -229,9 +231,80 @@ TEST(SplitInput, EscapeCancelsReply)
     input.insertText("FeelsWeirdMan");
     ASSERT_EQ(input.getInputText(), "@forsen FeelsWeirdMan");
 
+    split.show();
+    split.activateWindow();
+    edit->setFocus();
+    QApplication::processEvents();
+
     QKeyEvent escape(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
     QApplication::sendEvent(edit, &escape);
     EXPECT_EQ(input.getInputText(), "FeelsWeirdMan");
+}
+
+TEST(SplitInput, ReboundCancelReplyShortcut)
+{
+    MockApplication app;
+    app.hotkeys.replaceHotkey(
+        "cancel reply",
+        std::make_shared<Hotkey>(HotkeyCategory::SplitInput,
+                                 QKeySequence("Ctrl+Alt+Y"), "cancelReply",
+                                 std::vector<QString>{}, "cancel reply"));
+
+    Split split(nullptr);
+    auto &input = split.getInput();
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+    input.insertText("FeelsWeirdMan");
+
+    split.show();
+    split.activateWindow();
+    edit->setFocus();
+    QApplication::processEvents();
+
+    // Escape no longer cancels replies after rebinding
+    QKeyEvent escape(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QApplication::sendEvent(edit, &escape);
+    EXPECT_EQ(input.getInputText(), "@forsen FeelsWeirdMan");
+
+    QKeyEvent cancel(QEvent::KeyPress, Qt::Key_Y,
+                     Qt::ControlModifier | Qt::AltModifier);
+    QApplication::sendEvent(edit, &cancel);
+    EXPECT_EQ(input.getInputText(), "FeelsWeirdMan");
+}
+
+TEST(SplitInput, EscapeClosesCompletionWithoutCancellingReply)
+{
+    MockApplication app;
+    app.settings.emoteCompletionWithColon = true;
+    Split split(nullptr);
+    auto &input = split.getInput();
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    split.show();
+    split.activateWindow();
+    edit->setFocus();
+    QApplication::processEvents();
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+    input.insertText(":forsen");
+    auto *window = input.findChild<BaseWindow *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *popup = dynamic_cast<InputCompletionPopup *>(window);
+    ASSERT_NE(popup, nullptr);
+    ASSERT_TRUE(popup->isVisible());
+
+    // Close completion before cancelling the reply
+    QKeyEvent escape(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QApplication::sendEvent(edit, &escape);
+    EXPECT_FALSE(popup->isVisible());
+    EXPECT_EQ(input.getInputText(), "@forsen :forsen");
 }
 
 TEST(SplitInput, ReplyCommandCompletion)
