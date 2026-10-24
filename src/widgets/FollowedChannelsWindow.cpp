@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdint>
 #include <vector>
 
 namespace chatterino {
@@ -53,7 +54,17 @@ constexpr auto SORT_ROLE = Qt::UserRole + 1;
 constexpr auto CHANNEL_ID_ROLE = Qt::UserRole + 2;
 constexpr auto LIVE_ROLE = Qt::UserRole + 3;
 
-constexpr std::array SEARCH_COLUMNS{0, 3, 4};
+enum class Column : std::uint8_t {
+    Channel,
+    Viewers,
+    Uptime,
+    Category,
+    Title,
+    Count,
+};
+
+constexpr std::array SEARCH_COLUMNS{int(Column::Channel), int(Column::Category),
+                                    int(Column::Title)};
 
 qint64 uptimeSeconds(const QString &startedAt)
 {
@@ -116,8 +127,8 @@ protected:
     bool filterAcceptsRow(int sourceRow,
                           const QModelIndex &sourceParent) const override
     {
-        const auto first =
-            this->sourceModel()->index(sourceRow, 0, sourceParent);
+        const auto first = this->sourceModel()->index(
+            sourceRow, int(Column::Channel), sourceParent);
         if (!this->showOffline && !first.data(LIVE_ROLE).toBool())
         {
             return false;
@@ -152,8 +163,10 @@ protected:
             return QSortFilterProxyModel::lessThan(left, right);
         }
 
-        const auto leftName = left.sibling(left.row(), 0).data().toString();
-        const auto rightName = right.sibling(right.row(), 0).data().toString();
+        const auto leftName =
+            left.sibling(left.row(), int(Column::Channel)).data().toString();
+        const auto rightName =
+            right.sibling(right.row(), int(Column::Channel)).data().toString();
         const auto comparison =
             leftName.compare(rightName, Qt::CaseInsensitive);
         return this->sortOrder() == Qt::AscendingOrder ? comparison < 0
@@ -189,7 +202,7 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
     this->ui.search->setPlaceholderText("Search channels");
     this->ui.showOffline->setChecked(true);
 
-    this->ui.model->setColumnCount(5);
+    this->ui.model->setColumnCount(int(Column::Count));
     this->ui.model->setHorizontalHeaderLabels(
         {"Channel", "Viewers", "Uptime", "Category", "Title"});
 
@@ -203,13 +216,13 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
     this->ui.list->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui.list->setShowGrid(false);
     this->ui.list->setSortingEnabled(true);
-    this->ui.list->sortByColumn(1, Qt::DescendingOrder);
+    this->ui.list->sortByColumn(int(Column::Viewers), Qt::DescendingOrder);
     this->ui.list->setContextMenuPolicy(Qt::CustomContextMenu);
     this->ui.list->verticalHeader()->hide();
     this->ui.list->horizontalHeader()->setSectionResizeMode(
         QHeaderView::ResizeToContents);
     this->ui.list->horizontalHeader()->setSectionResizeMode(
-        4, QHeaderView::Stretch);
+        int(Column::Title), QHeaderView::Stretch);
 
     auto *layout = new QVBoxLayout(this->getLayoutContainer());
     layout->addWidget(this->ui.search);
@@ -229,9 +242,10 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
                      });
     QObject::connect(this->ui.list, &QAbstractItemView::activated, this,
                      [this](const QModelIndex &index) {
-                         this->openChannelInNewTab(index.sibling(index.row(), 0)
-                                                       .data(CHANNEL_LOGIN_ROLE)
-                                                       .toString());
+                         this->openChannelInNewTab(
+                             index.sibling(index.row(), int(Column::Channel))
+                                 .data(CHANNEL_LOGIN_ROLE)
+                                 .toString());
                      });
     QObject::connect(this->ui.list, &QTableView::customContextMenuRequested,
                      this, &FollowedChannelsWindow::showContextMenu);
@@ -431,7 +445,7 @@ void FollowedChannelsWindow::updateList()
     QHash<QString, QStandardItem *> existingRows;
     for (int row = 0; row < this->ui.model->rowCount(); ++row)
     {
-        auto *item = this->ui.model->item(row, 0);
+        auto *item = this->ui.model->item(row, int(Column::Channel));
         existingRows.insert(item->data(CHANNEL_ID_ROLE).toString(), item);
     }
 
@@ -448,15 +462,16 @@ void FollowedChannelsWindow::updateList()
         QList<QVariant> sortValues{entry.name.toCaseFolded(), -1, -1, {}, {}};
         if (stream != nullptr)
         {
-            columns[1] = localizeNumbers(stream->viewerCount);
-            columns[2] = formatUptime(stream->startedAt);
-            columns[3] = stream->gameName;
-            columns[4] = stream->title;
+            columns[int(Column::Viewers)] =
+                localizeNumbers(stream->viewerCount);
+            columns[int(Column::Uptime)] = formatUptime(stream->startedAt);
+            columns[int(Column::Category)] = stream->gameName;
+            columns[int(Column::Title)] = stream->title;
 
-            sortValues[1] = stream->viewerCount;
-            sortValues[2] = uptimeSeconds(stream->startedAt);
-            sortValues[3] = stream->gameName.toCaseFolded();
-            sortValues[4] = stream->title.toCaseFolded();
+            sortValues[int(Column::Viewers)] = stream->viewerCount;
+            sortValues[int(Column::Uptime)] = uptimeSeconds(stream->startedAt);
+            sortValues[int(Column::Category)] = stream->gameName.toCaseFolded();
+            sortValues[int(Column::Title)] = stream->title.toCaseFolded();
         }
 
         const auto existing = existingRows.find(entry.id);
@@ -492,7 +507,7 @@ void FollowedChannelsWindow::updateList()
             }
         }
 
-        auto *first = this->ui.model->item(row, 0);
+        auto *first = this->ui.model->item(row, int(Column::Channel));
         first->setData(entry.id, CHANNEL_ID_ROLE);
         first->setData(entry.login, CHANNEL_LOGIN_ROLE);
         first->setData(stream != nullptr, LIVE_ROLE);
@@ -500,8 +515,9 @@ void FollowedChannelsWindow::updateList()
 
     for (int row = this->ui.model->rowCount() - 1; row >= 0; --row)
     {
-        if (!currentIDs.contains(
-                this->ui.model->item(row, 0)->data(CHANNEL_ID_ROLE).toString()))
+        if (!currentIDs.contains(this->ui.model->item(row, int(Column::Channel))
+                                     ->data(CHANNEL_ID_ROLE)
+                                     .toString()))
         {
             this->ui.model->removeRow(row);
         }
@@ -590,7 +606,9 @@ QString FollowedChannelsWindow::selectedChannel() const
     {
         return {};
     }
-    return index.sibling(index.row(), 0).data(CHANNEL_LOGIN_ROLE).toString();
+    return index.sibling(index.row(), int(Column::Channel))
+        .data(CHANNEL_LOGIN_ROLE)
+        .toString();
 }
 
 void FollowedChannelsWindow::showContextMenu(QPoint position)
