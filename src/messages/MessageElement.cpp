@@ -1581,6 +1581,7 @@ void TwitchGifElement::addToContainer(MessageLayoutContainer &container,
     }
 
     auto size = image->size() * container.getScale() * scale;
+    // Scale down to fit within the split
     if (size.width() > container.remainingWidth())
     {
         size *= container.remainingWidth() / size.width();
