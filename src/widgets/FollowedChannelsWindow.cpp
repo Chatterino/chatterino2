@@ -314,19 +314,21 @@ void FollowedChannelsWindow::themeChangedEvent()
 
 void FollowedChannelsWindow::load()
 {
-    this->followedChannelsToken = CancellationToken{};
-    this->streamsToken = CancellationToken{};
     this->followedChannels.clear();
     this->streams.clear();
-    this->followedChannelsError.clear();
-    this->streamsError.clear();
-    this->loadingFollowedChannels = false;
-    this->loadingStreams = false;
     this->ui.model->removeRows(0, this->ui.model->rowCount());
 
     const auto account = getApp()->getAccounts()->twitch.getCurrent();
     if (account->isAnon())
     {
+        // Cancel pending requests and clear loading/error state when logging out.
+        this->followedChannelsToken = CancellationToken{};
+        this->streamsToken = CancellationToken{};
+        this->followedChannelsError.clear();
+        this->streamsError.clear();
+        this->loadingFollowedChannels = false;
+        this->loadingStreams = false;
+
         this->ui.status->setText("Log in to Twitch to see followed channels.");
         this->ui.status->show();
         return;
