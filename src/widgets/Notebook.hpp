@@ -137,9 +137,10 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    void setShowTabs(bool value);
+
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
 
     void setGrowWrappedNotebookLines(bool value);
 
@@ -294,11 +295,14 @@ public:
     void toggleTabVisibility();
 
     QAction *showAllTabsAction;
-    QAction *onlyShowLiveTabsAction;
+    QAction *showLiveTabsAction;
+    QAction *showUnreadTabsAction;
+    QAction *showOtherTabsAction;
     QAction *hideAllTabsAction;
 
 protected:
     void showEvent(QShowEvent *event) override;
+    void updateTabActionCheckedState();
 
     void afterPageAdded() override;
     void afterPageRemoved() override;
