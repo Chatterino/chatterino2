@@ -108,7 +108,10 @@ bool checkMessageUserName(const QString &userName, MessagePtr message)
     bool isSelectedUser =
         message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
 
-    return (isSubscription || isModAction || isSelectedUser);
+    bool isNoticeTarget =
+        message->noticeTarget.compare(userName, Qt::CaseInsensitive) == 0;
+
+    return (isSubscription || isModAction || isSelectedUser || isNoticeTarget);
 }
 
 ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
