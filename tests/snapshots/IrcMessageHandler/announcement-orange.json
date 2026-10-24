@@ -204,7 +204,7 @@
             "messageText": "orange announcement",
             "searchText": "pajlada  pajlada: orange announcement ",
             "serverReceivedTime": "2026-04-18T11:15:25Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "124"
             },

@@ -102,7 +102,7 @@
             "messageText": "username",
             "searchText": "testaccount_420 display-name=테스트계정420 testaccount_420: username ",
             "serverReceivedTime": "2024-09-21T10:54:17Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"
             },

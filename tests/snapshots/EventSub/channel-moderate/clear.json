@@ -111,7 +111,7 @@
             "messageText": "nerixyz cleared the chat. ",
             "searchText": "nerixyz cleared the chat. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "nerixyz",
+            "targetUser": "nerixyz",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

@@ -140,7 +140,7 @@
             "messageText": "Wooohooo, I got a social media badge! or another one",
             "searchText": "gunny_q  gunny_q: Wooohooo, I got a social media badge! or another one ",
             "serverReceivedTime": "2026-04-06T03:02:37Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
@@ -231,7 +231,7 @@
             "messageText": "Gunny_Q earned a Level 1 Social Media Badge!",
             "searchText": "Gunny_Q earned a Level 1 Social Media Badge!",
             "serverReceivedTime": "",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

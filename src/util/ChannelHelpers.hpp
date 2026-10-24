@@ -51,14 +51,14 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         }
 
         if (s->flags.has(MessageFlag::Untimeout) &&
-            s->timeoutUser == message->timeoutUser)
+            s->targetUser == message->targetUser)
         {
             break;
         }
 
         if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
         {
-            if (s->loginName == message->timeoutUser &&
+            if (s->loginName == message->targetUser &&
                 s->flags.hasNone(
                     {MessageFlag::Disabled, MessageFlag::ModerationAction}))
             {
@@ -75,7 +75,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)
+            s->targetUser == message->targetUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
                 !s->flags.has(MessageFlag::PubSub))
@@ -99,12 +99,12 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
             uint32_t count = s->count + 1;
 
-            MessageBuilder replacement(timeoutMessage, message->timeoutUser,
+            MessageBuilder replacement(timeoutMessage, message->targetUser,
                                        message->loginName, message->channelName,
                                        message->searchText, count,
                                        message->serverReceivedTime);
 
-            replacement->timeoutUser = message->timeoutUser;
+            replacement->targetUser = message->targetUser;
             replacement->channelName = message->channelName;
             replacement->count = count;
             replacement->flags = message->flags;
@@ -122,7 +122,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         for (qsizetype i = 0; i < snapshotLength; i++)
         {
             auto &s = buffer[i];
-            if (s->loginName == message->timeoutUser &&
+            if (s->loginName == message->targetUser &&
                 s->flags.hasNone(
                     {MessageFlag::ModerationAction, MessageFlag::Whisper}))
             {
@@ -195,7 +195,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
         if (timeoutStackStyle ==
                 TimeoutStackStyle::DontStackBeyondUserMessage &&
             s->flags.has(MessageFlag::PubSub) &&
-            s->timeoutUser != message->timeoutUser)
+            s->targetUser != message->targetUser)
         {
             break;
         }
@@ -203,7 +203,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
         uint32_t count = s->count + 1;
 
         auto replacement = MessageBuilder::makeClearChatMessage(
-            message->serverReceivedTime, message->timeoutUser,
+            message->serverReceivedTime, message->targetUser,
             message->channelName, count);
         replacement->flags = message->flags;
 

@@ -942,7 +942,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->message().flags.set(MessageFlag::Timeout);
     this->message().flags.set(MessageFlag::ModerationAction);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    this->message().timeoutUser = username;
+    this->message().targetUser = username;
 
     this->emplaceSystemTextAndUpdate(text, fullText);
     this->message().messageText = fullText;
@@ -1488,7 +1488,7 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
         .emplace<TextElement>(deletedMessageText, MessageElementFlag::Text,
                               MessageColor::Text)
         ->setLink({Link::JumpToMessage, originalMessage->id});
-    builder.message().timeoutUser = "msg:" + originalMessage->id;
+    builder.message().targetUser = "msg:" + originalMessage->id;
 
     const auto deletionText =
         QString("A message from %1 was deleted: %2")
@@ -1665,7 +1665,7 @@ MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
                                         MessageColor::System);
         messageText = actor + ' ';
         builder.emplaceSystemTextAndUpdate("cleared the chat.", messageText);
-        builder->timeoutUser = actor;
+        builder->targetUser = actor;
     }
 
     if (count > 1)

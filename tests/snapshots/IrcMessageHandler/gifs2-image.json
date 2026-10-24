@@ -186,7 +186,7 @@
             "messageText": "before [Y A Y Yes GIF by Djemilah Birnie] after",
             "searchText": "twitchdev  twitchdev: before [Y A Y Yes GIF by Djemilah Birnie] after ",
             "serverReceivedTime": "2026-07-09T21:35:07Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "30"
             },

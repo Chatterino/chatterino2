@@ -65,7 +65,7 @@
             "messageText": "This room is now in emote-only mode.",
             "searchText": "This room is now in emote-only mode.",
             "serverReceivedTime": "",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

@@ -197,7 +197,7 @@
             "messageText": "nerixyz banned twitchdev in testaccount_420: a reason 😂 ",
             "searchText": "nerixyz banned twitchdev in testaccount_420: a reason 😂 ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

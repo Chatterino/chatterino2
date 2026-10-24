@@ -244,7 +244,7 @@
             "messageText": "badge",
             "searchText": "badgy  badgy: badge ",
             "serverReceivedTime": "2024-09-19T16:40:56Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"
             },

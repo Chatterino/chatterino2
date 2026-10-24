@@ -104,7 +104,7 @@ bool checkMessageUserName(const QString &userName, MessagePtr message)
                               userName, Qt::CaseInsensitive) == 0;
 
     bool isModAction =
-        message->timeoutUser.compare(userName, Qt::CaseInsensitive) == 0;
+        message->targetUser.compare(userName, Qt::CaseInsensitive) == 0;
     bool isSelectedUser =
         message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
 

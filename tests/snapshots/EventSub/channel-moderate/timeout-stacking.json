@@ -229,7 +229,7 @@
             "messageText": "nerixyz timed out twitchdev for 1s. (2 times) ",
             "searchText": "nerixyz timed out twitchdev for 1s. (2 times) ",
             "serverReceivedTime": "2025-02-22T17:53:50Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
@@ -371,7 +371,7 @@
             "messageText": "nerixyz timed out twitchdev for 1s. ",
             "searchText": "nerixyz timed out twitchdev for 1s. ",
             "serverReceivedTime": "2025-02-22T17:54:50Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

@@ -165,7 +165,7 @@
             "messageText": "testaccount_420 deleted message from testaccount_420 saying: asd",
             "searchText": "testaccount_420 deleted message from testaccount_420 saying: asd",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "testaccount_420",
+            "targetUser": "testaccount_420",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

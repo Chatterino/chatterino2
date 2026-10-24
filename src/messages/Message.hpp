@@ -55,7 +55,7 @@ struct Message {
     QString displayName;
     QString localizedName;
     QString userID;
-    QString timeoutUser;
+    QString targetUser;
     QString channelName;
     QColor usernameColor;
     QDateTime serverReceivedTime;

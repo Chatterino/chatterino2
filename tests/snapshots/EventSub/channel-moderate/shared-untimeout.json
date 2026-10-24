@@ -179,7 +179,7 @@
             "messageText": "nerixyz untimedout uint128 in testaccount_420. ",
             "searchText": "nerixyz untimedout uint128 in testaccount_420. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "uint128",
+            "targetUser": "uint128",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

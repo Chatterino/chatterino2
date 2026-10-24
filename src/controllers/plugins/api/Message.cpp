@@ -809,7 +809,7 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
     msg->displayName = tbl.get_or("display_name", QString{});
     msg->localizedName = tbl.get_or("localized_name", QString{});
     msg->userID = tbl.get_or("user_id", QString{});
-    // missing: timeoutUser
+    // missing: targetUser
     msg->channelName = tbl.get_or("channel_name", QString{});
 
     auto usernameColor = tbl.get_or("username_color", QString{});

@@ -157,7 +157,7 @@
             "messageText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
             "searchText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "uint128",
+            "targetUser": "uint128",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

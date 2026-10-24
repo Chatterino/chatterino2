@@ -58,7 +58,7 @@ TEST(ChannelHelpers, DontStackTimeouts)
 
         const auto addTimeout = [&](bool eventSub) {
             auto message = std::make_shared<Message>();
-            message->timeoutUser = "user";
+            message->targetUser = "user";
             message->serverReceivedTime = time;
             message->flags.set(MessageFlag::Timeout,
                                MessageFlag::ModerationAction);

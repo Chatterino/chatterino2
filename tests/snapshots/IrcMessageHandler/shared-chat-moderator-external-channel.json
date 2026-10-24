@@ -177,7 +177,7 @@
             "messageText": "I'm a mod in a shared channel",
             "searchText": "nuuls  nuuls: I'm a mod in a shared channel ",
             "serverReceivedTime": "2024-10-22T20:00:37Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

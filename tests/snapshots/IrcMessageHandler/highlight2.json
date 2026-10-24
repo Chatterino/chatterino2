@@ -115,7 +115,7 @@
             "messageText": "something my-highlight *",
             "searchText": "nerixyz  nerixyz: something my-highlight * ",
             "serverReceivedTime": "2024-09-20T21:15:16Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"
             },

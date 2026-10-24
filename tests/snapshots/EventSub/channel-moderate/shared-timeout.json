@@ -204,7 +204,7 @@
             "messageText": "nerixyz timed out twitchdev for 10m in testaccount_420. ",
             "searchText": "nerixyz timed out twitchdev for 10m in testaccount_420. ",
             "serverReceivedTime": "2025-02-22T17:54:04Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

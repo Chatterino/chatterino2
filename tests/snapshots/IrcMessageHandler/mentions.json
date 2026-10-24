@@ -163,7 +163,7 @@
             "messageText": "@~ @TwitchDev @UserColor!",
             "searchText": "nerixyz  nerixyz: @~ @TwitchDev @UserColor! ",
             "serverReceivedTime": "2024-09-18T16:57:23Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"
             },

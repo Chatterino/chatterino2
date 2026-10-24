@@ -95,7 +95,7 @@
         "messageText": "",
         "searchText": "",
         "serverReceivedTime": "",
-        "timeoutUser": "",
+        "targetUser": "",
         "twitchBadgeInfos": {
         },
         "twitchBadges": [

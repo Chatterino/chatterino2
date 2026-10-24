@@ -132,7 +132,7 @@
             "messageText": "foo bar",
             "searchText": "test  test: foo bar ",
             "serverReceivedTime": "2022-09-03T10:31:42Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

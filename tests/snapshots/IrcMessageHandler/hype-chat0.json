@@ -151,7 +151,7 @@
             "messageText": "-$5",
             "searchText": "snoopythebot  snoopythebot: -$5 ",
             "serverReceivedTime": "2022-09-30T02:46:14Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "3"
             },

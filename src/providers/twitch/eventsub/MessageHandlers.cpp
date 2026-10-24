@@ -99,7 +99,7 @@ void handleModerateMessage(
     }
 
     builder.setMessageAndSearchText(text);
-    builder->timeoutUser = action.userLogin.qt();
+    builder->targetUser = action.userLogin.qt();
 
     auto msg = builder.release();
     runInGuiThread([chan, msg, time] {
@@ -145,7 +145,7 @@ void handleModerateMessage(
     }
 
     builder.setMessageAndSearchText(text);
-    builder->timeoutUser = action.userLogin.qt();
+    builder->targetUser = action.userLogin.qt();
 
     auto msg = builder.release();
     runInGuiThread([chan, msg, time] {

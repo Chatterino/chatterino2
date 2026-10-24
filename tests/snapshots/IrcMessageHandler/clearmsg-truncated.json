@@ -116,7 +116,7 @@
             "messageText": "A message from kooby_ was deleted: Hello! its me Winston! Go to your fridge and stuff…",
             "searchText": "A message from kooby_ was deleted: Hello! its me Winston! Go to your fridge and stuff…",
             "serverReceivedTime": "",
-            "timeoutUser": "msg:ee436bee-aaac-49db-9a87-755c29105f6a",
+            "targetUser": "msg:ee436bee-aaac-49db-9a87-755c29105f6a",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

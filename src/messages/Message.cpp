@@ -117,7 +117,7 @@ std::shared_ptr<Message> Message::clone() const
     cloned->displayName = this->displayName;
     cloned->localizedName = this->localizedName;
     cloned->userID = this->userID;
-    cloned->timeoutUser = this->timeoutUser;
+    cloned->targetUser = this->targetUser;
     cloned->channelName = this->channelName;
     cloned->usernameColor = this->usernameColor;
     cloned->serverReceivedTime = this->serverReceivedTime;
@@ -149,7 +149,7 @@ QJsonObject Message::toJson() const
         {"displayName"_L1, this->displayName},
         {"localizedName"_L1, this->localizedName},
         {"userID"_L1, this->userID},
-        {"timeoutUser"_L1, this->timeoutUser},
+        {"targetUser"_L1, this->targetUser},
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},

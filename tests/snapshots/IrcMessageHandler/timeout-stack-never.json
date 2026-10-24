@@ -79,7 +79,7 @@
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
             "serverReceivedTime": "2025-01-15T19:22:44Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
@@ -198,7 +198,7 @@
             "messageText": "1",
             "searchText": "twitchdev  twitchdev: 1 ",
             "serverReceivedTime": "2025-01-15T19:22:45Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
@@ -284,7 +284,7 @@
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
             "serverReceivedTime": "2025-01-15T19:22:47Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
@@ -370,7 +370,7 @@
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
             "serverReceivedTime": "2025-01-15T19:22:47Z",
-            "timeoutUser": "twitchdev",
+            "targetUser": "twitchdev",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

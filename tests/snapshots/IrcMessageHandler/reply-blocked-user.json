@@ -172,7 +172,7 @@
             "messageText": "@nerixyz reply",
             "searchText": "nerixyz  nerixyz: @nerixyz reply ",
             "serverReceivedTime": "2024-09-18T21:18:47Z",
-            "timeoutUser": "",
+            "targetUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"
             },
