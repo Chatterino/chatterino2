@@ -150,10 +150,9 @@
             "localizedName": "",
             "loginName": "uint128",
             "messageText": "uint128 has removed forsen as a VIP of this channel. ",
-            "noticeTarget": "forsen",
             "searchText": "uint128 has removed forsen as a VIP of this channel. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timeoutUser": "forsen",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

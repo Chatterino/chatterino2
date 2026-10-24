@@ -144,10 +144,9 @@
             "localizedName": "",
             "loginName": "uint128",
             "messageText": "uint128 modded forsen. ",
-            "noticeTarget": "forsen",
             "searchText": "uint128 modded forsen. ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timeoutUser": "forsen",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

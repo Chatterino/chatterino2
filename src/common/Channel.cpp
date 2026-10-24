@@ -176,10 +176,10 @@ void Channel::addSystemMessage(const QString &contents)
 }
 
 void Channel::addSystemMessage(const QString &contents,
-                               const QString &noticeTarget)
+                               const QString &timeoutUser)
 {
     MessageBuilder builder(systemMessage, contents);
-    builder->noticeTarget = noticeTarget;
+    builder->timeoutUser = timeoutUser;
     this->addMessage(builder.release(), MessageContext::Original);
 }
 

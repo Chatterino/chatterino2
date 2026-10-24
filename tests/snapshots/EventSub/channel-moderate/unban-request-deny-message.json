@@ -155,10 +155,9 @@
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
-            "noticeTarget": "uint128",
             "searchText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timeoutUser": "uint128",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

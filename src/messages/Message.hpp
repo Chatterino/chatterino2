@@ -56,8 +56,6 @@ struct Message {
     QString localizedName;
     QString userID;
     QString timeoutUser;
-    /// Login of the user receiving the action
-    QString noticeTarget;
     QString channelName;
     QColor usernameColor;
     QDateTime serverReceivedTime;
