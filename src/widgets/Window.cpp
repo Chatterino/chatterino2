@@ -53,8 +53,6 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
-#include <tuple>
-
 namespace chatterino {
 
 Window::Window(WindowType type, QWidget *parent)
