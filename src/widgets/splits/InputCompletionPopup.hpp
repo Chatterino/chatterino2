@@ -34,6 +34,8 @@ public:
     void updateCompletion(const QString &text, CompletionKind kind,
                           ChannelPtr channel);
 
+    bool hasCompletions() const;
+
     void setInputAction(ActionCallback callback);
 
     std::optional<std::pair<QStringList, int>> selectedCompletions(
