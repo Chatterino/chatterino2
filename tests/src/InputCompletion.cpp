@@ -18,6 +18,7 @@
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
@@ -25,6 +26,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QKeyEvent>
 #include <QModelIndex>
 #include <QString>
 #include <QTemporaryDir>
@@ -305,6 +307,22 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     ASSERT_EQ(completion[0].displayName, "cat");
     // FFZ emote is prioritized over any other matching emojis
     ASSERT_EQ(completion[1].displayName, "CatBag");
+}
+
+TEST_F(InputCompletionTest, EmptyPopupDoesNotConsumeEnter)
+{
+    auto channel = std::make_shared<TwitchChannel>("forsen");
+    channel->addRecentChatter("pajlada");
+    InputCompletionPopup popup;
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+
+    // Enter is not consumed when there is no completion to accept.
+    popup.updateCompletion("@nothing", CompletionKind::User, channel);
+    EXPECT_FALSE(popup.eventFilter(nullptr, &enter));
+
+    // Enter accepts an available completion.
+    popup.updateCompletion("@paj", CompletionKind::User, channel);
+    EXPECT_TRUE(popup.eventFilter(nullptr, &enter));
 }
 
 TEST_F(InputCompletionTest, ClassicEmoteExactNameMatching)
