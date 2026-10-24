@@ -440,11 +440,13 @@ void BaseWindow::setTopMost(bool topMost)
         this->tryApplyTopMost();
     }
 #else
-    auto isVisible = this->isVisible();
-    this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-    if (isVisible)
+    auto flags = this->windowFlags();
+    flags.setFlag(Qt::WindowStaysOnTopHint, topMost);
+    this->overrideWindowFlags(flags);
+
+    if (auto *window = this->windowHandle())
     {
-        this->show();
+        window->setFlag(Qt::WindowStaysOnTopHint, topMost);
     }
 #endif
 
