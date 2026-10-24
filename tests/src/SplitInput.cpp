@@ -154,6 +154,42 @@ public:
 
 }  // namespace
 
+TEST(SplitInput, PrependText)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    input.insertText("please stop whispering me");
+    auto cursor = edit->textCursor();
+    cursor.setPosition(6);
+    cursor.setPosition(11, QTextCursor::KeepAnchor);
+    edit->setTextCursor(cursor);
+
+    // Prepending keeps existing input text, and does not replace selected text
+    input.prependText("/w forsen ");
+    EXPECT_EQ(input.getInputText(), "/w forsen please stop whispering me");
+    EXPECT_EQ(edit->textCursor().position(), input.getInputText().size());
+
+    // Undo removes the prefix without clearing undo history
+    input.undoInput();
+    EXPECT_EQ(input.getInputText(), "please stop whispering me");
+    input.undoInput();
+    EXPECT_TRUE(input.getInputText().isEmpty());
+}
+
+TEST(SplitInput, PrependTextToEmptyInput)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.prependText("/w forsen ");
+    EXPECT_EQ(input.getInputText(), "/w forsen ");
+}
+
 TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
 {
     this->input.insertText("don't ping him :paja");

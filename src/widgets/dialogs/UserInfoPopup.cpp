@@ -44,6 +44,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 #include "widgets/Window.hpp"
 
 #include <QCheckBox>
@@ -449,7 +450,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                     return;
                 }
 
-                this->split_->insertTextToInput("/w " + this->userName_ + " ");
+                this->split_->getInput().prependText("/w " + this->userName_ +
+                                                     " ");
                 this->split_->setFocus(Qt::MouseFocusReason);
                 this->close();
             });
