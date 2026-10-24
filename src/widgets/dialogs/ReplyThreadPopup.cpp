@@ -8,6 +8,7 @@
 #include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -144,7 +145,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
     layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     // Top Row
-    bool addCheckbox = getSettings()->enableThreadHighlight;
+    bool addCheckbox =
+        getApp()->getHighlights()->isSubscribedThreadHighlightEnabled;
     if (addCheckbox || closeAutomatically)
     {
         auto *hbox = new QHBoxLayout();
