@@ -640,7 +640,7 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
     });
     menu->addSeparator();
 
-    menu->addAction("&Open in new split", this, [this, channel] {
+    menu->addAction("Open in &new split", this, [this, channel] {
         this->openChannelInNewSplit(channel);
     });
     menu->addAction("Open in new &tab", this, [this, channel] {
