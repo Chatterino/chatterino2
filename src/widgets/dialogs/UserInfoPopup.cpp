@@ -453,7 +453,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 this->split_->getInput().prependText("/w " + this->userName_ +
                                                      " ");
                 this->split_->setFocus(Qt::MouseFocusReason);
-                this->close();
             });
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
