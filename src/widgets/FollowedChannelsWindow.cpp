@@ -52,6 +52,7 @@ constexpr auto CHANNEL_LOGIN_ROLE = Qt::UserRole;
 constexpr auto SORT_ROLE = Qt::UserRole + 1;
 constexpr auto CHANNEL_ID_ROLE = Qt::UserRole + 2;
 constexpr auto LIVE_ROLE = Qt::UserRole + 3;
+
 constexpr std::array SEARCH_COLUMNS{0, 3, 4};
 
 qint64 uptimeSeconds(const QString &startedAt)
@@ -91,21 +92,23 @@ public:
     void setQuery(const QString &query)
     {
         const auto trimmed = query.trimmed();
-        if (this->query_ == trimmed)
+        if (this->query == trimmed)
         {
             return;
         }
-        this->query_ = trimmed;
+
+        this->query = trimmed;
         this->invalidateFilter();
     }
 
     void setShowOffline(bool showOffline)
     {
-        if (this->showOffline_ == showOffline)
+        if (this->showOffline == showOffline)
         {
             return;
         }
-        this->showOffline_ = showOffline;
+
+        this->showOffline = showOffline;
         this->invalidateFilter();
     }
 
@@ -115,26 +118,29 @@ protected:
     {
         const auto first =
             this->sourceModel()->index(sourceRow, 0, sourceParent);
-        if (!this->showOffline_ && !first.data(LIVE_ROLE).toBool())
+        if (!this->showOffline && !first.data(LIVE_ROLE).toBool())
         {
             return false;
         }
-        if (this->query_.isEmpty())
+
+        if (this->query.isEmpty())
         {
             return true;
         }
+
         if (first.data(CHANNEL_LOGIN_ROLE)
                 .toString()
-                .contains(this->query_, Qt::CaseInsensitive))
+                .contains(this->query, Qt::CaseInsensitive))
         {
             return true;
         }
+
         return std::ranges::any_of(SEARCH_COLUMNS, [&](int column) {
             return this->sourceModel()
                 ->index(sourceRow, column, sourceParent)
                 .data(Qt::DisplayRole)
                 .toString()
-                .contains(this->query_, Qt::CaseInsensitive);
+                .contains(this->query, Qt::CaseInsensitive);
         });
     }
 
@@ -155,8 +161,8 @@ protected:
     }
 
 private:
-    QString query_;
-    bool showOffline_{true};
+    QString query;
+    bool showOffline{true};
 };
 
 FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
@@ -164,67 +170,73 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
           {BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave,
            BaseWindow::ClearBuffersOnDpiChange, BaseWindow::BoundsCheckOnShow},
           parent)
-    , search_(new QLineEdit(this))
-    , showOffline_(new QCheckBox("Show offline channels", this))
-    , status_(new QLabel(this))
-    , model_(new QStandardItemModel(this))
-    , proxyModel_(new FollowedChannelsFilterModel(this))
-    , list_(new QTableView(this))
-    , refreshTimer_(new QTimer(this))
-    , followedChannelsRefreshTimer_(new QTimer(this))
-    , window_(parent)
+    , ui{
+          .search = new QLineEdit(this),
+          .showOffline = new QCheckBox("Show offline channels", this),
+          .status = new QLabel(this),
+          .model = new QStandardItemModel(this),
+          .proxyModel = new FollowedChannelsFilterModel(this),
+          .list = new QTableView(this),
+      }
+    , refreshTimer(new QTimer(this))
+    , followedChannelsRefreshTimer(new QTimer(this))
+    , window(parent)
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle("Followed Channels");
     this->resize(int(750 * this->scale()), int(450 * this->scale()));
 
-    this->search_->setPlaceholderText("Search channels");
-    this->showOffline_->setChecked(true);
-    this->model_->setColumnCount(5);
-    this->model_->setHorizontalHeaderLabels(
+    this->ui.search->setPlaceholderText("Search channels");
+    this->ui.showOffline->setChecked(true);
+
+    this->ui.model->setColumnCount(5);
+    this->ui.model->setHorizontalHeaderLabels(
         {"Channel", "Viewers", "Uptime", "Category", "Title"});
-    this->proxyModel_->setSourceModel(this->model_);
-    this->proxyModel_->setSortRole(SORT_ROLE);
-    this->proxyModel_->setSortCaseSensitivity(Qt::CaseInsensitive);
-    this->list_->setModel(this->proxyModel_);
-    this->list_->setAlternatingRowColors(true);
-    this->list_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    this->list_->setSelectionMode(QAbstractItemView::SingleSelection);
-    this->list_->setShowGrid(false);
-    this->list_->setSortingEnabled(true);
-    this->list_->sortByColumn(1, Qt::DescendingOrder);
-    this->list_->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->list_->verticalHeader()->hide();
-    this->list_->horizontalHeader()->setSectionResizeMode(
+
+    this->ui.proxyModel->setSourceModel(this->ui.model);
+    this->ui.proxyModel->setSortRole(SORT_ROLE);
+    this->ui.proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+
+    this->ui.list->setModel(this->ui.proxyModel);
+    this->ui.list->setAlternatingRowColors(true);
+    this->ui.list->setSelectionBehavior(QAbstractItemView::SelectRows);
+    this->ui.list->setSelectionMode(QAbstractItemView::SingleSelection);
+    this->ui.list->setShowGrid(false);
+    this->ui.list->setSortingEnabled(true);
+    this->ui.list->sortByColumn(1, Qt::DescendingOrder);
+    this->ui.list->setContextMenuPolicy(Qt::CustomContextMenu);
+    this->ui.list->verticalHeader()->hide();
+    this->ui.list->horizontalHeader()->setSectionResizeMode(
         QHeaderView::ResizeToContents);
-    this->list_->horizontalHeader()->setSectionResizeMode(4,
-                                                          QHeaderView::Stretch);
+    this->ui.list->horizontalHeader()->setSectionResizeMode(
+        4, QHeaderView::Stretch);
 
     auto *layout = new QVBoxLayout(this->getLayoutContainer());
-    layout->addWidget(this->search_);
-    layout->addWidget(this->showOffline_);
-    layout->addWidget(this->status_);
-    layout->addWidget(this->list_);
+    layout->addWidget(this->ui.search);
+    layout->addWidget(this->ui.showOffline);
+    layout->addWidget(this->ui.status);
+    layout->addWidget(this->ui.list);
 
-    QObject::connect(this->search_, &QLineEdit::textChanged, this,
+    QObject::connect(this->ui.search, &QLineEdit::textChanged, this,
                      [this](const QString &query) {
-                         this->proxyModel_->setQuery(query);
+                         this->ui.proxyModel->setQuery(query);
                          this->updateStatus();
                      });
-    QObject::connect(this->showOffline_, &QCheckBox::toggled, this,
+    QObject::connect(this->ui.showOffline, &QCheckBox::toggled, this,
                      [this](bool showOffline) {
-                         this->proxyModel_->setShowOffline(showOffline);
+                         this->ui.proxyModel->setShowOffline(showOffline);
                          this->updateStatus();
                      });
-    QObject::connect(this->list_, &QAbstractItemView::activated, this,
+    QObject::connect(this->ui.list, &QAbstractItemView::activated, this,
                      [this](const QModelIndex &index) {
                          this->openChannelInNewTab(index.sibling(index.row(), 0)
                                                        .data(CHANNEL_LOGIN_ROLE)
                                                        .toString());
                      });
-    QObject::connect(this->list_, &QTableView::customContextMenuRequested, this,
-                     &FollowedChannelsWindow::showContextMenu);
-    QObject::connect(this->refreshTimer_, &QTimer::timeout, this, [this] {
+    QObject::connect(this->ui.list, &QTableView::customContextMenuRequested,
+                     this, &FollowedChannelsWindow::showContextMenu);
+
+    QObject::connect(this->refreshTimer, &QTimer::timeout, this, [this] {
         const auto account = getApp()->getAccounts()->twitch.getCurrent();
         if (!account->isAnon())
         {
@@ -232,13 +244,14 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
         }
     });
     QObject::connect(
-        this->followedChannelsRefreshTimer_, &QTimer::timeout, this, [this] {
+        this->followedChannelsRefreshTimer, &QTimer::timeout, this, [this] {
             const auto account = getApp()->getAccounts()->twitch.getCurrent();
             if (!account->isAnon())
             {
                 this->loadFollowedChannels(account->getUserId());
             }
         });
+
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->load();
@@ -249,8 +262,9 @@ FollowedChannelsWindow::FollowedChannelsWindow(Window *parent)
                                            this->addShortcuts();
                                        });
 
-    this->refreshTimer_->start(std::chrono::minutes(1));
-    this->followedChannelsRefreshTimer_->start(std::chrono::minutes(5));
+    this->refreshTimer->start(std::chrono::minutes(1));
+    this->followedChannelsRefreshTimer->start(std::chrono::minutes(5));
+
     this->addShortcuts();
     this->load();
 }
@@ -269,8 +283,8 @@ void FollowedChannelsWindow::addShortcuts()
         {"openTab", nullptr},
         {"search",
          [this](const std::vector<QString> &) -> QString {
-             this->search_->setFocus();
-             this->search_->selectAll();
+             this->ui.search->setFocus();
+             this->ui.search->selectAll();
              return {};
          }},
     };
@@ -286,51 +300,54 @@ void FollowedChannelsWindow::themeChangedEvent()
 
 void FollowedChannelsWindow::load()
 {
-    this->followedChannelsToken_ = CancellationToken{};
-    this->streamsToken_ = CancellationToken{};
-    this->followedChannels_.clear();
-    this->streams_.clear();
-    this->followedChannelsError_.clear();
-    this->streamsError_.clear();
-    this->loadingFollowedChannels_ = false;
-    this->loadingStreams_ = false;
-    this->model_->removeRows(0, this->model_->rowCount());
+    this->followedChannelsToken = CancellationToken{};
+    this->streamsToken = CancellationToken{};
+    this->followedChannels.clear();
+    this->streams.clear();
+    this->followedChannelsError.clear();
+    this->streamsError.clear();
+    this->loadingFollowedChannels = false;
+    this->loadingStreams = false;
+    this->ui.model->removeRows(0, this->ui.model->rowCount());
 
     const auto account = getApp()->getAccounts()->twitch.getCurrent();
     if (account->isAnon())
     {
-        this->status_->setText("Log in to Twitch to see followed channels.");
-        this->status_->show();
+        this->ui.status->setText("Log in to Twitch to see followed channels.");
+        this->ui.status->show();
         return;
     }
 
-    this->status_->setText("Loading followed channels...");
-    this->status_->show();
+    this->ui.status->setText("Loading followed channels...");
+    this->ui.status->show();
     this->loadFollowedChannels(account->getUserId());
     this->loadFollowedStreams(account->getUserId());
 }
 
 void FollowedChannelsWindow::loadFollowedChannels(const QString &userID)
 {
-    this->loadingFollowedChannels_ = true;
-    this->followedChannelsError_.clear();
-    this->pendingFollowedChannels_.clear();
+    this->loadingFollowedChannels = true;
+    this->followedChannelsError.clear();
+    this->pendingFollowedChannels.clear();
+
     CancellationToken token(false);
-    this->followedChannelsToken_ = token;
+    this->followedChannelsToken = token;
     const auto requestToken = token;
     QPointer self(this);
+
     getHelix()->getFollowedChannels(
         userID,
         [this](const auto &channels, const auto &state) {
             for (const auto &channel : channels)
             {
-                this->pendingFollowedChannels_.insert_or_assign(
+                this->pendingFollowedChannels.insert_or_assign(
                     channel.broadcasterID, channel);
             }
+
             if (state.done)
             {
-                this->loadingFollowedChannels_ = false;
-                this->followedChannels_.swap(this->pendingFollowedChannels_);
+                this->loadingFollowedChannels = false;
+                this->followedChannels.swap(this->pendingFollowedChannels);
                 this->updateList();
             }
         },
@@ -339,8 +356,9 @@ void FollowedChannelsWindow::loadFollowedChannels(const QString &userID)
             {
                 return;
             }
-            self->loadingFollowedChannels_ = false;
-            self->followedChannelsError_ = error;
+
+            self->loadingFollowedChannels = false;
+            self->followedChannelsError = error;
             self->updateList();
         },
         std::move(token));
@@ -348,24 +366,27 @@ void FollowedChannelsWindow::loadFollowedChannels(const QString &userID)
 
 void FollowedChannelsWindow::loadFollowedStreams(const QString &userID)
 {
-    this->loadingStreams_ = true;
-    this->streamsError_.clear();
-    this->pendingStreams_.clear();
+    this->loadingStreams = true;
+    this->streamsError.clear();
+    this->pendingStreams.clear();
+
     CancellationToken token(false);
-    this->streamsToken_ = token;
+    this->streamsToken = token;
     const auto requestToken = token;
     QPointer self(this);
+
     getHelix()->getFollowedStreams(
         userID,
         [this](const auto &streams, const auto &state) {
             for (const auto &stream : streams)
             {
-                this->pendingStreams_.insert_or_assign(stream.userId, stream);
+                this->pendingStreams.insert_or_assign(stream.userId, stream);
             }
+
             if (state.done)
             {
-                this->loadingStreams_ = false;
-                this->streams_.swap(this->pendingStreams_);
+                this->loadingStreams = false;
+                this->streams.swap(this->pendingStreams);
                 this->updateList();
             }
         },
@@ -374,8 +395,9 @@ void FollowedChannelsWindow::loadFollowedStreams(const QString &userID)
             {
                 return;
             }
-            self->loadingStreams_ = false;
-            self->streamsError_ = error;
+
+            self->loadingStreams = false;
+            self->streamsError = error;
             self->updateList();
         },
         std::move(token));
@@ -391,14 +413,15 @@ void FollowedChannelsWindow::updateList()
     };
 
     std::vector<Entry> entries;
-    entries.reserve(this->streams_.size() + this->followedChannels_.size());
-    for (const auto &[id, stream] : this->streams_)
+    entries.reserve(this->streams.size() + this->followedChannels.size());
+    for (const auto &[id, stream] : this->streams)
     {
         entries.push_back({id, stream.userLogin, stream.userName, &stream});
     }
-    for (const auto &[id, channel] : this->followedChannels_)
+
+    for (const auto &[id, channel] : this->followedChannels)
     {
-        if (!this->streams_.contains(id))
+        if (!this->streams.contains(id))
         {
             entries.push_back({id, channel.broadcasterLogin,
                                channel.broadcasterName, nullptr});
@@ -406,19 +429,21 @@ void FollowedChannelsWindow::updateList()
     }
 
     QHash<QString, QStandardItem *> existingRows;
-    for (int row = 0; row < this->model_->rowCount(); ++row)
+    for (int row = 0; row < this->ui.model->rowCount(); ++row)
     {
-        auto *item = this->model_->item(row, 0);
+        auto *item = this->ui.model->item(row, 0);
         existingRows.insert(item->data(CHANNEL_ID_ROLE).toString(), item);
     }
 
     QSet<QString> currentIDs;
     QList<QStandardItem *> items;
-    items.reserve(this->model_->columnCount());
+    items.reserve(this->ui.model->columnCount());
+
     for (const auto &entry : entries)
     {
         currentIDs.insert(entry.id);
         const auto *stream = entry.stream;
+
         QStringList columns{entry.name, {}, {}, {}, {}};
         QList<QVariant> sortValues{entry.name.toCaseFolded(), -1, -1, {}, {}};
         if (stream != nullptr)
@@ -427,6 +452,7 @@ void FollowedChannelsWindow::updateList()
             columns[2] = formatUptime(stream->startedAt);
             columns[3] = stream->gameName;
             columns[4] = stream->title;
+
             sortValues[1] = stream->viewerCount;
             sortValues[2] = uptimeSeconds(stream->startedAt);
             sortValues[3] = stream->gameName.toCaseFolded();
@@ -443,14 +469,16 @@ void FollowedChannelsWindow::updateList()
                 item->setEditable(false);
                 items.append(item);
             }
-            this->model_->appendRow(items);
+
+            this->ui.model->appendRow(items);
         }
+
         const auto row = existing == existingRows.end()
-                             ? this->model_->rowCount() - 1
+                             ? this->ui.model->rowCount() - 1
                              : existing.value()->row();
         for (int column = 0; column < columns.size(); ++column)
         {
-            auto *item = this->model_->item(row, column);
+            auto *item = this->ui.model->item(row, column);
             item->setText(columns[column]);
             item->setData(sortValues[column], SORT_ROLE);
             if (stream == nullptr)
@@ -463,18 +491,19 @@ void FollowedChannelsWindow::updateList()
                 item->setData(QVariant{}, Qt::ForegroundRole);
             }
         }
-        auto *first = this->model_->item(row, 0);
+
+        auto *first = this->ui.model->item(row, 0);
         first->setData(entry.id, CHANNEL_ID_ROLE);
         first->setData(entry.login, CHANNEL_LOGIN_ROLE);
         first->setData(stream != nullptr, LIVE_ROLE);
     }
 
-    for (int row = this->model_->rowCount() - 1; row >= 0; --row)
+    for (int row = this->ui.model->rowCount() - 1; row >= 0; --row)
     {
         if (!currentIDs.contains(
-                this->model_->item(row, 0)->data(CHANNEL_ID_ROLE).toString()))
+                this->ui.model->item(row, 0)->data(CHANNEL_ID_ROLE).toString()))
         {
-            this->model_->removeRow(row);
+            this->ui.model->removeRow(row);
         }
     }
 
@@ -483,48 +512,50 @@ void FollowedChannelsWindow::updateList()
 
 void FollowedChannelsWindow::updateStatus()
 {
-    const auto query = this->search_->text().trimmed();
+    const auto query = this->ui.search->text().trimmed();
     const auto account = getApp()->getAccounts()->twitch.getCurrent();
+
     if (account->isAnon())
     {
-        this->status_->setText("Log in to Twitch to see followed channels.");
+        this->ui.status->setText("Log in to Twitch to see followed channels.");
     }
-    else if (!this->streamsError_.isEmpty())
+    else if (!this->streamsError.isEmpty())
     {
-        this->status_->setText("Failed to load followed streams: " +
-                               this->streamsError_);
+        this->ui.status->setText("Failed to load followed streams: " +
+                                 this->streamsError);
     }
-    else if (this->showOffline_->isChecked() &&
-             !this->followedChannelsError_.isEmpty())
+    else if (this->ui.showOffline->isChecked() &&
+             !this->followedChannelsError.isEmpty())
     {
-        this->status_->setText("Failed to load followed channels: " +
-                               this->followedChannelsError_);
+        this->ui.status->setText("Failed to load followed channels: " +
+                                 this->followedChannelsError);
     }
-    else if (this->loadingStreams_ || (this->showOffline_->isChecked() &&
-                                       this->loadingFollowedChannels_))
+    else if (this->loadingStreams || (this->ui.showOffline->isChecked() &&
+                                      this->loadingFollowedChannels))
     {
-        this->status_->setText("Loading followed channels...");
+        this->ui.status->setText("Loading followed channels...");
     }
-    else if (this->proxyModel_->rowCount() == 0)
+    else if (this->ui.proxyModel->rowCount() == 0)
     {
         if (!query.isEmpty())
         {
-            this->status_->setText("No matching channels.");
+            this->ui.status->setText("No matching channels.");
         }
-        else if (this->showOffline_->isChecked())
+        else if (this->ui.showOffline->isChecked())
         {
-            this->status_->setText("No followed channels found.");
+            this->ui.status->setText("No followed channels found.");
         }
         else
         {
-            this->status_->setText("No followed channels are live.");
+            this->ui.status->setText("No followed channels are live.");
         }
     }
     else
     {
-        this->status_->clear();
+        this->ui.status->clear();
     }
-    this->status_->setVisible(!this->status_->text().isEmpty());
+
+    this->ui.status->setVisible(!this->ui.status->text().isEmpty());
 }
 
 void FollowedChannelsWindow::openChannelInNewTab(const QString &channelLogin)
@@ -534,7 +565,7 @@ void FollowedChannelsWindow::openChannelInNewTab(const QString &channelLogin)
         return;
     }
 
-    auto *tab = this->window_->getNotebook().addPage(true);
+    auto *tab = this->window->getNotebook().addPage(true);
     tab->appendNewSplit(false)->setChannel(
         getApp()->getTwitch()->getOrAddChannel(channelLogin));
 }
@@ -546,7 +577,7 @@ void FollowedChannelsWindow::openChannelInNewSplit(const QString &channelLogin)
         return;
     }
 
-    this->window_->getNotebook()
+    this->window->getNotebook()
         .getOrAddSelectedPage()
         ->appendNewSplit(false)
         ->setChannel(getApp()->getTwitch()->getOrAddChannel(channelLogin));
@@ -554,7 +585,7 @@ void FollowedChannelsWindow::openChannelInNewSplit(const QString &channelLogin)
 
 QString FollowedChannelsWindow::selectedChannel() const
 {
-    const auto index = this->list_->currentIndex();
+    const auto index = this->ui.list->currentIndex();
     if (!index.isValid())
     {
         return {};
@@ -564,7 +595,7 @@ QString FollowedChannelsWindow::selectedChannel() const
 
 void FollowedChannelsWindow::showContextMenu(QPoint position)
 {
-    this->list_->setCurrentIndex(this->list_->indexAt(position));
+    this->ui.list->setCurrentIndex(this->ui.list->indexAt(position));
     const auto channel = this->selectedChannel();
     if (channel.isEmpty())
     {
@@ -574,6 +605,7 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
     const auto url = "https://twitch.tv/" + channel;
     auto *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
+
     menu->addAction("&Open link", this, [url] {
         QDesktopServices::openUrl(QUrl(url));
     });
@@ -587,6 +619,7 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
         crossPlatformCopy(url);
     });
     menu->addSeparator();
+
     menu->addAction("&Open in new split", this, [this, channel] {
         this->openChannelInNewSplit(channel);
     });
@@ -594,6 +627,7 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
         this->openChannelInNewTab(channel);
     });
     menu->addSeparator();
+
     menu->addAction("Open player in &browser", this, [channel] {
         const auto playerUrl = TWITCH_PLAYER_URL.arg(channel);
         if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
@@ -614,7 +648,8 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
             openInCustomPlayer(channel);
         });
     }
-    menu->popup(this->list_->viewport()->mapToGlobal(position));
+
+    menu->popup(this->ui.list->viewport()->mapToGlobal(position));
 }
 
 }  // namespace chatterino

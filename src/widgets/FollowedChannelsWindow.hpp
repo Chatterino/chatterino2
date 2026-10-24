@@ -43,26 +43,47 @@ private:
     void showContextMenu(QPoint position);
     QString selectedChannel() const;
 
-    QLineEdit *search_{};
-    QCheckBox *showOffline_{};
-    QLabel *status_{};
-    QStandardItemModel *model_{};
-    FollowedChannelsFilterModel *proxyModel_{};
-    QTableView *list_{};
-    QTimer *refreshTimer_{};
-    QTimer *followedChannelsRefreshTimer_{};
-    Window *window_{};
+    struct {
+        QLineEdit *search;
+        QCheckBox *showOffline;
+        QLabel *status;
+        QStandardItemModel *model;
+        FollowedChannelsFilterModel *proxyModel;
+        QTableView *list;
+    } ui;
 
-    std::map<QString, HelixFollowedChannel> followedChannels_;
-    std::map<QString, HelixFollowedChannel> pendingFollowedChannels_;
-    std::map<QString, HelixStream> streams_;
-    std::map<QString, HelixStream> pendingStreams_;
-    ScopedCancellationToken followedChannelsToken_;
-    ScopedCancellationToken streamsToken_;
-    QString followedChannelsError_;
-    QString streamsError_;
-    bool loadingFollowedChannels_{};
-    bool loadingStreams_{};
+    // Refresh followed live channels every minute
+    QTimer *refreshTimer{};
+    // Refresh the complete followed-channel list every five minutes
+    QTimer *followedChannelsRefreshTimer{};
+
+    // Open tabs and splits in the window that opened this popup
+    Window *window{};
+
+    // The last complete followed-channel list
+    std::map<QString, HelixFollowedChannel> followedChannels;
+    // Pages collected so far for the current followed-channel request
+    std::map<QString, HelixFollowedChannel> pendingFollowedChannels;
+
+    // The last complete list of followed live channels
+    std::map<QString, HelixStream> streams;
+    // Pages collected so far for the current request for followed live channels
+    std::map<QString, HelixStream> pendingStreams;
+
+    // Cancels the followed-channel request when replaced or destroyed
+    ScopedCancellationToken followedChannelsToken;
+    // Cancels the request for followed live channels when replaced or destroyed
+    ScopedCancellationToken streamsToken;
+
+    // Error from the latest followed-channel request
+    QString followedChannelsError;
+    // Error from the latest request for followed live channels
+    QString streamsError;
+
+    // Whether a followed-channel request is in progress
+    bool loadingFollowedChannels{};
+    // Whether a request for followed live channels is in progress
+    bool loadingStreams{};
 };
 
 }  // namespace chatterino
