@@ -1528,6 +1528,10 @@ SplitNotebook::SplitNotebook(Window *parent)
             {
                 case NotebookTabVisibility::LiveOnly:
                     this->setTabVisibilityFilter([](const NotebookTab *tab) {
+                        if (tab->alwaysShow())
+                        {
+                            return true;
+                        }
                         return tab->isLive();
                     });
                     break;
