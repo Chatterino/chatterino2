@@ -480,12 +480,12 @@ void BaseWindow::tryApplyTopMost()
 #endif
 
 #ifdef Q_OS_MACOS
-// On macOS, if a window is elevated to the top, it will not show up in
-// things like Mission Control anymore by default, which is not really
-// expected behavior for the main application window, even if always on top.
-// This manually tells macOS that we want this window to still be managed.
 void BaseWindow::setMacOSWindowManagedIfTopMost(bool topMost)
 {
+    // If a window is elevated to the top, it will stop showing up in
+    // things like Mission Control. This manually tells macOS that
+    // we want this window to still be managed.
+
     if (topMost)
     {
         setMacOSWindowManaged(*this);
