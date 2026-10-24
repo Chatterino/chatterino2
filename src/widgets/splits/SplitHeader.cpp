@@ -462,16 +462,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Change channel",
         h->getDisplaySequence(HotkeyCategory::Split, "changeChannel"),
         this->split_, &Split::changeChannel);
-    menu->addAction(
-        "Followed channels",
-        h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
-        this, [this] {
-            auto *window = dynamic_cast<Window *>(this->window());
-            if (window != nullptr)
-            {
-                window->showFollowedChannels();
-            }
-        });
     menu->addAction("Close",
                     h->getDisplaySequence(HotkeyCategory::Split, "delete"),
                     this->split_, &Split::deleteFromContainer);
@@ -527,7 +517,30 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "openModView"),
                 this->split_, &Split::openModViewInBrowser);
         }
+    }
 
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
+    {
+        menu->addAction(
+            OPEN_WHISPERS_IN_BROWSER,
+            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
+            this->split_, &Split::openWhispersInBrowser);
+    }
+
+    menu->addAction(
+        "Followed channels",
+        h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
+        this, [this] {
+            auto *window = dynamic_cast<Window *>(this->window());
+            if (window != nullptr)
+            {
+                window->showFollowedChannels();
+            }
+        });
+    menu->addSeparator();
+
+    if (twitchChannel)
+    {
         menu->addAction(
                 "Create a clip",
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),
@@ -553,15 +566,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             });
         }
 
-        menu->addSeparator();
-    }
-
-    if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
-    {
-        menu->addAction(
-            OPEN_WHISPERS_IN_BROWSER,
-            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
-            this->split_, &Split::openWhispersInBrowser);
         menu->addSeparator();
     }
 
