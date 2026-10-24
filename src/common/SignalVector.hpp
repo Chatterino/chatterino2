@@ -117,8 +117,9 @@ public:
         assertInGuiThread();
 
         this->items_.clear();
+        this->updateReadOnly();
         this->itemsCleared.invoke();
-        this->itemsChanged_();
+        this->scheduleItemsChanged();
     }
 
     /// This may only be called from the GUI thread.
