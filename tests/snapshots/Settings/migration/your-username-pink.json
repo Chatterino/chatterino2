@@ -1,0 +1,54 @@
+{
+    "input": {
+        "highlighting": {
+            "selfHighlightColor": "#ffff00ff"
+        }
+    },
+    "output": {
+        "highlighting": {
+            "highlights2": [
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "backgroundColor": "#ffff00ff",
+                    "id": "yourusername"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "selfHighlightColor": "#ffff00ff"
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}
