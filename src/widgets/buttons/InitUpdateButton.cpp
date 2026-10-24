@@ -5,12 +5,13 @@
 #include "widgets/buttons/InitUpdateButton.hpp"
 
 #include "Application.hpp"
-#include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 
 namespace chatterino {
 
-void initUpdateButton(PixmapButton &button,
+void initUpdateButton(SvgButton &button,
+
                       const std::function<void()> &relayout,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
@@ -50,10 +51,13 @@ void initUpdateButton(PixmapButton &button,
     auto updateChange = [&button, relayout](auto) {
         button.setVisible(getApp()->getUpdates().shouldShowUpdateButton());
 
-        const auto *imageUrl = getApp()->getUpdates().isError()
-                                   ? ":/buttons/updateError.png"
-                                   : ":/buttons/update.png";
-        button.setPixmap(QPixmap(imageUrl));
+        const bool isError = getApp()->getUpdates().isError();
+        button.setSource({
+            .dark = isError ? ":/buttons/updateError-darkMode.svg"
+                            : ":/buttons/update-darkMode.svg",
+            .light = isError ? ":/buttons/updateError-darkMode.svg"
+                             : ":/buttons/update-lightMode.svg",
+        });
 
         relayout();
     };

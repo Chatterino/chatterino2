@@ -12,12 +12,13 @@ class SignalHolder;
 
 namespace chatterino {
 
-class PixmapButton;
+class SvgButton;
 
 /// Initializes the update button
 ///
 /// The `relayout` function gets called whenever the button visibility changes
-void initUpdateButton(PixmapButton &button,
+void initUpdateButton(SvgButton &button,
+
                       const std::function<void()> &relayout,
                       pajlada::Signals::SignalHolder &signalHolder);
 
