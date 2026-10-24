@@ -2,7 +2,7 @@
     "input": "@room-id=11148817;rm-received-ts=1729627607652;tmi-sent-ts=1729627607545;historical=1 :tmi.twitch.tv CLEARCHAT #pajlada",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
