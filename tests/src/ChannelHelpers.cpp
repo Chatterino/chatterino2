@@ -7,11 +7,52 @@
 #include "mocks/BaseApplication.hpp"
 #include "Test.hpp"
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <vector>
 
 namespace chatterino {
+
+TEST(ChannelHelpers, DeduplicateMessages)
+{
+    auto whisperWithoutID = std::make_shared<Message>();
+    whisperWithoutID->flags.set(MessageFlag::Whisper);
+    auto systemMessageWithoutID = std::make_shared<Message>();
+    systemMessageWithoutID->flags.set(MessageFlag::System);
+    systemMessageWithoutID->messageText = "connected";
+    auto clonedSystemMessageWithoutID = systemMessageWithoutID->clone();
+    auto messageWithID = std::make_shared<Message>();
+    messageWithID->id = "message-id";
+    auto clonedMessageWithID = messageWithID->clone();
+
+    std::vector<MessagePtr> messages{
+        whisperWithoutID,
+        messageWithID,
+        systemMessageWithoutID,
+        whisperWithoutID,
+        clonedSystemMessageWithoutID,
+        clonedMessageWithID,
+        systemMessageWithoutID,
+        whisperWithoutID,
+    };
+    deduplicateMessages(messages);
+
+    ASSERT_EQ(messages.size(), 4);
+
+    // The same Message object should only be kept once
+    EXPECT_EQ(std::ranges::count(messages, whisperWithoutID), 1);
+    EXPECT_EQ(std::ranges::count(messages, systemMessageWithoutID), 1);
+
+    // Different Message objects without IDs should be kept even if they
+    // have the same content
+    EXPECT_EQ(std::ranges::count(messages, clonedSystemMessageWithoutID), 1);
+
+    // Different Message objects with the same ID should be deduplicated
+    EXPECT_EQ(std::ranges::count(messages, messageWithID) +
+                  std::ranges::count(messages, clonedMessageWithID),
+              1);
+}
 
 TEST(ChannelHelpers, DontStackTimeouts)
 {

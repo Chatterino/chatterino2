@@ -75,8 +75,9 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
+            "flags": "System|Highlighted|DoNotTriggerNotification|UncategorizedNotification",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",

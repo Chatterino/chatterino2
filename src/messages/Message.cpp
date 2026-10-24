@@ -4,7 +4,6 @@
 
 #include "messages/Message.hpp"
 
-#include "Application.hpp"
 #include "common/Literals.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -23,7 +22,6 @@ namespace chatterino {
 using namespace literals;
 
 Message::Message()
-    : parseTime(QTime::currentTime())
 {
     DebugCount::increase(DebugObject::Message);
 }
@@ -35,73 +33,10 @@ Message::~Message()
 
 ScrollbarHighlight Message::getScrollBarHighlight() const
 {
-    if (this->flags.has(MessageFlag::Highlighted) ||
-        this->flags.has(MessageFlag::HighlightedWhisper))
+    if (this->flags.has(MessageFlag::Highlighted))
     {
         return {
             this->highlightColor,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::WatchStreak) &&
-        getSettings()->enableWatchStreakHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::WatchStreak),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-        this->flags.has(MessageFlag::RedeemedChannelPointReward))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            ScrollbarHighlight::Default,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::FirstMessage))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
-        this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::AutomodHighlight),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Announcement) &&
-        getSettings()->enableAnnouncementHighlight)
-    {
-        return {
-            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
-                this->announcementColor,
-                getSettings()->enableColoredAnnouncementHighlight)),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::UncategorizedNotification))
-    {
-        // TODO: Give this a better/its own color :-)
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
         };
     }
 
@@ -112,7 +47,6 @@ std::shared_ptr<Message> Message::clone() const
 {
     auto cloned = std::make_shared<Message>();
     cloned->flags = this->flags;
-    cloned->parseTime = this->parseTime;
     cloned->id = this->id;
     cloned->searchText = this->searchText;
     cloned->messageText = this->messageText;
@@ -205,12 +139,6 @@ QJsonObject Message::toJson() const
     {
         msg["announcementColor"_L1] =
             qmagicenum::enumNameString(this->announcementColor);
-    }
-
-    // XXX: figure out if we can add this in tests
-    if (!getApp()->isTest())
-    {
-        msg["parseTime"_L1] = this->parseTime.toString(Qt::ISODate);
     }
 
     QJsonArray elements;

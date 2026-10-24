@@ -5,6 +5,7 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/completion/sources/UserSource.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
@@ -16,6 +17,7 @@
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
@@ -256,6 +258,27 @@ protected:
                                                          isFirstWord);
     }
 };
+
+TEST_F(InputCompletionTest, WhisperUserCompletion)
+{
+    auto currentUser = this->mockApplication->accounts.twitch.getCurrent();
+    currentUser->addWhisperUser("forsen");
+    currentUser->addWhisperUser("pajlada");
+
+    Channel whispers("/whispers", Channel::Type::TwitchWhispers);
+    UserSource source(&whispers, std::make_unique<ClassicUserStrategy>(),
+                      nullptr, false);
+
+    source.update("for");
+    ASSERT_EQ(source.output().size(), 1);
+    EXPECT_EQ(source.output()[0].first, "forsen");
+    EXPECT_EQ(source.output()[0].second, "forsen");
+
+    QStringList completions;
+    source.addToStringList(completions);
+    ASSERT_EQ(completions.size(), 1);
+    EXPECT_EQ(completions[0], "forsen ");
+}
 
 TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
 {
