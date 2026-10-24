@@ -27,6 +27,10 @@
 
 #include <functional>
 
+#ifdef Q_OS_MACOS
+#    include "util/MacOsHelpers.h"
+#endif
+
 #ifdef USEWINSDK
 #    include <dwmapi.h>
 #    include <shellapi.h>
@@ -99,8 +103,14 @@ std::optional<UINT> hiddenTaskbarEdge(LPRECT rcMon = nullptr)
         return std::nullopt;
     }
 
-    APPBARDATA state = {sizeof(state), taskbar};
-    APPBARDATA pos = {sizeof(pos), taskbar};
+    APPBARDATA state{
+        .cbSize = sizeof(state),
+        .hWnd = taskbar,
+    };
+    APPBARDATA pos{
+        .cbSize = sizeof(pos),
+        .hWnd = taskbar,
+    };
 
     auto appBarState =
         static_cast<LRESULT>(SHAppBarMessage(ABM_GETSTATE, &state));
@@ -430,12 +440,18 @@ void BaseWindow::setTopMost(bool topMost)
         this->tryApplyTopMost();
     }
 #else
-    auto isVisible = this->isVisible();
-    this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-    if (isVisible)
+    auto flags = this->windowFlags();
+    flags.setFlag(Qt::WindowStaysOnTopHint, topMost);
+    this->overrideWindowFlags(flags);
+
+    if (auto *window = this->windowHandle())
     {
-        this->show();
+        window->setFlag(Qt::WindowStaysOnTopHint, topMost);
     }
+#endif
+
+#ifdef Q_OS_MACOS
+    this->setMacOSWindowManagedIfTopMost(topMost);
 #endif
 
     this->topMostChanged(this->isTopMost_);
@@ -462,6 +478,20 @@ void BaseWindow::tryApplyTopMost()
 
     ::SetWindowPos(*hwnd, this->isTopMost_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+#endif
+
+#ifdef Q_OS_MACOS
+void BaseWindow::setMacOSWindowManagedIfTopMost(bool topMost)
+{
+    // If a window is elevated to the top, it will stop showing up in
+    // things like Mission Control. This manually tells macOS that
+    // we want this window to still be managed.
+
+    if (topMost)
+    {
+        setMacOSWindowManaged(*this);
+    }
 }
 #endif
 
@@ -803,6 +833,10 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+#ifdef Q_OS_MACOS
+    this->setMacOSWindowManagedIfTopMost(this->isTopMost());
+#endif
+
 #ifdef Q_OS_WIN
     if (this->flags_.has(BoundsCheckOnShow))
     {
@@ -1126,7 +1160,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         if (this->hasCustomWindowFrame())
         {
             // disable OS window border
-            const MARGINS margins = {-1};
+            const MARGINS margins{.cxLeftWidth = -1};
             DwmExtendFrameIntoClientArea(msg->hwnd, &margins);
         }
 
