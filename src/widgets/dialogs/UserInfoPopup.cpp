@@ -452,6 +452,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                 this->split_->getInput().prependText("/w " + this->userName_ +
                                                      " ");
+                this->split_->window()->activateWindow();
                 this->split_->setFocus(Qt::MouseFocusReason);
             });
 
