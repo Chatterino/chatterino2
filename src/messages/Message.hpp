@@ -55,6 +55,9 @@ struct Message {
     QString displayName;
     QString localizedName;
     QString userID;
+    /// The username of the user being banned, warned, modded, etc.
+    /// For chat clears, this is the moderator who cleared chat.
+    /// For message deletions, this is "msg:<message ID>" instead of a username.
     QString targetUser;
     QString channelName;
     QColor usernameColor;
