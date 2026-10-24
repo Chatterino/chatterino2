@@ -18,7 +18,9 @@ CommandModel::CommandModel(QObject *parent)
 
 // turn a vector item into a model row
 Command CommandModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                     const Command &original)
+                                     const Command &original,
+                                     std::optional<QModelIndex> index,
+                                     std::optional<int> role)
 {
     return Command(row[Column::Trigger]->data(Qt::EditRole).toString(),
                    row[Column::CommandFunc]->data(Qt::EditRole).toString(),
