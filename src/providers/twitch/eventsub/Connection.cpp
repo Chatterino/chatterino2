@@ -15,6 +15,7 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -248,7 +249,7 @@ void Connection::onAutomodMessageHold(
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
             message, MessageContext::Original);
 
-        if (getSettings()->showAutomodInMentions)
+        if (message->flags.has(MessageFlag::ShowInMentions))
         {
             getApp()->getTwitch()->getMentionsChannel()->addMessage(
                 message, MessageContext::Original);
@@ -308,12 +309,19 @@ void Connection::onChannelSuspiciousUserMessage(
     }
 
     auto time = chronoToQDateTime(metadata.messageTimestamp);
-    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
-    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+    auto [message, messageAlert] =
+        makeSuspiciousUserMessage(channel, time, payload.event);
 
-    runInGuiThread([channel, header, body] {
-        channel->addMessage(header, MessageContext::Original);
-        channel->addMessage(body, MessageContext::Original);
+    runInGuiThread([channel, message, messageAlert] {
+        MessageBuilder::triggerHighlights(channel, messageAlert);
+
+        channel->addMessage(message, MessageContext::Original);
+
+        if (message->flags.has(MessageFlag::ShowInMentions))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                message, MessageContext::Original);
+        }
     });
 }
 

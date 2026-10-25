@@ -37,7 +37,9 @@ struct Event {
     std::string heldAt;
 
     /// json_tag=reason
-    std::variant<automod::AutomodReason, automod::BlockedTermReason> reason;
+    std::variant<automod::AutomodReason, automod::BlockedTermReason,
+                 std::string>
+        reason;
 };
 
 struct Payload {
