@@ -712,6 +712,17 @@ void Notebook::setShowTabs(bool value)
     this->updateTabVisibility();
 }
 
+bool Notebook::getShowLine() const
+{
+    return this->showLine_;
+}
+
+void Notebook::setShowLine(bool value)
+{
+    this->showLine_ = value;
+    this->update();
+}
+
 void Notebook::setGrowWrappedNotebookLines(bool value)
 {
     if (this->growWrappedNotebookLines != value)
@@ -802,15 +813,22 @@ void Notebook::performLayout(bool animated)
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
     const auto spacing = static_cast<int>(2 * this->scale());
+    auto minimumTabAreaSpace = static_cast<int>(tabHeight * 0.5);
+    auto lineThickness = spacing;
+    if (!this->showLine_)
+    {
+        minimumTabAreaSpace = 0;
+        lineThickness = 0;
+    }
     const LayoutContext ctx{
         .left = spacing,
         .right = this->width() - spacing,
         .bottom = this->height(),
         .scale = scale,
         .tabHeight = tabHeight,
-        .minimumTabAreaSpace = static_cast<int>(tabHeight * 0.5),
+        .minimumTabAreaSpace = minimumTabAreaSpace,
         .addButtonWidth = this->showAddButton_ ? tabHeight : 0,
-        .lineThickness = spacing,
+        .lineThickness = lineThickness,
         .tabSpacer = std::max(1, static_cast<int>(scale)),
         .buttonWidth = tabHeight,
         .buttonHeight = tabHeight - 1,
@@ -977,8 +995,11 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
             this->update();
         }
 
-        /// Increment for the line at the bottom
-        y += int(2 * ctx.scale);
+        if (this->showLine_)
+        {
+            /// Increment for the line at the bottom
+            y += int(2 * ctx.scale);
+        }
 
         // set page bounds
         if (this->selectedPage_ != nullptr)
@@ -1254,6 +1275,11 @@ void Notebook::setTabLocation(NotebookTabLocation location)
 
 void Notebook::paintEvent(QPaintEvent *event)
 {
+    if (!this->showLine_)
+    {
+        return;
+    }
+
     auto scale = this->scale();
 
     QPainter painter(this);

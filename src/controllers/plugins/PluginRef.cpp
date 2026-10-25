@@ -5,6 +5,7 @@
 #include "controllers/plugins/PluginRef.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/plugins/Plugin.hpp"

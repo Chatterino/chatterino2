@@ -557,7 +557,13 @@ std::shared_ptr<lua::api::ChannelProvider> PluginController::findProvider(
     {
         return nullptr;
     }
-    const auto &providers = pluginIt->second->channelProviders();
+    const auto *oPl = std::get_if<PluginPtr>(&pluginIt->second);
+    if (oPl == nullptr)
+    {
+        return nullptr;
+    }
+
+    const auto &providers = (*oPl)->channelProviders();
     auto providerIt = providers.find(providerID);
     if (providerIt == providers.end())
     {

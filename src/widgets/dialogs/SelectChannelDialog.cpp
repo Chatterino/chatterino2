@@ -49,15 +49,16 @@ struct WeakChannelProvider {
 #endif
 };
 
-class MyNotebook : public Notebook
+class SizedNotebook : public Notebook
 {
 public:
-    MyNotebook(QWidget *parent = nullptr)
+    SizedNotebook(QWidget *parent = nullptr)
         : Notebook(parent)
     {
         this->setShowAddButton(false);
         this->setShowTabs(false);
         this->setAllowUserTabManagement(false);
+        this->setShowLine(false);
     }
 
     QSize sizeHint() const override;
@@ -65,18 +66,14 @@ public:
     bool hasHeightForWidth() const override;
     int heightForWidth(int width) const override;
 
+    void select(QWidget *page, bool focusPage = true,
+                bool recordInHistory = true) override;
+
 protected:
-    void afterPageAdded() override
-    {
-        if (this->getPageCount() > 1 && !this->getShowTabs())
-        {
-            this->setShowTabs(true);
-            this->setShowAddButton(false);
-        }
-    }
+    void afterPageAdded() override;
 };
 
-QSize MyNotebook::sizeHint() const
+QSize SizedNotebook::sizeHint() const
 {
     if (auto *sp = this->getSelectedPage())
     {
@@ -87,18 +84,27 @@ QSize MyNotebook::sizeHint() const
     return {0, 0};
 }
 
-QSize MyNotebook::minimumSizeHint() const
+QSize SizedNotebook::minimumSizeHint() const
 {
-    if (auto *sp = this->getSelectedPage())
+    QSize hint;
+    for (int i = 0, count = this->getPageCount(); i < count; ++i)
     {
-        QSize hint = sp->minimumSizeHint();
-        hint.rheight() += this->height() - sp->height();
-        return hint;
+        auto *page = this->getPageAt(i);
+        if (page)
+        {
+            hint = hint.expandedTo(page->minimumSizeHint());
+        }
     }
-    return {0, 0};
+
+    // Add the header to the minimum size.
+    if (auto *selected = this->getSelectedPage())
+    {
+        hint.rheight() += this->height() - selected->height();
+    }
+    return hint;
 }
 
-bool MyNotebook::hasHeightForWidth() const
+bool SizedNotebook::hasHeightForWidth() const
 {
     if (auto *sp = this->getSelectedPage())
     {
@@ -107,7 +113,7 @@ bool MyNotebook::hasHeightForWidth() const
     return false;
 }
 
-int MyNotebook::heightForWidth(int width) const
+int SizedNotebook::heightForWidth(int width) const
 {
     if (auto *sp = this->getSelectedPage())
     {
@@ -115,6 +121,30 @@ int MyNotebook::heightForWidth(int width) const
         return hfw + (this->height() - sp->height());
     }
     return 0;
+}
+
+void SizedNotebook::select(QWidget *page, bool focusPage, bool recordInHistory)
+{
+    Notebook::select(page, focusPage, recordInHistory);
+    this->updateGeometry();
+    // this->adjustSize();
+    // if (auto *parent = this->parentWidget())
+    // {
+    //     if (auto *layout = parent->layout())
+    //     {
+    //         layout->activate();
+    //     }
+    // }
+}
+
+void SizedNotebook::afterPageAdded()
+{
+    if (this->getPageCount() > 1 && !this->getShowTabs())
+    {
+        this->setShowTabs(true);
+        this->setShowAddButton(false);
+        this->setShowLine(true);
+    }
 }
 
 }  // namespace
@@ -143,7 +173,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     auto &ui = this->ui_;
     auto *rootLayout = new QVBoxLayout(this->getLayoutContainer());
     rootLayout->setContentsMargins({});
-    ui.notebook = new MyNotebook(this->getLayoutContainer());
+    ui.notebook = new SizedNotebook(this->getLayoutContainer());
     rootLayout->addWidget(ui.notebook, 1);
 
     ui.twitchPage = new QWidget;
@@ -172,6 +202,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              ui.channelName->setFocus();
                              ui.channelName->selectAll();
                          }
+                         ui.notebook->updateGeometry();
                      });
 
     ui.channel->installEventFilter(&this->tabFilter_);
@@ -191,6 +222,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.whispersLabel->setVisible(enabled);
+                         ui.notebook->updateGeometry();
                      });
 
     ui.whispers->installEventFilter(&this->tabFilter_);
@@ -209,6 +241,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.mentionsLabel->setVisible(enabled);
+                         ui.notebook->updateGeometry();
                      });
 
     ui.mentions->installEventFilter(&this->tabFilter_);
@@ -225,6 +258,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.watchingLabel->setVisible(enabled);
+                         ui.notebook->updateGeometry();
                      });
 
     ui.watching->installEventFilter(&this->tabFilter_);
@@ -241,6 +275,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.liveLabel->setVisible(enabled);
+                         ui.notebook->updateGeometry();
                      });
 
     ui.live->installEventFilter(&this->tabFilter_);
@@ -259,6 +294,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.automodLabel->setVisible(enabled);
+                         ui.notebook->updateGeometry();
                      });
 
     ui.automod->installEventFilter(&this->tabFilter_);
@@ -270,9 +306,15 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     // Plugin page
     std::vector<std::pair<QString, WeakChannelProvider>> providers;
 #ifdef CHATTERINO_HAVE_PLUGINS
-    const auto &plugins = getApp()->getPlugins()->plugins();
-    for (const auto &[pluginID, plugin] : plugins)
+    const auto &plugins = getApp()->getPlugins()->allPlugins();
+    for (const auto &[pluginID, maybePlugin] : plugins)
     {
+        const auto *pluginPtrPtr = std::get_if<PluginPtr>(&maybePlugin);
+        if (!pluginPtrPtr)
+        {
+            continue;
+        }
+        const auto *plugin = pluginPtrPtr->get();
         for (const auto &[providerID, provider] : plugin->channelProviders())
         {
             auto name =
@@ -296,6 +338,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         QObject::connect(ui.pluginProviderBox, &QComboBox::currentIndexChanged,
                          this, [this] {
                              this->refreshChannelProviderWidgets();
+                             this->ui_.notebook->updateGeometry();
                          });
         layout->addWidget(ui.pluginProviderBox);
 
@@ -382,7 +425,6 @@ void SelectChannelDialog::setSelectedChannel(
         break;
 #ifdef CHATTERINO_HAVE_PLUGINS
         case Channel::Type::Plugin: {
-            this->ui_.notebook->select(this->ui_.pluginPage);
             if (auto *pc = dynamic_cast<PluginChannel *>(channel.get()))
             {
                 auto provider = getApp()->getPlugins()->findProvider(
@@ -395,6 +437,7 @@ void SelectChannelDialog::setSelectedChannel(
                     {
                         this->ui_.pluginProviderBox->setCurrentIndex(idx);
                         this->applyChannelProviderArguments(pc->arguments());
+                        this->ui_.notebook->select(this->ui_.pluginPage);
                     }
                 }
             }

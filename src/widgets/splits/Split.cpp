@@ -1320,7 +1320,7 @@ SplitDescriptor Split::buildDescriptor() const
             break;
 
         case Channel::Type::Plugin: {
-            auto *pl = dynamic_cast<PluginChannel *>(chan.get());
+            auto *pl = dynamic_cast<PluginChannel *>(chan.get().get());
             descriptor.channelName_ = pl->getName();
             descriptor.pluginID = pl->pluginID();
             descriptor.providerID = pl->providerID();
