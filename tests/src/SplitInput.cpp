@@ -172,6 +172,82 @@ public:
 
 }  // namespace
 
+TEST(SplitInput, SetWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    input.insertText("please stop whispering me");
+    auto cursor = edit->textCursor();
+    cursor.setPosition(6);
+    cursor.setPosition(11, QTextCursor::KeepAnchor);
+    edit->setTextCursor(cursor);
+
+    // Prepending keeps existing input text, and does not replace selected text
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen please stop whispering me");
+    EXPECT_EQ(edit->textCursor().position(), input.getInputText().size());
+
+    // Undo removes the prefix without clearing undo history
+    input.undoInput();
+    EXPECT_EQ(input.getInputText(), "please stop whispering me");
+    input.undoInput();
+    EXPECT_TRUE(input.getInputText().isEmpty());
+}
+
+TEST(SplitInput, SetWhisperTargetWithEmptyInput)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen ");
+}
+
+TEST(SplitInput, RepeatedWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.insertText("please stop whispering me");
+    input.setWhisperTarget("forsen");
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen please stop whispering me");
+}
+
+TEST(SplitInput, ChangeWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.insertText(".w pajlada FeelsDankMan");
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen FeelsDankMan");
+
+    input.undoInput();
+    EXPECT_EQ(input.getInputText(), ".w pajlada FeelsDankMan");
+}
+
+TEST(SplitInput, SetWhisperTargetWithoutMessage)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    for (const auto &text : {"/w", "/w ", "/w pajlada", ".w pajlada "})
+    {
+        input.setInputText(text);
+        input.setWhisperTarget("forsen");
+        EXPECT_EQ(input.getInputText(), "/w forsen ") << text;
+    }
+}
+
 namespace chatterino {
 
 class PopupCycleFixture : public ::testing::Test
