@@ -1237,6 +1237,11 @@ public:
         FailureCallback<HelixGetSharedChatSessionError, QString>
             failureCallback) = 0;
 
+    /// Technically not a helix request >:-)
+    /// https://dev.twitch.tv/docs/authentication/validate-tokens#validating-tokens
+    virtual void validateToken(NetworkSuccessCallback successCallback,
+                               NetworkErrorCallback errorCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1674,6 +1679,11 @@ public:
         ResultCallback<HelixSharedChatSession> successCallback,
         FailureCallback<HelixGetSharedChatSessionError, QString>
             failureCallback) final;
+
+    /// Technically not a helix request >:-)
+    /// https://dev.twitch.tv/docs/authentication/validate-tokens#validating-tokens
+    void validateToken(NetworkSuccessCallback successCallback,
+                       NetworkErrorCallback errorCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
