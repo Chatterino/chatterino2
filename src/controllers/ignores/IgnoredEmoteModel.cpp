@@ -14,7 +14,9 @@ IgnoredEmoteModel::IgnoredEmoteModel(QObject *parent)
 }
 
 IgnoredEmote IgnoredEmoteModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const IgnoredEmote & /*original*/)
+    std::vector<QStandardItem *> &row, const IgnoredEmote & /*original*/,
+    // NOLINTNEXTLINE(clazy-function-args-by-ref)
+    std::optional<QModelIndex> /*index*/, std::optional<int> /*role*/)
 {
     return IgnoredEmote{row[0]->data(Qt::DisplayRole).toString(),
                         row[1]->data(Qt::CheckStateRole).toBool()};

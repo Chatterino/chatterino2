@@ -1179,9 +1179,9 @@ TEST_F(PluginTest, MessageModification)
                 assert(msg.username_color == "#ccbbaaff")
             end,
             function(msg)
-                assert(msg.server_received_time == 1230000)
-                msg.server_received_time = 1240000
-                assert(msg.server_received_time == 1240000)
+                assert(msg.timestamp == 1230000)
+                msg.timestamp = 1240000
+                assert(msg.timestamp == 1240000)
             end,
             function(msg)
                 print(msg.highlight_color)
@@ -1210,7 +1210,7 @@ TEST_F(PluginTest, MessageModification)
         msg->userID = "id";
         msg->channelName = "channel";
         msg->usernameColor = QColor(0xaabbcc);
-        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->timestamp = QDateTime::fromMSecsSinceEpoch(1230000);
         msg->highlightColor = std::make_shared<QColor>(0x223344);
         msg->elements.push_back(
             std::make_unique<TextElement>("lol", MessageElementFlag::Text));

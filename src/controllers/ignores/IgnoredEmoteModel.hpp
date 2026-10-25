@@ -16,7 +16,9 @@ public:
 
 protected:
     IgnoredEmote getItemFromRow(std::vector<QStandardItem *> &row,
-                                const IgnoredEmote &original) override;
+                                const IgnoredEmote &original,
+                                std::optional<QModelIndex> index,
+                                std::optional<int> role) override;
     void getRowFromItem(const IgnoredEmote &item,
                         std::vector<QStandardItem *> &row) override;
 };
