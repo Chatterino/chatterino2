@@ -312,12 +312,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
                 continue;
             }
 
-            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            if (msg->timestamp < snapshotMsg->timestamp)
             {
                 // We found the first message that comes after the current message.
                 // Therefore, we can put the current message directly before. We
                 // assume that the messages we are filling in are in ascending
-                // order by serverReceivedTime.
+                // order by timestamp.
                 this->messages_.insertBefore(snapshotMsg, msg);
                 insertedFlag = true;
                 break;
@@ -441,6 +441,7 @@ MessageSinkTraits Channel::sinkTraits() const
     return {
         MessageSinkTrait::AddMentionsToGlobalChannel,
         MessageSinkTrait::RequiresKnownChannelPointReward,
+        MessageSinkTrait::UpdateCurrentUserState,
     };
 }
 
