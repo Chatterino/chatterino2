@@ -69,10 +69,14 @@ struct HelixMinimalUser {
         switch (mode)
         {
             case UsernameDisplayMode::Username:
-                return this->login;
+                if (hasLocalizedName)
+                {
+                    return this->login;
+                }
+                return this->displayName;
 
             case UsernameDisplayMode::LocalizedName:
-                return hasLocalizedName ? this->displayName : this->login;
+                return this->displayName;
 
             default:
             case UsernameDisplayMode::UsernameAndLocalizedName:
@@ -81,7 +85,7 @@ struct HelixMinimalUser {
                     return this->login + QStringLiteral(" (") +
                            this->displayName + QStringLiteral(")");
                 }
-                return this->login;
+                return this->displayName;
         }
     }
 };
