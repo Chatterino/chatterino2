@@ -160,12 +160,16 @@ IndirectChannel SplitDescriptor::decodeChannel() const
         case Channel::Type::Misc:
             return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
         case Channel::Type::Plugin:
+#if CHATTERINO_HAVE_PLUGINS
             return getApp()->getPlugins()->getOrCreatePluginChannelFromSave({
                 .channelName = this->channelName_,
                 .pluginID = this->pluginID,
                 .providerID = this->providerID,
                 .arguments = this->arguments,
             });
+#else
+            return Channel::getEmpty();
+#endif
 
         case Channel::Type::None:
         case Channel::Type::Direct:
