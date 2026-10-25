@@ -254,7 +254,7 @@ namespace chatterino {
 using namespace chatterino::nm::detail;
 using namespace literals;
 
-bool registerNmHost(const Paths &paths)
+ExpectedStr<void> registerNmHost(const Paths &paths)
 {
     QStringList extensionIDs =
         getSettings()->additionalExtensionIDs.getValue().split(
@@ -265,11 +265,13 @@ bool registerNmHost(const Paths &paths)
 
     const auto chromeRegistered =
         registerNmManifest(paths, CHROME, chromeManifest);
+    QStringList errors;
     if (!chromeRegistered)
     {
         qCDebug(chatterinoNativeMessage)
             << "Chrome native messaging registration:"
             << chromeRegistered.error();
+        errors.append(u"Chrome: "_s % chromeRegistered.error());
     }
     const auto firefoxRegistered =
         registerNmManifest(paths, FIREFOX, firefoxManifest);
@@ -278,6 +280,7 @@ bool registerNmHost(const Paths &paths)
         qCDebug(chatterinoNativeMessage)
             << "Firefox native messaging registration:"
             << firefoxRegistered.error();
+        errors.append(u"Firefox: "_s % firefoxRegistered.error());
     }
 
 #ifndef Q_OS_WIN
@@ -291,7 +294,11 @@ bool registerNmHost(const Paths &paths)
             break;
     }
 #endif
-    return bool(chromeRegistered) && bool(firefoxRegistered);
+    if (!errors.isEmpty())
+    {
+        return makeUnexpected(errors.join('\n'));
+    }
+    return {};
 }
 
 void registerNmHost(Modes modes, const Paths &paths)

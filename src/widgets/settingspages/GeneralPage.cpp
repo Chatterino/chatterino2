@@ -27,6 +27,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -530,7 +531,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "match the width of Twitch web chat.")
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
+    auto *timestampFormatDropdown = layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
@@ -548,6 +549,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    timestampFormatDropdown->completer()->setCaseSensitivity(Qt::CaseSensitive);
 
     SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
         ->addTo(layout);
@@ -567,6 +569,31 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Twitch GIFs will be shown inline. When disabled, they're "
                      "shown as links.")
         ->addTo(layout);
+
+    auto *twitchGifSize = layout.addDropdown<float>(
+        "Twitch GIF size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.4x (Twitch)", "1.5x", "2x"},
+        s.twitchGifScale,
+        [](auto value) {
+            if (value == 1)
+            {
+                return QString("Default");
+            }
+            if (qFuzzyCompare(value, 1.4F))
+            {
+                return QString("1.4x (Twitch)");
+            }
+            return QString::number(value) + "x";
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        });
+    twitchGifSize->setEnabled(s.showTwitchGifs);
+    s.showTwitchGifs.connect(
+        [twitchGifSize](bool enabled) {
+            twitchGifSize->setEnabled(enabled);
+        },
+        this->managedConnections_);
 
     layout.addDropdown<int>(
         "Limit message height",
@@ -959,15 +986,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "to point your browser extension to this copy of Chatterino. "
             "You may manually register it below.");
         layout.addButton("Register browser integration", [this] {
-            if (registerNmHost(getApp()->getPaths()))
+            const auto result = registerNmHost(getApp()->getPaths());
+            if (result)
             {
                 QMessageBox::information(this, "Registration Successful",
                                          "Browser integration registered.");
             }
             else
             {
-                QMessageBox::warning(this, "Registration Failed",
-                                     "Failed to register browser integration.");
+                QMessageBox::warning(
+                    this, "Registration Failed",
+                    "Failed to register browser integration:\n" +
+                        result.error());
             }
         });
     }
