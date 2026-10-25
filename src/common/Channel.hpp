@@ -102,6 +102,7 @@ public:
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
     void addSystemMessage(const QString &contents);
+    void addSystemMessage(const QString &contents, const QString &timeoutUser);
 
     /// Inserts the given messages in order by Message::timestamp.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
