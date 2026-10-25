@@ -3853,6 +3853,21 @@ void Helix::getSharedChatSession(
         .execute();
 }
 
+void Helix::validateToken(NetworkSuccessCallback successCallback,
+                          NetworkErrorCallback errorCallback)
+{
+    static constexpr QStringView baseUrl = u"https://id.twitch.tv/oauth2/";
+
+    QUrl fullUrl(baseUrl % u"validate");
+
+    NetworkRequest(fullUrl, NetworkRequestType::Get)
+        .timeout(20 * 1000)
+        .header("Authorization", u"OAuth " % this->oauthToken)
+        .onSuccess(std::move(successCallback))
+        .onError(std::move(errorCallback))
+        .execute();
+}
+
 QDebug &operator<<(QDebug &dbg,
                    const HelixCreateEventSubSubscriptionResponse &data)
 {
@@ -4209,14 +4224,10 @@ void Helix::paginate(
 {
     auto onSuccess =
         std::make_shared<std::function<void(NetworkResult)>>(nullptr);
-    // This is the actual callback passed to NetworkRequest.
-    // It wraps the shared-ptr.
-    auto onSuccessCb = [onSuccess](const auto &res) {
-        return (*onSuccess)(res);
-    };
+    std::weak_ptr<std::function<void(NetworkResult)>> weakCb = onSuccess;
 
-    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccessCb,
-                  url{url}, baseQuery{baseQuery},
+    *onSuccess = [this, onPage = std::move(onPage), onError, weakCb, url{url},
+                  baseQuery{baseQuery},
                   cancellationToken =
                       std::move(cancellationToken)](const NetworkResult &res) {
         if (cancellationToken.isCancelled())
@@ -4248,14 +4259,24 @@ void Helix::paginate(
         query.removeAllQueryItems(u"after"_s);
         query.addQueryItem(u"after"_s, cursor);
 
+        auto nextOnSuccess = weakCb.lock();
+        if (!nextOnSuccess)
+        {
+            return;
+        }
+
         this->makeGet(url, query)
-            .onSuccess(onSuccessCb)
+            .onSuccess([onSuccess = std::move(nextOnSuccess)](const auto &res) {
+                (*onSuccess)(res);
+            })
             .onError(onError)
             .execute();
     };
 
     this->makeGet(url, baseQuery)
-        .onSuccess(std::move(onSuccessCb))
+        .onSuccess([onSuccess = std::move(onSuccess)](const auto &res) {
+            (*onSuccess)(res);
+        })
         .onError(std::move(onError))
         .execute();
 }

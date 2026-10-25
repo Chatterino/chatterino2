@@ -95,14 +95,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|Collapsed|WatchStreak",
+            "flags": "System|Highlighted|Collapsed|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "12265c31-d7c1-4344-9afd-894b3c290bc9",
             "localizedName": "",
             "loginName": "club_reg",
             "messageText": "club_reg watched 15 consecutive streams and sparked a watch streak!",
             "searchText": "club_reg watched 15 consecutive streams and sparked a watch streak!",
-            "serverReceivedTime": "2026-05-30T12:19:28Z",
+            "timestamp": "2026-05-30T12:19:28Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

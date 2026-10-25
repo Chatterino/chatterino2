@@ -201,7 +201,7 @@ declare namespace c2 {
         user_id: string;
         channel_name: string;
         username_color: string;
-        server_received_time: number;
+        timestamp: number;
         highlight_color: string | null;
         frozen: boolean;
         elements(): MessageElement[];
@@ -225,7 +225,7 @@ declare namespace c2 {
         user_id?: string;
         channel_name?: string;
         username_color?: string;
-        server_received_time?: number;
+        timestamp?: number;
         highlight_color?: string | null;
         elements?: (MessageElementInit | MessageElement)[];
     }

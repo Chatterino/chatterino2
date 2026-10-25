@@ -1502,9 +1502,11 @@ std::unique_ptr<MessageElement> LinebreakElement::clone() const
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
-                                         MessageElementFlags flags)
+                                         MessageElementFlags flags,
+                                         QString copyText)
     : MessageElement(flags)
     , images_(std::move(images))
+    , copyText_(std::move(copyText))
 {
 }
 
@@ -1530,6 +1532,11 @@ const ImageSet &ScalingImageElement::images() const
     return this->images_;
 }
 
+const QString &ScalingImageElement::copyText() const
+{
+    return this->copyText_;
+}
+
 QJsonObject ScalingImageElement::toJson() const
 {
     auto base = MessageElement::toJson();
@@ -1545,8 +1552,48 @@ std::string_view ScalingImageElement::type() const
 }
 std::unique_ptr<MessageElement> ScalingImageElement::clone() const
 {
+    auto elem = std::make_unique<ScalingImageElement>(
+        this->images_, this->getFlags(), this->copyText_);
+    elem->cloneFrom(*this);
+    return elem;
+}
+
+TwitchGifElement::TwitchGifElement(ImageSet images, QString copyText)
+    : ScalingImageElement(std::move(images), MessageElementFlag::TwitchGif,
+                          std::move(copyText))
+{
+}
+
+void TwitchGifElement::addToContainer(MessageLayoutContainer &container,
+                                      const MessageLayoutContext &ctx)
+{
+    if (!this->matchesFlags(ctx.flags))
+    {
+        return;
+    }
+
+    const auto scale = getSettings()->twitchGifScale.getValue();
+    const auto &image =
+        this->images().getImageOrLoaded(container.getImageScale() * scale);
+    if (image->isEmpty())
+    {
+        return;
+    }
+
+    auto size = image->size() * container.getScale() * scale;
+    // Scale down to fit within the split
+    if (size.width() > container.remainingWidth())
+    {
+        size *= container.remainingWidth() / size.width();
+    }
+
+    container.addElement(new ImageLayoutElement(*this, image, size));
+}
+
+std::unique_ptr<MessageElement> TwitchGifElement::clone() const
+{
     auto elem =
-        std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
+        std::make_unique<TwitchGifElement>(this->images(), this->copyText());
     elem->cloneFrom(*this);
     return elem;
 }

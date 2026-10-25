@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "controllers/filters/lang/Tokenizer.hpp"
 #include "controllers/filters/lang/Types.hpp"
 
 #include <QString>

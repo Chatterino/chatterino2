@@ -44,6 +44,11 @@ public:
         return this->args_;
     }
 
+    const Modes &getModes() override
+    {
+        return this->modes_;
+    }
+
     Theme *getThemes() override
     {
         assert(

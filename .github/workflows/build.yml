@@ -78,6 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
           persist-credentials: false
@@ -136,7 +137,7 @@ jobs:
 
       - name: Upload artifact - .deb (Ubuntu)
         if: matrix.build-deb
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Chatterino-${{ matrix.os }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
@@ -168,6 +169,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
           persist-credentials: false
@@ -197,7 +199,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
+        uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -301,14 +303,14 @@ jobs:
 
       - name: Upload artifact (Windows - binary)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
       - name: Upload artifact (Windows - symbols)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
           path: build/bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z
@@ -359,7 +361,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
           path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
@@ -372,6 +374,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           fetch-depth: 0 # allows for tags access
           persist-credentials: true # Required to update the nightly-build tag.
 
