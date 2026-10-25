@@ -519,14 +519,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         }
     }
 
-    if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
-    {
-        menu->addAction(
-            OPEN_WHISPERS_IN_BROWSER,
-            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
-            this->split_, &Split::openWhispersInBrowser);
-    }
-
     menu->addAction(
         "Followed channels",
         h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
@@ -566,6 +558,15 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             });
         }
 
+        menu->addSeparator();
+    }
+
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
+    {
+        menu->addAction(
+            OPEN_WHISPERS_IN_BROWSER,
+            h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"),
+            this->split_, &Split::openWhispersInBrowser);
         menu->addSeparator();
     }
 
