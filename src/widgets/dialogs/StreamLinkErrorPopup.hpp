@@ -16,13 +16,14 @@ namespace chatterino {
 class StreamLinkErrorPopup : public BasePopup
 {
 public:
-    StreamLinkErrorPopup(const QString &url, const QString &errorMessage);
     static void showError(const QString &url, const QString &errorMessage);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
 
 private:
+    StreamLinkErrorPopup(const QString &url, const QString &errorMessage);
+
     void okButtonClicked();
 
     struct {
