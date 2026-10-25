@@ -27,11 +27,6 @@ namespace {
 
 using namespace chatterino;
 
-void showStreamLinkError(const QString &url, const QString &output)
-{
-    StreamLinkErrorPopup::showError(url, output);
-}
-
 QString getStreamlinkPath()
 {
     if (getSettings()->streamlinkUseCustomPath)
@@ -127,7 +122,7 @@ void getStreamQualities(const QString &channelURL,
             QString lastLine = output.trimmed().split('\n').last().trimmed();
             if (!lastLine.startsWith("Available streams: "))
             {
-                showStreamLinkError(channelURL, output);
+                StreamLinkErrorPopup::showError(channelURL, output);
                 return;
             }
 
@@ -179,8 +174,8 @@ void openStreamlink(const QString &url, const QString &quality,
                      [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
                          if (exitCode != 0)
                          {
-                             showStreamLinkError(url,
-                                                 proc->readAllStandardOutput());
+                             StreamLinkErrorPopup::showError(
+                                 url, proc->readAllStandardOutput());
                          }
                      });
 
