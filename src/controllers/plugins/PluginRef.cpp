@@ -6,7 +6,6 @@
 
 #include "util/WeakPtrHelpers.hpp"
 
-
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "Application.hpp"
