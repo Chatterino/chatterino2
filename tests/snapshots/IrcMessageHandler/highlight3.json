@@ -113,7 +113,7 @@
             "loginName": "nerixyz",
             "messageText": "foo no-mention-highlight",
             "searchText": "nerixyz  nerixyz: foo no-mention-highlight ",
-            "serverReceivedTime": "2024-09-20T21:15:27Z",
+            "timestamp": "2024-09-20T21:15:27Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "27"

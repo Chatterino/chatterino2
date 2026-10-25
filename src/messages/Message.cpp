@@ -33,73 +33,10 @@ Message::~Message()
 
 ScrollbarHighlight Message::getScrollBarHighlight() const
 {
-    if (this->flags.has(MessageFlag::Highlighted) ||
-        this->flags.has(MessageFlag::HighlightedWhisper))
+    if (this->flags.has(MessageFlag::Highlighted))
     {
         return {
             this->highlightColor,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::WatchStreak) &&
-        getSettings()->enableWatchStreakHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::WatchStreak),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-        this->flags.has(MessageFlag::RedeemedChannelPointReward))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            ScrollbarHighlight::Default,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::FirstMessage))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
-        this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::AutomodHighlight),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Announcement) &&
-        getSettings()->enableAnnouncementHighlight)
-    {
-        return {
-            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
-                this->announcementColor,
-                getSettings()->enableColoredAnnouncementHighlight)),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::UncategorizedNotification))
-    {
-        // TODO: Give this a better/its own color :-)
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
         };
     }
 
@@ -120,7 +57,7 @@ std::shared_ptr<Message> Message::clone() const
     cloned->timeoutUser = this->timeoutUser;
     cloned->channelName = this->channelName;
     cloned->usernameColor = this->usernameColor;
-    cloned->serverReceivedTime = this->serverReceivedTime;
+    cloned->timestamp = this->timestamp;
     cloned->twitchBadges = this->twitchBadges;
     cloned->twitchBadgeInfos = this->twitchBadgeInfos;
     cloned->externalBadges = this->externalBadges;
@@ -153,8 +90,7 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
-        {"serverReceivedTime"_L1,
-         this->serverReceivedTime.toString(Qt::ISODate)},
+        {"timestamp"_L1, this->timestamp.toString(Qt::ISODate)},
         {"frozen"_L1, this->frozen},
     };
 
@@ -229,8 +165,7 @@ Message::ReplyStatus Message::isReplyable() const
                             MessageFlag::Timeout, MessageFlag::Whisper,
                             MessageFlag::ModerationAction,
                             MessageFlag::InvalidReplyTarget}) ||
-        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
-            oneDayInSeconds)
+        this->timestamp.secsTo(QDateTime::currentDateTime()) > oneDayInSeconds)
     {
         messageReplyable = false;
     }

@@ -66,7 +66,7 @@
             "loginName": "",
             "messageText": "Chat has been cleared by a moderator. (4 times) ",
             "searchText": "Chat has been cleared by a moderator. (4 times) ",
-            "serverReceivedTime": "2025-01-12T10:41:54Z",
+            "timestamp": "2025-01-12T10:41:54Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
@@ -233,7 +233,7 @@
             "loginName": "pajlada",
             "messageText": "asd",
             "searchText": "pajlada  pajlada: asd ",
-            "serverReceivedTime": "2025-01-12T10:41:52Z",
+            "timestamp": "2025-01-12T10:41:52Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "108"

@@ -932,7 +932,7 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
     {
         if (auto *popup = this->inputCompletionPopup_.data())
         {
-            if (popup->isVisible())
+            if (popup->isVisible() && popup->hasCompletions())
             {
                 // Stop shortcut from triggering by saying we will handle it ourselves
                 event->accept();
@@ -1084,6 +1084,11 @@ void SplitInput::updateCompletionPopup()
 
     // check if in completion prefix
     auto &edit = *this->ui_.textEdit;
+    if (edit.isCompletionInProgress())
+    {
+        this->hideCompletionPopup();
+        return;
+    }
 
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
@@ -1143,8 +1148,16 @@ void SplitInput::showCompletionPopup(const QString &text, CompletionKind kind)
             [that = QPointer(this)](const QString &text) mutable {
                 if (auto *this2 = that.data())
                 {
+                    auto completions =
+                        this2->inputCompletionPopup_->selectedCompletions(
+                            this2->ui_.textEdit->isFirstWord());
                     this2->insertCompletionText(text);
                     this2->hideCompletionPopup();
+                    if (completions)
+                    {
+                        auto [items, index] = *completions;
+                        this2->ui_.textEdit->continueCompletion(items, index);
+                    }
                 }
             });
     }
@@ -1231,6 +1244,40 @@ QString SplitInput::getInputText() const
 void SplitInput::insertText(const QString &text)
 {
     this->ui_.textEdit->insertPlainText(text);
+}
+
+void SplitInput::setWhisperTarget(const QString &username) const
+{
+    auto cursor = this->ui_.textEdit->textCursor();
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::Start);
+    const auto input = this->getInputText();
+    if (TWITCH_WHISPER_COMMANDS.contains(input.section(' ', 0, 0)))
+    {
+        auto prefixEnd = input.indexOf(' ');
+        if (prefixEnd < 0)
+        {
+            prefixEnd = input.size();
+        }
+        while (prefixEnd < input.size() && input[prefixEnd] == ' ')
+        {
+            ++prefixEnd;
+        }
+        while (prefixEnd < input.size() && input[prefixEnd] != ' ')
+        {
+            ++prefixEnd;
+        }
+        if (prefixEnd < input.size())
+        {
+            ++prefixEnd;
+        }
+        cursor.setPosition(static_cast<int>(prefixEnd),
+                           QTextCursor::KeepAnchor);
+    }
+    cursor.insertText("/w " + username + " ");
+    cursor.endEditBlock();
+    cursor.movePosition(QTextCursor::End);
+    this->ui_.textEdit->setTextCursor(cursor);
 }
 
 void SplitInput::hide()

@@ -16,14 +16,15 @@
 namespace chatterino {
 
 // commandmodel
-ModerationActionModel ::ModerationActionModel(QObject *parent)
+ModerationActionModel::ModerationActionModel(QObject *parent)
     : SignalVectorModel<ModerationAction>(2, parent)
 {
 }
 
 // turn a vector item into a model row
 ModerationAction ModerationActionModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const ModerationAction &original)
+    std::vector<QStandardItem *> &row, const ModerationAction &original,
+    std::optional<QModelIndex> index, std::optional<int> role)
 {
     return ModerationAction(
         row[Column::Command]->data(Qt::DisplayRole).toString(),

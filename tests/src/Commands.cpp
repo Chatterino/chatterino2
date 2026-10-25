@@ -876,6 +876,8 @@ TEST(Commands, E2E)
 
     EXPECT_CALL(mockHelix, update).Times(1);
     EXPECT_CALL(mockHelix, loadBlocks).Times(1);
+    // from checking the user's scopes
+    EXPECT_CALL(mockHelix, validateToken).Times(1);
 
     auto account = std::make_shared<TwitchAccount>(
         testaccount420["login"].toString(), "token", "oauthclient",
@@ -1110,6 +1112,91 @@ TEST(Commands, E2E)
                                std::optional<std::chrono::seconds>{120}, _, _));
     getApp()->getCommands()->execCommand(
         "/pin --id existing-after --duration 120", channel, false);
+}
+
+TEST(Commands, customCommands)
+{
+    MockApplication app;
+    std::shared_ptr<TwitchChannel> channel =
+        std::make_shared<TwitchChannel>("forsen");
+
+    struct Case {
+        Command command;
+        std::unordered_map<QString, QString> context;
+        QStringList words;
+        QString expected;
+    };
+
+    std::vector<Case> cases{
+        {
+            .command = Command("/cmd", "simple custom command"),
+            .context = {},
+            .words = {"/cmd", "ignored", "words"},
+            .expected = "simple custom command",
+        },
+        {
+            .command = Command(
+                "/cmd", "channel name: {channel.name} {channel.name;xd}"),
+            .context = {},
+            .words = {},
+            .expected = "channel name: forsen forsen",
+        },
+        {
+            .command = Command("/cmd", "msg id: {msg.id}"),
+            .context = {},
+            .words = {},
+            .expected = "msg id: ",
+        },
+        {
+            .command = Command("/cmd", "msg id2: {msg.id;lol xd}"),
+            .context = {},
+            .words = {},
+            .expected = "msg id2: lol xd",
+        },
+        {
+            .command =
+                Command("/cmd", "context: {ctx;123} and {second-ctx;alt}"),
+            .context =
+                {
+                    {"ctx", "test"},
+                    {"second-ctx", ""},
+                },
+            .words = {},
+            .expected = "context: test and alt",
+        },
+        {
+            .command = Command("/cmd", "fallback: {non-existing-var} {0}"),
+            .context = {},
+            .words = {"/cmd", "ignored"},
+            .expected = "fallback: {non-existing-var} {0}",
+        },
+        {
+            .command = Command("/cmd", "one {1} two {2}three {3}"),
+            .context = {},
+            .words = {"/cmd", "a", "b"},
+            .expected = "one a two bthree ",
+        },
+        {
+            .command = Command("/cmd", "{2+} xd {1+} {3} word {4+} 123"),
+            .context = {},
+            .words = {"/cmd", "test1", "test2", "test3"},
+            .expected = "test2 test3 xd test1 test2 test3 test3 word  123",
+        },
+        {
+            .command = Command("/cmd", "{2} literally {{1}"),
+            .context = {},
+            .words = {"/cmd", "xd", "test"},
+            .expected = "test literally {1}",
+        },
+    };
+
+    for (size_t i = 0; i < cases.size(); i++)
+    {
+        const auto &c = cases.at(i);
+        auto got = app.getCommands()->execCustomCommand(
+            c.words, c.command, false, channel, nullptr, c.context);
+        ASSERT_EQ(got, c.expected) << "index=" << i;
+    }
 }
 
 }  // namespace chatterino
