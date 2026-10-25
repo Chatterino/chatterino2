@@ -75,14 +75,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|WatchStreak",
+            "flags": "System|Highlighted|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "JCRouzer has been a moderator for 18 months!",
             "searchText": "JCRouzer has been a moderator for 18 months!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

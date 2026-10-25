@@ -4,7 +4,10 @@
 
 #include "controllers/completion/sources/UserSource.hpp"
 
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
@@ -57,6 +60,17 @@ void UserSource::addToStringList(QStringList &list, size_t maxCount,
 
 void UserSource::initializeFromChannel(const Channel *channel)
 {
+    if (channel->getType() == Channel::Type::TwitchWhispers)
+    {
+        const auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
+        this->items_.reserve(currentUser->whisperUsers().size());
+        for (const auto &user : currentUser->whisperUsers())
+        {
+            this->items_.emplace_back(user, user);
+        }
+        return;
+    }
+
     const auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     if (!tc)
     {
