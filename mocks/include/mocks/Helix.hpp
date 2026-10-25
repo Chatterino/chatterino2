@@ -543,6 +543,11 @@ public:
                       failureCallback)),
                 (override));
 
+    MOCK_METHOD(void, validateToken,
+                (NetworkSuccessCallback successCallback,
+                 NetworkErrorCallback errorCallback),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
