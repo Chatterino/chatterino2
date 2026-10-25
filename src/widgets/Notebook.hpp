@@ -139,7 +139,7 @@ public:
 
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
+    virtual void setShowTabs(bool value);
 
     void setGrowWrappedNotebookLines(bool value);
 
@@ -148,6 +148,16 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *) override;
+
+    virtual void afterPageAdded()
+    {
+    }
+    virtual void afterPageRemoved()
+    {
+    }
+    virtual void afterPageMoved()
+    {
+    }
 
     DrawnButton *addButton_;
 
@@ -209,11 +219,6 @@ private:
 
     void performHorizontalLayout(const LayoutContext &ctx, bool animated);
     void performVerticalLayout(const LayoutContext &ctx, bool animated);
-
-    /**
-     * @brief Show a popup informing the user of some big tab visibility changes
-     **/
-    void showTabVisibilityInfoPopup();
 
     /**
      * @brief Updates the visibility state of all tabs
@@ -290,6 +295,12 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+    void setShowTabs(bool value) override;
+
+    void afterPageAdded() override;
+    void afterPageRemoved() override;
+    void afterPageMoved() override;
+
 private:
     QAction *sortTabsAlphabeticallyAction_;
 
@@ -302,6 +313,11 @@ private:
     void updateStreamerModeIcon();
 
     void setLockNotebookLayout(bool value) override;
+
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
+    void showTabVisibilityInfoPopup();
 };
 
 }  // namespace chatterino

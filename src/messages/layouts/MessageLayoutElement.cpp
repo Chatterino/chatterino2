@@ -147,6 +147,16 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
             str += ' ';
         }
     }
+    else if (const auto *imageElement =
+                 dynamic_cast<ScalingImageElement *>(&this->getCreator()))
+    {
+        str += imageElement->copyText();
+        if (!imageElement->copyText().isEmpty() && this->hasTrailingSpace() &&
+            to >= 2)
+        {
+            str += ' ';
+        }
+    }
 }
 
 size_t ImageLayoutElement::getSelectionIndexCount() const
@@ -183,7 +193,18 @@ bool ImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
         {
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
+            const bool smooth =
+                this->getFlags().has(MessageElementFlag::TwitchGif);
+            if (smooth)
+            {
+                painter.save();
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+            }
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            if (smooth)
+            {
+                painter.restore();
+            }
             return true;
         }
     }

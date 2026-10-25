@@ -34,7 +34,7 @@ MessagePtr makeMessage(const QDateTime &time)
     auto message = std::make_shared<Message>();
     message->loginName = "forsen";
     message->messageText = "i'm chicken";
-    message->serverReceivedTime = time;
+    message->timestamp = time;
     return message;
 }
 
