@@ -476,8 +476,6 @@ ExpectedStr<std::queue<RawImageData>> ImageUploader::getImages(
 {
     BenchmarkGuard benchmarkGuard("ImageUploader::getImages");
 
-    std::queue<ImageInput> images;
-
     auto urlImages = getImagesFromUrls(source);
     if (urlImages.has_value() && !urlImages->empty())
     {
