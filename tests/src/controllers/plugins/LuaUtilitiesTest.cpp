@@ -2,24 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
+#include "controllers/plugins/LuaUtilitiesTest.hpp"
+
 #include "controllers/plugins/LuaMethodRef.hpp"
 #include "controllers/plugins/PluginTestApp.hpp"
 #include "controllers/plugins/SignalCallback.hpp"
 #include "controllers/plugins/SolTypes.hpp"
 #include "Test.hpp"
-
-namespace {
-
-struct MyQObject : public QObject {
-    Q_OBJECT
-
-Q_SIGNALS:
-    void empty();
-    void boolArg(bool b);                     // NOLINT(readability-*)
-    void multiArg(const QString &qs, int i);  // NOLINT(readability-*)
-};
-
-}  // namespace
 
 namespace chatterino::lua {
 
@@ -93,6 +82,7 @@ TEST(LuaUtilitiesFunctionRef, call)
     ASSERT_EQ(lastCall, "");
 }
 
+// NOLINTBEGIN(bugprone-use-after-move)
 TEST(LuaUtilitiesFunctionRef, specialMembers)
 {
     testlib::PluginApplication app;
@@ -184,11 +174,14 @@ TEST(LuaUtilitiesFunctionRef, specialMembers)
     ASSERT_FALSE(fnFooCopyAssigned.tryCall<void>({}));
     ASSERT_EQ(called, 8);
 }
+// NOLINTEND(bugprone-use-after-move)
 
 // MARK: SignalCallback
 
 TEST(LuaUtilitiesSignalCallback, qObjectCompat)
 {
+    using mock::lua::MockQObject;
+
     testlib::PluginApplication app;
 
     auto *plugin1 = app.loadPlugin("plugin1");
@@ -214,12 +207,12 @@ TEST(LuaUtilitiesSignalCallback, qObjectCompat)
         end
     )");
 
-    MyQObject obj;
-    QObject::connect(&obj, &MyQObject::empty,
+    MockQObject obj;
+    QObject::connect(&obj, &MockQObject::empty,
                      SignalCallback(weak, (*state)["take_empty"]));
-    QObject::connect(&obj, &MyQObject::boolArg,
+    QObject::connect(&obj, &MockQObject::boolArg,
                      SignalCallback(weak, (*state)["take_bool"]));
-    QObject::connect(&obj, &MyQObject::multiArg,
+    QObject::connect(&obj, &MockQObject::multiArg,
                      SignalCallback(weak, (*state)["take_multi"]));
 
     ASSERT_EQ(lastCall, "");
@@ -373,6 +366,7 @@ TEST(LuaUtilitiesMethodRef, tryCall)
     ASSERT_EQ(lastCall, "");
 }
 
+// NOLINTBEGIN(bugprone-use-after-move)
 TEST(LuaUtilitiesMethodRef, specialMembers)
 {
     testlib::PluginApplication app;
@@ -470,7 +464,6 @@ TEST(LuaUtilitiesMethodRef, specialMembers)
     ASSERT_FALSE(fnFooCopyAssigned.tryCall<void>({}));
     ASSERT_EQ(called, 8);
 }
+// NOLINTEND(bugprone-use-after-move)
 
 }  // namespace chatterino::lua
-
-#include "LuaUtilitiesTest.moc"

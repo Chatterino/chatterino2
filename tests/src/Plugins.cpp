@@ -214,7 +214,8 @@ TEST_F(PluginTest, testCommands)
     )lua");
 
     EXPECT_EQ(app->getCommands()->pluginCommands(), QStringList{"/test"});
-    app->getCommands()->execCommand("/test with arguments", channel, false);
+    this->app->getCommands()->execCommand("/test with arguments", this->channel,
+                                          false);
     bool called = (*lua)["called"];
     EXPECT_EQ(called, true);
 
