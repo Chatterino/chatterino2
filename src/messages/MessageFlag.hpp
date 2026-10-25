@@ -30,7 +30,7 @@ enum class MessageFlag : std::int64_t {
     AutoMod = (1LL << 14),
     RecentMessage = (1LL << 15),
     Whisper = (1LL << 16),
-    HighlightedWhisper = (1LL << 17),
+    //
     Debug = (1LL << 18),
     Similar = (1LL << 19),
     RedeemedHighlight = (1LL << 20),

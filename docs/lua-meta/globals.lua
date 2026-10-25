@@ -974,7 +974,6 @@ c2.MessageFlag = {
     AutoMod = 0,
     RecentMessage = 0,
     Whisper = 0,
-    HighlightedWhisper = 0,
     Debug = 0,
     Similar = 0,
     RedeemedHighlight = 0,
