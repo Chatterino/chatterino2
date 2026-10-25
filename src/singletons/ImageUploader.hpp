@@ -61,7 +61,7 @@ public:
     /**
      * Tries to get the image(s) from the given QMimeData
      *
-     * If no images were found, the second value in the pair will contain an error message
+     * Returns an error if no images were found or an image couldn't be processed
      */
     static ExpectedStr<std::queue<RawImageData>> getImages(
         const QMimeData *source);
