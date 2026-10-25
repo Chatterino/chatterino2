@@ -3,7 +3,6 @@
         "msg = {",
         "  flags = c2.MessageFlag.System | c2.MessageFlag.Disabled,",
         "  id = 'foo-bar',",
-        "  parse_time = 420000,",
         "  search_text = 'search',",
         "  message_text = 'message',",
         "  login_name = 'login',",

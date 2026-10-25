@@ -127,6 +127,7 @@ const QStringList &getSampleSubMessages()
 
 const QStringList &getSampleMiscMessages()
 {
+    // clang-format off
     static QStringList list{
         // display name renders strangely
         R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)",
@@ -165,7 +166,11 @@ const QStringList &getSampleMiscMessages()
         // Gifs
         R"(@badge-info=subscriber/30;badges=broadcaster/1,subscriber/0;color=#033700;display-name=TwitchDev;emotes=;first-msg=0;flags=;gifs=0-33|joSNxeswxuc74Juo8X|https://media4.giphy.com/media/joSNxeswxuc74Juo8X/giphy.gif?cid=095d7a5dzizsiwgabonagkmigggv8v1spfai91ac3x0dsiy0&ep=v1_gifs_trending&rid=giphy.gif&ct=g;id=401abf17-7e99-45d6-9bdf-43934e839327;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1783632907018;turbo=0;user-id=141981764;user-type= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada :[Y A Y Yes GIF by Djemilah Birnie])",
         R"(@badge-info=subscriber/30;badges=broadcaster/1,subscriber/0;color=#033700;display-name=TwitchDev;emotes=;first-msg=0;flags=;gifs=7-40|joSNxeswxuc74Juo8X|https://media4.giphy.com/media/joSNxeswxuc74Juo8X/giphy.gif?cid=095d7a5dzizsiwgabonagkmigggv8v1spfai91ac3x0dsiy0&ep=v1_gifs_trending&rid=giphy.gif&ct=g;id=401abf17-7e99-45d6-9bdf-43934e839327;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1783632907018;turbo=0;user-id=141981764;user-type= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada :before [Y A Y Yes GIF by Djemilah Birnie] after)",
+
+        // sub conversion
+        R"(@emotes;user-id=62882992;flags;user-type;badges=subscriber/6;tmi-sent-ts=1789895039770;login=you_got_ducked;system-msg=YOU_GOT_duckED\sconverted\sfrom\sa\sPrime\ssub\sto\sa\sTier\s1\ssub!;vip=0;badge-info=subscriber/10;room-id=11148817;subscriber=1;rm-received-ts=1789895039874;id=37a74f8f-38c7-40da-9ae0-f1f21c877a0e;historical=1;mod=0;msg-param-sub-plan=1000;msg-id=primepaidupgrade;color=#DAA520;display-name=YOU_GOT_duckED :tmi.twitch.tv USERNOTICE #pajlada)",
     };
+    // clang-format on
     return list;
 }
 
