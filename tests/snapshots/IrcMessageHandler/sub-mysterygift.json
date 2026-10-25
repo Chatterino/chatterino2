@@ -86,15 +86,16 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|Highlighted|DoNotTriggerNotification|Subscription",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "ozdani is gifting 1 Tier 1 Subs to KaiCenat's community! They've gifted a total of 1 in the channel!",
             "searchText": "ozdani is gifting 1 Tier 1 Subs to KaiCenat's community! They've gifted a total of 1 in the channel!",
-            "serverReceivedTime": "",
             "timeoutUser": "",
+            "timestamp": "",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
