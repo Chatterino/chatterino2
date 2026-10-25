@@ -190,12 +190,7 @@ void openStreamlink(const QString &url, const QString &quality,
     arguments << QProcess::splitCommand(additionalOptions);
 
     proc->setArguments(arguments);
-    bool res = proc->startDetached();
-
-    if (!res)
-    {
-        showStreamlinkNotFoundError();
-    }
+    proc->start();
 }
 
 void openStreamlinkForChannelOrUrl(const QString &channelOrUrl)
