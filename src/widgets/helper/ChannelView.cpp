@@ -664,11 +664,11 @@ void ChannelView::invalidateBuffers()
     this->update();
 }
 
-void ChannelView::queueLayout()
+void ChannelView::queueLayout(bool disableAnimation)
 {
     if (this->isVisible())
     {
-        this->performLayout();
+        this->performLayout(/*causedByScrollbar=*/false, disableAnimation);
     }
     else
     {
@@ -680,11 +680,12 @@ void ChannelView::showEvent(QShowEvent * /*event*/)
 {
     if (this->layoutQueued_)
     {
-        this->performLayout(false, true);
+        this->performLayout(/*causedByScrollbar=*/false,
+                            /*disableAnimation=*/true);
     }
 }
 
-void ChannelView::performLayout(bool causedByScrollbar, bool causedByShow)
+void ChannelView::performLayout(bool causedByScrollbar, bool disableAnimation)
 {
     // BenchmarkGuard benchmark("layout");
 
@@ -701,7 +702,7 @@ void ChannelView::performLayout(bool causedByScrollbar, bool causedByShow)
     this->layoutVisibleMessages(messages);
 
     /// Update scrollbar
-    this->updateScrollbar(messages, causedByScrollbar, causedByShow);
+    this->updateScrollbar(messages, causedByScrollbar, disableAnimation);
 
     this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
                                   this->scrollBar_->isVisible() &&
@@ -748,7 +749,7 @@ void ChannelView::layoutVisibleMessages(
 }
 
 void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
-                                  bool causedByScrollbar, bool causedByShow)
+                                  bool causedByScrollbar, bool disableAnimation)
 {
     if (messages.size() == 0)
     {
@@ -806,7 +807,7 @@ void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
         showScrollbar && !causedByScrollbar)
     {
         this->scrollBar_->scrollToBottom(
-            !causedByShow &&
+            !disableAnimation &&
             getSettings()->enableSmoothScrollingNewMessages.getValue());
     }
 }
@@ -1237,9 +1238,7 @@ void ChannelView::messageAppended(MessagePtr &message,
              messageFlags->has(MessageFlag::ShowInMentions) &&
              !messageFlags->has(MessageFlag::Subscription) &&
              (getSettings()->highlightMentions ||
-              this->channel_->getType() != Channel::Type::TwitchMentions)) ||
-            (this->channel_->getType() == Channel::Type::TwitchAutomod &&
-             getSettings()->enableAutomodHighlight))
+              this->channel_->getType() != Channel::Type::TwitchMentions)))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
@@ -1393,7 +1392,7 @@ void ChannelView::resizeEvent(QResizeEvent * /*event*/)
 
     this->scrollBar_->raise();
 
-    this->queueLayout();
+    this->queueLayout(/*disableAnimation=*/true);
 
     this->update();
 }
@@ -1637,8 +1636,8 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
                       getApp()->getTwitch()->getMentionsChannel(),
 
         .y = -static_cast<int>(
-            messagesSnapshot[start]->getHeight() *
-            (fmod(this->scrollBar_->getRelativeCurrentValue(), 1))),
+            std::round(messagesSnapshot[start]->getHeight() *
+                       (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
         .messageIndex = start,
         .isLastReadMessage = false,
 
@@ -2038,10 +2037,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     const auto *emoteElement = dynamic_cast<const EmoteElement *>(element);
     const auto *layeredEmoteElement =
         dynamic_cast<const LayeredEmoteElement *>(element);
-    bool isNotEmote = emoteElement == nullptr && layeredEmoteElement == nullptr;
+    const auto *scalingImageElement =
+        dynamic_cast<const ScalingImageElement *>(element);
+    bool isEmoteOrTwitchGif =
+        emoteElement != nullptr || layeredEmoteElement != nullptr ||
+        (scalingImageElement != nullptr &&
+         element->getFlags().has(MessageElementFlag::TwitchGif));
 
     if (element->getTooltip().isEmpty() ||
-        (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
+        (isLinkValid && !isEmoteOrTwitchGif && !getSettings()->linkInfoTooltip))
     {
         this->tooltipWidget_->hide();
     }

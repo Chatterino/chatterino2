@@ -147,6 +147,16 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
             str += ' ';
         }
     }
+    else if (const auto *imageElement =
+                 dynamic_cast<ScalingImageElement *>(&this->getCreator()))
+    {
+        str += imageElement->copyText();
+        if (!imageElement->copyText().isEmpty() && this->hasTrailingSpace() &&
+            to >= 2)
+        {
+            str += ' ';
+        }
+    }
 }
 
 size_t ImageLayoutElement::getSelectionIndexCount() const
@@ -190,8 +200,13 @@ bool ImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
     return false;
 }
 
-int ImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int ImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -319,8 +334,13 @@ bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
     return animatedFlag;
 }
 
-int LayeredImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int LayeredImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -593,8 +613,13 @@ bool TextIconLayoutElement::paintAnimated(QPainter & /*painter*/,
     return false;
 }
 
-int TextIconLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int TextIconLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -668,8 +693,13 @@ bool ReplyCurveLayoutElement::paintAnimated(QPainter & /*painter*/,
     return false;
 }
 
-int ReplyCurveLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int ReplyCurveLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 

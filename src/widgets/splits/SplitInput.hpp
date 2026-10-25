@@ -19,6 +19,8 @@
 
 #include <memory>
 
+class QMimeData;
+
 namespace chatterino {
 
 class Split;
@@ -218,6 +220,9 @@ protected:
 
     bool inHistorySearch = false;
 
+private:
+    void handleImagePaste(const QMimeData *source);
+
     void startHistorySearch(bool backwards, bool loop);
     void stopHistorySearchIfNecessary();
 
@@ -261,6 +266,7 @@ private Q_SLOTS:
 
     friend class Split;
     friend class ReplyThreadPopup;
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

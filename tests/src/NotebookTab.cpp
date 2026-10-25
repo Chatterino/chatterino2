@@ -10,11 +10,14 @@
 #include "mocks/BaseApplication.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "Test.hpp"
 #include "widgets/Notebook.hpp"
 
+#include <QApplication>
 #include <QDebug>
 #include <QString>
+#include <QWheelEvent>
 
 using namespace chatterino;
 using ::testing::Exactly;
@@ -25,28 +28,21 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : theme(this->paths_)
-        , fonts(this->settings)
+        : windowManager(this->args_, this->paths_, this->settings, this->theme,
+                        this->fonts)
     {
-    }
-    Theme *getThemes() override
-    {
-        return &this->theme;
     }
 
+    WindowManager *getWindows() override
+    {
+        return &this->windowManager;
+    }
     HotkeyController *getHotkeys() override
     {
         return &this->hotkeys;
     }
-
-    Fonts *getFonts() override
-    {
-        return &this->fonts;
-    }
-
-    Theme theme;
     HotkeyController hotkeys;
-    Fonts fonts;
+    WindowManager windowManager;
 };
 
 class MockNotebookTab : public NotebookTab
@@ -72,6 +68,33 @@ protected:
     MockApplication mockApplication;
     Notebook notebook;
     MockNotebookTab tab;
+};
+
+class NotebookWheelFixture : public ::testing::Test
+{
+protected:
+    NotebookWheelFixture()
+        : notebook(nullptr)
+    {
+        this->notebook.setAttribute(Qt::WA_DontShowOnScreen);
+        this->notebook.resize(500, 300);
+        this->firstTab = this->notebook.addPage(new QWidget, "first", true);
+        this->notebook.addPage(new QWidget, "second");
+        this->notebook.show();
+        QApplication::processEvents();
+    }
+
+    static void scroll(QWidget *target, QPoint position, int delta)
+    {
+        QWheelEvent event(position, target->mapToGlobal(position), {},
+                          {0, delta}, Qt::NoButton, Qt::NoModifier,
+                          Qt::NoScrollPhase, false);
+        QApplication::sendEvent(target, &event);
+    }
+
+    MockApplication app;
+    Notebook notebook;
+    NotebookTab *firstTab{};
 };
 
 }  // namespace
@@ -127,4 +150,41 @@ TEST_F(NotebookTabFixture, DontDowngradeHighlightState)
     EXPECT_EQ(this->tab.highlightState(), HighlightState::Highlighted);
     this->tab.setHighlightState(HighlightState::NewMessage);
     EXPECT_EQ(this->tab.highlightState(), HighlightState::Highlighted);
+}
+
+TEST_F(NotebookWheelFixture, ScrollOnTab)
+{
+    scroll(this->firstTab, this->firstTab->rect().center(), -120);
+    EXPECT_EQ(this->notebook.getSelectedIndex(), 1);
+}
+
+TEST_F(NotebookWheelFixture, ScrollOnTabStripBackground)
+{
+    const QPoint position{this->notebook.width() - 5, 14};
+    ASSERT_EQ(this->notebook.childAt(position), nullptr);
+
+    scroll(&this->notebook, position, -120);
+    EXPECT_EQ(this->notebook.getSelectedIndex(), 1);
+}
+
+TEST_F(NotebookWheelFixture, ScrollOverPageDoesNotChangeTab)
+{
+    const QPoint position{this->notebook.width() / 2,
+                          this->notebook.height() / 2};
+    ASSERT_TRUE(
+        this->notebook.getSelectedPage()->geometry().contains(position));
+
+    scroll(&this->notebook, position, -120);
+    EXPECT_EQ(this->notebook.getSelectedIndex(), 0);
+}
+
+TEST_F(NotebookWheelFixture, SmallDeltasAccumulateAcrossTabStrip)
+{
+    const QPoint background{this->notebook.width() - 5, 14};
+    ASSERT_EQ(this->notebook.childAt(background), nullptr);
+
+    scroll(this->firstTab, this->firstTab->rect().center(), -60);
+    EXPECT_EQ(this->notebook.getSelectedIndex(), 0);
+    scroll(&this->notebook, background, -60);
+    EXPECT_EQ(this->notebook.getSelectedIndex(), 1);
 }

@@ -180,7 +180,7 @@ public:
 
 private:
     // Load window layout from the window-layout.json file
-    WindowLayout loadWindowLayoutFromFile() const;
+    ExpectedStr<WindowLayout> loadWindowLayoutFromFile() const;
 
     // Apply a window layout for this window manager.
     void applyWindowLayout(const WindowLayout &layout);

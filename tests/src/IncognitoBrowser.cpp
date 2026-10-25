@@ -15,6 +15,7 @@ TEST(IncognitoBrowser, getPrivateSwitch)
     ASSERT_EQ(getPrivateSwitch("firefox.exe"), "-private-window");
     ASSERT_EQ(getPrivateSwitch("firefox"), "-private-window");
     ASSERT_EQ(getPrivateSwitch("firefox-forsen-version"), "-private-window");
+    ASSERT_EQ(getPrivateSwitch("zen.exe"), "-private-window");
 
     ASSERT_EQ(getPrivateSwitch("chrome.exe"), "-incognito");
     ASSERT_EQ(getPrivateSwitch("google-chrome-stable"), "-incognito");

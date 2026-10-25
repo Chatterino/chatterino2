@@ -1004,6 +1004,7 @@ TEST_F(PluginTest, MessageElementFlag)
                          "SubscriptionHeader=0x10000000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
+                         "TwitchGif=0x80,"
                          "Username=0x4,"
                          "WatchStreakHeader=0x20000000000";
 
@@ -1132,9 +1133,6 @@ TEST_F(PluginTest, MessageModification)
     // Test that we can modify properties and that Lua sees the modification
     sol::table tests = lua->script(R"lua(
         return {
-            function(msg)
-                msg.parse_time = 1234567
-            end,
             function(msg)
                 assert(msg.id == "abc")
                 msg.id = "1234"
