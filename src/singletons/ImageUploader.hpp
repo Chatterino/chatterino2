@@ -63,8 +63,8 @@ public:
      *
      * If no images were found, the second value in the pair will contain an error message
      */
-    ExpectedStr<std::queue<RawImageData>> getImages(
-        const QMimeData *source) const;
+    static ExpectedStr<std::queue<RawImageData>> getImages(
+        const QMimeData *source);
 
     /// Uploads the given images to the user's configured image uploader service
     void upload(std::queue<RawImageData> images, ChannelPtr channel,

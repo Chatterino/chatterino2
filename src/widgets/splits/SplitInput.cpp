@@ -176,7 +176,7 @@ void SplitInput::handleImagePaste(const QMimeData *source)
     auto channel = this->split_->getChannel();
     auto *imageUploader = getApp()->getImageUploader();
 
-    auto images = imageUploader->getImages(source);
+    auto images = ImageUploader::getImages(source);
     if (!images.has_value())
     {
         channel->addSystemMessage(

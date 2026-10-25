@@ -94,7 +94,8 @@ ExpectedStr<std::queue<ImageInput>> getImagesFromUrls(const QMimeData *source)
     auto mimeDb = QMimeDatabase();
     // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
     // Each entry in source->urls() is a QUrl pointing to a file that was copied.
-    for (const QUrl &path : source->urls())
+    const auto urls = source->urls();
+    for (const QUrl &path : urls)
     {
         QString localPath = path.toLocalFile();
         QMimeType mime = mimeDb.mimeTypeForUrl(path);
@@ -471,7 +472,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
 }
 
 ExpectedStr<std::queue<RawImageData>> ImageUploader::getImages(
-    const QMimeData *source) const
+    const QMimeData *source)
 {
     BenchmarkGuard benchmarkGuard("ImageUploader::getImages");
 
