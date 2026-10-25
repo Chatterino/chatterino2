@@ -319,7 +319,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         {
             auto name =
                 provider->displayName() % u" (" % plugin->meta.name % ')';
-            providers.emplace_back(name, WeakChannelProvider(provider));
+            providers.emplace_back(name, WeakChannelProvider{provider});
         }
     }
 #endif
@@ -432,7 +432,7 @@ void SelectChannelDialog::setSelectedChannel(
                 if (provider)
                 {
                     auto idx = this->ui_.pluginProviderBox->findData(
-                        QVariant::fromValue(WeakChannelProvider(provider)));
+                        QVariant::fromValue(WeakChannelProvider{provider}));
                     if (idx >= 0)
                     {
                         this->ui_.pluginProviderBox->setCurrentIndex(idx);
