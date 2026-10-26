@@ -9,7 +9,7 @@ set(
         themes/ChatterinoTheme.schema.json
 )
 set(RES_EXCLUDE_FILTER ^raw)
-set(RES_IMAGE_EXCLUDE_FILTER "^(buttons/(update|clearSearch)|avatars|icon|settings|raw)")
+set(RES_IMAGE_EXCLUDE_FILTER "^(buttons/clearSearch|avatars|icon|settings|raw)")
 
 file(GLOB_RECURSE RES_ALL_FILES RELATIVE "${RES_DIR}" LIST_DIRECTORIES false CONFIGURE_DEPENDS "${RES_DIR}/*")
 file(GLOB_RECURSE RES_IMAGE_FILES RELATIVE "${RES_DIR}" LIST_DIRECTORIES false CONFIGURE_DEPENDS "${RES_DIR}/*.png")

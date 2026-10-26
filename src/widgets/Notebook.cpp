@@ -1678,7 +1678,10 @@ void SplitNotebook::addCustomButtons()
     });
 
     // updates
-    auto *updateBtn = this->addCustomButton<PixmapButton>();
+    auto *updateBtn = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/update-darkMode.svg",
+        .light = ":/buttons/update-lightMode.svg",
+    });
 
     initUpdateButton(
         *updateBtn,
