@@ -80,7 +80,7 @@
             "loginName": "",
             "messageText": "twitchdev has been timed out for 10m. (3 times) ",
             "searchText": "twitchdev has been timed out for 10m. (3 times) ",
-            "serverReceivedTime": "2025-01-15T19:22:47Z",
+            "timestamp": "2025-01-15T19:22:47Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },
@@ -199,7 +199,7 @@
             "loginName": "twitchdev",
             "messageText": "1",
             "searchText": "twitchdev  twitchdev: 1 ",
-            "serverReceivedTime": "2025-01-15T19:22:45Z",
+            "timestamp": "2025-01-15T19:22:45Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
