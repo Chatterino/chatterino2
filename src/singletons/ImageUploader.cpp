@@ -154,7 +154,7 @@ ExpectedStr<std::queue<ImageInput>> getImagesDirectly(const QMimeData *source)
 
     if (images.empty())
     {
-        return makeUnexpected("Cannot upload file, failed to convert to png.");
+        return makeUnexpected("No image found in clipboard.");
     }
 
     return images;
@@ -203,7 +203,7 @@ ExpectedStr<std::queue<RawImageData>> processImages(
         {
             return makeUnexpected(
                 input.filePath.isEmpty()
-                    ? "Cannot upload file, failed to convert to png."
+                    ? "Clipboard reported an image, but it couldn't be loaded."
                     : "Couldn't load image :(");
         }
 
