@@ -474,14 +474,9 @@ Split *ChannelView::findParentSplit() const
     }
 
     auto *searchPopup = dynamic_cast<SearchPopup *>(this->parentWidget());
-    if (!searchPopup)
+    if (searchPopup)
     {
-        return nullptr;
-    }
-    split = dynamic_cast<Split *>(searchPopup->parentWidget());
-    if (split)
-    {
-        return split;
+        return dynamic_cast<Split *>(searchPopup->parentWidget());
     }
 
     if (this->parentWidget() != nullptr)
