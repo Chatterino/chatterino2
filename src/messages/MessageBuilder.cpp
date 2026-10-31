@@ -499,6 +499,7 @@ struct TokenizedText {
 struct TokenizedEmote {
     EmotePtr emote;
     bool trailingSpace = true;
+    bool lastEmote = false;
 };
 struct TokenizedGif {
     QString id;
@@ -507,6 +508,11 @@ struct TokenizedGif {
 struct TokenizedEmoji {
     EmotePtr emote;
 };
+
+bool isEmoteOccurrence(const TwitchSpecialOccurrence &special)
+{
+    return std::holds_alternative<TwitchEmoteOccurrence>(special.data);
+}
 
 /// Tokenizes `text` into words and special Twitch items (emotes).
 ///
@@ -551,20 +557,22 @@ void tokenizeWords(QStringView text,
 
             // A special item at the end always has a trailing space.
             bool trailingSpace = current == end || *current == ' ';
-            std::visit(
-                variant::Overloaded{[&](const TwitchEmoteOccurrence &emote) {
-                                        visitor(TokenizedEmote{
-                                            .emote = emote.ptr,
-                                            .trailingSpace = trailingSpace,
-                                        });
-                                    },
-                                    [&](const TwitchGifOccurrence &gif) {
-                                        visitor(TokenizedGif{
-                                            .id = gif.id,
-                                            .originalText = originalText,
-                                        });
-                                    }},
-                special.data);
+            std::visit(variant::Overloaded{
+                           [&](const TwitchEmoteOccurrence &emote) {
+                               visitor(TokenizedEmote{
+                                   .emote = emote.ptr,
+                                   .trailingSpace = trailingSpace,
+                                   .lastEmote = std::ranges::none_of(
+                                       specials.subspan(1), isEmoteOccurrence),
+                               });
+                           },
+                           [&](const TwitchGifOccurrence &gif) {
+                               visitor(TokenizedGif{
+                                   .id = gif.id,
+                                   .originalText = originalText,
+                               });
+                           }},
+                       special.data);
 
             specials = specials.subspan(1);
             continue;
@@ -1907,6 +1915,11 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             textState.bitsLeft = optBits->toInt();
         }
 
+        if (tags.getOrEmpty("msg-id") == "gigantified-emote-message")
+        {
+            textState.gigantifiedEmote = true;
+        }
+
         // Twitch emotes
         auto twitchSpecials = parseTwitchOccurrences(
             tags, content, static_cast<int>(messageOffset));
@@ -1980,6 +1993,20 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 void MessageBuilder::addEmoji(const EmotePtr &emote)
 {
     this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
+}
+
+void MessageBuilder::addTwitchEmote(const EmotePtr &emote, bool trailingSpace,
+                                    bool gigantified)
+{
+    if (gigantified)
+    {
+        this->emplace<LinebreakElement>(MessageElementFlag::Emote);
+    }
+
+    auto *element = this->emplace<EmoteElement>(
+        emote, MessageElementFlag::Emote, this->textColor_);
+    element->setTrailingSpace(trailingSpace);
+    element->setGigantified(gigantified);
 }
 
 void MessageBuilder::addTextOrEmote(TextState &state, QString string)
@@ -2836,9 +2863,8 @@ void MessageBuilder::addWords(
                 this->addEmoji(tok.emote);
             },
             [&](const TokenizedEmote &tok) {
-                this->emplace<EmoteElement>(
-                        tok.emote, MessageElementFlag::Emote, this->textColor_)
-                    ->setTrailingSpace(tok.trailingSpace);
+                this->addTwitchEmote(tok.emote, tok.trailingSpace,
+                                     state.gigantifiedEmote && tok.lastEmote);
             },
             [&](const TokenizedGif &gif) {
                 this->addTwitchGif(gif.id, gif.originalText);
