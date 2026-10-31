@@ -217,6 +217,9 @@ protected:
 
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(isAnon ? 0 : 1));
+        // from checking the user's scopes
+        EXPECT_CALL(*this->mockHelix, validateToken)
+            .Times(Exactly(isAnon ? 0 : 1));
 
         this->mockApplication->accounts.load();
     }
