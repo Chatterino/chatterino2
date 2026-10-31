@@ -273,9 +273,10 @@ ExpectedStr<void> registerNmHost(const Paths &paths)
     QJsonDocument chromeManifest = buildChromeManifest(extensionIDs);
     QJsonDocument firefoxManifest = buildFirefoxManifest(extensionIDs);
 
+    QStringList errors;
+
     const auto chromeRegistered =
         registerNmManifest(paths, CHROME, chromeManifest);
-    QStringList errors;
     if (!chromeRegistered)
     {
         qCDebug(chatterinoNativeMessage)
