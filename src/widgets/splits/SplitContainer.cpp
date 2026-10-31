@@ -833,6 +833,8 @@ void SplitContainer::popup()
     // highlighting on new messages
     popupContainer->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
 
+    popupContainer->getTab()->setAlwaysShow(tab.alwaysShow_);
+
     // splits
     if (tab.rootNode_)
     {
