@@ -59,7 +59,7 @@ TEST(TwitchChannel, LiveUpdateGrouping)
     addEmote("FirstEmote", time);
     ASSERT_EQ(channel->countMessages(), 1);
     auto first = channel->getLastMessage();
-    EXPECT_EQ(first->serverReceivedTime, time);
+    EXPECT_EQ(first->timestamp, time);
 
     // Grouping considers the date, not only the time.
     const auto nextDay = time.addDays(1);
@@ -74,7 +74,7 @@ TEST(TwitchChannel, LiveUpdateGrouping)
     auto grouped = channel->getLastMessage();
     EXPECT_TRUE(grouped->messageText.contains("SecondEmote"));
     EXPECT_TRUE(grouped->messageText.contains("ThirdEmote"));
-    EXPECT_EQ(grouped->serverReceivedTime, nextDay.addSecs(4));
+    EXPECT_EQ(grouped->timestamp, nextDay.addSecs(4));
 
     // Updates more than five seconds apart start a new group.
     addEmote("FourthEmote", nextDay.addSecs(10));

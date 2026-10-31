@@ -2,7 +2,7 @@
     "input": "@target-user-id=141981764;ban-duration=600;historical=1;room-id=111448817;rm-received-ts=1736968967915;tmi-sent-ts=1736968967813 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -78,7 +78,7 @@
             "loginName": "",
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
-            "serverReceivedTime": "2025-01-15T19:22:44Z",
+            "timestamp": "2025-01-15T19:22:44Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },
@@ -197,7 +197,7 @@
             "loginName": "twitchdev",
             "messageText": "1",
             "searchText": "twitchdev  twitchdev: 1 ",
-            "serverReceivedTime": "2025-01-15T19:22:45Z",
+            "timestamp": "2025-01-15T19:22:45Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
@@ -207,7 +207,7 @@
             "usernameColor": "#ffff0000"
         },
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -283,7 +283,7 @@
             "loginName": "",
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
-            "serverReceivedTime": "2025-01-15T19:22:47Z",
+            "timestamp": "2025-01-15T19:22:47Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },
@@ -293,7 +293,7 @@
             "usernameColor": "#ff000000"
         },
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -369,7 +369,7 @@
             "loginName": "",
             "messageText": "twitchdev has been timed out for 10m. ",
             "searchText": "twitchdev has been timed out for 10m. ",
-            "serverReceivedTime": "2025-01-15T19:22:47Z",
+            "timestamp": "2025-01-15T19:22:47Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },

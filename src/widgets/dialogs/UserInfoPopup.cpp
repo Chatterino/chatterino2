@@ -44,6 +44,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 #include "widgets/Window.hpp"
 
 #include <QCheckBox>
@@ -424,6 +425,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
         user.emplace<LabelButton>("Add notes", this)
             .assign(&this->ui_.notesAdd);
+        auto whisper = user.emplace<LabelButton>("Whisper", this);
         auto usercard = user.emplace<LabelButton>("Usercard", this)
                             .assign(&this->ui_.usercardLabel);
         auto mod = user.emplace<PixmapButton>(this);
@@ -440,6 +442,18 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         unvip->setScaleIndependentSize(30, 30);
 
         user->addStretch(1);
+
+        QObject::connect(
+            whisper.getElement(), &Button::leftClicked, this, [this] {
+                if (this->userName_.isEmpty())
+                {
+                    return;
+                }
+
+                this->split_->getInput().setWhisperTarget(this->userName_);
+                this->split_->window()->activateWindow();
+                this->split_->setFocus(Qt::MouseFocusReason);
+            });
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
@@ -904,6 +918,19 @@ void UserInfoPopup::updateLatestMessages()
                         this->updateLatestMessages();
                     }
                 }));
+
+    this->replaceConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            this->underlyingChannel_->messageReplaced.connect(
+                [this](auto, const auto &message, const auto &replacement) {
+                    if (!checkMessageUserName(this->userName_, replacement))
+                    {
+                        return;
+                    }
+
+                    this->ui_.latestMessages->channel()->replaceMessage(
+                        message, replacement);
+                }));
 }
 
 void UserInfoPopup::updateUserData()
@@ -1205,6 +1232,8 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
             this->ui_.avatarButton->setPixmap(QPixmap());
         }
     });
+    QObject::connect(reply, &QNetworkReply::finished, reply,
+                     &QObject::deleteLater);
 }
 
 void UserInfoPopup::updateNotes()
