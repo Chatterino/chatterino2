@@ -22,7 +22,7 @@ class FilterRecord
 public:
     FilterRecord(QString name, QString filter);
 
-    FilterRecord(QString name, QString filter, const QUuid &id);
+    FilterRecord(QString name, QString filter, bool global, const QUuid &id);
 
     const QString &getName() const;
 
@@ -32,6 +32,8 @@ public:
 
     bool valid() const;
 
+    bool isGlobal() const;
+
     bool filter(filters::RunContext context) const;
 
     bool operator==(const FilterRecord &other) const;
@@ -39,6 +41,7 @@ public:
 private:
     const QString name_;
     const QString filterText_;
+    const bool global_;
     const QUuid id_;
 
     const std::unique_ptr<filters::Filter> filter_;
@@ -59,6 +62,7 @@ struct Serialize<chatterino::FilterRecordPtr> {
 
         chatterino::rj::set(ret, "name", value->getName(), a);
         chatterino::rj::set(ret, "filter", value->getFilter(), a);
+        chatterino::rj::set(ret, "global", value->isGlobal(), a);
         chatterino::rj::set(ret, "id",
                             value->getId().toString(QUuid::WithoutBraces), a);
 
@@ -79,13 +83,15 @@ struct Deserialize<chatterino::FilterRecordPtr> {
         }
 
         QString _name, _filter, _id;
+        bool _global;
 
         chatterino::rj::getSafe(value, "name", _name);
         chatterino::rj::getSafe(value, "filter", _filter);
+        chatterino::rj::getSafe(value, "global", _global);
         chatterino::rj::getSafe(value, "id", _id);
 
         return std::make_shared<chatterino::FilterRecord>(
-            _name, _filter, QUuid::fromString(_id));
+            _name, _filter, _global, QUuid::fromString(_id));
     }
 };
 
