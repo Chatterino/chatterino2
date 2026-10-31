@@ -1346,6 +1346,7 @@ std::pair<MessagePtr, HighlightAlert>
         Channel *channel)
 {
     MessageBuilder builder;
+    builder->channelName = channel->getName();
 
     builder.appendChannelPointRewardMessage(reward, isMod, isBroadcaster);
 
