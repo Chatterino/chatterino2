@@ -5,7 +5,6 @@
 #pragma once
 
 #include <pajlada/signals/signal.hpp>
-#include <QKeySequence>
 #include <QWidget>
 
 #include <span>
@@ -15,6 +14,8 @@ class QTableView;
 class QHBoxLayout;
 
 namespace chatterino {
+
+class HotkeySequence;
 
 class EditableModelView : public QWidget
 {
@@ -34,7 +35,7 @@ public:
 
     bool filterSearchResults(const QString &query,
                              std::span<const int> columnSelect);
-    void filterSearchResultsHotkey(const QKeySequence &keySequenceQuery);
+    void filterSearchResultsHotkey(const HotkeySequence &query);
 
 private:
     QTableView *tableView_{};

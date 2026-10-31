@@ -12,8 +12,6 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
 
-#include <QSignalBlocker>
-
 namespace chatterino {
 
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
@@ -23,18 +21,6 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
-    // normalize Key_Enter (numpad) to Key_Return so both Enter keys display and behave identically
-    QObject::connect(
-        this->ui_->keyComboEdit, &QKeySequenceEdit::keySequenceChanged, this,
-        [this](const QKeySequence &keySequence) {
-            auto normalized = normalizeKeySequence(keySequence);
-            if (normalized != keySequence)
-            {
-                // Block signals to prevent infinite loop
-                QSignalBlocker blocker(this->ui_->keyComboEdit);
-                this->ui_->keyComboEdit->setKeySequence(normalized);
-            }
-        });
     this->setStyleSheet(R"(QToolTip {
     padding: 2px;
     background-color: #333333;
@@ -77,8 +63,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
 
     // update pickers/input boxes to values from Hotkey object
     this->ui_->categoryPicker->setCurrentIndex(size_t(hotkey->category()));
-    this->ui_->keyComboEdit->setKeySequence(
-        QKeySequence::fromString(hotkey->keySequence().toString()));
+    this->ui_->keyComboEdit->setSequence(hotkey->sequence());
     this->ui_->nameEdit->setText(hotkey->name());
 
     auto def = findHotkeyActionDefinition(hotkey->category(), hotkey->action());
@@ -203,7 +188,8 @@ void EditHotkeyDialog::afterEdit()
         this->showEditError("Hotkey name is missing");
         return;
     }
-    if (this->ui_->keyComboEdit->keySequence().count() == 0)
+    auto sequence = this->ui_->keyComboEdit->sequence();
+    if (sequence.isEmpty())
     {
         this->showEditError("Key Sequence is missing");
         return;
@@ -214,21 +200,24 @@ void EditHotkeyDialog::afterEdit()
         return;
     }
 
-    auto firstKeyInt = this->ui_->keyComboEdit->keySequence()[0];
-    bool hasModifier = firstKeyInt.keyboardModifiers().testAnyFlags(
-        Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier);
-    bool isKeyExcempt = firstKeyInt.key() == Qt::Key_Escape ||
-                        firstKeyInt.key() == Qt::Key_Enter ||
-                        firstKeyInt.key() == Qt::Key_Return;
-
-    if (!isKeyExcempt && !hasModifier && !this->shownSingleKeyWarning)
+    if (!sequence.isMouse())
     {
-        this->showEditError(
-            "Warning: using keybindings without modifiers can lead to not "
-            "being\nable to use the key for the normal purpose.\nPress the "
-            "submit button again to do it anyway.");
-        this->shownSingleKeyWarning = true;
-        return;
+        auto firstKeyInt = sequence.keySequence()[0];
+        bool hasModifier = firstKeyInt.keyboardModifiers().testAnyFlags(
+            Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier);
+        bool isKeyExcempt = firstKeyInt.key() == Qt::Key_Escape ||
+                            firstKeyInt.key() == Qt::Key_Enter ||
+                            firstKeyInt.key() == Qt::Key_Return;
+
+        if (!isKeyExcempt && !hasModifier && !this->shownSingleKeyWarning)
+        {
+            this->showEditError(
+                "Warning: using keybindings without modifiers can lead to not "
+                "being\nable to use the key for the normal purpose.\nPress the "
+                "submit button again to do it anyway.");
+            this->shownSingleKeyWarning = true;
+            return;
+        }
     }
 
     // use raw name from item data if possible, otherwise fallback to what the user has entered.
@@ -247,12 +236,10 @@ void EditHotkeyDialog::afterEdit()
                 .second;
     }
 
-    auto hotkey = std::make_shared<Hotkey>(
-        *category, this->ui_->keyComboEdit->keySequence(), action, arguments,
-        nameText);
+    auto hotkey = std::make_shared<Hotkey>(*category, sequence, action,
+                                           arguments, nameText);
     auto keyComboWasEdited =
-        this->data() &&
-        this->ui_->keyComboEdit->keySequence() != this->data()->keySequence();
+        this->data() && sequence != this->data()->sequence();
     auto nameWasEdited = this->data() && nameText != this->data()->name();
 
     if (isEditing)
