@@ -25,7 +25,8 @@ cmake -S. -Bbuild-clang-tidy \
     -DCHATTERINO_LTO=Off \
     -DCHATTERINO_PLUGINS=On \
     -DBUILD_TESTS=On \
-    -DBUILD_BENCHMARKS=On
+    -DBUILD_BENCHMARKS=On \
+    -DBUILD_EMBED=On
 
 curl -sSLo build-clang-tidy/clazy.zip \
     https://github.com/Nerixyz/clazy-ubuntu-builds/releases/download/ci/clazy-$CLAZY_VERSION-clang$CLANG_TIDY_VERSION.zip
