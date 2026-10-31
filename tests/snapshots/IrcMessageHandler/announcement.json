@@ -188,14 +188,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Announcement",
+            "flags": "Highlighted|Collapsed|Announcement",
             "frozen": false,
+            "highlightColor": "#64ff66ed",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
             "messageText": "mm test lol",
             "searchText": "supinic  supinic: mm test lol ",
-            "serverReceivedTime": "2022-03-31T21:30:19Z",
+            "timestamp": "2022-03-31T21:30:19Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "47"

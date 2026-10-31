@@ -683,6 +683,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     MessageBuilder::triggerHighlights(c, alert);
 
     getApp()->getTwitch()->setLastUserThatWhisperedMe(message->loginName);
+    getApp()->getAccounts()->twitch.getCurrent()->addWhisperUser(
+        message->loginName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
@@ -774,10 +776,18 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
     if (msgType == "subgift")
     {
         // subgifts are special because they include two users
-        const auto msg = MessageBuilder::makeSubgiftMessage(
+        const auto [msg, alert] = MessageBuilder::makeSubgiftMessage(
             tags, calculateMessageTime(message).time(), channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
+
+        if (msg->flags.has(MessageFlag::ShowInMentions) &&
+            sink.sinkTraits().has(MessageSinkTrait::AddMentionsToGlobalChannel))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                msg, MessageContext::Original);
+        }
         return;
     }
 
@@ -884,11 +894,12 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 })
                 .value_or(MessageColor::System);
 
-        auto msg = MessageBuilder::makeSystemMessageWithUser(
+        auto [msg, alert] = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
             calculateMessageTime(message).time(), *message, channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
     }
 }
 

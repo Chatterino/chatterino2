@@ -107,14 +107,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|Highlighted|Subscription",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "pajlada gifted a Tier 1 sub to rustafur!",
             "searchText": "pajlada gifted a Tier 1 sub to rustafur!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

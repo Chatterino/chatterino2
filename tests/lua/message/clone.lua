@@ -18,7 +18,7 @@ local tests = {
             user_id = "user",
             channel_name = "channel",
             username_color = "#ff0000",
-            server_received_time = 123345678,
+            timestamp = 123345678,
             highlight_color = "#00ff00",
             elements = {
                 { type = "text", text = "abcde", exhaustive_flags = true },
@@ -42,7 +42,7 @@ local tests = {
         assert(msg.user_id == clone.user_id)
         assert(msg.channel_name == clone.channel_name)
         assert(msg.username_color == clone.username_color)
-        assert(msg.server_received_time == clone.server_received_time)
+        assert(msg.timestamp == clone.timestamp)
         assert(msg.highlight_color == clone.highlight_color)
         assert(#msg:elements() == #clone:elements())
         for i, element in pairs(msg:elements()) do

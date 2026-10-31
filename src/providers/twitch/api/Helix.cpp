@@ -3348,6 +3348,70 @@ void Helix::getFollowedChannel(
         .execute();
 }
 
+void Helix::getFollowedChannels(
+    QString userID,
+    const ResultCallback<std::vector<HelixFollowedChannel>,
+                         HelixPaginationState> &pageCallback,
+    const FailureCallback<QString> &failureCallback, CancellationToken &&token)
+{
+    QUrlQuery query{
+        {u"user_id"_s, userID},
+        {u"first"_s, u"100"_s},
+    };
+
+    this->paginate(
+        u"channels/followed"_s, query,
+        [pageCallback](const QJsonObject &json, const auto &state) {
+            const auto data = json["data"_L1].toArray();
+            std::vector<HelixFollowedChannel> channels;
+            channels.reserve(data.size());
+            for (const auto &channel : data)
+            {
+                channels.emplace_back(channel.toObject());
+            }
+            pageCallback(channels, state);
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            const auto message =
+                result.parseJson().value("message"_L1).toString();
+            failureCallback(message.isEmpty() ? result.formatError() : message);
+        },
+        std::move(token));
+}
+
+void Helix::getFollowedStreams(
+    QString userID,
+    const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+        &pageCallback,
+    const FailureCallback<QString> &failureCallback, CancellationToken &&token)
+{
+    QUrlQuery query{
+        {u"user_id"_s, userID},
+        {u"first"_s, u"100"_s},
+    };
+
+    this->paginate(
+        u"streams/followed"_s, query,
+        [pageCallback](const QJsonObject &json, const auto &state) {
+            const auto data = json["data"_L1].toArray();
+            std::vector<HelixStream> streams;
+            streams.reserve(data.size());
+            for (const auto &stream : data)
+            {
+                streams.emplace_back(stream.toObject());
+            }
+            pageCallback(streams, state);
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            const auto message =
+                result.parseJson().value("message"_L1).toString();
+            failureCallback(message.isEmpty() ? result.formatError() : message);
+        },
+        std::move(token));
+}
+
 void Helix::createPoll(QString broadcasterID, QString title,
                        QStringList choices, const std::chrono::seconds duration,
                        const int pointsPerVote,
@@ -3853,6 +3917,21 @@ void Helix::getSharedChatSession(
         .execute();
 }
 
+void Helix::validateToken(NetworkSuccessCallback successCallback,
+                          NetworkErrorCallback errorCallback)
+{
+    static constexpr QStringView baseUrl = u"https://id.twitch.tv/oauth2/";
+
+    QUrl fullUrl(baseUrl % u"validate");
+
+    NetworkRequest(fullUrl, NetworkRequestType::Get)
+        .timeout(20 * 1000)
+        .header("Authorization", u"OAuth " % this->oauthToken)
+        .onSuccess(std::move(successCallback))
+        .onError(std::move(errorCallback))
+        .execute();
+}
+
 QDebug &operator<<(QDebug &dbg,
                    const HelixCreateEventSubSubscriptionResponse &data)
 {
@@ -4209,14 +4288,10 @@ void Helix::paginate(
 {
     auto onSuccess =
         std::make_shared<std::function<void(NetworkResult)>>(nullptr);
-    // This is the actual callback passed to NetworkRequest.
-    // It wraps the shared-ptr.
-    auto onSuccessCb = [onSuccess](const auto &res) {
-        return (*onSuccess)(res);
-    };
+    std::weak_ptr<std::function<void(NetworkResult)>> weakCb = onSuccess;
 
-    *onSuccess = [this, onPage = std::move(onPage), onError, onSuccessCb,
-                  url{url}, baseQuery{baseQuery},
+    *onSuccess = [this, onPage = std::move(onPage), onError, weakCb, url{url},
+                  baseQuery{baseQuery},
                   cancellationToken =
                       std::move(cancellationToken)](const NetworkResult &res) {
         if (cancellationToken.isCancelled())
@@ -4248,14 +4323,24 @@ void Helix::paginate(
         query.removeAllQueryItems(u"after"_s);
         query.addQueryItem(u"after"_s, cursor);
 
+        auto nextOnSuccess = weakCb.lock();
+        if (!nextOnSuccess)
+        {
+            return;
+        }
+
         this->makeGet(url, query)
-            .onSuccess(onSuccessCb)
+            .onSuccess([onSuccess = std::move(nextOnSuccess)](const auto &res) {
+                (*onSuccess)(res);
+            })
             .onError(onError)
             .execute();
     };
 
     this->makeGet(url, baseQuery)
-        .onSuccess(std::move(onSuccessCb))
+        .onSuccess([onSuccess = std::move(onSuccess)](const auto &res) {
+            (*onSuccess)(res);
+        })
         .onError(std::move(onError))
         .execute();
 }
