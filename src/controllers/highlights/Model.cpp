@@ -45,6 +45,7 @@ void Model::updateRow(const AnyHighlight &highlight,
 
         QFont f;
         f.setStrikeOut(true);
+        f.setItalic(hasUserDefinedName(highlight));
         row[Column::Name]->setData(f, Qt::FontRole);
 
         row[Column::Enabled]->setData("Error", Qt::EditRole);
@@ -55,6 +56,7 @@ void Model::updateRow(const AnyHighlight &highlight,
         row[Column::Enabled]->setData(QString{}, Qt::ToolTipRole);
 
         QFont f;
+        f.setItalic(hasUserDefinedName(highlight));
         row[Column::Name]->setData(f, Qt::FontRole);
 
         if (enabled)
