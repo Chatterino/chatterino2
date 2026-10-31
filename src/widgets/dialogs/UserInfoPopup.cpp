@@ -202,17 +202,20 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                         "moderation action to execute, see description in the "
                         "editor";
              }
+             const QString userTarget = this->userId_.isEmpty()
+                                            ? this->userName_
+                                            : "id:" + this->userId_;
              auto target = arguments.at(0);
              QString msg;
 
              // these can't have /timeout/ buttons because they are not timeouts
              if (target == "ban")
              {
-                 msg = QString("/ban %1").arg(this->userName_);
+                 msg = QString("/ban %1").arg(userTarget);
              }
              else if (target == "unban")
              {
-                 msg = QString("/unban %1").arg(this->userName_);
+                 msg = QString("/unban %1").arg(userTarget);
              }
              else
              {
@@ -242,7 +245,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                  }
                  const auto &button = timeoutButtons.at(buttonNum - 1);
                  msg = QString("/timeout %1 %2")
-                           .arg(this->userName_)
+                           .arg(userTarget)
                            .arg(calculateTimeoutDuration(button));
              }
 
@@ -556,13 +559,15 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             TimeoutWidget::Action action;
             int arg;
             std::tie(action, arg) = item;
-
+            const QString userTarget = this->userId_.isEmpty()
+                                           ? this->userName_
+                                           : "id:" + this->userId_;
             switch (action)
             {
                 case TimeoutWidget::Ban: {
                     if (this->underlyingChannel_)
                     {
-                        QString value = "/ban " + this->userName_;
+                        QString value = "/ban " + userTarget;
                         value = getApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
@@ -573,7 +578,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 case TimeoutWidget::Unban: {
                     if (this->underlyingChannel_)
                     {
-                        QString value = "/unban " + this->userName_;
+                        QString value = "/unban " + userTarget;
                         value = getApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
@@ -584,7 +589,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 case TimeoutWidget::Timeout: {
                     if (this->underlyingChannel_)
                     {
-                        QString value = "/timeout " + this->userName_ + " " +
+                        QString value = "/timeout " + userTarget + " " +
                                         QString::number(arg);
 
                         value = getApp()->getCommands()->execCommand(
