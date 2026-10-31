@@ -16,9 +16,11 @@ namespace chatterino {
 class Hotkey
 {
 public:
-    Hotkey(HotkeyCategory category, QKeySequence keySequence, QString action,
+    Hotkey(HotkeyCategory category, QKeySequence keySequence,
+           QKeySequence *keySequenceAlt, QString action,
            std::vector<QString> arguments, QString name);
-    virtual ~Hotkey() = default;
+    //virtual ~Hotkey() = default;
+    ~Hotkey();
 
     /**
      * @brief Returns the OS-specific string representation of the hotkey
@@ -29,12 +31,28 @@ public:
     QString toString() const;
 
     /**
+     * @brief Returns the OS-specific string representation of the alternate hotkey
+     *
+     * Suitable for showing in the GUI
+     * e.g. Ctrl+F5 or Command+F5
+     */
+    QString toStringAlt() const;
+
+    /**
      * @brief Returns the portable string representation of the hotkey
      *
      * Suitable for saving to/loading from file
      * e.g. Ctrl+F5 or Shift+Ctrl+R
      */
     QString toPortableString() const;
+
+    /**
+     * @brief Returns the portable string representation of the hotkey
+     *
+     * Suitable for saving to/loading from file
+     * e.g. Ctrl+F5 or Shift+Ctrl+R
+     */
+    QString toPortableStringAlt() const;
 
     /**
      * @brief Returns the category where this hotkey is active. This is labeled the "Category" in the UI.
@@ -80,10 +98,12 @@ public:
      * The actual key codes required for the hotkey to trigger specifically on e.g CTRL+F5
      */
     const QKeySequence &keySequence() const;
+    const QKeySequence *keySequenceAlt() const;
 
 private:
     HotkeyCategory category_;
     QKeySequence keySequence_;
+    QKeySequence *keySequenceAlt_;
     QString action_;
     std::vector<QString> arguments_;
     QString name_;
