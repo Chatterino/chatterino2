@@ -6,9 +6,11 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"  // IWYU pragma: keep
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -25,6 +27,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -237,6 +240,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+    SettingWidget::checkbox("Extend wrapped tabs", s.growWrappedNotebookLines)
+        ->setTooltip("When horizontal tabs are wrapped, extend the line for "
+                     "the whole width of the window.")
+        ->addTo(layout);
 
     layout.addWidget(new FontSettingWidget(s.chatFontFamily, s.chatFontSize,
                                            s.chatFontWeight),
@@ -519,7 +526,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.hideMessageTimestampsWhenLive)
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
+    SettingWidget::checkbox("Correct ASCII art wrapping", s.wrapAsciiArt)
+        ->setTooltip("Limit the width of messages containing ASCII art to "
+                     "match the width of Twitch web chat.")
+        ->addTo(layout);
+
+    auto *timestampFormatDropdown = layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
@@ -537,6 +549,52 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    timestampFormatDropdown->completer()->setCaseSensitivity(Qt::CaseSensitive);
+
+    SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show announcement header",
+                            s.showAnnouncementHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show subscription header",
+                            s.showSubscriptionHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show watch streak header", s.showWatchStreakHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show Twitch GIFs", s.showTwitchGifs)
+        ->setTooltip("Twitch GIFs will be shown inline. When disabled, they're "
+                     "shown as links.")
+        ->addTo(layout);
+
+    auto *twitchGifSize = layout.addDropdown<float>(
+        "Twitch GIF size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.4x (Twitch)", "1.5x", "2x"},
+        s.twitchGifScale,
+        [](auto value) {
+            if (value == 1)
+            {
+                return QString("Default");
+            }
+            if (qFuzzyCompare(value, 1.4F))
+            {
+                return QString("1.4x (Twitch)");
+            }
+            return QString::number(value) + "x";
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        });
+    twitchGifSize->setEnabled(s.showTwitchGifs);
+    s.showTwitchGifs.connect(
+        [twitchGifSize](bool enabled) {
+            twitchGifSize->setEnabled(enabled);
+        },
+        this->managedConnections_);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -920,6 +978,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 
 #ifdef Q_OS_WIN
+    if (getApp()->getModes().isPortable)
+    {
+        layout.addDescription(
+            "Portable Chatterino does not register browser integration "
+            "automatically. Registration writes to your Windows user registry "
+            "to point your browser extension to this copy of Chatterino. "
+            "You may manually register it below.");
+        layout.addButton("Register browser integration", [this] {
+            const auto result = registerNmHost(getApp()->getPaths());
+            if (result)
+            {
+                QMessageBox::information(this, "Registration Successful",
+                                         "Browser integration registered.");
+            }
+            else
+            {
+                QMessageBox::warning(
+                    this, "Registration Failed",
+                    "Failed to register browser integration:\n" +
+                        result.error());
+            }
+        });
+    }
+
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
@@ -1504,7 +1586,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.linksDoubleClickOnly)
         ->setTooltip("When enabled, opening links/usercards requires "
                      "double-clicking.\nUseful for making sure you don't "
-                     "accidentally click on suspicious links.")
+                     "accidentally click on suspicious links.\nClicking a link "
+                     "once will pause the chat briefly to allow for a less "
+                     "accident-prone double-clicking.")
+        ->addKeywords({"pause"})
         ->addTo(layout);
 
     SettingWidget::checkbox("Unshorten links", s.unshortLinks)
@@ -1528,14 +1613,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
-                     "/whispers.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Highlight received inline whispers",
-                            s.highlightInlineWhispers)
-        ->setTooltip(
-            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-            "whispers inline\" is disabled, this setting will do nothing.")
+                     "/whispers.\nHighlighting of this is now controlled in "
+                     "the Highlights page.")
         ->addTo(layout);
 
     SettingWidget::checkbox(
@@ -1549,6 +1628,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
+        ->addTo(layout);
+
+    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl,
+                            recentmessages::DEFAULT_API_URL.toString())
+        ->setTooltip(
+            "Use %1 where the channel name should be inserted, for example: " +
+            recentmessages::DEFAULT_API_URL.toString())
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history

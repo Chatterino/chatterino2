@@ -16,6 +16,7 @@
 #include <QWidget>
 
 #include <functional>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -105,6 +106,8 @@ public:
      **/
     void selectPreviousTab(bool focusPage = true, bool recordInHistory = true);
 
+    void scrollTabs(QWheelEvent *event);
+
     /**
      * @brief Selects the last visible tab. 
      **/
@@ -136,12 +139,25 @@ public:
 
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
+    virtual void setShowTabs(bool value);
+
+    void setGrowWrappedNotebookLines(bool value);
 
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *) override;
+
+    virtual void afterPageAdded()
+    {
+    }
+    virtual void afterPageRemoved()
+    {
+    }
+    virtual void afterPageMoved()
+    {
+    }
 
     DrawnButton *addButton_;
 
@@ -205,18 +221,13 @@ private:
     void performVerticalLayout(const LayoutContext &ctx, bool animated);
 
     /**
-     * @brief Show a popup informing the user of some big tab visibility changes
-     **/
-    void showTabVisibilityInfoPopup();
-
-    /**
      * @brief Updates the visibility state of all tabs
      **/
     void updateTabVisibility();
     void resizeAddButton();
 
     bool containsPage(QWidget *page) const;
-    Item *findItem(QWidget *page);
+    std::optional<Item> findItem(QWidget *page);
 
     void pruneInvalidHistoryEntries();
 
@@ -238,7 +249,9 @@ private:
     bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
+    int mouseWheelDelta_ = 0;
     bool lockNotebookLayout_ = false;
+    bool growWrappedNotebookLines = false;
 
     bool refreshPaused_ = false;
     bool refreshRequested_ = false;
@@ -282,6 +295,12 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+    void setShowTabs(bool value) override;
+
+    void afterPageAdded() override;
+    void afterPageRemoved() override;
+    void afterPageMoved() override;
+
 private:
     QAction *sortTabsAlphabeticallyAction_;
 
@@ -294,6 +313,11 @@ private:
     void updateStreamerModeIcon();
 
     void setLockNotebookLayout(bool value) override;
+
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
+    void showTabVisibilityInfoPopup();
 };
 
 }  // namespace chatterino

@@ -4,7 +4,6 @@
 
 #include "messages/Message.hpp"
 
-#include "Application.hpp"
 #include "common/Literals.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -23,7 +22,6 @@ namespace chatterino {
 using namespace literals;
 
 Message::Message()
-    : parseTime(QTime::currentTime())
 {
     DebugCount::increase(DebugObject::Message);
 }
@@ -35,89 +33,46 @@ Message::~Message()
 
 ScrollbarHighlight Message::getScrollBarHighlight() const
 {
-    if (this->flags.has(MessageFlag::Highlighted) ||
-        this->flags.has(MessageFlag::HighlightedWhisper))
+    if (this->flags.has(MessageFlag::Highlighted))
     {
         return {
             this->highlightColor,
         };
     }
 
-    if (this->flags.has(MessageFlag::WatchStreak) &&
-        getSettings()->enableWatchStreakHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::WatchStreak),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-        this->flags.has(MessageFlag::RedeemedChannelPointReward))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            ScrollbarHighlight::Default,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::ElevatedMessage))
-    {
-        return {
-            ColorProvider::instance().color(
-                ColorType::ElevatedMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            false,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::FirstMessage))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            ScrollbarHighlight::Default,
-            false,
-            true,
-        };
-    }
-
-    if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
-        this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
-    {
-        return {
-            ColorProvider::instance().color(ColorType::AutomodHighlight),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::Announcement) &&
-        getSettings()->enableAnnouncementHighlight)
-    {
-        return {
-            ColorProvider::instance().color(colorTypeFromHelixAnnouncementColor(
-                this->announcementColor,
-                getSettings()->enableColoredAnnouncementHighlight)),
-        };
-    }
-
-    if (this->flags.has(MessageFlag::UncategorizedNotification))
-    {
-        // TODO: Give this a better/its own color :-)
-        return {
-            ColorProvider::instance().color(ColorType::Subscription),
-        };
-    }
-
     return {};
+}
+
+std::shared_ptr<Message> Message::clone() const
+{
+    auto cloned = std::make_shared<Message>();
+    cloned->flags = this->flags;
+    cloned->id = this->id;
+    cloned->searchText = this->searchText;
+    cloned->messageText = this->messageText;
+    cloned->loginName = this->loginName;
+    cloned->displayName = this->displayName;
+    cloned->localizedName = this->localizedName;
+    cloned->userID = this->userID;
+    cloned->timeoutUser = this->timeoutUser;
+    cloned->channelName = this->channelName;
+    cloned->usernameColor = this->usernameColor;
+    cloned->timestamp = this->timestamp;
+    cloned->twitchBadges = this->twitchBadges;
+    cloned->twitchBadgeInfos = this->twitchBadgeInfos;
+    cloned->externalBadges = this->externalBadges;
+    cloned->highlightColor = this->highlightColor;
+    cloned->replyThread = this->replyThread;
+    cloned->replyParent = this->replyParent;
+    cloned->count = this->count;
+    cloned->reward = this->reward;
+    cloned->bits = this->bits;
+    cloned->announcementColor = this->announcementColor;
+    std::ranges::transform(this->elements, std::back_inserter(cloned->elements),
+                           [](const auto &element) {
+                               return element->clone();
+                           });
+    return cloned;
 }
 
 QJsonObject Message::toJson() const
@@ -135,8 +90,7 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
-        {"serverReceivedTime"_L1,
-         this->serverReceivedTime.toString(Qt::ISODate)},
+        {"timestamp"_L1, this->timestamp.toString(Qt::ISODate)},
         {"frozen"_L1, this->frozen},
     };
 
@@ -187,12 +141,6 @@ QJsonObject Message::toJson() const
             qmagicenum::enumNameString(this->announcementColor);
     }
 
-    // XXX: figure out if we can add this in tests
-    if (!getApp()->isTest())
-    {
-        msg["parseTime"_L1] = this->parseTime.toString(Qt::ISODate);
-    }
-
     QJsonArray elements;
     for (const auto &element : this->elements)
     {
@@ -217,8 +165,7 @@ Message::ReplyStatus Message::isReplyable() const
                             MessageFlag::Timeout, MessageFlag::Whisper,
                             MessageFlag::ModerationAction,
                             MessageFlag::InvalidReplyTarget}) ||
-        this->serverReceivedTime.secsTo(QDateTime::currentDateTime()) >
-            oneDayInSeconds)
+        this->timestamp.secsTo(QDateTime::currentDateTime()) > oneDayInSeconds)
     {
         messageReplyable = false;
     }

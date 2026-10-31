@@ -59,7 +59,11 @@ uint16_t readPortEnv(const char *envName, uint16_t defaultValue)
     return defaultValue;
 }
 
-bool readBoolEnv(const char *envName, bool defaultValue)
+}  // namespace
+
+namespace env {
+
+bool readBool(const char *envName, bool defaultValue)
 {
     auto envString = qEnvironmentVariable(envName);
     if (!envString.isEmpty())
@@ -70,20 +74,19 @@ bool readBoolEnv(const char *envName, bool defaultValue)
     return defaultValue;
 }
 
-}  // namespace
+}  // namespace env
 
 Env::Env()
     : recentMessagesApiUrl(
-          qEnvironmentVariable("CHATTERINO2_RECENT_MESSAGES_URL",
-                               "https://recent-messages.robotty.de/api/v2/"
-                               "recent-messages/%1"))
+          qEnvironmentVariable("CHATTERINO2_RECENT_MESSAGES_URL"))
     , linkResolverUrl(qEnvironmentVariable(
           "CHATTERINO2_LINK_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/link_resolver/%1"))
     , twitchServerHost(qEnvironmentVariable("CHATTERINO2_TWITCH_SERVER_HOST",
                                             "irc.chat.twitch.tv"))
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
-    , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
+    , twitchServerSecure(
+          env::readBool("CHATTERINO2_TWITCH_SERVER_SECURE", true))
     , proxyUrl(readOptionalStringEnv("CHATTERINO2_PROXY_URL"))
     , logToFile(qEnvironmentVariable(env::LOG_TO_FILE, ""))
 {

@@ -29,6 +29,9 @@
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QPointer>
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 
@@ -45,6 +48,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    this->setWindowRole(u"chatterino.settings"_s);
     // Disable the ? button in the titlebar until we decide to use it
     this->setWindowFlags(this->windowFlags() &
                          ~Qt::WindowContextHelpButtonHint);
@@ -334,13 +338,15 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
 void SettingsDialog::showDialog(QWidget *parent,
                                 SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog(parent);
-    static bool hasShownBefore = false;
-    if (hasShownBefore)
+    static QPointer<SettingsDialog> instance;
+    if (instance)
     {
         instance->refresh();
     }
-    hasShownBefore = true;
+    else
+    {
+        instance = new SettingsDialog(parent);
+    }
 
     // Resets the cancel button.
     getSettings()->saveSnapshot();

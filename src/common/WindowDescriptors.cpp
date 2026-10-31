@@ -8,6 +8,7 @@
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "util/Backup.hpp"
 #include "util/QMagicEnum.hpp"
 #include "widgets/Window.hpp"
 
@@ -15,21 +16,40 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include <span>
+
+using namespace Qt::Literals;
+
 namespace chatterino {
 
 namespace {
 
-QJsonArray loadWindowArray(const QString &settingsPath)
+ExpectedStr<QJsonArray> loadWindowArray(const QString &settingsPath)
 {
     QFile file(settingsPath);
     if (!file.open(QIODevice::ReadOnly))
     {
-        return {};
+        return makeUnexpected(u"Failed to open file: " % file.errorString());
     }
     QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
-    return windows_arr;
+    QJsonParseError err;
+    QJsonDocument document = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError)
+    {
+        return makeUnexpected(u"Failed to parse JSON: " % err.errorString());
+    }
+    if (!document.isObject())
+    {
+        return makeUnexpected(u"Root element is not an object"_s);
+    }
+    const auto rootObj = document.object();
+    const auto windowsEl = rootObj["windows"_L1];
+    if (!windowsEl.isArray())
+    {
+        return makeUnexpected(
+            u"Root object does not contain a 'windows' array"_s);
+    }
+    return windowsEl.toArray();
 }
 
 QList<QUuid> loadFilters(const QJsonValue &val)
@@ -47,6 +67,16 @@ QList<QUuid> loadFilters(const QJsonValue &val)
     }
 
     return filterIds;
+}
+
+QJsonArray encodeFilters(std::span<const QUuid> filters)
+{
+    QJsonArray arr;
+    for (const auto &f : filters)
+    {
+        arr.append(f.toString(QUuid::WithoutBraces));
+    }
+    return arr;
 }
 
 }  // namespace
@@ -76,6 +106,29 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     }
 
     return descriptor;
+}
+
+QJsonObject SplitDescriptor::toJson() const
+{
+    QJsonObject obj;
+
+    obj.insert("type", "split");
+    obj.insert("moderationMode", this->moderationMode_);
+
+    QJsonObject data{{"type"_L1, this->type_}};
+    if (!this->channelName_.isEmpty())
+    {
+        data.insert("name"_L1, this->channelName_);
+    }
+    obj.insert("data", data);
+
+    obj.insert("filters", encodeFilters(this->filters_));
+
+    if (this->spellCheckOverride.has_value())
+    {
+        obj["checkSpelling"] = *this->spellCheckOverride;
+    }
+    return obj;
 }
 
 IndirectChannel SplitDescriptor::decodeChannel() const
@@ -127,6 +180,14 @@ SplitNodeDescriptor SplitNodeDescriptor::loadFromJSON(const QJsonObject &root)
     return descriptor;
 }
 
+QJsonObject SplitNodeDescriptor::toJson() const
+{
+    QJsonObject obj = SplitDescriptor::toJson();
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
+    return obj;
+}
+
 ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
     const QJsonObject &root)
 {
@@ -155,6 +216,26 @@ ContainerNodeDescriptor ContainerNodeDescriptor::loadFromJSON(
     }
 
     return descriptor;
+}
+
+QJsonObject ContainerNodeDescriptor::toJson() const
+{
+    QJsonObject obj;
+    obj.insert("type", this->vertical_ ? "vertical" : "horizontal");
+    obj.insert("flexh", this->flexH_);
+    obj.insert("flexv", this->flexV_);
+
+    QJsonArray itemsArr;
+    for (const auto &n : this->items_)
+    {
+        itemsArr.append(std::visit(
+            [](auto &&it) {
+                return it.toJson();
+            },
+            n));
+    }
+    obj.insert("items", itemsArr);
+    return obj;
 }
 
 TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
@@ -193,16 +274,21 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
     return tab;
 }
 
-WindowLayout WindowLayout::loadFromFile(const QString &path)
+ExpectedStr<WindowLayout> WindowLayout::loadFromFile(const QString &path)
 {
     WindowLayout layout;
 
     bool hasSetAMainWindow = false;
 
-    // "deserialize"
-    for (const auto windowVal : loadWindowArray(path))
+    auto rootArray = loadWindowArray(path);
+    if (!rootArray)
     {
-        QJsonObject windowObj = windowVal.toObject();
+        return makeUnexpected(std::move(rootArray).error());
+    }
+
+    for (const auto windowVal : std::as_const(*rootArray))
+    {
+        const QJsonObject windowObj = windowVal.toObject();
 
         WindowDescriptor window;
 
@@ -242,6 +328,13 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             int height = windowObj.value("height").toInt(-1);
 
             window.geometry_ = QRect(x, y, width, height);
+        }
+
+        // Load popup ID
+        auto idVal = windowObj["popupID"];
+        if (idVal.isDouble())
+        {
+            window.popupID = idVal.toInt(1);
         }
 
         bool hasSetASelectedTab = false;

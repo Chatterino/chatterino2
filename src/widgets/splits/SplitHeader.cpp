@@ -35,6 +35,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDrag>
 #include <QHBoxLayout>
@@ -44,6 +45,8 @@
 #include <QPainter>
 
 #include <cmath>
+
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -471,12 +474,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Popup overlay",
         h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"),
         this->split_, &Split::showOverlayWindow);
-    menu->addAction("Search",
+    menu->addAction(u"Search…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "showSearch"),
                     this->split_, [this] {
                         this->split_->showSearch(true);
                     });
-    menu->addAction("Set filters",
+    menu->addAction(u"Set filters…"_s,
                     h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"),
                     this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
@@ -514,7 +517,22 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "openModView"),
                 this->split_, &Split::openModViewInBrowser);
         }
+    }
 
+    menu->addAction(
+        "Followed channels",
+        h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
+        this, [this] {
+            auto *window = dynamic_cast<Window *>(this->window());
+            if (window != nullptr)
+            {
+                window->showFollowedChannels();
+            }
+        });
+    menu->addSeparator();
+
+    if (twitchChannel)
+    {
         menu->addAction(
                 "Create a clip",
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),

@@ -11,6 +11,7 @@
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
+#include "widgets/helper/SvgWidget.hpp"
 #include "widgets/settingspages/CustomWidgets.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
@@ -22,7 +23,6 @@
 #include <QLineEdit>
 #include <QPixmap>
 #include <QSvgRenderer>
-#include <QSvgWidget>
 #include <Qt>
 
 #include <algorithm>
@@ -40,7 +40,7 @@ const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
 namespace chatterino {
 
 SettingWidget::SettingWidget(const QString &mainKeyword)
-    : tooltipIcon(new QSvgWidget(this))
+    : tooltipIcon(new SvgWidget(this))
     , vLayout(new QVBoxLayout(this))
     , hLayout(new QHBoxLayout)
 {
