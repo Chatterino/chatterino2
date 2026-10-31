@@ -8,11 +8,8 @@
     "boost-beast",
     "boost-circular-buffer",
     "boost-date-time",
-    "boost-foreach",
     "boost-interprocess",
     "boost-json",
-    "boost-signals2",
-    "boost-variant",
     "hunspell",
     "pkgconf",
     {

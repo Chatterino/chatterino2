@@ -50,8 +50,9 @@ const QString CHATTERINO_OS = u"unknown"_s;
 
 namespace chatterino {
 
-Updates::Updates(const Paths &paths_, Settings &settings)
+Updates::Updates(const Modes &modes_, const Paths &paths_, Settings &settings)
     : paths(paths_)
+    , modes(modes_)
     , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
@@ -147,7 +148,7 @@ void Updates::installUpdates()
     box->open();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    if (Modes::instance().isPortable)
+    if (this->modes.isPortable)
     {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
@@ -205,7 +206,7 @@ void Updates::installUpdates()
                 file.flush();
                 file.close();
 
-                auto updaterPath = Updates::portableUpdaterPath();
+                auto updaterPath = Updates::portableUpdaterPath(this->paths);
                 if (!QFile::exists(updaterPath))
                 {
                     this->setStatus_(MissingPortableUpdater);
@@ -409,9 +410,9 @@ Updates::Status Updates::getStatus() const
     return this->status_;
 }
 
-QString Updates::portableUpdaterPath()
+QString Updates::portableUpdaterPath(const Paths &paths)
 {
-    return combinePath(QCoreApplication::applicationDirPath(),
+    return combinePath(paths.rootAppDataDirectory,
                        "updater.1/ChatterinoUpdater.exe");
 }
 

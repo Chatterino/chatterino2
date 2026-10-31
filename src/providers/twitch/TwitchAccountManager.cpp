@@ -54,11 +54,8 @@ QString missingScopes(const QJsonArray &scopesArray)
 
 void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
 {
-    NetworkRequest(u"https://id.twitch.tv/oauth2/validate"_s,
-                   NetworkRequestType::Get)
-        .header("Authorization", u"OAuth " % account->getOAuthToken())
-        .timeout(20000)
-        .onSuccess([account](const auto &res) {
+    getHelix()->validateToken(
+        [account](const auto &res) {
             auto *app = tryGetApp();
             if (!app)
             {
@@ -97,12 +94,11 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
             app->getTwitch()->forEachChannel([msg](const auto &chan) {
                 chan->addMessage(msg, MessageContext::Original);
             });
-        })
-        .onError([](const auto &res) {
+        },
+        [](const auto &res) {
             qCWarning(chatterinoTwitch)
                 << "Failed to check for missing scopes:" << res.formatError();
-        })
-        .execute();
+        });
 }
 
 }  // namespace
@@ -165,7 +161,8 @@ const std::vector<QStringView> AUTH_SCOPES{
     u"moderator:manage:banned_users",  // for ban/unban/timeout/untimeout api & channel.moderate eventsub topic
 
     // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
-    u"moderator:manage:chat_messages",  // for delete message api (/delete, /clear) & channel.moderate eventsub topic
+    // https://dev.twitch.tv/docs/api/reference#pin-chat-message
+    u"moderator:manage:chat_messages",  // for message moderation api (/delete, /clear, /pin) & channel.moderate eventsub topic
 
     // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
     u"user:manage:chat_color",  // for update user color api (/color coral)
@@ -221,6 +218,9 @@ const std::vector<QStringView> AUTH_SCOPES{
 
     u"moderator:read:suspicious_users",  // for channel.suspicious_user.message and channel.suspicious_user.update
 
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+    u"moderator:read:followers",
+
     // https://dev.twitch.tv/docs/api/reference#add-suspicious-status-to-chat-user
     // https://dev.twitch.tv/docs/api/reference#remove-suspicious-status-from-chat-user
     u"moderator:manage:suspicious_users",
@@ -230,7 +230,8 @@ TwitchAccountManager::TwitchAccountManager()
     : accounts(SharedPtrElementLess<TwitchAccount>{})
     , anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
-    this->currentUserChanged.connect([this] {
+    // This is our own signal.
+    std::ignore = this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
         currentUser->loadBlocks();
         currentUser->loadSeventvUserID();
@@ -344,7 +345,7 @@ void TwitchAccountManager::reloadUsers()
                     qCDebug(chatterinoTwitch)
                         << "It was the current user, so we need to "
                            "reconnect stuff!";
-                    this->currentUserChanged();
+                    this->currentUserChanged.invoke();
                 }
             }
             break;
@@ -389,7 +390,7 @@ void TwitchAccountManager::load()
             this->currentUser_ = this->anonymousUser_;
         }
 
-        this->currentUserChanged();
+        this->currentUserChanged.invoke();
         this->currentUser_->reloadEmotes();
     });
 }

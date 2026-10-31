@@ -107,6 +107,14 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
             : createTooltip(emoteName.string, author.string, isGlobal);
     auto imageSet = SeventvEmotes::createImageSet(emoteData, false);
 
+    const auto tagsArray = emoteData["tags"].toArray();
+    QStringList tags;
+    tags.reserve(tagsArray.size());
+    for (const auto tag : tagsArray)
+    {
+        tags.append(tag.toString());
+    }
+
     auto emote = Emote({
         emoteName,
         imageSet,
@@ -116,6 +124,7 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
         emoteId,
         author,
         makeConditionedOptional(aliasedName, baseEmoteName),
+        tags,
     });
 
     return {emote, emoteId, emoteName, !emote.images.getImage1()->isEmpty()};
@@ -140,14 +149,21 @@ EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
                         dispatch.emoteName == oldEmote->baseName->string;
 
     auto baseName = oldEmote->baseName.value_or(oldEmote->name);
-    auto emote = std::make_shared<const Emote>(Emote(
-        {EmoteName{dispatch.emoteName}, oldEmote->images,
-         toNonAliased
-             ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
-             : createAliasedTooltip(dispatch.emoteName, baseName.string,
-                                    oldEmote->author.string, false),
-         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
-         oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
+    auto emote = std::make_shared<const Emote>(Emote({
+        .name = EmoteName{dispatch.emoteName},
+        .images = oldEmote->images,
+        .tooltip = toNonAliased ? createTooltip(dispatch.emoteName,
+                                                oldEmote->author.string, false)
+                                : createAliasedTooltip(
+                                      dispatch.emoteName, baseName.string,
+                                      oldEmote->author.string, false),
+        .homePage = oldEmote->homePage,
+        .zeroWidth = oldEmote->zeroWidth,
+        .id = oldEmote->id,
+        .author = oldEmote->author,
+        .baseName = makeConditionedOptional(!toNonAliased, baseName),
+        .tags = oldEmote->tags,
+    }));
     return emote;
 }
 
@@ -205,7 +221,7 @@ std::shared_ptr<const EmoteMap> SeventvEmotes::globalEmotes() const
     return this->global_.get();
 }
 
-std::optional<EmotePtr> SeventvEmotes::globalEmote(const EmoteName &name) const
+std::optional<EmotePtr> SeventvEmotes::globalEmote(EmoteNameView name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);

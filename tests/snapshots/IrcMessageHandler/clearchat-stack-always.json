@@ -2,7 +2,7 @@
     "input": "@tmi-sent-ts=1736678514028;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
     "output": [
         {
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 4,
             "displayName": "",
             "elements": [
@@ -66,7 +66,7 @@
             "loginName": "",
             "messageText": "Chat has been cleared by a moderator. (4 times) ",
             "searchText": "Chat has been cleared by a moderator. (4 times) ",
-            "serverReceivedTime": "2025-01-12T10:41:54Z",
+            "timestamp": "2025-01-12T10:41:54Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },
@@ -233,7 +233,7 @@
             "loginName": "pajlada",
             "messageText": "asd",
             "searchText": "pajlada  pajlada: asd ",
-            "serverReceivedTime": "2025-01-12T10:41:52Z",
+            "timestamp": "2025-01-12T10:41:52Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "108"

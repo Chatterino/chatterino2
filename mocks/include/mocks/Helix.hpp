@@ -35,7 +35,7 @@ public:
 
     MOCK_METHOD(
         void, getChannelFollowers,
-        (QString broadcasterID,
+        (QString broadcasterID, QString userID,
          ResultCallback<HelixGetChannelFollowersResponse> successCallback,
          std::function<void(QString)> failureCallback),
         (override));
@@ -368,7 +368,8 @@ public:
     MOCK_METHOD(
         void, getChatters,
         (QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-         ResultCallback<HelixChatters> successCallback,
+         const QObject *caller,
+         const ResultCallback<HelixChatters> &successCallback,
          (FailureCallback<HelixGetChattersError, QString> failureCallback)),
         (override));  // getChatters
 
@@ -377,7 +378,7 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getChannelVIPs,
-        (QString broadcasterID,
+        (const QString &broadcasterID, const QObject *caller,
          ResultCallback<std::vector<HelixVip>> successCallback,
          (FailureCallback<HelixListVIPsError, QString> failureCallback)),
         (override));  // /vips
@@ -397,7 +398,8 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getModerators,
-        (QString broadcasterID, int maxModeratorsToFetch,
+        (const QString &broadcasterID, int maxModeratorsToFetch,
+         const QObject *caller,
          ResultCallback<std::vector<HelixModerator>> successCallback,
          (FailureCallback<HelixGetModeratorsError, QString> failureCallback)),
         (override));  // /mods
@@ -443,6 +445,22 @@ public:
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));
+
+    MOCK_METHOD(void, getFollowedChannels,
+                (QString userID,
+                 (const ResultCallback<std::vector<HelixFollowedChannel>,
+                                       HelixPaginationState> &pageCallback),
+                 const FailureCallback<QString> &failureCallback,
+                 CancellationToken &&token),
+                (override));
+
+    MOCK_METHOD(void, getFollowedStreams,
+                (QString userID,
+                 (const ResultCallback<std::vector<HelixStream>,
+                                       HelixPaginationState> &pageCallback),
+                 const FailureCallback<QString> &failureCallback,
+                 CancellationToken &&token),
+                (override));
 
     // create poll
     MOCK_METHOD(void, createPoll,
@@ -502,6 +520,48 @@ public:
     MOCK_METHOD(void, deleteEventSubSubscription,
                 (const QString &request, ResultCallback<> successCallback,
                  (FailureCallback<QString> failureCallback)),
+                (override));
+
+    MOCK_METHOD(
+        void, pinChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixPinMessageError, QString>)failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, updatePinnedChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, std::optional<std::chrono::seconds> duration,
+         ResultCallback<> successCallback,
+         (FailureCallback<HelixPinMessageError, QString>)failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, getPinnedChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+         FailureCallback<QString> failureCallback),
+        (override));
+
+    MOCK_METHOD(
+        void, unpinChatMessage,
+        (const QString &broadcasterID, const QString &moderatorID,
+         const QString &messageID, ResultCallback<> successCallback,
+         (FailureCallback<HelixUnpinMessageError, QString>)failureCallback),
+        (override));
+
+    MOCK_METHOD(void, getSharedChatSession,
+                (QString broadcasterID,
+                 ResultCallback<HelixSharedChatSession> successCallback,
+                 (FailureCallback<HelixGetSharedChatSessionError, QString>
+                      failureCallback)),
+                (override));
+
+    MOCK_METHOD(void, validateToken,
+                (NetworkSuccessCallback successCallback,
+                 NetworkErrorCallback errorCallback),
                 (override));
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),

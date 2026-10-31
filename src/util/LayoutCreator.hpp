@@ -76,7 +76,7 @@ public:
         return LayoutCreator<U>(layout);
     }
 
-    LayoutCreator<T> assign(T **ptr)
+    LayoutCreator<T> assign(auto **ptr)
     {
         *ptr = this->item_;
 

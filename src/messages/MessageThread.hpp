@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QString>
 
 #include <memory>
@@ -70,7 +70,7 @@ public:
 
     QJsonObject toJson() const;
 
-    boost::signals2::signal<void()> subscriptionUpdated;
+    pajlada::Signals::NoArgSignal subscriptionUpdated;
 
 private:
     const QString rootMessageId_;

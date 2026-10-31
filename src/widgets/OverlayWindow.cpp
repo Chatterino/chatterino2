@@ -111,6 +111,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
+    this->setWindowRole(u"chatterino.overlay"_s);
 
     // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
@@ -223,6 +224,29 @@ void OverlayWindow::applyTheme()
         this->dropShadow_->setBlurRadius(settings->overlayShadowRadius);
     }
     this->update();
+}
+
+void OverlayWindow::wheelEvent(QWheelEvent *event)
+{
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
+    {
+        return;
+    }
+
+    if (event->modifiers().testFlag(Qt::ControlModifier))
+    {
+        if (event->angleDelta().y() > 0)
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() + 0.1F);
+        }
+        else
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() - 0.1F);
+        }
+    }
 }
 
 float OverlayWindow::desiredScale() const
@@ -518,7 +542,7 @@ void OverlayWindow::addShortcuts()
              const auto &direction = arguments.at(0);
              if (direction == "reset")
              {
-                 getSettings()->uiScale.setValue(1);
+                 getSettings()->setClampedOverlayScale(1);
                  return "";
              }
 

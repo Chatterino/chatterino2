@@ -151,6 +151,8 @@ public:
         struct {
             QColor background;
             QColor backgroundPulse;
+            QColor searchHighlightBackground;
+            QColor searchFailText;
             QColor text;
             // Used by the ChatterListWidget & QuickSwitcherPopup
             QString styleSheet;

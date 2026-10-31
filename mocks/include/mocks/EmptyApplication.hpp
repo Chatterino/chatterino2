@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/Modes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
 
@@ -41,6 +42,11 @@ public:
     const Args &getArgs() override
     {
         return this->args_;
+    }
+
+    const Modes &getModes() override
+    {
+        return this->modes_;
     }
 
     Theme *getThemes() override
@@ -293,8 +299,9 @@ public:
     }
 
     QTemporaryDir settingsDir;
-    Paths paths_;
     Args args_;
+    Modes modes_{args_};
+    Paths paths_ = {args_, modes_};
 };
 
 }  // namespace chatterino::mock

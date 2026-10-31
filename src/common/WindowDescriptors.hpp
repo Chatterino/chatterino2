@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/ProviderId.hpp"
+#include "util/Expected.hpp"
 
 #include <QJsonObject>
 #include <QList>
@@ -17,6 +18,8 @@
 #include <vector>
 
 namespace chatterino {
+
+class IndirectChannel;
 
 /**
  * A WindowLayout contains one or more windows.
@@ -52,13 +55,23 @@ struct SplitDescriptor {
 
     QList<QUuid> filters_;
 
-    static void loadFromJSON(SplitDescriptor &descriptor,
-                             const QJsonObject &root, const QJsonObject &data);
+    static SplitDescriptor loadFromJSON(const QJsonObject &root);
+
+    QJsonObject toJson() const;
+
+    IndirectChannel decodeChannel() const;
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
+    SplitNodeDescriptor() = default;
+    SplitNodeDescriptor(SplitDescriptor descriptor);
+
     qreal flexH_ = 1;
     qreal flexV_ = 1;
+
+    static SplitNodeDescriptor loadFromJSON(const QJsonObject &root);
+
+    QJsonObject toJson() const;
 };
 
 struct ContainerNodeDescriptor;
@@ -73,16 +86,20 @@ struct ContainerNodeDescriptor {
     bool vertical_ = false;
 
     std::vector<NodeDescriptor> items_;
+
+    static ContainerNodeDescriptor loadFromJSON(const QJsonObject &root);
+
+    QJsonObject toJson() const;
 };
 
 struct TabDescriptor {
-    static TabDescriptor loadFromJSON(const QJsonObject &root);
-
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};
 
     std::optional<NodeDescriptor> rootNode_;
+
+    static TabDescriptor loadFromJSON(const QJsonObject &tabObj);
 };
 
 struct WindowDescriptor {
@@ -96,6 +113,7 @@ struct WindowDescriptor {
     State state_ = State::None;
 
     QRect geometry_;
+    std::optional<size_t> popupID;
 
     std::vector<TabDescriptor> tabs_;
 };
@@ -118,7 +136,7 @@ public:
     /// If no split with the channel exists, a new one is added.
     /// If no window exists, a new one is added.
     void activateOrAddChannel(ProviderId provider, const QString &name);
-    static WindowLayout loadFromFile(const QString &path);
+    static ExpectedStr<WindowLayout> loadFromFile(const QString &path);
 };
 
 }  // namespace chatterino

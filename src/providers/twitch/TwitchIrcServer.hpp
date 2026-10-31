@@ -143,8 +143,6 @@ public:
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override;
 
-    void open(ConnectionType type);
-
 private:
     Atomic<QString> lastUserThatWhisperedMe;
 
@@ -169,15 +167,16 @@ public:
                        SeventvEventAPI *seventvEventAPI) override;
 
 protected:
-    void initializeConnection(IrcConnection *connection, ConnectionType type);
+    static void initializeConnection(IrcConnection *connection,
+                                     ConnectionType type);
+
     std::shared_ptr<Channel> createChannel(const QString &channelName);
 
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
     void readConnectionMessageReceived(Communi::IrcMessage *message);
     void writeConnectionMessageReceived(Communi::IrcMessage *message);
 
-    void onReadConnected(IrcConnection *connection);
-    void onWriteConnected(IrcConnection *connection);
+    void onReadConnected();
     void onDisconnected();
     void markChannelsConnected();
 
@@ -201,9 +200,6 @@ private:
     // Our rate limiting bucket for the Twitch join rate limits
     // https://dev.twitch.tv/docs/irc/guide#rate-limits
     QObjectPtr<RatelimitBucket> joinBucket_;
-
-    QTimer reconnectTimer_;
-    int falloffCounter_ = 1;
 
     std::mutex connectionMutex_;
 

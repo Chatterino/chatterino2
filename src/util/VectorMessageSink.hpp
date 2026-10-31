@@ -6,6 +6,8 @@
 
 #include "messages/MessageSink.hpp"
 
+#include <vector>
+
 namespace chatterino {
 
 class VectorMessageSink final : public MessageSink

@@ -28,6 +28,10 @@ case "$ubuntu_release" in
         # Qt6 static-linked deb, see https://github.com/Chatterino/docker
         dependencies="libc6, libstdc++6, libglx0, libopengl0, libpng16-16, libharfbuzz0b, libfreetype6, libfontconfig1, libjpeg-turbo8, libxcb-glx0, libegl1, libx11-6, libxkbcommon0, libx11-xcb1, libxkbcommon-x11-0, libxcb-cursor0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0, libxcb-render-util0, libxcb-shm0, libxcb-sync1, libxcb-xfixes0, libxcb-render0, libxcb-shape0, libxcb-xkb1, libxcb1, libbrotli1, libglib2.0-0, zlib1g, libicu74, libpcre2-16-0, libssl3, libgraphite2-3, libexpat1, libuuid1, libxcb-util1, libxau6, libxdmcp6, libffi8, libmount1, libnotify4, libselinux1, libpcre3, libbsd0, libblkid1, libpcre2-8-0, libmd0"
         ;;
+    26.04)
+        # Qt6 static-linked deb, see https://github.com/Chatterino/docker
+        dependencies="libc6, libstdc++6, libglx0, libopengl0, libpng16-16, libharfbuzz0b, libfreetype6, libfontconfig1, libjpeg-turbo8, libxcb-glx0, libegl1, libx11-6, libxkbcommon0, libx11-xcb1, libxkbcommon-x11-0, libxcb-cursor0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0, libxcb-render-util0, libxcb-shm0, libxcb-sync1, libxcb-xfixes0, libxcb-render0, libxcb-shape0, libxcb-xkb1, libxcb1, libbrotli1, libglib2.0-0, zlib1g, libicu78, libpcre2-16-0, libssl3, libgraphite2-3, libexpat1, libuuid1, libxcb-util1, libxau6, libxdmcp6, libffi8, libmount1, libnotify4, libselinux1, libbsd0, libblkid1, libpcre2-dev, libmd0"
+        ;;
     *)
         echo "Unsupported Ubuntu release $ubuntu_release"
         exit 1

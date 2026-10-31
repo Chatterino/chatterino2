@@ -49,6 +49,15 @@ public:
         Signal<const QJsonObject &> redeemed;
     } pointReward;
 
+    struct {
+        /// Emitted when a message is pinned or its pin is updated.
+        /// The argument is the channel name.
+        Signal<const QString &> pinned;
+        /// Emitted when the pinned message is removed.
+        /// The argument is the channel name.
+        Signal<const QString &> unpinned;
+    } pinnedChatUpdates;
+
     /**
      * Listen to incoming channel point redemptions in the given channel.
      * This topic is relevant for everyone.
@@ -56,6 +65,14 @@ public:
      * PubSub topic: community-points-channel-v1.{channelID}
      */
     void listenToChannelPointRewards(const QString &channelID);
+
+    /**
+     * Listen to real time pin/unpin events in the given channel.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: pinned-chat-updates-v1.{channelID}
+     */
+    void listenToPinnedChatUpdates(const QString &channelID);
 
     struct {
         std::atomic<uint32_t> messagesReceived{0};

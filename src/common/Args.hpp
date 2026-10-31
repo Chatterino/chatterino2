@@ -44,7 +44,7 @@ public:
     };
 
     Args() = default;
-    Args(const QApplication &app, const Paths &paths);
+    explicit Args(const QApplication &app);
 
     bool printVersion{};
 
@@ -62,11 +62,14 @@ public:
     // Not settings directly
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
-    std::optional<WindowLayout> customChannelLayout;
+    std::vector<Channel> customChannels;
     std::optional<Channel> activateChannel;
     std::optional<QString> initialLogin;
     bool verbose{};
     bool safeMode{};
+
+    bool portableEnable{};
+    std::optional<QString> portableDirectory;
 
     bool useOldScaling = false;
 
@@ -76,10 +79,10 @@ public:
 #endif
 
     QStringList currentArguments() const;
+    std::optional<WindowLayout> makeCustomChannelLayout(
+        const QString &windowLayoutFile) const;
 
 private:
-    void applyCustomChannelLayout(const QString &argValue, const Paths &paths);
-
     QStringList currentArguments_;
 };
 

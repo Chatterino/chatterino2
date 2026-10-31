@@ -97,7 +97,7 @@ public:
         : mock::BaseApplication(TEST_SETTINGS)
         , plugins(this->paths_)
         , commands(this->paths_)
-        , windows(this->args, this->paths_, this->settings, this->theme,
+        , windows(this->args_, this->paths_, this->settings, this->theme,
                   this->fonts)
     {
     }
@@ -206,7 +206,7 @@ public:
         getApp()->getPlugins()->openLibrariesFor(plugin);
     }
 
-    static std::map<QString, std::unique_ptr<Plugin>> &plugins()
+    static std::map<QString, AnyPlugin> &plugins()
     {
         return getApp()->getPlugins()->plugins_;
     }
@@ -973,6 +973,7 @@ TEST_F(PluginTest, MessageElementFlag)
     )lua");
 
     const char *VALUES = "AlwaysShow=0x2000000,"
+                         "AnnouncementHeader=0x8000000000,"
                          "BadgeBttv=0x40,"
                          "BadgeChannelAuthority=0x8000,"
                          "BadgeChatterino=0x40000,"
@@ -993,15 +994,19 @@ TEST_F(PluginTest, MessageElementFlag)
                          "EmojiText=0x1000000,"
                          "EmoteImage=0x10,"
                          "EmoteText=0x20,"
+                         "HeaderTimestamp=0x4000000000,"
                          "LowercaseLinks=0x20000000,"
                          "Mention=0x8000000,"
                          "Misc=0x1,"
                          "ModeratorTools=0x400000,"
                          "RepliedMessage=0x100000000,"
                          "ReplyButton=0x200000000,"
+                         "SubscriptionHeader=0x10000000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
-                         "Username=0x4";
+                         "TwitchGif=0x80,"
+                         "Username=0x4,"
+                         "WatchStreakHeader=0x20000000000";
 
     std::string got = (*lua)["out"];
     ASSERT_EQ(got, VALUES);
@@ -1129,9 +1134,6 @@ TEST_F(PluginTest, MessageModification)
     sol::table tests = lua->script(R"lua(
         return {
             function(msg)
-                msg.parse_time = 1234567
-            end,
-            function(msg)
                 assert(msg.id == "abc")
                 msg.id = "1234"
                 assert(msg.id == "1234")
@@ -1177,9 +1179,9 @@ TEST_F(PluginTest, MessageModification)
                 assert(msg.username_color == "#ccbbaaff")
             end,
             function(msg)
-                assert(msg.server_received_time == 1230000)
-                msg.server_received_time = 1240000
-                assert(msg.server_received_time == 1240000)
+                assert(msg.timestamp == 1230000)
+                msg.timestamp = 1240000
+                assert(msg.timestamp == 1240000)
             end,
             function(msg)
                 print(msg.highlight_color)
@@ -1208,7 +1210,7 @@ TEST_F(PluginTest, MessageModification)
         msg->userID = "id";
         msg->channelName = "channel";
         msg->usernameColor = QColor(0xaabbcc);
-        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->timestamp = QDateTime::fromMSecsSinceEpoch(1230000);
         msg->highlightColor = std::make_shared<QColor>(0x223344);
         msg->elements.push_back(
             std::make_unique<TextElement>("lol", MessageElementFlag::Text));
@@ -1697,6 +1699,19 @@ TEST_F(PluginImageTest, NoPerms)
 
 INSTANTIATE_TEST_SUITE_P(PluginImage, PluginImageTest,
                          testing::ValuesIn(discoverLuaTests("images")));
+
+class PluginDateTimeTest : public PluginTest,
+                           public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginDateTimeTest, Run)
+{
+    this->configure();
+    runLuaTest("datetime", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginDateTimeTest,
+                         testing::ValuesIn(discoverLuaTests("datetime")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)
