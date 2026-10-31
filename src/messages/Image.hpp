@@ -7,6 +7,7 @@
 #include "common/Aliases.hpp"
 #include "util/DebugCount.hpp"
 
+#include <QByteArray>
 #include <QList>
 #include <QPixmap>
 #include <QString>
@@ -38,6 +39,7 @@ class Frames
 public:
     Frames();
     Frames(QList<Frame> &&frames);
+    explicit Frames(QByteArray data);
     ~Frames();
 
     Frames(const Frames &) = delete;
@@ -47,6 +49,7 @@ public:
     Frames &operator=(Frames &&) = delete;
 
     void clear();
+    void onPaint(std::chrono::steady_clock::time_point paintTime);
     bool empty() const;
     bool animated() const;
     std::optional<QPixmap> current() const;
@@ -56,13 +59,15 @@ public:
 private:
     struct Storage;
     struct CachedFrames;
+    struct DynamicFrames;
 
     int64_t memoryUsage() const;
     std::unique_ptr<Storage> storage_;
 };
 
 QList<Frame> readFrames(QImageReader &reader, const Url &url);
-void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed);
+void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed,
+                  QByteArray dynamicData = {});
 
 }  // namespace chatterino::detail
 
@@ -88,6 +93,9 @@ public:
 
     static ImagePtr fromUrl(const Url &url, qreal scale = 1,
                             QSize expectedSize = {});
+    /// Decode frames during playback instead of storing them all in memory.
+    static ImagePtr fromUrlWithDynamicFrames(const Url &url, qreal scale = 1,
+                                             QSize expectedSize = {});
     static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
@@ -107,7 +115,8 @@ public:
 
 private:
     Image();
-    Image(const Url &url, qreal scale, QSize expectedSize);
+    Image(Url url, qreal scale, QSize expectedSize,
+          bool useDynamicFrames = false);
     Image(qreal scale);
 
     void setPixmap(const QPixmap &pixmap);
@@ -124,6 +133,7 @@ private:
     const QSize expectedSize_{16, 16};
     std::atomic_bool empty_{false};
 
+    const bool useDynamicFrames_{false};
     bool shouldLoad_{false};
 
     mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
@@ -132,8 +142,8 @@ private:
     std::unique_ptr<detail::Frames> frames_;
 
     friend class ImageExpirationPool;
-    friend void detail::assignFrames(std::weak_ptr<Image>,
-                                     QList<detail::Frame>);
+    friend void detail::assignFrames(std::weak_ptr<Image>, QList<detail::Frame>,
+                                     QByteArray);
 };
 
 // forward-declarable function that calls Image::getEmpty() under the hood.
