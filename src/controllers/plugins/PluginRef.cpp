@@ -9,6 +9,7 @@
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "util/WeakPtrHelpers.hpp"
 
 #    include <QMessageBox>
 #    include <QStringBuilder>
@@ -63,6 +64,11 @@ PluginRef PluginWeakRef::strong() const noexcept
 bool PluginWeakRef::isAlive() const noexcept
 {
     return !this->weak.expired();
+}
+
+bool PluginWeakRef::operator==(const PluginWeakRef &other) const noexcept
+{
+    return weakOwnerEquals(this->weak, other.weak);
 }
 
 }  // namespace chatterino::lua

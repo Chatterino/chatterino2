@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/Backup.hpp"
@@ -21,6 +22,8 @@
 using namespace Qt::Literals;
 
 namespace chatterino {
+
+using namespace Qt::Literals;
 
 namespace {
 
@@ -87,7 +90,6 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
 
     SplitDescriptor descriptor;
     descriptor.type_ = data.value("type").toString();
-    descriptor.server_ = data.value("server").toInt(-1);
     descriptor.moderationMode_ = root.value("moderationMode").toBool();
     if (data.contains("channel"))
     {
@@ -157,6 +159,13 @@ IndirectChannel SplitDescriptor::decodeChannel() const
             return getApp()->getTwitch()->getAutomodChannel();
         case Channel::Type::Misc:
             return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
+        case Channel::Type::Plugin:
+            return getApp()->getPlugins()->getOrCreatePluginChannelFromSave({
+                .channelName = this->channelName_,
+                .pluginID = this->pluginID,
+                .providerID = this->providerID,
+                .arguments = this->arguments,
+            });
 
         case Channel::Type::None:
         case Channel::Type::Direct:

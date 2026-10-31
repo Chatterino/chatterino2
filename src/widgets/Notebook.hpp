@@ -141,6 +141,9 @@ protected:
     bool getShowTabs() const;
     virtual void setShowTabs(bool value);
 
+    bool getShowLine() const;
+    void setShowLine(bool value);
+
     void setGrowWrappedNotebookLines(bool value);
 
     void scaleChangedEvent(float scale_) override;
@@ -247,6 +250,7 @@ private:
 
     bool allowUserTabManagement_ = false;
     bool showTabs_ = true;
+    bool showLine_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     int mouseWheelDelta_ = 0;
