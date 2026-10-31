@@ -28,10 +28,12 @@ jobs:
       C2_ENABLE_LTO: false
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Get memory
         id: mem
@@ -40,7 +42,7 @@ jobs:
           echo "mem_mb=$MEM_MB" >> $GITHUB_OUTPUT
 
       - name: Build using FreeBSD
-        uses: vmactions/freebsd-vm@v1.5.2
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
           envs: "C2_ENABLE_LTO"
           release: "14.4"

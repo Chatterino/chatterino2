@@ -44,7 +44,7 @@ public:
     FfzEmotes();
 
     std::shared_ptr<const EmoteMap> emotes() const;
-    std::optional<EmotePtr> emote(const EmoteName &name) const;
+    std::optional<EmotePtr> emote(EmoteNameView name) const;
     void loadEmotes();
     void setEmotes(std::shared_ptr<const EmoteMap> emotes);
     static void loadChannel(

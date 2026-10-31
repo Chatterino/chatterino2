@@ -59,6 +59,26 @@ void createUserTypes(sol::table &c2)
         "to_unix_seconds",
         [](const QDateTime &self) {
             return self.toSecsSinceEpoch();
+        },  //
+
+        // Timezone info.
+        "is_local",
+        [](const QDateTime &self) {
+            return self.timeSpec() == Qt::LocalTime;
+        },
+        "is_utc",
+        [](const QDateTime &self) {
+            return self.timeSpec() == Qt::UTC;
+        },
+
+        // Timezone conversion.
+        "to_local",
+        [](const QDateTime &self) {
+            return self.toLocalTime();
+        },
+        "to_utc",
+        [](const QDateTime &self) {
+            return self.toUTC();
         }  //
     );
 }

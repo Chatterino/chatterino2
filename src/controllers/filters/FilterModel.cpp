@@ -19,7 +19,9 @@ FilterModel::FilterModel(QObject *parent)
 
 // turn a vector item into a model row
 FilterRecordPtr FilterModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                            const FilterRecordPtr &original)
+                                            const FilterRecordPtr &original,
+                                            std::optional<QModelIndex> index,
+                                            std::optional<int> role)
 {
     auto item =
         std::make_shared<FilterRecord>(row[0]->data(Qt::DisplayRole).toString(),

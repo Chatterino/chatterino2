@@ -977,6 +977,21 @@ GraphViz output:
 
 Get all open windows.
 
+##### `WindowManager:on_channelview_context_menu_requested(cb)`
+
+Registers an event handler for context menus in ChannelViews.
+
+When a context menu is requested, `cb` is passed a table with the following
+fields:
+
+- `split?` ([`Split`](#split)) The split holding the channel view. This is `nil`
+  if the view is not inside a split.
+- `message` ([`Message`](#message)) The clicked message.
+- `message_element?` (`MessageElement`) The clicked message element.
+- `channel?` ([`Channel`](#channel)) The channel shown in the view. Note that
+  this might be a virtual channel (e.g. in a search popup or usercard).
+- `menu` ([`Menu`](#qmenu)) The context menu. Add your actions here.
+
 #### `c2.windows`
 
 The global [`WindowManager`](#windowmanager).
@@ -1024,6 +1039,60 @@ Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in mil
 ##### `DateTime:to_unix_seconds()`
 
 Convert a datetime to a Unix timestamp (offset from 1970-01-01 00:00 UTC) in seconds.
+
+##### `DateTime:is_local()`
+
+Check if the datetime is in the user's local timezone.
+Local times are represented without a timezone. Whenever the timezone is needed
+(e.g. for comparison) it is queried from the system. This is distinct from a
+datetime with your system timezone.
+
+##### `DateTime:is_utc()`
+
+Check if the datetime is in UTC.
+
+##### `DateTime:to_local()`
+
+Returns a copy of this datetime converted to the user's local timezone.
+A local time is represented without a timezone. That is `1970-01-01T00:00:00` is
+a local time but `1970-01-01T00:00:00Z` is not.
+
+##### `DateTime:to_utc()`
+
+Returns a copy of this datetime converted to UTC.
+
+#### `Menu`
+
+A generic menu used for context menus.
+
+##### `Menu:add_action(text, cb)`
+
+Appends a new action to the menu.
+
+##### `Menu:insert_action(before, text, cb)`
+
+Inserts an action named `text` before `before`. If `before` is not found, the
+action is inserted at the end. `before` can either be a name or a one-based
+index.
+
+##### `Menu:add_menu(title)`
+
+Appends a new Menu with `title` to the menu. Returns the new menu.
+
+##### `Menu:insert_menu(before, text)`
+
+Inserts a new Menu named `title` before `before`. If `before` is not found,
+the menu is inserted at the end. `before` can either be a name or a one-based
+index. Returns the new menu.
+
+##### `Menu:add_separator()`
+
+Appends a new separator.
+
+##### `Menu:insert_separator(before)`
+
+Inserts a new separator before `before`. If `before` is not found, the separator
+is inserted at the end. `before` can either be a name or a one-based index.
 
 ### Input/Output API
 

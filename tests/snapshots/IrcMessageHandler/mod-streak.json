@@ -154,14 +154,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|WatchStreak",
+            "flags": "Highlighted|Collapsed|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "090939a1-18a5-4370-9066-b4f56512c320",
             "localizedName": "",
             "loginName": "jcrouzer",
             "messageText": "I don't know what this looks like but new thing to celebrate the indentured servitude! I'm celebrating my 18 month Mod Anniversary!",
             "searchText": "jcrouzer  jcrouzer: I don't know what this looks like but new thing to celebrate the indentured servitude! I'm celebrating my 18 month Mod Anniversary! ",
-            "serverReceivedTime": "2026-05-30T09:44:34Z",
+            "timestamp": "2026-05-30T09:44:34Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "20"
@@ -248,14 +249,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|WatchStreak",
+            "flags": "System|Highlighted|DoNotTriggerNotification|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "JCRouzer has been a moderator for 18 months!",
             "searchText": "JCRouzer has been a moderator for 18 months!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

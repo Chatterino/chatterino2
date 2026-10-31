@@ -223,7 +223,7 @@ std::shared_ptr<const EmoteMap> FfzEmotes::emotes() const
     return this->global_.get();
 }
 
-std::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
+std::optional<EmotePtr> FfzEmotes::emote(EmoteNameView name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);

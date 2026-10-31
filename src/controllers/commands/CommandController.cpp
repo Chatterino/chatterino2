@@ -266,6 +266,7 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
     },
     // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
     {"input.text", NO_OP_PLACEHOLDER},
+    {"element.copytext", NO_OP_PLACEHOLDER},
 };
 
 }  // namespace
