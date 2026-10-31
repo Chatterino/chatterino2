@@ -321,6 +321,9 @@ public:
     std::unique_ptr<MessageElement> clone() const override;
 
     const MessageColor &color() const noexcept;
+    void addToContainer(MessageLayoutContainer &container,
+                        const MessageLayoutContext &ctx,
+                        MessageElement &creator);
     FontStyle fontStyle() const noexcept;
 
     void appendText(QStringView text);
@@ -532,11 +535,13 @@ public:
     static constexpr std::string_view TYPE = "emote";
 
     EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
-                 const MessageColor &textElementColor = MessageColor::Text);
+                 const MessageColor &textElementColor = MessageColor::Text,
+                 bool ignored = false);
 
     void addToContainer(MessageLayoutContainer &container,
                         const MessageLayoutContext &ctx) override;
     EmotePtr getEmote() const;
+    bool isIgnored() const;
 
     QJsonObject toJson() const override;
     std::string_view type() const override;
@@ -552,6 +557,7 @@ private:
     std::unique_ptr<TextElement> textElement_;
     MessageColor textColor_;
     bool usingFallbackColor_ = false;
+    bool ignored_;
 
     EmotePtr emote_;
 };

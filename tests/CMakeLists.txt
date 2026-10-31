@@ -54,6 +54,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Plugins.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchIrc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IgnoreController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IgnoredEmote.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/OnceFlag.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IncognitoBrowser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/EventSubMessages.cpp
