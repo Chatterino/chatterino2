@@ -317,7 +317,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         const auto *plugin = pluginPtrPtr->get();
         for (const auto &[providerID, provider] : plugin->channelProviders())
         {
-            auto name =
+            QString name =
                 provider->displayName() % u" (" % plugin->meta.name % ')';
             providers.emplace_back(name, WeakChannelProvider{provider});
         }
@@ -684,7 +684,7 @@ void SelectChannelDialog::refreshChannelProviderWidgets()
 
     for (const auto &arg : provider->arguments())
     {
-        QWidget *actionWidget = createChannelProviderArgumentWidget(arg);
+        QWidget *actionWidget = this->createChannelProviderArgumentWidget(arg);
 
         auto *label = new QLabel(arg.displayName);
         label->setToolTip(arg.tooltip);

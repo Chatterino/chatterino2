@@ -208,5 +208,12 @@ const Plugin::ChannelProviderMap &Plugin::channelProviders() const
     return this->channelProviders_;
 }
 
+void Plugin::clearChannelProviders()
+{
+    assert(getApp()->isTest());
+
+    this->channelProviders_.clear();
+}
+
 }  // namespace chatterino
 #endif

@@ -121,6 +121,8 @@ public:
 
     const ChannelProviderMap &channelProviders() const;
 
+    void clearChannelProviders();
+
     /**
      * If the plugin crashes while evaluating the main file, this function will return the error
      */
