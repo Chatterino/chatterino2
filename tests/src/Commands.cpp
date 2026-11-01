@@ -1188,6 +1188,18 @@ TEST(Commands, customCommands)
             .words = {"/cmd", "xd", "test"},
             .expected = "test literally {1}",
         },
+        {
+            .command = Command("/cmd", "{1} and {2;two}"),
+            .context = {},
+            .words = {"/cmd", "one"},
+            .expected = "one and two",
+        },
+        {
+            .command = Command("/cmd", "{1+;test} {2;two} x{3+}y {4+;test 123}"),
+            .context = {},
+            .words = {"/cmd", "a", "b"},
+            .expected = "a b b xy test 123",
+        },
     };
 
     for (size_t i = 0; i < cases.size(); i++)
