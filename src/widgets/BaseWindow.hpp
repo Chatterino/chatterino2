@@ -232,6 +232,10 @@ private:
     bool isMaximized_ = false;
 #endif
 
+#ifdef Q_OS_MACOS
+    void setMacOSWindowManagedIfTopMost(bool topMost);
+#endif
+
     pajlada::Signals::SignalHolder connections_;
 
     friend class BaseWidget;

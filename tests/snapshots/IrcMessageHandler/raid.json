@@ -87,14 +87,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|UncategorizedNotification",
+            "flags": "System|Highlighted|DoNotTriggerNotification|UncategorizedNotification",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "2 raiders from nerixyz have joined!",
             "searchText": "2 raiders from nerixyz have joined!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

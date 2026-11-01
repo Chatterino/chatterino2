@@ -10,7 +10,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -34,8 +33,10 @@
 #include <QList>
 #include <QStandardPaths>
 #include <QUuid>
+#include <QWheelEvent>
 #include <QWidget>
 
+#include <cstdlib>
 #include <memory>
 #include <ranges>
 #include <utility>
@@ -75,10 +76,6 @@ Notebook::Notebook(QWidget *parent)
         });
 
     this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
-
-    // Load lock notebook layout state from settings
-    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
-
     this->lockNotebookLayoutAction_->setCheckable(true);
     this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
 
@@ -124,9 +121,6 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
                                  bool select)
 {
-    // Queue up save because: Tab added
-    getApp()->getWindows()->queueSave();
-
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
@@ -156,14 +150,12 @@ NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
 
     this->performLayout();
     tab->setVisible(this->shouldShowTab(tab));
+    this->afterPageAdded();
     return tab;
 }
 
 void Notebook::removePage(QWidget *page)
 {
-    // Queue up save because: Tab removed
-    getApp()->getWindows()->queueSave();
-
     int removingIndex = this->indexOf(page);
     assert(removingIndex != -1);
 
@@ -208,6 +200,7 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+    this->afterPageRemoved();
 }
 
 void Notebook::duplicatePage(QWidget *page)
@@ -344,21 +337,19 @@ void Notebook::select(QWidget *page, bool focusPage, bool recordInHistory)
 
         if (focusPage)
         {
-            if (item->selectedWidget == nullptr)
+            if (item->selectedWidget != nullptr &&
+                containsChild(page, item->selectedWidget))
             {
-                item->page->setFocus();
+                item->selectedWidget->setFocus(Qt::MouseFocusReason);
             }
             else
             {
-                if (containsChild(page, item->selectedWidget))
-                {
-                    item->selectedWidget->setFocus(Qt::MouseFocusReason);
-                }
-                else
+                if (item->selectedWidget != nullptr)
                 {
                     qCDebug(chatterinoWidget) << "Notebook: selected child of "
                                                  "page doesn't exist anymore";
                 }
+                page->setFocus();
             }
         }
     }
@@ -689,12 +680,10 @@ void Notebook::rearrangePage(QWidget *page, int index)
         return;
     }
 
-    // Queue up save because: Tab rearranged
-    getApp()->getWindows()->queueSave();
-
     this->items_.move(this->indexOf(page), index);
 
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 bool Notebook::getAllowUserTabManagement() const
@@ -720,53 +709,14 @@ void Notebook::setShowTabs(bool value)
     this->performLayout();
 
     this->updateTabVisibility();
-
-    // show a popup upon hiding tabs
-    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
-    {
-        this->showTabVisibilityInfoPopup();
-    }
 }
 
-void Notebook::showTabVisibilityInfoPopup()
+void Notebook::setGrowWrappedNotebookLines(bool value)
 {
-    auto unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
-    if (unhideSeq.isEmpty())
+    if (this->growWrappedNotebookLines != value)
     {
-        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
-    }
-    if (unhideSeq.isEmpty())
-    {
-        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{"on"}});
-    }
-    QString hotkeyInfo = "(currently unbound)";
-    if (!unhideSeq.isEmpty())
-    {
-        hotkeyInfo =
-            "(" + unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
-            ")";
-    }
-    QMessageBox msgBox(this->window());
-    msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
-    msgBox.setText("You've just hidden your tabs.");
-    msgBox.setInformativeText(
-        "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
-        " or right-clicking the tab area and selecting \"Toggle "
-        "visibility of tabs\".");
-    msgBox.addButton(QMessageBox::Ok);
-    auto *dsaButton =
-        msgBox.addButton("Don't show again", QMessageBox::YesRole);
-
-    msgBox.setDefaultButton(QMessageBox::Ok);
-
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == dsaButton)
-    {
-        getSettings()->informOnTabVisibilityToggle.setValue(false);
+        this->growWrappedNotebookLines = value;
+        this->performLayout();
     }
 }
 
@@ -817,7 +767,7 @@ void Notebook::scaleChangedEvent(float /*scale*/)
     this->refreshRequested_ = false;
     for (auto &i : this->items_)
     {
-        i.tab->updateSize();
+        i.tab->refreshAndCommitSize(true);
     }
     this->refreshPaused_ = false;
     if (this->refreshRequested_)
@@ -850,15 +800,16 @@ void Notebook::performLayout(bool animated)
 
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
+    const auto spacing = static_cast<int>(2 * this->scale());
     const LayoutContext ctx{
-        .left = static_cast<int>(2 * this->scale()),
-        .right = this->width(),
+        .left = spacing,
+        .right = this->width() - spacing,
         .bottom = this->height(),
         .scale = scale,
         .tabHeight = tabHeight,
         .minimumTabAreaSpace = static_cast<int>(tabHeight * 0.5),
         .addButtonWidth = this->showAddButton_ ? tabHeight : 0,
-        .lineThickness = static_cast<int>(2 * scale),
+        .lineThickness = spacing,
         .tabSpacer = std::max(1, static_cast<int>(scale)),
         .buttonWidth = tabHeight,
         .buttonHeight = tabHeight - 1,
@@ -918,11 +869,32 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
 
     if (this->showTabs_)
     {
-        // layout tabs
-        /// Notebook tabs need to know if they are in the last row.
-        auto *firstInBottomRow =
-            ctx.items.empty() ? nullptr : &ctx.items.front();
+        auto layoutWrappedLine = [&](std::span<Item> line, int x, const int y,
+                                     int accumulatedWidth) {
+            if (line.empty() || !this->growWrappedNotebookLines)
+            {
+                return;
+            }
+            int widthPerItem = (ctx.right - x - accumulatedWidth) /
+                               static_cast<int>(line.size());
 
+            for (Item &item : line.subspan(0, line.size() - 1))
+            {
+                int itemWidth = item.tab->minimumTabWidth() + widthPerItem;
+                item.tab->growWidth(itemWidth);
+                item.tab->queueMove(QPoint(x, y), animated);
+                x += itemWidth + ctx.tabSpacer;
+            }
+
+            Item &lastItem = line.back();
+            // The last item gets all the breadcrumbs from rounding down.
+            int lastItemWidth = ctx.right - x;
+            lastItem.tab->growWidth(lastItemWidth);
+            lastItem.tab->queueMove(QPoint(x, y), animated);
+        };
+
+        Item *rowStart = ctx.items.empty() ? nullptr : &ctx.items.front();
+        int rowXStart = x;
         for (auto &item : ctx.items)
         {
             /// Break line if element doesn't fit.
@@ -930,30 +902,36 @@ void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
             auto isLast = &item == &ctx.items.back();
 
             auto fitsInLine = ((isLast ? ctx.addButtonWidth : 0) + x +
-                               item.tab->width()) <= this->width();
+                               item.tab->minimumTabWidth()) <= ctx.right;
 
             if (!isFirst && !fitsInLine)
             {
+                int accumulatedWidth = x - rowXStart;
+                layoutWrappedLine({rowStart, &item}, rowXStart, y,
+                                  accumulatedWidth);
                 y += item.tab->height() * reverse;
                 x = ctx.left;
-                firstInBottomRow = &item;
+                rowXStart = x;
+                rowStart = &item;
             }
 
             /// Layout tab
             item.tab->growWidth(0);
-            item.tab->moveAnimated(QPoint(x, y), animated);
-            x += item.tab->width() + ctx.tabSpacer;
+            item.tab->queueMove(QPoint(x, y), animated);
+            x += item.tab->minimumTabWidth() + ctx.tabSpacer;
         }
 
         /// Update which tabs are in the last row
         auto inLastRow = false;
         for (const auto &item : ctx.items)
         {
-            if (&item == firstInBottomRow)
+            if (&item == rowStart)
             {
                 inLastRow = true;
             }
             item.tab->setInLastRow(inLastRow);
+            item.tab->commitSize(false);
+            item.tab->commitMove();
         }
 
         // move misc buttons
@@ -1097,7 +1075,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
             for (int i = tabStart; i < tabEnd; i++)
             {
                 largestWidth =
-                    std::max(ctx.items[i].tab->normalTabWidth(), largestWidth);
+                    std::max(ctx.items[i].tab->minimumTabWidth(), largestWidth);
             }
 
             if (isLastColumn && this->showAddButton_)
@@ -1110,7 +1088,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
             {
                 if (isRight)
                 {
-                    int distanceFromRight = this->width() - x;
+                    int distanceFromRight = ctx.right - x;
                     largestWidth = std::max(
                         largestWidth, consumedButtonWidths - distanceFromRight);
                 }
@@ -1123,7 +1101,11 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
 
             if (isRight)
             {
-                x -= largestWidth + ctx.lineThickness;
+                x -= largestWidth;
+                if (col != 0)
+                {
+                    x -= ctx.lineThickness;
+                }
             }
 
             for (int i = tabStart; i < tabEnd; i++)
@@ -1132,6 +1114,7 @@ void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
 
                 /// Layout tab
                 item.tab->growWidth(largestWidth);
+                item.tab->commitSize(false);
                 item.tab->moveAnimated(QPoint(x, y), animated);
                 item.tab->setInLastRow(isLastColumn);
                 y += ctx.tabHeight + ctx.tabSpacer;
@@ -1215,6 +1198,43 @@ void Notebook::mousePressEvent(QMouseEvent *event)
     }
 }
 
+void Notebook::wheelEvent(QWheelEvent *event)
+{
+    if (this->selectedPage_ != nullptr &&
+        this->selectedPage_->geometry().contains(event->position().toPoint()))
+    {
+        event->ignore();
+        return;
+    }
+
+    this->scrollTabs(event);
+}
+
+void Notebook::scrollTabs(QWheelEvent *event)
+{
+    const auto defaultMouseDelta = 120;
+    const auto verticalDelta = event->angleDelta().y();
+    const auto selectTab = [this](int delta) {
+        delta > 0 ? this->selectPreviousTab() : this->selectNextTab();
+    };
+    // If it's true
+    // Then the user uses the trackpad or perhaps the most accurate mouse
+    // Which has small delta.
+    if (std::abs(verticalDelta) < defaultMouseDelta)
+    {
+        this->mouseWheelDelta_ += verticalDelta;
+        if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
+        {
+            selectTab(this->mouseWheelDelta_);
+            this->mouseWheelDelta_ = 0;
+        }
+    }
+    else
+    {
+        selectTab(verticalDelta);
+    }
+}
+
 void Notebook::setTabLocation(NotebookTabLocation location)
 {
     if (location != this->tabLocation_)
@@ -1278,7 +1298,6 @@ void Notebook::setLockNotebookLayout(bool value)
 {
     this->lockNotebookLayout_ = value;
     this->lockNotebookLayoutAction_->setChecked(value);
-    getSettings()->lockNotebookLayout.setValue(value);
 }
 
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
@@ -1355,8 +1374,8 @@ void Notebook::sortTabsAlphabetically()
         return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
     });
 
-    getApp()->getWindows()->queueSave();
     this->performLayout(true);
+    this->afterPageMoved();
 }
 
 SplitNotebook::SplitNotebook(Window *parent)
@@ -1513,6 +1532,15 @@ SplitNotebook::SplitNotebook(Window *parent)
                 }
             }
         });
+
+    getSettings()->growWrappedNotebookLines.connect(
+        [this](bool value) {
+            this->setGrowWrappedNotebookLines(value);
+        },
+        this->signalHolder_, true);
+
+    // Load lock notebook layout state from settings
+    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
 }
 
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
@@ -1649,7 +1677,10 @@ void SplitNotebook::addCustomButtons()
     });
 
     // updates
-    auto *updateBtn = this->addCustomButton<PixmapButton>();
+    auto *updateBtn = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/update-darkMode.svg",
+        .light = ":/buttons/update-lightMode.svg",
+    });
 
     initUpdateButton(
         *updateBtn,
@@ -1659,7 +1690,11 @@ void SplitNotebook::addCustomButtons()
         this->signalHolder_);
 
     // streamer mode
-    this->streamerModeIcon_ = this->addCustomButton<PixmapButton>();
+    this->streamerModeIcon_ = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/streamerModeEnabledDark.svg",
+        .light = ":/buttons/streamerModeEnabledLight.svg",
+    });
+
     QObject::connect(this->streamerModeIcon_, &Button::leftClicked, [this] {
         getApp()->getWindows()->showSettingsDialog(
             this, SettingsDialogPreference::StreamerMode);
@@ -1676,19 +1711,6 @@ void SplitNotebook::updateStreamerModeIcon()
     if (this->streamerModeIcon_ == nullptr)
     {
         return;
-    }
-    // A duplicate of this code is in Window class
-    // That copy handles the TitleBar icon in Window (main window on Windows)
-    // This one is the one near splits (on linux and mac or non-main windows on Windows)
-    if (getTheme()->isLightTheme())
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledLight);
-    }
-    else
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledDark);
     }
 
     auto oldVisibility = this->streamerModeIcon_->isVisible();
@@ -1770,7 +1792,76 @@ void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
 void SplitNotebook::setLockNotebookLayout(bool value)
 {
     Notebook::setLockNotebookLayout(value);
+    getSettings()->lockNotebookLayout.setValue(value);
     this->sortTabsAlphabeticallyAction_->setEnabled(!value);
+}
+
+void SplitNotebook::setShowTabs(bool value)
+{
+    Notebook::setShowTabs(value);
+
+    // show a popup upon hiding tabs
+    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
+    {
+        this->showTabVisibilityInfoPopup();
+    }
+}
+
+void SplitNotebook::afterPageAdded()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageRemoved()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::afterPageMoved()
+{
+    getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::showTabVisibilityInfoPopup()
+{
+    auto unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+    }
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+    }
+    QString hotkeyInfo = "(currently unbound)";
+    if (!unhideSeq.isEmpty())
+    {
+        hotkeyInfo =
+            "(" + unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+            ")";
+    }
+    QMessageBox msgBox(this->window());
+    msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
+    msgBox.setText("You've just hidden your tabs.");
+    msgBox.setInformativeText(
+        "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
+        " or right-clicking the tab area and selecting \"Toggle "
+        "visibility of tabs\".");
+    msgBox.addButton(QMessageBox::Ok);
+    auto *dsaButton =
+        msgBox.addButton("Don't show again", QMessageBox::YesRole);
+
+    msgBox.setDefaultButton(QMessageBox::Ok);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == dsaButton)
+    {
+        getSettings()->informOnTabVisibilityToggle.setValue(false);
+    }
 }
 
 }  // namespace chatterino

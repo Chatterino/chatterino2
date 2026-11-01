@@ -30,7 +30,7 @@ enum class MessageFlag : std::int64_t {
     AutoMod = (1LL << 14),
     RecentMessage = (1LL << 15),
     Whisper = (1LL << 16),
-    HighlightedWhisper = (1LL << 17),
+    //
     Debug = (1LL << 18),
     Similar = (1LL << 19),
     RedeemedHighlight = (1LL << 20),
@@ -80,6 +80,8 @@ enum class MessageFlag : std::int64_t {
     Announcement = (1LL << 44),
     /// Notifications that do not yet have special handling/categorization
     UncategorizedNotification = (1LL << 45),
+    /// The message was detected as ASCII art and has its layout width limited to the default web chat width.
+    AsciiArt = (1LL << 46),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

@@ -48,6 +48,7 @@
 #include "widgets/Window.hpp"
 
 #include <IrcConnection>
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -523,9 +524,11 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 
     if (!reward.isUserInputRequired)
     {
-        this->addMessage(MessageBuilder::makeChannelPointRewardMessage(
-                             reward, this->isMod(), this->isBroadcaster()),
-                         MessageContext::Original);
+        const auto [msg, highlights] =
+            MessageBuilder::makeChannelPointRewardMessage(
+                reward, this->isMod(), this->isBroadcaster(), this);
+        this->addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(this, highlights);
         return;
     }
 
@@ -608,6 +611,10 @@ void TwitchChannel::updateStreamStatus(
     if (helixStream)
     {
         auto stream = *helixStream;
+        if (!stream.userName.isEmpty())
+        {
+            this->updateDisplayName(stream.userName);
+        }
         {
             auto status = this->streamStatus_.access();
             status->streamId = stream.id;
@@ -654,24 +661,36 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
 {
     // Similar code exists in NotificationController::updateFakeChannel.
     // Since we're a TwitchChannel, we also send a message here.
+    const HelixMinimalUser channel{
+        .id = this->roomId(),
+        .login = this->getName(),
+        .displayName = this->nameOptions.actualDisplayName,
+    };
     if (isLive)
     {
         qCDebug(chatterinoTwitch).nospace().noquote()
             << "[TwitchChannel " << this->getName() << "] Online";
 
+        QString streamId;
+        QString title;
+        {
+            const auto streamStatus = this->accessStreamStatus();
+            streamId = streamStatus->streamId;
+            title = streamStatus->title;
+        }
         getApp()->getNotifications()->notifyTwitchChannelLive({
             .channelId = this->roomId(),
+            .streamId = streamId,
             .channelName = this->getName(),
-            .displayName = this->getDisplayName(),
-            .title = this->accessStreamStatus()->title,
+            .displayName = channel.displayName,
+            .title = title,
             .isInitialUpdate = isInitialUpdate,
         });
 
         // Channel live message
         this->addMessage(
             MessageBuilder::makeLiveMessage(
-                this->getDisplayName(), this->roomId(),
-                this->accessStreamStatus()->title,
+                channel, title,
                 {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
             MessageContext::Original);
     }
@@ -681,8 +700,7 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             << "[TwitchChannel " << this->getName() << "] Offline";
 
         // Channel offline message
-        this->addMessage(MessageBuilder::makeOfflineSystemMessage(
-                             this->getDisplayName(), this->roomId()),
+        this->addMessage(MessageBuilder::makeOfflineSystemMessage(channel),
                          MessageContext::Original);
 
         getApp()->getNotifications()->notifyTwitchChannelOffline(
@@ -1052,7 +1070,7 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
-std::optional<EmotePtr> TwitchChannel::twitchEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::twitchEmote(EmoteNameView name) const
 {
     auto emotes = this->localTwitchEmotes();
     auto it = emotes->find(name);
@@ -1064,7 +1082,7 @@ std::optional<EmotePtr> TwitchChannel::twitchEmote(const EmoteName &name) const
     return it->second;
 }
 
-std::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::bttvEmote(EmoteNameView name) const
 {
     auto emotes = this->bttvEmotes_.get();
     auto it = emotes->find(name);
@@ -1076,7 +1094,7 @@ std::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
     return it->second;
 }
 
-std::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::ffzEmote(EmoteNameView name) const
 {
     auto emotes = this->ffzEmotes_.get();
     auto it = emotes->find(name);
@@ -1088,7 +1106,7 @@ std::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
     return it->second;
 }
 
-std::optional<EmotePtr> TwitchChannel::seventvEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchChannel::seventvEmote(EmoteNameView name) const
 {
     auto emotes = this->seventvEmotes_.get();
     auto it = emotes->find(name);
@@ -1306,12 +1324,13 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
 void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
                                                      const QString &platform,
                                                      const QString &actor,
-                                                     const QString &emoteName)
+                                                     const QString &emoteName,
+                                                     const QDateTime &now)
 {
     if (this->tryReplaceLastLiveUpdateAddOrRemove(
             isEmoteAdd ? MessageFlag::LiveUpdatesAdd
                        : MessageFlag::LiveUpdatesRemove,
-            platform, actor, emoteName))
+            platform, actor, emoteName, now))
     {
         return;
     }
@@ -1322,13 +1341,13 @@ void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
     if (isEmoteAdd)
     {
         msg = MessageBuilder(liveUpdatesAddEmoteMessage, platform, actor,
-                             this->lastLiveUpdateEmoteNames_)
+                             this->lastLiveUpdateEmoteNames_, now)
                   .release();
     }
     else
     {
         msg = MessageBuilder(liveUpdatesRemoveEmoteMessage, platform, actor,
-                             this->lastLiveUpdateEmoteNames_)
+                             this->lastLiveUpdateEmoteNames_, now)
                   .release();
     }
     this->lastLiveUpdateEmotePlatform_ = platform;
@@ -1339,15 +1358,14 @@ void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
 
 bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     MessageFlag op, const QString &platform, const QString &actor,
-    const QString &emoteName)
+    const QString &emoteName, const QDateTime &now)
 {
     if (this->lastLiveUpdateEmotePlatform_ != platform)
     {
         return false;
     }
     auto last = this->lastLiveUpdateMessage_.lock();
-    if (!last || !last->flags.has(op) ||
-        last->parseTime < QTime::currentTime().addSecs(-5) ||
+    if (!last || !last->flags.has(op) || last->timestamp < now.addSecs(-5) ||
         last->loginName != actor)
     {
         return false;
@@ -1359,19 +1377,15 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
         if (op == MessageFlag::LiveUpdatesAdd)
         {
             return {
-                liveUpdatesAddEmoteMessage,
-                platform,
-                last->loginName,
-                this->lastLiveUpdateEmoteNames_,
+                liveUpdatesAddEmoteMessage,      platform, last->loginName,
+                this->lastLiveUpdateEmoteNames_, now,
             };
         }
 
         // op == RemoveEmoteMessage
         return {
-            liveUpdatesRemoveEmoteMessage,
-            platform,
-            last->loginName,
-            this->lastLiveUpdateEmoteNames_,
+            liveUpdatesRemoveEmoteMessage,   platform, last->loginName,
+            this->lastLiveUpdateEmoteNames_, now,
         };
     };
 
@@ -1764,7 +1778,7 @@ void TwitchChannel::refreshChatters()
     getHelix()->getChatters(
         this->roomId(),
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
-        MAX_CHATTERS_TO_FETCH,
+        MAX_CHATTERS_TO_FETCH, nullptr,
         [weak = this->weakFromThis()](const auto &result) {
             if (auto shared = weak.lock())
             {

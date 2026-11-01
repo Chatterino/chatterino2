@@ -25,6 +25,61 @@
                 {
                     "element": {
                         "color": "System",
+                        "flags": "Timestamp|HeaderTimestamp|AnnouncementHeader",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "11:15"
+                        ]
+                    },
+                    "exhaustiveFlags": true,
+                    "flags": "Timestamp|HeaderTimestamp|AnnouncementHeader",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "11:15:32",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "exhaustiveFlags": true,
+                    "flags": "Text|AnnouncementHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Announcement"
+                    ]
+                },
+                {
+                    "exhaustiveFlags": true,
+                    "flags": "AnnouncementHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
+                {
+                    "element": {
+                        "color": "System",
                         "flags": "Timestamp",
                         "link": {
                             "type": "None",
@@ -141,14 +196,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Announcement",
+            "flags": "Highlighted|Collapsed|Announcement",
             "frozen": false,
+            "highlightColor": "#64ff66ed",
             "id": "f00fe0c7-9e03-44a8-bf8e-b3e8eb6d4971",
             "localizedName": "",
             "loginName": "pajlada",
             "messageText": "purple announcement",
             "searchText": "pajlada  pajlada: purple announcement ",
-            "serverReceivedTime": "2026-04-18T11:15:32Z",
+            "timestamp": "2026-04-18T11:15:32Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "124"
@@ -160,73 +216,6 @@
             ],
             "userID": "11148817",
             "usernameColor": "#ffcc44ff"
-        },
-        {
-            "announcementColor": "Purple",
-            "channelName": "",
-            "count": 1,
-            "displayName": "",
-            "elements": [
-                {
-                    "element": {
-                        "color": "System",
-                        "flags": "Timestamp",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "TimestampMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "11:15"
-                        ]
-                    },
-                    "flags": "Timestamp",
-                    "format": "",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "time": "11:15:32",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TimestampElement"
-                },
-                {
-                    "color": "System",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "Announcement"
-                    ]
-                }
-            ],
-            "externalBadges": [
-            ],
-            "flags": "System|DoNotTriggerNotification|Announcement",
-            "frozen": false,
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "Announcement",
-            "searchText": "Announcement",
-            "serverReceivedTime": "",
-            "timeoutUser": "",
-            "twitchBadgeInfos": {
-            },
-            "twitchBadges": [
-            ],
-            "userID": "",
-            "usernameColor": "#ff000000"
         }
     ]
 }

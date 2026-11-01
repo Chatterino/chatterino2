@@ -9,6 +9,11 @@ if (BoostCertify_FOUND)
     set_target_properties(BoostCertify PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${BoostCertify_INCLUDE_DIR}"
             )
+
+    target_link_libraries(
+        BoostCertify INTERFACE
+        $<$<BOOL:${WIN32}>:Crypt32>
+    )
 endif ()
 
 mark_as_advanced(BoostCertify_INCLUDE_DIR)

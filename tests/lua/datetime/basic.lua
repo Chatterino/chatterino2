@@ -52,6 +52,7 @@ local tests = {
             assert_eq(dt:to_iso_string_without_ms(), spec.iso_sec)
             assert_eq(dt:to_unix_milliseconds(), spec.unix_ms)
             assert_eq(dt:to_unix_seconds(), spec.unix_sec)
+            assert(dt:is_utc())
         end
     end,
     iso_string_sec = function()
@@ -65,6 +66,7 @@ local tests = {
             assert_eq(dt:to_iso_string_without_ms(), spec.iso_sec)
             assert_eq(dt:to_unix_milliseconds(), spec.unix_ms)
             assert_eq(dt:to_unix_seconds(), spec.unix_sec)
+            assert(dt:is_utc())
         end
     end,
 
@@ -72,8 +74,10 @@ local tests = {
         local dt = c2.DateTime.current_local()
         -- We don't know what it should be, but we know that it must be valid.
         assert(dt:to_iso_string() ~= "")
+        assert(dt:is_local())
         dt = c2.DateTime.current_utc()
         assert(dt:to_iso_string() ~= "")
+        assert(dt:is_utc())
     end,
 
     unix_timestamp_ms = function()
@@ -82,11 +86,11 @@ local tests = {
             assert_eq(dt, c2.DateTime.from_unix_milliseconds(spec.unix_ms))
             assert_eq(dt:to_unix_milliseconds(), spec.unix_ms)
             assert_eq(dt:to_unix_seconds(), spec.unix_sec)
+            assert(dt:is_local())
 
-            -- FIXME: Check the ISO string here, but it's in the local time zone right now.
-            -- assert_eq(dt, c2.DateTime.from_iso_string(spec.iso_ms))
-            -- assert_eq(dt:to_iso_string(), spec.iso_ms)
-            -- assert_eq(dt:to_iso_string_without_ms(), spec.iso_sec)
+            assert_eq(dt, c2.DateTime.from_iso_string(spec.iso_ms))
+            assert_eq(dt:to_utc():to_iso_string(), spec.iso_ms)
+            assert_eq(dt:to_utc():to_iso_string_without_ms(), spec.iso_sec)
         end
     end,
     unix_timestamp_sec = function()
@@ -97,7 +101,26 @@ local tests = {
             assert_eq(dt, c2.DateTime.from_unix_milliseconds(spec.unix_ms))
             assert_eq(dt:to_unix_milliseconds(), spec.unix_ms)
             assert_eq(dt:to_unix_seconds(), spec.unix_sec)
+            assert(dt:is_local())
+
+            assert_eq(dt, c2.DateTime.from_iso_string(spec.iso_ms))
+            assert_eq(dt:to_utc():to_iso_string(), spec.iso_ms)
+            assert_eq(dt:to_utc():to_iso_string_without_ms(), spec.iso_sec)
         end
+    end,
+
+    local_utc_conversion = function()
+        local dt_utc = c2.DateTime.current_utc()
+        local dt_local = dt_utc:to_local()
+        assert(dt_utc:is_utc())
+        assert(dt_local:is_local())
+        assert_eq(dt_local, dt_utc)
+
+        dt_local = c2.DateTime.current_local()
+        dt_utc = dt_local:to_utc()
+        assert(dt_utc:is_utc())
+        assert(dt_local:is_local())
+        assert_eq(dt_local, dt_utc)
     end,
 }
 

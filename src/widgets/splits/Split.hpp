@@ -59,7 +59,7 @@ public:
     SplitInput &getInput();
     [[nodiscard]] PinnedMessageWidget *getPinnedBanner() const;
 
-    IndirectChannel getIndirectChannel();
+    IndirectChannel getIndirectChannel() const;
     ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 

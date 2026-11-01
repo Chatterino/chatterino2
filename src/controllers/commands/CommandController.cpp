@@ -266,6 +266,7 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
     },
     // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
     {"input.text", NO_OP_PLACEHOLDER},
+    {"element.copytext", NO_OP_PLACEHOLDER},
 };
 
 }  // namespace
@@ -519,6 +520,8 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
     this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
 }
+
+CommandController::~CommandController() = default;
 
 void CommandController::save()
 {

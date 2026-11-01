@@ -39,6 +39,7 @@ public:
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
                  const ChannelPtr &openingChannel);
+    Split *getSplit() const;
 
 protected:
     void themeChangedEvent() override;
@@ -70,6 +71,7 @@ private:
     pajlada::Signals::NoArgSignal userStateChanged_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
+    std::unique_ptr<pajlada::Signals::ScopedConnection> replaceConnection_;
     std::unique_ptr<pajlada::Signals::ScopedConnection>
         userDataUpdatedConnection_;
 

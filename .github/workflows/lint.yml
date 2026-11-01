@@ -17,12 +17,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
 
       - name: Check formatting with Prettier
         run: |
           npx prettier@3.8.1 --write .
+      - name: Generate LuaLS metadata
+        run: python3 scripts/make_luals_meta.py
       - name: Show diff
         run: git --no-pager diff --exit-code --color=never
         shell: bash

@@ -1,0 +1,138 @@
+{
+    "input": {
+        "highlighting": {
+            "automod": {
+                "soundUrl": ""
+            },
+            "badges": [
+            ],
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "(?: |^)(?:D+o+m+i+(?: |,|\\.|n+i+k+|$)|W+i+s+s+i+(?: |,|\\.|d+i+d+o+m+|$))",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#7fffbf00",
+                    "pattern": "(?:viewers|blast your stream|chat.s so dead|remove the space|snoring)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                }
+            ],
+            "selfMessageHighlight": {
+                "enabled": false
+            },
+            "users": [
+            ]
+        }
+    },
+    "output": {
+        "highlighting": {
+            "automod": {
+                "soundUrl": ""
+            },
+            "badges": [
+            ],
+            "highlights": [
+                {
+                    "alert": true,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "(?: |^)(?:D+o+m+i+(?: |,|\\.|n+i+k+|$)|W+i+s+s+i+(?: |,|\\.|d+i+d+o+m+|$))",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#7fffbf00",
+                    "pattern": "(?:viewers|blast your stream|chat.s so dead|remove the space|snoring)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                }
+            ],
+            "highlights2": [
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "alert": true,
+                    "backgroundColor": "#7f7f3f49",
+                    "caseSensitive": false,
+                    "id": "test-1",
+                    "pattern": "(?: |^)(?:D+o+m+i+(?: |,|\\.|n+i+k+|$)|W+i+s+s+i+(?: |,|\\.|d+i+d+o+m+|$))",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "001-ping2",
+                    "type": "message"
+                },
+                {
+                    "alert": false,
+                    "backgroundColor": "#7fffbf00",
+                    "caseSensitive": false,
+                    "id": "test-2",
+                    "pattern": "(?:viewers|blast your stream|chat.s so dead|remove the space|snoring)",
+                    "regex": true,
+                    "showInMentions": true,
+                    "sound": "001-ping2",
+                    "type": "message"
+                },
+                {
+                    "enabled": false,
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "id": "automodcaught"
+                },
+                {
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ],
+            "selfMessageHighlight": {
+                "enabled": false
+            },
+            "users": [
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

@@ -29,6 +29,7 @@
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QPointer>
 
 using namespace Qt::Literals;
 
@@ -337,13 +338,15 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
 void SettingsDialog::showDialog(QWidget *parent,
                                 SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog(parent);
-    static bool hasShownBefore = false;
-    if (hasShownBefore)
+    static QPointer<SettingsDialog> instance;
+    if (instance)
     {
         instance->refresh();
     }
-    hasShownBefore = true;
+    else
+    {
+        instance = new SettingsDialog(parent);
+    }
 
     // Resets the cancel button.
     getSettings()->saveSnapshot();
