@@ -689,6 +689,8 @@ set(SOURCE_FILES
         widgets/BaseWindow.hpp
         widgets/ChatterListWidget.cpp
         widgets/ChatterListWidget.hpp
+        widgets/FollowedChannelsWindow.cpp
+        widgets/FollowedChannelsWindow.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
