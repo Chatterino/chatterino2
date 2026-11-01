@@ -4,6 +4,7 @@
 
 #include "util/QMagicEnum.hpp"
 
+#include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "common/ThumbnailPreviewMode.hpp"
@@ -19,6 +20,7 @@ using qmagicenum::enumFlagsName;
 using qmagicenum::enumName;
 using qmagicenum::enumNames;
 using qmagicenum::enumNameString;
+using qmagicenum::SerializedName;
 
 namespace {
 
@@ -52,6 +54,19 @@ constexpr chatterino::qmagicenum::customize_t qmagicenumDisplayName(
     {
         case MyCustom::First:
             return "First (Display Name)";
+
+        default:
+            return {};
+    }
+}
+
+constexpr chatterino::qmagicenum::customize_t qmagicenumSerializedName(
+    MyCustom value) noexcept
+{
+    switch (value)
+    {
+        case MyCustom::First:
+            return "First (Serialized Name)";
 
         default:
             return {};
@@ -248,22 +263,31 @@ TEST(QMagicEnumTagged, enumDisplayNameString)
 {
     auto withSpecDN = DisplayName::enumNameString<MyCustom::First>();
     ASSERT_EQ(withSpecDN, u"First (Display Name)");
+    auto withSpecSN = SerializedName::enumNameString<MyCustom::First>();
+    ASSERT_EQ(withSpecSN, u"First (Serialized Name)");
 
     auto withSpec = enumName<MyCustom::First>();
     ASSERT_EQ(withSpec, u"myfirst");
 
     auto withoutSpecDN = DisplayName::enumNameString<MyFlag::Eight>();
     ASSERT_EQ(withoutSpecDN, u"Eight");
+    auto withoutSpecSN = SerializedName::enumNameString<MyFlag::Eight>();
+    ASSERT_EQ(withoutSpecSN, u"Eight");
 
     auto withoutSpec = enumName<MyFlag::Eight>();
     ASSERT_EQ(withoutSpec, u"Eight");
 
     auto secondWithSpecDN = DisplayName::enumNameString<MyCustom::Second>();
     ASSERT_EQ(secondWithSpecDN, u"mysecond.*");
+    auto secondWithSpecSN = SerializedName::enumNameString<MyCustom::Second>();
+    ASSERT_EQ(secondWithSpecSN, u"mysecond.*");
 
     auto secondWithSpec = enumName<MyCustom::Second>();
     ASSERT_EQ(secondWithSpec, u"mysecond.*");
 
     ASSERT_EQ(DisplayName::enumNameString<ThumbnailPreviewMode::DontShow>(),
               u"Don't show");
+
+    ASSERT_EQ(SerializedName::enumNameString<Channel::Type::TwitchWatching>(),
+              u"watching");
 }
