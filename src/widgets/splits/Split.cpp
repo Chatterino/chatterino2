@@ -21,7 +21,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/QMagicEnumTagged.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/ChatterListWidget.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -1309,29 +1308,7 @@ SplitDescriptor Split::buildDescriptor() const
     descriptor.moderationMode_ = this->getModerationMode();
     descriptor.filters_ = this->getFilters();
     descriptor.spellCheckOverride = this->checkSpellingOverride();
-
-    auto chan = this->getIndirectChannel();
-    descriptor.type_ =
-        qmagicenum::SerializedName::enumNameString(chan.getType());
-    switch (chan.getType())
-    {
-        case Channel::Type::Twitch:
-        case Channel::Type::Misc:
-            descriptor.channelName_ = chan.get()->getName();
-            break;
-
-        case Channel::Type::TwitchWhispers:
-        case Channel::Type::TwitchWatching:
-        case Channel::Type::TwitchMentions:
-        case Channel::Type::TwitchLive:
-        case Channel::Type::TwitchAutomod:
-
-        // FIXME: Remove these (#5703)
-        case Channel::Type::None:
-        case Channel::Type::Direct:
-        case Channel::Type::TwitchEnd:
-            break;
-    }
+    descriptor.setChannel(this->getIndirectChannel());
 
     return descriptor;
 }
