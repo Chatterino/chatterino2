@@ -214,6 +214,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
      }},
     {HotkeyCategory::SplitInput,
      {
+         {"cancelReply", ActionDefinition{.displayName = "Cancel reply"}},
          {"clear", ActionDefinition{"Clear message"}},
          {"copy",
           ActionDefinition{
