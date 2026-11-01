@@ -2115,7 +2115,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 auto scale = getSettings()->emoteTooltipScale.getEnum();
                 this->tooltipWidget_->setOne(TooltipEntry::scaled(
-                    showThumbnail
+                    showThumbnail && !emoteElement->isIgnored()
                         ? emoteElement->getEmote()->images.getImage(3.0)
                         : nullptr,
                     element->getTooltip(), getTooltipScale(scale)));
