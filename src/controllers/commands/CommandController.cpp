@@ -662,10 +662,8 @@ QString CommandController::execCustomCommand(
     static QRegularExpression parseCommand(
         R"((^|[^{])({{)*{(\d+\+?|([a-zA-Z.-]+)(?:;(.+?))?)})");
 
-    int lastCaptureEnd = 0;
-
-    auto globalMatch = parseCommand.globalMatch(command.func);
-    int matchOffset = 0;
+    qsizetype lastCaptureEnd = 0;
+    qsizetype matchOffset = 0;
 
     while (true)
     {
@@ -686,10 +684,9 @@ QString CommandController::execCustomCommand(
         QString wordIndexMatch = match.captured(3);
 
         bool plus = wordIndexMatch.at(wordIndexMatch.size() - 1) == '+';
-        wordIndexMatch = wordIndexMatch.replace("+", "");
 
         bool ok;
-        int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
+        int wordIndex = placeholderName.replace("+", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
             auto varName = match.captured(4);
