@@ -102,9 +102,10 @@ const std::unordered_map<QString, HypeChatPaidLevel> HYPE_CHAT_PAID_LEVEL{
 
 /// MessageFlag::Subscription message types
 const QSet<QString> SUB_MESSAGE_TYPES{
-    "sub",      //
-    "subgift",  //
-    "resub",    // resub messages
+    "sub",             //
+    "subgift",         //
+    "resub",           // resub messages
+    "submysterygift",  //
 };
 
 QString formatUpdatedEmoteList(const QString &platform,
@@ -1345,6 +1346,7 @@ std::pair<MessagePtr, HighlightAlert>
         Channel *channel)
 {
     MessageBuilder builder;
+    builder->channelName = channel->getName();
 
     builder.appendChannelPointRewardMessage(reward, isMod, isBroadcaster);
 
@@ -1352,7 +1354,7 @@ std::pair<MessagePtr, HighlightAlert>
     Communi::TagsRef tags(tagsMap);
     auto highlights = builder.parseHighlights(tags, "", {}, channel);
 
-    return {builder.release(), HighlightAlert{}};
+    return {builder.release(), highlights};
 }
 
 MessagePtr MessageBuilder::makeLiveMessage(const HelixMinimalUser &channel,

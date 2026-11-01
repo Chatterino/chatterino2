@@ -175,6 +175,14 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
+void Channel::addSystemMessage(const QString &contents,
+                               const QString &timeoutUser)
+{
+    MessageBuilder builder(systemMessage, contents);
+    builder->timeoutUser = timeoutUser;
+    this->addMessage(builder.release(), MessageContext::Original);
+}
+
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(

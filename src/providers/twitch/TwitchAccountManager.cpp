@@ -54,11 +54,8 @@ QString missingScopes(const QJsonArray &scopesArray)
 
 void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
 {
-    NetworkRequest(u"https://id.twitch.tv/oauth2/validate"_s,
-                   NetworkRequestType::Get)
-        .header("Authorization", u"OAuth " % account->getOAuthToken())
-        .timeout(20000)
-        .onSuccess([account](const auto &res) {
+    getHelix()->validateToken(
+        [account](const auto &res) {
             auto *app = tryGetApp();
             if (!app)
             {
@@ -97,12 +94,11 @@ void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
             app->getTwitch()->forEachChannel([msg](const auto &chan) {
                 chan->addMessage(msg, MessageContext::Original);
             });
-        })
-        .onError([](const auto &res) {
+        },
+        [](const auto &res) {
             qCWarning(chatterinoTwitch)
                 << "Failed to check for missing scopes:" << res.formatError();
-        })
-        .execute();
+        });
 }
 
 }  // namespace
