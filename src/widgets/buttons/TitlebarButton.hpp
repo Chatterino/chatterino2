@@ -14,7 +14,6 @@ enum class TitleBarButtonStyle : std::uint8_t {
     Maximize,
     Unmaximize,
     Close,
-    Settings,
 };
 
 class TitleBarButton : public DimButton

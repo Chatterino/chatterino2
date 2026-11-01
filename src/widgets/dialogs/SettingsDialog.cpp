@@ -28,8 +28,10 @@
 #include "widgets/settingspages/PluginsPage.hpp"
 
 #include <QDialogButtonBox>
-#include <QFile>
 #include <QLineEdit>
+#include <QPointer>
+
+using namespace Qt::Literals;
 
 namespace chatterino {
 
@@ -40,29 +42,21 @@ SettingsDialog::SettingsDialog(QWidget *parent)
               BaseWindow::Flags::Dialog,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
+              BaseWindow::UseSettingsStylesheet,
           },
           parent)
 {
     this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
+    this->setWindowRole(u"chatterino.settings"_s);
     // Disable the ? button in the titlebar until we decide to use it
     this->setWindowFlags(this->windowFlags() &
                          ~Qt::WindowContextHelpButtonHint);
 
     this->resize(915, 600);
-    this->themeChangedEvent();
-    QFile styleFile(":/qss/settings.qss");
-    if (!styleFile.open(QFile::ReadOnly))
-    {
-        assert(false && "Resources not loaded");
-        qCWarning(chatterinoWidget) << "Resources not loaded";
-    }
-    QString stylesheet = QString::fromUtf8(styleFile.readAll());
-    this->setStyleSheet(stylesheet);
 
     this->initUi();
     this->addTabs();
-    this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
@@ -344,13 +338,15 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
 void SettingsDialog::showDialog(QWidget *parent,
                                 SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog(parent);
-    static bool hasShownBefore = false;
-    if (hasShownBefore)
+    static QPointer<SettingsDialog> instance;
+    if (instance)
     {
         instance->refresh();
     }
-    hasShownBefore = true;
+    else
+    {
+        instance = new SettingsDialog(parent);
+    }
 
     // Resets the cancel button.
     getSettings()->saveSnapshot();
@@ -424,15 +420,6 @@ void SettingsDialog::scaleChangedEvent(float newScale)
     {
         this->ui_.tabContainerContainer->setFixedWidth(150);
     }
-}
-
-void SettingsDialog::themeChangedEvent()
-{
-    BaseWindow::themeChangedEvent();
-
-    QPalette palette;
-    palette.setColor(QPalette::Window, QColor("#111"));
-    this->setPalette(palette);
 }
 
 void SettingsDialog::showEvent(QShowEvent *e)

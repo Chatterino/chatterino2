@@ -8,20 +8,40 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/plugins/PluginController.hpp"
+#include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
+#include "mocks/Channel.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/TwitchIrcServer.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "Test.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/listview/GenericListView.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
+#include "widgets/splits/InputCompletionPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <QApplication>
+#include <QCompleter>
 #include <QDebug>
+#include <QKeyEvent>
 #include <QString>
+
+#include <initializer_list>
+#include <tuple>
 
 using namespace chatterino;
 using ::testing::Exactly;
@@ -32,7 +52,7 @@ class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : windowManager(this->args, this->paths_, this->settings, this->theme,
+        : windowManager(this->args_, this->paths_, this->settings, this->theme,
                         this->fonts)
         , commands(this->paths_)
     {
@@ -63,11 +83,76 @@ public:
         return &this->emotes;
     }
 
+    ITwitchIrcServer *getTwitch() override
+    {
+        return &this->twitch;
+    }
+
+    mock::MockTwitchIrcServer twitch;
+
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttv;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffz;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventv;
+    }
+
+    BttvEmotes bttv;
+    FfzEmotes ffz;
+    SeventvEmotes seventv;
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *getPlugins() override
+    {
+        return &this->plugins;
+    }
+
+    PluginController plugins{this->paths_};
+#endif
+
     HotkeyController hotkeys;
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
     mock::EmoteController emotes;
+};
+
+class TestSplitInput : public SplitInput
+{
+public:
+    using SplitInput::insertCompletionText;
+    using SplitInput::SplitInput;
+
+    void undoInput()
+    {
+        this->ui_.textEdit->undo();
+    }
+
+    bool completionPopupBlocksSendShortcut(const QString &text)
+    {
+        this->showCompletionPopup(text, CompletionKind::User);
+        QKeyEvent event(QEvent::ShortcutOverride, Qt::Key_Return,
+                        Qt::NoModifier);
+        event.ignore();
+        this->eventFilter(this, &event);
+        return event.isAccepted();
+    }
+};
+
+class SplitInputCompletionTest : public ::testing::Test
+{
+public:
+    MockApplication mockApplication;
+    Split split{nullptr};
+    TestSplitInput input{&this->split};
 };
 
 class SplitInputTest
@@ -87,6 +172,414 @@ public:
 
 }  // namespace
 
+TEST(SplitInput, SetWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    input.insertText("please stop whispering me");
+    auto cursor = edit->textCursor();
+    cursor.setPosition(6);
+    cursor.setPosition(11, QTextCursor::KeepAnchor);
+    edit->setTextCursor(cursor);
+
+    // Prepending keeps existing input text, and does not replace selected text
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen please stop whispering me");
+    EXPECT_EQ(edit->textCursor().position(), input.getInputText().size());
+
+    // Undo removes the prefix without clearing undo history
+    input.undoInput();
+    EXPECT_EQ(input.getInputText(), "please stop whispering me");
+    input.undoInput();
+    EXPECT_TRUE(input.getInputText().isEmpty());
+}
+
+TEST(SplitInput, SetWhisperTargetWithEmptyInput)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen ");
+}
+
+TEST(SplitInput, RepeatedWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.insertText("please stop whispering me");
+    input.setWhisperTarget("forsen");
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen please stop whispering me");
+}
+
+TEST(SplitInput, ChangeWhisperTarget)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    input.insertText(".w pajlada FeelsDankMan");
+    input.setWhisperTarget("forsen");
+    EXPECT_EQ(input.getInputText(), "/w forsen FeelsDankMan");
+
+    input.undoInput();
+    EXPECT_EQ(input.getInputText(), ".w pajlada FeelsDankMan");
+}
+
+TEST(SplitInput, SetWhisperTargetWithoutMessage)
+{
+    MockApplication app;
+    Split split{nullptr};
+    TestSplitInput input{&split};
+
+    for (const auto &text : {"/w", "/w ", "/w pajlada", ".w pajlada "})
+    {
+        input.setInputText(text);
+        input.setWhisperTarget("forsen");
+        EXPECT_EQ(input.getInputText(), "/w forsen ") << text;
+    }
+}
+
+namespace chatterino {
+
+class PopupCycleFixture : public ::testing::Test
+{
+public:
+    PopupCycleFixture()
+        : input(this->split.getInput())
+    {
+    }
+
+    void setChannel(ChannelPtr channel)
+    {
+        this->split.setChannel(IndirectChannel(std::move(channel)));
+        this->split.show();
+    }
+
+    void setChatters(std::initializer_list<QString> names)
+    {
+        auto channel = std::make_shared<TwitchChannel>("forsen");
+        for (const auto &name : names)
+        {
+            channel->addRecentChatter(name);
+        }
+        this->setChannel(channel);
+    }
+
+    void setEmotes(std::initializer_list<QString> names, bool zeroWidth = false)
+    {
+        auto emotes = std::make_shared<EmoteMap>();
+        for (const auto &name : names)
+        {
+            auto emote = std::make_shared<Emote>();
+            emote->name = EmoteName{name};
+            emote->zeroWidth = zeroWidth;
+            emotes->emplace(emote->name, std::move(emote));
+        }
+        auto channel = std::make_shared<TwitchChannel>("forsen");
+        channel->setBttvEmotes(std::move(emotes));
+        this->setChannel(channel);
+    }
+
+    ResizingTextEdit *edit() const
+    {
+        return this->input.ui_.textEdit;
+    }
+
+    InputCompletionPopup *popup()
+    {
+        return this->input.inputCompletionPopup_;
+    }
+
+    void showUserPopup(const QString &text)
+    {
+        this->input.showCompletionPopup(text, CompletionKind::User);
+    }
+
+    GenericListView *list()
+    {
+        auto *result = this->popup();
+        return result ? result->ui_.listView : nullptr;
+    }
+
+    void pressTab() const
+    {
+        QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier, "\t");
+        QApplication::sendEvent(this->edit(), &tab);
+    }
+
+    void pressBacktab() const
+    {
+        QKeyEvent backtab(QEvent::KeyPress, Qt::Key_Backtab, Qt::ShiftModifier);
+        QApplication::sendEvent(this->edit(), &backtab);
+    }
+
+    MockApplication app;
+    Split split{nullptr};
+    SplitInput &input;
+};
+
+}  // namespace chatterino
+
+TEST_F(SplitInputCompletionTest, EmoteCompletionPreservesUndoHistory)
+{
+    this->input.insertText("don't ping him :paja");
+    ASSERT_EQ("don't ping him :paja", this->input.getInputText());
+
+    this->input.insertCompletionText("pajaGIGA");
+    ASSERT_EQ("don't ping him pajaGIGA ", this->input.getInputText());
+
+    this->input.undoInput();
+    EXPECT_EQ("don't ping him :paja", this->input.getInputText());
+    this->input.undoInput();
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, UsernameCompletionPreservesUndoHistory)
+{
+    this->input.insertText("boring game @fors");
+    ASSERT_EQ("boring game @fors", this->input.getInputText());
+
+    this->input.insertCompletionText("forsen");
+    ASSERT_EQ("boring game @forsen ", this->input.getInputText());
+
+    this->input.undoInput();
+    EXPECT_EQ("boring game @fors", this->input.getInputText());
+    this->input.undoInput();
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(SplitInputCompletionTest, EmptyPopupDoesNotBlockSendShortcut)
+{
+    auto channel = std::make_shared<TwitchChannel>("forsen");
+    channel->addRecentChatter("pajlada");
+    this->split.setChannel(IndirectChannel{channel});
+
+    // An empty completion popup does not block the send shortcut.
+    EXPECT_FALSE(this->input.completionPopupBlocksSendShortcut("@nothing"));
+
+    // A matching completion still takes priority over sending.
+    EXPECT_TRUE(this->input.completionPopupBlocksSendShortcut("@paj"));
+}
+
+TEST_F(PopupCycleFixture, CustomSendShortcutWorksWithEmptyPopup)
+{
+    class RecordingChannel : public mock::MockChannel
+    {
+    public:
+        RecordingChannel()
+            : mock::MockChannel("forsen")
+        {
+        }
+
+        void sendMessage(const QString &message) override
+        {
+            this->sentMessages.append(message);
+        }
+
+        QStringList sentMessages;
+    };
+
+    this->app.hotkeys.replaceHotkey(
+        "send message",
+        std::make_shared<Hotkey>(HotkeyCategory::SplitInput, QKeySequence("F6"),
+                                 "sendMessage", std::vector<QString>{},
+                                 "send message"));
+    this->app.hotkeys.onItemsUpdated.invoke();
+    auto channel = std::make_shared<RecordingChannel>();
+    this->setChannel(channel);
+    QApplication::setActiveWindow(&this->split);
+    this->edit()->setFocus();
+    QApplication::processEvents();
+    ASSERT_TRUE(this->edit()->hasFocus());
+
+    const auto pressSend = [this] {
+        QKeyEvent press(QEvent::KeyPress, Qt::Key_F6, Qt::NoModifier);
+        QApplication::sendEvent(this->edit(), &press);
+        QKeyEvent release(QEvent::KeyRelease, Qt::Key_F6, Qt::NoModifier);
+        QApplication::sendEvent(this->edit(), &release);
+        QApplication::processEvents();
+    };
+
+    // The custom binding sends normally without a popup
+    this->input.insertText("hello");
+    pressSend();
+    ASSERT_EQ(channel->sentMessages, QStringList{"hello"});
+    ASSERT_TRUE(this->input.getInputText().isEmpty());
+
+    // An empty popup doesn't block the custom send binding
+    this->input.insertText("@zznothingmatches");
+    this->showUserPopup("@zznothingmatches");
+    ASSERT_NE(this->popup(), nullptr);
+    QApplication::setActiveWindow(&this->split);
+    this->edit()->setFocus();
+    this->popup()->show();
+    ASSERT_TRUE(this->edit()->hasFocus());
+    ASSERT_TRUE(this->popup()->isVisible());
+    ASSERT_EQ(this->list()->model()->rowCount(), 0);
+    pressSend();
+    EXPECT_EQ(channel->sentMessages,
+              (QStringList{"hello", "@zznothingmatches"}));
+    EXPECT_TRUE(this->input.getInputText().isEmpty());
+}
+
+TEST_F(PopupCycleFixture, UsernameSelectionCyclesWithTab)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    ASSERT_NE(this->edit(), nullptr);
+
+    this->input.insertText("@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_TRUE(this->popup()->isVisible());
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(1, 0));
+    const auto *selected = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(list->currentIndex().data()));
+    ASSERT_NE(selected, nullptr);
+    const auto selectedText = "@" + selected->insertionText() + ", ";
+
+    // The first tab accepts the selected username
+    this->pressTab();
+    const auto first = this->input.getInputText();
+    EXPECT_EQ(first, selectedText);
+
+    // Further tabs cycle through the popup usernames
+    this->pressTab();
+    const auto second = this->input.getInputText();
+    EXPECT_TRUE(second == "@zzpopupfirst, " || second == "@zzpopupsecond, ");
+    EXPECT_NE(second, first);
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), first);
+    this->pressBacktab();
+    EXPECT_EQ(this->input.getInputText(), second);
+}
+
+TEST_F(PopupCycleFixture, EnterAcceptanceCyclesWithTab)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    this->input.insertText("@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(1, 0));
+
+    // Enter accepts the popup item and tab continues through its list
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, "\r");
+    QApplication::sendEvent(this->edit(), &enter);
+    const auto first = this->input.getInputText();
+    EXPECT_TRUE(first == "@zzpopupfirst, " || first == "@zzpopupsecond, ");
+    this->pressTab();
+    EXPECT_NE(this->input.getInputText(), first);
+}
+
+TEST_F(PopupCycleFixture, OneCharacterSelectionCyclesAfterClick)
+{
+    this->setEmotes({"⚽", "⚽more"}, true);
+    this->input.insertText(":~⚽");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    const auto *first = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(list->model()->index(0, 0).data()));
+    ASSERT_NE(first, nullptr);
+    const auto selection = list->model()->index(
+        first->insertionText() == QString::fromUtf8("⚽") ? 0 : 1, 0);
+    const auto *selected = dynamic_cast<const InputCompletionItem *>(
+        GenericListItem::fromVariant(selection.data()));
+    ASSERT_NE(selected, nullptr);
+    ASSERT_EQ(selected->insertionText(), QString::fromUtf8("⚽"));
+
+    // Clicking a one-character result still allows tab to choose the next
+    list->setCurrentIndex(selection);
+    Q_EMIT list->clicked(selection);
+    EXPECT_EQ(this->input.getInputText(), QString::fromUtf8("⚽ "));
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), QString::fromUtf8("⚽more "));
+}
+
+TEST_F(PopupCycleFixture, CompletionAfterNewlineKeepsPreviousLine)
+{
+    this->setChatters({"zzpopupfirst", "zzpopupsecond"});
+    this->input.insertText("previous\n@zzpopup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    ASSERT_EQ(list->model()->rowCount(), 2);
+    list->setCurrentIndex(list->model()->index(0, 0));
+
+    // Cycling a completion on a new line keeps the text before the newline
+    this->pressTab();
+    const auto first = this->input.getInputText();
+    ASSERT_TRUE(first.startsWith("previous\n@"));
+    this->pressTab();
+    const auto second = this->input.getInputText();
+    EXPECT_TRUE(second.startsWith("previous\n@"));
+    EXPECT_NE(second, first);
+}
+
+TEST_F(PopupCycleFixture, DuplicateEmoteNamesCycleOnce)
+{
+    this->setEmotes({"zzdupone", "zzduptwo"});
+    auto duplicate = std::make_shared<Emote>();
+    duplicate->name = EmoteName{"zzdupone"};
+    auto globalEmotes = std::make_shared<EmoteMap>();
+    globalEmotes->emplace(duplicate->name, duplicate);
+    this->app.bttv.setEmotes(std::move(globalEmotes));
+
+    this->input.insertText(":zzdup");
+    auto *list = this->list();
+    ASSERT_NE(list, nullptr);
+    // The same emote name appears in both the channel and global results
+    ASSERT_EQ(list->model()->rowCount(), 3);
+
+    int lastDuplicateRow = -1;
+    int duplicateCount = 0;
+    for (int row = 0; row < list->model()->rowCount(); ++row)
+    {
+        const auto *item = dynamic_cast<const InputCompletionItem *>(
+            GenericListItem::fromVariant(list->model()->index(row, 0).data()));
+        ASSERT_NE(item, nullptr);
+        if (item->insertionText() == "zzdupone")
+        {
+            lastDuplicateRow = row;
+            ++duplicateCount;
+        }
+    }
+    ASSERT_EQ(duplicateCount, 2);
+    ASSERT_GE(lastDuplicateRow, 0);
+    list->setCurrentIndex(list->model()->index(lastDuplicateRow, 0));
+
+    // Selecting a duplicate skips the other copy on the next tab
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "zzdupone ");
+    this->pressTab();
+    EXPECT_EQ(this->input.getInputText(), "zzduptwo ");
+}
+
+TEST_F(SplitInputCompletionTest, TabCompletionPreservesUndoHistory)
+{
+    ResizingTextEdit edit;
+    QCompleter completer;
+    edit.setCompleter(&completer);
+    edit.insertPlainText("UR DONE BA");
+
+    Q_EMIT completer.highlighted(QString("BAND "));
+    ASSERT_EQ("UR DONE BAND ", edit.toPlainText());
+
+    edit.undo();
+    EXPECT_EQ("UR DONE BA", edit.toPlainText());
+    edit.undo();
+    EXPECT_TRUE(edit.toPlainText().isEmpty());
+}
+
 TEST_P(SplitInputTest, Reply)
 {
     std::tuple<QString, QString> params = this->GetParam();
@@ -102,6 +595,194 @@ TEST_P(SplitInputTest, Reply)
     QString actual = this->input.getInputText();
     ASSERT_EQ(expected, actual) << "Input text after setReply should be '"
                                 << expected << "', but got '" << actual << "'";
+}
+
+TEST(SplitInput, ReplyCommandCompletion)
+{
+    MockApplication app;
+    app.commands.items.append(Command{"/slashreplycompletion", "test"});
+    app.commands.items.append(Command{".dotreplycompletion", "test"});
+    Split split(nullptr);
+    SplitInput input(&split);
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
+    ASSERT_NE(edit, nullptr);
+    mock::MockChannel channel("forsen");
+    edit->setCompleter(new QCompleter(channel.completionModel, edit));
+
+    // Slash and dot commands can be completed in replies
+    for (const auto &trigger :
+         {QString("/slashreplycomp"), QString(".dotreplycomp")})
+    {
+        auto message = std::make_shared<Message>();
+        message->displayName = "forsen";
+        input.setInputText("");
+        input.setReply(message);
+        input.insertText(trigger);
+
+        // Commands are completed at the first word after the reply prefix `@username `
+        QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(), "@forsen " + trigger + "letion ");
+
+        // Commands are not completed later than the first word after the prefix
+        input.setInputText("@forsen test " + trigger);
+        edit->moveCursor(QTextCursor::End);
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(), "@forsen test " + trigger);
+
+        // Manually restoring an edited prefix does not restore reply completion
+        input.setInputText("@forsenX " + trigger);
+        input.setInputText("@forsen " + trigger);
+        edit->moveCursor(QTextCursor::End);
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(), "@forsen " + trigger);
+
+        // Normal command completion works after cancelling a reply
+        input.setReply(message);
+        input.setReply(nullptr);
+        input.setInputText(trigger);
+        edit->moveCursor(QTextCursor::End);
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(), trigger + "letion ");
+    }
+}
+
+TEST(SplitInput, EmptyReplyUsernameCompletion)
+{
+    MockApplication app;
+    app.settings.mentionUsersWithComma = true;
+    app.settings.alwaysIncludeBroadcasterInUserCompletions = true;
+    app.commands.items.append(Command{"/slashreplycompletion", "test"});
+    Split split(nullptr);
+    SplitInput input(&split);
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
+    ASSERT_NE(edit, nullptr);
+    TwitchChannel channel("forsen");
+    edit->setCompleter(new QCompleter(channel.completionModel, edit));
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+
+    // Completing the username in an empty reply does not add a comma
+    QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
+    QApplication::sendEvent(edit, &tab);
+    EXPECT_EQ(input.getInputText(), "@forsen ");
+
+    // Reply completion still works after completing the prefix username
+    input.insertText("/slashreplycomp");
+    QApplication::sendEvent(edit, &tab);
+    EXPECT_EQ(input.getInputText(), "@forsen /slashreplycompletion ");
+}
+
+TEST(SplitInput, ReplyBodyUsernameCompletion)
+{
+    MockApplication app;
+    Split split(nullptr);
+    SplitInput input(&split);
+    auto *textEdit = input.findChild<QTextEdit *>();
+    // NOLINTNEXTLINE(clazy-unneeded-cast)
+    auto *edit = dynamic_cast<ResizingTextEdit *>(textEdit);
+    ASSERT_NE(edit, nullptr);
+    TwitchChannel channel("forsen");
+    channel.addRecentChatter("pajlada");
+    edit->setCompleter(new QCompleter(channel.completionModel, edit));
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+
+    for (bool mentionComma : {true, false})
+    {
+        app.settings.mentionUsersWithComma = mentionComma;
+
+        // The first username in the reply body respects the comma setting
+        input.setInputText("@forsen @paj");
+        edit->moveCursor(QTextCursor::End);
+        EXPECT_TRUE(input.isEditFirstWord());
+        QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(),
+                  mentionComma ? "@forsen @pajlada, " : "@forsen @pajlada ");
+
+        // Usernames later in the reply body do not get a comma
+        input.setInputText("@forsen test @paj");
+        edit->moveCursor(QTextCursor::End);
+        EXPECT_FALSE(input.isEditFirstWord());
+        QApplication::sendEvent(edit, &tab);
+        EXPECT_EQ(input.getInputText(), "@forsen test @pajlada ");
+    }
+}
+
+TEST(SplitInput, ReplyPrefixFormatting)
+{
+    MockApplication app;
+    Split split(nullptr);
+    SplitInput input(&split);
+    auto *edit = input.findChild<QTextEdit *>();
+    ASSERT_NE(edit, nullptr);
+
+    auto message = std::make_shared<Message>();
+    message->displayName = "forsen";
+    input.setReply(message);
+    input.insertText("pretty much everywhere, it's gonna be hot");
+
+    auto prefixFormatting = [&](const QString &prefix) {
+        QList<QTextEdit::ExtraSelection> result;
+        const auto selections = edit->extraSelections();
+        for (const auto &selection : selections)
+        {
+            if (selection.cursor.selectionStart() == 0 &&
+                selection.cursor.selectionEnd() == prefix.size())
+            {
+                result.append(selection);
+            }
+        }
+        return result;
+    };
+
+    // Reply prefix is set when replying
+    ASSERT_EQ(prefixFormatting("@forsen ").size(), 1);
+    EXPECT_EQ(prefixFormatting("@forsen ").constFirst().cursor.selectedText(),
+              "@forsen ");
+
+    // Reply prefix uses the theme's placeholder colour
+    EXPECT_EQ(
+        prefixFormatting("@forsen ").constFirst().format.foreground().color(),
+        app.theme.messages.textColors.chatPlaceholder);
+
+    // The cursor stays in position after the message
+    EXPECT_EQ(edit->textCursor().position(), input.getInputText().size());
+
+    // Changing the reply target updates the prefix
+    auto other = std::make_shared<Message>();
+    other->displayName = "pajlada";
+    input.setReply(other);
+    ASSERT_EQ(prefixFormatting("@pajlada ").size(), 1);
+    EXPECT_EQ(prefixFormatting("@pajlada ").constFirst().cursor.selectedText(),
+              "@pajlada ");
+
+    // Editing the prefix invalidates it
+    input.setInputText("@pajladaX pajaBing");
+    EXPECT_TRUE(prefixFormatting("@pajlada ").isEmpty());
+
+    // Restoring the prefix manually does not restore it on our end
+    input.setInputText("@pajlada pajaBing");
+    EXPECT_TRUE(prefixFormatting("@pajlada ").isEmpty());
+
+    // Cancelling the reply invalidates the prefix
+    input.setReply(message);
+    input.setReply(nullptr);
+    EXPECT_TRUE(prefixFormatting("@forsen ").isEmpty());
+
+    // Clearing the input invalidates the reply prefix
+    input.setReply(message);
+    input.setInputText("");
+    EXPECT_TRUE(prefixFormatting("@forsen ").isEmpty());
 }
 
 INSTANTIATE_TEST_SUITE_P(

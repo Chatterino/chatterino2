@@ -46,6 +46,9 @@ public:
 
         /// special flag that enables the Qt::Popup flag on Linux
         LinuxPopup = 1 << 10,
+
+        /// Override the default stylesheet & user-specificed theme with our settings.qss stylesheet
+        UseSettingsStylesheet = 1 << 11,
     };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
@@ -227,6 +230,10 @@ private:
     /// GetWindowRect. Used for drawing.
     QRect realBounds_;
     bool isMaximized_ = false;
+#endif
+
+#ifdef Q_OS_MACOS
+    void setMacOSWindowManagedIfTopMost(bool topMost);
 #endif
 
     pajlada::Signals::SignalHolder connections_;

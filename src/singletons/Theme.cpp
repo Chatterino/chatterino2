@@ -9,7 +9,6 @@
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/WindowManager.hpp"
 
 #include <QApplication>
 #include <QColor>
@@ -208,6 +207,8 @@ void parseSplits(const QJsonObject &splits, const QJsonObject &splitsFallback,
         const auto inputFallback = splitsFallback["input"_L1].toObject();
         parseColor(theme.splits, input, background);
         parseColor(theme.splits, input, backgroundPulse);
+        parseColor(theme.splits, input, searchHighlightBackground);
+        parseColor(theme.splits, input, searchFailText);
         parseColor(theme.splits, input, text);
     }
 }
@@ -338,7 +339,6 @@ Theme::Theme(const Paths &paths)
                          if (this->isSystemTheme())
                          {
                              this->update();
-                             getApp()->getWindows()->forceLayoutChannelViews();
                          }
                      });
 

@@ -4,9 +4,11 @@
 
 #include "widgets/settingspages/AboutPage.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "singletons/Paths.hpp"
 #include "util/Expected.hpp"  // IWYU pragma: keep - this is being used to see if we're using the expected_lite library
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
@@ -66,6 +68,15 @@ AboutPage::AboutPage()
                 string += "<br>" % version.extraString();
             }
 
+            string +=
+                "<br><br>Your settings directory is located at <a href=\"";
+            string +=
+                QUrl::fromLocalFile(getApp()->getPaths().settingsDirectory)
+                    .toString(QUrl::FullyEncoded);
+            string += "\">";
+            string += getApp()->getPaths().settingsDirectory.toHtmlEscaped();
+            string += "</a>.";
+
             auto label = vbox.emplace<QLabel>(string);
             label->setWordWrap(true);
             label->setOpenExternalLinks(true);
@@ -110,11 +121,6 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Serialize",
                        "https://github.com/pajlada/serialize",
                        ":/licenses/pajlada_serialize.txt");
-#ifndef NO_QTKEYCHAIN
-            addLicense(form.getElement(), "QtKeychain",
-                       "https://github.com/frankosterfeld/qtkeychain",
-                       ":/licenses/qtkeychain.txt");
-#endif
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
@@ -175,6 +181,9 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Google emojis provided by <a href=\"https://google.com\">Google</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a> "
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/Sadiquecat/sounds/865918/">Sadiquecat C4 Harmonic</a> by <a href="https://freesound.org/people/Sadiquecat/">freesound.org/people/Sadiquecat</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/CAT-FOX_ALEX/sounds/859006/">CAT-FOX_Alex FX-Jump 3</a> by <a href="https://freesound.org/people/CAT-FOX_ALEX/">freesound.org/people/CAT-FOX_ALEX</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/yfjesse/sounds/235911/">Notification Sound</a> by <a href="https://freesound.org/people/yfjesse/">freesound.org/people/yfjesse</a>)")->setOpenExternalLinks(true);
             // clang-format on
         }
 

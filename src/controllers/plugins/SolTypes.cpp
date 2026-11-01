@@ -111,7 +111,7 @@ void logError(Plugin *plugin, QStringView context, const QString &msg)
     QString fullMessage = context % u" - " % msg;
     qCWarning(chatterinoLua).noquote()
         << "[" + plugin->id + ":" + plugin->meta.name + "]" << fullMessage;
-    plugin->onLog(api::LogLevel::Warning, fullMessage);
+    plugin->onLog.invoke(api::LogLevel::Warning, fullMessage);
 }
 
 }  // namespace chatterino::lua

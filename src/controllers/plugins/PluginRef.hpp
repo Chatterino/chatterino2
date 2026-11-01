@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -75,6 +79,8 @@ public:
     PluginRef strong() const noexcept;
 
     bool isAlive() const noexcept;
+
+    bool operator==(const PluginWeakRef &rhs) const noexcept;
 
 private:
     PluginWeakRef(std::weak_ptr<Plugin> weak);

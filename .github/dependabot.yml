@@ -6,6 +6,8 @@ updates:
       interval: "daily"
     labels:
       - "ci"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
@@ -13,3 +15,5 @@ updates:
     labels:
       - "ci"
       - "submodules"
+    cooldown:
+      default-days: 7

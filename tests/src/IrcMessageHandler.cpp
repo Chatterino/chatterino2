@@ -4,6 +4,7 @@
 
 #include "providers/twitch/IrcMessageHandler.hpp"
 
+#include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -16,6 +17,7 @@
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmoteController.hpp"
+#include "mocks/Helix.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -59,20 +61,16 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+const bool UPDATE_SNAPSHOTS =
+    chatterino::env::readBool("CHATTERINO_UPDATE_TEST_SNAPSHOTS", false);
 
 const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication()
-        : highlights(this->settings, &this->accounts)
-    {
-    }
-
     MockApplication(const QString &settingsData)
-        : mock::BaseApplication(settingsData)
+        : mock::BaseApplication(settingsData, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)
     {
     }
@@ -160,6 +158,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::EmoteController emotes;
+    mock::Helix helix;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
@@ -561,6 +560,21 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
+
+        const auto helixExpectations =
+            this->snapshot->param("helixExpectations").toObject();
+        if (!helixExpectations.isEmpty())
+        {
+            initializeHelix(&this->mockHelix);
+
+            int nCalls =
+                helixExpectations.value("getSharedChatSession").toInt();
+            if (nCalls > 0)
+            {
+                EXPECT_CALL(this->mockHelix, getSharedChatSession)
+                    .Times(nCalls);
+            }
+        }
     }
 
     void TearDown() override
@@ -573,6 +587,7 @@ public:
     std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<testlib::Snapshot> snapshot;
+    testing::StrictMock<mock::Helix> mockHelix;
 };
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
@@ -593,6 +608,9 @@ public:
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
 /// - `nAdditional`: Include n additional built messages (from `prevMessages`)
+/// - `helixExpectations`: An object with names of Helix API methods that will
+///   be called during the test and the expected call count. Name of the method
+///   is the key and the number of calls its value.
 TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
@@ -650,6 +668,46 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST(IrcMessageHandler, RecentMessagesDoNotUpdateCurrentUserState)
+{
+    MockApplication app(QString::fromUtf8(SETTINGS_DEFAULT));
+    initializeHelix(&app.helix);
+    auto &accounts = app.getAccounts()->twitch;
+    accounts.accounts.append(
+        std::make_shared<TwitchAccount>("forsenwiki", "", "", "405330073"));
+    accounts.load();
+    accounts.currentUsername = "forsenwiki";
+    ASSERT_EQ(accounts.getCurrent()->getUserId(), "405330073");
+
+    auto channel = std::make_shared<TwitchChannel>("pajlada");
+    ASSERT_FALSE(channel->isVip());
+    const QByteArray data =
+        "@tmi-sent-ts=1790452460376;id=863f60c5-3de6-4ecf-b2ff-20cdd85c12e9;"
+        "room-id=11148817;user-id=405330073;display-name=forsenWiki;"
+        "badges=vip/1;badge-info=;flags=;user-type=;emotes= "
+        ":forsenwiki!forsenwiki@forsenwiki.tmi.twitch.tv "
+        "PRIVMSG #pajlada :peepoZ";
+
+    // A message that isn't from a live sink does not set vip status
+    auto *historyMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(historyMessage, nullptr);
+    VectorMessageSink historySink({}, MessageFlag::RecentMessage);
+    IrcMessageHandler::parseMessageInto(historyMessage, historySink,
+                                        channel.get());
+    delete historyMessage;
+    ASSERT_EQ(historySink.messages().size(), 1);
+    EXPECT_FALSE(channel->isVip());
+
+    // The same message parsed from a live sink sets vip status
+    auto *liveMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(liveMessage, nullptr);
+    VectorMessageSink liveSink(channel->sinkTraits());
+    IrcMessageHandler::parseMessageInto(liveMessage, liveSink, channel.get());
+    delete liveMessage;
+    ASSERT_EQ(liveSink.messages().size(), 1);
+    EXPECT_TRUE(channel->isVip());
 }
 
 TEST_P(TestIrcMessageHandlerP, CloneElements)

@@ -12,7 +12,6 @@
 #include "util/QMagicEnum.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <boost/variant.hpp>
 #include <QFile>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>

@@ -21,10 +21,30 @@ void addMember(rapidjson::Value &obj, const char *key, rapidjson::Value &value,
     obj.AddMember(rapidjson::Value(key, a).Move(), value.Move(), a);
 }
 
+void setOptionally(rapidjson::Value &obj, const char *key, const QString &value,
+                   rapidjson::Document::AllocatorType &a)
+{
+    assert(obj.IsObject());
+
+    if (!value.isNull())
+    {
+        addMember(obj, key, pajlada::Serialize<QString>::get(value, a), a);
+    }
+}
+
 QString stringify(const rapidjson::Value &value)
 {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    value.Accept(writer);
+
+    return buffer.GetString();
+}
+
+QString pp(const rapidjson::Value &value)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     value.Accept(writer);
 
     return buffer.GetString();

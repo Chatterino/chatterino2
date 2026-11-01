@@ -38,29 +38,31 @@ void TwitchBadges::loadTwitchBadges()
 
     getHelix()->getGlobalBadges(
         [this](auto globalBadges) {
-            auto badgeSets = this->badgeSets_.access();
-
-            for (const auto &badgeSet : globalBadges.badgeSets)
             {
-                const auto &setID = badgeSet.setID;
-                for (const auto &version : badgeSet.versions)
+                auto badgeSets = this->badgeSets_.access();
+
+                for (const auto &badgeSet : globalBadges.badgeSets)
                 {
-                    const auto &emote = Emote{
-                        .name = EmoteName{},
-                        .images =
-                            ImageSet{
-                                Image::fromUrl(version.imageURL1x, 1,
-                                               BADGE_BASE_SIZE),
-                                Image::fromUrl(version.imageURL2x, .5,
-                                               BADGE_BASE_SIZE * 2),
-                                Image::fromUrl(version.imageURL4x, .25,
-                                               BADGE_BASE_SIZE * 4),
-                            },
-                        .tooltip = Tooltip{version.title},
-                        .homePage = version.clickURL,
-                    };
-                    (*badgeSets)[setID][version.id] =
-                        std::make_shared<Emote>(emote);
+                    const auto &setID = badgeSet.setID;
+                    for (const auto &version : badgeSet.versions)
+                    {
+                        const auto &emote = Emote{
+                            .name = EmoteName{},
+                            .images =
+                                ImageSet{
+                                    Image::fromUrl(version.imageURL1x, 1,
+                                                   BADGE_BASE_SIZE),
+                                    Image::fromUrl(version.imageURL2x, .5,
+                                                   BADGE_BASE_SIZE * 2),
+                                    Image::fromUrl(version.imageURL4x, .25,
+                                                   BADGE_BASE_SIZE * 4),
+                                },
+                            .tooltip = Tooltip{version.title},
+                            .homePage = version.clickURL,
+                        };
+                        (*badgeSets)[setID][version.id] =
+                            std::make_shared<Emote>(emote);
+                    }
                 }
             }
 

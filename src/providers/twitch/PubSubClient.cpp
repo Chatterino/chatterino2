@@ -162,6 +162,46 @@ void PubSubClient::handleResponse(const PubSubMessage &message)
 
 void PubSubClient::handleMessageResponse(const PubSubMessageMessage &message)
 {
+    if (message.topic.startsWith("pinned-chat-updates-v1."))
+    {
+        auto oInnerMessage =
+            message.toInner<PubSubPinnedChatUpdatesV1Message>();
+        if (!oInnerMessage)
+        {
+            qCDebug(chatterinoPubSub)
+                << "Malformed pinned-chat-updates-v1 message";
+            return;
+        }
+
+        const auto &innerMessage = *oInnerMessage;
+        // strip the "pinned-chat-updates-v1." prefix
+        const auto channelId = message.topic.sliced(
+            static_cast<qsizetype>(sizeof("pinned-chat-updates-v1.") - 1));
+
+        switch (innerMessage.type)
+        {
+            case PubSubPinnedChatUpdatesV1Message::Type::PinMessage:
+            case PubSubPinnedChatUpdatesV1Message::Type::UpdateMessage: {
+                this->manager_.pinnedChatUpdates.pinned.invoke(channelId);
+            }
+            break;
+
+            case PubSubPinnedChatUpdatesV1Message::Type::UnpinMessage: {
+                this->manager_.pinnedChatUpdates.unpinned.invoke(channelId);
+            }
+            break;
+
+            case PubSubPinnedChatUpdatesV1Message::Type::INVALID:
+            default: {
+                qCDebug(chatterinoPubSub) << "Invalid pinned-chat-updates-v1 "
+                                             "event type:"
+                                          << innerMessage.typeString;
+            }
+            break;
+        }
+        return;
+    }
+
     if (!message.topic.startsWith("community-points-channel-v1."))
     {
         return;

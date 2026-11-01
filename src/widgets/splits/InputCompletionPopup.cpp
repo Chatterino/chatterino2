@@ -10,8 +10,12 @@
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
+
+#include <QKeyEvent>
+#include <QSet>
 
 namespace chatterino {
 
@@ -107,8 +111,72 @@ void InputCompletionPopup::setInputAction(ActionCallback callback)
     this->callback_ = std::move(callback);
 }
 
+bool InputCompletionPopup::hasCompletions() const
+{
+    return this->model_.rowCount() != 0;
+}
+
+std::optional<std::pair<QStringList, int>>
+    InputCompletionPopup::selectedCompletions(bool isFirstWord) const
+{
+    if (!this->currentKind_)
+    {
+        return std::nullopt;
+    }
+
+    const auto index = this->ui_.listView->currentIndex().row();
+    const auto count = this->model_.rowCount();
+    if (index < 0 || index >= count)
+    {
+        return std::nullopt;
+    }
+
+    QStringList completions;
+    QSet<QString> seen;
+    int selectedIndex = -1;
+    for (int row = 0; row < count; ++row)
+    {
+        auto *item = dynamic_cast<InputCompletionItem *>(
+            GenericListItem::fromVariant(this->model_.index(row).data()));
+        if (item == nullptr)
+        {
+            return std::nullopt;
+        }
+
+        auto text = item->insertionText();
+        if (*this->currentKind_ == CompletionKind::User)
+        {
+            text =
+                "@" + formatUserMention(text, isFirstWord,
+                                        getSettings()->mentionUsersWithComma);
+        }
+        text += ' ';
+        if (!seen.contains(text))
+        {
+            seen.insert(text);
+            completions.append(text);
+        }
+        if (row == index)
+        {
+            selectedIndex = static_cast<int>(completions.indexOf(text));
+        }
+    }
+    return std::pair{std::move(completions), selectedIndex};
+}
+
 bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
 {
+    if (event->type() == QEvent::KeyPress)
+    {
+        const auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        assert(keyEvent != nullptr);
+        if ((keyEvent->key() == Qt::Key_Enter ||
+             keyEvent->key() == Qt::Key_Return) &&
+            !this->hasCompletions())
+        {
+            return BasePopup::eventFilter(watched, event);
+        }
+    }
     return this->ui_.listView->eventFilter(watched, event);
 }
 

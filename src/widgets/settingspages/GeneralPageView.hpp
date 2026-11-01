@@ -7,9 +7,9 @@
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Variant.hpp"
 #include "widgets/buttons/SignalLabel.hpp"
 
-#include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QComboBox>
 #include <QDebug>
@@ -18,6 +18,7 @@
 #include <QVBoxLayout>
 
 #include <utility>
+#include <variant>
 
 class QScrollArea;
 
@@ -161,22 +162,22 @@ public:
     }
 
     template <typename T>
-    ComboBox *addDropdown(
-        const QString &text, const QStringList &items,
-        pajlada::Settings::Setting<T> &setting,
-        std::function<boost::variant<int, QString>(T)> getValue,
-        std::function<T(DropdownArgs)> setValue, bool editable = true,
-        QString toolTipText = {}, bool listenToActivated = false)
+    ComboBox *addDropdown(const QString &text, const QStringList &items,
+                          pajlada::Settings::Setting<T> &setting,
+                          std::function<std::variant<int, QString>(T)> getValue,
+                          std::function<T(DropdownArgs)> setValue,
+                          bool editable = true, QString toolTipText = {},
+                          bool listenToActivated = false)
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
 
-        if (selected.which() == 1)
+        if (auto *str = std::get_if<QString>(&selected))
         {
             // QString
-            if (!editable && !items2.contains(boost::get<QString>(selected)))
+            if (!editable && !items2.contains(*str))
             {
-                items2.insert(0, boost::get<QString>(selected));
+                items2.insert(0, *str);
             }
         }
 
@@ -186,33 +187,31 @@ public:
             combo->setEditable(true);
         }
 
-        if (selected.which() == 0)
-        {
-            // int
-            auto value = boost::get<int>(selected);
-            if (value >= 0 && value < items2.size())
-            {
-                combo->setCurrentIndex(value);
-            }
-        }
-        else if (selected.which() == 1)
-        {
-            // QString
-            combo->setEditText(boost::get<QString>(selected));
-        }
+        std::visit(variant::Overloaded{
+                       [&](int value) {
+                           if (value >= 0 && value < items2.size())
+                           {
+                               combo->setCurrentIndex(value);
+                           }
+                       },
+                       [&](const QString &str) {
+                           combo->setEditText(str);
+                       },
+                   },
+                   selected);
 
         setting.connect(
             [getValue = std::move(getValue), combo](const T &value, auto) {
-                auto var = getValue(value);
-                if (var.which() == 0)
-                {
-                    combo->setCurrentIndex(boost::get<int>(var));
-                }
-                else
-                {
-                    combo->setCurrentText(boost::get<QString>(var));
-                    combo->setEditText(boost::get<QString>(var));
-                }
+                std::visit(variant::Overloaded{
+                               [&](int value) {
+                                   combo->setCurrentIndex(value);
+                               },
+                               [&](const QString &str) {
+                                   combo->setCurrentText(str);
+                                   combo->setEditText(str);
+                               },
+                           },
+                           getValue(value));
             },
             this->managedConnections_);
 
