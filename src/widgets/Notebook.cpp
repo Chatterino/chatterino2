@@ -1699,10 +1699,8 @@ void SplitNotebook::addCustomButtons()
         getApp()->getWindows()->showSettingsDialog(
             this, SettingsDialogPreference::StreamerMode);
     });
-
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
-
     this->updateStreamerModeIcon();
 
     this->performLayout(false);
