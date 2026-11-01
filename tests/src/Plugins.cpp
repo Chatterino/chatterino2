@@ -955,6 +955,7 @@ TEST_F(PluginTest, ChannelType)
     const char *VALUES = "Direct,"
                          "Misc,"
                          "None,"
+                         "Plugin,"
                          "Twitch,"
                          "TwitchAutomod,"
                          "TwitchEnd,"

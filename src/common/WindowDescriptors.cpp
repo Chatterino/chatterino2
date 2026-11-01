@@ -211,11 +211,13 @@ void SplitDescriptor::setChannel(const IndirectChannel &chan)
             break;
 
         case Channel::Type::Plugin: {
+#ifdef CHATTERINO_HAVE_PLUGINS
             auto *pl = dynamic_cast<PluginChannel *>(chan.get().get());
             this->channelName_ = pl->getName();
             this->pluginID = pl->pluginID();
             this->providerID = pl->providerID();
             this->arguments = pl->arguments();
+#endif
         }
         break;
 
