@@ -22,6 +22,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/ChatterListWidget.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -1311,7 +1312,8 @@ SplitDescriptor Split::buildDescriptor() const
     descriptor.spellCheckOverride = this->checkSpellingOverride();
 
     auto chan = this->getIndirectChannel();
-    descriptor.type_ = qmagicenum::enumNameString(chan.getType());
+    descriptor.type_ =
+        qmagicenum::SerializedName::enumNameString(chan.getType());
     switch (chan.getType())
     {
         case Channel::Type::Twitch:

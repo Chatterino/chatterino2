@@ -10,7 +10,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/Backup.hpp"
-#include "util/QMagicEnum.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "widgets/Window.hpp"
 
 #include <QFile>
@@ -137,7 +137,8 @@ IndirectChannel SplitDescriptor::decodeChannel() const
 {
     assertInGuiThread();
 
-    auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
+    auto type =
+        qmagicenum::SerializedName::enumCast<Channel::Type>(this->type_);
     if (!type)
     {
         return Channel::getEmpty();

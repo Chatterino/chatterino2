@@ -18,8 +18,13 @@ namespace tag {
 
 struct DisplayName {
 };
+struct SerializedName {
+};
 
 }  // namespace tag
+
+template <typename T, typename... U>
+constexpr static bool ONE_OF_V = std::disjunction_v<std::is_same<T, U>...>;
 
 /// Builds the tagged data for a specific enum value (V), type (E), and Tag.
 ///
@@ -35,12 +40,16 @@ constexpr auto buildEnumValueTaggedData() noexcept
 {
     [[maybe_unused]] constexpr auto custom = [] {
         static_assert(
-            std::is_same_v<Tag, tag::DisplayName>,
+            ONE_OF_V<Tag, tag::DisplayName, tag::SerializedName>,
             "unhandled tag in QMagicEnumTagged.hpp::enumTaggedDataValue");
 
         if constexpr (std::is_same_v<Tag, tag::DisplayName>)
         {
             return qmagicenumDisplayName(V);
+        }
+        if constexpr (std::is_same_v<Tag, tag::SerializedName>)
+        {
+            return qmagicenumSerializedName(V);
         }
     }();
 
@@ -270,11 +279,26 @@ struct HasDisplayName<T> : std::true_type {
 struct DisplayNameResolver : TaggedResolver<DisplayName, HasDisplayName> {
 };
 
+template <typename T>
+struct HasSerializedName : std::false_type {
+};
+template <typename T>
+    requires(requires(T v) { qmagicenumSerializedName(v); })
+struct HasSerializedName<T> : std::true_type {
+};
+
+struct SerializedNameResolver
+    : TaggedResolver<SerializedName, HasSerializedName> {
+};
+
 }  // namespace tag
 
 }  // namespace detail
 
 /// Display names specialized with `qmagicenumDisplayName()`.
 using DisplayName = detail::tag::DisplayNameResolver;
+
+/// Display names specialized with `qmagicenumSerializedName()`.
+using SerializedName = detail::tag::SerializedNameResolver;
 
 }  // namespace chatterino::qmagicenum

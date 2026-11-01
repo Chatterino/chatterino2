@@ -159,4 +159,5 @@ endif ()
 
 gtest_discover_tests(${PROJECT_NAME}
     DISCOVERY_MODE PRE_TEST
+    PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=minimal"
 )
