@@ -5,6 +5,7 @@
 #include "util/FormatTime.hpp"
 
 #include "common/QLogging.hpp"
+#include "util/Helpers.hpp"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -181,6 +182,37 @@ QString formatTime(std::chrono::seconds totalSeconds, int components)
                                     static_cast<std::chrono::seconds::rep>(
                                         std::numeric_limits<int>::max()))),
         components);
+}
+
+QString formatDurationExact(std::chrono::seconds seconds)
+{
+    if (seconds.count() == 0)
+    {
+        return u"0s"_s;
+    }
+
+    auto [value, unit] = [&]() -> std::pair<int64_t, char16_t> {
+        int64_t value = seconds.count();
+        if ((value % 60) != 0)
+        {
+            return {value, 's'};
+        }
+        value /= 60;
+        if ((value % 60) != 0)
+        {
+            return {value, 'm'};
+        }
+        value /= 60;
+        if ((value % 24) != 0)
+        {
+            return {value, 'h'};
+        }
+        return {value / 24, 'd'};
+    }();
+
+    auto str = localizeNumbers(value);
+    str += unit;
+    return str;
 }
 
 QString formatLongFriendlyDuration(const QDateTime &from, const QDateTime &to)

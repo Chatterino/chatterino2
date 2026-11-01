@@ -75,14 +75,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|Highlighted|DoNotTriggerNotification|UncategorizedNotification",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "whoopiix just earned a new 1K Bits badge!",
             "searchText": "whoopiix just earned a new 1K Bits badge!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

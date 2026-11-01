@@ -16,7 +16,9 @@ Checks: "-*,
   clazy-*,
   -clazy-qstring-allocations,
   -clazy-missing-qobject-macro,
+  -clazy-incorrect-emit,
   -clazy-ctor-missing-parent-argument,
+  -clazy-incorrect-emit,
   cppcoreguidelines-*,
   -cppcoreguidelines-pro-type-cstyle-cast,
   -cppcoreguidelines-pro-type-vararg,
@@ -30,6 +32,8 @@ Checks: "-*,
   -performance-noexcept-move-constructor,
   -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
+  -misc-static-assert,
+  -cert-dcl03-c,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
@@ -89,3 +93,6 @@ CheckOptions:
 
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
     value: true
+
+  - key: cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses
+    value: ^QJson(Object|Array|Value)

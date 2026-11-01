@@ -183,10 +183,9 @@ void LoggingChannel::addMessage(const MessagePtr &message,
                                 const QString &streamID)
 {
     QDateTime messageTimestamp;
-    if (getSettings()->tryUseTwitchTimestamps &&
-        !message->serverReceivedTime.isNull())
+    if (getSettings()->tryUseTwitchTimestamps && !message->timestamp.isNull())
     {
-        messageTimestamp = message->serverReceivedTime;
+        messageTimestamp = message->timestamp;
     }
     else
     {

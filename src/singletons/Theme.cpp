@@ -9,8 +9,8 @@
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/WindowManager.hpp"
 
+#include <QApplication>
 #include <QColor>
 #include <QDir>
 #include <QElapsedTimer>
@@ -18,10 +18,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSet>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-#    include <QStyleHints>
-#endif
-#include <QApplication>
+#include <QStyleHints>
 
 #include <cmath>
 #include <numbers>
@@ -210,6 +207,8 @@ void parseSplits(const QJsonObject &splits, const QJsonObject &splitsFallback,
         const auto inputFallback = splitsFallback["input"_L1].toObject();
         parseColor(theme.splits, input, background);
         parseColor(theme.splits, input, backgroundPulse);
+        parseColor(theme.splits, input, searchHighlightBackground);
+        parseColor(theme.splits, input, searchFailText);
         parseColor(theme.splits, input, text);
     }
 }
@@ -334,17 +333,14 @@ Theme::Theme(const Paths &paths)
 
     this->loadAvailableThemes(paths);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     QObject::connect(QApplication::styleHints(),
                      &QStyleHints::colorSchemeChanged, &this->lifetime_,
                      [this] {
                          if (this->isSystemTheme())
                          {
                              this->update();
-                             getApp()->getWindows()->forceLayoutChannelViews();
                          }
                      });
-#endif
 
     this->update();
 }
@@ -352,7 +348,6 @@ Theme::Theme(const Paths &paths)
 void Theme::update()
 {
     auto currentTheme = [&]() -> QString {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         if (this->isSystemTheme())
         {
             switch (QApplication::styleHints()->colorScheme())
@@ -364,7 +359,6 @@ void Theme::update()
                     return this->darkSystemThemeName;
             }
         }
-#endif
         return this->themeName;
     };
 

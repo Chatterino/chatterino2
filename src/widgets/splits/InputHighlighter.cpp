@@ -24,9 +24,9 @@ namespace {
 
 using namespace chatterino;
 
-bool isEmote(TwitchChannel *twitch, const QString &word)
+bool isEmote(TwitchChannel *twitch, QStringView word)
 {
-    EmoteName name{word};
+    EmoteNameView name{word};
     if (twitch)
     {
         if (twitch->bttvEmote(name) || twitch->ffzEmote(name) ||
@@ -96,12 +96,13 @@ namespace chatterino {
 
 namespace inputhighlight::detail {
 
-// A word is a string of unicode letters. Words are seperated by whitespace
-// (tokenRegex) or, inside a token, by punctuation characters (except '_')
+/// A word is a string of unicode letters possibly concatenated by `'` or `-`.
+/// This regex assumes the text it's matched on does not contain whitespace.
+/// Any words next to underscores (`_`) is ignored.
 QRegularExpression wordRegex()
 {
     static QRegularExpression regex{
-        R"((?<=^|(?!_)\p{P})\p{L}+(?=$|(?!_)\p{P}))",
+        R"((?<=^|(?!_)\p{P})\p{L}+(?:['-]\p{L}+)*(?=$|(?!_)\p{P}))",
         QRegularExpression::PatternOption::UseUnicodePropertiesOption,
     };
     return regex;
@@ -135,6 +136,41 @@ std::vector<QString> InputHighlighter::getSpellCheckedWords(const QString &text)
         words.emplace_back(word);
     });
     return words;
+}
+
+QStringView InputHighlighter::getWordAt(QStringView text, qsizetype pos)
+{
+    auto tokenIt = this->tokenRegex.globalMatchView(text);
+    QString token;
+    qsizetype posInWord = 0;
+    qsizetype tokenStart = 0;
+    while (tokenIt.hasNext())
+    {
+        auto match = tokenIt.next();
+        // using '<= end' to include the word left to the cursor if it's at the end
+        if (match.capturedStart() <= pos && pos <= match.capturedEnd())
+        {
+            token = match.captured();
+            tokenStart = match.capturedStart();
+            posInWord = pos - tokenStart;
+            break;
+        }
+    }
+    if (token.isEmpty())
+    {
+        return {};
+    }
+
+    QStringView word;
+    this->visitWords(token, [&](const QString & /*curWord*/, qsizetype start,
+                                qsizetype count) {
+        if (start <= posInWord && posInWord <= start + count)
+        {
+            assert(word.isEmpty());
+            word = text.sliced(tokenStart + start, count);
+        }
+    });
+    return word;
 }
 
 void InputHighlighter::highlightBlock(const QString &text)

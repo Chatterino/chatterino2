@@ -1,33 +1,41 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22..4.3.2)
 # CMake upgrade notes:
 #  - In CMake >= 3.29, we should deprecate USE_ALTERNATE_LINKER in favour of CMake's CMAKE_LINKER_TYPE
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY On) # For rapidjson
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
+if(POLICY CMP0207)
+    cmake_policy(SET CMP0207 NEW) # file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching
+endif()
 include(FeatureSummary)
 include(FetchContent)
+include(CMakeDependentOption)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
     )
+
+if(WIN32 AND NOT MINGW)
+    include(EnableSegmentHeap)
+endif()
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
-option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
-option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers (Temporarily not supported on macOS)" ON)
 option(BUILD_WITH_QT6 "Build with Qt6" On)
 option(BUILD_WITH_LIBNOTIFY "Build with libnotify" ON)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
-# We don't use translations, and we don't want qtkeychain to build translations
-option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
+# CMake doesn't detect LTO for some compilers (e.g. clang-cl: https://gitlab.kitware.com/cmake/cmake/-/issues/21635),
+# so this skips the check and assumes LTO works.
+cmake_dependent_option(CHATTERINO_FORCE_LTO "Skip check if LTO is supported" OFF CHATTERINO_LTO OFF)
+option(CHATTERINO_FORCE_LTO "Don't check if LTO is supported" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 option(CHATTERINO_ALLOW_PRIVATE_QT_API "Allow uses of Qt's private API - when enabling this, Chatterino must use the EXACT Qt version it was compiled against" OFF)
@@ -60,7 +68,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.4
+    VERSION 2.5.6
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
@@ -76,9 +84,14 @@ if(CHATTERINO_GENERATE_COVERAGE)
 endif()
 
 if(CHATTERINO_LTO)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
-    message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    if (CHATTERINO_FORCE_LTO)
+        set(CHATTERINO_ENABLE_LTO ON)
+        message(STATUS "LTO: Enabled (Force)")
+    else()
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)
+        message(STATUS "LTO: Enabled (Supported: ${CHATTERINO_ENABLE_LTO} - ${IPO_ERROR})")
+    endif()
 else()
     message(STATUS "LTO: Disabled")
 endif()
@@ -148,7 +161,11 @@ if (WIN32)
 endif ()
 
 # Find boost on the system
-find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS headers)
+set(BOOST_REQUIRED_COMPONENTS "")
+if (VCPKG_TARGET_TRIPLET)
+    list(APPEND BOOST_REQUIRED_COMPONENTS json)
+endif ()
+find_package(Boost REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_COMPONENTS} OPTIONAL_COMPONENTS headers)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -178,39 +195,14 @@ else()
     add_subdirectory("${LIBCOMMUNI_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
 endif()
 
-if (BUILD_WITH_QTKEYCHAIN)
-    # Link QtKeychain statically
-    if (USE_SYSTEM_QTKEYCHAIN)
-        find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
-    else()
-        set(QTKEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
-        if (NOT EXISTS "${QTKEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
-            message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
-        endif()
-
-        set(_prev_testing ${BUILD_TESTING})
-        set(BUILD_TESTING Off)
-        add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
-        set(BUILD_TESTING ${_prev_testing})
-
-        if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
-            message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
-        endif()
-        if (MSVC AND "${MAJOR_QT_VERSION}" STREQUAL "5")
-            target_compile_definitions(qt5keychain PRIVATE UNICODE)
-            target_compile_options(qt5keychain PRIVATE /utf-8)
-            set_target_properties(qt5keychain PROPERTIES CXX_STANDARD 17)
-        endif()
-    endif()
-endif()
-
 if (BUILD_TESTS)
     include(GoogleTest)
     # For MSVC: Prevent overriding the parent project's compiler/linker settings
     # See https://github.com/google/googletest/blob/main/googletest/README.md#visual-studio-dynamic-vs-static-runtimes
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest")
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib/googletest" "lib/googletest"
+                     EXCLUDE_FROM_ALL)
 
     mark_as_advanced(
             BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
@@ -242,19 +234,19 @@ FetchContent_Declare(
     PajladaSignals
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/signals
     EXCLUDE_FROM_ALL
-    FIND_PACKAGE_ARGS CONFIG
+    FIND_PACKAGE_ARGS 0.1.3 CONFIG
 )
 FetchContent_Declare(
     PajladaSerialize
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/serialize
     EXCLUDE_FROM_ALL
-    FIND_PACKAGE_ARGS CONFIG
+    FIND_PACKAGE_ARGS 0.3.0 CONFIG
 )
 FetchContent_Declare(
     PajladaSettings
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/settings
     EXCLUDE_FROM_ALL
-    FIND_PACKAGE_ARGS CONFIG
+    FIND_PACKAGE_ARGS 0.5.1 CONFIG
 )
 
 FetchContent_MakeAvailable(RapidJSON PajladaSignals PajladaSerialize PajladaSettings)

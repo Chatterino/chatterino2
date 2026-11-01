@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "common/Args.hpp"
+#include "common/Modes.hpp"
 #include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -10,6 +11,7 @@
 
 #include <QApplication>
 #include <QJsonArray>
+#include <QLocale>
 #include <QLoggingCategory>
 #include <QtConcurrent>
 #include <QTimer>
@@ -23,12 +25,20 @@ using namespace chatterino;
 
 int main(int argc, char **argv)
 {
+    // Force the Qt Platform plugin to use minimal - this ensures we can "show" windows without
+    // someone's window manager actually showing a window.
+    // https://doc.qt.io/qt-6/qguiapplication.html#platformName-prop
+    // https://doc.qt.io/qt-6/qpa.html
+    qputenv("QT_QPA_PLATFORM", "minimal");
+
     ::testing::InitGoogleTest(&argc, argv);
 
 #ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
     // make sure to always debug-log
     QLoggingCategory::setFilterRules("chatterino.*=true");
+    // make sure we use the same language when formatting
+    QLocale::setDefault(QLocale("en_GB"));
 
     initResources();
 
@@ -39,7 +49,7 @@ int main(int argc, char **argv)
     // Ensure settings are initialized before any tests are run
     QTemporaryDir settingsDir;
     settingsDir.setAutoRemove(false);  // we'll remove it manually
-    chatterino::Settings settings(args, settingsDir.path());
+    chatterino::Settings settings(Modes(args), args, settingsDir.path());
 
     QTimer::singleShot(0, [&]() {
         auto res = RUN_ALL_TESTS();

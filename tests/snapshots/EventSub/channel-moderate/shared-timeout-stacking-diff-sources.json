@@ -299,7 +299,7 @@
             "loginName": "",
             "messageText": "nerixyz timed out twitchdev for 10m in testaccount_420. (2 times) ",
             "searchText": "nerixyz timed out twitchdev for 10m in testaccount_420. (2 times) ",
-            "serverReceivedTime": "2025-02-22T17:54:05Z",
+            "timestamp": "2025-02-22T17:54:05Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },
@@ -441,7 +441,7 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz timed out twitchdev for 10m. ",
             "searchText": "nerixyz timed out twitchdev for 10m. ",
-            "serverReceivedTime": "2025-02-22T17:54:06Z",
+            "timestamp": "2025-02-22T17:54:06Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },
@@ -613,7 +613,7 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz timed out twitchdev for 10m in forsen. ",
             "searchText": "nerixyz timed out twitchdev for 10m in forsen. ",
-            "serverReceivedTime": "2025-02-22T17:54:07Z",
+            "timestamp": "2025-02-22T17:54:07Z",
             "timeoutUser": "twitchdev",
             "twitchBadgeInfos": {
             },

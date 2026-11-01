@@ -20,12 +20,11 @@ WebSocketPoolImpl::WebSocketPoolImpl(const QString &shortName)
     , work(this->ioc.get_executor())
 {
     boost::system::error_code ec;
-    auto _ = this->ssl.set_options(
-        boost::asio::ssl::context::no_tlsv1 |
-            boost::asio::ssl::context::no_tlsv1_1 |
-            boost::asio::ssl::context::default_workarounds |
-            boost::asio::ssl::context::single_dh_use,
-        ec);
+    this->ssl.set_options(boost::asio::ssl::context::no_tlsv1 |
+                              boost::asio::ssl::context::no_tlsv1_1 |
+                              boost::asio::ssl::context::default_workarounds |
+                              boost::asio::ssl::context::single_dh_use,
+                          ec);
     if (ec)
     {
         qCWarning(chatterinoWebsocket) << "Failed to set SSL context options"

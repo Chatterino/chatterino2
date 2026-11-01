@@ -344,6 +344,25 @@ QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
     return dt;
 }
 
+qsizetype codepointLength(QStringView str)
+{
+    qsizetype length = 0;
+    const QChar *pos = str.begin();
+    const QChar *end = str.end();
+
+    while (pos < end)
+    {
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < end && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        length++;
+    }
+
+    return length;
+}
+
 QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
 {
     if (end <= begin || begin < 0)
@@ -381,20 +400,12 @@ QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
 
 void removeFirstQS(QString &str)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     str.removeFirst();
-#else
-    str.remove(0, 1);
-#endif
 }
 
 void removeLastQS(QString &str)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     str.removeLast();
-#else
-    str.chop(1);
-#endif
 }
 
 void writeProviderEmotesCache(const QString &id, const QString &provider,

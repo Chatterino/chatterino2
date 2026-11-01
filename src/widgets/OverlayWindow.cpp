@@ -111,6 +111,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
+    this->setWindowRole(u"chatterino.overlay"_s);
 
     // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
@@ -225,6 +226,29 @@ void OverlayWindow::applyTheme()
     this->update();
 }
 
+void OverlayWindow::wheelEvent(QWheelEvent *event)
+{
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
+    {
+        return;
+    }
+
+    if (event->modifiers().testFlag(Qt::ControlModifier))
+    {
+        if (event->angleDelta().y() > 0)
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() + 0.1F);
+        }
+        else
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() - 0.1F);
+        }
+    }
+}
+
 float OverlayWindow::desiredScale() const
 {
     return getSettings()->getClampedUiScale() *
@@ -299,7 +323,7 @@ void OverlayWindow::toggleInertia()
     this->setInert(!this->inert_);
 }
 
-void OverlayWindow::enterEvent(EnterEvent * /*event*/)
+void OverlayWindow::enterEvent(QEnterEvent * /*event*/)
 {
 #ifndef OVERLAY_NATIVE_MOVE
     this->startInteraction();
@@ -315,7 +339,7 @@ void OverlayWindow::leaveEvent(QEvent * /*event*/)
 
 #ifdef Q_OS_WIN
 bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
-                                NativeResult *result)
+                                qintptr *result)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -368,7 +392,7 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
     return returnValue;
 }
 
-void OverlayWindow::handleNCHITTEST(MSG *msg, NativeResult *result)
+void OverlayWindow::handleNCHITTEST(MSG *msg, qintptr *result)
 {
     // This implementation is similar to the one of BaseWindow, but has the
     // following differences:
@@ -518,7 +542,7 @@ void OverlayWindow::addShortcuts()
              const auto &direction = arguments.at(0);
              if (direction == "reset")
              {
-                 getSettings()->uiScale.setValue(1);
+                 getSettings()->setClampedOverlayScale(1);
                  return "";
              }
 

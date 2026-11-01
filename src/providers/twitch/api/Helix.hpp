@@ -5,7 +5,9 @@
 #pragma once
 
 #include "common/Aliases.hpp"
+#include "common/enums/UsernameDisplayMode.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "providers/twitch/api/HelixEnums.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/Helpers.hpp"
@@ -53,12 +55,74 @@ struct HelixUser {
     }
 };
 
+struct HelixMinimalUser {
+    QString id;
+    QString login;
+    QString displayName;
+
+    /// Returns the display name formatted according to @a mode.
+    [[nodiscard]] QString formatted(UsernameDisplayMode mode) const
+    {
+        const bool hasLocalizedName =
+            this->displayName.compare(this->login, Qt::CaseInsensitive) != 0;
+
+        switch (mode)
+        {
+            case UsernameDisplayMode::Username:
+                if (hasLocalizedName)
+                {
+                    return this->login;
+                }
+                return this->displayName;
+
+            case UsernameDisplayMode::LocalizedName:
+                return this->displayName;
+
+            default:
+            case UsernameDisplayMode::UsernameAndLocalizedName:
+                if (hasLocalizedName)
+                {
+                    return this->login + QStringLiteral(" (") +
+                           this->displayName + QStringLiteral(")");
+                }
+                return this->displayName;
+        }
+    }
+};
+
+struct HelixChannelFollower {
+    QString userId;
+    QString userLogin;
+    QString userName;
+    QDateTime followedAt;
+
+    explicit HelixChannelFollower(const QJsonObject &jsonObject)
+        : userId(jsonObject["user_id"].toString())
+        , userLogin(jsonObject["user_login"].toString())
+        , userName(jsonObject["user_name"].toString())
+        , followedAt(QDateTime::fromString(jsonObject["followed_at"].toString(),
+                                           Qt::ISODate))
+    {
+    }
+};
+
 struct HelixGetChannelFollowersResponse {
     int total;
+    std::optional<HelixChannelFollower> specifiedFollower;
 
-    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject)
+    explicit HelixGetChannelFollowersResponse(const QJsonObject &jsonObject,
+                                              bool followerSpecified)
         : total(jsonObject.value("total").toInt())
     {
+        if (followerSpecified)
+        {
+            const auto first = jsonObject["data"].toArray().at(0);
+            if (first.isObject())
+            {
+                this->specifiedFollower =
+                    HelixChannelFollower(first.toObject());
+            }
+        }
     }
 };
 
@@ -110,7 +174,7 @@ struct HelixStream {
         , thumbnailUrl(jsonObject.value("thumbnail_url").toString())
     {
         const auto jsonTags = jsonObject.value("tags").toArray();
-        for (const auto &tag : jsonTags)
+        for (const auto tag : jsonTags)
         {
             this->tags.push_back(tag.toString());
         }
@@ -251,7 +315,7 @@ struct HelixCheermoteSet {
         : prefix(jsonObject.value("prefix").toString())
         , type(jsonObject.value("type").toString())
     {
-        for (const auto &tier : jsonObject.value("tiers").toArray())
+        for (const auto tier : jsonObject.value("tiers").toArray())
         {
             this->tiers.emplace_back(tier.toObject());
         }
@@ -359,7 +423,7 @@ struct HelixModerators {
                      .toString())
     {
         const auto &data = jsonObject.value("data").toArray();
-        for (const auto &mod : data)
+        for (const auto mod : data)
         {
             HelixModerator moderator(mod.toObject());
 
@@ -395,7 +459,7 @@ struct HelixBadgeSet {
         : setID(json.value("set_id").toString())
     {
         const auto jsonVersions = json.value("versions").toArray();
-        for (const auto &version : jsonVersions)
+        for (const auto version : jsonVersions)
         {
             this->versions.emplace_back(version.toObject());
         }
@@ -408,7 +472,7 @@ struct HelixGlobalBadges {
     explicit HelixGlobalBadges(const QJsonObject &jsonObject)
     {
         const auto &data = jsonObject.value("data").toArray();
-        for (const auto &set : data)
+        for (const auto set : data)
         {
             this->badgeSets.emplace_back(set.toObject());
         }
@@ -466,6 +530,7 @@ struct HelixSendMessageArgs {
     QString message;
     /// Optional
     QString replyParentMessageID;
+    bool pin = false;
 };
 
 struct HelixPollChoice {
@@ -494,7 +559,7 @@ struct HelixPoll {
     {
         const auto &data = jsonObject.value("choices").toArray();
         this->choices.reserve(data.size());
-        for (const auto &c : data)
+        for (const auto c : data)
         {
             HelixPollChoice choice(c.toObject());
             this->choices.push_back(choice);
@@ -511,7 +576,7 @@ struct HelixPolls {
     {
         const auto &data = jsonObject.value("data").toArray();
         this->polls.reserve(data.size());
-        for (const auto &p : data)
+        for (const auto p : data)
         {
             HelixPoll poll(p.toObject());
             this->polls.push_back(poll);
@@ -549,7 +614,7 @@ struct HelixPrediction {
     {
         const auto &data = jsonObject.value("outcomes").toArray();
         this->outcomes.reserve(data.size());
-        for (const auto &o : data)
+        for (const auto o : data)
         {
             HelixPredictionOutcome outcome(o.toObject());
             this->outcomes.push_back(outcome);
@@ -566,7 +631,7 @@ struct HelixPredictions {
     {
         const auto &data = jsonObject.value("data").toArray();
         this->predictions.reserve(data.size());
-        for (const auto &p : data)
+        for (const auto p : data)
         {
             HelixPrediction prediction(p.toObject());
             this->predictions.push_back(prediction);
@@ -574,247 +639,19 @@ struct HelixPredictions {
     }
 };
 
-enum class HelixAnnouncementColor {
-    Blue,
-    Green,
-    Orange,
-    Purple,
+struct HelixSharedChatSession {
+    QStringList participantIds;
 
-    // this is the executor's chat color
-    Primary,
-};
-
-enum class HelixClipError {
-    Unknown,
-    ClipsUnavailable,
-    ClipsDisabled,
-    ClipsRestricted,
-    ClipsRestrictedCategory,
-    UserNotAuthenticated,
-};
-
-enum class HelixStreamMarkerError {
-    Unknown,
-    UserNotAuthorized,
-    UserNotAuthenticated,
-};
-
-enum class HelixAutoModMessageError {
-    Unknown,
-    MessageAlreadyProcessed,
-    UserNotAuthenticated,
-    UserNotAuthorized,
-    MessageNotFound,
-};
-
-enum class HelixUpdateUserChatColorError {
-    Unknown,
-    UserMissingScope,
-    InvalidColor,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixDeleteChatMessagesError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthenticated,
-    UserNotAuthorized,
-    MessageUnavailable,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixSendChatAnnouncementError {
-    Unknown,
-    UserMissingScope,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixAddChannelModeratorError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    TargetAlreadyModded,
-    TargetIsVIP,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixRemoveChannelModeratorError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    TargetNotModded,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixAddChannelVIPError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixRemoveChannelVIPError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-// These changes are from the helix-command-migration/unban-untimeout branch
-enum class HelixUnbanUserError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    ConflictingOperation,
-    TargetNotBanned,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // These changes are from the helix-command-migration/unban-untimeout branch
-
-enum class HelixStartRaidError {  // /raid
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    CantRaidYourself,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /raid
-
-enum class HelixCancelRaidError {  // /unraid
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    NoRaidPending,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /unraid
-
-enum class HelixUpdateChatSettingsError {  // update chat settings
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    Forbidden,
-    OutOfRange,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // update chat settings
-
-/// Error type for Helix::updateChannel
-///
-/// Used in the /settitle and /setgame commands
-enum class HelixUpdateChannelError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixBanUserError {  // /timeout, /ban
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    ConflictingOperation,
-    TargetBanned,
-    CannotBanUser,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /timeout, /ban
-
-enum class HelixWarnUserError {  // /warn
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    ConflictingOperation,
-    CannotWarnUser,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /warn
-
-enum class HelixWhisperError {  // /w
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    Ratelimited,
-    NoVerifiedPhone,
-    RecipientBlockedUser,
-    WhisperSelf,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /w
-
-enum class HelixGetChattersError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixGetModeratorsError {
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixListVIPsError {  // /vips
-    Unknown,
-    UserMissingScope,
-    UserNotAuthorized,
-    UserNotBroadcaster,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};  // /vips
-
-enum class HelixSendShoutoutError {
-    Unknown,
-    // 400
-    UserIsBroadcaster,
-    BroadcasterNotLive,
-    // 401
-    UserNotAuthorized,
-    UserMissingScope,
-
-    Ratelimited,
+    explicit HelixSharedChatSession(const QJsonObject &jsonObject)
+    {
+        const auto &participants = jsonObject.value("participants").toArray();
+        for (const auto p : participants)
+        {
+            const auto broadcasterId =
+                p.toObject().value("broadcaster_id").toString();
+            this->participantIds.push_back(broadcasterId);
+        }
+    }
 };
 
 struct HelixStartCommercialResponse {
@@ -856,47 +693,6 @@ struct HelixShieldModeStatus {
     {
         this->lastActivatedAt.setTimeZone(QTimeZone::utc());
     }
-};
-
-enum class HelixUpdateShieldModeError {
-    Unknown,
-    UserMissingScope,
-    MissingPermission,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixStartCommercialError {
-    Unknown,
-    TokenMustMatchBroadcaster,
-    UserMissingScope,
-    BroadcasterNotStreaming,
-    MissingLengthParameter,
-    Ratelimited,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixGetGlobalBadgesError {
-    Unknown,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
-};
-
-enum class HelixSendMessageError {
-    Unknown,
-
-    MissingText,
-    BadRequest,
-    Forbidden,
-    MessageTooLarge,
-    UserMissingScope,
-
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
 };
 
 struct HelixError {
@@ -969,16 +765,36 @@ struct HelixCreateEventSubSubscriptionResponse {
         QDebug &dbg, const HelixCreateEventSubSubscriptionResponse &data);
 };
 
-enum class HelixCreateEventSubSubscriptionError : std::uint8_t {
-    BadRequest,
-    Unauthorized,
-    Forbidden,
-    Conflict,
-    Ratelimited,
-    NoSession,
+struct HelixPinnedChatMessage {
+    HelixMinimalUser sender;
+    HelixMinimalUser pinnedBy;
+    QString messageID;
+    QString messageText;
+    QDateTime startsAt;
+    std::optional<QDateTime> endsAt;
 
-    // The error message is forwarded directly from the Twitch API
-    Forwarded,
+    explicit HelixPinnedChatMessage(const QJsonObject &data)
+        : sender({
+              .id = data["sender_user_id"].toString(),
+              .login = data["sender_user_login"].toString(),
+              .displayName = data["sender_user_name"].toString(),
+          })
+        , pinnedBy({
+              .id = data["pinned_by_user_id"].toString(),
+              .login = data["pinned_by_user_login"].toString(),
+              .displayName = data["pinned_by_user_name"].toString(),
+          })
+        , messageID(data["message_id"].toString())
+        , messageText(data["message"].toObject().value("text").toString())
+        , startsAt(
+              QDateTime::fromString(data["starts_at"].toString(), Qt::ISODate))
+    {
+        auto endsAt = data["ends_at"].toString();
+        if (!endsAt.isEmpty())
+        {
+            this->endsAt = QDateTime::fromString(endsAt, Qt::ISODate);
+        }
+    }
 };
 
 class IHelix
@@ -1001,7 +817,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     virtual void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) = 0;
 
@@ -1264,20 +1080,22 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
         QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
 
     // Get moderators from the `broadcasterID` channel
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     virtual void getModerators(
-        QString broadcasterID, int maxModeratorsToFetch,
+        const QString &broadcasterID, int maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     virtual void getChannelVIPs(
-        QString broadcasterID,
+        const QString &broadcasterID, const QObject *caller,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) = 0;
 
@@ -1337,6 +1155,22 @@ public:
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+    virtual void getFollowedChannels(
+        QString userID,
+        const ResultCallback<std::vector<HelixFollowedChannel>,
+                             HelixPaginationState> &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-streams
+    virtual void getFollowedStreams(
+        QString userID,
+        const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+            &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) = 0;
+
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     virtual void createPoll(QString broadcasterID, QString title,
                             QStringList choices, std::chrono::seconds duration,
@@ -1386,6 +1220,44 @@ public:
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference#pin-chat-message
+    virtual void pinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    virtual void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
+    virtual void getPinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
+    virtual void unpinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, ResultCallback<> successCallback,
+        FailureCallback<HelixUnpinMessageError, QString> failureCallback) = 0;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    virtual void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) = 0;
+
+    /// Technically not a helix request >:-)
+    /// https://dev.twitch.tv/docs/authentication/validate-tokens#validating-tokens
+    virtual void validateToken(NetworkSuccessCallback successCallback,
+                               NetworkErrorCallback errorCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1412,7 +1284,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
     void getChannelFollowers(
-        QString broadcasterID,
+        QString broadcasterID, QString userID,
         ResultCallback<HelixGetChannelFollowersResponse> successCallback,
         std::function<void(QString)> failureCallback) final;
 
@@ -1671,21 +1543,23 @@ public:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
         QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
     // Get moderators from the `broadcasterID` channel
     // This will follow the returned cursor
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void getModerators(
-        QString broadcasterID, int maxModeratorsToFetch,
+        const QString &broadcasterID, int maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback)
         final;
 
     // https://dev.twitch.tv/docs/api/reference#get-vips
     void getChannelVIPs(
-        QString broadcasterID,
+        const QString &broadcasterID, const QObject *caller,
         ResultCallback<std::vector<HelixVip>> successCallback,
         FailureCallback<HelixListVIPsError, QString> failureCallback) final;
 
@@ -1743,6 +1617,20 @@ public:
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
 
+    void getFollowedChannels(
+        QString userID,
+        const ResultCallback<std::vector<HelixFollowedChannel>,
+                             HelixPaginationState> &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) final;
+
+    void getFollowedStreams(
+        QString userID,
+        const ResultCallback<std::vector<HelixStream>, HelixPaginationState>
+            &pageCallback,
+        const FailureCallback<QString> &failureCallback,
+        CancellationToken &&token) final;
+
     /// https://dev.twitch.tv/docs/api/reference#create-poll
     void createPoll(QString broadcasterID, QString title, QStringList choices,
                     std::chrono::seconds duration, int pointsPerVote,
@@ -1789,6 +1677,44 @@ public:
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) final;
 
+    // https://dev.twitch.tv/docs/api/reference/#pin-chat-message
+    void pinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#update-pinned-chat-message
+    void updatePinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, std::optional<std::chrono::seconds> duration,
+        ResultCallback<> successCallback,
+        FailureCallback<HelixPinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
+    void getPinnedChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        ResultCallback<std::optional<HelixPinnedChatMessage>> successCallback,
+        FailureCallback<QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#unpin-chat-message
+    void unpinChatMessage(
+        const QString &broadcasterID, const QString &moderatorID,
+        const QString &messageID, ResultCallback<> successCallback,
+        FailureCallback<HelixUnpinMessageError, QString> failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
+    void getSharedChatSession(
+        QString broadcasterID,
+        ResultCallback<HelixSharedChatSession> successCallback,
+        FailureCallback<HelixGetSharedChatSessionError, QString>
+            failureCallback) final;
+
+    /// Technically not a helix request >:-)
+    /// https://dev.twitch.tv/docs/authentication/validate-tokens#validating-tokens
+    void validateToken(NetworkSuccessCallback successCallback,
+                       NetworkErrorCallback errorCallback) final;
+
     void update(QString clientId, QString oauthToken) final;
 
     static void initialize();
@@ -1804,8 +1730,9 @@ protected:
     // Recursive boy
     void onFetchChattersSuccess(
         std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
-        QString moderatorID, size_t maxChattersToFetch,
-        ResultCallback<HelixChatters> successCallback,
+        const QString &moderatorID, size_t maxChattersToFetch,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback,
         HelixChatters chatters);
 
@@ -1813,13 +1740,15 @@ protected:
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void fetchChatters(
         QString broadcasterID, QString moderatorID, int first, QString after,
-        ResultCallback<HelixChatters> successCallback,
+        const QObject *caller,
+        const ResultCallback<HelixChatters> &successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback);
 
     // Recursive boy
     void onFetchModeratorsSuccess(
         std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-        QString broadcasterID, size_t maxModeratorsToFetch,
+        const QString &broadcasterID, size_t maxModeratorsToFetch,
+        const QObject *caller,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback,
         HelixModerators moderators);
@@ -1827,8 +1756,9 @@ protected:
     // Get moderator list - This method is what actually runs the API request
     // https://dev.twitch.tv/docs/api/reference#get-moderators
     void fetchModerators(
-        QString broadcasterID, int first, QString after,
-        ResultCallback<HelixModerators> successCallback,
+        const QString &broadcasterID, int first, const QString &after,
+        const QObject *caller,
+        const ResultCallback<HelixModerators> &successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback);
 
 private:

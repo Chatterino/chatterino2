@@ -8,24 +8,24 @@
 #    include "common/Channel.hpp"
 #    include "common/network/NetworkCommon.hpp"
 #    include "controllers/accounts/AccountController.hpp"
-#    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/PluginTestApp.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "lib/Snapshot.hpp"
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
-#    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/EmoteController.hpp"
 #    include "mocks/Logging.hpp"
 #    include "mocks/TwitchIrcServer.hpp"
 #    include "NetworkHelpers.hpp"
 #    include "singletons/Logging.hpp"
+#    include "singletons/WindowManager.hpp"
 #    include "Test.hpp"
 
 #    include <lauxlib.h>
@@ -89,24 +89,12 @@ public:
     }
 };
 
-class MockApplication : public mock::BaseApplication
+class MockApplication : public testlib::PluginApplication
 {
 public:
     MockApplication()
-        : mock::BaseApplication(TEST_SETTINGS)
-        , plugins(this->paths_)
-        , commands(this->paths_)
+        : PluginApplication(TEST_SETTINGS)
     {
-    }
-
-    PluginController *getPlugins() override
-    {
-        return &this->plugins;
-    }
-
-    CommandController *getCommands() override
-    {
-        return &this->commands;
     }
 
     EmoteController *getEmotes() override
@@ -129,9 +117,7 @@ public:
         return &this->accounts;
     }
 
-    PluginController plugins;
     mock::Logging logging;
-    CommandController commands;
     mock::EmoteController emotes;
     MockTwitch twitch;
     AccountController accounts;
@@ -182,34 +168,6 @@ bool runLuaTest(const QString &category, const QString &entry,
 
 }  // namespace
 
-namespace chatterino {
-
-class PluginControllerAccess
-{
-public:
-    static bool tryLoadFromDir(const QDir &pluginDir)
-    {
-        return getApp()->getPlugins()->tryLoadFromDir(pluginDir);
-    }
-
-    static void openLibrariesFor(Plugin *plugin)
-    {
-        getApp()->getPlugins()->openLibrariesFor(plugin);
-    }
-
-    static std::map<QString, std::unique_ptr<Plugin>> &plugins()
-    {
-        return getApp()->getPlugins()->plugins_;
-    }
-
-    static lua_State *state(Plugin *pl)
-    {
-        return pl->state_;
-    }
-};
-
-}  // namespace chatterino
-
 class PluginTest : public ::testing::Test
 {
 protected:
@@ -217,28 +175,8 @@ protected:
     {
         this->app = std::make_unique<MockApplication>();
 
-        auto &plugins = PluginControllerAccess::plugins();
-        {
-            PluginMeta meta;
-            meta.name = "Test";
-            meta.license = "MIT";
-            meta.homepage = "https://github.com/Chatterino/chatterino2";
-            meta.description = "Plugin for tests";
-            meta.permissions = std::move(permissions);
-
-            QDir plugindir =
-                QDir(app->paths_.pluginsDirectory).absoluteFilePath("test");
-
-            plugindir.mkpath(".");
-            auto temp = std::make_unique<Plugin>("test", luaL_newstate(), meta,
-                                                 plugindir);
-            this->rawpl = temp.get();
-            plugins.insert({"test", std::move(temp)});
-        }
-
-        // XXX: this skips PluginController::load()
-        PluginControllerAccess::openLibrariesFor(rawpl);
-        this->lua = new sol::state_view(PluginControllerAccess::state(rawpl));
+        this->rawpl = this->app->loadDefaultPlugin(std::move(permissions));
+        this->lua.emplace(this->rawpl->state());
 
         this->channel = app->twitch.mm2pl;
         this->rawpl->dataDirectory().mkpath(".");
@@ -249,16 +187,14 @@ protected:
     void TearDown() override
     {
         // perform safe destruction of the plugin
-        delete this->lua;
-        this->lua = nullptr;
-        PluginControllerAccess::plugins().clear();
+        this->lua.reset();
         this->rawpl = nullptr;
         this->app.reset();
     }
 
     Plugin *rawpl = nullptr;
     std::unique_ptr<MockApplication> app;
-    sol::state_view *lua;
+    std::optional<sol::state_view> lua;
     ChannelPtr channel;
 };
 
@@ -277,8 +213,9 @@ TEST_F(PluginTest, testCommands)
         end)
     )lua");
 
-    EXPECT_EQ(app->commands.pluginCommands(), QStringList{"/test"});
-    app->commands.execCommand("/test with arguments", channel, false);
+    EXPECT_EQ(app->getCommands()->pluginCommands(), QStringList{"/test"});
+    this->app->getCommands()->execCommand("/test with arguments", this->channel,
+                                          false);
     bool called = (*lua)["called"];
     EXPECT_EQ(called, true);
 
@@ -336,7 +273,7 @@ TEST_F(PluginTest, testCompletion)
     bool done{};
     QStringList results;
     std::tie(done, results) =
-        app->plugins.updateCustomCompletions("foo", "foo", 3, true);
+        this->app->getPlugins()->updateCustomCompletions("foo", "foo", 3, true);
     ASSERT_EQ(done, false);
     ASSERT_EQ(results, QStringList{"Completion"});
 
@@ -345,7 +282,7 @@ TEST_F(PluginTest, testCompletion)
     ASSERT_EQ((*lua).get<int>("cursor_position"), 3);
     ASSERT_EQ((*lua).get<bool>("is_first_word"), true);
 
-    std::tie(done, results) = app->plugins.updateCustomCompletions(
+    std::tie(done, results) = this->app->getPlugins()->updateCustomCompletions(
         "exclusive", "foo exclusive", 13, false);
     ASSERT_EQ(done, true);
     ASSERT_EQ(results, QStringList({"Completion1", "Completion2"}));
@@ -477,7 +414,7 @@ TEST_F(PluginTest, testHttp)
             waiter.requestDone();
         };
 
-        (*lua)["DoReq"](HTTPBIN_BASE_URL + c.url, c.data);
+        (*lua)["DoReq"](HTTPBIN_BASE_URL.toStdString().c_str() + c.url, c.data);
         waiter.waitForRequest();
 
         EXPECT_EQ(lua->get<bool>("success"), c.success);
@@ -740,8 +677,10 @@ TEST_F(PluginTest, testTcpWebSocket)
         open = true;
     });
 
+    lua->set("url", "ws://" + PUBSUB_WS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_text = function(data)
             add(true, data)
         end
@@ -816,8 +755,10 @@ TEST_F(PluginTest, testTlsWebSocket)
         open = true;
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             headers = {
                 ["User-Agent"] = "Lua",
                 ["A-Header"] = "A value",
@@ -893,8 +834,10 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     )lua");
     ASSERT_TRUE(res);
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     const char *shouldThrow = R"lua(
-        return c2.WebSocket.new('wss://127.0.0.1:9050/echo')
+        return c2.WebSocket.new(url)
     )lua";
     EXPECT_ANY_THROW(lua->script(shouldThrow));
 }
@@ -902,12 +845,13 @@ TEST_F(PluginTest, testWebSocketNoPerms)
 TEST_F(PluginTest, testWebSocketApi)
 {
     configure({PluginPermission{{{"type", "Network"}}}});
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
 
     bool ok = lua->script(R"lua(
         local t = function () end
         local b = function () end
         local c = function () end
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+        local ws = c2.WebSocket.new(url, {
             on_text = t,
             on_binary = b,
             on_close = c,
@@ -928,8 +872,10 @@ TEST_F(PluginTest, testWebSocketUnsetFns)
         waiter.requestDone();
     });
 
+    lua->set("url", "wss://" + PUBSUB_WSS_ADDR + "/echo");
+
     lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        local ws = c2.WebSocket.new(url)
         ws.on_close = function()
             done()
         end
@@ -955,6 +901,7 @@ TEST_F(PluginTest, MessageElementFlag)
     )lua");
 
     const char *VALUES = "AlwaysShow=0x2000000,"
+                         "AnnouncementHeader=0x8000000000,"
                          "BadgeBttv=0x40,"
                          "BadgeChannelAuthority=0x8000,"
                          "BadgeChatterino=0x40000,"
@@ -975,17 +922,48 @@ TEST_F(PluginTest, MessageElementFlag)
                          "EmojiText=0x1000000,"
                          "EmoteImage=0x10,"
                          "EmoteText=0x20,"
+                         "HeaderTimestamp=0x4000000000,"
                          "LowercaseLinks=0x20000000,"
                          "Mention=0x8000000,"
                          "Misc=0x1,"
                          "ModeratorTools=0x400000,"
                          "RepliedMessage=0x100000000,"
                          "ReplyButton=0x200000000,"
+                         "SubscriptionHeader=0x10000000000,"
                          "Text=0x2,"
                          "Timestamp=0x8,"
-                         "Username=0x4";
+                         "TwitchGif=0x80,"
+                         "Username=0x4,"
+                         "WatchStreakHeader=0x20000000000";
 
     std::string got = (*lua)["out"];
+    ASSERT_EQ(got, VALUES);
+}
+
+TEST_F(PluginTest, ChannelType)
+{
+    this->configure();
+    this->lua->script(R"lua(
+        values = {}
+        for k, v in pairs(c2.ChannelType) do
+            table.insert(values, k)
+        end
+        table.sort(values)
+        out = table.concat(values, ",")
+    )lua");
+
+    const char *VALUES = "Direct,"
+                         "Misc,"
+                         "None,"
+                         "Twitch,"
+                         "TwitchAutomod,"
+                         "TwitchEnd,"
+                         "TwitchLive,"
+                         "TwitchMentions,"
+                         "TwitchWatching,"
+                         "TwitchWhispers";
+
+    std::string got = (*this->lua)["out"];
     ASSERT_EQ(got, VALUES);
 }
 
@@ -1111,9 +1089,6 @@ TEST_F(PluginTest, MessageModification)
     sol::table tests = lua->script(R"lua(
         return {
             function(msg)
-                msg.parse_time = 1234567
-            end,
-            function(msg)
                 assert(msg.id == "abc")
                 msg.id = "1234"
                 assert(msg.id == "1234")
@@ -1159,9 +1134,9 @@ TEST_F(PluginTest, MessageModification)
                 assert(msg.username_color == "#ccbbaaff")
             end,
             function(msg)
-                assert(msg.server_received_time == 1230000)
-                msg.server_received_time = 1240000
-                assert(msg.server_received_time == 1240000)
+                assert(msg.timestamp == 1230000)
+                msg.timestamp = 1240000
+                assert(msg.timestamp == 1240000)
             end,
             function(msg)
                 print(msg.highlight_color)
@@ -1190,7 +1165,7 @@ TEST_F(PluginTest, MessageModification)
         msg->userID = "id";
         msg->channelName = "channel";
         msg->usernameColor = QColor(0xaabbcc);
-        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->timestamp = QDateTime::fromMSecsSinceEpoch(1230000);
         msg->highlightColor = std::make_shared<QColor>(0x223344);
         msg->elements.push_back(
             std::make_unique<TextElement>("lol", MessageElementFlag::Text));
@@ -1641,6 +1616,57 @@ TEST_P(PluginChannelTest, Run)
 
 INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginChannelTest,
                          testing::ValuesIn(discoverLuaTests("channel")));
+
+class PluginImageTest : public PluginTest,
+                        public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginImageTest, Run)
+{
+    this->configure({PluginPermission({{"type", "network"}})});
+    runLuaTest("images", GetParam(), *this->lua);
+}
+
+TEST_F(PluginImageTest, NoPerms)
+{
+    this->configure();
+    auto res = this->lua->safe_script(R"lua(
+        local ok, err = pcall(c2.Image.from_url, "https://foo.bar")
+        assert(not ok and err == "Missing network permission to create images")
+        ok, err = pcall(c2.ImageSet.new)
+        assert(not ok and err == "Missing network permission to create images")
+        ok, err = pcall(c2.ImageSet.new, c2.Image.empty(), "https://foo.bar")
+        assert(not ok and err == "Missing network permission to create images")
+        -- should still be able to query images
+        local img = c2.Image.empty()
+        assert(img.url == "")
+        assert(not img.animated)
+        assert(not img.is_loaded)
+        assert(img.is_empty)
+        assert(img.width == 0)
+        assert(img.height == 0)
+        assert(img.scale == 1)
+        assert(img.size[1] == img.width)
+        assert(img.size[2] == img.height)
+    )lua");
+    ASSERT_TRUE(res.valid());
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginImage, PluginImageTest,
+                         testing::ValuesIn(discoverLuaTests("images")));
+
+class PluginDateTimeTest : public PluginTest,
+                           public ::testing::WithParamInterface<QString>
+{
+};
+TEST_P(PluginDateTimeTest, Run)
+{
+    this->configure();
+    runLuaTest("datetime", GetParam(), *this->lua);
+}
+
+INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginDateTimeTest,
+                         testing::ValuesIn(discoverLuaTests("datetime")));
 
 // verify that all snapshots are included
 TEST(PluginMessageConstructionTest, Integrity)

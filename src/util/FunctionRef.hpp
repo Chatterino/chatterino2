@@ -63,8 +63,6 @@ public:
                this->callable == other.callable;
     }
 
-    bool operator!=(const FunctionRef &other) const = default;
-
 private:
     // same signature as callTrampoline
     using Callback = Ret(uintptr_t, Params...);

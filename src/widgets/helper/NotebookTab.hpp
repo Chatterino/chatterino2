@@ -27,7 +27,15 @@ class NotebookTab : public Button
 public:
     explicit NotebookTab(Notebook *notebook);
 
-    void updateSize();
+    void refreshAndCommitSize(bool notify);
+    void commitSize(bool notify);
+    void refreshSize();
+
+    QSize minimumTabSize() const;
+    int minimumTabWidth() const;
+
+    void queueMove(QPoint to, bool animated);
+    void commitMove();
 
     QWidget *page{};
 
@@ -89,7 +97,6 @@ public:
     void tabSizeChanged();
 
     void growWidth(int width);
-    int normalTabWidth() const;
 
 protected:
     void themeChangedEvent() override;
@@ -102,11 +109,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent *event) override;
-#else
-    void enterEvent(QEvent *event) override;
-#endif
     void leaveEvent(QEvent *) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -155,7 +158,6 @@ private:
     bool mouseOverX_{};
     bool mouseDownX_{};
     bool isInLastRow_{};
-    int mouseWheelDelta_ = 0;
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
 
     HighlightState highlightState_ = HighlightState::None;
@@ -166,6 +168,10 @@ private:
     bool isRerun_{};
 
     int growWidth_ = 0;
+    QSize computedMinimumSize;
+
+    QPoint queuedMove;
+    bool queuedMoveAnimated = false;
 
     QMenu menu_;
     QMenu *closeMultipleTabsMenu_{};

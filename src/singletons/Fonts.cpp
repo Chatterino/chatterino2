@@ -18,7 +18,6 @@ using namespace chatterino;
 
 int getUsernameBoldness()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     // From qfont.cpp
     // https://github.com/qt/qtbase/blob/589c6d066f84833a7c3dda1638037f4b2e91b7aa/src/gui/text/qfont.cpp#L143-L169
     static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap{{
@@ -55,9 +54,6 @@ int getUsernameBoldness()
     }
 
     return result;
-#else
-    return getSettings()->boldScale.getValue();
-#endif
 }
 
 float fontSize(FontStyle style)
@@ -260,7 +256,21 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             break;
     }
 
-    return font;
+    // If the requested font is not available, trigger
+    // automatic substitution by the closest font
+    // that is actually available.
+    //
+    // It is absolutely necessary to do this because
+    // QFontMetrics does not care that it computed metrics
+    // for a font that will not be used for the actual rendering.
+    // By fixing up the font early we can prevent some rendering
+    // issues caused by the mismatch between what QFontMetrics
+    // computed and what got painted on the screen.
+
+    QWidget w;
+    w.setFont(font);
+
+    return w.font();
 }
 
 }  // namespace chatterino

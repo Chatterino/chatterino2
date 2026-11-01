@@ -6,6 +6,8 @@
 
 #include "widgets/listview/GenericListItem.hpp"
 
+#include <QAbstractItemView>
+
 namespace chatterino {
 
 SwitcherItemDelegate::SwitcherItemDelegate(QObject *parent)
@@ -45,7 +47,18 @@ QSize SwitcherItemDelegate::sizeHint(const QStyleOptionViewItem &option,
 
     if (item)
     {
-        return item->sizeHint(option.rect);
+        QRect rect = option.rect;
+        if (auto *view =
+                qobject_cast<const QAbstractItemView *>(this->parent()))
+        {
+            const int viewportWidth = view->viewport()->width();
+            if (viewportWidth > 0)
+            {
+                rect.setWidth(viewportWidth);
+            }
+        }
+
+        return item->sizeHint(rect);
     }
 
     return QStyledItemDelegate::sizeHint(option, index);

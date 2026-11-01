@@ -11,6 +11,7 @@
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
 
+#    include <QJsonDocument>
 #    include <sol/sol.hpp>
 
 namespace {
@@ -104,6 +105,30 @@ std::unique_ptr<ReplyCurveElement> replyCurveElementFromTable()
     return std::make_unique<ReplyCurveElement>();
 }
 
+std::unique_ptr<ImageElement> imageElementFromTable(const sol::table &tbl)
+{
+    return std::make_unique<ImageElement>(
+        requiredGet<ImagePtr>(tbl, "image"),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
+std::unique_ptr<CircularImageElement> circularImageElementFromTable(
+    const sol::table &tbl)
+{
+    return std::make_unique<CircularImageElement>(
+        requiredGet<ImagePtr>(tbl, "image"), requiredGet<int>(tbl, "padding"),
+        QColor::fromString(requiredGet<std::string_view>(tbl, "background")),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
+std::unique_ptr<ScalingImageElement> scalingImageElementFromTable(
+    const sol::table &tbl)
+{
+    return std::make_unique<ScalingImageElement>(
+        requiredGet<ImageSet>(tbl, "images"),
+        requiredGet<MessageElementFlag>(tbl, "flags"));
+}
+
 void setLinkOn(MessageElement *el, const Link &link)
 {
     el->setLink(link);
@@ -177,6 +202,18 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
         el = replyCurveElementFromTable();
         linksAllowed = false;
     }
+    else if (type == ImageElement::TYPE)
+    {
+        el = imageElementFromTable(tbl);
+    }
+    else if (type == CircularImageElement::TYPE)
+    {
+        el = circularImageElementFromTable(tbl);
+    }
+    else if (type == ScalingImageElement::TYPE)
+    {
+        el = scalingImageElementFromTable(tbl);
+    }
     else
     {
         throw std::runtime_error("Invalid message type");
@@ -184,6 +221,10 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     assert(el);
 
     el->setTrailingSpace(tbl.get_or("trailing_space", true));
+    if (auto exhaustiveFlags = tbl.get<std::optional<bool>>("exhaustive_flags"))
+    {
+        el->exhaustiveFlags = *exhaustiveFlags;
+    }
 
     auto link = tbl.get<sol::optional<Link>>("link");
     if (link)
@@ -201,70 +242,6 @@ std::unique_ptr<MessageElement> elementFromTable(const sol::table &tbl)
     }
 
     return el;
-}
-
-std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
-{
-    auto msg = std::make_shared<Message>();
-    msg->flags = tbl.get_or("flags", MessageFlag::None);
-
-    // This takes a UTC offset (not the milliseconds since the start of the day)
-    auto parseTime = tbl.get<std::optional<qint64>>("parse_time");
-    if (parseTime)
-    {
-        msg->parseTime = datetimeFromOffset(*parseTime).time();
-    }
-
-    msg->id = tbl.get_or("id", QString{});
-    msg->searchText = tbl.get_or("search_text", QString{});
-    msg->messageText = tbl.get_or("message_text", QString{});
-    msg->loginName = tbl.get_or("login_name", QString{});
-    msg->displayName = tbl.get_or("display_name", QString{});
-    msg->localizedName = tbl.get_or("localized_name", QString{});
-    msg->userID = tbl.get_or("user_id", QString{});
-    // missing: timeoutUser
-    msg->channelName = tbl.get_or("channel_name", QString{});
-
-    auto usernameColor = tbl.get_or("username_color", QString{});
-    if (!usernameColor.isEmpty())
-    {
-        msg->usernameColor = QColor(usernameColor);
-    }
-
-    auto serverReceivedTime =
-        tbl.get<std::optional<qint64>>("server_received_time");
-    if (serverReceivedTime)
-    {
-        msg->serverReceivedTime = datetimeFromOffset(*serverReceivedTime);
-    }
-
-    // missing: badges
-    // missing: badgeInfos
-
-    // we construct a color on the fly here
-    auto highlightColor = tbl.get_or("highlight_color", QString{});
-    if (!highlightColor.isEmpty())
-    {
-        msg->highlightColor = std::make_shared<QColor>(highlightColor);
-    }
-
-    // missing: replyThread
-    // missing: replyParent
-    // missing: count
-
-    auto elements = tbl.get<std::optional<sol::table>>("elements");
-    if (elements)
-    {
-        auto size = elements->size();
-        for (size_t i = 1; i <= size; i++)
-        {
-            msg->elements.emplace_back(
-                elementFromTable(elements->get<sol::table>(i)));
-        }
-    }
-
-    // missing: reward
-    return msg;
 }
 
 void checkWritable(Message *msg)
@@ -297,162 +274,140 @@ decltype(auto) memberAccessor()
         });
 }
 
+std::shared_ptr<Message> messageFromTable(const sol::table &tbl);
+
 }  // namespace
 
 namespace chatterino::lua::api::message {
 
-struct ElementRef {
-    ElementRef() = default;
-    ElementRef(std::shared_ptr<Message> msg, size_t index)
-        : msg(std::move(msg))
-        , index(index)
+MessageElement *ElementRef::element() const
+{
+    if (!this->msg || this->index >= this->msg->elements.size())
     {
+        return nullptr;
     }
+    checkWritable(this->msg.get());
+    return this->msg->elements[this->index].get();
+}
 
-    MessageElement *element() const
+const MessageElement *ElementRef::constElement() const
+{
+    if (!this->msg || this->index >= this->msg->elements.size())
     {
-        if (!this->msg || this->index >= this->msg->elements.size())
+        return nullptr;
+    }
+    return this->msg->elements[this->index].get();
+}
+
+MessageElement &ElementRef::ref() const
+{
+    auto *el = this->element();
+    if (!el)
+    {
+        throw std::runtime_error("Element does not exist or expired");
+    }
+    return *el;
+}
+
+const MessageElement &ElementRef::cref() const
+{
+    const auto *el = this->constElement();
+    if (!el)
+    {
+        throw std::runtime_error("Element does not exist or expired");
+    }
+    return *el;
+}
+
+template <typename T>
+sol::optional<T &> ElementRef::as() const
+{
+    // using ref() to error if the reference is invalid
+    auto *el = dynamic_cast<T *>(&this->ref());
+    if (!el)
+    {
+        return sol::nullopt;
+    }
+    return *el;
+}
+
+template <typename T>
+sol::optional<const T &> ElementRef::asConst() const
+{
+    // using cref() to error if the reference is invalid
+    const auto *el = dynamic_cast<const T *>(&this->cref());
+    if (!el)
+    {
+        return sol::nullopt;
+    }
+    return *el;
+}
+
+template <typename T>
+bool ElementRef::is() const
+{
+    return dynamic_cast<const T *>(&this->cref()) != nullptr;
+}
+
+/// Visit this element by dynamic casting
+template <typename... T>
+auto ElementRef::visit(auto &&...cb) const
+{
+    static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
+
+    // infer the returned type inside the optional
+    using Cb0 = std::tuple_element_t<0, std::tuple<decltype(cb)...>>;
+    using T0 = std::tuple_element_t<0, std::tuple<T...>>;
+    using TReturn = std::invoke_result_t<Cb0, T0 &>;
+
+    return this->visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
+}
+
+bool ElementRef::operator==(const ElementRef &rhs) const
+{
+    return this->msg.get() == rhs.msg.get() && this->index == rhs.index;
+}
+
+template <bool Const>
+decltype(auto) ElementRef::maybeConstElement() const
+{
+    if constexpr (Const)
+    {
+        return this->constElement();
+    }
+    else
+    {
+        return this->element();
+    }
+}
+
+template <typename TReturn, typename T, typename... Rest>
+auto ElementRef::visitOne(auto &&cb, auto &&...rest) const
+    -> std::conditional_t<std::is_void_v<TReturn>, void, sol::optional<TReturn>>
+{
+    auto *el = dynamic_cast<T *>(this->maybeConstElement<std::is_const_v<T>>());
+    if (!el)
+    {
+        if constexpr (sizeof...(rest) == 0)
         {
-            return nullptr;
-        }
-        checkWritable(this->msg.get());
-        return this->msg->elements[this->index].get();
-    }
-
-    const MessageElement *constElement() const
-    {
-        if (!this->msg || this->index >= this->msg->elements.size())
-        {
-            return nullptr;
-        }
-        return this->msg->elements[this->index].get();
-    }
-
-    MessageElement &ref() const
-    {
-        auto *el = this->element();
-        if (!el)
-        {
-            throw std::runtime_error("Element does not exist or expired");
-        }
-        return *el;
-    }
-
-    const MessageElement &cref() const
-    {
-        const auto *el = this->constElement();
-        if (!el)
-        {
-            throw std::runtime_error("Element does not exist or expired");
-        }
-        return *el;
-    }
-
-    /// Cast this element to `T`. Otherwise nullopt is returned.
-    /// Use `.map()` to access the content.
-    template <typename T>
-    sol::optional<T &> as() const
-    {
-        // using ref() to error if the reference is invalid
-        auto *el = dynamic_cast<T *>(&this->ref());
-        if (!el)
-        {
-            return sol::nullopt;
-        }
-        return *el;
-    }
-
-    /// Cast this element to `const T`. Otherwise nullopt is returned.
-    /// Use `.map()` to access the content.
-    template <typename T>
-    sol::optional<const T &> asConst() const
-    {
-        // using cref() to error if the reference is invalid
-        const auto *el = dynamic_cast<const T *>(&this->cref());
-        if (!el)
-        {
-            return sol::nullopt;
-        }
-        return *el;
-    }
-
-    template <typename T>
-    bool is() const
-    {
-        return dynamic_cast<const T *>(&this->cref()) != nullptr;
-    }
-
-    /// Visit this element by dynamic casting
-    template <typename... T>
-    auto visit(auto &&...cb) const
-    {
-        static_assert(sizeof...(T) == sizeof...(cb) && sizeof...(T) > 0);
-
-        // infer the returned type inside the optional
-        using Cb0 = std::tuple_element_t<0, std::tuple<decltype(cb)...>>;
-        using T0 = std::tuple_element_t<0, std::tuple<T...>>;
-        using TReturn = std::invoke_result_t<Cb0, T0 &>;
-
-        return this->visitOne<TReturn, T...>(std::forward<decltype(cb)>(cb)...);
-    }
-
-    bool operator==(const ElementRef &rhs) const
-    {
-        return this->msg.get() == rhs.msg.get() && this->index == rhs.index;
-    }
-
-    std::shared_ptr<Message> msg;
-    size_t index = 0;
-
-private:
-    template <bool Const>
-    decltype(auto) maybeConstElement() const
-    {
-        if constexpr (Const)
-        {
-            return this->constElement();
-        }
-        else
-        {
-            return this->element();
-        }
-    }
-
-    /// Run one callback
-    ///
-    /// This is called recursively.
-    /// If the callback returns something, we return an `optional<T>` otherwise
-    /// we return `void`.
-    template <typename TReturn, typename T, typename... Rest>
-    auto visitOne(auto &&cb, auto &&...rest) const
-        -> std::conditional_t<std::is_void_v<TReturn>, void,
-                              sol::optional<TReturn>>
-    {
-        auto *el =
-            dynamic_cast<T *>(this->maybeConstElement<std::is_const_v<T>>());
-        if (!el)
-        {
-            if constexpr (sizeof...(rest) == 0)
+            if constexpr (std::is_void_v<
+                              std::invoke_result_t<decltype(cb), T &>>)
             {
-                if constexpr (std::is_void_v<
-                                  std::invoke_result_t<decltype(cb), T &>>)
-                {
-                    return;
-                }
-                else
-                {
-                    return sol::nullopt;
-                }
+                return;
             }
             else
             {
-                return this->visitOne<TReturn, Rest...>(
-                    std::forward<decltype(rest)>(rest)...);
+                return sol::nullopt;
             }
         }
-        return std::invoke(cb, *el);
+        else
+        {
+            return this->visitOne<TReturn, Rest...>(
+                std::forward<decltype(rest)>(rest)...);
+        }
     }
-};
+    return std::invoke(cb, *el);
+}
 
 struct ElementIterator {
     using difference_type = std::ptrdiff_t;
@@ -636,6 +591,10 @@ void createUserType(sol::table &c2)
         "type", sol::property([](const ElementRef &el) {
             return el.cref().type();
         }),
+        "to_json",
+        [](const ElementRef &el) {
+            return QJsonDocument(el.cref().toJson()).toJson();
+        },
         "flags", sol::property([](const ElementRef &el) {
             return el.cref().getFlags().value();
         }),
@@ -656,6 +615,9 @@ void createUserType(sol::table &c2)
                 }
                 setLinkOn(&el.ref(), link);
             }),
+        "exhaustive_flags", sol::property([](const ElementRef &el) {
+            return el.cref().exhaustiveFlags;
+        }),
         "tooltip",
         sol::property(
             [](const ElementRef &el) {
@@ -677,10 +639,18 @@ void createUserType(sol::table &c2)
                 &CircularImageElement::padding);
         }),
         "background", sol::property([](const ElementRef &el) {
-            return el.as<CircularImageElement>().map(
+            return el.asConst<CircularImageElement>().map(
                 [](const CircularImageElement &el) {
                     return el.background().name(QColor::HexArgb);
                 });
+        }),
+        "images", sol::property([](const ElementRef &el) {
+            return el.asConst<ScalingImageElement>().map(
+                &ScalingImageElement::images);
+        }),
+        "image", sol::property([](const ElementRef &el) {
+            return el.visit<const ImageElement, const CircularImageElement>(
+                &ImageElement::image, &CircularImageElement::image);
         }),
         "words", sol::property([](const ElementRef &el) {
             return el.visit<const TextElement, const SingleLineTextElement>(
@@ -742,16 +712,6 @@ void createUserType(sol::table &c2)
                 // flags are always mutable
                 msg->flags = f;
             }),
-        "parse_time",
-        sol::property(
-            [](Message *msg) {
-                return QDateTime(QDate::currentDate(), msg->parseTime)
-                    .toMSecsSinceEpoch();
-            },
-            [](Message *msg, qint64 ms) {
-                checkWritable(msg);
-                msg->parseTime = datetimeFromOffset(ms).time();
-            }),
         "id", memberAccessor<&Message::id>(),                         //
         "search_text", memberAccessor<&Message::searchText>(),        //
         "message_text", memberAccessor<&Message::messageText>(),      //
@@ -769,14 +729,14 @@ void createUserType(sol::table &c2)
                 checkWritable(msg);
                 msg->usernameColor = QColor::fromString(sv);
             }),
-        "server_received_time",
+        "timestamp",
         sol::property(
             [](Message *msg) {
-                return msg->serverReceivedTime.toMSecsSinceEpoch();
+                return msg->timestamp.toMSecsSinceEpoch();
             },
             [](Message *msg, qint64 ms) {
                 checkWritable(msg);
-                msg->serverReceivedTime = datetimeFromOffset(ms);
+                msg->timestamp = datetimeFromOffset(ms);
             }),
         "highlight_color",
         sol::property(
@@ -808,16 +768,100 @@ void createUserType(sol::table &c2)
             return MessageElements(msg);
         },
         "append_element",
-        [](Message *msg, const sol::table &tbl) {
-            checkWritable(msg);
-            auto el = elementFromTable(tbl);
-            if (el)
-            {
-                msg->elements.emplace_back(std::move(el));
-            }
+        sol::overload(
+            // Message:append_element(MessageElement)
+            // Create a clone of the given element and add it to the message
+            [](Message *msg, ElementRef &element) {
+                checkWritable(msg);
+                msg->elements.emplace_back(element.constElement()->clone());
+            },
+            // Message:append_element(MessageElementInit)
+            // Create a new element
+            [](Message *msg, const sol::table &tbl) {
+                checkWritable(msg);
+                auto el = elementFromTable(tbl);
+                if (el)
+                {
+                    msg->elements.emplace_back(std::move(el));
+                }
+            }),
+        "clone",
+        [](const Message &message) {
+            return message.clone();
         });
 }
 
 }  // namespace chatterino::lua::api::message
+
+namespace {
+
+using namespace chatterino;
+
+std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
+{
+    auto msg = std::make_shared<Message>();
+    msg->flags = tbl.get_or("flags", MessageFlag::None);
+
+    msg->id = tbl.get_or("id", QString{});
+    msg->searchText = tbl.get_or("search_text", QString{});
+    msg->messageText = tbl.get_or("message_text", QString{});
+    msg->loginName = tbl.get_or("login_name", QString{});
+    msg->displayName = tbl.get_or("display_name", QString{});
+    msg->localizedName = tbl.get_or("localized_name", QString{});
+    msg->userID = tbl.get_or("user_id", QString{});
+    // missing: timeoutUser
+    msg->channelName = tbl.get_or("channel_name", QString{});
+
+    auto usernameColor = tbl.get_or("username_color", QString{});
+    if (!usernameColor.isEmpty())
+    {
+        msg->usernameColor = QColor(usernameColor);
+    }
+
+    auto timestamp = tbl.get<std::optional<qint64>>("timestamp");
+    if (timestamp)
+    {
+        msg->timestamp = datetimeFromOffset(*timestamp);
+    }
+
+    // missing: badges
+    // missing: badgeInfos
+
+    // we construct a color on the fly here
+    auto highlightColor = tbl.get_or("highlight_color", QString{});
+    if (!highlightColor.isEmpty())
+    {
+        msg->highlightColor = std::make_shared<QColor>(highlightColor);
+    }
+
+    // missing: replyThread
+    // missing: replyParent
+    // missing: count
+
+    auto elements = tbl.get<std::optional<sol::table>>("elements");
+    if (elements)
+    {
+        auto size = elements->size();
+        for (size_t i = 1; i <= size; i++)
+        {
+            auto ref =
+                elements->get<std::optional<lua::api::message::ElementRef>>(i);
+            if (ref.has_value())
+            {
+                msg->elements.emplace_back(ref->constElement()->clone());
+            }
+            else
+            {
+                msg->elements.emplace_back(
+                    elementFromTable(elements->get<sol::table>(i)));
+            }
+        }
+    }
+
+    // missing: reward
+    return msg;
+}
+
+}  // namespace
 
 #endif

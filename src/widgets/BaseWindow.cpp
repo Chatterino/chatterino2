@@ -19,12 +19,17 @@
 #include "widgets/Window.hpp"
 
 #include <QApplication>
+#include <QFile>
 #include <QFont>
 #include <QIcon>
 #include <QScreen>
 #include <QWindow>
 
 #include <functional>
+
+#ifdef Q_OS_MACOS
+#    include "util/MacOsHelpers.h"
+#endif
 
 #ifdef USEWINSDK
 #    include <dwmapi.h>
@@ -98,8 +103,14 @@ std::optional<UINT> hiddenTaskbarEdge(LPRECT rcMon = nullptr)
         return std::nullopt;
     }
 
-    APPBARDATA state = {sizeof(state), taskbar};
-    APPBARDATA pos = {sizeof(pos), taskbar};
+    APPBARDATA state{
+        .cbSize = sizeof(state),
+        .hWnd = taskbar,
+    };
+    APPBARDATA pos{
+        .cbSize = sizeof(pos),
+        .hWnd = taskbar,
+    };
 
     auto appBarState =
         static_cast<LRESULT>(SHAppBarMessage(ABM_GETSTATE, &state));
@@ -131,17 +142,13 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
     {
         // GetDpiForWindow and GetSystemMetricsForDpi are only supported on
         // Windows 10 and later. Qt 6 requires Windows 10.
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto dpi = GetDpiForWindow(hwnd);
-#    endif
 
         auto systemMetric = [&](auto index) {
-#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             if (dpi != 0)
             {
                 return GetSystemMetricsForDpi(index, dpi);
             }
-#    endif
             return GetSystemMetrics(index);
         };
 
@@ -272,6 +279,20 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+
+    if (this->flags_.has(UseSettingsStylesheet))
+    {
+        QFile styleFile(":/qss/settings.qss");
+        if (!styleFile.open(QFile::ReadOnly))
+        {
+            assert(false && "Resources not loaded");
+            qCWarning(chatterinoWidget) << "Resources not loaded";
+        }
+        QString stylesheet = QString::fromUtf8(styleFile.readAll());
+        this->setStyleSheet(stylesheet);
+        this->overrideBackgroundColor_ = QColor("#111111");
+    }
+
     DebugCount::increase(DebugObject::BaseWindow);
 }
 
@@ -419,12 +440,18 @@ void BaseWindow::setTopMost(bool topMost)
         this->tryApplyTopMost();
     }
 #else
-    auto isVisible = this->isVisible();
-    this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-    if (isVisible)
+    auto flags = this->windowFlags();
+    flags.setFlag(Qt::WindowStaysOnTopHint, topMost);
+    this->overrideWindowFlags(flags);
+
+    if (auto *window = this->windowHandle())
     {
-        this->show();
+        window->setFlag(Qt::WindowStaysOnTopHint, topMost);
     }
+#endif
+
+#ifdef Q_OS_MACOS
+    this->setMacOSWindowManagedIfTopMost(topMost);
 #endif
 
     this->topMostChanged(this->isTopMost_);
@@ -451,6 +478,20 @@ void BaseWindow::tryApplyTopMost()
 
     ::SetWindowPos(*hwnd, this->isTopMost_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+#endif
+
+#ifdef Q_OS_MACOS
+void BaseWindow::setMacOSWindowManagedIfTopMost(bool topMost)
+{
+    // If a window is elevated to the top, it will stop showing up in
+    // things like Mission Control. This manually tells macOS that
+    // we want this window to still be managed.
+
+    if (topMost)
+    {
+        setMacOSWindowManaged(*this);
+    }
 }
 #endif
 
@@ -531,6 +572,12 @@ void BaseWindow::themeChangedEvent()
         {
             button->setMouseEffectColor(this->theme->window.text);
         }
+    }
+    else if (this->flags_.has(UseSettingsStylesheet))
+    {
+        QPalette palette;
+        palette.setColor(QPalette::Window, QColor("#111"));
+        this->setPalette(palette);
     }
     else
     {
@@ -786,6 +833,10 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+#ifdef Q_OS_MACOS
+    this->setMacOSWindowManagedIfTopMost(this->isTopMost());
+#endif
+
 #ifdef Q_OS_WIN
     if (this->flags_.has(BoundsCheckOnShow))
     {
@@ -804,13 +855,8 @@ void BaseWindow::showEvent(QShowEvent *)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              qintptr *result)
-#else
-bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
-                             long *result)
-#endif
 {
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -1114,7 +1160,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         if (this->hasCustomWindowFrame())
         {
             // disable OS window border
-            const MARGINS margins = {-1};
+            const MARGINS margins{.cxLeftWidth = -1};
             DwmExtendFrameIntoClientArea(msg->hwnd, &margins);
         }
 
@@ -1134,11 +1180,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     if (!this->hasCustomWindowFrame())
@@ -1250,11 +1292,7 @@ bool BaseWindow::handleMOVE(MSG *msg)
     return false;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
-#else
-bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
-#endif
 {
 #ifdef USEWINSDK
     const LONG borderWidth = 8;  // in device independent pixels

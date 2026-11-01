@@ -12,6 +12,31 @@
 #include "singletons/Settings.hpp"
 #include "util/ChannelHelpers.hpp"
 
+namespace {
+
+constexpr uint8_t MAX_RECURSION = 64;
+
+struct RecursionGuard {
+    constexpr RecursionGuard(uint8_t *count) noexcept
+        : count(count)
+    {
+        assert(*count < MAX_RECURSION);
+        *this->count += 1;
+    }
+    RecursionGuard(const RecursionGuard &) = delete;
+    RecursionGuard(RecursionGuard &&) = delete;
+    RecursionGuard &operator=(const RecursionGuard &) = delete;
+    RecursionGuard &operator=(RecursionGuard &&) = delete;
+    constexpr ~RecursionGuard()
+    {
+        *this->count -= 1;
+    }
+
+    uint8_t *count;
+};
+
+}  // namespace
+
 namespace chatterino {
 
 //
@@ -33,7 +58,7 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app && this->anythingLogged_)
+    if (app && !isAppAboutToQuit() && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
@@ -109,6 +134,12 @@ MessagePtr Channel::getLastMessage() const
 void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     message->freeze();
 
     MessagePtr deleted;
@@ -142,6 +173,14 @@ void Channel::addSystemMessage(const QString &contents)
 {
     auto msg = makeSystemMessage(contents);
     this->addMessage(msg, MessageContext::Original);
+}
+
+void Channel::addSystemMessage(const QString &contents,
+                               const QString &timeoutUser)
+{
+    MessageBuilder builder(systemMessage, contents);
+    builder->timeoutUser = timeoutUser;
+    this->addMessage(builder.release(), MessageContext::Original);
 }
 
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
@@ -185,6 +224,12 @@ void Channel::disableAllMessages()
 
 void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : _messages)
     {
         msg->freeze();
@@ -205,6 +250,13 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     {
         return;
     }
+
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     for (const auto &msg : messages)
     {
         msg->freeze();
@@ -260,12 +312,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
                 continue;
             }
 
-            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            if (msg->timestamp < snapshotMsg->timestamp)
             {
                 // We found the first message that comes after the current message.
                 // Therefore, we can put the current message directly before. We
                 // assume that the messages we are filling in are in ascending
-                // order by serverReceivedTime.
+                // order by timestamp.
                 this->messages_.insertBefore(snapshotMsg, msg);
                 insertedFlag = true;
                 break;
@@ -293,6 +345,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 void Channel::replaceMessage(const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
     int index = this->messages_.replaceItem(message, replacement);
 
@@ -304,6 +362,12 @@ void Channel::replaceMessage(const MessagePtr &message,
 
 void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     MessagePtr prev;
@@ -316,6 +380,12 @@ void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 void Channel::replaceMessage(size_t hint, const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     replacement->freeze();
 
     auto index = this->messages_.replaceItem(hint, message, replacement);
@@ -336,6 +406,12 @@ void Channel::disableMessage(const QString &messageID)
 
 void Channel::clearMessages()
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     this->messages_.clear();
     this->messagesCleared.invoke();
 }
@@ -365,6 +441,7 @@ MessageSinkTraits Channel::sinkTraits() const
     return {
         MessageSinkTrait::AddMentionsToGlobalChannel,
         MessageSinkTrait::RequiresKnownChannelPointReward,
+        MessageSinkTrait::UpdateCurrentUserState,
     };
 }
 
@@ -448,6 +525,11 @@ void Channel::onConnected()
 
 void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
+}
+
+bool Channel::canRecurse() const noexcept
+{
+    return this->recursionCount_ < MAX_RECURSION;
 }
 
 //

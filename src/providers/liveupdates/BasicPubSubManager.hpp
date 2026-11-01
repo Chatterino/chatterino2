@@ -122,6 +122,11 @@ protected:
     {
         assertInGuiThread();
 
+        if (this->isSubscribed(subscription))
+        {
+            return;
+        }
+
         if (this->trySubscribe(subscription))
         {
             return;
@@ -147,7 +152,6 @@ private:
     {
         assertInGuiThread();
 
-        DebugCount::increase(DebugObject::LiveUpdatesConnection);
         this->addingClient_ = false;
         this->diag.connectionsOpened.fetch_add(1, std::memory_order_acq_rel);
 
@@ -271,6 +275,20 @@ private:
                 std::weak_ptr{client}, this->derived(), id));
         client->ws_ = std::move(hdl);
         this->clients_.emplace(id, std::move(client));
+        DebugCount::increase(DebugObject::LiveUpdatesConnection);
+    }
+
+    bool isSubscribed(const Subscription &subscription) const
+    {
+        for (const auto &client : this->clients_)
+        {
+            if (client.second->subscriptions_.contains(subscription))
+            {
+                return true;
+            }
+        }
+        return std::ranges::find(this->pendingSubscriptions_, subscription) !=
+               this->pendingSubscriptions_.end();
     }
 
     bool trySubscribe(const Subscription &subscription)

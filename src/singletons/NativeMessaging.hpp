@@ -15,15 +15,16 @@
 
 namespace chatterino::nm::detail {
 
-enum class WriteManifestError : std::uint8_t {
-    FailedToCreateDirectory,
-    FailedToCreateFile,
-};
+ExpectedStr<void> writeManifestTo(QString directory, const QString &nmDirectory,
+                                  const QString &filename,
+                                  const QJsonDocument &json);
 
-Expected<void, WriteManifestError> writeManifestTo(QString directory,
-                                                   const QString &nmDirectory,
-                                                   const QString &filename,
-                                                   const QJsonDocument &json);
+#ifndef Q_OS_WIN
+/// Parse `path` by replacing '~', '$XDG_CONFIG_HOME' and '$XDG_DATA_HOME'
+/// with their respective values.
+/// Returns nullopt if the path is empty or relative.
+std::optional<QString> parseCustomPath(QString path);
+#endif
 
 }  // namespace chatterino::nm::detail
 
@@ -32,10 +33,12 @@ namespace chatterino {
 class Application;
 class Paths;
 class Channel;
+class Modes;
 
 using ChannelPtr = std::shared_ptr<Channel>;
 
-void registerNmHost(const Paths &paths);
+void registerNmHost(Modes modes, const Paths &paths);
+ExpectedStr<void> registerNmHost(const Paths &paths);
 std::string &getNmQueueName(const Paths &paths);
 
 Atomic<std::optional<QString>> &nmIpcError();
@@ -85,6 +88,11 @@ private:
     std::vector<ChannelPtr> channelWarmer_;
 
     friend ReceiverThread;
+};
+
+enum class BrowserManifestFormat {
+    Chrome,
+    Firefox,
 };
 
 }  // namespace chatterino

@@ -102,8 +102,9 @@ public:
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
     void addSystemMessage(const QString &contents);
+    void addSystemMessage(const QString &contents, const QString &timeoutUser);
 
-    /// Inserts the given messages in order by Message::serverReceivedTime.
+    /// Inserts the given messages in order by Message::timestamp.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
     void addOrReplaceTimeout(MessagePtr message, const QDateTime &now) final;
@@ -155,10 +156,21 @@ protected:
     QString platform_;
 
 private:
+    bool canRecurse() const noexcept;
+
     const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
     bool anythingLogged_ = false;
+
+    /// Recursion count for message signals.
+    ///
+    /// This is intended to prevent _trivial_ infinite recursion of signals
+    /// (e.g. unconditionally adding a message in `messageAppended`). It is not
+    /// intended to prevent all infinite recursion. That will still crash the
+    /// program.
+    uint8_t recursionCount_ = 0;
+
     QTimer clearCompletionModelTimer_;
 };
 
@@ -186,5 +198,35 @@ public:
 private:
     std::shared_ptr<Data> data_;
 };
+
+constexpr std::optional<std::string_view> qmagicenumSerializedName(
+    Channel::Type value) noexcept
+{
+    using Type = Channel::Type;
+
+    switch (value)
+    {
+        case Type::Twitch:
+            return "twitch";
+        case Type::TwitchAutomod:
+            return "automod";
+        case Type::TwitchMentions:
+            return "mentions";
+        case Type::TwitchWatching:
+            return "watching";
+        case Type::TwitchWhispers:
+            return "whispers";
+        case Type::TwitchLive:
+            return "live";
+        case Type::Misc:
+            return "misc";
+
+        case Type::None:
+        case Type::Direct:
+        case Type::TwitchEnd:
+            return std::nullopt;  // FIXME: Remove these (#5703)
+    }
+    return std::nullopt;
+}
 
 }  // namespace chatterino

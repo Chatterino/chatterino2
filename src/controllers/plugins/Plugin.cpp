@@ -56,7 +56,7 @@ lua::SignalCallback Plugin::createCallback(sol::main_protected_function pfn)
 
 Plugin::~Plugin()
 {
-    this->onUnloaded();
+    this->onUnloaded.invoke();
 
     for (auto *timer : this->activeTimeouts)
     {
@@ -83,6 +83,12 @@ Plugin::~Plugin()
            "This must be empty or destructor of sol::protected_function would "
            "explode malloc structures later");
 }
+
+lua::PluginWeakRef Plugin::weakRef() const
+{
+    return this->selfRef_.weak();
+}
+
 int Plugin::addTimeout(QTimer *timer)
 {
     this->activeTimeouts.push_back(timer);
@@ -140,7 +146,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
     stream.noquote();
     stream << "[" + this->id + ":" + this->meta.name + "]";
     QString fullMessage;
-    for (const auto &arg : args)
+    for (const auto arg : args)
     {
         auto s = lua::toString(L, arg.stack_index());
         stream << s;
@@ -155,7 +161,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
         lua_pop(L, 1);
     }
 
-    this->onLog(level, fullMessage);
+    this->onLog.invoke(level, fullMessage);
 }
 
 sol::state_view Plugin::state()

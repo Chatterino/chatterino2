@@ -5,8 +5,8 @@
 #include "controllers/sound/MiniaudioBackend.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/highlights/Sounds.hpp"
 #include "debug/Benchmark.hpp"
-#include "util/QMagicEnum.hpp"
 #include "util/RenameThread.hpp"
 
 #include <boost/asio.hpp>
@@ -66,14 +66,12 @@ void miniaudioLogCallback(void *userData, ma_uint32 level, const char *pMessage)
 
 namespace chatterino {
 
-// NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
-constexpr const auto NUM_SOUNDS = 4;
-
-MiniaudioBackend::MiniaudioBackend()
+MiniaudioBackend::MiniaudioBackend(bool keepEngineAlive_)
     : context(std::make_unique<ma_context>())
     , engine(std::make_unique<ma_engine>())
     , workGuard(boost::asio::make_work_guard(this->ioContext))
     , sleepTimer(this->ioContext)
+    , keepEngineAlive(keepEngineAlive_)
 {
     qCInfo(chatterinoSound) << "Initializing miniaudio sound backend";
 
@@ -116,16 +114,6 @@ MiniaudioBackend::MiniaudioBackend()
             return;
         }
 
-        /// Load default sound
-        QFile defaultPingFile(":/sounds/ping2.wav");
-        if (!defaultPingFile.open(QIODevice::ReadOnly))
-        {
-            qCWarning(chatterinoSound) << "Error loading default ping sound";
-            this->state = State::Failed;
-            return;
-        }
-        this->defaultPingData = defaultPingFile.readAll();
-
         /// Initialize engine
         auto engineConfig = ma_engine_config_init();
         engineConfig.pContext = this->context.get();
@@ -138,6 +126,18 @@ MiniaudioBackend::MiniaudioBackend()
                 << "Error initializing engine:" << result;
             this->state = State::Failed;
             return;
+        }
+
+        if (this->keepEngineAlive)
+        {
+            // User has configured the "keep engine alive option"
+            // We pre-start the engine to ensure it's available to play sounds as soon as possible.
+            result = ma_engine_start(this->engine.get());
+            if (result != MA_SUCCESS)
+            {
+                qCWarning(chatterinoSound)
+                    << "Error pre-starting engine " << result;
+            }
         }
 
         /// Initialize default ping sounds
@@ -154,42 +154,65 @@ MiniaudioBackend::MiniaudioBackend()
             soundFlags |= MA_SOUND_FLAG_NO_SPATIALIZATION;
 
             auto decoderConfig =
-                ma_decoder_config_init(ma_format_f32, 0, 48000);
-            // This must match the encoding format of our default ping sound
+                ma_decoder_config_init(ma_format_f32, 0, 44100);
             decoderConfig.encodingFormat = ma_encoding_format_wav;
 
-            for (auto i = 0; i < NUM_SOUNDS; ++i)
+            for (const auto &[_, defaultSound] : highlights::defaultSounds())
             {
-                auto dec = std::make_unique<ma_decoder>();
-                auto snd = std::make_unique<ma_sound>();
+                BuiltInSound bis;
 
-                result = ma_decoder_init_memory(
-                    (void *)this->defaultPingData.data(),
-                    this->defaultPingData.size() * sizeof(char), &decoderConfig,
-                    dec.get());
-                if (result != MA_SUCCESS)
-                {
-                    qCWarning(chatterinoSound) << "Error initializing default "
-                                                  "ping decoder from memory:"
-                                               << result;
-                    this->state = State::Failed;
-                    return;
-                }
-
-                result = ma_sound_init_from_data_source(this->engine.get(),
-                                                        dec.get(), soundFlags,
-                                                        nullptr, snd.get());
-                if (result != MA_SUCCESS)
+                // Load the sound from the resource path
+                QFile defaultPingFile(defaultSound.resourcePath.sliced(3));
+                if (!defaultPingFile.open(QIODevice::ReadOnly))
                 {
                     qCWarning(chatterinoSound)
-                        << "Error initializing default sound from data source:"
-                        << result;
+                        << "Error loading default ping sound"
+                        << defaultSound.resourcePath;
                     this->state = State::Failed;
                     return;
                 }
+                bis.data = defaultPingFile.readAll();
+                for (auto i = 0; i < NUM_SOUNDS; ++i)
+                {
+                    auto dec = std::make_unique<ma_decoder>();
+                    auto snd = std::make_unique<ma_sound>();
 
-                this->defaultPingDecoders.emplace_back(std::move(dec));
-                this->defaultPingSounds.emplace_back(std::move(snd));
+                    result = ma_decoder_init_memory(
+                        (void *)bis.data.data(), bis.data.size() * sizeof(char),
+                        &decoderConfig, dec.get());
+                    if (result != MA_SUCCESS)
+                    {
+                        qCWarning(chatterinoSound)
+                            << "Error initializing default "
+                               "ping decoder from memory:"
+                            << result;
+                        this->state = State::Failed;
+                        return;
+                    }
+
+                    result = ma_sound_init_from_data_source(
+                        this->engine.get(), dec.get(), soundFlags, nullptr,
+                        snd.get());
+                    if (result != MA_SUCCESS)
+                    {
+                        qCWarning(chatterinoSound)
+                            << "Error initializing default sound from data "
+                               "source:"
+                            << result;
+                        this->state = State::Failed;
+                        return;
+                    }
+
+                    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
+                    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                    bis.decoders[i] = std::move(dec);
+                    bis.sounds[i] = std::move(snd);
+                    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                    // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
+                }
+
+                this->defaultPingSounds[defaultSound.resourcePath] =
+                    std::move(bis);
             }
         }
 
@@ -213,13 +236,16 @@ MiniaudioBackend::~MiniaudioBackend()
     this->state = State::Stopping;
 
     boost::asio::post(this->ioContext, [this] {
-        for (const auto &snd : this->defaultPingSounds)
+        for (const auto &[_, snds] : this->defaultPingSounds)
         {
-            ma_sound_uninit(snd.get());
-        }
-        for (const auto &dec : this->defaultPingDecoders)
-        {
-            ma_decoder_uninit(dec.get());
+            for (const auto &snd : snds.sounds)
+            {
+                ma_sound_uninit(snd.get());
+            }
+            for (const auto &dec : snds.decoders)
+            {
+                ma_decoder_uninit(dec.get());
+            }
         }
 
         ma_engine_uninit(this->engine.get());
@@ -280,36 +306,50 @@ void MiniaudioBackend::play(const QUrl &sound)
                 qCWarning(chatterinoSound) << "Failed to play sound" << sound
                                            << soundPath << ":" << result;
             }
-
-            return;
         }
-
-        // Play default sound, loaded from our resources in the constructor
-        auto &snd = this->defaultPingSounds[++i % NUM_SOUNDS];
-        ma_sound_seek_to_pcm_frame(snd.get(), 0);
-        result = ma_sound_start(snd.get());
-        if (result != MA_SUCCESS)
+        else
         {
-            qCWarning(chatterinoSound)
-                << "Failed to play default ping" << result;
+            const auto defaultSoundIt = this->defaultPingSounds.find(sound);
+            if (defaultSoundIt != this->defaultPingSounds.end())
+            {
+                // Play default sound, loaded from our resources in the constructor
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                auto &snd = defaultSoundIt->second.sounds[++i % NUM_SOUNDS];
+                ma_sound_seek_to_pcm_frame(snd.get(), 0);
+                result = ma_sound_start(snd.get());
+                if (result != MA_SUCCESS)
+                {
+                    qCWarning(chatterinoSound)
+                        << "Failed to play default ping" << sound << result;
+                }
+            }
+            else
+            {
+                qCDebug(chatterinoSound)
+                    << "did not found default ping sound" << sound;
+                // The given resource didn't exist - do we hotload it?
+            }
         }
 
-        this->sleepTimer.expires_after(STOP_AFTER_DURATION);
-        this->sleepTimer.async_wait([this](const auto &ec) {
-            if (ec)
-            {
-                // Timer was most likely cancelled
-                return;
-            }
+        if (!this->keepEngineAlive)
+        {
+            this->sleepTimer.expires_after(STOP_AFTER_DURATION);
+            this->sleepTimer.async_wait([this](const auto &ec) {
+                if (ec)
+                {
+                    // Timer was most likely cancelled
+                    return;
+                }
 
-            auto result = ma_engine_stop(this->engine.get());
-            if (result != MA_SUCCESS)
-            {
-                qCWarning(chatterinoSound)
-                    << "Error stopping miniaudio engine " << result;
-                return;
-            }
-        });
+                auto result = ma_engine_stop(this->engine.get());
+                if (result != MA_SUCCESS)
+                {
+                    qCWarning(chatterinoSound)
+                        << "Error stopping miniaudio engine " << result;
+                    return;
+                }
+            });
+        }
     });
 }
 

@@ -6,9 +6,11 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"  // IWYU pragma: keep
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "providers/recentmessages/Api.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/CrashHandler.hpp"
@@ -25,6 +27,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -134,14 +137,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     {
         auto *themes = getApp()->getThemes();
         auto available = themes->availableThemes();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         available.emplace_back("System", "System");
-#endif
 
         SettingWidget::dropdown("Theme", themes->themeName, available)
             ->addTo(layout);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         SettingWidget::dropdown("Dark system theme",
                                 themes->darkSystemThemeName,
                                 themes->availableThemes())
@@ -157,7 +157,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                          "theme and you enabled the adaptive 'System' theme.")
             ->conditionallyEnabledBy(themes->themeName, "System")
             ->addTo(layout);
-#endif
     }
 
     layout.addDropdown<float>(
@@ -241,6 +240,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         false, "Choose which tabs are visible in the notebook");
 
     SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+    SettingWidget::checkbox("Extend wrapped tabs", s.growWrappedNotebookLines)
+        ->setTooltip("When horizontal tabs are wrapped, extend the line for "
+                     "the whole width of the window.")
+        ->addTo(layout);
 
     layout.addWidget(new FontSettingWidget(s.chatFontFamily, s.chatFontSize,
                                            s.chatFontWeight),
@@ -399,7 +402,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Message overflow", {"Highlight", "Prevent", "Allow"},
         s.messageOverflow,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<MessageOverflow>(args.index);
@@ -416,7 +419,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -433,7 +436,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         s.usernameRightClickModifierBehavior,
         [](auto index) {
-            return index;
+            return static_cast<int>(index);
         },
         [](auto args) {
             return static_cast<UsernameRightClickBehavior>(args.index);
@@ -511,7 +514,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                             s.fadeMessageHistory)
         ->setTooltip(
             "Reduce opacity of messages that were posted before Chatterino "
-            "was started or while re-connection.")
+            "was started or while re-connecting.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
@@ -519,7 +522,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "When enabled, messages deleted by moderators will be hidden.")
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
+    SettingWidget::checkbox("Hide message timestamps when channel is live",
+                            s.hideMessageTimestampsWhenLive)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Correct ASCII art wrapping", s.wrapAsciiArt)
+        ->setTooltip("Limit the width of messages containing ASCII art to "
+                     "match the width of Twitch web chat.")
+        ->addTo(layout);
+
+    auto *timestampFormatDropdown = layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
@@ -537,6 +549,52 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    timestampFormatDropdown->completer()->setCaseSensitivity(Qt::CaseSensitive);
+
+    SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show announcement header",
+                            s.showAnnouncementHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show subscription header",
+                            s.showSubscriptionHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show watch streak header", s.showWatchStreakHeader)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show Twitch GIFs", s.showTwitchGifs)
+        ->setTooltip("Twitch GIFs will be shown inline. When disabled, they're "
+                     "shown as links.")
+        ->addTo(layout);
+
+    auto *twitchGifSize = layout.addDropdown<float>(
+        "Twitch GIF size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.4x (Twitch)", "1.5x", "2x"},
+        s.twitchGifScale,
+        [](auto value) {
+            if (value == 1)
+            {
+                return QString("Default");
+            }
+            if (qFuzzyCompare(value, 1.4F))
+            {
+                return QString("1.4x (Twitch)");
+            }
+            return QString::number(value) + "x";
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        });
+    twitchGifSize->setEnabled(s.showTwitchGifs);
+    s.showTwitchGifs.connect(
+        [twitchGifSize](bool enabled) {
+            twitchGifSize->setEnabled(enabled);
+        },
+        this->managedConnections_);
+
     layout.addDropdown<int>(
         "Limit message height",
         {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
@@ -756,6 +814,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "that you don't want to show on stream.")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Hide user notes", s.streamerModeHideUserNotes)
+        ->setTooltip("Hide user notes from showing in usercards.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Mute mention sounds", s.streamerModeMuteMentions)
         ->setTooltip("Mute your ping sound from playing.")
         ->addTo(layout);
@@ -916,6 +978,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 
 #ifdef Q_OS_WIN
+    if (getApp()->getModes().isPortable)
+    {
+        layout.addDescription(
+            "Portable Chatterino does not register browser integration "
+            "automatically. Registration writes to your Windows user registry "
+            "to point your browser extension to this copy of Chatterino. "
+            "You may manually register it below.");
+        layout.addButton("Register browser integration", [this] {
+            const auto result = registerNmHost(getApp()->getPaths());
+            if (result)
+            {
+                QMessageBox::information(this, "Registration Successful",
+                                         "Browser integration registered.");
+            }
+            else
+            {
+                QMessageBox::warning(
+                    this, "Registration Failed",
+                    "Failed to register browser integration:\n" +
+                        result.error());
+            }
+        });
+    }
+
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
@@ -946,11 +1032,38 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             ->addTo(layout, form);
     }
 
+#ifndef Q_OS_WIN
+    {
+        auto *note = layout.addDescription(
+            "A path to write the native messaging manifest to. The manifest is "
+            "already automatically created for Firefox and Google Chrome if "
+            "they are installed."
+#    ifdef Q_OS_LINUX
+            "\nYou may use $XDG_CONFIG_HOME or $XDG_DATA_HOME in the path."
+#    endif
+        );
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
+        layout.addWidget(note);
+
+        auto *form = new QFormLayout();
+        layout.addLayout(form);
+        SettingWidget::lineEdit("Custom manifest path",
+                                s.customNativeMessagingManifestPath,
+                                "/full/path/to/native/messaging/manifest.json")
+            ->addTo(layout, form);
+
+        SettingWidget::dropdown("Custom manifest format",
+                                s.customNativeMessagingManifestFormat)
+            ->addTo(layout);
+    }
+#endif
+
     layout.addTitle("AppData & Cache");
 
     layout.addSubtitle("Application Data");
     layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
+                          "stored in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
         QDesktopServices::openUrl("file://" +
@@ -1006,6 +1119,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addLayout(box);
     }
 
+    layout.addTitle("Sound");
+
+    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
+        ->setTooltip("Change this only if you're noticing issues with sound "
+                     "playback on your system")
+        ->addTo(layout);
+    SettingWidget::checkbox("Keep sound backend alive (requires restart)",
+                            s.soundMiniaudioKeepEngineAlive)
+        ->setTooltip(
+            "This setting makes Chatterino output silence to your sound "
+            "device, even if no ping is being played. Try this setting if you "
+            "have issues with wireless devices not playing the first sound. "
+            "Note that this can prevent your monitor or computer from "
+            "sleeping.")
+        ->addTo(layout);
+
     layout.addTitle("Advanced");
 
     layout.addSubtitle("Chat title");
@@ -1023,11 +1152,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Show the stream title")
         ->addTo(layout);
 
-    layout.addSubtitle("R9K");
+    layout.addSubtitle("Unique chat (R9K)");
     auto toggleLocalr9kSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "toggleLocalR9K");
     QString toggleLocalr9kShortcut =
-        "an assigned hotkey (Window -> Toggle local R9K)";
+        "an assigned hotkey (Window -> Toggle local unique chat (R9K))";
     if (!toggleLocalr9kSeq.isEmpty())
     {
         toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
@@ -1317,16 +1446,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("When possible, restart Chatterino if the program crashes")
         ->addTo(layout);
 
-#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getApp()->getPaths().isPortable())
-    {
-        SettingWidget::checkbox(
-            "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring)
-            ->addTo(layout);
-    }
-#endif
-
     SettingWidget::inverseCheckbox("Show moderation messages",
                                    s.hideModerationActions)
         ->setTooltip(
@@ -1347,7 +1466,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Mention users with a comma",
                             s.mentionUsersWithComma)
-        ->setTooltip("When using tab-completon, if the username is at the "
+        ->setTooltip("When using tab-completion, if the username is at the "
                      "start of the message, include a comma at the end of the "
                      "name.\ne.g. pajl -> pajlada,")
         ->addTo(layout);
@@ -1372,6 +1491,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox(
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup)
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Always show pinned channel message",
+                            s.alwaysShowPinnedMessage)
+        ->setTooltip(
+            "When enabled, pinned messages will stay visible instead of "
+            "automatically hiding after a few seconds.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Lowercase domains (anti-phishing)",
@@ -1432,7 +1558,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             },
             false,
             "Customizes how you see Asian Language names.\nUsing an option "
-            "that includes \"localized\" will display the username in it's "
+            "that includes \"localized\" will display the username in its "
             "respective Asian language.\ne.g. "
             "Username and localized: testaccount_420(테스트계정420)\n"
             "Username: testaccount_420\n"
@@ -1459,8 +1585,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Double click to open links and other elements in chat",
         s.linksDoubleClickOnly)
         ->setTooltip("When enabled, opening links/usercards requires "
-                     "double-clicking.\nUseful making sure you don't "
-                     "accidentally click on suspicious links.")
+                     "double-clicking.\nUseful for making sure you don't "
+                     "accidentally click on suspicious links.\nClicking a link "
+                     "once will pause the chat briefly to allow for a less "
+                     "accident-prone double-clicking.")
+        ->addKeywords({"pause"})
         ->addTo(layout);
 
     SettingWidget::checkbox("Unshorten links", s.unshortLinks)
@@ -1484,14 +1613,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
-                     "/whispers.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Highlight received inline whispers",
-                            s.highlightInlineWhispers)
-        ->setTooltip(
-            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-            "whispers inline\" is disabled, this setting will do nothing.")
+                     "/whispers.\nHighlighting of this is now controlled in "
+                     "the Highlights page.")
         ->addTo(layout);
 
     SettingWidget::checkbox(
@@ -1505,6 +1628,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Load message history on connect",
                             s.loadTwitchMessageHistoryOnConnect)
+        ->addTo(layout);
+
+    SettingWidget::lineEdit("Message history URL", s.messageHistoryUrl,
+                            recentmessages::DEFAULT_API_URL.toString())
+        ->setTooltip(
+            "Use %1 where the channel name should be inserted, for example: " +
+            recentmessages::DEFAULT_API_URL.toString())
         ->addTo(layout);
 
     // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
@@ -1573,7 +1703,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
-        ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
+        ->setTooltip("'Helix' will use Twitch's Helix API to send messages. "
                      "'IRC' will use IRC to send messages.")
         ->addTo(layout);
 
@@ -1582,20 +1712,25 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "clicked to send the message")
         ->addTo(layout);
 
-    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
-        ->setTooltip("Change this only if you're noticing issues with sound "
-                     "playback on your system")
-        ->addTo(layout);
-
-    SettingWidget::checkbox(
-        "Enable experimental Twitch EventSub support (requires restart)",
-        s.enableExperimentalEventSub)
-        ->addTo(layout);
-
     SettingWidget::checkbox("Disable renaming of tabs on double-click",
                             s.disableTabRenamingOnClick)
         ->setTooltip("Prevents the rename dialog from opening when a tab is "
                      "double-clicked")
+        ->addTo(layout);
+
+    SettingWidget::intInput(
+        "Shared chat session status refresh interval",
+        s.sharedChatSessionRefreshInterval,
+        {.min = 5, .max = 999, .singleStep = 1, .suffix = "s"})
+        ->setTooltip("How often Chatterino polls the Twitch API for the "
+                     "shared chat session status.")
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show shared chat badge for all messages",
+                            s.sharedChatAlwaysShowBadge)
+        ->setTooltip(
+            "If turned off, only messages from other participants have a "
+            "shared chat badge")
         ->addTo(layout);
 
     layout.addStretch();

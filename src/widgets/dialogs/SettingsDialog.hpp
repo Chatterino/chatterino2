@@ -33,6 +33,7 @@ enum class SettingsDialogPreference {
     NoPreference,
     StreamerMode,
     Accounts,
+    Highlights,
     ModerationActions,
     About,
 };
@@ -48,7 +49,6 @@ public:
 
 protected:
     void scaleChangedEvent(float newDpi) override;
-    void themeChangedEvent() override;
     void showEvent(QShowEvent *) override;
 
 private:

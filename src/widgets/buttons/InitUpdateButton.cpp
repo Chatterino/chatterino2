@@ -5,13 +5,12 @@
 #include "widgets/buttons/InitUpdateButton.hpp"
 
 #include "Application.hpp"
-#include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 
 namespace chatterino {
 
-void initUpdateButton(PixmapButton &button,
-                      const std::function<void()> &relayout,
+void initUpdateButton(SvgButton &button, const std::function<void()> &relayout,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();
@@ -37,21 +36,10 @@ void initUpdateButton(PixmapButton &button,
         // be destroyed before the button is destroyed, since it is destroyed on focus loss
         //
         // The button is either attached to a Notebook, or a Window frame
-        std::ignore =
-            dialog->buttonClicked.connect([&button, relayout](auto buttonType) {
-                switch (buttonType)
-                {
-                    case UpdateDialog::Dismiss: {
-                        button.hide();
-                        relayout();
-                    }
-                    break;
-                    case UpdateDialog::Install: {
-                        getApp()->getUpdates().installUpdates();
-                    }
-                    break;
-                }
-            });
+        std::ignore = dialog->dismissed.connect([&button, relayout]() {
+            button.hide();
+            relayout();
+        });
 
         //        handle.reset(dialog);
         //        dialog->closing.connect([&handle] { handle.release(); });
@@ -61,10 +49,13 @@ void initUpdateButton(PixmapButton &button,
     auto updateChange = [&button, relayout](auto) {
         button.setVisible(getApp()->getUpdates().shouldShowUpdateButton());
 
-        const auto *imageUrl = getApp()->getUpdates().isError()
-                                   ? ":/buttons/updateError.png"
-                                   : ":/buttons/update.png";
-        button.setPixmap(QPixmap(imageUrl));
+        const bool isError = getApp()->getUpdates().isError();
+        button.setSource({
+            .dark = isError ? ":/buttons/updateError-darkMode.svg"
+                            : ":/buttons/update-darkMode.svg",
+            .light = isError ? ":/buttons/updateError-darkMode.svg"
+                             : ":/buttons/update-lightMode.svg",
+        });
 
         relayout();
     };

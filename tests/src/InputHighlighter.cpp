@@ -186,8 +186,7 @@ TEST_F(InputHighlighterTest, getSpellCheckedWords)
         {.input = "   word word  ", .words = {"word", "word"}},
         {.input = "word?", .words = {"word"}},
         {.input = "word?word", .words = {"word", "word"}},
-        // FIXME: should  be "word-word"
-        {.input = "word-word", .words = {"word", "word"}},
+        {.input = "word-word", .words = {"word-word"}},
         {
             .input = "channel emotes 7TVEmote a BTTVEmote b FFZEmote c",
             .words = {"channel", "emotes", "a", "b", "c"},
@@ -268,10 +267,30 @@ TEST(InputHighlight, wordRegex)
         {.input = u"inogre123numbers", .words = {}},
         {.input = u"under_score", .words = {}},
         {.input = u"äwördü", .words = {u"äwördü"}},
-        {.input = u"abc!@foo#bar&(baz]",
-         .words = {u"abc", u"foo", u"bar", u"baz"}},
+        {
+            .input = u"abc!@foo#bar&(baz]",
+            .words = {u"abc", u"foo", u"bar", u"baz"},
+        },
         {.input = u"1234567,word/a123", .words = {u"word"}},
         {.input = u"'quotes\"", .words = {u"quotes"}},
+        {.input = u"doesn't", .words = {u"doesn't"}},
+        {.input = u"wouldn't've", .words = {u"wouldn't've"}},
+        {
+            .input = u"abc'd'efg'hij-klm'n-o-p",
+            .words = {u"abc'd'efg'hij-klm'n-o-p"},
+        },
+        {.input = u"'abc'", .words = {u"abc"}},
+        {.input = u"'abc'def", .words = {u"abc'def"}},
+        {.input = u"'abc'def'", .words = {u"abc'def"}},
+        {.input = u"follow-up", .words = {u"follow-up"}},
+        {.input = u"abc-def", .words = {u"abc-def"}},
+        {.input = u"-abc-def-", .words = {u"abc-def"}},
+        {.input = u"abc--def", .words = {u"abc", u"def"}},
+        {.input = u"'abc--def'", .words = {u"abc", u"def"}},
+        {.input = u"abc_def", .words = {}},
+        {.input = u"abc_", .words = {}},
+        {.input = u"_def", .words = {}},
+        {.input = u"abc'def_ghi'jkl", .words = {u"abc", u"jkl"}},
     };
 
     auto re = inputhighlight::detail::wordRegex();
@@ -285,5 +304,90 @@ TEST(InputHighlight, wordRegex)
             got.emplace_back(match.next().capturedView());
         }
         ASSERT_EQ(got, c.words) << "index=" << i;
+    }
+}
+
+TEST_F(InputHighlighterTest, getWordAt)
+{
+    struct Case {
+        std::pair<QStringView, qsizetype> input;
+        QStringView word;
+    };
+
+    std::vector<Case> cases{
+        {.input = {u"", 0}, .word = {}},
+        {.input = {u"", -1}, .word = {}},
+        {.input = {u"", -2}, .word = {}},
+        {.input = {u"", 1}, .word = {}},
+        {.input = {u"", 2}, .word = {}},
+        {.input = {u"word", -1}, .word = {}},
+        {.input = {u"word", 0}, .word = u"word"},
+        {.input = {u"word", 1}, .word = u"word"},
+        {.input = {u"word", 2}, .word = u"word"},
+        {.input = {u"word", 3}, .word = u"word"},
+        {.input = {u"word", 4}, .word = u"word"},
+        {.input = {u"word", 5}, .word = {}},
+        {.input = {u"a word", -1}, .word = {}},
+        {.input = {u"a word", 0}, .word = u"a"},
+        {.input = {u"a word", 1}, .word = u"a"},
+        {.input = {u"a word", 2}, .word = u"word"},
+        {.input = {u"a word", 3}, .word = u"word"},
+        {.input = {u"a word", 4}, .word = u"word"},
+        {.input = {u"a word", 5}, .word = u"word"},
+        {.input = {u"a word", 6}, .word = u"word"},
+        {.input = {u"a word", 7}, .word = {}},
+        {.input = {u"a word!", 6}, .word = u"word"},
+        {.input = {u"a word!", 7}, .word = {}},
+        {.input = {u"a word!", 8}, .word = {}},
+        {.input = {u"three words are", 0}, .word = u"three"},
+        {.input = {u"three words are", 4}, .word = u"three"},
+        {.input = {u"three words are", 5}, .word = u"three"},
+        {.input = {u"three words are", 6}, .word = u"words"},
+        {.input = {u"three words are", 10}, .word = u"words"},
+        {.input = {u"three words are", 11}, .word = u"words"},
+        {.input = {u"three words are", 12}, .word = u"are"},
+        {.input = {u"three words are", 14}, .word = u"are"},
+        {.input = {u"three words are", 15}, .word = u"are"},
+        {.input = {u"three words are", 16}, .word = {}},
+        {.input = {u"a#text#is#here!", 0}, .word = u"a"},
+        {.input = {u"a#text#is#here!", 1}, .word = u"a"},
+        {.input = {u"a#text#is#here!", 2}, .word = u"text"},
+        {.input = {u"a#text#is#here!", 5}, .word = u"text"},
+        {.input = {u"a#text#is#here!", 6}, .word = u"text"},
+        {.input = {u"a#text#is#here!", 7}, .word = u"is"},
+        {.input = {u"a#text#is#here!", 8}, .word = u"is"},
+        {.input = {u"a#text#is#here!", 9}, .word = u"is"},
+        {.input = {u"a#text#is#here!", 10}, .word = u"here"},
+        {.input = {u"a#text#is#here!", 13}, .word = u"here"},
+        {.input = {u"a#text#is#here!", 14}, .word = u"here"},
+        {.input = {u"a#text#is#here!", 15}, .word = {}},
+        {.input = {u"here! there!", 3}, .word = u"here"},
+        {.input = {u"here! there!", 4}, .word = u"here"},
+        {.input = {u"here! there!", 5}, .word = {}},
+        {.input = {u"here! there!", 6}, .word = u"there"},
+        {.input = {u"/my-command wow", 0}, .word = {}},
+        {.input = {u"/my-command wow", 1}, .word = {}},
+        {.input = {u"/my-command wow", 2}, .word = {}},
+        {.input = {u"/my-command wow", 10}, .word = {}},
+        {.input = {u"/my-command wow", 11}, .word = {}},
+        {.input = {u"/my-command wow", 12}, .word = u"wow"},
+        {.input = {u"a 7TVGlobal b", 0}, .word = u"a"},
+        {.input = {u"a 7TVGlobal b", 1}, .word = u"a"},
+        {.input = {u"a 7TVGlobal b", 2}, .word = {}},
+        {.input = {u"a 7TVGlobal b", 10}, .word = {}},
+        {.input = {u"a 7TVGlobal b", 11}, .word = {}},
+        {.input = {u"a 7TVGlobal b", 12}, .word = u"b"},
+        {.input = {u"a 7TVGlobal b", 13}, .word = u"b"},
+        {.input = {u"a 7TVGlobal b", 14}, .word = {}},
+    };
+
+    SpellChecker nullSpellChecker;
+    InputHighlighter highlighter(nullSpellChecker, nullptr);
+    highlighter.setChannel(this->channel);
+    for (size_t i = 0; i < cases.size(); i++)
+    {
+        const auto &c = cases[i];
+        auto got = highlighter.getWordAt(c.input.first, c.input.second);
+        ASSERT_EQ(got, c.word) << "index=" << i;
     }
 }
