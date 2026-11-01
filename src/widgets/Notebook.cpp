@@ -1715,8 +1715,8 @@ void SplitNotebook::updateStreamerModeIcon()
         return;
     }
 
-    const auto oldVisibility = this->streamerModeIcon_->isVisible();
-    const auto newVisibility = getApp()->getStreamerMode()->isEnabled();
+    auto oldVisibility = this->streamerModeIcon_->isVisible();
+    auto newVisibility = getApp()->getStreamerMode()->isEnabled();
 
     this->streamerModeIcon_->setVisible(newVisibility);
 
