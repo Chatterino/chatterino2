@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
