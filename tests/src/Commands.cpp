@@ -1195,7 +1195,8 @@ TEST(Commands, customCommands)
             .expected = "one and two",
         },
         {
-            .command = Command("/cmd", "{1+;test} {2;two} x{3+}y {4+;test 123}"),
+            .command =
+                Command("/cmd", "{1+;test} {2;two} x{3+}y {4+;test 123}"),
             .context = {},
             .words = {"/cmd", "a", "b"},
             .expected = "a b b xy test 123",
