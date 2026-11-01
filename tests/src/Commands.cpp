@@ -1165,10 +1165,10 @@ TEST(Commands, customCommands)
             .expected = "context: test and alt",
         },
         {
-            .command = Command("/cmd", "fallback: {non-existing-var} {0}"),
+            .command = Command("/cmd", "fallback: {non-existing-var;alt} {0}"),
             .context = {},
             .words = {"/cmd", "ignored"},
-            .expected = "fallback: {non-existing-var} {0}",
+            .expected = "fallback: {non-existing-var;alt} {0}",
         },
         {
             .command = Command("/cmd", "one {1} two {2}three {3}"),
