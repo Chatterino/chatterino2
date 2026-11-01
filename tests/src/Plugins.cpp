@@ -942,8 +942,8 @@ TEST_F(PluginTest, MessageElementFlag)
 
 TEST_F(PluginTest, ChannelType)
 {
-    configure();
-    lua->script(R"lua(
+    this->configure();
+    this->lua->script(R"lua(
         values = {}
         for k, v in pairs(c2.ChannelType) do
             table.insert(values, k)
@@ -963,7 +963,7 @@ TEST_F(PluginTest, ChannelType)
                          "TwitchWatching,"
                          "TwitchWhispers";
 
-    std::string got = (*lua)["out"];
+    std::string got = (*this->lua)["out"];
     ASSERT_EQ(got, VALUES);
 }
 
