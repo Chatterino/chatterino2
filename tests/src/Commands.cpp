@@ -876,6 +876,8 @@ TEST(Commands, E2E)
 
     EXPECT_CALL(mockHelix, update).Times(1);
     EXPECT_CALL(mockHelix, loadBlocks).Times(1);
+    // from checking the user's scopes
+    EXPECT_CALL(mockHelix, validateToken).Times(1);
 
     auto account = std::make_shared<TwitchAccount>(
         testaccount420["login"].toString(), "token", "oauthclient",

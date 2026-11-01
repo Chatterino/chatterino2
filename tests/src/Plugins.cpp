@@ -8,18 +8,17 @@
 #    include "common/Channel.hpp"
 #    include "common/network/NetworkCommon.hpp"
 #    include "controllers/accounts/AccountController.hpp"
-#    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/PluginTestApp.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "lib/Snapshot.hpp"
 #    include "messages/Message.hpp"
 #    include "messages/MessageElement.hpp"
-#    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/EmoteController.hpp"
 #    include "mocks/Logging.hpp"
@@ -90,26 +89,12 @@ public:
     }
 };
 
-class MockApplication : public mock::BaseApplication
+class MockApplication : public testlib::PluginApplication
 {
 public:
     MockApplication()
-        : mock::BaseApplication(TEST_SETTINGS)
-        , plugins(this->paths_)
-        , commands(this->paths_)
-        , windows(this->args_, this->paths_, this->settings, this->theme,
-                  this->fonts)
+        : PluginApplication(TEST_SETTINGS)
     {
-    }
-
-    PluginController *getPlugins() override
-    {
-        return &this->plugins;
-    }
-
-    CommandController *getCommands() override
-    {
-        return &this->commands;
     }
 
     EmoteController *getEmotes() override
@@ -132,19 +117,11 @@ public:
         return &this->accounts;
     }
 
-    WindowManager *getWindows() override
-    {
-        return &this->windows;
-    }
-
-    PluginController plugins;
     mock::Logging logging;
-    CommandController commands;
     mock::EmoteController emotes;
     MockTwitch twitch;
     AccountController accounts;
     mock::Helix helix;
-    WindowManager windows;
 };
 
 QDir luaTestBaseDir(const QString &category)
@@ -191,34 +168,6 @@ bool runLuaTest(const QString &category, const QString &entry,
 
 }  // namespace
 
-namespace chatterino {
-
-class PluginControllerAccess
-{
-public:
-    static bool tryLoadFromDir(const QDir &pluginDir)
-    {
-        return getApp()->getPlugins()->tryLoadFromDir(pluginDir);
-    }
-
-    static void openLibrariesFor(Plugin *plugin)
-    {
-        getApp()->getPlugins()->openLibrariesFor(plugin);
-    }
-
-    static std::map<QString, AnyPlugin> &plugins()
-    {
-        return getApp()->getPlugins()->plugins_;
-    }
-
-    static lua_State *state(Plugin *pl)
-    {
-        return pl->state_;
-    }
-};
-
-}  // namespace chatterino
-
 class PluginTest : public ::testing::Test
 {
 protected:
@@ -226,28 +175,8 @@ protected:
     {
         this->app = std::make_unique<MockApplication>();
 
-        auto &plugins = PluginControllerAccess::plugins();
-        {
-            PluginMeta meta;
-            meta.name = "Test";
-            meta.license = "MIT";
-            meta.homepage = "https://github.com/Chatterino/chatterino2";
-            meta.description = "Plugin for tests";
-            meta.permissions = std::move(permissions);
-
-            QDir plugindir =
-                QDir(app->paths_.pluginsDirectory).absoluteFilePath("test");
-
-            plugindir.mkpath(".");
-            auto temp = std::make_unique<Plugin>("test", luaL_newstate(), meta,
-                                                 plugindir);
-            this->rawpl = temp.get();
-            plugins.insert({"test", std::move(temp)});
-        }
-
-        // XXX: this skips PluginController::load()
-        PluginControllerAccess::openLibrariesFor(rawpl);
-        this->lua = new sol::state_view(PluginControllerAccess::state(rawpl));
+        this->rawpl = this->app->loadDefaultPlugin(std::move(permissions));
+        this->lua.emplace(this->rawpl->state());
 
         this->channel = app->twitch.mm2pl;
         this->rawpl->dataDirectory().mkpath(".");
@@ -258,16 +187,14 @@ protected:
     void TearDown() override
     {
         // perform safe destruction of the plugin
-        delete this->lua;
-        this->lua = nullptr;
-        PluginControllerAccess::plugins().clear();
+        this->lua.reset();
         this->rawpl = nullptr;
         this->app.reset();
     }
 
     Plugin *rawpl = nullptr;
     std::unique_ptr<MockApplication> app;
-    sol::state_view *lua;
+    std::optional<sol::state_view> lua;
     ChannelPtr channel;
 };
 
@@ -286,8 +213,9 @@ TEST_F(PluginTest, testCommands)
         end)
     )lua");
 
-    EXPECT_EQ(app->commands.pluginCommands(), QStringList{"/test"});
-    app->commands.execCommand("/test with arguments", channel, false);
+    EXPECT_EQ(app->getCommands()->pluginCommands(), QStringList{"/test"});
+    this->app->getCommands()->execCommand("/test with arguments", this->channel,
+                                          false);
     bool called = (*lua)["called"];
     EXPECT_EQ(called, true);
 
@@ -345,7 +273,7 @@ TEST_F(PluginTest, testCompletion)
     bool done{};
     QStringList results;
     std::tie(done, results) =
-        app->plugins.updateCustomCompletions("foo", "foo", 3, true);
+        this->app->getPlugins()->updateCustomCompletions("foo", "foo", 3, true);
     ASSERT_EQ(done, false);
     ASSERT_EQ(results, QStringList{"Completion"});
 
@@ -354,7 +282,7 @@ TEST_F(PluginTest, testCompletion)
     ASSERT_EQ((*lua).get<int>("cursor_position"), 3);
     ASSERT_EQ((*lua).get<bool>("is_first_word"), true);
 
-    std::tie(done, results) = app->plugins.updateCustomCompletions(
+    std::tie(done, results) = this->app->getPlugins()->updateCustomCompletions(
         "exclusive", "foo exclusive", 13, false);
     ASSERT_EQ(done, true);
     ASSERT_EQ(results, QStringList({"Completion1", "Completion2"}));
@@ -1179,9 +1107,9 @@ TEST_F(PluginTest, MessageModification)
                 assert(msg.username_color == "#ccbbaaff")
             end,
             function(msg)
-                assert(msg.server_received_time == 1230000)
-                msg.server_received_time = 1240000
-                assert(msg.server_received_time == 1240000)
+                assert(msg.timestamp == 1230000)
+                msg.timestamp = 1240000
+                assert(msg.timestamp == 1240000)
             end,
             function(msg)
                 print(msg.highlight_color)
@@ -1210,7 +1138,7 @@ TEST_F(PluginTest, MessageModification)
         msg->userID = "id";
         msg->channelName = "channel";
         msg->usernameColor = QColor(0xaabbcc);
-        msg->serverReceivedTime = QDateTime::fromMSecsSinceEpoch(1230000);
+        msg->timestamp = QDateTime::fromMSecsSinceEpoch(1230000);
         msg->highlightColor = std::make_shared<QColor>(0x223344);
         msg->elements.push_back(
             std::make_unique<TextElement>("lol", MessageElementFlag::Text));

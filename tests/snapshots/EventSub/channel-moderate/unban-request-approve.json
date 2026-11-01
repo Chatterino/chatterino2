@@ -151,8 +151,8 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz approved the unban request from uint128. ",
             "searchText": "nerixyz approved the unban request from uint128. ",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timestamp": "2024-05-14T12:31:47Z",
+            "timeoutUser": "uint128",
             "twitchBadgeInfos": {
             },
             "twitchBadges": [

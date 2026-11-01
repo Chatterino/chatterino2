@@ -474,11 +474,25 @@ Split *ChannelView::findParentSplit() const
     }
 
     auto *searchPopup = dynamic_cast<SearchPopup *>(this->parentWidget());
-    if (!searchPopup)
+    if (searchPopup)
     {
-        return nullptr;
+        return dynamic_cast<Split *>(searchPopup->parentWidget());
     }
-    return dynamic_cast<Split *>(searchPopup->parentWidget());
+
+    if (this->parentWidget() != nullptr)
+    {
+        if (this->parentWidget()->parentWidget() != nullptr)
+        {
+            auto *userInfoPopup = dynamic_cast<UserInfoPopup *>(
+                this->parentWidget()->parentWidget()->parentWidget());
+            if (userInfoPopup != nullptr)
+            {
+                split = userInfoPopup->getSplit();
+            }
+        }
+    }
+
+    return split;
 }
 
 bool ChannelView::pausable() const
