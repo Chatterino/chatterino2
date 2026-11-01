@@ -203,9 +203,12 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1)
     {
+        QString channelName;
+        trimChannelName(message->parameter(0), channelName);
+
         return ClearChatMessage{
             .message = MessageBuilder::makeClearChatMessage(
-                calculateMessageTime(message), {}),
+                calculateMessageTime(message), {}, channelName),
             .disableAllMessages = true,
         };
     }
@@ -223,6 +226,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
                        calculateMessageTime(message))
             .release();
+    trimChannelName(message->parameter(0), timeoutMsg->channelName);
 
     return ClearChatMessage{.message = timeoutMsg,
                             .disableAllMessages = false,
@@ -394,12 +398,16 @@ void IrcMessageHandler::parsePrivMessageInto(
     TwitchChannel *channel)
 {
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
-    if (message->tag("user-id") == currentUser->getUserId())
+    auto isCurrentUser = message->tag("user-id") == currentUser->getUserId();
+    auto shouldUpdateChannelFromMessage =
+        isCurrentUser &&
+        sink.sinkTraits().has(MessageSinkTrait::UpdateCurrentUserState);
+
+    if (shouldUpdateChannelFromMessage)
     {
         auto badgesTag = message->tag("badges");
         if (badgesTag.isValid())
         {
-            // TODO: We should not update mod or vip status from recent messages
             auto parsedBadges = parseBadges(badgesTag.toString());
             channel->setMod(parsedBadges.contains("moderator") ||
                             parsedBadges.contains("lead_moderator"));
@@ -407,19 +415,16 @@ void IrcMessageHandler::parsePrivMessageInto(
             channel->setStaff(parsedBadges.contains("staff"));
         }
 
-        if (!channel->isLoadingRecentMessages())
-        {
-            // Clear the send wait timer when we are able to send a message
-            channel->setSendWait(0);
+        // Clear the send wait timer when we are able to send a message
+        channel->setSendWait(0);
 
-            // Update send wait timer with slow mode timeout if this user is not a mod or vip.
-            if (!channel->hasHighRateLimit())
+        // Update send wait timer with slow mode timeout if this user is not a mod or vip.
+        if (!channel->hasHighRateLimit())
+        {
+            auto roomModes = *channel->accessRoomModes();
+            if (roomModes.slowMode > 0)
             {
-                auto roomModes = *channel->accessRoomModes();
-                if (roomModes.slowMode > 0)
-                {
-                    channel->setSendWait(roomModes.slowMode);
-                }
+                channel->setSendWait(roomModes.slowMode);
             }
         }
     }
@@ -678,6 +683,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     MessageBuilder::triggerHighlights(c, alert);
 
     getApp()->getTwitch()->setLastUserThatWhisperedMe(message->loginName);
+    getApp()->getAccounts()->twitch.getCurrent()->addWhisperUser(
+        message->loginName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
@@ -769,10 +776,18 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
     if (msgType == "subgift")
     {
         // subgifts are special because they include two users
-        const auto msg = MessageBuilder::makeSubgiftMessage(
+        const auto [msg, alert] = MessageBuilder::makeSubgiftMessage(
             tags, calculateMessageTime(message).time(), channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
+
+        if (msg->flags.has(MessageFlag::ShowInMentions) &&
+            sink.sinkTraits().has(MessageSinkTrait::AddMentionsToGlobalChannel))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                msg, MessageContext::Original);
+        }
         return;
     }
 
@@ -879,11 +894,12 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                 })
                 .value_or(MessageColor::System);
 
-        auto msg = MessageBuilder::makeSystemMessageWithUser(
+        auto [msg, alert] = MessageBuilder::makeSystemMessageWithUser(
             parseTagString(messageText), login, displayName, userColor,
             calculateMessageTime(message).time(), *message, channel);
 
         sink.addMessage(msg, MessageContext::Original);
+        MessageBuilder::triggerHighlights(channel, alert);
     }
 }
 

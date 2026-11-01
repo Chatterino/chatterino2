@@ -93,3 +93,6 @@ CheckOptions:
 
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
     value: true
+
+  - key: cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses
+    value: ^QJson(Object|Array|Value)

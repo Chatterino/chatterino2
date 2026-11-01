@@ -12,6 +12,8 @@
 
 namespace chatterino {
 
+QColor parseHexColor(const QString &text);
+
 class ColorInput : public QWidget
 {
     Q_OBJECT

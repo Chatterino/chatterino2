@@ -44,6 +44,21 @@ public:
     {
     }
 
+    BaseApplication(const QString &settingsData, bool runMigrations,
+                    bool runCleanup)
+        : EmptyApplication(settingsData)
+        , settings(this->modes_, this->args_, this->settingsDir.path(),
+                   {
+                       .isTest = true,
+                       .runMigrations = runMigrations,
+                       .runCleanup = runCleanup,
+                   })
+        , updates(this->modes_, this->paths_, this->settings)
+        , theme(this->paths_)
+        , fonts(this->settings)
+    {
+    }
+
     Updates &getUpdates() override
     {
         return this->updates;

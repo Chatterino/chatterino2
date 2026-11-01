@@ -196,14 +196,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|Announcement",
+            "flags": "Highlighted|Collapsed|Announcement",
             "frozen": false,
+            "highlightColor": "#646694ff",
             "id": "40a7aa20-5f3b-421c-8fd0-4d17c57ccc74",
             "localizedName": "",
             "loginName": "pajlada",
             "messageText": "blue announcement",
             "searchText": "pajlada  pajlada: blue announcement ",
-            "serverReceivedTime": "2026-04-18T11:15:08Z",
+            "timestamp": "2026-04-18T11:15:08Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "124"

@@ -297,10 +297,6 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     QPainter painter(this);
     painter.fillRect(this->rect(), this->theme->scrollbars.background);
 
-    bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
-    bool enableFirstMessageHighlights =
-        getSettings()->enableFirstMessageHighlight;
-
     if (this->shouldShowThumb())
     {
         this->thumbRect_.setX(xOffset);
@@ -336,35 +332,24 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
                 continue;
             }
 
-            if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
-            {
-                continue;
-            }
-
-            if (highlight.isFirstMessageHighlight() &&
-                !enableFirstMessageHighlights)
-            {
-                continue;
-            }
-
             QColor color = highlight.getColor();
             color.setAlpha(255);
 
             int y = static_cast<int>(dY * static_cast<float>(i));
             switch (highlight.getStyle())
             {
-                case ScrollbarHighlight::Default: {
+                case ScrollbarHighlight::Style::Default: {
                     painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight,
                                      color);
                 }
                 break;
 
-                case ScrollbarHighlight::Line: {
+                case ScrollbarHighlight::Style::Line: {
                     painter.fillRect(0, y, w, 1, color);
                 }
                 break;
 
-                case ScrollbarHighlight::None:;
+                case ScrollbarHighlight::Style::None:;
             }
         }
     }

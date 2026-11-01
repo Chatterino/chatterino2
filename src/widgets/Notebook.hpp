@@ -23,7 +23,7 @@
 namespace chatterino {
 
 class Button;
-class PixmapButton;
+class SvgButton;
 class Window;
 class DrawnButton;
 class NotebookTab;
@@ -66,7 +66,7 @@ public:
     int visibleIndexOf(QWidget *page) const;
 
     /**
-     * @brief Returns the number of visible tabs in Notebook. 
+     * @brief Returns the number of visible tabs in Notebook.
      **/
     int getVisibleTabCount() const;
 
@@ -83,33 +83,33 @@ public:
 
     /**
      * @brief Selects the Notebook tab at the given index. Ignores whether tabs
-     * are visible or not. 
+     * are visible or not.
      **/
     void selectIndex(int index, bool focusPage = true);
 
     /**
      * @brief Selects the index'th visible tab in the Notebook.
-     * 
-     * For example, selecting the 0th visible tab selects the first tab in this 
+     *
+     * For example, selecting the 0th visible tab selects the first tab in this
      * Notebook that is visible according to the TabVisibilityFilter. If no filter
      * is set, equivalent to Notebook::selectIndex.
      **/
     void selectVisibleIndex(int index, bool focusPage = true);
 
     /**
-     * @brief Selects the next visible tab. Wraps to the start if required. 
+     * @brief Selects the next visible tab. Wraps to the start if required.
      **/
     void selectNextTab(bool focusPage = true, bool recordInHistory = true);
 
     /**
-     * @brief Selects the previous visible tab. Wraps to the end if required. 
+     * @brief Selects the previous visible tab. Wraps to the end if required.
      **/
     void selectPreviousTab(bool focusPage = true, bool recordInHistory = true);
 
     void scrollTabs(QWheelEvent *event);
 
     /**
-     * @brief Selects the last visible tab. 
+     * @brief Selects the last visible tab.
      **/
     void selectLastTab(bool focusPage = true);
 
@@ -139,7 +139,7 @@ public:
 
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
+    virtual void setShowTabs(bool value);
 
     void setGrowWrappedNotebookLines(bool value);
 
@@ -221,11 +221,6 @@ private:
     void performVerticalLayout(const LayoutContext &ctx, bool animated);
 
     /**
-     * @brief Show a popup informing the user of some big tab visibility changes
-     **/
-    void showTabVisibilityInfoPopup();
-
-    /**
      * @brief Updates the visibility state of all tabs
      **/
     void updateTabVisibility();
@@ -300,6 +295,8 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+    void setShowTabs(bool value) override;
+
     void afterPageAdded() override;
     void afterPageRemoved() override;
     void afterPageMoved() override;
@@ -312,10 +309,15 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Main window on Windows has basically a duplicate of this in Window
-    PixmapButton *streamerModeIcon_{};
+    SvgButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
 
     void setLockNotebookLayout(bool value) override;
+
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
+    void showTabVisibilityInfoPopup();
 };
 
 }  // namespace chatterino

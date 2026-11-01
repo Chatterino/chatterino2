@@ -50,6 +50,7 @@ public:
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+    void setWhisperTarget(const QString &username) const;
 
     void setReply(MessagePtr target);
     void setPlaceholderText(const QString &text);
@@ -266,6 +267,7 @@ private Q_SLOTS:
 
     friend class Split;
     friend class ReplyThreadPopup;
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

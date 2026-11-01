@@ -81,8 +81,7 @@ MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
 
 struct HighlightAlert {
-    QUrl customSound;
-    bool playSound = false;
+    QUrl sound;
     bool windowAlert = false;
 };
 class MessageBuilder
@@ -168,8 +167,9 @@ public:
     void appendChannelPointRewardMessage(const ChannelPointReward &reward,
                                          bool isMod, bool isBroadcaster);
 
-    static MessagePtr makeChannelPointRewardMessage(
-        const ChannelPointReward &reward, bool isMod, bool isBroadcaster);
+    static std::pair<MessagePtr, HighlightAlert> makeChannelPointRewardMessage(
+        const ChannelPointReward &reward, bool isMod, bool isBroadcaster,
+        Channel *channel);
 
     /// Make a "CHANNEL_NAME has gone live!" message
     static MessagePtr makeLiveMessage(const HelixMinimalUser &channel,
@@ -229,15 +229,14 @@ public:
         const std::shared_ptr<MessageThread> &thread = {},
         const MessagePtr &parent = {});
 
-    static MessagePtrMut makeSystemMessageWithUser(
+    static std::pair<MessagePtrMut, HighlightAlert> makeSystemMessageWithUser(
         const QString &text, const QString &loginName,
         const QString &displayName, const MessageColor &userColor,
         const QTime &time, const Communi::IrcMessage &ircMessage,
         TwitchChannel *channel);
 
-    static MessagePtrMut makeSubgiftMessage(Communi::TagsRef tags,
-                                            const QTime &time,
-                                            TwitchChannel *channel);
+    static std::pair<MessagePtrMut, HighlightAlert> makeSubgiftMessage(
+        Communi::TagsRef tags, const QTime &time, TwitchChannel *channel);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
 
@@ -246,6 +245,7 @@ public:
     /// @param count How many times this message has been received already
     static MessagePtrMut makeClearChatMessage(const QDateTime &now,
                                               const QString &actor,
+                                              const QString &channelName,
                                               uint32_t count = 1);
 
     static MessagePtrMut makePinSuccessMessage(QString text, const QString &id);
@@ -309,11 +309,15 @@ private:
                      const Channel *channel,
                      const std::shared_ptr<MessageThread> &thread,
                      const MessagePtr &parent);
-    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
-    HighlightAlert parseHighlights(Communi::TagsRef tags,
-                                   const QString &originalMessage,
-                                   const MessageParseArgs &args);
 
+public:
+    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
+    [[nodiscard]] HighlightAlert parseHighlights(Communi::TagsRef tags,
+                                                 const QString &originalMessage,
+                                                 const MessageParseArgs &args,
+                                                 Channel *channel);
+
+private:
     void appendChannelName(const Channel *channel);
     void appendUsername(Communi::TagsRef tags, const MessageParseArgs &args);
 

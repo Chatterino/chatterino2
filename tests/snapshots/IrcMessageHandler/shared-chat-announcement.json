@@ -244,14 +244,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|SharedMessage|Announcement",
+            "flags": "Highlighted|Collapsed|SharedMessage|Announcement",
             "frozen": false,
+            "highlightColor": "#64ff66ed",
             "id": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22",
             "localizedName": "",
             "loginName": "lahoooo",
             "messageText": "hi this is an announcement from 1",
             "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
-            "serverReceivedTime": "2024-09-12T05:19:38Z",
+            "timestamp": "2024-09-12T05:19:38Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

@@ -72,6 +72,9 @@ public:
 
     bool isAnon() const;
 
+    void addWhisperUser(const QString &user);
+    [[nodiscard]] const std::unordered_set<QString> &whisperUsers() const;
+
     void loadBlocks();
     void blockUser(const QString &userId, const QString &userLogin,
                    const QObject *caller, std::function<void()> onSuccess,
@@ -126,6 +129,7 @@ private:
     Atomic<QColor> color_;
 
     QStringList userstateEmoteSets_;
+    std::unordered_set<QString> whisperUsers_;
 
     ScopedCancellationToken blockToken_;
     ExponentialBackoff<5> blocksRetryBackoff_{std::chrono::seconds(5)};

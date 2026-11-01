@@ -7,9 +7,17 @@
 namespace chatterino {
 
 enum UsernameDisplayMode : int {
-    Username = 1,                  // Username
-    LocalizedName = 2,             // Localized name
-    UsernameAndLocalizedName = 3,  // Username (Localized name)
+    /// The user's display name, disregarding the localized name
+    /// e.g. "forsen", "testaccount_420", "NymN"
+    Username = 1,
+
+    /// The user's display name or localized name
+    /// e.g. "forsen", "테스트계정420", "NymN"
+    LocalizedName = 2,
+
+    /// The user's display name and, if it exists, their localized name
+    /// e.g. "forsen", "testaccount_420 (테스트계정420)", "NymN"
+    UsernameAndLocalizedName = 3,
 };
 
 }  // namespace chatterino

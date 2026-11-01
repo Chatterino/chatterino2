@@ -2,6 +2,7 @@
 
 #include <AppKit/AppKit.h>
 #include <QUrl>
+#include <QWidget>
 
 void chatterinoSetMacOsActivationPolicyProhibited()
 {
@@ -12,6 +13,26 @@ void chatterinoSetMacOsActivationPolicyProhibited()
 namespace chatterino {
 
 #ifdef Q_OS_DARWIN
+void setMacOSWindowManaged(QWidget &widget)
+{
+    if (widget.windowType() != Qt::Window && widget.windowType() != Qt::Dialog)
+    {
+        return;
+    }
+
+    auto *view = reinterpret_cast<NSView *>(widget.effectiveWinId());
+    auto *window = view.window;
+    if (window == nil)
+    {
+        return;
+    }
+
+    window.collectionBehavior =
+        (window.collectionBehavior & ~(NSWindowCollectionBehaviorTransient |
+                                       NSWindowCollectionBehaviorStationary)) |
+        NSWindowCollectionBehaviorManaged;
+}
+
 QString getMacOSDefaultBrowserPath()
 {
     @autoreleasepool {

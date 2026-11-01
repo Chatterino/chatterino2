@@ -10,7 +10,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -77,10 +76,6 @@ Notebook::Notebook(QWidget *parent)
         });
 
     this->lockNotebookLayoutAction_ = new QAction("Lock Tab Layout", this);
-
-    // Load lock notebook layout state from settings
-    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
-
     this->lockNotebookLayoutAction_->setCheckable(true);
     this->lockNotebookLayoutAction_->setChecked(this->lockNotebookLayout_);
 
@@ -714,12 +709,6 @@ void Notebook::setShowTabs(bool value)
     this->performLayout();
 
     this->updateTabVisibility();
-
-    // show a popup upon hiding tabs
-    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
-    {
-        this->showTabVisibilityInfoPopup();
-    }
 }
 
 void Notebook::setGrowWrappedNotebookLines(bool value)
@@ -728,48 +717,6 @@ void Notebook::setGrowWrappedNotebookLines(bool value)
     {
         this->growWrappedNotebookLines = value;
         this->performLayout();
-    }
-}
-
-void Notebook::showTabVisibilityInfoPopup()
-{
-    auto unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
-    if (unhideSeq.isEmpty())
-    {
-        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
-    }
-    if (unhideSeq.isEmpty())
-    {
-        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
-            HotkeyCategory::Window, "setTabVisibility", {{"on"}});
-    }
-    QString hotkeyInfo = "(currently unbound)";
-    if (!unhideSeq.isEmpty())
-    {
-        hotkeyInfo =
-            "(" + unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
-            ")";
-    }
-    QMessageBox msgBox(this->window());
-    msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
-    msgBox.setText("You've just hidden your tabs.");
-    msgBox.setInformativeText(
-        "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
-        " or right-clicking the tab area and selecting \"Toggle "
-        "visibility of tabs\".");
-    msgBox.addButton(QMessageBox::Ok);
-    auto *dsaButton =
-        msgBox.addButton("Don't show again", QMessageBox::YesRole);
-
-    msgBox.setDefaultButton(QMessageBox::Ok);
-
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == dsaButton)
-    {
-        getSettings()->informOnTabVisibilityToggle.setValue(false);
     }
 }
 
@@ -1351,7 +1298,6 @@ void Notebook::setLockNotebookLayout(bool value)
 {
     this->lockNotebookLayout_ = value;
     this->lockNotebookLayoutAction_->setChecked(value);
-    getSettings()->lockNotebookLayout.setValue(value);
 }
 
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
@@ -1592,6 +1538,9 @@ SplitNotebook::SplitNotebook(Window *parent)
             this->setGrowWrappedNotebookLines(value);
         },
         this->signalHolder_, true);
+
+    // Load lock notebook layout state from settings
+    this->setLockNotebookLayout(getSettings()->lockNotebookLayout.getValue());
 }
 
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
@@ -1728,7 +1677,10 @@ void SplitNotebook::addCustomButtons()
     });
 
     // updates
-    auto *updateBtn = this->addCustomButton<PixmapButton>();
+    auto *updateBtn = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/update-darkMode.svg",
+        .light = ":/buttons/update-lightMode.svg",
+    });
 
     initUpdateButton(
         *updateBtn,
@@ -1738,7 +1690,11 @@ void SplitNotebook::addCustomButtons()
         this->signalHolder_);
 
     // streamer mode
-    this->streamerModeIcon_ = this->addCustomButton<PixmapButton>();
+    this->streamerModeIcon_ = this->addCustomButton<SvgButton>(SvgButton::Src{
+        .dark = ":/buttons/streamerModeEnabledDark.svg",
+        .light = ":/buttons/streamerModeEnabledLight.svg",
+    });
+
     QObject::connect(this->streamerModeIcon_, &Button::leftClicked, [this] {
         getApp()->getWindows()->showSettingsDialog(
             this, SettingsDialogPreference::StreamerMode);
@@ -1755,19 +1711,6 @@ void SplitNotebook::updateStreamerModeIcon()
     if (this->streamerModeIcon_ == nullptr)
     {
         return;
-    }
-    // A duplicate of this code is in Window class
-    // That copy handles the TitleBar icon in Window (main window on Windows)
-    // This one is the one near splits (on linux and mac or non-main windows on Windows)
-    if (getTheme()->isLightTheme())
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledLight);
-    }
-    else
-    {
-        this->streamerModeIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledDark);
     }
 
     auto oldVisibility = this->streamerModeIcon_->isVisible();
@@ -1849,7 +1792,19 @@ void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
 void SplitNotebook::setLockNotebookLayout(bool value)
 {
     Notebook::setLockNotebookLayout(value);
+    getSettings()->lockNotebookLayout.setValue(value);
     this->sortTabsAlphabeticallyAction_->setEnabled(!value);
+}
+
+void SplitNotebook::setShowTabs(bool value)
+{
+    Notebook::setShowTabs(value);
+
+    // show a popup upon hiding tabs
+    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
+    {
+        this->showTabVisibilityInfoPopup();
+    }
 }
 
 void SplitNotebook::afterPageAdded()
@@ -1865,6 +1820,48 @@ void SplitNotebook::afterPageRemoved()
 void SplitNotebook::afterPageMoved()
 {
     getApp()->getWindows()->queueSave();
+}
+
+void SplitNotebook::showTabVisibilityInfoPopup()
+{
+    auto unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+        HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
+    }
+    if (unhideSeq.isEmpty())
+    {
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "setTabVisibility", {{"on"}});
+    }
+    QString hotkeyInfo = "(currently unbound)";
+    if (!unhideSeq.isEmpty())
+    {
+        hotkeyInfo =
+            "(" + unhideSeq.toString(QKeySequence::SequenceFormat::NativeText) +
+            ")";
+    }
+    QMessageBox msgBox(this->window());
+    msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
+    msgBox.setText("You've just hidden your tabs.");
+    msgBox.setInformativeText(
+        "You can toggle tabs by using the keyboard shortcut " + hotkeyInfo +
+        " or right-clicking the tab area and selecting \"Toggle "
+        "visibility of tabs\".");
+    msgBox.addButton(QMessageBox::Ok);
+    auto *dsaButton =
+        msgBox.addButton("Don't show again", QMessageBox::YesRole);
+
+    msgBox.setDefaultButton(QMessageBox::Ok);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == dsaButton)
+    {
+        getSettings()->informOnTabVisibilityToggle.setValue(false);
+    }
 }
 
 }  // namespace chatterino

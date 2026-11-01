@@ -21,6 +21,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/ChatterListWidget.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -779,6 +780,9 @@ ChannelPtr Split::getChannel() const
 
 void Split::setChannel(IndirectChannel newChannel)
 {
+    this->channelSignalHolder_.clear();
+    this->input_->setSendWaitStatus("");
+
     this->channel_ = newChannel;
 
     this->view_->setChannel(newChannel.get());
@@ -819,7 +823,7 @@ void Split::setChannel(IndirectChannel newChannel)
 
     this->indirectChannelChangedConnection_ =
         newChannel.getChannelChanged().connect([this] {
-            QTimer::singleShot(0, [this] {
+            QTimer::singleShot(0, this, [this] {
                 this->setChannel(this->channel_);
             });
         });
@@ -1307,7 +1311,8 @@ SplitDescriptor Split::buildDescriptor() const
     descriptor.spellCheckOverride = this->checkSpellingOverride();
 
     auto chan = this->getIndirectChannel();
-    descriptor.type_ = qmagicenum::enumNameString(chan.getType());
+    descriptor.type_ =
+        qmagicenum::SerializedName::enumNameString(chan.getType());
     switch (chan.getType())
     {
         case Channel::Type::Twitch:

@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"  // IWYU pragma: keep
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -26,6 +27,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -529,7 +531,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "match the width of Twitch web chat.")
         ->addTo(layout);
 
-    layout.addDropdown<QString>(
+    auto *timestampFormatDropdown = layout.addDropdown<QString>(
         "Message timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
@@ -547,6 +549,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                                    : args.value;
         },
         true, "a = am/pm, zzz = milliseconds");
+    timestampFormatDropdown->completer()->setCaseSensitivity(Qt::CaseSensitive);
 
     SettingWidget::checkbox("Show header timestamps", s.showHeaderTimestamps)
         ->addTo(layout);
@@ -566,6 +569,31 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Twitch GIFs will be shown inline. When disabled, they're "
                      "shown as links.")
         ->addTo(layout);
+
+    auto *twitchGifSize = layout.addDropdown<float>(
+        "Twitch GIF size",
+        {"0.5x", "0.75x", "Default", "1.25x", "1.4x (Twitch)", "1.5x", "2x"},
+        s.twitchGifScale,
+        [](auto value) {
+            if (value == 1)
+            {
+                return QString("Default");
+            }
+            if (qFuzzyCompare(value, 1.4F))
+            {
+                return QString("1.4x (Twitch)");
+            }
+            return QString::number(value) + "x";
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        });
+    twitchGifSize->setEnabled(s.showTwitchGifs);
+    s.showTwitchGifs.connect(
+        [twitchGifSize](bool enabled) {
+            twitchGifSize->setEnabled(enabled);
+        },
+        this->managedConnections_);
 
     layout.addDropdown<int>(
         "Limit message height",
@@ -950,6 +978,30 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 
 #ifdef Q_OS_WIN
+    if (getApp()->getModes().isPortable)
+    {
+        layout.addDescription(
+            "Portable Chatterino does not register browser integration "
+            "automatically. Registration writes to your Windows user registry "
+            "to point your browser extension to this copy of Chatterino. "
+            "You may manually register it below.");
+        layout.addButton("Register browser integration", [this] {
+            const auto result = registerNmHost(getApp()->getPaths());
+            if (result)
+            {
+                QMessageBox::information(this, "Registration Successful",
+                                         "Browser integration registered.");
+            }
+            else
+            {
+                QMessageBox::warning(
+                    this, "Registration Failed",
+                    "Failed to register browser integration:\n" +
+                        result.error());
+            }
+        });
+    }
+
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
     SettingWidget::checkbox("Attach to any browser (may cause issues)",
@@ -1561,14 +1613,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Show Twitch whispers inline", s.inlineWhispers)
         ->setTooltip("Show whispers as messages in all splits instead of just "
-                     "/whispers.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Highlight received inline whispers",
-                            s.highlightInlineWhispers)
-        ->setTooltip(
-            "Highlight the whispers shown in all splits.\nIf \"Show Twitch "
-            "whispers inline\" is disabled, this setting will do nothing.")
+                     "/whispers.\nHighlighting of this is now controlled in "
+                     "the Highlights page.")
         ->addTo(layout);
 
     SettingWidget::checkbox(

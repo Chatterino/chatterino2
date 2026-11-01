@@ -124,6 +124,31 @@ TEST(AsciiArtLayout, LimitsTheMessageWidth)
     container.endLayout();
 }
 
+TEST(MessageLayoutContainer, InlineGifCopyText)
+{
+    MockApplication mockApplication;
+    MessageLayoutContainer container;
+    MessageLayoutContext ctx{
+        .messageColors = {},
+        .flags = MessageElementFlag::TwitchGif,
+        .width = 1000,
+        .scale = 1.0F,
+        .imageScale = 1.0F,
+    };
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale, {});
+
+    ScalingImageElement gif(
+        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
+        MessageElementFlag::TwitchGif, "[Peppah Dog By Forsen]");
+    auto clone = gif.clone();
+    clone->addToContainer(container, ctx);
+    container.endLayout();
+
+    QString copyText;
+    container.addSelectionText(copyText, 0, 100, CopyMode::OnlyTextAndEmotes);
+    EXPECT_EQ(copyText.trimmed(), "[Peppah Dog By Forsen]");
+}
+
 class MessageLayoutContainerTest : public ::testing::TestWithParam<TestParam>
 {
 public:

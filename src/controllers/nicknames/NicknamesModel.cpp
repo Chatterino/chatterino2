@@ -16,7 +16,9 @@ NicknamesModel::NicknamesModel(QObject *parent)
 
 // turn a vector item into a model row
 Nickname NicknamesModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                        const Nickname &original)
+                                        const Nickname &original,
+                                        std::optional<QModelIndex> index,
+                                        std::optional<int> role)
 {
     return Nickname{row[0]->data(Qt::DisplayRole).toString().trimmed(),
                     row[1]->data(Qt::DisplayRole).toString(),

@@ -214,6 +214,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
      }},
     {HotkeyCategory::SplitInput,
      {
+         {"cancelReply", ActionDefinition{.displayName = "Cancel reply"}},
          {"clear", ActionDefinition{"Clear message"}},
          {"copy",
           ActionDefinition{
@@ -312,6 +313,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"newTab", ActionDefinition{"Create a new tab"}},
          {"openSettings", ActionDefinition{"Open settings"}},
          {"openAccountSelector", ActionDefinition{"Open account selector"}},
+         {"openFollowedChannels",
+          ActionDefinition{.displayName = "Open Following window"}},
          {"openTab",
           ActionDefinition{
               "Select tab",

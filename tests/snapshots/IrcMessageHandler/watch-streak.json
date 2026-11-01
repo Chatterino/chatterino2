@@ -227,14 +227,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "Collapsed|WatchStreak",
+            "flags": "Highlighted|Collapsed|WatchStreak",
             "frozen": false,
+            "highlightColor": "#460082ff",
             "id": "5f360c15-db41-439a-83fd-2e2dbcdebada",
             "localizedName": "",
             "loginName": "imrlazyi",
             "messageText": "🫣",
             "searchText": "imrlazyi  imrlazyi: 🫣 ",
-            "serverReceivedTime": "2026-05-30T11:49:28Z",
+            "timestamp": "2026-05-30T11:49:28Z",
             "timeoutUser": "",
             "twitchBadgeInfos": {
                 "subscriber": "5"
