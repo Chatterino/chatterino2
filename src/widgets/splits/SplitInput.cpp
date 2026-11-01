@@ -653,6 +653,14 @@ int SplitInput::scaledMaxHeight() const
 void SplitInput::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
+        {"cancelReply",
+         [this](const std::vector<QString> &) -> QString {
+             if (this->replyTarget_ != nullptr)
+             {
+                 this->setReply(nullptr);
+             }
+             return {};
+         }},
         {"cursorToStart",
          [this](const std::vector<QString> &arguments) -> QString {
              this->stopHistorySearchIfNecessary();
@@ -920,6 +928,15 @@ void SplitInput::addShortcuts()
              return {};
          }},
     };
+
+    if (!this->enableInlineReplying_)
+    {
+        // Disable the hotkey if inline replying is not enabled (i.e. reply popups)
+        // The reply thread popup uses the `Popup windows -> Close` hotkey already,
+        // and clearing its reply target would leave it open but make subsequent
+        // messages send outside the thread
+        actions["cancelReply"] = nullptr;
+    }
 
     this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::SplitInput, actions, this->parentWidget());
