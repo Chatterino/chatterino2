@@ -940,6 +940,33 @@ TEST_F(PluginTest, MessageElementFlag)
     ASSERT_EQ(got, VALUES);
 }
 
+TEST_F(PluginTest, ChannelType)
+{
+    configure();
+    lua->script(R"lua(
+        values = {}
+        for k, v in pairs(c2.ChannelType) do
+            table.insert(values, k)
+        end
+        table.sort(values)
+        out = table.concat(values, ",")
+    )lua");
+
+    const char *VALUES = "Direct,"
+                         "Misc,"
+                         "None,"
+                         "Twitch,"
+                         "TwitchAutomod,"
+                         "TwitchEnd,"
+                         "TwitchLive,"
+                         "TwitchMentions,"
+                         "TwitchWatching,"
+                         "TwitchWhispers";
+
+    std::string got = (*lua)["out"];
+    ASSERT_EQ(got, VALUES);
+}
+
 TEST_F(PluginTest, ChannelAddMessage)
 {
     configure();
