@@ -689,6 +689,8 @@ set(SOURCE_FILES
         widgets/BaseWindow.hpp
         widgets/ChatterListWidget.cpp
         widgets/ChatterListWidget.hpp
+        widgets/FollowedChannelsWindow.cpp
+        widgets/FollowedChannelsWindow.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
@@ -745,6 +747,8 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+        widgets/dialogs/StreamLinkErrorPopup.cpp
+        widgets/dialogs/StreamLinkErrorPopup.hpp
 
         widgets/dialogs/font/FontDialog.cpp
         widgets/dialogs/font/FontDialog.hpp

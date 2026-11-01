@@ -274,7 +274,7 @@ std::vector<MessagePtr> SearchPopup::buildSnapshot()
     // resort by time for presentation
     std::sort(combinedSnapshot.begin(), combinedSnapshot.end(),
               [](MessagePtr &a, MessagePtr &b) {
-                  return a->serverReceivedTime < b->serverReceivedTime;
+                  return a->timestamp < b->timestamp;
               });
 
     return combinedSnapshot;
