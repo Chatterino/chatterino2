@@ -10,8 +10,11 @@
 #include <boost/circular_buffer.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QColor>
 #include <QPropertyAnimation>
 #include <QWidget>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -103,6 +106,12 @@ public:
 
     void clearHighlights();
 
+    /// Sets the last read message marker.
+    ///
+    /// The position is relative to the start of the message buffer, i.e. the
+    /// index of the message within the buffer.
+    void setLastMessageMarker(std::optional<qreal> relativePosition);
+
     void scrollToBottom(bool animate = false);
     void scrollToTop(bool animate = false);
     bool isAtBottom() const;
@@ -187,6 +196,10 @@ private:
     QPropertyAnimation currentValueAnimation_;
 
     boost::circular_buffer<ScrollbarHighlight> highlights_;
+
+    std::optional<qreal> lastMessageMarkerRelativePosition_;
+    /// Color of the last read message marker
+    QColor lastMessageMarkerColor_;
 
     bool atBottom_{true};
     /// This takes precedence over `settingHideThumb`
