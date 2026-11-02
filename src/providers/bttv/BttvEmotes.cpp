@@ -93,6 +93,7 @@ std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
             .tooltip = Tooltip{name.string + "<br>Global BetterTTV Emote"},
             .homePage = Url{EMOTE_LINK_FORMAT.arg(id.string)},
             .zeroWidth = ZERO_WIDTH_EMOTES.contains(name.string),
+            .id = id,
         });
 
         emotes[name] = cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
