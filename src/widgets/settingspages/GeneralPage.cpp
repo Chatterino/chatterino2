@@ -1464,6 +1464,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "themselves")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Readable username colors",
+                            s.readableUsernameColors)
+        ->setTooltip("Adjust username colors to be readable on the current "
+                     "theme.\nWhen disabled, users' original colors are "
+                     "shown, which can be hard to read.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Mention users with a comma",
                             s.mentionUsersWithComma)
         ->setTooltip("When using tab-completion, if the username is at the "

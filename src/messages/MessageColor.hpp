@@ -12,12 +12,27 @@ namespace chatterino {
 struct MessageColors;
 
 struct MessageColor {
-    enum Type { Custom, Text, Link, System };
+    /// User behaves like Custom, but marks the color as coming from a user
+    /// (e.g. their Twitch color), so it can be exempt from readability
+    /// adjustments
+    enum Type { Custom, Text, Link, System, User };
 
     MessageColor(const QColor &color);
     MessageColor(Type type_ = Text);
 
+    /// Creates a color that is marked as coming from a user
+    static MessageColor user(const QColor &color);
+
     const QColor &getColor(const MessageColors &colors) const;
+
+    /// Returns a copy of this color marked as a user color, if it's a custom
+    /// color. Other colors are returned unchanged.
+    MessageColor asUserColor() const;
+
+    bool isUserColor() const noexcept
+    {
+        return this->type_ == Type::User;
+    }
 
     QString toString() const;
 

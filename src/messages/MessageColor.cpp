@@ -19,11 +19,28 @@ MessageColor::MessageColor(Type type)
 {
 }
 
+MessageColor MessageColor::user(const QColor &color)
+{
+    MessageColor c(color);
+    c.type_ = Type::User;
+    return c;
+}
+
+MessageColor MessageColor::asUserColor() const
+{
+    if (this->type_ == Type::Custom)
+    {
+        return MessageColor::user(this->customColor_);
+    }
+    return *this;
+}
+
 const QColor &MessageColor::getColor(const MessageColors &colors) const
 {
     switch (this->type_)
     {
         case Type::Custom:
+        case Type::User:
             return this->customColor_;
         case Type::Text:
             return colors.regularText;
@@ -42,6 +59,7 @@ QString MessageColor::toString() const
     switch (this->type_)
     {
         case Type::Custom:
+        case Type::User:
             return this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("Text");
@@ -59,6 +77,7 @@ QString MessageColor::toLua() const
     switch (this->type_)
     {
         case Type::Custom:
+        case Type::User:
             return this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("text");
