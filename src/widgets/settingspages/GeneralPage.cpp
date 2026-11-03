@@ -1466,9 +1466,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     SettingWidget::checkbox("Readable username colors",
                             s.readableUsernameColors)
-        ->setTooltip("Adjust username colors to be readable on the current "
-                     "theme.\nWhen disabled, users' original colors are "
-                     "shown, which can be hard to read.")
+        ->setTooltip(
+            "Adjust username colors to be readable on the current theme.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Mention users with a comma",

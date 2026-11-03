@@ -227,7 +227,9 @@ public:
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
     BoolSetting readableUsernameColors = {
-        "/appearance/messages/readableUsernameColors", true};
+        "/appearance/messages/readableUsernameColors",
+        true,
+    };
     EnumSetting<UsernameDisplayMode> usernameDisplayMode = {
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
