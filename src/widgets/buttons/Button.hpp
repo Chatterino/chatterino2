@@ -197,6 +197,7 @@ protected:
     }
 
 private:
+    void startEffectTimer();
     void onMouseEffectTimeout();
     void showMenu();
 

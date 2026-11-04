@@ -22,7 +22,6 @@ Button::Button(BaseWidget *parent)
             &Button::onMouseEffectTimeout);
 
     this->effectTimer_.setInterval(20);
-    this->effectTimer_.start();
 
     this->setMouseTracking(true);
 }
@@ -174,6 +173,7 @@ void Button::enterEvent(QEnterEvent * /*event*/)
     if (!this->mouseOver_)
     {
         this->mouseOver_ = true;
+        this->startEffectTimer();
         this->update();
         this->mouseOverUpdated();
     }
@@ -184,6 +184,7 @@ void Button::leaveEvent(QEvent * /*event*/)
     if (this->mouseOver_)
     {
         this->mouseOver_ = false;
+        this->startEffectTimer();
         this->update();
         this->mouseOverUpdated();
     }
@@ -289,6 +290,15 @@ void Button::mouseMoveEvent(QMouseEvent *event)
 void Button::addClickEffect(QPoint position)
 {
     this->clickEffects_.emplace_back(position);
+    this->startEffectTimer();
+}
+
+void Button::startEffectTimer()
+{
+    if (!this->effectTimer_.isActive())
+    {
+        this->effectTimer_.start();
+    }
 }
 
 void Button::onMouseEffectTimeout()
@@ -337,6 +347,10 @@ void Button::onMouseEffectTimeout()
     if (performUpdate)
     {
         this->update();
+    }
+    else
+    {
+        this->effectTimer_.stop();
     }
 }
 
