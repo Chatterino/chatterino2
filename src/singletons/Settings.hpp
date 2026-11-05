@@ -665,6 +665,7 @@ public:
         "/misc/chatSendProtocol", ChatSendProtocol::Default};
 
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
+    BoolSetting openStreamsIncognito = {"/misc/openStreamsIncognito", true};
 
     EnumSetting<ThumbnailPreviewMode> emotesTooltipPreview = {
         "/misc/emotesTooltipPreview",

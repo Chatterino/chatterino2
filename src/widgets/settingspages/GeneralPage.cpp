@@ -1435,6 +1435,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         SettingWidget::checkbox("Open links in incognito/private mode",
                                 s.openLinksIncognito)
             ->addTo(layout);
+
+        SettingWidget::checkbox("Open streams and players in incognito/private mode",
+                                s.openStreamsIncognito)
+            ->conditionallyEnabledBy(s.openLinksIncognito)
+            ->addTo(layout);
     }
 
     SettingWidget::customCheckbox(
