@@ -101,13 +101,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     b.emplace<TimestampElement>();
     b.emplace<TextElement>(
-        app->getAccounts()->twitch.getCurrent()->getUserName(),
-        MessageElementFlag::Text, MessageColor::Text,
-        FontStyle::ChatMediumBold);
+         app->getAccounts()->twitch.getCurrent()->getUserName(),
+         MessageElementFlag::Text, MessageColor::Text,
+         FontStyle::ChatMediumBold)
+        ->setLink({Link::UserWhisper,
+                   app->getAccounts()->twitch.getCurrent()->getUserName()});
     b.emplace<TextElement>("->", MessageElementFlag::Text,
                            getApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
-                           MessageColor::Text, FontStyle::ChatMediumBold);
+                           MessageColor::Text, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserWhisper, words[1]});
 
     const auto &acc = app->getAccounts()->twitch.getCurrent();
     const auto &accemotes = *acc->accessEmotes();
