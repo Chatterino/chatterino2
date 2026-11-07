@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
+// SPDX-FileCopyrightText: 2026 Contributors to Chatterino <https://chatterino.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -10,17 +10,13 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "widgets/buttons/DrawnButton.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QPainter>
-#include <QPaintEvent>
 #include <QScrollArea>
 #include <QShowEvent>
-#include <QTimer>
 #include <QVBoxLayout>
 
 using namespace std::chrono_literals;
@@ -32,46 +28,19 @@ using namespace Qt::Literals;
 
 namespace chatterino {
 
-namespace {
-
-constexpr auto MUTED_STYLE = "color: #adadb8;";
-
-}  // namespace
-
 PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
-    : BaseWidget(parent)
-    , pinnedByLabel_(new QLabel(this))
-    , countdownLabel_(new QLabel(this))
+    : SplitBanner(parent)
     , menuButton_(new DrawnButton(DrawnButton::Symbol::Kebab, {}, this))
     , messageScrollArea_(new QScrollArea(this))
     , messageLabel_(new QLabel(this))
     , footerLabel_(new QLabel(this))
-    , progressTimer_(new QTimer(this))
-    , autoHideTimer_(new QTimer(this))
 {
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    auto *outerBox = new QVBoxLayout(this);
-    outerBox->setContentsMargins(0, 0, 0, 0);
-    outerBox->setSpacing(0);
-
-    auto *contentBox = new QVBoxLayout();
-    contentBox->setContentsMargins(8, 6, 8, 6);
-    contentBox->setSpacing(3);
-
     // Header row: "Pinned by <user>"  [⋮]
-    auto *headerRow = new QHBoxLayout();
-    headerRow->setSpacing(4);
-
-    headerRow->addWidget(this->pinnedByLabel_);
-    headerRow->addStretch(1);
     this->menuButton_->setScaleIndependentSize(28, 28);
     this->menuButton_->setToolTip(u"Mod options"_s);
     this->menuButton_->setMenu(this->buildModMenu());
     this->menuButton_->hide();
-    headerRow->addWidget(this->menuButton_);
-
-    contentBox->addLayout(headerRow);
+    this->headerRow()->addWidget(this->menuButton_);
 
     // Message body
     this->messageLabel_->setWordWrap(true);
@@ -95,7 +64,7 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     this->messageScrollArea_->setSizePolicy(QSizePolicy::Expanding,
                                             QSizePolicy::Fixed);
     this->messageScrollArea_->setWidget(this->messageLabel_);
-    contentBox->addWidget(this->messageScrollArea_);
+    this->contentBox()->addWidget(this->messageScrollArea_);
 
     // Footer: [sender · time] ... [countdown]
     auto *footerRow = new QHBoxLayout();
@@ -106,53 +75,22 @@ PinnedMessageWidget::PinnedMessageWidget(QWidget *parent)
     footerRow->addWidget(this->footerLabel_);
     footerRow->addStretch(1);
 
-    this->countdownLabel_->setStyleSheet(MUTED_STYLE);
-    this->countdownLabel_->hide();
-    footerRow->addWidget(this->countdownLabel_);
-    contentBox->addLayout(footerRow);
-
-    outerBox->addLayout(contentBox);
-
-    // 1px bottom border - separates pin widget from the chat view below
-    auto *bottomBorder = new QWidget(this);
-    bottomBorder->setFixedHeight(1);
-    bottomBorder->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    bottomBorder->setAutoFillBackground(true);
-    {
-        QPalette pal = bottomBorder->palette();
-        pal.setColor(QPalette::Window, pal.color(QPalette::Mid));
-        bottomBorder->setPalette(pal);
-    }
-    outerBox->addWidget(bottomBorder);
-
-    // Countdown timer (fires every second)
-    this->progressTimer_->setInterval(1s);
-    QObject::connect(this->progressTimer_, &QTimer::timeout, this, [this] {
-        this->tickProgress();
-    });
-
-    // auto-hide timer
-    this->autoHideTimer_->setSingleShot(true);
-    QObject::connect(this->autoHideTimer_, &QTimer::timeout, this, [this] {
-        if (!this->userToggled_)
-        {
-            this->hide();
-        }
-    });
+    footerRow->addWidget(this->countdownLabel());
+    this->contentBox()->addLayout(footerRow);
 
     this->scaleChangedEvent(this->scale());
     this->hide();
 }
 
-void PinnedMessageWidget::tickProgress()
+void PinnedMessageWidget::tickCountdown()
 {
     const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
     const qint64 endsMs = this->pinEndsAt_.toMSecsSinceEpoch();
 
     if (nowMs >= endsMs)
     {
-        this->progressTimer_->stop();
-        this->countdownLabel_->hide();
+        this->stopCountdown();
+        this->countdownLabel()->hide();
         if (this->channel_)
         {
             this->channel_->clearPinnedMessage();
@@ -160,40 +98,17 @@ void PinnedMessageWidget::tickProgress()
         return;
     }
 
-    const qint64 remainingMs = endsMs - nowMs;
-    const qint64 totalSecs = (remainingMs + 999) / 1000;  // round up
-    const qint64 hours = totalSecs / 3600;
-    const qint64 mins = (totalSecs % 3600) / 60;
-    const qint64 secs = totalSecs % 60;
-
-    QString timeStr;
-    if (hours > 0)
-    {
-        timeStr = u"\u23F1 %1:%2:%3"_s.arg(hours)
-                      .arg(mins, 2, 10, QChar(u'0'))
-                      .arg(secs, 2, 10, QChar(u'0'));
-    }
-    else
-    {
-        timeStr = u"\u23F1 %1:%2"_s.arg(mins, 2, 10, QChar(u'0'))
-                      .arg(secs, 2, 10, QChar(u'0'));
-    }
-
-    this->countdownLabel_->setText(timeStr);
-    this->countdownLabel_->show();
+    this->countdownLabel()->setText(
+        u"\u23F1 %1"_s.arg(formatCountdown(endsMs - nowMs)));
+    this->countdownLabel()->show();
 }
 
-void PinnedMessageWidget::paintEvent(QPaintEvent *event)
+void PinnedMessageWidget::autoHide()
 {
-    QPainter painter(this);
-    auto *theme = getTheme();
-
-    // Fill background (same color as the split header above)
-    painter.fillRect(event->rect(), theme->splits.header.background);
-
-    // Draw 1px top border
-    painter.setPen(theme->splits.header.border);
-    painter.drawLine(0, 0, this->width() - 1, 0);
+    if (!this->userToggled_)
+    {
+        this->hide();
+    }
 }
 
 void PinnedMessageWidget::setChannel(TwitchChannel *channel)
@@ -201,7 +116,7 @@ void PinnedMessageWidget::setChannel(TwitchChannel *channel)
     this->signalHolder_.clear();
     this->channel_ = channel;
     this->userToggled_ = false;
-    this->autoHideTimer_->stop();
+    this->stopAutoHide();
 
     if (channel)
     {
@@ -274,8 +189,8 @@ void PinnedMessageWidget::refresh()
 {
     if (!this->channel_)
     {
-        this->progressTimer_->stop();
-        this->autoHideTimer_->stop();
+        this->stopCountdown();
+        this->stopAutoHide();
         this->userToggled_ = false;
         this->hide();
         return;
@@ -284,8 +199,8 @@ void PinnedMessageWidget::refresh()
     const auto *pin = this->channel_->getPinnedMessage();
     if (!pin)
     {
-        this->progressTimer_->stop();
-        this->autoHideTimer_->stop();
+        this->stopCountdown();
+        this->stopAutoHide();
         this->userToggled_ = false;
         this->hide();
         return;
@@ -293,7 +208,7 @@ void PinnedMessageWidget::refresh()
 
     const auto mode = static_cast<UsernameDisplayMode>(
         getSettings()->usernameDisplayMode.getValue());
-    this->pinnedByLabel_->setText(u"Pinned by <b>%1</b>"_s.arg(
+    this->headerLabel()->setText(u"Pinned by <b>%1</b>"_s.arg(
         pin->pinnedBy.formatted(mode).toHtmlEscaped()));
 
     this->messageLabel_->setText(pin->messageText);
@@ -306,13 +221,12 @@ void PinnedMessageWidget::refresh()
             pin->sender.formatted(mode).toHtmlEscaped(), sentAt));
     }
 
-    this->progressTimer_->stop();
-    this->countdownLabel_->hide();
+    this->stopCountdown();
+    this->countdownLabel()->hide();
     if (pin->endsAt.has_value() && pin->endsAt->isValid())
     {
         this->pinEndsAt_ = *pin->endsAt;
-        this->tickProgress();  // set initial text immediately
-        this->progressTimer_->start();
+        this->startCountdown();
     }
 
     const bool isMod = this->channel_->hasModRights();
@@ -321,10 +235,10 @@ void PinnedMessageWidget::refresh()
     this->show();
     this->updateMessageHeightIfNeeded();
 
-    this->autoHideTimer_->stop();
+    this->stopAutoHide();
     if (!getSettings()->alwaysShowPinnedMessage && !this->userToggled_)
     {
-        this->autoHideTimer_->start(30s);
+        this->startAutoHide(30s);
     }
 }
 
@@ -333,13 +247,13 @@ void PinnedMessageWidget::toggleUserPinned()
     if (this->isVisible())
     {
         this->userToggled_ = false;
-        this->autoHideTimer_->stop();
+        this->stopAutoHide();
         this->hide();
     }
     else
     {
         this->userToggled_ = true;
-        this->autoHideTimer_->stop();
+        this->stopAutoHide();
         this->show();
         this->updateMessageHeightIfNeeded();
     }
@@ -377,28 +291,25 @@ void PinnedMessageWidget::updateMessageHeightIfNeeded()
 
 void PinnedMessageWidget::resizeEvent(QResizeEvent *event)
 {
-    BaseWidget::resizeEvent(event);
+    SplitBanner::resizeEvent(event);
     this->updateMessageHeight();
 }
 
 void PinnedMessageWidget::showEvent(QShowEvent *event)
 {
-    BaseWidget::showEvent(event);
+    SplitBanner::showEvent(event);
     this->visibilityChanged.invoke();
 }
 
 void PinnedMessageWidget::hideEvent(QHideEvent *event)
 {
-    BaseWidget::hideEvent(event);
+    SplitBanner::hideEvent(event);
     this->visibilityChanged.invoke();
 }
 
 void PinnedMessageWidget::scaleChangedEvent(float newScale)
 {
-    QFont headerFont = this->pinnedByLabel_->font();
-    headerFont.setPointSizeF(9.5F * newScale);
-    this->pinnedByLabel_->setFont(headerFont);
-    this->countdownLabel_->setFont(headerFont);
+    SplitBanner::scaleChangedEvent(newScale);
 
     QFont bodyFont = this->messageLabel_->font();
     bodyFont.setPointSizeF(11.0F * newScale);
@@ -409,11 +320,6 @@ void PinnedMessageWidget::scaleChangedEvent(float newScale)
     QFont footerFont = this->footerLabel_->font();
     footerFont.setPointSizeF(9.0F * newScale);
     this->footerLabel_->setFont(footerFont);
-}
-
-void PinnedMessageWidget::mousePressEvent(QMouseEvent *event)
-{
-    // ignore to disable the parent's right click menu
 }
 
 }  // namespace chatterino
