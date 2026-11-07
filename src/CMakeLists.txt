@@ -296,6 +296,8 @@ set(SOURCE_FILES
 
         controllers/plugins/api/Accounts.cpp
         controllers/plugins/api/Accounts.hpp
+        controllers/plugins/api/ChannelProviders.cpp
+        controllers/plugins/api/ChannelProviders.hpp
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/api/ConnectionHandle.cpp
@@ -337,6 +339,8 @@ set(SOURCE_FILES
         controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginChannel.cpp
+        controllers/plugins/PluginChannel.hpp
         controllers/plugins/PluginMeta.cpp
         controllers/plugins/PluginMeta.hpp
         controllers/plugins/PluginPermission.cpp

@@ -29,6 +29,8 @@ struct ChannelRef {
 public:
     ChannelRef(const std::shared_ptr<Channel> &chan);
 
+    std::weak_ptr<Channel> asWeak() const;
+
     /**
      * Returns true if the channel this object points to is valid.
      * If the object expired, returns false

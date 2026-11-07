@@ -55,6 +55,7 @@ public:
         TwitchEnd,
         /// Misc
         Misc,
+        Plugin,
     };
 
     explicit Channel(const QString &name, Type type);
@@ -220,6 +221,8 @@ constexpr std::optional<std::string_view> qmagicenumSerializedName(
             return "live";
         case Type::Misc:
             return "misc";
+        case Type::Plugin:
+            return "plugin";
 
         case Type::None:
         case Type::Direct:

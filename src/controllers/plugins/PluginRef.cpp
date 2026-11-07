@@ -11,6 +11,7 @@
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "util/WeakPtrHelpers.hpp"
 
 #    include <QMessageBox>
 #    include <QStringBuilder>

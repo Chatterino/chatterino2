@@ -955,6 +955,7 @@ TEST_F(PluginTest, ChannelType)
     const char *VALUES = "Direct,"
                          "Misc,"
                          "None,"
+                         "Plugin,"
                          "Twitch,"
                          "TwitchAutomod,"
                          "TwitchEnd,"
@@ -1611,6 +1612,62 @@ class PluginChannelTest : public PluginTest,
 TEST_P(PluginChannelTest, Run)
 {
     this->configure();
+
+    sol::state_view &lua = *this->lua;
+    ASSERT_FALSE(lua.get<std::optional<sol::table>>("c2test").has_value());
+    auto c2test = lua.create_table("c2test");
+
+    // Type that owns a channel (unlike ChannelRef).
+    struct OwnedChannel {
+        OwnedChannel() = default;
+        explicit OwnedChannel(std::shared_ptr<Channel> chan)
+            : chan(std::move(chan))
+        {
+        }
+        OwnedChannel(const OwnedChannel &) = default;
+        OwnedChannel(OwnedChannel &&) = default;
+        OwnedChannel &operator=(const OwnedChannel &) = default;
+        OwnedChannel &operator=(OwnedChannel &&) = default;
+        ~OwnedChannel()
+        {
+            if (chan)
+            {
+                assert(false && "Channel still open");
+            }
+        }
+
+        std::shared_ptr<Channel> chan;
+    };
+    c2test.new_usertype<OwnedChannel>(
+        "OwnedChannel", sol::no_constructor,  //
+        "from_split_table",
+        [](const QJsonObject &json) {
+            auto descriptor = SplitDescriptor::loadFromJSON(json);
+            return OwnedChannel(descriptor.decodeChannel().get());
+        },
+        "to_split_table",
+        [](const OwnedChannel &chan) {
+            if (!chan.chan)
+            {
+                throw std::runtime_error("Expired channel");
+            }
+            SplitDescriptor d;
+            d.setChannel(IndirectChannel(chan.chan));
+            return d.toJson();
+        },
+        "channel",
+        [](const OwnedChannel &chan) {
+            return lua::api::ChannelRef(chan.chan);
+        },
+        "clear",
+        [](OwnedChannel &chan) {
+            chan.chan = {};
+        });
+
+    c2test.set_function("clear_channel_providers", [this] {
+        this->rawpl->clearChannelProviders();
+    });
+
     runLuaTest("channel", GetParam(), *this->lua);
 }
 
@@ -1665,7 +1722,7 @@ TEST_P(PluginDateTimeTest, Run)
     runLuaTest("datetime", GetParam(), *this->lua);
 }
 
-INSTANTIATE_TEST_SUITE_P(PluginChannel, PluginDateTimeTest,
+INSTANTIATE_TEST_SUITE_P(PluginDateTime, PluginDateTimeTest,
                          testing::ValuesIn(discoverLuaTests("datetime")));
 
 // verify that all snapshots are included

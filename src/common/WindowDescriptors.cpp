@@ -6,6 +6,8 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/plugins/PluginChannel.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/Backup.hpp"
@@ -21,6 +23,8 @@
 using namespace Qt::Literals;
 
 namespace chatterino {
+
+using namespace Qt::Literals;
 
 namespace {
 
@@ -87,7 +91,6 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
 
     SplitDescriptor descriptor;
     descriptor.type_ = data.value("type").toString();
-    descriptor.server_ = data.value("server").toInt(-1);
     descriptor.moderationMode_ = root.value("moderationMode").toBool();
     if (data.contains("channel"))
     {
@@ -97,6 +100,11 @@ SplitDescriptor SplitDescriptor::loadFromJSON(const QJsonObject &root)
     {
         descriptor.channelName_ = data.value("name").toString();
     }
+
+    descriptor.pluginID = data.value("pluginID").toString();
+    descriptor.providerID = data.value("providerID").toString();
+    descriptor.arguments = data.value("arguments").toObject();
+
     descriptor.filters_ = loadFilters(root.value("filters"));
 
     auto spellOverride = root["checkSpelling"];
@@ -120,6 +128,19 @@ QJsonObject SplitDescriptor::toJson() const
     {
         data.insert("name"_L1, this->channelName_);
     }
+    if (!this->pluginID.isEmpty())
+    {
+        data.insert("pluginID", this->pluginID);
+    }
+    if (!this->providerID.isEmpty())
+    {
+        data.insert("providerID", this->providerID);
+    }
+    if (!this->arguments.isEmpty())
+    {
+        data.insert("arguments", this->arguments);
+    }
+
     obj.insert("data", data);
 
     obj.insert("filters", encodeFilters(this->filters_));
@@ -158,6 +179,17 @@ IndirectChannel SplitDescriptor::decodeChannel() const
             return getApp()->getTwitch()->getAutomodChannel();
         case Channel::Type::Misc:
             return getApp()->getTwitch()->getChannelOrEmpty(this->channelName_);
+        case Channel::Type::Plugin:
+#if CHATTERINO_HAVE_PLUGINS
+            return getApp()->getPlugins()->getOrCreatePluginChannelFromSave({
+                .channelName = this->channelName_,
+                .pluginID = this->pluginID,
+                .providerID = this->providerID,
+                .arguments = this->arguments,
+            });
+#else
+            return Channel::getEmpty();
+#endif
 
         case Channel::Type::None:
         case Channel::Type::Direct:
@@ -166,6 +198,41 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     }
 
     return Channel::getEmpty();
+}
+
+void SplitDescriptor::setChannel(const IndirectChannel &chan)
+{
+    this->type_ = qmagicenum::SerializedName::enumNameString(chan.getType());
+    switch (chan.getType())
+    {
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
+            this->channelName_ = chan.get()->getName();
+            break;
+
+        case Channel::Type::Plugin: {
+#ifdef CHATTERINO_HAVE_PLUGINS
+            auto *pl = dynamic_cast<PluginChannel *>(chan.get().get());
+            this->channelName_ = pl->getName();
+            this->pluginID = pl->pluginID();
+            this->providerID = pl->providerID();
+            this->arguments = pl->arguments();
+#endif
+        }
+        break;
+
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;
+    }
 }
 
 SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)

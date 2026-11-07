@@ -28,6 +28,11 @@ ChannelRef::ChannelRef(const std::shared_ptr<Channel> &chan)
 {
 }
 
+std::weak_ptr<Channel> ChannelRef::asWeak() const
+{
+    return this->weak;
+}
+
 std::shared_ptr<Channel> ChannelRef::strong()
 {
     auto c = this->weak.lock();
