@@ -83,6 +83,19 @@ void showTutorialVideo(QWidget *parent, const QString &source,
     window->getLayoutContainer()->setLayout(layout);
     window->show();
 }
+
+void openStreamUrl(const QString &url)
+{
+    if (getSettings()->openLinksIncognito &&
+        getSettings()->openStreamsIncognito && supportsIncognitoLinks())
+    {
+        openLinkIncognito(url);
+    }
+    else
+    {
+        QDesktopServices::openUrl(QUrl(url));
+    }
+}
 }  // namespace
 
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
@@ -738,15 +751,7 @@ void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        const auto playerUrl = TWITCH_PLAYER_URL.arg(twitchChannel->getName());
-        if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
-        {
-            openLinkIncognito(playerUrl);
-        }
-        else
-        {
-            QDesktopServices::openUrl(QUrl(playerUrl));
-        }
+        openStreamUrl(TWITCH_PLAYER_URL.arg(twitchChannel->getName()));
     }
 }
 
@@ -1094,8 +1099,7 @@ void Split::openInBrowser()
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        QDesktopServices::openUrl("https://www.twitch.tv/" +
-                                  twitchChannel->getName());
+        openStreamUrl("https://www.twitch.tv/" + twitchChannel->getName());
     }
 }
 

@@ -650,7 +650,8 @@ void FollowedChannelsWindow::showContextMenu(QPoint position)
 
     menu->addAction("Open player in &browser", this, [channel] {
         const auto playerUrl = TWITCH_PLAYER_URL.arg(channel);
-        if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
+        if (getSettings()->openLinksIncognito &&
+            getSettings()->openStreamsIncognito && supportsIncognitoLinks())
         {
             openLinkIncognito(playerUrl);
         }
