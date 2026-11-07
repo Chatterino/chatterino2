@@ -748,6 +748,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
+        const bool normalize = !this->color_.isUserColor() ||
+                               getSettings()->readableUsernameColors;
 
         for (const auto &word : this->words_)
         {
@@ -756,7 +758,10 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             auto getTextLayoutElement = [&](QString text, qreal width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(ctx.messageColors);
-                app->getThemes()->normalizeColor(color);
+                if (normalize)
+                {
+                    app->getThemes()->normalizeColor(color);
+                }
 
                 auto *e = new TextLayoutElement(
                     *this, text, QSizeF(width, metrics.height()), color,
@@ -1007,11 +1012,16 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
+        const bool normalize = !this->color_.isUserColor() ||
+                               getSettings()->readableUsernameColors;
 
         auto getTextLayoutElement = [&](QString text, qreal width,
                                         bool hasTrailingSpace) {
             auto color = this->color_.getColor(ctx.messageColors);
-            app->getThemes()->normalizeColor(color);
+            if (normalize)
+            {
+                app->getThemes()->normalizeColor(color);
+            }
 
             auto *e = new TextLayoutElement(
                 *this, text, QSizeF(width, metrics.height()), color,
@@ -1210,7 +1220,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
                                MessageElementFlags messageFlags)
     : TextElement(displayName, messageFlags)
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_)
+    , userColor_(userColor_.asUserColor())
     , userLoginName_(std::move(loginName_))
 {
 }
@@ -1223,7 +1233,7 @@ MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
     : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
                   messageFlags)
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_)
+    , userColor_(userColor_.asUserColor())
     , userLoginName_(std::move(loginName_))
 {
 }
@@ -1235,7 +1245,8 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
     : TextElement(displayName,
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_.isValid() ? userColor_ : fallbackColor_)
+    , userColor_(userColor_.isValid() ? MessageColor::user(userColor_)
+                                      : fallbackColor_)
     , userLoginName_(std::move(loginName_))
 {
 }

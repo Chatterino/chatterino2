@@ -226,6 +226,10 @@ public:
         "/appearance/messages/hideDeletionActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
+    BoolSetting readableUsernameColors = {
+        "/appearance/messages/readableUsernameColors",
+        true,
+    };
     EnumSetting<UsernameDisplayMode> usernameDisplayMode = {
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
