@@ -65,13 +65,23 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
         for (const auto &f : *availableFilters)
         {
             auto *checkbox = new QCheckBox(f->getName(), this);
-            bool alreadySelected = previousSelection.contains(f->getId());
-            checkbox->setCheckState(alreadySelected
-                                        ? Qt::CheckState::Checked
-                                        : Qt::CheckState::Unchecked);
-            if (alreadySelected)
+
+            if (f->isGlobal())
             {
-                this->currentSelection_.append(f->getId());
+                checkbox->setEnabled(false);
+                checkbox->setCheckState(Qt::CheckState::Checked);
+                checkbox->setText(checkbox->text() + " (global)");
+            }
+            else
+            {
+                bool alreadySelected = previousSelection.contains(f->getId());
+                checkbox->setCheckState(alreadySelected
+                                            ? Qt::CheckState::Checked
+                                            : Qt::CheckState::Unchecked);
+                if (alreadySelected)
+                {
+                    this->currentSelection_.append(f->getId());
+                }
             }
 
             QObject::connect(checkbox, &QCheckBox::stateChanged,

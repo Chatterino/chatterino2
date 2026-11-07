@@ -13,7 +13,7 @@ namespace chatterino {
 
 // commandmodel
 FilterModel::FilterModel(QObject *parent)
-    : SignalVectorModel<FilterRecordPtr>(3, parent)
+    : SignalVectorModel<FilterRecordPtr>(4, parent)
 {
 }
 
@@ -23,10 +23,11 @@ FilterRecordPtr FilterModel::getItemFromRow(std::vector<QStandardItem *> &row,
                                             std::optional<QModelIndex> index,
                                             std::optional<int> role)
 {
-    auto item =
-        std::make_shared<FilterRecord>(row[0]->data(Qt::DisplayRole).toString(),
-                                       row[1]->data(Qt::DisplayRole).toString(),
-                                       original->getId());  // persist id
+    auto item = std::make_shared<FilterRecord>(
+        row[0]->data(Qt::DisplayRole).toString(),
+        row[1]->data(Qt::DisplayRole).toString(),
+        row[3]->data(Qt::CheckStateRole).toBool(),
+        original->getId());  // persist id
 
     // force 'valid' column to update
     setBoolItem(row[2], item->valid(), false, false);
@@ -43,6 +44,7 @@ void FilterModel::getRowFromItem(const FilterRecordPtr &item,
     setStringItem(row[1], item->getFilter());
     setBoolItem(row[2], item->valid(), false, false);
     setStringItem(row[2], item->valid() ? "Valid" : "Show errors");
+    setBoolItem(row[3], item->isGlobal());
 }
 
 }  // namespace chatterino
