@@ -294,21 +294,10 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     // draw last read message line
-    if (ctx.isLastReadMessage)
+    if (ctx.isLastReadMessage && ctx.preferences.lastMessageColor.isValid())
     {
-        QColor color;
-        if (ctx.preferences.lastMessageColor.isValid())
-        {
-            color = ctx.preferences.lastMessageColor;
-        }
-        else
-        {
-            color = ctx.isWindowFocused
-                        ? ctx.messageColors.focusedLastMessageLine
-                        : ctx.messageColors.unfocusedLastMessageLine;
-        }
-
-        QBrush brush(color, ctx.preferences.lastMessagePattern);
+        QBrush brush(ctx.preferences.lastMessageColor,
+                     ctx.preferences.lastMessagePattern);
 
         ctx.painter.fillRect(
             QRectF{

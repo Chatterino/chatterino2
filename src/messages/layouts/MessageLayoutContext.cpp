@@ -40,9 +40,6 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
 
     this->messageSeperator = theme->splits.messageSeperator;
 
-    this->focusedLastMessageLine = theme->tabs.selected.backgrounds.regular;
-    this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
-
     this->hasTransparency =
         this->regularBg.alpha() != 255 || this->alternateBg.alpha() != 255;
 }

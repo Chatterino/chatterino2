@@ -39,9 +39,6 @@ struct MessageColors {
 
     QColor messageSeperator;
 
-    QColor focusedLastMessageLine;
-    QColor unfocusedLastMessageLine;
-
     void applyTheme(Theme *theme, bool isOverlay, int backgroundOpacity);
 };
 
@@ -68,8 +65,6 @@ struct MessagePaintContext {
 
     // width of the area we have to draw on
     const int canvasWidth{};
-    // whether the painting should be treated as if this view's window is focused
-    const bool isWindowFocused{};
     // whether the painting should be treated as if this view is the special mentions view
     const bool isMentions{};
 
