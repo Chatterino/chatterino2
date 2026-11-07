@@ -8,18 +8,16 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/helper/HotkeySequenceEdit.hpp"
 
-#include <QFormLayout>
 #include <QHeaderView>
-#include <QKeySequenceEdit>
 #include <QLabel>
 #include <QMessageBox>
-#include <QSignalBlocker>
+#include <QPushButton>
 #include <QTableView>
 
 #include <array>
@@ -88,22 +86,14 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                          tableCellClicked(clicked, view, model);
                      });
 
-    auto *keySequenceInput = new QKeySequenceEdit(this);
+    auto *keySequenceInput = new HotkeySequenceEdit(this);
 
     keySequenceInput->setClearButtonEnabled(true);
     auto *searchText = new QLabel("Search keybind:", this);
 
-    QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
-                     this,
-                     [view, keySequenceInput](const QKeySequence &keySequence) {
-                         // Normalize Key_Enter (numpad) to Key_Return for consistent search
-                         auto normalized = normalizeKeySequence(keySequence);
-                         if (normalized != keySequence)
-                         {
-                             QSignalBlocker blocker(keySequenceInput);
-                             keySequenceInput->setKeySequence(normalized);
-                         }
-                         view->filterSearchResultsHotkey(normalized);
+    QObject::connect(keySequenceInput, &HotkeySequenceEdit::sequenceChanged,
+                     this, [view](const HotkeySequence &sequence) {
+                         view->filterSearchResultsHotkey(sequence);
                      });
     view->addCustomButton(searchText);
     view->addCustomButton(keySequenceInput);

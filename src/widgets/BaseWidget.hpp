@@ -6,10 +6,10 @@
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
-#include <QShortcut>
 #include <QWidget>
 
 #include <optional>
+#include <vector>
 
 namespace chatterino {
 
@@ -53,7 +53,7 @@ protected:
 
     Theme *theme;
 
-    std::vector<QShortcut *> shortcuts_;
+    std::vector<QObject *> shortcuts_;
     void clearShortcuts();
     pajlada::Signals::SignalHolder signalHolder_;
 
