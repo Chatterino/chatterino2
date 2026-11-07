@@ -6,7 +6,6 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/Env.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
@@ -26,12 +25,140 @@
 #include <QPointer>
 #include <QSaveFile>
 
+#include <array>
 #include <utility>
+
+namespace chatterino {
 
 namespace {
 
 // Delay between uploads in milliseconds
 constexpr int UPLOAD_DELAY = 2000;
+
+struct ImageInput {
+    QByteArray data;
+    QImage image;
+    QStringView format;
+    QString filePath;
+};
+
+struct SupportedFormat {
+    QStringView mime;
+    QStringView format;
+};
+
+const std::array SUPPORTED_FORMATS{
+    SupportedFormat{
+        .mime = u"image/apng",
+        .format = u"apng",
+    },
+    SupportedFormat{
+        .mime = u"image/png",
+        .format = u"png",
+    },
+    SupportedFormat{
+        .mime = u"image/jpeg",
+        .format = u"jpeg",
+    },
+    SupportedFormat{
+        .mime = u"image/gif",
+        .format = u"gif",
+    },
+    SupportedFormat{
+        .mime = u"image/webp",
+        .format = u"webp",
+    },
+};
+
+QStringView uploadFormat(const QMimeType &mime)
+{
+    for (const auto &format : SUPPORTED_FORMATS)
+    {
+        if (mime.inherits(format.mime.toString()))
+        {
+            return format.format;
+        }
+    }
+    return {};
+}
+
+ExpectedStr<std::queue<ImageInput>> getImagesFromUrls(const QMimeData *source)
+{
+    if (!source->hasUrls())
+    {
+        return {};
+    }
+
+    std::queue<ImageInput> images;
+
+    auto mimeDb = QMimeDatabase();
+    // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
+    // Each entry in source->urls() is a QUrl pointing to a file that was copied.
+    const auto urls = source->urls();
+    for (const QUrl &path : urls)
+    {
+        QString localPath = path.toLocalFile();
+        QMimeType mime = mimeDb.mimeTypeForUrl(path);
+        const auto format = uploadFormat(mime);
+        if (!mime.name().startsWith("image") && format.isEmpty())
+        {
+            continue;
+        }
+
+        if (format.isEmpty())
+        {
+            images.push({
+                .image = QImage(localPath),
+                .filePath = localPath,
+            });
+            continue;
+        }
+
+        QFile file(localPath);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            return makeUnexpected("Failed to open file :(");
+        }
+        images.push({
+            .data = file.readAll(),
+            .format = format,
+            .filePath = localPath,
+        });
+    }
+
+    return images;
+}
+
+ExpectedStr<std::queue<ImageInput>> getImagesDirectly(const QMimeData *source)
+{
+    std::queue<ImageInput> images;
+
+    for (const auto &format : SUPPORTED_FORMATS)
+    {
+        if (source->hasFormat(format.mime.toString()))
+        {
+            images.push({
+                .data = source->data(format.mime.toString()),
+                .format = format.format,
+            });
+            return images;
+        }
+    }
+
+    if (source->hasImage())
+    {
+        images.push({
+            .image = qvariant_cast<QImage>(source->imageData()),
+        });
+    }
+
+    if (images.empty())
+    {
+        return makeUnexpected("No image found in clipboard.");
+    }
+
+    return images;
+}
 
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
@@ -47,9 +174,70 @@ std::optional<QByteArray> convertToPng(const QImage &image)
     return std::nullopt;
 }
 
+/// Process the input images and make them ready for upload
+ExpectedStr<std::queue<RawImageData>> processImages(
+    std::queue<ImageInput> inputImages)
+{
+    std::queue<RawImageData> images;
+
+    while (!inputImages.empty())
+    {
+        auto input = std::move(inputImages.front());
+        inputImages.pop();
+
+        if (!input.format.isEmpty())
+        {
+            images.push({
+                .data = std::move(input.data),
+                .format = input.format,
+                .filePath = std::move(input.filePath),
+            });
+            continue;
+        }
+
+        if (input.image.isNull())
+        {
+            input.image = QImage::fromData(input.data);
+        }
+        if (input.image.isNull())
+        {
+            return makeUnexpected(
+                input.filePath.isEmpty()
+                    ? "Clipboard reported an image, but it couldn't be loaded."
+                    : "Couldn't load image :(");
+        }
+
+        auto imageData = convertToPng(input.image);
+        if (!imageData)
+        {
+            if (!input.filePath.isEmpty())
+            {
+                return makeUnexpected(
+                    QString("Cannot upload file: %1. Couldn't convert image "
+                            "to png.")
+                        .arg(input.filePath));
+            }
+            return makeUnexpected(
+                "Cannot upload file, failed to convert to png.");
+        }
+        images.push({
+            .data = *imageData,
+            .format = u"png",
+            .filePath = std::move(input.filePath),
+        });
+    }
+
+    if (images.empty())
+    {
+        return makeUnexpected("no valid images to upload");
+    }
+
+    return images;
+}
+
 }  // namespace
 
-namespace chatterino::imageuploader::detail {
+namespace imageuploader::detail {
 
 // extracting link to either image or its deletion from response body
 QString getJSONValue(QJsonValue responseJson, QStringView jsonPattern)
@@ -94,9 +282,7 @@ QString getLinkFromResponse(const NetworkResult &response, QString pattern)
     return pattern;
 }
 
-}  // namespace chatterino::imageuploader::detail
-
-namespace chatterino {
+}  // namespace imageuploader::detail
 
 using namespace imageuploader::detail;
 
@@ -285,118 +471,26 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     this->logToFile(originalFilePath, link, deletionLink, channel);
 }
 
-std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
-    const QMimeData *source) const
+ExpectedStr<std::queue<RawImageData>> ImageUploader::getImages(
+    const QMimeData *source)
 {
     BenchmarkGuard benchmarkGuard("ImageUploader::getImages");
 
-    auto tryUploadFromUrls =
-        [&]() -> std::pair<std::queue<RawImageData>, QString> {
-        if (!source->hasUrls())
-        {
-            return {{}, {}};
-        }
-
-        std::queue<RawImageData> images;
-
-        auto mimeDb = QMimeDatabase();
-        // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
-        // Each entry in source->urls() is a QUrl pointing to a file that was copied.
-        for (const QUrl &path : source->urls())
-        {
-            QString localPath = path.toLocalFile();
-            QMimeType mime = mimeDb.mimeTypeForUrl(path);
-            if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
-            {
-                QImage img = QImage(localPath);
-                if (img.isNull())
-                {
-                    return {{}, "Couldn't load image :("};
-                }
-
-                auto imageData = convertToPng(img);
-                if (!imageData)
-                {
-                    return {
-                        {},
-                        QString("Cannot upload file: %1. Couldn't convert "
-                                "image to png.")
-                            .arg(localPath),
-                    };
-                }
-                images.push({*imageData, "png", localPath});
-            }
-            else if (mime.inherits("image/gif"))
-            {
-                QFile file(localPath);
-                bool isOkay = file.open(QIODevice::ReadOnly);
-                if (!isOkay)
-                {
-                    return {{}, "Failed to open file :("};
-                }
-                // file.readAll() => might be a bit big but it /should/ work
-                images.push({file.readAll(), "gif", localPath});
-                file.close();
-            }
-        }
-
-        return {images, {}};
-    };
-
-    auto tryUploadDirectly =
-        [&]() -> std::pair<std::queue<RawImageData>, QString> {
-        std::queue<RawImageData> images;
-
-        if (source->hasFormat("image/png"))
-        {
-            // the path to file is not present every time, thus the filePath is empty
-            images.push({source->data("image/png"), "png", ""});
-            return {images, {}};
-        }
-
-        if (source->hasFormat("image/jpeg"))
-        {
-            images.push({source->data("image/jpeg"), "jpeg", ""});
-            return {images, {}};
-        }
-
-        if (source->hasFormat("image/gif"))
-        {
-            images.push({source->data("image/gif"), "gif", ""});
-            return {images, {}};
-        }
-
-        // not PNG, try loading it into QImage and save it to a PNG.
-        auto image = qvariant_cast<QImage>(source->imageData());
-        auto imageData = convertToPng(image);
-        if (imageData)
-        {
-            images.push({*imageData, "png", ""});
-            return {images, {}};
-        }
-
-        // No direct upload happenned
-        return {{}, "Cannot upload file, failed to convert to png."};
-    };
-
-    const auto [urlImageData, urlError] = tryUploadFromUrls();
-
-    if (!urlImageData.empty())
+    auto urlImages = getImagesFromUrls(source);
+    if (urlImages.has_value() && !urlImages->empty())
     {
-        return {urlImageData, {}};
+        return processImages(std::move(urlImages.value()));
     }
 
-    const auto [directImageData, directError] = tryUploadDirectly();
-    if (!directImageData.empty())
+    auto directImages = getImagesDirectly(source);
+    if (directImages.has_value() && !directImages->empty())
     {
-        return {directImageData, {}};
+        return processImages(std::move(directImages.value()));
     }
 
-    return {
-        {},
-        // TODO: verify that this looks ok xd
-        urlError + directError,
-    };
+    return makeUnexpected("no valid files to upload: " %
+                          urlImages.error_or("") % " - " %
+                          directImages.error_or(""));
 }
 
 void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,

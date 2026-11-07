@@ -176,14 +176,16 @@ void SplitInput::handleImagePaste(const QMimeData *source)
     auto channel = this->split_->getChannel();
     auto *imageUploader = getApp()->getImageUploader();
 
-    auto [images, imageProcessError] = imageUploader->getImages(source);
-    if (images.empty())
+    auto images = ImageUploader::getImages(source);
+    if (!images.has_value())
     {
         channel->addSystemMessage(
             QString("An error occurred trying to process your image: %1")
-                .arg(imageProcessError));
+                .arg(images.error()));
         return;
     }
+
+    assert(!images->empty());
 
     if (getSettings()->askOnImageUpload.getValue())
     {
@@ -228,7 +230,7 @@ void SplitInput::handleImagePaste(const QMimeData *source)
     }
 
     QPointer<ResizingTextEdit> edit = this->ui_.textEdit;
-    imageUploader->upload(std::move(images), channel, edit);
+    imageUploader->upload(std::move(images.value()), channel, edit);
 }
 
 void SplitInput::initLayout()
