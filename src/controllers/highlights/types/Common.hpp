@@ -44,6 +44,9 @@ QStringView getHighlightTypeName(const AnyHighlight &h);
 /// Returns the user-defined name of the highlight, or, if no user-defined name is specified, its default name.
 QString getName(const AnyHighlight &h);
 
+/// Returns true if the user has changed the name of the highlight.
+bool hasUserDefinedName(const AnyHighlight &h);
+
 /// Returns true if the highlight is enabled.
 bool isEnabled(const AnyHighlight &h);
 
