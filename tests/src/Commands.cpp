@@ -1165,10 +1165,10 @@ TEST(Commands, customCommands)
             .expected = "context: test and alt",
         },
         {
-            .command = Command("/cmd", "fallback: {non-existing-var} {0}"),
+            .command = Command("/cmd", "fallback: {non-existing-var;alt} {0}"),
             .context = {},
             .words = {"/cmd", "ignored"},
-            .expected = "fallback: {non-existing-var} {0}",
+            .expected = "fallback: {non-existing-var;alt} {0}",
         },
         {
             .command = Command("/cmd", "one {1} two {2}three {3}"),
@@ -1187,6 +1187,19 @@ TEST(Commands, customCommands)
             .context = {},
             .words = {"/cmd", "xd", "test"},
             .expected = "test literally {1}",
+        },
+        {
+            .command = Command("/cmd", "{1} and {2;two}"),
+            .context = {},
+            .words = {"/cmd", "one"},
+            .expected = "one and two",
+        },
+        {
+            .command =
+                Command("/cmd", "{1+;test} {2;two} x{3+}y {4+;test 123}"),
+            .context = {},
+            .words = {"/cmd", "a", "b"},
+            .expected = "a b b xy test 123",
         },
     };
 
