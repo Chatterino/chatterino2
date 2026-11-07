@@ -90,7 +90,7 @@ std::optional<bool> readRecoverySettings(const Paths &paths)
                                  [[maybe_unused]] const Args &args)
 {
 #ifdef NDEBUG
-    if (args.isFramelessEmbed || args.shouldRunBrowserExtensionHost)
+    if (args.isAnyEmbed() || args.shouldRunBrowserExtensionHost)
     {
         return false;
     }
