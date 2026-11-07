@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/ignores/IgnoredEmoteModel.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -29,6 +30,9 @@ namespace chatterino {
 using namespace literals;
 
 static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
+namespace {
+void addEmotesTab(LayoutCreator<QVBoxLayout> layout);
+}  // namespace
 static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,
                         QStringListModel &model);
 
@@ -39,6 +43,7 @@ IgnoresPage::IgnoresPage()
     auto tabs = layout.emplace<QTabWidget>();
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
+    addEmotesTab(tabs.appendTab(new QVBoxLayout, "Emotes"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
                 this->userListModel_);
     this->onShow();
@@ -77,6 +82,27 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         });
     });
 }
+
+namespace {
+void addEmotesTab(LayoutCreator<QVBoxLayout> layout)
+{
+    layout.emplace<QLabel>("Ignored emotes are shown as text. "
+                           "Names are case-sensitive.");
+    auto *view = layout
+                     .emplace<EditableModelView>(
+                         (new IgnoredEmoteModel(nullptr))
+                             ->initialized(&getSettings()->ignoredEmotes))
+                     .getElement();
+    view->setTitles({"Name", "Regex"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        0, QHeaderView::Stretch);
+    view->addRegexHelpLink();
+
+    std::ignore = view->addButtonPressed.connect([] {
+        getSettings()->ignoredEmotes.append(IgnoredEmote{"emote", false});
+    });
+}
+}  // namespace
 
 void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                  QStringListModel &userModel)
