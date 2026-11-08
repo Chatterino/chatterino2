@@ -31,6 +31,7 @@ class SplitHeader final : public BaseWidget
 
 public:
     explicit SplitHeader(Split *split);
+    ~SplitHeader() override;
 
     void setAddButtonVisible(bool value);
 
@@ -102,6 +103,8 @@ private:
     // and don't change when the parent Split changes its underlying channel
     pajlada::Signals::SignalHolder managedConnections_;
     pajlada::Signals::SignalHolder channelConnections_;
+
+    pajlada::Signals::Connection filtersChanged_;
 
 public Q_SLOTS:
     void reloadChannelEmotes();
