@@ -4,6 +4,7 @@
 
 #include "widgets/helper/EditableModelView.hpp"
 
+#include "controllers/hotkeys/HotkeySequence.hpp"
 #include "widgets/helper/RegExpItemDelegate.hpp"
 #include "widgets/helper/TableStyles.hpp"
 
@@ -11,6 +12,7 @@
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QKeySequence>
 #include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
@@ -191,8 +193,7 @@ bool EditableModelView::filterSearchResults(const QString &query,
     return searchFoundSomething;
 }
 
-void EditableModelView::filterSearchResultsHotkey(
-    const QKeySequence &keySequenceQuery)
+void EditableModelView::filterSearchResultsHotkey(const HotkeySequence &query)
 {
     auto rowAmount = this->model_->rowCount();
 
@@ -200,11 +201,22 @@ void EditableModelView::filterSearchResultsHotkey(
     {
         QModelIndex idx = this->model_->index(i, 1);
         QVariant a = this->model_->data(idx);
-        auto seq = qvariant_cast<QKeySequence>(a);
 
-        // todo: Make this fuzzy match, right now only exact matches happen
-        // so ctrl+f won't match ctrl+shift+f shortcuts
-        if (keySequenceQuery.matches(seq) != QKeySequence::NoMatch)
+        bool matches = false;
+        if (query.isMouse())
+        {
+            matches = a.toString() == query.toString();
+        }
+        else
+        {
+            auto seq = qvariant_cast<QKeySequence>(a);
+
+            // todo: Make this fuzzy match, right now only exact matches happen
+            // so ctrl+f won't match ctrl+shift+f shortcuts
+            matches = query.keySequence().matches(seq) != QKeySequence::NoMatch;
+        }
+
+        if (matches)
         {
             this->tableView_->showRow(i);
         }
