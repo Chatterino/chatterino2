@@ -8,21 +8,28 @@
 #include "controllers/hotkeys/ActionNames.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 
+#include <utility>
+
 namespace chatterino {
 
-Hotkey::Hotkey(HotkeyCategory category, QKeySequence keySequence,
-               QString action, std::vector<QString> arguments, QString name)
+Hotkey::Hotkey(HotkeyCategory category, HotkeySequence sequence, QString action,
+               std::vector<QString> arguments, QString name)
     : category_(category)
-    , keySequence_(keySequence)
-    , action_(action)
-    , arguments_(arguments)
-    , name_(name)
+    , sequence_(std::move(sequence))
+    , action_(std::move(action))
+    , arguments_(std::move(arguments))
+    , name_(std::move(name))
 {
 }
 
 const QKeySequence &Hotkey::keySequence() const
 {
-    return this->keySequence_;
+    return this->sequence_.keySequence();
+}
+
+const HotkeySequence &Hotkey::sequence() const
+{
+    return this->sequence_;
 }
 
 QString Hotkey::name() const
@@ -85,12 +92,12 @@ Qt::ShortcutContext Hotkey::getContext() const
 
 QString Hotkey::toString() const
 {
-    return this->keySequence().toString(QKeySequence::NativeText);
+    return this->sequence_.toString();
 }
 
 QString Hotkey::toPortableString() const
 {
-    return this->keySequence().toString(QKeySequence::PortableText);
+    return this->sequence_.toPortableString();
 }
 
 }  // namespace chatterino

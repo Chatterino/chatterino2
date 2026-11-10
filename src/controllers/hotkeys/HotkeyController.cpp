@@ -8,6 +8,7 @@
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
+#include "controllers/hotkeys/HotkeySequence.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
 #include <pajlada/settings.hpp>
@@ -223,7 +224,7 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
         }
 
         if (shared->category() == hotkey->category() &&
-            shared->keySequence() == hotkey->keySequence())
+            shared->sequence() == hotkey->sequence())
         {
             return true;
         }
@@ -287,8 +288,8 @@ void HotkeyController::loadHotkeys()
             continue;
         }
         this->hotkeys_.append(std::make_shared<Hotkey>(
-            *category, QKeySequence(keySequence), action, arguments,
-            QString::fromStdString(key)));
+            *category, HotkeySequence::fromPortableString(keySequence), action,
+            arguments, QString::fromStdString(key)));
     }
 
     if (numDefaultsFromSettings != numCombinedDefaults)
@@ -319,8 +320,8 @@ void HotkeyController::saveHotkeys()
         auto section = "/hotkeys/" + hotkey->name().toStdString();
         pajlada::Settings::Setting<QString>::set(section + "/action",
                                                  hotkey->action());
-        pajlada::Settings::Setting<QString>::set(
-            section + "/keySequence", hotkey->keySequence().toString());
+        pajlada::Settings::Setting<QString>::set(section + "/keySequence",
+                                                 hotkey->toPortableString());
 
         auto categoryName = hotkeyCategoryName(hotkey->category());
         pajlada::Settings::Setting<QString>::set(section + "/category",
