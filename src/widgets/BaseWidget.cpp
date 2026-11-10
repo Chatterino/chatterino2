@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/MouseShortcut.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/BaseWindow.hpp"
 
@@ -40,7 +41,14 @@ void BaseWidget::clearShortcuts()
 {
     for (auto *shortcut : this->shortcuts_)
     {
-        shortcut->setKey(QKeySequence());
+        if (auto *keyShortcut = qobject_cast<QShortcut *>(shortcut))
+        {
+            keyShortcut->setKey(QKeySequence());
+        }
+        else if (auto *mouseShortcut = qobject_cast<MouseShortcut *>(shortcut))
+        {
+            mouseShortcut->clear();
+        }
         shortcut->removeEventFilter(this);
         shortcut->deleteLater();
     }

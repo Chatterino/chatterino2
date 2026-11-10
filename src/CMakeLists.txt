@@ -263,6 +263,10 @@ set(SOURCE_FILES
         controllers/hotkeys/HotkeyHelpers.hpp
         controllers/hotkeys/HotkeyModel.cpp
         controllers/hotkeys/HotkeyModel.hpp
+        controllers/hotkeys/HotkeySequence.cpp
+        controllers/hotkeys/HotkeySequence.hpp
+        controllers/hotkeys/MouseShortcut.cpp
+        controllers/hotkeys/MouseShortcut.hpp
 
         controllers/ignores/IgnoreController.cpp
         controllers/ignores/IgnoreController.hpp
