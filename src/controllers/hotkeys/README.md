@@ -48,7 +48,7 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
 
 Keyboard chords use `QShortcut`. Extra mouse buttons (Mouse Back, Mouse Forward, and Mouse Button 6+) are stored in the same `keySequence` settings field as `MouseBack` / `MouseForward` / `MouseButtonN` and dispatched with `MouseShortcut`. Left, Right, and Middle cannot be bound. Mouse bindings do not include keyboard modifiers.
 
-There are no default mouse bindings.
+Users can bind extra mouse buttons in Settings → Keybindings. There are no default mouse bindings.
 
 ## Adding new hotkey categories
 
