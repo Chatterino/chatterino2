@@ -751,6 +751,13 @@ c2.register_command("/testing", function(ctx)
 end)
 ```
 
+Element colors (`color`, `fallback_color`, and `user_color`) can be `"text"`,
+`"link"`, or `"system"` to use the current theme's colors, or any other color
+(e.g. `"blue"` or `"#ff0000"`). Colors prefixed with `user:` (e.g.
+`"user:#ff0000"`) are marked as coming from a user (like username colors), so
+they aren't adjusted for readability if "Readable username colors" is disabled.
+Colors read from existing elements use the same format.
+
 The full range of options can be found in the typing files ([LuaLS](./lua-meta/globals.lua), [TypeScript](./chatterino.d.ts)).
 Existing `MessageElement`s in `elements` field of the table will be cloned regardless if they can be created in Lua.
 
