@@ -267,7 +267,18 @@ INSTANTIATE_TEST_SUITE_P(
             u"@aliens غير LTR text !emote3 !emote4 !emote2 !emote1 ور !!!"_s,
             TextDirection::RTL,
         },
+        // a leading mention doesn't decide the direction
+        TestParam{
+            u"@aliens @user ور دارت غير"_s,
+            u"@aliens غير دارت ور @user"_s,
+            TextDirection::RTL,
+        },
         // LTR
+        TestParam{
+            u"@aliens @فاصولي hello world"_s,
+            u"@aliens @فاصولي hello world"_s,
+            TextDirection::LTR,
+        },
         TestParam{
             u"@aliens LTR و غير دا ميناء غير"_s,
             u"@aliens LTR غير ميناء دا غير و"_s,

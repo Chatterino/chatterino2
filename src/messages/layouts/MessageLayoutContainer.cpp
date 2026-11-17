@@ -655,10 +655,13 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         this->lineContainsRTL_ = true;
     }
 
-    // check the first non-neutral word to see if we should render RTL or LTR
+    // check the first non-neutral word to see if we should render RTL or LTR.
+    // Leading mentions are skipped: "@name hello" is an English message even
+    // if the name is RTL, and "@name مرحبا" is an Arabic one.
     if (isAddingMode && this->isNeutral() &&
         element->getFlags().has(MessageElementFlag::Text) &&
-        !element->getFlags().has(MessageElementFlag::RepliedMessage))
+        !element->getFlags().has(MessageElementFlag::RepliedMessage) &&
+        !element->getText().startsWith('@'))
     {
         if (isRTLElement)
         {
@@ -785,6 +788,9 @@ void MessageLayoutContainer::reorderRTL(size_t firstTextIndex)
     for (size_t i = startIndex; i <= endIndex; i++)
     {
         auto &element = this->elements_[i];
+
+        element->mentionInLTRLine =
+            this->isLTR() && element->getText().startsWith('@');
 
         const auto neutral = chatterino::isNeutral(element->getText());
         const auto neutralOrUsername =
