@@ -61,7 +61,8 @@ QString MessageColor::toString() const
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
         case Type::User:
-            return u"user:" + this->customColor_.name(QColor::HexArgb);
+            return QStringLiteral("user:") +
+                   this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("Text");
         case Type::System:
@@ -80,7 +81,8 @@ QString MessageColor::toLua() const
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
         case Type::User:
-            return u"user:" + this->customColor_.name(QColor::HexArgb);
+            return QStringLiteral("user:") +
+                   this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("text");
         case Type::System:
