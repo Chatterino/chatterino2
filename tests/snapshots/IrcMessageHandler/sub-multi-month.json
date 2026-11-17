@@ -62,7 +62,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ff9acd32",
+                    "userColor": "user:#ff9acd32",
                     "userLoginName": "foly__",
                     "words": [
                         "foly__"

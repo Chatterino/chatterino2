@@ -45,7 +45,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffeb078d",
+                    "userColor": "user:#ffeb078d",
                     "userLoginName": "lucidfoxx",
                     "words": [
                         "Lucidfoxx"

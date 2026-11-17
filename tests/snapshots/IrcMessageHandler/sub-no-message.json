@@ -62,7 +62,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffcc00c2",
+                    "userColor": "user:#ffcc00c2",
                     "userLoginName": "cspice",
                     "words": [
                         "cspice"
@@ -103,7 +103,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffcc00c2",
+                    "userColor": "user:#ffcc00c2",
                     "userLoginName": "cspice",
                     "words": [
                         "cspice"

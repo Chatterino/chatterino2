@@ -48,7 +48,7 @@
                     ]
                 },
                 {
-                    "color": "#ffff0000",
+                    "color": "user:#ffff0000",
                     "flags": "RepliedMessage",
                     "link": {
                         "type": "UserInfo",
@@ -115,7 +115,7 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "#ffff0000",
+                    "color": "user:#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",

@@ -154,7 +154,7 @@
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ff0096cc",
+                    "color": "user:#ff0096cc",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
