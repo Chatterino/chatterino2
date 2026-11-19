@@ -194,6 +194,7 @@
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
+                "moderator",
                 "staff",
                 "turbo"
             ],
