@@ -42,6 +42,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/NotebookTab.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/SplitInput.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkInfo.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Image.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/MessageLayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/MessageSimilarity.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/QMagicEnum.cpp
