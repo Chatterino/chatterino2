@@ -67,9 +67,9 @@ jobs:
           variant: sccache
           # only save on the default (master) branch
           save: ${{ github.event_name == 'push' }}
-          key: sccache-test-${{ matrix.os }}-clang22-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          key: sccache-test-${{ matrix.os }}-clang23-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
           restore-keys: |
-            sccache-test-${{ matrix.os }}-clang22-${{ matrix.qt-version }}
+            sccache-test-${{ matrix.os }}-clang23-${{ matrix.qt-version }}
 
       - name: Cache conan packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
