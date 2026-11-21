@@ -17,27 +17,27 @@ struct MessageColor {
         Text,
         Link,
         System,
-        /// Behaves like Custom, but marks the color as coming from a user
-        /// (e.g. their Twitch color), so it can be exempt from readability
-        /// adjustments
-        User,
+        /// Behaves like Custom, but marks the color as a user's username
+        /// color (e.g. their Twitch color), so it can be exempt from
+        /// readability adjustments
+        Username,
     };
 
     MessageColor(const QColor &color);
     MessageColor(Type type_ = Text);
 
-    /// Creates a color that is marked as coming from a user
-    static MessageColor user(const QColor &color);
+    /// Creates a color that is marked as a user's username color
+    static MessageColor username(const QColor &color);
 
     const QColor &getColor(const MessageColors &colors) const;
 
-    /// Returns a copy of this color marked as a user color, if it's a custom
-    /// color. Other colors are returned unchanged.
-    MessageColor asUserColor() const;
+    /// Returns a copy of this color marked as a username color, if it's a
+    /// custom color. Other colors are returned unchanged.
+    MessageColor asUsernameColor() const;
 
-    bool isUserColor() const noexcept
+    bool isUsernameColor() const noexcept
     {
-        return this->type_ == Type::User;
+        return this->type_ == Type::Username;
     }
 
     QString toString() const;

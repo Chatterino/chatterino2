@@ -748,7 +748,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
-        const bool normalize = !this->color_.isUserColor() ||
+        const bool normalize = !this->color_.isUsernameColor() ||
                                getSettings()->readableUsernameColors;
 
         for (const auto &word : this->words_)
@@ -1012,7 +1012,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     {
         auto metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
-        const bool normalize = !this->color_.isUserColor() ||
+        const bool normalize = !this->color_.isUsernameColor() ||
                                getSettings()->readableUsernameColors;
 
         auto getTextLayoutElement = [&](QString text, qreal width,
@@ -1220,7 +1220,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
                                MessageElementFlags messageFlags)
     : TextElement(displayName, messageFlags)
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_.asUserColor())
+    , userColor_(userColor_.asUsernameColor())
     , userLoginName_(std::move(loginName_))
 {
 }
@@ -1233,7 +1233,7 @@ MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
     : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
                   messageFlags)
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_.asUserColor())
+    , userColor_(userColor_.asUsernameColor())
     , userLoginName_(std::move(loginName_))
 {
 }
@@ -1245,7 +1245,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
     : TextElement(displayName,
                   {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor_(fallbackColor_)
-    , userColor_(userColor_.isValid() ? MessageColor::user(userColor_)
+    , userColor_(userColor_.isValid() ? MessageColor::username(userColor_)
                                       : fallbackColor_)
     , userLoginName_(std::move(loginName_))
 {

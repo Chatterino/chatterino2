@@ -19,18 +19,18 @@ MessageColor::MessageColor(Type type)
 {
 }
 
-MessageColor MessageColor::user(const QColor &color)
+MessageColor MessageColor::username(const QColor &color)
 {
     MessageColor c(color);
-    c.type_ = Type::User;
+    c.type_ = Type::Username;
     return c;
 }
 
-MessageColor MessageColor::asUserColor() const
+MessageColor MessageColor::asUsernameColor() const
 {
     if (this->type_ == Type::Custom)
     {
-        return MessageColor::user(this->customColor_);
+        return MessageColor::username(this->customColor_);
     }
     return *this;
 }
@@ -40,7 +40,7 @@ const QColor &MessageColor::getColor(const MessageColors &colors) const
     switch (this->type_)
     {
         case Type::Custom:
-        case Type::User:
+        case Type::Username:
             return this->customColor_;
         case Type::Text:
             return colors.regularText;
@@ -60,8 +60,8 @@ QString MessageColor::toString() const
     {
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
-        case Type::User:
-            return QStringLiteral("user:") +
+        case Type::Username:
+            return QStringLiteral("username:") +
                    this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("Text");
@@ -80,8 +80,8 @@ QString MessageColor::toLua() const
     {
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
-        case Type::User:
-            return QStringLiteral("user:") +
+        case Type::Username:
+            return QStringLiteral("username:") +
                    this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("text");
@@ -112,9 +112,9 @@ MessageColor MessageColor::fromLua(const QString &spec, Type fallback)
     {
         return MessageColor::System;
     }
-    if (spec.startsWith(u"user:"))
+    if (spec.startsWith(u"username:"))
     {
-        return MessageColor::user(QColor(spec.mid(5)));
+        return MessageColor::username(QColor(spec.mid(9)));
     }
     // custom
     return QColor(spec);

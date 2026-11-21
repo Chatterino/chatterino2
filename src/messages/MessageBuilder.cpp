@@ -1807,7 +1807,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     if (args.isAction)
     {
         builder.textColor_ =
-            MessageColor::user(builder.message_->usernameColor);
+            MessageColor::username(builder.message_->usernameColor);
         builder->flags.set(MessageFlag::Action);
     }
 
@@ -2583,14 +2583,14 @@ void MessageBuilder::parseThread(const QString &messageContent,
                 "@" + usernameText +
                     (threadRoot->flags.has(MessageFlag::Action) ? "" : ":"),
                 MessageElementFlag::RepliedMessage,
-                MessageColor::user(threadRoot->usernameColor),
+                MessageColor::username(threadRoot->usernameColor),
                 FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         MessageColor color = MessageColor::Text;
         if (threadRoot->flags.has(MessageFlag::Action))
         {
-            color = MessageColor::user(threadRoot->usernameColor);
+            color = MessageColor::username(threadRoot->usernameColor);
         }
         this->emplace<SingleLineTextElement>(
                 threadRoot->messageText,
@@ -2741,7 +2741,7 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
     {
         // Sender username
         this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
-                                   MessageColor::user(this->usernameColor_),
+                                   MessageColor::username(this->usernameColor_),
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserWhisper, this->message().displayName});
 
@@ -2753,7 +2753,7 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
 
         QColor selfColor = currentUser->color();
         MessageColor selfMsgColor = selfColor.isValid()
-                                        ? MessageColor::user(selfColor)
+                                        ? MessageColor::username(selfColor)
                                         : MessageColor::System;
 
         // Your own username
@@ -2769,7 +2769,7 @@ void MessageBuilder::appendUsername(Communi::TagsRef tags,
         }
 
         this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
-                                   MessageColor::user(this->usernameColor_),
+                                   MessageColor::username(this->usernameColor_),
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->message().displayName});
     }
