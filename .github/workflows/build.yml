@@ -127,6 +127,8 @@ jobs:
             -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
             -DFORCE_JSON_GENERATION=Off \
             -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
+            -DSKIP_LUA_DEFINITIONS_GENERATION=${{matrix.os == 'ubuntu-20.04' && 'On' || 'Off'}} \
+            -DFORCE_LUA_DEFINITIONS_GENERATION=${{matrix.os != 'ubuntu-20.04' && 'On' || 'Off'}} \
             ..
           make -j"$(nproc)"
 
