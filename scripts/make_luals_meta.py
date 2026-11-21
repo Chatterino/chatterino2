@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: 2023 Mm2PL <mm2pl+gh@kotmisia.pl>
 # SPDX-FileContributor: Nerixyz <nerixdev@outlook.de>
+# SPDX-FileContributor: pajlada <rasmus.karlsson@pajlada.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -43,12 +44,15 @@ will be inserted as-is. These only work in the top-level scope. They don't work
 for class bodies.
 """
 
-from io import TextIOWrapper
-from pathlib import Path
-from typing import Optional
 import argparse
 import logging
 import re
+import sys
+from io import TextIOWrapper
+from pathlib import Path
+from typing import Optional
+
+log = logging.getLogger(__name__)
 
 BOILERPLATE = """
 ---@meta _
@@ -63,7 +67,7 @@ c2 = {}
 repo_root = Path(__file__).parent.parent
 lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
 lua_meta = repo_root / "docs" / "lua-meta" / "globals.lua"
-
+panic_on_error = True
 
 
 def strip_line(line: str):
@@ -236,12 +240,16 @@ def finish_class(out, name):
 
 
 def printmsg(path: Path, line: int, message: str):
-    logging.debug(f"{path.relative_to(repo_root)}:{line} {message}")
+    log.debug(f"{path.relative_to(repo_root)}:{line} {message}")
 
 
 def panic(path: Path, line: int, message: str):
-    logging.critical(f"{path.relative_to(repo_root)}:{line} {message}")
-    exit(1)
+    log.critical(f"{path.relative_to(repo_root)}:{line} {message}")
+    if panic_on_error:
+        sys.exit(1)
+    else:
+        log.info("panic_on_error set to False, exiting cleanly")
+        sys.exit(0)
 
 
 def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
@@ -285,7 +293,7 @@ def write_enum(
 
 
 def read_file(path: Path, out: TextIOWrapper):
-    logging.debug(f"Reading {path.relative_to(repo_root)}")
+    log.debug(f"Reading {path.relative_to(repo_root)}")
     with path.open("r") as f:
         lines = f.read().splitlines()
 
@@ -403,18 +411,25 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
     elif comment.startswith("@lua@"):
         out.write(f"---{comment.replace('@lua', '', 1)}\n")
 
+
 depedancy_list: list[Path] = []
 
+
 def main():
+    global panic_on_error
     p = argparse.ArgumentParser()
-    p.add_argument('--depfile', help='Generate a dependancy file', type=Path)
+    p.add_argument("--depfile", help="Generate a dependancy file", type=Path)
     p.add_argument("--log", default="DEBUG")
+    p.add_argument(
+        "--panic-on-error", default=True, action=argparse.BooleanOptionalAction
+    )
     args = p.parse_args()
     log_level = getattr(logging, args.log.upper(), logging.DEBUG)
     logging.basicConfig(level=log_level, format="%(message)s")
+    panic_on_error = args.panic_on_error
 
     depedancy_list.append(lua_api_file)
-    logging.debug(f"Writing to {lua_meta.relative_to(repo_root)}")
+    log.debug(f"Writing to {lua_meta.relative_to(repo_root)}")
     with lua_meta.open("w") as output:
         output.write(BOILERPLATE[1:])  # skip the newline after triple quote
         read_file(lua_api_file, output)
@@ -423,12 +438,13 @@ def main():
     if depfile:
         depfile.parent.mkdir(exist_ok=True, parents=True)
         with open(depfile, "w") as output:
-            output.write(str(lua_meta.resolve()) + ': ')
-            output.write(f' \\\n{" "*4}'.join(
-                str(p.resolve()) for p in depedancy_list
-            ))
-            output.write('\n')
-        logging.info(f'Wrote dependancy file: {depfile}')
+            output.write(str(lua_meta.resolve()) + ": ")
+            output.write(
+                f" \\\n{' ' * 4}".join(str(p.resolve()) for p in depedancy_list)
+            )
+            output.write("\n")
+        log.info(f"Wrote dependancy file: {depfile}")
+
 
 if __name__ == "__main__":
     main()
