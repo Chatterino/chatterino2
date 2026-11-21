@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2025 Rasmus Karlsson <rasmus.karlsson@pajlada.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 set -e
 
 # This is a script that runs then kills chatterino at random intervals

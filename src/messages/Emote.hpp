@@ -1,7 +1,13 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
 #include "messages/ImageSet.hpp"
+
+#include <QStringList>
 
 #include <functional>
 #include <memory>
@@ -26,22 +32,23 @@ struct Emote {
      * the original (base) name of the emote.
      */
     std::optional<EmoteName> baseName;
+    QStringList tags;
 
     // FOURTF: no solution yet, to be refactored later
     const QString &getCopyString() const
     {
-        return name.string;
+        return this->name.string;
     }
 
     QJsonObject toJson() const;
 };
 
 bool operator==(const Emote &a, const Emote &b);
-bool operator!=(const Emote &a, const Emote &b);
 
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class EmoteMap : public std::unordered_map<EmoteName, EmotePtr>
+class EmoteMap : public std::unordered_map<EmoteName, EmotePtr, EmoteNameHash,
+                                           std::equal_to<>>
 {
 public:
     /**

@@ -1,4 +1,10 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/helper/color/ColorInput.hpp"
+
+namespace chatterino {
 
 namespace {
 
@@ -21,6 +27,8 @@ int fromHex(char c) noexcept
     return -1;
 }
 
+}  // namespace
+
 QColor parseHexColor(const QString &text)
 {
     if (text.length() == 5)  // #rgba
@@ -29,7 +37,7 @@ QColor parseHexColor(const QString &text)
         QStringView v(text);
         v.chop(1);
         QColor col(v);
-        col.setAlpha(alphaHex);
+        col.setAlpha((alphaHex << 4) | alphaHex);
         return col;
     }
     QColor col(text);
@@ -43,10 +51,6 @@ QColor parseHexColor(const QString &text)
     }
     return col;
 }
-
-}  // namespace
-
-namespace chatterino {
 
 ColorInput::ColorInput(QColor color, QWidget *parent)
     : QWidget(parent)

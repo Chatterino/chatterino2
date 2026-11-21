@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/RatelimitBucket.hpp"
 
 #include <QTimer>
@@ -26,17 +30,17 @@ void RatelimitBucket::send(QString channel)
 
 void RatelimitBucket::handleOne()
 {
-    if (queue_.isEmpty())
+    if (this->queue_.isEmpty())
     {
         return;
     }
 
-    auto item = queue_.takeFirst();
+    auto item = this->queue_.takeFirst();
 
     this->budget_--;
-    callback_(item);
+    this->callback_(item);
 
-    QTimer::singleShot(cooldown_, this, [this] {
+    QTimer::singleShot(this->cooldown_, this, [this] {
         this->budget_++;
         this->handleOne();
     });

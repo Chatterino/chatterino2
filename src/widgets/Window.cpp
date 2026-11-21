@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Common.hpp"
-#include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -11,7 +14,6 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
@@ -22,11 +24,13 @@
 #include "widgets/buttons/InitUpdateButton.hpp"
 #include "widgets/buttons/LabelButton.hpp"
 #include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/SvgButton.hpp"
 #include "widgets/buttons/TitlebarButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/FollowedChannelsWindow.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
@@ -67,10 +71,10 @@ Window::Window(WindowType type, QWidget *parent)
     this->addMenuBar();
 #endif
 
-    this->bSignals_.emplace_back(
-        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.currentUserChanged, [this] {
             this->onAccountSelected();
-        }));
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)
@@ -119,6 +123,28 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
+void Window::showFollowedChannels()
+{
+    auto *window = this->findChild<FollowedChannelsWindow *>();
+    if (window == nullptr)
+    {
+        window = new FollowedChannelsWindow(this);
+    }
+    window->show();
+    window->raise();
+    window->activateWindow();
+}
+
+void Window::setPopupID(size_t id)
+{
+    this->popupID_ = id;
+}
+
+std::optional<size_t> Window::popupID() const
+{
+    return this->popupID_;
+}
+
 bool Window::event(QEvent *event)
 {
     switch (event->type())
@@ -153,10 +179,19 @@ bool Window::event(QEvent *event)
 
 void Window::closeEvent(QCloseEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        qCWarning(chatterinoWidget)
+            << "Window closeEvent ran when Application is already dead";
+        return;
+    }
+
+    auto *app = getApp();
+
     if (this->type_ == WindowType::Main)
     {
-        getApp()->getWindows()->save();
-        getApp()->getWindows()->closeAll();
+        app->getWindows()->save();
+        app->getWindows()->closeAll();
     }
     else
     {
@@ -167,7 +202,7 @@ void Window::closeEvent(QCloseEvent *)
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
     // `selectedWindow_`.
-    getApp()->getWindows()->selectedWindow_ = nullptr;
+    app->getWindows()->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -203,16 +238,24 @@ void Window::addCustomTitlebarButtons()
     }
 
     // settings
-    this->addTitleBarButton<TitleBarButton>(
+    auto *settings = this->addTitleBarButton<SvgButton>(
         [this] {
             getApp()->getWindows()->showSettingsDialog(this);
         },
-        TitleBarButtonStyle::Settings);
+        SvgButton::Src{
+            .dark = ":/buttons/settings-darkMode.svg",
+            .light = ":/buttons/settings-lightMode.svg",
+        });
+    settings->setPadding({3, 3});
 
     // updates
-    auto *update = this->addTitleBarButton<PixmapButton>([] {});
+    auto *update = this->addTitleBarButton<SvgButton>(
+        [] {}, SvgButton::Src{
+                   .dark = ":/buttons/update-darkMode.svg",
+                   .light = ":/buttons/update-lightMode.svg",
+               });
 
-    initUpdateButton(*update, this->signalHolder_);
+    initUpdateButton(*update, [] {}, this->signalHolder_);
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
@@ -220,13 +263,17 @@ void Window::addCustomTitlebarButtons()
             this->userLabel_->mapToGlobal(
                 this->userLabel_->rect().bottomLeft()));
     });
-    this->userLabel_->setMinimumWidth(20 * scale());
+    this->userLabel_->setMinimumWidth(20 * this->scale());
 
     // streamer mode
-    this->streamerModeTitlebarIcon_ =
-        this->addTitleBarButton<PixmapButton>([this] {
+    this->streamerModeTitlebarIcon_ = this->addTitleBarButton<SvgButton>(
+        [this] {
             getApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
+        },
+        SvgButton::Src{
+            .dark = ":/buttons/streamerModeEnabledDark.svg",
+            .light = ":/buttons/streamerModeEnabledLight.svg",
         });
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &Window::updateStreamerModeIcon);
@@ -237,25 +284,12 @@ void Window::addCustomTitlebarButtons()
 
 void Window::updateStreamerModeIcon()
 {
-    // A duplicate of this code is in SplitNotebook class (in Notebook.{c,h}pp)
-    // That one is the one near splits (on linux and mac or non-main windows on Windows)
-    // This copy handles the TitleBar icon in Window (main window on Windows)
     if (this->streamerModeTitlebarIcon_ == nullptr)
     {
         return;
     }
 #ifdef Q_OS_WIN
     assert(this->getType() == WindowType::Main);
-    if (getTheme()->isLightTheme())
-    {
-        this->streamerModeTitlebarIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledLight);
-    }
-    else
-    {
-        this->streamerModeTitlebarIcon_->setPixmap(
-            getResources().buttons.streamerModeEnabledDark);
-    }
     this->streamerModeTitlebarIcon_->setVisible(
         getApp()->getStreamerMode()->isEnabled());
 #else
@@ -410,6 +444,16 @@ void Window::addShortcuts()
              }
              return "";
          }},
+        {"selectTabHistoryBack",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryBack(true);
+             return "";
+         }},
+        {"selectTabHistoryForward",
+         [this](const std::vector<QString> &) -> QString {
+             this->notebook_->selectHistoryForward(true);
+             return "";
+         }},
         {"popup",
          [this](std::vector<QString> arguments) -> QString {
              if (arguments.size() == 0)
@@ -527,6 +571,11 @@ void Window::addShortcuts()
          [this](std::vector<QString>) -> QString {
              auto *quickSwitcher = new QuickSwitcherPopup(this);
              quickSwitcher->show();
+             return "";
+         }},
+        {"openFollowedChannels",
+         [this](const std::vector<QString> &) -> QString {
+             this->showFollowedChannels();
              return "";
          }},
         {"quit",

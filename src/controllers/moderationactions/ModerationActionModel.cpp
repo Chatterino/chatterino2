@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/moderationactions/ModerationActionModel.hpp"
 
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -12,14 +16,15 @@
 namespace chatterino {
 
 // commandmodel
-ModerationActionModel ::ModerationActionModel(QObject *parent)
+ModerationActionModel::ModerationActionModel(QObject *parent)
     : SignalVectorModel<ModerationAction>(2, parent)
 {
 }
 
 // turn a vector item into a model row
 ModerationAction ModerationActionModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const ModerationAction &original)
+    std::vector<QStandardItem *> &row, const ModerationAction &original,
+    std::optional<QModelIndex> index, std::optional<int> role)
 {
     return ModerationAction(
         row[Column::Command]->data(Qt::DisplayRole).toString(),

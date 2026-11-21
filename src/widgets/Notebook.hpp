@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
+#include "util/TabHistory.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/NotebookEnums.hpp"
 
@@ -11,16 +16,16 @@
 #include <QWidget>
 
 #include <functional>
+#include <optional>
 #include <span>
+#include <vector>
 
 namespace chatterino {
 
 class Button;
-class PixmapButton;
 class SvgButton;
 class Window;
-class UpdateDialog;
-class NotebookButton;
+class DrawnButton;
 class NotebookTab;
 class SplitContainer;
 class Split;
@@ -61,42 +66,50 @@ public:
     int visibleIndexOf(QWidget *page) const;
 
     /**
-     * @brief Returns the number of visible tabs in Notebook. 
+     * @brief Returns the number of visible tabs in Notebook.
      **/
     int getVisibleTabCount() const;
 
     /**
      * @brief Selects the Notebook tab containing the given page.
      **/
-    virtual void select(QWidget *page, bool focusPage = true);
+    virtual void select(QWidget *page, bool focusPage = true,
+                        bool recordInHistory = true);
+
+    void selectHistoryBack(bool focusPage);
+    void selectHistoryForward(bool focusPage);
+    QWidget *getPreviousVisitedPage() const;
+    std::vector<QWidget *> getVisitHistoryPages() const;
 
     /**
      * @brief Selects the Notebook tab at the given index. Ignores whether tabs
-     * are visible or not. 
+     * are visible or not.
      **/
     void selectIndex(int index, bool focusPage = true);
 
     /**
      * @brief Selects the index'th visible tab in the Notebook.
-     * 
-     * For example, selecting the 0th visible tab selects the first tab in this 
+     *
+     * For example, selecting the 0th visible tab selects the first tab in this
      * Notebook that is visible according to the TabVisibilityFilter. If no filter
      * is set, equivalent to Notebook::selectIndex.
      **/
     void selectVisibleIndex(int index, bool focusPage = true);
 
     /**
-     * @brief Selects the next visible tab. Wraps to the start if required. 
+     * @brief Selects the next visible tab. Wraps to the start if required.
      **/
-    void selectNextTab(bool focusPage = true);
+    void selectNextTab(bool focusPage = true, bool recordInHistory = true);
 
     /**
-     * @brief Selects the previous visible tab. Wraps to the end if required. 
+     * @brief Selects the previous visible tab. Wraps to the end if required.
      **/
-    void selectPreviousTab(bool focusPage = true);
+    void selectPreviousTab(bool focusPage = true, bool recordInHistory = true);
+
+    void scrollTabs(QWheelEvent *event);
 
     /**
-     * @brief Selects the last visible tab. 
+     * @brief Selects the last visible tab.
      **/
     void selectLastTab(bool focusPage = true);
 
@@ -117,7 +130,7 @@ public:
     void setTabLocation(NotebookTabLocation location);
 
     bool isNotebookLayoutLocked() const;
-    void setLockNotebookLayout(bool value);
+    virtual void setLockNotebookLayout(bool value);
 
     virtual void addNotebookActionsToMenu(QMenu *menu);
 
@@ -126,21 +139,33 @@ public:
 
 protected:
     bool getShowTabs() const;
-    void setShowTabs(bool value);
+    virtual void setShowTabs(bool value);
+
+    void setGrowWrappedNotebookLines(bool value);
 
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *) override;
 
-    NotebookButton *getAddButton();
+    virtual void afterPageAdded()
+    {
+    }
+    virtual void afterPageRemoved()
+    {
+    }
+    virtual void afterPageMoved()
+    {
+    }
+
+    DrawnButton *addButton_;
 
     template <typename T>
     T *addCustomButton(auto &&...args)
     {
         auto *btn = new T(std::forward<decltype(args)>(args)..., this);
         this->customButtons_.push_back(btn);
-        this->performLayout();
 
         return btn;
     }
@@ -153,7 +178,7 @@ protected:
 
     const QList<Item> items()
     {
-        return items_;
+        return this->items_;
     }
 
     /**
@@ -170,9 +195,11 @@ protected:
      **/
     bool shouldShowTab(const NotebookTab *tab) const;
 
-private:
     void performLayout(bool animate = false);
 
+    void sortTabsAlphabetically();
+
+private:
     struct LayoutContext {
         int left = 0;
         int right = 0;
@@ -194,18 +221,15 @@ private:
     void performVerticalLayout(const LayoutContext &ctx, bool animated);
 
     /**
-     * @brief Show a popup informing the user of some big tab visibility changes
-     **/
-    void showTabVisibilityInfoPopup();
-
-    /**
      * @brief Updates the visibility state of all tabs
      **/
     void updateTabVisibility();
     void resizeAddButton();
 
-    bool containsPage(QWidget *page);
-    Item *findItem(QWidget *page);
+    bool containsPage(QWidget *page) const;
+    std::optional<Item> findItem(QWidget *page);
+
+    void pruneInvalidHistoryEntries();
 
     static bool containsChild(const QObject *obj, const QObject *child);
     NotebookTab *getTabFromPage(QWidget *page);
@@ -217,14 +241,17 @@ private:
     QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
 
-    NotebookButton *addButton_;
+    TabHistory tabHistory_;
+
     std::vector<Button *> customButtons_;
 
     bool allowUserTabManagement_ = false;
     bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
+    int mouseWheelDelta_ = 0;
     bool lockNotebookLayout_ = false;
+    bool growWrappedNotebookLines = false;
 
     bool refreshPaused_ = false;
     bool refreshRequested_ = false;
@@ -248,7 +275,8 @@ public:
     SplitContainer *getOrAddSelectedPage();
     /// Returns `nullptr` when no page is selected.
     SplitContainer *getSelectedPage();
-    void select(QWidget *page, bool focusPage = true) override;
+    void select(QWidget *page, bool focusPage = true,
+                bool recordInHistory = true) override;
     void themeChangedEvent() override;
 
     void addNotebookActionsToMenu(QMenu *menu) override;
@@ -267,14 +295,29 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+    void setShowTabs(bool value) override;
+
+    void afterPageAdded() override;
+    void afterPageRemoved() override;
+    void afterPageMoved() override;
+
 private:
+    QAction *sortTabsAlphabeticallyAction_;
+
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
 
     // Main window on Windows has basically a duplicate of this in Window
-    PixmapButton *streamerModeIcon_{};
+    SvgButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    void setLockNotebookLayout(bool value) override;
+
+    /**
+     * @brief Show a popup informing the user of some big tab visibility changes
+     **/
+    void showTabVisibilityInfoPopup();
 };
 
 }  // namespace chatterino

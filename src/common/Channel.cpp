@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Channel.hpp"
 
 #include "Application.hpp"
@@ -7,6 +11,31 @@
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/ChannelHelpers.hpp"
+
+namespace {
+
+constexpr uint8_t MAX_RECURSION = 64;
+
+struct RecursionGuard {
+    constexpr RecursionGuard(uint8_t *count) noexcept
+        : count(count)
+    {
+        assert(*count < MAX_RECURSION);
+        *this->count += 1;
+    }
+    RecursionGuard(const RecursionGuard &) = delete;
+    RecursionGuard(RecursionGuard &&) = delete;
+    RecursionGuard &operator=(const RecursionGuard &) = delete;
+    RecursionGuard &operator=(RecursionGuard &&) = delete;
+    constexpr ~RecursionGuard()
+    {
+        *this->count -= 1;
+    }
+
+    uint8_t *count;
+};
+
+}  // namespace
 
 namespace chatterino {
 
@@ -29,11 +58,10 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app && this->anythingLogged_)
+    if (app && !isAppAboutToQuit() && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
-    this->destroyed.invoke();
 }
 
 Channel::Type Channel::getType() const
@@ -71,14 +99,49 @@ bool Channel::hasMessages() const
     return !this->messages_.empty();
 }
 
-LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
+size_t Channel::countMessages() const
+{
+    return this->messages_.size();
+}
+
+std::vector<MessagePtr> Channel::getMessageSnapshot() const
 {
     return this->messages_.getSnapshot();
+}
+
+std::vector<MessagePtr> Channel::getMessageSnapshot(size_t nItems) const
+{
+    return this->messages_.lastN(nItems);
+}
+
+std::vector<MessagePtrMut> Channel::getMessageSnapshotMut(size_t nItems) const
+{
+    return this->messages_.lastNBy<MessagePtrMut>(nItems, [](const auto &msg) {
+        return std::const_pointer_cast<Message>(msg);
+    });
+}
+
+MessagePtr Channel::getLastMessage() const
+{
+    auto last = this->messages_.last();
+    if (last)
+    {
+        return *std::move(last);
+    }
+    return nullptr;
 }
 
 void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    message->freeze();
+
     MessagePtr deleted;
 
     if (context == MessageContext::Original && this->getType() != Type::None)
@@ -112,6 +175,14 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
+void Channel::addSystemMessage(const QString &contents,
+                               const QString &timeoutUser)
+{
+    MessageBuilder builder(systemMessage, contents);
+    builder->timeoutUser = timeoutUser;
+    this->addMessage(builder.release(), MessageContext::Original);
+}
+
 void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
@@ -128,7 +199,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelClear(
-        this->getMessageSnapshot(), std::move(message), now,
+        this->getMessageSnapshot(20), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -139,24 +210,31 @@ void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 
 void Channel::disableAllMessages()
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.size();
-    for (int i = 0; i < snapshotLength; i++)
+    for (const auto &message : this->getMessageSnapshot())
     {
-        const auto &message = snapshot[i];
         if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout,
                                    MessageFlag::Whisper}))
         {
             continue;
         }
 
-        // FOURTF: disabled for now
-        const_cast<Message *>(message.get())->flags.set(MessageFlag::Disabled);
+        message->flags.set(MessageFlag::Disabled);
     }
 }
 
 void Channel::addMessagesAtStart(const std::vector<MessagePtr> &_messages)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    for (const auto &msg : _messages)
+    {
+        msg->freeze();
+    }
+
     std::vector<MessagePtr> addedMessages =
         this->messages_.pushFront(_messages);
 
@@ -171,6 +249,17 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     if (messages.empty())
     {
         return;
+    }
+
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    for (const auto &msg : messages)
+    {
+        msg->freeze();
     }
 
     auto snapshot = this->getMessageSnapshot();
@@ -223,12 +312,12 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
                 continue;
             }
 
-            if (msg->serverReceivedTime < snapshotMsg->serverReceivedTime)
+            if (msg->timestamp < snapshotMsg->timestamp)
             {
                 // We found the first message that comes after the current message.
                 // Therefore, we can put the current message directly before. We
                 // assume that the messages we are filling in are in ascending
-                // order by serverReceivedTime.
+                // order by timestamp.
                 this->messages_.insertBefore(snapshotMsg, msg);
                 insertedFlag = true;
                 break;
@@ -256,6 +345,13 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
 void Channel::replaceMessage(const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    replacement->freeze();
     int index = this->messages_.replaceItem(message, replacement);
 
     if (index >= 0)
@@ -266,6 +362,14 @@ void Channel::replaceMessage(const MessagePtr &message,
 
 void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    replacement->freeze();
+
     MessagePtr prev;
     if (this->messages_.replaceItem(index, replacement, &prev))
     {
@@ -276,6 +380,14 @@ void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 void Channel::replaceMessage(size_t hint, const MessagePtr &message,
                              const MessagePtr &replacement)
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
+    replacement->freeze();
+
     auto index = this->messages_.replaceItem(hint, message, replacement);
     if (index >= 0)
     {
@@ -294,6 +406,12 @@ void Channel::disableMessage(const QString &messageID)
 
 void Channel::clearMessages()
 {
+    RecursionGuard g{&this->recursionCount_};
+    if (!this->canRecurse())
+    {
+        return;
+    }
+
     this->messages_.clear();
     this->messagesCleared.invoke();
 }
@@ -323,6 +441,7 @@ MessageSinkTraits Channel::sinkTraits() const
     return {
         MessageSinkTrait::AddMentionsToGlobalChannel,
         MessageSinkTrait::RequiresKnownChannelPointReward,
+        MessageSinkTrait::UpdateCurrentUserState,
     };
 }
 
@@ -408,6 +527,11 @@ void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
 }
 
+bool Channel::canRecurse() const noexcept
+{
+    return this->recursionCount_ < MAX_RECURSION;
+}
+
 //
 // Indirect channel
 //
@@ -424,7 +548,7 @@ IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
 
 ChannelPtr IndirectChannel::get() const
 {
-    return data_->channel;
+    return this->data_->channel;
 }
 
 void IndirectChannel::reset(ChannelPtr channel)

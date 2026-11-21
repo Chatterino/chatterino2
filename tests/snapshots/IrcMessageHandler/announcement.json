@@ -2,14 +2,7 @@
     "input": "@badge-info=subscriber/47;badges=broadcaster/1,subscriber/3012,twitchconAmsterdam2020/1;color=#FF0000;display-name=Supinic;emotes=;flags=;id=8c26e1ab-b50c-4d9d-bc11-3fd57a941d90;login=supinic;mod=0;msg-id=announcement;msg-param-color=PRIMARY;room-id=11148817;subscriber=1;system-msg=;tmi-sent-ts=1648762219962;user-id=31400525;user-type= :tmi.twitch.tv USERNOTICE #pajlada :mm test lol",
     "output": [
         {
-            "badgeInfos": {
-                "subscriber": "47"
-            },
-            "badges": [
-                "broadcaster",
-                "subscriber",
-                "twitchconAmsterdam2020"
-            ],
+            "announcementColor": "Primary",
             "channelName": "pajlada",
             "count": 1,
             "displayName": "Supinic",
@@ -28,6 +21,61 @@
                     "words": [
                         "#pajlada"
                     ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp|HeaderTimestamp|AnnouncementHeader",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "21:30"
+                        ]
+                    },
+                    "exhaustiveFlags": true,
+                    "flags": "Timestamp|HeaderTimestamp|AnnouncementHeader",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "21:30:19",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "exhaustiveFlags": true,
+                    "flags": "Text|AnnouncementHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Announcement"
+                    ]
+                },
+                {
+                    "exhaustiveFlags": true,
+                    "flags": "AnnouncementHeader",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
                 },
                 {
                     "element": {
@@ -138,80 +186,28 @@
                     ]
                 }
             ],
-            "flags": "Highlighted|Collapsed|Subscription",
-            "highlightColor": "#64c466ff",
+            "externalBadges": [
+            ],
+            "flags": "Highlighted|Collapsed|Announcement",
+            "frozen": false,
+            "highlightColor": "#64ff66ed",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
             "messageText": "mm test lol",
             "searchText": "supinic  supinic: mm test lol ",
-            "serverReceivedTime": "2022-03-31T21:30:19Z",
+            "timestamp": "2022-03-31T21:30:19Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+                "subscriber": "47"
+            },
+            "twitchBadges": [
+                "broadcaster",
+                "subscriber",
+                "twitchconAmsterdam2020"
+            ],
             "userID": "31400525",
             "usernameColor": "#ffff0000"
-        },
-        {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
-            "channelName": "",
-            "count": 1,
-            "displayName": "",
-            "elements": [
-                {
-                    "element": {
-                        "color": "System",
-                        "flags": "Timestamp",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "TimestampMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "21:30"
-                        ]
-                    },
-                    "flags": "Timestamp",
-                    "format": "",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "time": "21:30:19",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TimestampElement"
-                },
-                {
-                    "color": "System",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "Announcement"
-                    ]
-                }
-            ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "Announcement",
-            "searchText": "Announcement",
-            "serverReceivedTime": "",
-            "timeoutUser": "",
-            "userID": "",
-            "usernameColor": "#ff000000"
         }
     ]
 }

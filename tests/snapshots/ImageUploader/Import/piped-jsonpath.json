@@ -1,0 +1,27 @@
+{
+    "input": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "{json:delete}",
+        "DestinationType": "ImageUploader, FileUploader",
+        "ErrorMessage": "{json:message}",
+        "FileFormName": "file",
+        "Headers": {
+            "X-bing": "bong",
+            "X-foo": "bar"
+        },
+        "Parameters": {
+            "urlfoo": "urlbar"
+        },
+        "RequestMethod": "POST",
+        "RequestURL": "https://kappa.lol/api/upload",
+        "URL": "{json:response|files[0].url}",
+        "Version": "14.0.1"
+    },
+    "output": {
+        "deletionLink": "{delete}",
+        "formField": "file",
+        "headers": "X-bing: bong;X-foo: bar",
+        "link": "{files.0.url}",
+        "url": "https://kappa.lol/api/upload"
+    }
+}

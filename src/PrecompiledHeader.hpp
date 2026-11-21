@@ -1,8 +1,9 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef __cplusplus
 #    include <boost/circular_buffer.hpp>
-#    include <boost/current_function.hpp>
-#    include <boost/foreach.hpp>
-#    include <boost/signals2.hpp>
 #    include <IrcCommand>
 #    include <IrcConnection>
 #    include <IrcMessage>

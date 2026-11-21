@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/lang/Tokenizer.hpp"
 
 #include "common/QLogging.hpp"
@@ -18,12 +22,14 @@ namespace chatterino::filters {
 
 const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"author.badges", "author badges"},
+    {"author.external_badges", "author external badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},
     {"author.user_id", "author user id"},
     {"author.no_color", "author has no color?"},
     {"author.subbed", "author subscribed?"},
     {"author.sub_length", "author sub length"},
+    {"bits.amount", "bits cheered"},
     {"channel.name", "channel name"},
     {"channel.watching", "/watching channel?"},
     {"channel.live", "channel live?"},
@@ -34,10 +40,10 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"flags.system_message", "system message?"},
     {"flags.reward_message", "channel point reward message?"},
     {"flags.first_message", "first message?"},
-    {"flags.elevated_message", "hype chat message?"},
+    {"flags.elevated_message", "deprecated"},
     // Ideally these values are unique, because ChannelFilterEditorDialog::ValueSpecifier::expressionText depends on
     // std::map layout in Qt 6 and internal implementation in Qt 5.
-    {"flags.hype_chat", "hype chat message?"},
+    {"flags.hype_chat", "deprecated"},
     {"flags.cheer_message", "cheer message?"},
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},
@@ -45,7 +51,9 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"flags.restricted", "restricted message?"},
     {"flags.monitored", "monitored message?"},
     {"flags.shared", "shared message?"},
-    {"flags.similar", "r9k filtered message?"},
+    {"flags.similar", "unique chat (r9k) filtered message?"},
+    {"flags.watch_streak", "watch streak message?"},
+    {"flags.announcement", "announcement message?"},
     {"message.content", "message text"},
     {"message.length", "message length"},
     {"reward.title", "point reward title"},

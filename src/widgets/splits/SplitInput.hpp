@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Message.hpp"
@@ -8,22 +12,27 @@
 #include <QLineEdit>
 #include <QPaintEvent>
 #include <QPointer>
+#include <QPropertyAnimation>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include <memory>
 
+class QMimeData;
+
 namespace chatterino {
 
 class Split;
 class EmotePopup;
 class InputCompletionPopup;
+class InputHighlighter;
 class MessageView;
 class LabelButton;
 class ResizingTextEdit;
 class ChannelView;
 class SvgButton;
+class SpellCheckHighlighter;
 enum class CompletionKind;
 
 class SplitInput : public BaseWidget
@@ -41,6 +50,7 @@ public:
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+    void setWhisperTarget(const QString &username) const;
 
     void setReply(MessagePtr target);
     void setPlaceholderText(const QString &text);
@@ -68,6 +78,8 @@ public:
      **/
     bool isHidden() const;
 
+    bool isInHistorySearch() const;
+
     /**
      * @brief Sets the text of this input
      *
@@ -75,8 +87,21 @@ public:
      */
     void setInputText(const QString &newInputText);
 
+    /**
+     * @brief Sets a formatted time to sendWaitStatus
+     *
+     * This method is used to update the text of the timeout and slow mode timer
+     */
+    void setSendWaitStatus(const QString &text) const;
+
+    void triggerSelfMessageReceived();
+
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
+
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
+    pajlada::Signals::NoArgSignal historySearchStateChanged;
 
 protected:
     void scaleChangedEvent(float scale_) override;
@@ -99,10 +124,7 @@ protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
-#ifdef DEBUG
-    bool keyPressedEventInstalled{};
-#endif
-    void installKeyPressedEvent();
+    void installTextEditEvents();
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
@@ -152,7 +174,11 @@ protected:
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
         LabelButton *sendButton;
+        QLabel *sendWaitStatus;
         SvgButton *emoteButton;
+        QWidget *historySearchWrap;
+        QLineEdit *historySearchInput;
+        QLabel *historySearchLabel;
     } ui_;
 
     MessagePtr replyTarget_ = nullptr;
@@ -169,11 +195,79 @@ protected:
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
 
+    /// Updates the text edit palette using the current theme
+    /// and current "backgroundColor" property
+    void updateTextEditPalette();
+
+    // the background color defines the current background color of this split input
+    // instead of reading straight from the theme, we store a property here
+    // to be used by a property to be able to pulse a highlight color on demand
+    Q_PROPERTY(
+        QColor backgroundColor READ backgroundColor WRITE setBackgroundColor);
+
+    QColor backgroundColor_{"#000000"};
+    QColor backgroundColor() const;
+    void setBackgroundColor(QColor newColor);
+
+    QPropertyAnimation backgroundColorAnimation;
+
+    std::optional<bool> checkSpellingOverride_;
+    bool shouldCheckSpelling() const;
+    void checkSpellingChanged();
+
+    InputHighlighter *inputHighlighter = nullptr;
+
+    void updateFonts();
+
+    bool inHistorySearch = false;
+
+private:
+    void handleImagePaste(const QMimeData *source);
+
+    void startHistorySearch(bool backwards, bool loop);
+    void stopHistorySearchIfNecessary();
+
+    /// Search through all previous messages for `historySearchQuery`
+    void refreshHistorySearch(bool backwards, bool loop);
+
+    void cycleHistorySearch(bool backwards, bool loop);
+    void loopHistorySearchIfNeeded(bool backwards);
+
+    /// Show the currently selected message in the input box
+    void updateSelectedHistorySearchMatch();
+
+    void updateHistorySearchStatus(bool failed, const QString &message);
+
+    QString historySearchQuery;
+
+    struct HistorySearchResult {
+        /// Index of the message in `prevMsg_`
+        qsizetype messageIdx = 0;
+        QString message;
+    };
+    std::vector<HistorySearchResult> historySearchResults;
+
+    /// Index into `historySearchResults`
+    /// This might be out of bounds if there's no match.
+    qsizetype historySearchResultIndex = -1;
+
+    bool historySearchFailed = false;
+
+    bool lastHistorySearchBackwards = false;
+    bool lastHistorySearchLoop = false;
+
+    /// `prevIndex_` value before a history search was started.
+    ///
+    /// The history search modifies `prevIndex_`, but we need this anchor when
+    /// the user updates the query.
+    int prevIndexBeforeSearch = 0;
+
 private Q_SLOTS:
     void editTextChanged();
 
     friend class Split;
     friend class ReplyThreadPopup;
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

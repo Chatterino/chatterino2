@@ -1,4 +1,10 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
+
+#include <functional>
 
 namespace pajlada::Signals {
 class SignalHolder;
@@ -6,10 +12,12 @@ class SignalHolder;
 
 namespace chatterino {
 
-class PixmapButton;
-class UpdateDialog;
+class SvgButton;
 
-void initUpdateButton(PixmapButton &button,
+/// Initializes the update button
+///
+/// The `relayout` function gets called whenever the button visibility changes
+void initUpdateButton(SvgButton &button, const std::function<void()> &relayout,
                       pajlada::Signals::SignalHolder &signalHolder);
 
 }  // namespace chatterino

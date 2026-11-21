@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <chrono>
@@ -30,6 +34,9 @@ public:
     ///
     /// The calling thread will be suspended during the wait.
     void wait();
+
+    /// Is the flag currently set?
+    bool isSet();
 
 private:
     std::mutex mutex;

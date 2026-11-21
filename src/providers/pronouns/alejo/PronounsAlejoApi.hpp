@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "providers/pronouns/UserPronouns.hpp"
@@ -29,8 +33,14 @@ private:
     void loadAvailablePronouns();
 
     std::shared_mutex mutex;
-    /// Maps alejo.io pronoun IDs to human readable representation like `they/them` or `other`
-    std::unordered_map<QString, QString> pronouns;
+    struct PronounEntry {
+        QString subject;
+        QString object;
+        bool singular;
+    };
+
+    /// Maps alejo.io pronoun IDs to their human readable representation (subject, object, and singularity)
+    std::unordered_map<QString, PronounEntry> pronouns;
 
     /// Parse a pronoun definition from the /users endpoint into a finished UserPronouns
     UserPronouns parsePronoun(const QJsonObject &object);

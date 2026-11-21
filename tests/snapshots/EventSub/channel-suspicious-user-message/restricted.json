@@ -27,10 +27,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -83,28 +79,17 @@
                     "words": [
                         "Restricted"
                     ]
-                }
-            ],
-            "flags": "LowTrustUsers|RestrictedMessage|EventSub",
-            "id": "",
-            "localizedName": "",
-            "loginName": "",
-            "messageText": "Suspicious User: Restricted",
-            "searchText": "Suspicious User: Restricted",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
-            "userID": "",
-            "usernameColor": "#ff000000"
-        },
-        {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
-            "channelName": "pajlada",
-            "count": 1,
-            "displayName": "",
-            "elements": [
+                },
+                {
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -191,14 +176,22 @@
                     ]
                 }
             ],
-            "flags": "PubSub|LowTrustUsers|RestrictedMessage|EventSub",
+            "externalBadges": [
+            ],
+            "flags": "Highlighted|PubSub|LowTrustUsers|RestrictedMessage|EventSub",
+            "frozen": true,
+            "highlightColor": "#7f404040",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: FeelsDankMan",
-            "searchText": "nerixyz: FeelsDankMan",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "messageText": "Suspicious User: Restricted nerixyz: FeelsDankMan",
+            "searchText": "Suspicious User: Restricted nerixyz: FeelsDankMan",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

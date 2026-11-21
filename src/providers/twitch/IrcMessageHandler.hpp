@@ -1,6 +1,8 @@
-#pragma once
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
 
-#include "messages/LimitedQueueSnapshot.hpp"
+#pragma once
 
 #include <IrcMessage>
 
@@ -21,6 +23,13 @@ class MessageSink;
 struct ClearChatMessage {
     MessagePtr message;
     bool disableAllMessages;
+    std::optional<QString> username;
+};
+
+struct AddMessageArgs {
+    bool isSub = false;
+    bool isAction = false;
+    bool isSpecial = false;
 };
 
 class IrcMessageHandler
@@ -61,11 +70,11 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *chan, const QString &originalContent,
-                           ITwitchIrcServer &twitch, bool isSub, bool isAction);
+                           ITwitchIrcServer &twitch, AddMessageArgs addArgs);
 
 private:
     static float similarity(const MessagePtr &msg,
-                            const LimitedQueueSnapshot<MessagePtr> &messages);
+                            const std::vector<MessagePtr> &messages);
     static void setSimilarityFlags(const MessagePtr &message,
                                    const ChannelPtr &channel);
 };

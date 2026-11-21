@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 
 #include "Application.hpp"
@@ -21,7 +25,8 @@ void handleModerateMessage(
 {
     runInGuiThread([chan, actor{event.moderatorUserLogin.qt()}, time] {
         chan->addOrReplaceClearChat(
-            MessageBuilder::makeClearChatMessage(time, actor), time);
+            MessageBuilder::makeClearChatMessage(time, actor, chan->getName()),
+            time);
         if (getSettings()->hideModerated)
         {
             // XXX: This is expensive. We could use a layout request if the layout

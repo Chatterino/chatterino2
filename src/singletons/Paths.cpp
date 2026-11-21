@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/Paths.hpp"
 
+#include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
@@ -15,23 +20,17 @@ using namespace std::literals;
 
 namespace chatterino {
 
-Paths::Paths()
+Paths::Paths(const Args &args, const Modes &modes)
 {
     this->initAppFilePathHash();
 
-    this->initCheckPortable();
-    this->initRootDirectory();
+    this->initRootDirectory(args, modes);
     this->initSubDirectories();
 }
 
 bool Paths::createFolder(const QString &folderPath)
 {
     return QDir().mkpath(folderPath);
-}
-
-bool Paths::isPortable() const
-{
-    return Modes::instance().isPortable;
 }
 
 QString Paths::cacheDirectory() const
@@ -76,23 +75,18 @@ void Paths::initAppFilePathHash()
             .replace("/", "x");
 }
 
-void Paths::initCheckPortable()
+void Paths::initRootDirectory(const Args &args, const Modes &modes)
 {
-    this->portable_ = QFileInfo::exists(
-        combinePath(QCoreApplication::applicationDirPath(), "portable"));
-}
-
-void Paths::initRootDirectory()
-{
-    assert(this->portable_.has_value());
-
-    // Root path = %APPDATA%/Chatterino or the folder that the executable
-    // resides in
-
     this->rootAppDataDirectory = [&]() -> QString {
         // portable
-        if (Modes::instance().isPortable)
+        if (modes.isPortable)
         {
+            // override
+            if (args.portableDirectory.has_value())
+            {
+                return args.portableDirectory.value();
+            }
+
             return QCoreApplication::applicationDirPath();
         }
 
@@ -145,6 +139,7 @@ void Paths::initSubDirectories()
     this->pluginsDirectory = makePath("Plugins");
     this->themesDirectory = makePath("Themes");
     this->crashdumpDirectory = makePath("Crashes");
+    this->dictionariesDirectory = makePath("Dictionaries");
 #ifdef Q_OS_WIN
     this->ipcDirectory = makePath("IPC");
 #else

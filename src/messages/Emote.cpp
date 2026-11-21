@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/Emote.hpp"
 
 #include "common/Literals.hpp"
@@ -14,11 +18,6 @@ bool operator==(const Emote &a, const Emote &b)
 {
     return std::tie(a.homePage, a.name, a.tooltip, a.images) ==
            std::tie(b.homePage, b.name, b.tooltip, b.images);
-}
-
-bool operator!=(const Emote &a, const Emote &b)
-{
-    return !(a == b);
 }
 
 QJsonObject Emote::toJson() const

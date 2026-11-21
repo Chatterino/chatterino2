@@ -7,9 +7,8 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.11
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
-  QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
@@ -23,20 +22,25 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-14]
-        qt-version: [6.4.3, 6.7.1]
+        include:
+          - os: macos-15
+            qt-version: 6.8.3
+          - os: macos-26
+            qt-version: 6.11.1
       fail-fast: false
     env:
-      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+      QT_MODULES: qtimageformats
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4.3.0
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -45,7 +49,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake boost
+          # brew install openssl rapidjson p7zip create-dmg cmake boost hunspell
+          brew install openssl rapidjson p7zip create-dmg boost hunspell
 
       - name: Install httpbox
         run: |
@@ -63,6 +68,7 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

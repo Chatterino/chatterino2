@@ -120,10 +120,6 @@
     ],
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 2,
             "displayName": "",
@@ -220,22 +216,25 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "nerixyz banned uint128: my reason (2 times) ",
             "searchText": "nerixyz banned uint128: my reason (2 times) ",
-            "serverReceivedTime": "2025-02-22T17:53:50Z",
+            "timestamp": "2025-02-22T17:53:50Z",
             "timeoutUser": "uint128",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         },
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -350,14 +349,21 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "nerixyz banned uint128: my reason ",
             "searchText": "nerixyz banned uint128: my reason ",
-            "serverReceivedTime": "2025-02-22T17:54:50Z",
+            "timestamp": "2025-02-22T17:54:50Z",
             "timeoutUser": "uint128",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

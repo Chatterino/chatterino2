@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -8,13 +12,13 @@
 #include "common/UniqueAccess.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/circular_buffer/space_optimized.hpp>
-#include <boost/signals2.hpp>
 #include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
@@ -22,6 +26,7 @@
 #include <QRegularExpression>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
@@ -58,6 +63,7 @@ struct HelixStream;
 struct HelixCheermoteSet;
 struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
+struct HelixPinnedChatMessage;
 
 class TwitchIrcServer;
 class TwitchAccount;
@@ -167,6 +173,9 @@ public:
     TwitchChannel &operator=(const TwitchChannel &) = delete;
     TwitchChannel &operator=(TwitchChannel &&) = delete;
 
+    std::shared_ptr<TwitchChannel> sharedFromThis();
+    std::weak_ptr<TwitchChannel> weakFromThis();
+
     void initialize();
 
     // Channel methods
@@ -182,13 +191,25 @@ public:
     bool canReconnect() const override;
     void reconnect() override;
     QString getCurrentStreamID() const override;
-    void createClip();
+    void createClip(const QString &title, std::optional<int> duration);
 
     /// Delete the message with the specified ID as a moderator.
     ///
     /// If the ID is empty, all messages will be deleted, effectively clearing
     /// the chat.
     void deleteMessagesAs(const QString &messageID, TwitchAccount *moderator);
+
+    void pinMessageAs(const QString &messageID,
+                      std::optional<std::chrono::seconds> duration,
+                      const TwitchAccount &moderator, QString textHint = {});
+
+    void updatePinnedMessageAs(const QString &messageID,
+                               std::optional<std::chrono::seconds> duration,
+                               const TwitchAccount &moderator,
+                               QString textHint = {});
+
+    void unpinMessageAs(const QString &messageID,
+                        const TwitchAccount &moderator);
 
     // Data
     const QString &subscriptionUrl();
@@ -212,10 +233,10 @@ public:
     void markConnected();
 
     // Emotes
-    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
-    std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> twitchEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> bttvEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> ffzEmote(EmoteNameView name) const;
+    std::optional<EmotePtr> seventvEmote(EmoteNameView name) const;
 
     std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
@@ -293,6 +314,27 @@ public:
      */
     std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
 
+    /// Fired when a message is supposed to be sent by the user in this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, bool &> sendMessageSignal;
+
+    /// Fired when a reply to a message is supposed to be sent by the user in
+    /// this channel.
+    ///
+    /// This should only be handled by one component.
+    ///
+    /// Arguments:
+    /// - `messageText`: The text to be sent.
+    /// - `replyToMessageID`: The ID of the replied-to message.
+    /// - `wasSent`: A return channel for whether the message was sent or not.
+    pajlada::Signals::Signal<const QString &, const QString &, bool &>
+        sendReplySignal;
+
     /**
      * This signal fires when the local user has joined the channel
      **/
@@ -310,6 +352,13 @@ public:
     pajlada::Signals::NoArgSignal streamStatusChanged;
 
     pajlada::Signals::NoArgSignal roomModesChanged;
+
+    pajlada::Signals::NoArgSignal destroyed;
+
+    pajlada::Signals::Signal<const QString &> sendWaitUpdate;
+
+    pajlada::Signals::Signal<const std::vector<HelixMinimalUser> &>
+        sharedChatStatusChanged;
 
     // Channel point rewards
     void addQueuedRedemption(const QString &rewardId,
@@ -340,6 +389,47 @@ public:
      **/
     const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
+
+    /**
+     * Sync the text of the send wait timer to the actual time remaining.
+     */
+    void syncSendWaitTimer();
+    /**
+     * Set the send wait timer to given number of seconds
+     *
+     * When a channel is in slow mode or the user is timed out, calling
+     * this function sets the timer to show how long the user will need
+     * to wait before they can send again.
+     */
+    void setSendWait(int seconds);
+
+    bool isLoadingRecentMessages() const;
+
+    const std::vector<HelixMinimalUser> &getSharedChatSessionParticipants()
+        const;
+    // Pinned message
+    /**
+     * Fetches the currently pinned message for this channel via the Helix API.
+     * Only has effect when the local user has moderator privileges.
+     */
+    void refreshPinnedMessage();
+
+    /**
+     * Clears the pinned message for this channel immediately (e.g. on unpin
+     * PubSub event).
+     */
+    void clearPinnedMessage();
+
+    /// Returns the currently pinned message, or null if none is pinned.
+    const HelixPinnedChatMessage *getPinnedMessage() const;
+
+    /**
+     * Unpin the currently pinned message. Only valid for moderators.
+     */
+    void unpinCurrentMessage();
+
+    /// Fires when the pinned message changes (set, cleared, or updated).
+    pajlada::Signals::NoArgSignal pinnedMessageChanged;
 
 private:
     struct NameOptions {
@@ -375,8 +465,14 @@ private:
     /// This should only happen once per channel, whenever the ID goes from unset to set
     void roomIdChanged();
 
+    void probeSharedChatSession();
+    void refreshSharedChatSessionState();
+
     /** Joins (subscribes to) a Twitch channel for updates on BTTV. */
     void joinBttvChannel() const;
+
+    void updateBttvActivity();
+
     /**
      * Indicates an activity to 7TV in this channel for this user.
      * This is done at most once every 60s.
@@ -416,11 +512,12 @@ private:
      * @param platform The platform the emote was updated on ("7TV", "BTTV", "FFZ")
      * @param actor The actor performing the update (possibly empty)
      * @param emoteName The emote's name
+     * @param now The time the update was received
      */
-    void addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
-                                          const QString &platform,
-                                          const QString &actor,
-                                          const QString &emoteName);
+    void addOrReplaceLiveUpdatesAddRemove(
+        bool isEmoteAdd, const QString &platform, const QString &actor,
+        const QString &emoteName,
+        const QDateTime &now = QDateTime::currentDateTime());
 
     /**
      * Tries to replace the last emote update message.
@@ -435,12 +532,18 @@ private:
      * @param platform The emote platform  ("7TV", "BTTV", "FFZ")
      * @param actor The actor performing the action (possibly empty)
      * @param emoteName The updated emote's name
+     * @param now The time the update was received
      * @return true, if the last message was replaced
      */
     bool tryReplaceLastLiveUpdateAddOrRemove(MessageFlag op,
                                              const QString &platform,
                                              const QString &actor,
-                                             const QString &emoteName);
+                                             const QString &emoteName,
+                                             const QDateTime &now);
+
+    void pinOrUpdateMessage(bool update, const QString &messageID,
+                            std::optional<std::chrono::seconds> duration,
+                            const TwitchAccount &moderator, QString textHint);
 
     // Data
     const QString subscriptionUrl_;
@@ -514,6 +617,8 @@ private:
      */
     QDateTime nextSeventvActivity_;
 
+    QDateTime nextBttvActivity_;
+
     /** The platform of the last live emote update ("7TV", "BTTV", "FFZ"). */
     QString lastLiveUpdateEmotePlatform_;
     /** The actor name of the last live emote update. */
@@ -523,8 +628,36 @@ private:
     /** A list of the emotes listed in the lat live emote update message. */
     std::vector<QString> lastLiveUpdateEmoteNames_;
 
+    /**
+     * List of display names of  broadcasters participating in a
+     * shared chat session on this channel. The list does not include
+     * the broadcaster who owns the channel.
+     * This list is passed to the UI for display.
+     */
+    std::vector<HelixMinimalUser> sharedChatSessionParticipants_;
+
+    /**
+     * Set of broadcasterIDs of broadcasters participating in a
+     * shared chat session on this channel. The set does not include
+     * the broadcaster who owns the channel.
+     * This set is used to quickly determine if the participants have
+     * changed since the last query of the shared chat session state.
+     */
+    QSet<QString> sharedChatSessionParticipantIds_;
+
+    /**
+     * Timer scheduling the next check of the shared chat session state.
+     */
+    QTimer nextSharedChatSessionUpdateTimer_;
+
+    /**
+     * Time when the next probe of shared chat session state triggered
+     * by reception of a shared chat message is allowed.
+     * Used to rate-limit Twitch API queries.
+     */
+    QDateTime nextSharedChatSessionProbe_;
+
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     eventsub::SubscriptionHandle eventSubChannelModerateHandle;
     eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
@@ -534,12 +667,24 @@ private:
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
 
+    /// May be null if no message is currently pinned.
+    std::unique_ptr<const HelixPinnedChatMessage> pinnedMessage_;
+    /// Incremented before each getPinnedChatMessage request so that stale
+    /// responses from earlier requests are discarded.
+    uint64_t pinnedMessageRequestId_ = 0;
+
     friend class TwitchIrcServer;
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
+    friend class TwitchChannel_LiveUpdateGrouping_Test;
+    friend class NotificationController_StatusMessagesRespectUsernameStyle_Test;
     friend class ::TestIrcMessageHandlerP;
     friend class ::TestEventSubMessagesP;
+
+    QTimer sendWaitTimer_;
+    // Timepoint at which the user can send messages again
+    std::optional<std::chrono::steady_clock::time_point> sendWaitEnd_;
 };
 
 }  // namespace chatterino

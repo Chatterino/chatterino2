@@ -46,16 +46,53 @@ declare namespace c2 {
         game_id: string;
     }
 
+    class ConnectionHandle {
+        disconnect(): void;
+        block(): void;
+        unblock(): void;
+        is_blocked(): boolean;
+        is_connected(): boolean;
+    }
+
     class Channel implements IWeakResource {
         is_valid(): boolean;
         get_name(): string;
         get_type(): ChannelType;
         get_display_name(): string;
 
+        on_display_name_changed(cb: () => void): ConnectionHandle;
+        on_messages_cleared(cb: () => void): ConnectionHandle;
+        on_message_replaced(
+            cb: (idx: number, old: Message, replacement: Message) => void
+        ): ConnectionHandle;
+        on_message_appended(
+            cb: (msg: Message, override_flags: MessageFlag | null) => void
+        ): ConnectionHandle;
+
         send_message(message: string, execute_commands: boolean): void;
         send_message(message: string): void;
 
         add_system_message(message: string): void;
+
+        add_message(
+            message: Message,
+            context?: MessageContext,
+            override_flags?: MessageFlag | null
+        ): void;
+
+        message_snapshot(n_items: number): Message[];
+        last_message(): Message | null;
+        replace_message(message: Message, replacement: Message): void;
+        replace_message(
+            message: Message,
+            replacement: Message,
+            hint: number
+        ): void;
+        replace_message_at(index: number, replacement: Message): void;
+        clear_messages(): void;
+        find_message_by_id(id: string): Message | null;
+        has_messages(): boolean;
+        count_messages(): number;
 
         is_twitch_channel(): boolean;
 
@@ -133,6 +170,7 @@ declare namespace c2 {
         close(): void;
         send_text(data: string): void;
         send_binary(data: string): void;
+        on_open: null | (() => void);
         on_close: null | (() => void);
         on_text: null | ((data: string) => void);
         on_binary: null | ((data: string) => void);
@@ -143,6 +181,7 @@ declare namespace c2 {
             url: string,
             options?: {
                 headers?: Record<string, string>;
+                on_open?: () => void;
                 on_close?: () => void;
                 on_text?: (data: string) => void;
                 on_binary?: (data: string) => void;
@@ -150,4 +189,542 @@ declare namespace c2 {
         ) => WebSocket;
     }
     var WebSocket: WebSocketConstructor;
+
+    interface Message {
+        flags: MessageFlag;
+        id: string;
+        search_text: string;
+        message_text: string;
+        login_name: string;
+        display_name: string;
+        localized_name: string;
+        user_id: string;
+        channel_name: string;
+        username_color: string;
+        timestamp: number;
+        highlight_color: string | null;
+        frozen: boolean;
+        elements(): MessageElement[];
+        append_element(init: MessageElementInit | MessageElement): void;
+        clone(): Message;
+    }
+
+    interface MessageConstructor {
+        new: (this: void, init: MessageInit) => Message;
+    }
+    var Message: MessageConstructor;
+
+    interface MessageInit {
+        flags?: MessageFlag;
+        id?: string;
+        search_text?: string;
+        message_text?: string;
+        login_name?: string;
+        display_name?: string;
+        localized_name?: string;
+        user_id?: string;
+        channel_name?: string;
+        username_color?: string;
+        timestamp?: number;
+        highlight_color?: string | null;
+        elements?: (MessageElementInit | MessageElement)[];
+    }
+
+    interface MessageElementBase {
+        flags: MessageElementFlag;
+        tooltip: string;
+        trailing_space: boolean;
+        link: Link;
+        add_flags(flags: MessageElementFlag): void;
+    }
+
+    interface MessageElementInitBase {
+        tooltip?: string;
+        trailing_space?: boolean;
+        link?: Link;
+    }
+
+    type MessageColor = "text" | "link" | "system" | string;
+
+    type MessageElement =
+        | TextElement
+        | SingleLineTextElement
+        | MentionElement
+        | TimestampElement
+        | TwitchModerationElement
+        | LinebreakElement
+        | ReplyCurveElement
+        | LinkElement
+        | EmoteElement
+        | LayeredEmoteElement
+        | ImageElement
+        | CircularImageElement
+        | ScalingImageElement
+        | BadgeElement
+        | ModBadgeElement
+        | VipBadgeElement
+        | FfzBadgeElement;
+
+    type MessageElementInit =
+        | TextElementInit
+        | SingleLineTextElementInit
+        | MentionElementInit
+        | TimestampElementInit
+        | TwitchModerationElementInit
+        | LinebreakElementInit
+        | ReplyCurveElementInit
+        | ImageElementInit
+        | CircularImageElementInit
+        | ScalingImageElementInit;
+
+    interface TextElement extends MessageElementBase {
+        type: "text";
+        words: string[];
+        color: string;
+        style: c2.FontStyle;
+    }
+
+    interface TextElementInit extends MessageElementInitBase {
+        type: "text";
+        text: string;
+        flags?: MessageElementFlag;
+        color?: MessageColor;
+        style?: FontStyle;
+    }
+
+    interface SingleLineTextElement extends MessageElementBase {
+        type: "single-line-text";
+        words: string[];
+        color: string;
+        style: c2.FontStyle;
+    }
+
+    interface SingleLineTextElementInit extends MessageElementInitBase {
+        type: "single-line-text";
+        text: string;
+        flags?: MessageElementFlag;
+        color?: MessageColor;
+        style?: FontStyle;
+    }
+
+    interface MentionElement extends Omit<TextElement, "type"> {
+        type: "mention";
+        display_name: string;
+        login_name: string;
+        fallback_color: string;
+        user_color: string;
+    }
+
+    interface MentionElementInit extends MessageElementInitBase {
+        type: "mention";
+        display_name: string;
+        login_name: string;
+        fallback_color: MessageColor;
+        user_color: MessageColor;
+    }
+
+    interface TimestampElement extends MessageElementBase {
+        type: "timestamp";
+        time: number;
+    }
+
+    interface TimestampElementInit extends MessageElementInitBase {
+        type: "timestamp";
+        time?: number;
+    }
+
+    interface TwitchModerationElement extends MessageElementBase {
+        type: "twitch-moderation";
+    }
+
+    interface TwitchModerationElementInit extends MessageElementInitBase {
+        type: "twitch-moderation";
+    }
+
+    interface LinebreakElement extends MessageElementBase {
+        type: "linebreak";
+    }
+
+    interface LinebreakElementInit extends MessageElementInitBase {
+        type: "linebreak";
+        flags?: MessageElementFlag;
+    }
+
+    interface ReplyCurveElement extends MessageElementBase {
+        type: "reply-curve";
+    }
+
+    interface ReplyCurveElementInit extends MessageElementInitBase {
+        type: "reply-curve";
+    }
+
+    interface LinkElement extends Omit<TextElement, "type"> {
+        type: "link";
+        lowercase: string;
+        original: string;
+    }
+
+    interface EmoteElement extends MessageElementBase {
+        type: "emote";
+    }
+
+    interface LayeredEmoteElement extends MessageElementBase {
+        type: "layered-emote";
+    }
+
+    interface ImageElement extends MessageElementBase {
+        type: "image";
+        image: Image;
+    }
+
+    interface ImageElementInit extends MessageElementInitBase {
+        type: "image";
+        image: Image;
+        flags: MessageElementFlag;
+    }
+
+    interface CircularImageElement extends MessageElementBase {
+        type: "circular-image";
+        image: Image;
+        padding: number;
+        background: string;
+    }
+
+    interface CircularImageElementInit extends MessageElementInitBase {
+        type: "circular-image";
+        image: Image;
+        padding: number;
+        background: string;
+        flags: MessageElementFlag;
+    }
+
+    interface ScalingImageElement extends MessageElementBase {
+        type: "scaling-image";
+        images: ImageSet;
+    }
+
+    interface ScalingImageElementInit extends MessageElementInitBase {
+        type: "scaling-image";
+        images: ImageSet;
+        flags: MessageElementFlag;
+    }
+
+    interface BadgeElement extends MessageElementBase {
+        type: "badge";
+    }
+
+    interface ModBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "mod-badge";
+    }
+
+    interface VipBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "vip-badge";
+    }
+
+    interface FfzBadgeElement extends Omit<BadgeElement, "type"> {
+        type: "ffz-badge";
+    }
+
+    interface Link {
+        type: LinkType;
+        value: string;
+    }
+
+    enum LinkType {
+        Url,
+        UserInfo,
+        UserAction,
+        JumpToChannel,
+        CopyToClipboard,
+        JumpToMessage,
+        InsertText,
+    }
+
+    enum MessageFlag {
+        None = 0,
+        System = 0,
+        Timeout = 0,
+        Highlighted = 0,
+        DoNotTriggerNotification = 0,
+        Centered = 0,
+        Disabled = 0,
+        DisableCompactEmotes = 0,
+        Collapsed = 0,
+        ConnectedMessage = 0,
+        DisconnectedMessage = 0,
+        Untimeout = 0,
+        PubSub = 0,
+        Subscription = 0,
+        DoNotLog = 0,
+        AutoMod = 0,
+        RecentMessage = 0,
+        Whisper = 0,
+        HighlightedWhisper = 0,
+        Debug = 0,
+        Similar = 0,
+        RedeemedHighlight = 0,
+        RedeemedChannelPointReward = 0,
+        ShowInMentions = 0,
+        FirstMessage = 0,
+        ReplyMessage = 0,
+        SubscribedThread = 0,
+        CheerMessage = 0,
+        LiveUpdatesAdd = 0,
+        LiveUpdatesRemove = 0,
+        LiveUpdatesUpdate = 0,
+        AutoModOffendingMessageHeader = 0,
+        AutoModOffendingMessage = 0,
+        LowTrustUsers = 0,
+        RestrictedMessage = 0,
+        MonitoredMessage = 0,
+        Action = 0,
+        SharedMessage = 0,
+        AutoModBlockedTerm = 0,
+        ClearChat = 0,
+        EventSub = 0,
+        ModerationAction = 0,
+        InvalidReplyTarget = 0,
+        WatchStreak = 0,
+        Announcement = 0,
+    }
+
+    enum MessageElementFlag {
+        None = 0,
+        Misc = 0,
+        Text = 0,
+        Username = 0,
+        Timestamp = 0,
+        TwitchEmoteImage = 0,
+        TwitchEmoteText = 0,
+        TwitchEmote = 0,
+        BttvEmoteImage = 0,
+        BttvEmoteText = 0,
+        BttvEmote = 0,
+        ChannelPointReward = 0,
+        ChannelPointRewardImage = 0,
+        FfzEmoteImage = 0,
+        FfzEmoteText = 0,
+        FfzEmote = 0,
+        SevenTVEmoteImage = 0,
+        SevenTVEmoteText = 0,
+        SevenTVEmote = 0,
+        EmoteImages = 0,
+        EmoteText = 0,
+        BitsStatic = 0,
+        BitsAnimated = 0,
+        BadgeSharedChannel = 0,
+        BadgeGlobalAuthority = 0,
+        BadgePredictions = 0,
+        BadgeChannelAuthority = 0,
+        BadgeSubscription = 0,
+        BadgeVanity = 0,
+        BadgeChatterino = 0,
+        BadgeSevenTV = 0,
+        BadgeFfz = 0,
+        Badges = 0,
+        ChannelName = 0,
+        BitsAmount = 0,
+        ModeratorTools = 0,
+        EmojiImage = 0,
+        EmojiText = 0,
+        EmojiAll = 0,
+        AlwaysShow = 0,
+        Collapsed = 0,
+        Mention = 0,
+        LowercaseLinks = 0,
+        RepliedMessage = 0,
+        ReplyButton = 0,
+        TwitchGif = 0,
+        Default = 0,
+    }
+
+    enum FontStyle {
+        Tiny,
+        ChatSmall,
+        ChatMediumSmall,
+        ChatMedium,
+        ChatMediumBold,
+        ChatMediumItalic,
+        ChatLarge,
+        ChatVeryLarge,
+        TimestampMedium,
+        UiMedium,
+        UiMediumBold,
+        UiTabs,
+        EndType,
+        ChatStart,
+        ChatEnd,
+    }
+
+    enum MessageContext {
+        Original,
+        Repost,
+    }
+
+    class TwitchAccount implements IWeakResource {
+        is_valid(): boolean;
+        user_login(): string;
+        user_id(): string;
+        color(): string;
+        is_anon(): boolean;
+    }
+
+    function current_account(): TwitchAccount;
+
+    type QSize = [number, number];
+    type QSizeF = [number, number];
+
+    class Image {
+        readonly url: string;
+        readonly is_loaded: boolean;
+        readonly is_empty: boolean;
+        readonly width: number;
+        readonly height: number;
+        readonly scale: number;
+        readonly size: QSizeF;
+        readonly animated: boolean;
+
+        static from_url(
+            url: string,
+            scale?: number,
+            expected_size?: QSize
+        ): Image;
+        static empty(): Image;
+    }
+
+    interface ImageSet {
+        image1: Image;
+        image2: Image;
+        image3: Image;
+    }
+
+    interface ImageSetConstructor {
+        new: (
+            this: void,
+            image1?: Image | string,
+            image2?: Image | string,
+            image3?: Image | string
+        ) => ImageSet;
+    }
+    var ImageSet: ImageSetConstructor;
+
+    class Split implements IWeakResource {
+        is_valid(): boolean;
+        channel: Channel;
+    }
+
+    enum SplitContainerNodeType {
+        EmptyRoot,
+        Split,
+        VerticalContainer,
+        HorizontalContainer,
+    }
+
+    class SplitContainerNode {
+        type: SplitContainerNodeType;
+        split?: Split;
+        parent?: SplitContainerNode;
+        horizontal_flex: number;
+        vertical_flex: number;
+
+        children(): SplitContainerNode[];
+    }
+
+    class SplitContainer {
+        selected_split: Split;
+        base_node: SplitContainerNode;
+
+        splits(): Split[];
+    }
+
+    class SplitNotebook {
+        selected_page?: SplitContainer;
+        page_count: number;
+
+        page_at(i: number): SplitContainer | null;
+    }
+
+    enum WindowType {
+        Main,
+        Popup,
+        Attached,
+    }
+
+    class Window {
+        notebook: SplitNotebook;
+        type: WindowType;
+    }
+
+    interface ChannelViewContextMenuRequestedArgs {
+        split?: Split;
+        message: Message;
+        message_element: MessageElement;
+        channel?: Channel;
+        menu: Menu;
+    }
+
+    class WindowManager {
+        main_window: Window;
+        last_selected_window: Window;
+
+        all(): Window[];
+
+        on_channelview_context_menu_requested(
+            cb: (args: ChannelViewContextMenuRequestedArgs) => void
+        ): ConnectionHandle;
+    }
+
+    var windows: WindowManager;
+
+    class DateTime {
+        static from_iso_string(str: string): DateTime;
+        to_iso_string(): string;
+        to_iso_string_without_ms(): string;
+
+        static current_local(): DateTime;
+        static current_utc(): DateTime;
+
+        static from_unix_milliseconds(ts: number): DateTime;
+        static from_unix_seconds(ts: number): DateTime;
+        to_unix_milliseconds(): number;
+        to_unix_seconds(): number;
+
+        is_local(): boolean;
+        is_utc(): boolean;
+        to_local(): DateTime;
+        to_utc(): DateTime;
+    }
+
+    class Menu {
+        add_action(text: string, cb: () => void): void;
+        insert_action(
+            before: string | number,
+            text: string,
+            cb: () => void
+        ): void;
+        add_menu(text: string): Menu;
+        insert_menu(before: string | number, text: string): Menu;
+        add_separator(): void;
+        insert_separator(before: string | number): void;
+    }
+}
+
+declare module "chatterino.json" {
+    class _Dummy {}
+
+    function parse(
+        text: string,
+        opts?: { allow_comments?: boolean; allow_trailing_commas?: boolean }
+    ): any;
+    function stringify(
+        item: any,
+        opts?: { pretty?: boolean; indent_char?: string; indent_size?: number }
+    ): string;
+
+    let exports: {
+        null: _Dummy;
+        parse: typeof parse;
+        stringify: typeof stringify;
+    };
+    export = exports;
 }

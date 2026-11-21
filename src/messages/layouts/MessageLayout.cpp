@@ -1,6 +1,11 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/types/AutomodCaughtHighlight.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -37,12 +42,12 @@ QColor blendColors(const QColor &base, const QColor &apply)
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(std::move(message))
 {
-    DebugCount::increase("message layout");
+    DebugCount::increase(DebugObject::MessageLayout);
 }
 
 MessageLayout::~MessageLayout()
 {
-    DebugCount::decrease("message layout");
+    DebugCount::decrease(DebugObject::MessageLayout);
 }
 
 const Message *MessageLayout::getMessage()
@@ -268,21 +273,6 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
             ctx.messageColors.disabled);
     }
 
-    if (!ctx.isMentions &&
-        (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward) ||
-         this->message_->flags.has(MessageFlag::RedeemedHighlight)) &&
-        ctx.preferences.enableRedeemedHighlight)
-    {
-        ctx.painter.fillRect(
-            QRect{
-                0,
-                ctx.y,
-                static_cast<int>(this->scale_ * 4),
-                pixmap->height(),
-            },
-            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
-    }
-
     // draw selection
     if (!ctx.selection.isEmpty())
     {
@@ -297,7 +287,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
             QRectF{
                 0.0,
                 static_cast<qreal>(ctx.y),
-                this->container_.getWidth() + 64,
+                static_cast<qreal>(ctx.canvasWidth),
                 1.0,
             },
             ctx.messageColors.messageSeperator);
@@ -355,7 +345,7 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, qreal width, bool clear)
     }
 
     this->bufferValid_ = false;
-    DebugCount::increase("message drawing buffers");
+    DebugCount::increase(DebugObject::MessageDrawingBuffer);
     return this->buffer_.get();
 }
 
@@ -381,65 +371,18 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         return ctx.messageColors.regularBg;
     }();
 
-    if (this->message_->flags.has(MessageFlag::ElevatedMessage) &&
-        ctx.preferences.enableElevatedMessageHighlight)
+    if (this->message_->flags.has(MessageFlag::Highlighted) &&
+        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::ElevatedMessageHighlight));
-    }
-
-    else if (this->message_->flags.has(MessageFlag::FirstMessage) &&
-             ctx.preferences.enableFirstMessageHighlight)
-    {
-        backgroundColor = blendColors(
-            backgroundColor,
-            *ctx.colorProvider.color(ColorType::FirstMessageHighlight));
-    }
-    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
-    {
-        assert(this->message_->highlightColor);
-        if (this->message_->highlightColor)
+        // NOTE: As we move more things into Highlighted, and less things to use custom flags for their color,
+        // they will start respecting the IgnoreHighlights flag. Keep this in mind.
+        // assert(this->message_->highlightColor);
+        if (this->message_->highlightColor &&
+            this->message_->highlightColor->isValid())
         {
             // Blend highlight color with usual background color
             backgroundColor =
                 blendColors(backgroundColor, *this->message_->highlightColor);
-        }
-    }
-    else if (this->message_->flags.has(MessageFlag::Subscription) &&
-             ctx.preferences.enableSubHighlight)
-    {
-        // Blend highlight color with usual background color
-        backgroundColor = blendColors(
-            backgroundColor, *ctx.colorProvider.color(ColorType::Subscription));
-    }
-    else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
-              this->message_->flags.has(
-                  MessageFlag::RedeemedChannelPointReward)) &&
-             ctx.preferences.enableRedeemedHighlight)
-    {
-        // Blend highlight color with usual background color
-        backgroundColor =
-            blendColors(backgroundColor,
-                        *ctx.colorProvider.color(ColorType::RedeemedHighlight));
-    }
-    else if (this->message_->flags.has(MessageFlag::AutoMod) ||
-             this->message_->flags.has(MessageFlag::LowTrustUsers))
-    {
-        if (ctx.preferences.enableAutomodHighlight &&
-            (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) ||
-             this->message_->flags.has(
-                 MessageFlag::AutoModOffendingMessageHeader)))
-        {
-            backgroundColor = blendColors(
-                backgroundColor,
-                *ctx.colorProvider.color(ColorType::AutomodHighlight));
-        }
-        else
-        {
-            backgroundColor = QColor("#404040");
         }
     }
     else if (this->message_->flags.has(MessageFlag::Debug))
@@ -477,7 +420,7 @@ void MessageLayout::deleteBuffer()
 {
     if (this->buffer_ != nullptr)
     {
-        DebugCount::decrease("message drawing buffers");
+        DebugCount::decrease(DebugObject::MessageDrawingBuffer);
 
         this->buffer_ = nullptr;
     }

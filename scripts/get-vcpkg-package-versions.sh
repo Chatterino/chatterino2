@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2024 kornes <https://github.com/kornes>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 dependencies="$(jq -r -c '.dependencies[] | if type == "string" then . else .name end' vcpkg.json)"
 dependencies+=" openssl"
 baseline="$(jq -r -c '."builtin-baseline"' vcpkg.json)"

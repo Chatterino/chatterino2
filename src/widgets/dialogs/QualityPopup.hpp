@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BasePopup.hpp"
@@ -11,8 +15,8 @@ namespace chatterino {
 class QualityPopup : public BasePopup
 {
 public:
-    QualityPopup(const QString &channelURL, QStringList options);
-    static void showDialog(const QString &channelURL, QStringList options);
+    QualityPopup(const QString &url, QStringList options);
+    static void showDialog(const QString &url, QStringList options);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -27,7 +31,7 @@ private:
         QDialogButtonBox *buttonBox;
     } ui_{};
 
-    QString channelURL_;
+    QString url_;
 };
 
 }  // namespace chatterino

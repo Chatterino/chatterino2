@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/moderationactions/ModerationAction.hpp"
 
 #include "messages/Image.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "singletons/Resources.hpp"
 #include "Test.hpp"
 
@@ -19,12 +23,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
 };
 
 class ModerationActionTest : public ::testing::Test

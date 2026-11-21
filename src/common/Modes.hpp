@@ -1,15 +1,19 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 namespace chatterino {
 
+class Args;
+
 class Modes
 {
 public:
-    Modes();
+    explicit Modes(const Args &args);
 
-    static const Modes &instance();
-
-    bool isNightly{};
+    /// Marked by the line `portable` or `portableEnable` from `Args`
     bool isPortable{};
 
     /// Marked by the line `externally-packaged`

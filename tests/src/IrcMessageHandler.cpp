@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/IrcMessageHandler.hpp"
 
+#include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -11,11 +16,13 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "mocks/Helix.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -24,7 +31,6 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Emotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/VectorMessageSink.hpp"
@@ -38,6 +44,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
+#include <QStringBuilder>
 
 #include <unordered_map>
 #include <vector>
@@ -54,25 +61,21 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+const bool UPDATE_SNAPSHOTS =
+    chatterino::env::readBool("CHATTERINO_UPDATE_TEST_SNAPSHOTS", false);
 
 const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication()
-        : highlights(this->settings, &this->accounts)
-    {
-    }
-
     MockApplication(const QString &settingsData)
-        : mock::BaseApplication(settingsData)
+        : mock::BaseApplication(settingsData, /*runMigrations*/ true)
         , highlights(this->settings, &this->accounts)
     {
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -100,6 +103,11 @@ public:
     FfzBadges *getFfzBadges() override
     {
         return &this->ffzBadges;
+    }
+
+    BttvBadges *getBttvBadges() override
+    {
+        return &this->bttvBadges;
     }
 
     SeventvBadges *getSeventvBadges() override
@@ -149,11 +157,13 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
+    mock::Helix helix;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
+    BttvBadges bttvBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
     BttvEmotes bttvEmotes;
@@ -471,12 +481,11 @@ public:
             ->twitch.getCurrent()
             ->blockUserLocally(u"12345"_s, u"blocked"_s);
 
-        auto makeBadge = [](QStringView platform) {
+        auto makeBadge = [](QStringView platform, QStringView name) {
             return std::make_shared<Emote>(Emote{
-                .name = {},
-                .images = {Url{u"https://chatterino.com/" % platform %
-                               u".png"}},
-                .tooltip = {platform % u" badge"},
+                .name = {platform.toString().toLower() % ':' % name},
+                .images = {Url{u"https://chatterino.com/" % name % u".png"}},
+                .tooltip = {name % u" badge"},
                 .homePage = {},
                 .zeroWidth = false,
                 .id = {},
@@ -487,17 +496,21 @@ public:
 
         // Chatterino
         this->mockApplication->chatterinoBadges.setBadge(
-            {u"123456"_s}, makeBadge(u"Chatterino"));
+            {u"123456"_s}, makeBadge(u"chatterino", u"Chatterino"));
 
-        // FFZ
+        // FrankerFaceZ
         this->mockApplication->ffzBadges.registerBadge(
-            1, {.emote = makeBadge(u"FFZ1"), .color = {9, 10, 11, 12}});
+            1, {.emote = makeBadge(u"frankerfacez", u"FFZ1"),
+                .color = {9, 10, 11, 12}});
         this->mockApplication->ffzBadges.registerBadge(
-            2, {.emote = makeBadge(u"FFZ2"), .color = {13, 14, 15, 16}});
+            2, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {13, 14, 15, 16}});
         this->mockApplication->ffzBadges.registerBadge(
-            3, {.emote = makeBadge(u"FFZ2"), .color = {17, 18, 19, 20}});
+            3, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {17, 18, 19, 20}});
         this->mockApplication->ffzBadges.registerBadge(
-            4, {.emote = makeBadge(u"FFZ2"), .color = {21, 22, 23, 24}});
+            4, {.emote = makeBadge(u"frankerfacez", u"FFZ2"),
+                .color = {21, 22, 23, 24}});
         this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
                                                                  1);
         this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
@@ -506,6 +519,7 @@ public:
         // 7TV
         this->mockApplication->getSeventvBadges()->registerBadge({
             {u"id"_s, u"1"_s},
+            {u"name"_s, u"7TV badge name"_s},
             {u"tooltip"_s, u"7TV badge"_s},
             {
                 u"host"_s,
@@ -525,6 +539,14 @@ public:
         this->mockApplication->getSeventvBadges()->assignBadgeToUser(
             u"1"_s, {u"123456"_s});
 
+        // BetterTTV
+        this->mockApplication->getBttvBadges()->registerBadge({
+            {u"startedAt"_s, u"2017-01-11T09:54:10.000Z"_s},
+            {u"url"_s, u"https://chatterino.com/betterttv/test.png"_s},
+        });
+        this->mockApplication->getBttvBadges()->assignBadgeToUser(
+            u"https://chatterino.com/betterttv/test.png"_s, {u"123456"_s});
+
         // Twitch
         this->mockApplication->getTwitchBadges()->loadLocalBadges();
 
@@ -538,6 +560,21 @@ public:
 
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
+
+        const auto helixExpectations =
+            this->snapshot->param("helixExpectations").toObject();
+        if (!helixExpectations.isEmpty())
+        {
+            initializeHelix(&this->mockHelix);
+
+            int nCalls =
+                helixExpectations.value("getSharedChatSession").toInt();
+            if (nCalls > 0)
+            {
+                EXPECT_CALL(this->mockHelix, getSharedChatSession)
+                    .Times(nCalls);
+            }
+        }
     }
 
     void TearDown() override
@@ -550,6 +587,7 @@ public:
     std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
     std::unique_ptr<testlib::Snapshot> snapshot;
+    testing::StrictMock<mock::Helix> mockHelix;
 };
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
@@ -570,11 +608,25 @@ public:
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
 /// - `nAdditional`: Include n additional built messages (from `prevMessages`)
+/// - `helixExpectations`: An object with names of Helix API methods that will
+///   be called during the test and the expected call count. Name of the method
+///   is the key and the number of calls its value.
 TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
     VectorMessageSink sink;
+
+    const auto &userData = snapshot->param("userData").toObject();
+    for (auto it = userData.begin(); it != userData.end(); ++it)
+    {
+        const auto &userID = it.key();
+        const auto &data = it.value().toObject();
+        if (auto color = data.value("color").toString(); !color.isEmpty())
+        {
+            this->mockApplication->getUserData()->setUserColor(userID, color);
+        }
+    }
 
     for (auto prevInput : snapshot->param("prevMessages").toArray())
     {
@@ -616,4 +668,79 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
+}
+
+TEST(IrcMessageHandler, RecentMessagesDoNotUpdateCurrentUserState)
+{
+    MockApplication app(QString::fromUtf8(SETTINGS_DEFAULT));
+    initializeHelix(&app.helix);
+    auto &accounts = app.getAccounts()->twitch;
+    accounts.accounts.append(
+        std::make_shared<TwitchAccount>("forsenwiki", "", "", "405330073"));
+    accounts.load();
+    accounts.currentUsername = "forsenwiki";
+    ASSERT_EQ(accounts.getCurrent()->getUserId(), "405330073");
+
+    auto channel = std::make_shared<TwitchChannel>("pajlada");
+    ASSERT_FALSE(channel->isVip());
+    const QByteArray data =
+        "@tmi-sent-ts=1790452460376;id=863f60c5-3de6-4ecf-b2ff-20cdd85c12e9;"
+        "room-id=11148817;user-id=405330073;display-name=forsenWiki;"
+        "badges=vip/1;badge-info=;flags=;user-type=;emotes= "
+        ":forsenwiki!forsenwiki@forsenwiki.tmi.twitch.tv "
+        "PRIVMSG #pajlada :peepoZ";
+
+    // A message that isn't from a live sink does not set vip status
+    auto *historyMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(historyMessage, nullptr);
+    VectorMessageSink historySink({}, MessageFlag::RecentMessage);
+    IrcMessageHandler::parseMessageInto(historyMessage, historySink,
+                                        channel.get());
+    delete historyMessage;
+    ASSERT_EQ(historySink.messages().size(), 1);
+    EXPECT_FALSE(channel->isVip());
+
+    // The same message parsed from a live sink sets vip status
+    auto *liveMessage = Communi::IrcMessage::fromData(data, nullptr);
+    ASSERT_NE(liveMessage, nullptr);
+    VectorMessageSink liveSink(channel->sinkTraits());
+    IrcMessageHandler::parseMessageInto(liveMessage, liveSink, channel.get());
+    delete liveMessage;
+    ASSERT_EQ(liveSink.messages().size(), 1);
+    EXPECT_TRUE(channel->isVip());
+}
+
+TEST_P(TestIrcMessageHandlerP, CloneElements)
+{
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, *this->snapshot);
+
+    VectorMessageSink sink;
+
+    for (auto prevInput : this->snapshot->param("prevMessages").toArray())
+    {
+        auto *ircMessage = Communi::IrcMessage::fromData(
+            prevInput.toString().toUtf8(), nullptr);
+        ASSERT_NE(ircMessage, nullptr);
+        IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+        delete ircMessage;
+    }
+
+    auto *ircMessage =
+        Communi::IrcMessage::fromData(this->snapshot->inputUtf8(), nullptr);
+    ASSERT_NE(ircMessage, nullptr);
+    IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
+    delete ircMessage;
+
+    for (const auto &message : sink.messages())
+    {
+        for (const auto &original : message->elements)
+        {
+            auto originalObj = original->toJson();
+            auto clonedObj = original->clone()->toJson();
+            ASSERT_EQ(originalObj, clonedObj)
+                << "\noriginal:\n"
+                << QJsonDocument(originalObj).toJson() << "\ncloned:\n"
+                << QJsonDocument(clonedObj).toJson();
+        }
+    }
 }

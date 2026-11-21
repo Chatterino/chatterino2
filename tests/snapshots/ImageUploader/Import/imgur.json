@@ -1,0 +1,22 @@
+{
+    "input": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "https://imgur.com/delete/{data.deletehash}",
+        "FileFormName": "image",
+        "Headers": {
+            "Authorization": "Client-ID c898c0bb848ca39"
+        },
+        "Name": "Chatterino Image Uploader Settings",
+        "RequestMethod": "POST",
+        "RequestURL": "https://api.imgur.com/3/image",
+        "URL": "{data.link}",
+        "Version": "1.0.0"
+    },
+    "output": {
+        "deletionLink": "https://imgur.com/delete/{data.deletehash}",
+        "formField": "image",
+        "headers": "Authorization: Client-ID c898c0bb848ca39",
+        "link": "{data.link}",
+        "url": "https://api.imgur.com/3/image"
+    }
+}

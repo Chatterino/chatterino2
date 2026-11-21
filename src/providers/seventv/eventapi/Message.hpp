@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "providers/seventv/eventapi/Subscription.hpp"
@@ -28,6 +32,6 @@ std::optional<InnerClass> Message::toInner()
     return InnerClass{this->data};
 }
 
-std::optional<Message> parseBaseMessage(const QString &blob);
+std::optional<Message> parseBaseMessage(const QByteArray &blob);
 
 }  // namespace chatterino::seventv::eventapi

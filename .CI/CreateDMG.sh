@@ -23,7 +23,7 @@ fi
 
 if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     echo "Codesigning force deep inside the app"
-    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep --force chatterino.app
+    codesign -s "$MACOS_CODESIGN_CERTIFICATE" --deep --force --options=runtime chatterino.app
     echo "Done!"
 fi
 

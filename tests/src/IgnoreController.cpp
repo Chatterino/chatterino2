@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/ignores/IgnoreController.hpp"
 
 #include "controllers/accounts/AccountController.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchIrc.hpp"
 #include "Test.hpp"
 
@@ -15,7 +20,7 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
@@ -25,7 +30,7 @@ public:
         return &this->accounts;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
     AccountController accounts;
 };
 
@@ -52,20 +57,23 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
     struct TestCase {
         std::vector<IgnorePhrase> phrases;
         QString input;
-        std::vector<TwitchEmoteOccurrence> twitchEmotes;
+        std::vector<TwitchSpecialOccurrence> twitchSpecials;
         QString expectedMessage;
-        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
+        std::vector<TwitchSpecialOccurrence> expectedTwitchSpecials;
     };
 
     auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
 
     auto emoteAt = [&](int at, const QString &name) {
-        return TwitchEmoteOccurrence{
+        return TwitchSpecialOccurrence{
             .start = at,
-            .end = static_cast<int>(at + name.size() - 1),
-            .ptr =
-                twitchEmotes->getOrCreateEmote(EmoteId{name}, EmoteName{name}),
-            .name = EmoteName{name},
+            .length = static_cast<int>(name.size()),
+            .data =
+                TwitchEmoteOccurrence{
+                    .ptr = twitchEmotes->getOrCreateEmote(EmoteId{name},
+                                                          EmoteName{name}),
+                    .name = EmoteName{name},
+                },
         };
     };
 
@@ -167,19 +175,75 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
             "Kappa",
             {emoteAt(127, "Kappa")},
         },
+        {
+            {regexReplace("(f)o(o)", "\\1\\2", false)},
+            "foo foo foo foo Kappa",
+            {emoteAt(15, "Kappa")},
+            "fo fo fo fo Kappa",
+            {emoteAt(11, "Kappa")},
+        },
+        {
+            .phrases = {regularReplace("pp", "p")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo Kapa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("pa", "a")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo Kapa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("Ka", "a")},
+            .input = "foo Kappa bar",
+            .twitchSpecials = {emoteAt(4, "Kappa")},
+            .expectedMessage = "foo appa bar",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("Ka", "a")},
+            .input = "Kappa",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "appa",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("pa", "a")},
+            .input = "Kappa",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "Kapa",
+            .expectedTwitchSpecials = {},
+        },
+        {
+            .phrases = {regularReplace("a foo", "a")},
+            .input = "Kappa foo",
+            .twitchSpecials = {emoteAt(0, "Kappa")},
+            .expectedMessage = "Kappa",
+            .expectedTwitchSpecials = {emoteAt(0, "Kappa")},
+        },
+        {
+            .phrases = {regularReplace("Word", "wor")},
+            .input = "[Multi Word Emote]",
+            .twitchSpecials = {emoteAt(0, "[Multi Word Emote]")},
+            .expectedMessage = "[Multi wor Emote]",
+            .expectedTwitchSpecials = {},
+        },
     };
 
     for (const auto &test : testCases)
     {
         auto message = test.input;
-        auto emotes = test.twitchEmotes;
+        auto emotes = test.twitchSpecials;
         processIgnorePhrases(test.phrases, message, emotes);
 
         EXPECT_EQ(message, test.expectedMessage)
             << "Message not equal for input '" << test.input
             << "' - expected: '" << test.expectedMessage << "' got: '"
             << message << "'";
-        EXPECT_EQ(emotes, test.expectedTwitchEmotes)
+        EXPECT_EQ(emotes, test.expectedTwitchSpecials)
             << "Twitch emotes not equal for input '" << test.input
             << "' and output '" << message << "'";
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/filters/lang/expressions/Expression.hpp"
@@ -12,9 +16,9 @@ class RegexExpression : public Expression
 public:
     RegexExpression(const QString &regex, bool caseInsensitive);
 
-    QVariant execute(const ContextMap &context) const override;
-    PossibleType synthesizeType(const TypingContext &context) const override;
-    QString debug(const TypingContext &context) const override;
+    QVariant execute(RunContext context) const override;
+    PossibleType synthesizeType() const override;
+    QString debug() const override;
     QString filterString() const override;
 
 private:

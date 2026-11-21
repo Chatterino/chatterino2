@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "Application.hpp"
@@ -6,12 +10,14 @@
 #include "common/Literals.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "singletons/Settings.hpp"
 #include "util/QCompareTransparent.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
@@ -46,13 +52,10 @@ QString missingScopes(const QJsonArray &scopesArray)
     return missingList;
 }
 
-void checkMissingScopes(const QString &token)
+void checkMissingScopes(const std::shared_ptr<TwitchAccount> &account)
 {
-    NetworkRequest(u"https://id.twitch.tv/oauth2/validate"_s,
-                   NetworkRequestType::Get)
-        .header("Authorization", u"OAuth " % token)
-        .timeout(20000)
-        .onSuccess([](const auto &res) {
+    getHelix()->validateToken(
+        [account](const auto &res) {
             auto *app = tryGetApp();
             if (!app)
             {
@@ -60,6 +63,27 @@ void checkMissingScopes(const QString &token)
             }
 
             const auto json = res.parseJson();
+
+            const auto login = json["login"_L1].toString();
+            if (!login.isEmpty() &&
+                login.compare(account->getUserName(), Qt::CaseInsensitive) != 0)
+            {
+                account->setUserName(login);
+                const std::string basePath =
+                    "/accounts/uid" + account->getUserId().toStdString();
+                pajlada::Settings::Setting<QString>::set(basePath + "/username",
+                                                         login);
+                auto &manager = app->getAccounts()->twitch;
+                auto currentUsername = manager.getCurrent()->getUserName();
+                if (currentUsername.compare(manager.currentUsername.getValue(),
+                                            Qt::CaseInsensitive) != 0)
+                {
+                    manager.currentUsername = currentUsername;
+                }
+                getSettings()->requestSave();
+                app->getAccounts()->twitch.currentUserNameChanged.invoke();
+            }
+
             auto missing = missingScopes(json["scopes"_L1].toArray());
             if (missing.isEmpty())
             {
@@ -70,12 +94,11 @@ void checkMissingScopes(const QString &token)
             app->getTwitch()->forEachChannel([msg](const auto &chan) {
                 chan->addMessage(msg, MessageContext::Original);
             });
-        })
-        .onError([](const auto &res) {
+        },
+        [](const auto &res) {
             qCWarning(chatterinoTwitch)
                 << "Failed to check for missing scopes:" << res.formatError();
-        })
-        .execute();
+        });
 }
 
 }  // namespace
@@ -138,7 +161,8 @@ const std::vector<QStringView> AUTH_SCOPES{
     u"moderator:manage:banned_users",  // for ban/unban/timeout/untimeout api & channel.moderate eventsub topic
 
     // https://dev.twitch.tv/docs/api/reference#delete-chat-messages
-    u"moderator:manage:chat_messages",  // for delete message api (/delete, /clear) & channel.moderate eventsub topic
+    // https://dev.twitch.tv/docs/api/reference#pin-chat-message
+    u"moderator:manage:chat_messages",  // for message moderation api (/delete, /clear, /pin) & channel.moderate eventsub topic
 
     // https://dev.twitch.tv/docs/api/reference#update-user-chat-color
     u"user:manage:chat_color",  // for update user color api (/color coral)
@@ -193,19 +217,27 @@ const std::vector<QStringView> AUTH_SCOPES{
     u"moderator:read:vips",  // for channel.moderate eventsub topic
 
     u"moderator:read:suspicious_users",  // for channel.suspicious_user.message and channel.suspicious_user.update
+
+    // https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+    u"moderator:read:followers",
+
+    // https://dev.twitch.tv/docs/api/reference#add-suspicious-status-to-chat-user
+    // https://dev.twitch.tv/docs/api/reference#remove-suspicious-status-from-chat-user
+    u"moderator:manage:suspicious_users",
 };
 
 TwitchAccountManager::TwitchAccountManager()
     : accounts(SharedPtrElementLess<TwitchAccount>{})
     , anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
-    this->currentUserChanged.connect([this] {
+    // This is our own signal.
+    std::ignore = this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
         currentUser->loadBlocks();
         currentUser->loadSeventvUserID();
         if (!currentUser->isAnon())
         {
-            checkMissingScopes(currentUser->getOAuthToken());
+            checkMissingScopes(currentUser);
         }
     });
 
@@ -313,7 +345,7 @@ void TwitchAccountManager::reloadUsers()
                     qCDebug(chatterinoTwitch)
                         << "It was the current user, so we need to "
                            "reconnect stuff!";
-                    this->currentUserChanged();
+                    this->currentUserChanged.invoke();
                 }
             }
             break;
@@ -342,6 +374,9 @@ void TwitchAccountManager::load()
 
     this->currentUsername.connect([this](const QString &newUsername) {
         auto user = this->findUserByUsername(newUsername);
+
+        this->currentUserAboutToChange.invoke(this->currentUser_, user);
+
         if (user)
         {
             qCDebug(chatterinoTwitch)
@@ -355,7 +390,7 @@ void TwitchAccountManager::load()
             this->currentUser_ = this->anonymousUser_;
         }
 
-        this->currentUserChanged();
+        this->currentUserChanged.invoke();
         this->currentUser_->reloadEmotes();
     });
 }
@@ -379,7 +414,7 @@ bool TwitchAccountManager::removeUser(TwitchAccount *account)
     auto userID(account->getUserId());
     if (!userID.isEmpty())
     {
-        pajlada::Settings::SettingManager::removeSetting(
+        pajlada::Settings::SettingManager::gRemoveSetting(
             accountFormat.arg(userID).toStdString());
     }
 

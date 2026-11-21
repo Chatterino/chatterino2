@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -40,7 +44,7 @@ public:
     BttvEmotes();
 
     std::shared_ptr<const EmoteMap> emotes() const;
-    std::optional<EmotePtr> emote(const EmoteName &name) const;
+    std::optional<EmotePtr> emote(EmoteNameView name) const;
     void loadEmotes();
     void setEmotes(std::shared_ptr<const EmoteMap> emotes);
     static void loadChannel(std::weak_ptr<Channel> channel,

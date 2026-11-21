@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/hotkeys/HotkeyModel.hpp"
 
 #include "common/QLogging.hpp"
@@ -13,7 +17,8 @@ HotkeyModel::HotkeyModel(QObject *parent)
 
 // turn a vector item into a model row
 std::shared_ptr<Hotkey> HotkeyModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const std::shared_ptr<Hotkey> &original)
+    std::vector<QStandardItem *> &row, const std::shared_ptr<Hotkey> &original,
+    std::optional<QModelIndex> index, std::optional<int> role)
 {
     return original;
 }

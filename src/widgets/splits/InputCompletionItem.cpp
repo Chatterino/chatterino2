@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/splits/InputCompletionItem.hpp"
 
 #include "messages/Emote.hpp"
@@ -14,18 +18,16 @@ InputCompletionItem::InputCompletionItem(const EmotePtr &emote,
 {
 }
 
+QString InputCompletionItem::insertionText() const
+{
+    return this->emote_ ? this->emote_->name.string : this->text_;
+}
+
 void InputCompletionItem::action()
 {
     if (this->action_)
     {
-        if (this->emote_)
-        {
-            this->action_(this->emote_->name.string);
-        }
-        else
-        {
-            this->action_(this->text_);
-        }
+        this->action_(this->insertionText());
     }
 }
 

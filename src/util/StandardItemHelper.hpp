@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
+#include <QPixmap>
 #include <QStandardItem>
 #include <QUrl>
 
@@ -44,6 +49,15 @@ inline void setColorItem(QStandardItem *item, const QColor &value,
                          bool selectable = true)
 {
     item->setData(value, Qt::DecorationRole);
+    item->setFlags(
+        Qt::ItemFlags(defaultItemFlags(selectable) |
+                      (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));
+}
+
+inline void setIconItem(QStandardItem *item, const QPixmap &value,
+                        bool selectable = true)
+{
+    item->setData(QVariant::fromValue(value), Qt::DecorationRole);
     item->setFlags(
         Qt::ItemFlags(defaultItemFlags(selectable) |
                       (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));

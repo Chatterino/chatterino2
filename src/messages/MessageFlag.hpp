@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
@@ -6,6 +10,7 @@
 
 namespace chatterino {
 
+/** @exposeenum c2.MessageFlag [flags] */
 enum class MessageFlag : std::int64_t {
     None = 0LL,
     System = (1LL << 0),
@@ -25,7 +30,7 @@ enum class MessageFlag : std::int64_t {
     AutoMod = (1LL << 14),
     RecentMessage = (1LL << 15),
     Whisper = (1LL << 16),
-    HighlightedWhisper = (1LL << 17),
+    //
     Debug = (1LL << 18),
     Similar = (1LL << 19),
     RedeemedHighlight = (1LL << 20),
@@ -33,7 +38,7 @@ enum class MessageFlag : std::int64_t {
     ShowInMentions = (1LL << 22),
     FirstMessage = (1LL << 23),
     ReplyMessage = (1LL << 24),
-    ElevatedMessage = (1LL << 25),
+    //
     SubscribedThread = (1LL << 26),
     CheerMessage = (1LL << 27),
     LiveUpdatesAdd = (1LL << 28),
@@ -71,6 +76,12 @@ enum class MessageFlag : std::int64_t {
     ///  - message was deleted via chat clear user messages (IRC: CLEARCHAT(user), EVENTSUB: channel.chat.clear_user_messages)
     /// Note: If this message is inside a reply thread, the root must not have the flag either.
     InvalidReplyTarget = (1LL << 42),
+    WatchStreak = (1LL << 43),
+    Announcement = (1LL << 44),
+    /// Notifications that do not yet have special handling/categorization
+    UncategorizedNotification = (1LL << 45),
+    /// The message was detected as ASCII art and has its layout width limited to the default web chat width.
+    AsciiArt = (1LL << 46),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

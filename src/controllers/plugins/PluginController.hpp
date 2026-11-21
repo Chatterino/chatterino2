@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -5,7 +9,9 @@
 #    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "util/FunctionRef.hpp"
 
+#    include <pajlada/signals/signal.hpp>
 #    include <QDir>
 #    include <QFileInfo>
 #    include <QJsonArray>
@@ -40,8 +46,11 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
-    // TODO: make a function that iterates plugins that aren't errored/enabled
-    const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
+    /// Run `cb` on every loaded plugin, including those with load errors
+    void forEachPlugin(
+        FunctionRef<void(const std::unique_ptr<Plugin> &)>) const;
+
+    const std::map<QString, AnyPlugin> &allPlugins() const;
 
     /**
      * @brief Reload plugin given by id
@@ -63,20 +72,32 @@ public:
 
     WebSocketPool &webSocketPool();
 
+    pajlada::Signals::Signal<Plugin *> onPluginLoaded;
+    pajlada::Signals::NoArgSignal onPluginsUpdated;
+
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
               const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    static void openLibrariesFor(Plugin *plugin);
+    void openLibrariesFor(Plugin *plugin);
 
-    static void initSol(sol::state_view &lua, Plugin *plugin);
+    void initSol(sol::state_view &lua, Plugin *plugin);
 
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
-    std::map<QString, std::unique_ptr<Plugin>> plugins_;
+
+    void queueChangeNotification();
+
+    std::map<QString, AnyPlugin> plugins_;
     WebSocketPool webSocketPool_;
+
+    std::vector<
+        std::pair<std::string, std::function<sol::object(sol::state_view)>>>
+        loaders_;
+
+    bool changeNotificationQueued = false;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;

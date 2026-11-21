@@ -1,6 +1,7 @@
 Checks: "-*,
   clang-diagnostic-*,
   llvm-*,
+  chatterino-*,
   misc-*,
   -misc-unused-parameters,
   readability-identifier-naming,
@@ -12,17 +13,27 @@ Checks: "-*,
   misc-*,
   bugprone-*,
   cert-*,
+  clazy-*,
+  -clazy-qstring-allocations,
+  -clazy-missing-qobject-macro,
+  -clazy-incorrect-emit,
+  -clazy-ctor-missing-parent-argument,
+  -clazy-incorrect-emit,
   cppcoreguidelines-*,
   -cppcoreguidelines-pro-type-cstyle-cast,
+  -cppcoreguidelines-pro-type-vararg,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -cppcoreguidelines-avoid-do-while,
   -readability-magic-numbers,
   -performance-noexcept-move-constructor,
   -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
+  -misc-static-assert,
+  -cert-dcl03-c,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
@@ -31,7 +42,8 @@ Checks: "-*,
   -bugprone-easily-swappable-parameters,
   -cert-err58-cpp,
   -modernize-avoid-c-arrays,
-  -misc-include-cleaner
+  -misc-include-cleaner,
+  -llvm-prefer-static-over-anonymous-namespace
   "
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
@@ -81,3 +93,6 @@ CheckOptions:
 
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
     value: true
+
+  - key: cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses
+    value: ^QJson(Object|Array|Value)

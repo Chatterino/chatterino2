@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/enums/MessageContext.hpp"
@@ -26,6 +30,10 @@ enum class MessageSinkTrait : uint8_t {
     /// queued in the corresponding TwitchChannel (`addQueuedRedemption`) and
     /// the message should be replaced later.
     RequiresKnownChannelPointReward = 1 << 1,
+
+    /// Messages from the current user may update the corresponding TwitchChannel
+    /// e.g. for mod, vip, staff, and send-wait state.
+    UpdateCurrentUserState = 1 << 2,
 };
 using MessageSinkTraits = FlagsEnum<MessageSinkTrait>;
 

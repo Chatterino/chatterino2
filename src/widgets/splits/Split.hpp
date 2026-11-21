@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -5,7 +9,6 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/splits/SplitCommon.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QFont>
 #include <QPointer>
@@ -20,8 +23,11 @@ class SplitHeader;
 class SplitInput;
 class SplitContainer;
 class SplitOverlay;
+class PinnedMessageWidget;
 class SelectChannelDialog;
 class OverlayWindow;
+
+struct SplitDescriptor;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of
 // the chat widget: ChatWidgetHeader
@@ -51,8 +57,9 @@ public:
 
     ChannelView &getChannelView();
     SplitInput &getInput();
+    [[nodiscard]] PinnedMessageWidget *getPinnedBanner() const;
 
-    IndirectChannel getIndirectChannel();
+    IndirectChannel getIndirectChannel() const;
     ChannelPtr getChannel() const;
     void setChannel(IndirectChannel newChannel);
 
@@ -61,6 +68,9 @@ public:
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
+
+    std::optional<bool> checkSpellingOverride() const;
+    void setCheckSpellingOverride(std::optional<bool> override);
 
     void insertTextToInput(const QString &text);
 
@@ -77,6 +87,8 @@ public:
     void setContainer(SplitContainer *container);
 
     void setInputReply(const MessagePtr &reply);
+
+    SplitDescriptor buildDescriptor() const;
 
     // This is called on window focus lost
     void unpause();
@@ -123,15 +135,19 @@ private:
     void addShortcuts() override;
 
     /**
-     * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
+     * @brief Opens a Twitch channel's stream in your default browser's player (opens a formatted link)
      */
     void openChannelInBrowserPlayer(ChannelPtr channel);
     /**
-     * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     * @brief Opens a Twitch channel's stream in streamlink (if the stream's live, and streamlink's installed)
      */
     void openChannelInStreamlink(const QString channelName);
     /**
-     * @brief Opens Twitch channel chat in a new Chatterino tab
+     * @brief Opens a Twitch channel's stream in your custom player (if the stream's live, and the custom player protocol's set)
+     */
+    void openChannelInCustomPlayer(QString channelName);
+    /**
+     * @brief Opens a Twitch channel's chat in a new tab
      */
     void joinChannelInNewTab(const ChannelPtr &channel);
 
@@ -143,6 +159,8 @@ private:
      **/
     void refreshModerationMode();
 
+    void refreshInputState(const QString &inputText);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -153,6 +171,7 @@ private:
 
     QVBoxLayout *const vbox_;
     SplitHeader *const header_;
+    PinnedMessageWidget *const pinnedBanner_;
     ChannelView *const view_;
     SplitInput *const input_;
     SplitOverlay *const overlay_;
@@ -171,7 +190,6 @@ private:
     pajlada::Signals::SignalHolder channelSignalHolder_;
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
 public Q_SLOTS:
     void addSibling();
@@ -190,10 +208,10 @@ public Q_SLOTS:
     void openWithCustomScheme();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
-    void showChatterList();
+    void openChatterList();
     void openSubPage();
-    void reloadChannelAndSubscriberEmotes();
     void reconnect();
+    void togglePinnedBanner();
 };
 
 }  // namespace chatterino

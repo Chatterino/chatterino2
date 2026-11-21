@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
@@ -7,11 +11,14 @@
 #include <pajlada/serialize.hpp>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringView>
 
 #include <memory>
 #include <unordered_map>
 
 namespace chatterino {
+
+constexpr inline QStringView DEFAULT_IGNORE_PHRASE_REPLACE = u"***";
 
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;

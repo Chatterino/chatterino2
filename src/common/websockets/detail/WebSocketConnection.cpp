@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/detail/WebSocketConnection.hpp"
 
 #include "common/QLogging.hpp"

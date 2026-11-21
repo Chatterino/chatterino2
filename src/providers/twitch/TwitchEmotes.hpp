@@ -1,7 +1,12 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
+#include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 
 #include <boost/unordered/unordered_flat_map_fwd.hpp>
@@ -44,7 +49,7 @@ struct TwitchEmoteSet {
     /// This owner might not be resolved yet
     std::shared_ptr<TwitchUser> owner;
 
-    std::vector<EmotePtr> emotes;
+    EmoteMap emotes;
 
     /// If this is a bitstier emote set
     bool isBits = false;

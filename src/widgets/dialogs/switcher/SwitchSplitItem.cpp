@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 
 #include "Application.hpp"
@@ -6,6 +10,10 @@
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
+
+#include <QFontMetrics>
+
+#include <algorithm>
 
 namespace chatterino {
 
@@ -48,16 +56,19 @@ void SwitchSplitItem::paint(QPainter *painter, const QRect &rect) const
     {
         // Draw channel name and name of the containing tab
         const auto availableTextWidth = rect.width() - iconRect.width();
-        QRect leftTextRect =
-            QRect(iconRect.topRight(),
-                  QSize(0.3 * availableTextWidth, iconRect.height()));
+        const auto &channelName = this->split_->getChannel()->getName();
+        const auto channelNameWidth =
+            std::min(painter->fontMetrics().horizontalAdvance(channelName),
+                     availableTextWidth);
+        QRect leftTextRect = QRect(iconRect.topRight(),
+                                   QSize(channelNameWidth, iconRect.height()));
 
         painter->drawText(leftTextRect, Qt::AlignLeft | Qt::AlignVCenter,
-                          this->split_->getChannel()->getName());
+                          channelName);
 
-        QRect rightTextRect =
-            QRect(leftTextRect.topRight(),
-                  QSize(0.7 * availableTextWidth, iconRect.height()));
+        QRect rightTextRect = QRect(
+            leftTextRect.topRight(),
+            QSize(availableTextWidth - channelNameWidth, iconRect.height()));
 
         painter->setFont(
             getApp()->getFonts()->getFont(FontStyle::UiMedium, 1.0));

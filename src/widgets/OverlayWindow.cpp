@@ -1,11 +1,16 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/OverlayWindow.hpp"
 
 #include "Application.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "singletons/Emotes.hpp"
+#include "singletons/helper/GifTimer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
@@ -22,6 +27,7 @@
 #include <QKeySequence>
 #include <QMessageBox>
 #include <QSizeGrip>
+#include <QWindow>
 
 #ifdef Q_OS_WIN
 #    include <Windows.h>
@@ -105,6 +111,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
+    this->setWindowRole(u"chatterino.overlay"_s);
 
     // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
@@ -191,7 +198,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
     this->updateScale();
 
     this->triggerFirstActivation();
-    getApp()->getEmotes()->getGIFTimer().registerOpenOverlayWindow();
+    getApp()->getEmotes()->getGIFTimer()->registerOpenOverlayWindow();
 }
 
 OverlayWindow::~OverlayWindow()
@@ -199,7 +206,7 @@ OverlayWindow::~OverlayWindow()
 #ifdef Q_OS_WIN
     ::DestroyCursor(this->sizeAllCursor_);
 #endif
-    getApp()->getEmotes()->getGIFTimer().unregisterOpenOverlayWindow();
+    getApp()->getEmotes()->getGIFTimer()->unregisterOpenOverlayWindow();
 }
 
 void OverlayWindow::applyTheme()
@@ -219,6 +226,29 @@ void OverlayWindow::applyTheme()
     this->update();
 }
 
+void OverlayWindow::wheelEvent(QWheelEvent *event)
+{
+    // ignore horizontal mouse wheels
+    if (event->angleDelta().x() != 0)
+    {
+        return;
+    }
+
+    if (event->modifiers().testFlag(Qt::ControlModifier))
+    {
+        if (event->angleDelta().y() > 0)
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() + 0.1F);
+        }
+        else
+        {
+            getSettings()->setClampedOverlayScale(
+                getSettings()->getClampedOverlayScale() - 0.1F);
+        }
+    }
+}
+
 float OverlayWindow::desiredScale() const
 {
     return getSettings()->getClampedUiScale() *
@@ -231,6 +261,10 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
     switch (event->type())
     {
         case QEvent::MouseButtonPress: {
+            if (this->windowHandle()->startSystemMove())
+            {
+                return true;
+            }
             auto *evt = dynamic_cast<QMouseEvent *>(event);
             this->moving_ = true;
             this->moveOrigin_ = evt->globalPosition().toPoint();
@@ -289,7 +323,7 @@ void OverlayWindow::toggleInertia()
     this->setInert(!this->inert_);
 }
 
-void OverlayWindow::enterEvent(EnterEvent * /*event*/)
+void OverlayWindow::enterEvent(QEnterEvent * /*event*/)
 {
 #ifndef OVERLAY_NATIVE_MOVE
     this->startInteraction();
@@ -305,7 +339,7 @@ void OverlayWindow::leaveEvent(QEvent * /*event*/)
 
 #ifdef Q_OS_WIN
 bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
-                                NativeResult *result)
+                                qintptr *result)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     MSG *msg = reinterpret_cast<MSG *>(message);
@@ -358,7 +392,7 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
     return returnValue;
 }
 
-void OverlayWindow::handleNCHITTEST(MSG *msg, NativeResult *result)
+void OverlayWindow::handleNCHITTEST(MSG *msg, qintptr *result)
 {
     // This implementation is similar to the one of BaseWindow, but has the
     // following differences:
@@ -508,7 +542,7 @@ void OverlayWindow::addShortcuts()
              const auto &direction = arguments.at(0);
              if (direction == "reset")
              {
-                 getSettings()->uiScale.setValue(1);
+                 getSettings()->setClampedOverlayScale(1);
                  return "";
              }
 

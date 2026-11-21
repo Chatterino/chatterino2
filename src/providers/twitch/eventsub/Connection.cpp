@@ -1,14 +1,21 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/eventsub/Connection.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightResult.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
+#include "providers/twitch/PubSubManager.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -188,6 +195,11 @@ void Connection::onChannelModerate(
 
             if constexpr (CanMakeModMessage<Action>)
             {
+                // FIXME: This message should still be added, but instead hidden during layout if the setting is enabled.
+                if (getSettings()->hideDeletionActions)
+                {
+                    return;
+                }
                 EventSubMessageBuilder builder(channel, now);
                 builder->loginName = payload.event.moderatorUserLogin.qt();
                 makeModerateMessage(builder, payload.event, action);
@@ -223,41 +235,24 @@ void Connection::onAutomodMessageHold(
     }
 
     auto time = chronoToQDateTime(metadata.messageTimestamp);
-    auto header = makeAutomodHoldMessageHeader(channel, time, payload.event);
-    auto body = makeAutomodHoldMessageBody(channel, time, payload.event);
+    auto [message, messageAlert] =
+        makeAutomodHoldMessage(channel, time, payload.event);
 
     auto messageText = payload.event.message.text.qt();
     auto userLogin = payload.event.userLogin.qt();
 
-    runInGuiThread([channel, messageText, userLogin, header, body] {
-        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
-            {}, {}, userLogin, messageText, body->flags);
-        if (highlighted)
-        {
-            MessageBuilder::triggerHighlights(
-                channel,
-                {
-                    .customSound =
-                        highlightResult.customSoundUrl.value_or<QUrl>({}),
-                    .playSound = highlightResult.playSound,
-                    .windowAlert = highlightResult.alert,
-                });
-        }
+    runInGuiThread([channel, messageText, userLogin, message, messageAlert] {
+        MessageBuilder::triggerHighlights(channel, messageAlert);
 
-        channel->addMessage(header, MessageContext::Original);
-        channel->addMessage(body, MessageContext::Original);
+        channel->addMessage(message, MessageContext::Original);
 
         getApp()->getTwitch()->getAutomodChannel()->addMessage(
-            header, MessageContext::Original);
-        getApp()->getTwitch()->getAutomodChannel()->addMessage(
-            body, MessageContext::Original);
+            message, MessageContext::Original);
 
-        if (getSettings()->showAutomodInMentions)
+        if (message->flags.has(MessageFlag::ShowInMentions))
         {
             getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                header, MessageContext::Original);
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                body, MessageContext::Original);
+                message, MessageContext::Original);
         }
     });
 }
@@ -314,12 +309,19 @@ void Connection::onChannelSuspiciousUserMessage(
     }
 
     auto time = chronoToQDateTime(metadata.messageTimestamp);
-    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
-    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+    auto [message, messageAlert] =
+        makeSuspiciousUserMessage(channel, time, payload.event);
 
-    runInGuiThread([channel, header, body] {
-        channel->addMessage(header, MessageContext::Original);
-        channel->addMessage(body, MessageContext::Original);
+    runInGuiThread([channel, message, messageAlert] {
+        MessageBuilder::triggerHighlights(channel, messageAlert);
+
+        channel->addMessage(message, MessageContext::Original);
+
+        if (message->flags.has(MessageFlag::ShowInMentions))
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                message, MessageContext::Original);
+        }
     });
 }
 
@@ -411,12 +413,42 @@ bool Connection::isSubscribedTo(const SubscriptionRequest &request) const
 
 void Connection::markRequestSubscribed(const SubscriptionRequest &request)
 {
+    assert((this->twitchUserID.isEmpty() ||
+            this->twitchUserID == request.ownerTwitchUserID) &&
+           "A subscription was made when another user's subscriptions were "
+           "still active");
+
+    this->twitchUserID = request.ownerTwitchUserID;
+
     this->subscriptions.emplace(request);
 }
 
 void Connection::markRequestUnsubscribed(const SubscriptionRequest &request)
 {
     this->subscriptions.erase(request);
+
+    if (this->subscriptions.empty())
+    {
+        // TODO: Verify that it's fine for us to reuse a connection for another
+        // user after all old subscriptions are gone
+        this->twitchUserID.clear();
+    }
+}
+
+bool Connection::canHandleSubscriptionFrom(
+    const QString &otherTwitchUserID) const
+{
+    return this->twitchUserID.isEmpty() ||
+           this->twitchUserID == otherTwitchUserID;
+}
+
+void Connection::debug()
+{
+    for (const auto &request : this->subscriptions)
+    {
+        qCInfo(LOG).noquote().nospace()
+            << this->getSessionID() << " -> " << request;
+    }
 }
 
 }  // namespace chatterino::eventsub

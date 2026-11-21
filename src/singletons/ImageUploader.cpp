@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "singletons/ImageUploader.hpp"
 
 #include "Application.hpp"
@@ -140,7 +144,12 @@ void ImageUploader::logToFile(const QString &originalFilePath,
     // local path to an image (can be empty)
     // timestamp
     QSaveFile logSaveFile(logFileName);
-    logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    if (!logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qCDebug(chatterinoImageuploader)
+            << "Failed to open log file" << logSaveFile.errorString();
+        return;
+    }
     QJsonArray entries = QJsonDocument::fromJson(logs).array();
     entries.push_back(newLogEntry);
     logSaveFile.write(QJsonDocument(entries).toJson());

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
@@ -6,7 +10,7 @@
 #include "util/QStringHash.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QString>
 
 #include <memory>
@@ -55,9 +59,22 @@ public:
 
     pajlada::Settings::Setting<QString> currentUsername{"/accounts/current",
                                                         ""};
-    // pajlada::Signals::NoArgSignal currentUserChanged;
-    boost::signals2::signal<void()> currentUserChanged;
+
+    /// This signal fires after we've figured out what the new account is, but before
+    /// any updates to Helix have been made.
+    ///
+    /// Useful for scenarios where you have to call Helix using the previous account.
+    pajlada::Signals::Signal<std::shared_ptr<TwitchAccount>,
+                             std::shared_ptr<TwitchAccount>>
+        currentUserAboutToChange;
+
+    pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
+    pajlada::Signals::NoArgSignal currentUserNameChanged;
+
+    /// Fired when the IRC server sends a "Login authentication failed" notice,
+    /// indicating the current OAuth token has expired.
+    pajlada::Signals::NoArgSignal loginExpired;
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 

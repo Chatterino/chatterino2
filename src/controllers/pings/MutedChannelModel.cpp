@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/pings/MutedChannelModel.hpp"
 
 #include "Application.hpp"
@@ -13,7 +17,9 @@ MutedChannelModel::MutedChannelModel(QObject *parent)
 
 // turn a vector item into a model row
 QString MutedChannelModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                          const QString &original)
+                                          const QString &original,
+                                          std::optional<QModelIndex> index,
+                                          std::optional<int> role)
 {
     return QString(row[0]->data(Qt::DisplayRole).toString());
 }

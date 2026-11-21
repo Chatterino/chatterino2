@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/FlagsEnum.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageFlag.hpp"
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
@@ -61,6 +64,7 @@ enum class FromTwitchLinkOpenChannelIn {
     Tab,
     BrowserPlayer,
     Streamlink,
+    CustomPlayer,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -177,9 +181,16 @@ public:
     /// Checks if this view has a #sourceChannel
     bool hasSourceChannel() const;
 
-    LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
+    /// The platform channel this view derives its messages from.
+    ///
+    /// The currently active non-virtual source channel. In case of nested
+    /// views, this uses the #sourceChannel(), otherwise it uses the
+    /// #underlyingChannel().
+    ChannelPtr effectiveSourceChannel() const;
 
-    void queueLayout();
+    std::vector<MessageLayoutPtr> &getMessagesSnapshot();
+
+    void queueLayout(bool disableAnimation = false);
     void invalidateBuffers();
 
     void clearMessages();
@@ -212,6 +223,8 @@ public:
 
     Scrollbar *scrollbar();
 
+    Split *findParentSplit() const;
+
     using ChannelViewID = std::size_t;
     ///
     /// \brief Get the ID of this ChannelView
@@ -224,9 +237,17 @@ public:
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
-    pajlada::Signals::Signal<const Link &> linkClicked;
+    pajlada::Signals::Signal<const MessageLayoutElement *,
+                             Qt::KeyboardModifiers>
+        elementClicked;
+    pajlada::Signals::Signal<const Link &, Qt::KeyboardModifiers> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
         openChannelIn;
+    pajlada::Signals::Signal<QMenu *, const MessageLayoutElement *>
+        messageMenuCreated;
+
+    /// This signal fires when a message passed filters and was added to the channel view
+    Q_SIGNAL void messageAddedToChannel(MessagePtr &message);
 
 protected:
     void themeChangedEvent() override;
@@ -237,11 +258,7 @@ protected:
     void paintEvent(QPaintEvent * /*event*/) override;
     void wheelEvent(QWheelEvent *event) override;
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
-#else
-    void enterEvent(QEvent * /*event*/) override;
-#endif
     void leaveEvent(QEvent * /*event*/) override;
 
     bool event(QEvent *event) override;
@@ -281,11 +298,10 @@ private:
     void messagesUpdated();
 
     void performLayout(bool causedByScrollbar = false,
-                       bool causedByShow = false);
-    void layoutVisibleMessages(
-        const LimitedQueueSnapshot<MessageLayoutPtr> &messages);
-    void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
-                         bool causedByScrollbar, bool causedByShow);
+                       bool disableAnimation = false);
+    void layoutVisibleMessages(const std::vector<MessageLayoutPtr> &messages);
+    void updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
+                         bool causedByScrollbar, bool disableAnimation);
 
     void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
@@ -301,8 +317,9 @@ private:
                                     const MessageLayoutPtr &layout);
     void addTwitchLinkContextMenuItems(
         QMenu *menu, const MessageLayoutElement *hoveredElement);
-    void addCommandExecutionContextMenuItems(QMenu *menu,
-                                             const MessageLayoutPtr &layout);
+    void addCommandExecutionContextMenuItems(
+        QMenu *menu, const MessageLayoutElement *hoveredElement,
+        const MessageLayoutPtr &layout);
 
     int getLayoutWidth() const;
     void updatePauses();
@@ -350,7 +367,7 @@ private:
     MessageLayoutPtr lastReadMessage_;
 
     ThreadGuard snapshotGuard_;
-    LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
+    std::vector<MessageLayoutPtr> snapshot_;
 
     /// @brief The backing (internal) channel
     ///

@@ -1,13 +1,16 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Variant.hpp"
 #include "widgets/buttons/SignalLabel.hpp"
 
-#include <boost/variant.hpp>
 #include <pajlada/signals/signalholder.hpp>
-#include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QPushButton>
@@ -15,6 +18,7 @@
 #include <QVBoxLayout>
 
 #include <utility>
+#include <variant>
 
 class QScrollArea;
 
@@ -132,17 +136,9 @@ public:
 
     TitleLabel *addTitle(const QString &text);
     SubtitleLabel *addSubtitle(const QString &text);
-    /// @param inverse Inverses true to false and vice versa
-    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           bool inverse = false, QString toolTipText = {});
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
-    ComboBox *addDropdown(const QString &text, const QStringList &items,
-                          pajlada::Settings::Setting<QString> &setting,
-                          bool editable = false, QString toolTipText = {});
-    QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
-                          int max, int step, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
@@ -166,22 +162,22 @@ public:
     }
 
     template <typename T>
-    ComboBox *addDropdown(
-        const QString &text, const QStringList &items,
-        pajlada::Settings::Setting<T> &setting,
-        std::function<boost::variant<int, QString>(T)> getValue,
-        std::function<T(DropdownArgs)> setValue, bool editable = true,
-        QString toolTipText = {}, bool listenToActivated = false)
+    ComboBox *addDropdown(const QString &text, const QStringList &items,
+                          pajlada::Settings::Setting<T> &setting,
+                          std::function<std::variant<int, QString>(T)> getValue,
+                          std::function<T(DropdownArgs)> setValue,
+                          bool editable = true, QString toolTipText = {},
+                          bool listenToActivated = false)
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
 
-        if (selected.which() == 1)
+        if (auto *str = std::get_if<QString>(&selected))
         {
             // QString
-            if (!editable && !items2.contains(boost::get<QString>(selected)))
+            if (!editable && !items2.contains(*str))
             {
-                items2.insert(0, boost::get<QString>(selected));
+                items2.insert(0, *str);
             }
         }
 
@@ -191,33 +187,31 @@ public:
             combo->setEditable(true);
         }
 
-        if (selected.which() == 0)
-        {
-            // int
-            auto value = boost::get<int>(selected);
-            if (value >= 0 && value < items2.size())
-            {
-                combo->setCurrentIndex(value);
-            }
-        }
-        else if (selected.which() == 1)
-        {
-            // QString
-            combo->setEditText(boost::get<QString>(selected));
-        }
+        std::visit(variant::Overloaded{
+                       [&](int value) {
+                           if (value >= 0 && value < items2.size())
+                           {
+                               combo->setCurrentIndex(value);
+                           }
+                       },
+                       [&](const QString &str) {
+                           combo->setEditText(str);
+                       },
+                   },
+                   selected);
 
         setting.connect(
             [getValue = std::move(getValue), combo](const T &value, auto) {
-                auto var = getValue(value);
-                if (var.which() == 0)
-                {
-                    combo->setCurrentIndex(boost::get<int>(var));
-                }
-                else
-                {
-                    combo->setCurrentText(boost::get<QString>(var));
-                    combo->setEditText(boost::get<QString>(var));
-                }
+                std::visit(variant::Overloaded{
+                               [&](int value) {
+                                   combo->setCurrentIndex(value);
+                               },
+                               [&](const QString &str) {
+                                   combo->setCurrentText(str);
+                                   combo->setEditText(str);
+                               },
+                           },
+                           getValue(value));
             },
             this->managedConnections_);
 
@@ -244,67 +238,6 @@ public:
         }
 
         return combo;
-    }
-
-    template <typename T>
-    ComboBox *addDropdown(
-        const QString &text,
-        const std::vector<std::pair<QString, QVariant>> &items,
-        pajlada::Settings::Setting<T> &setting,
-        std::function<boost::variant<int, QString>(ComboBox *, T)> getValue,
-        std::function<T(DropdownArgs)> setValue, QString toolTipText = {},
-        const QString &defaultValueText = {})
-    {
-        auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
-
-        for (const auto &[itemText, userData] : items)
-        {
-            combo->addItem(itemText, userData);
-        }
-
-        if (!defaultValueText.isEmpty())
-        {
-            combo->setCurrentText(defaultValueText);
-        }
-
-        setting.connect(
-            [getValue = std::move(getValue), combo](const T &value, auto) {
-                auto var = getValue(combo, value);
-                if (var.which() == 0)
-                {
-                    const auto index = boost::get<int>(var);
-                    if (index >= 0)
-                    {
-                        combo->setCurrentIndex(index);
-                    }
-                }
-                else
-                {
-                    combo->setCurrentText(boost::get<QString>(var));
-                    combo->setEditText(boost::get<QString>(var));
-                }
-            },
-            this->managedConnections_);
-
-        QObject::connect(
-            combo, QOverload<const int>::of(&QComboBox::currentIndexChanged),
-            [combo, &setting,
-             setValue = std::move(setValue)](const int newIndex) {
-                setting = setValue(DropdownArgs{combo->itemText(newIndex),
-                                                combo->currentIndex(), combo});
-                getApp()->getWindows()->forceLayoutChannelViews();
-            });
-
-        return combo;
-    }
-
-    void enableIf(QComboBox *widget, auto &setting, auto cb)
-    {
-        auto updateVisibility = [cb = std::move(cb), &setting, widget]() {
-            auto enabled = cb(setting.getValue());
-            widget->setEnabled(enabled);
-        };
-        setting.connect(updateVisibility, this->managedConnections_);
     }
 
     DescriptionLabel *addDescription(const QString &text);

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
@@ -13,11 +17,13 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class MarkdownLabel;
 class EditUserNotesDialog;
 class ChannelView;
 class Split;
 class LabelButton;
 class PixmapButton;
+class LiveIndicator;
 
 class UserInfoPopup final : public DraggablePopup
 {
@@ -33,6 +39,7 @@ public:
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
                  const ChannelPtr &openingChannel);
+    Split *getSplit() const;
 
 protected:
     void themeChangedEvent() override;
@@ -64,6 +71,7 @@ private:
     pajlada::Signals::NoArgSignal userStateChanged_;
 
     std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
+    std::unique_ptr<pajlada::Signals::ScopedConnection> replaceConnection_;
     std::unique_ptr<pajlada::Signals::ScopedConnection>
         userDataUpdatedConnection_;
 
@@ -85,9 +93,11 @@ private:
         Label *followageLabel = nullptr;
         Label *subageLabel = nullptr;
 
+        LiveIndicator *liveIndicator = nullptr;
+
         QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
-        Label *notesPreview = nullptr;
+        MarkdownLabel *notesPreview = nullptr;
         LabelButton *notesAdd = nullptr;
 
         Label *noMessagesLabel = nullptr;

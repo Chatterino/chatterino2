@@ -34,11 +34,7 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
-            "channelName": "",
+            "channelName": "pajlada",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -105,14 +101,21 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|DoNotTriggerNotification|PubSub|ClearChat|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "nerixyz cleared the chat. ",
             "searchText": "nerixyz cleared the chat. ",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "nerixyz",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

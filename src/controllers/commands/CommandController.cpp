@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/CommandController.hpp"
 
 #include "Application.hpp"
@@ -15,6 +19,10 @@
 #include "controllers/commands/builtin/twitch/DeleteMessages.hpp"
 #include "controllers/commands/builtin/twitch/GetModerators.hpp"
 #include "controllers/commands/builtin/twitch/GetVIPs.hpp"
+#include "controllers/commands/builtin/twitch/LowTrust.hpp"
+#include "controllers/commands/builtin/twitch/Pin.hpp"
+#include "controllers/commands/builtin/twitch/Poll.hpp"
+#include "controllers/commands/builtin/twitch/Prediction.hpp"
 #include "controllers/commands/builtin/twitch/Raid.hpp"
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 #include "controllers/commands/builtin/twitch/RemoveVIP.hpp"
@@ -30,13 +38,14 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/plugins/PluginController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
@@ -257,6 +266,7 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
     },
     // variables used in mod buttons and the like, these make no sense in normal commands, so they are left empty
     {"input.text", NO_OP_PLACEHOLDER},
+    {"element.copytext", NO_OP_PLACEHOLDER},
 };
 
 }  // namespace
@@ -444,6 +454,11 @@ CommandController::CommandController(const Paths &paths)
 
     this->registerCommand("/warn", &commands::sendWarn);
 
+    this->registerCommand("/monitor", &commands::monitorUser);
+    this->registerCommand("/restrict", &commands::restrictUser);
+    this->registerCommand("/unmonitor", &commands::unmonitorUser);
+    this->registerCommand("/unrestrict", &commands::unrestrictUser);
+
     for (const auto &cmd : TWITCH_WHISPER_COMMANDS)
     {
         this->registerCommand(cmd, &commands::sendWhisper);
@@ -462,16 +477,51 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-force-image-unload",
                           &commands::forceImageUnload);
 
+    this->registerCommand("/debug-force-layout-channel-views",
+                          &commands::forceLayoutChannelViews);
+
+    this->registerCommand("/debug-increment-image-generation",
+                          &commands::incrementImageGeneration);
+
+    this->registerCommand("/debug-invalidate-buffers",
+                          &commands::invalidateBuffers);
+
+    this->registerCommand("/debug-eventsub", &commands::eventsub);
+
     this->registerCommand("/debug-test", &commands::debugTest);
+
+#ifdef Q_OS_WIN
+    this->registerCommand("/debug-relaunch-with-console",
+                          &commands::relaunchWithConsole);
+#endif
+
+    this->registerCommand("/debug-disable-logfile", &commands::disableLogfile);
+    this->registerCommand("/debug-enable-logfile", &commands::enableLogfile);
+    this->registerCommand("/debug-relaunch-with-logfile",
+                          &commands::relaunchWithLogfile);
 
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
     this->registerCommand("/shoutout", &commands::sendShoutout);
 
+    this->registerCommand("/poll", &commands::createPoll);
+    this->registerCommand("/cancelpoll", &commands::cancelPoll);
+    this->registerCommand("/endpoll", &commands::endPoll);
+
+    this->registerCommand("/prediction", &commands::createPrediction);
+    this->registerCommand("/lockprediction", &commands::lockPrediction);
+    this->registerCommand("/cancelprediction", &commands::cancelPrediction);
+    this->registerCommand("/completeprediction", &commands::completePrediction);
+
+    this->registerCommand("/pin", &commands::pin);
+    this->registerCommand("/unpin", &commands::unpin);
+
     this->registerCommand("/c2-set-logging-rules", &commands::setLoggingRules);
     this->registerCommand("/c2-theme-autoreload", &commands::toggleThemeReload);
 }
+
+CommandController::~CommandController() = default;
 
 void CommandController::save()
 {
@@ -610,12 +660,10 @@ QString CommandController::execCustomCommand(
     QString result;
 
     static QRegularExpression parseCommand(
-        R"((^|[^{])({{)*{(\d+\+?|([a-zA-Z.-]+)(?:;(.+?))?)})");
+        R"((?:^|[^{])(?:{{)*{(\d+\+?|([a-zA-Z.-]+))(;(.+?))?})");
 
-    int lastCaptureEnd = 0;
-
-    auto globalMatch = parseCommand.globalMatch(command.func);
-    int matchOffset = 0;
+    qsizetype lastCaptureEnd = 0;
+    qsizetype matchOffset = 0;
 
     while (true)
     {
@@ -633,17 +681,16 @@ QString CommandController::execCustomCommand(
         lastCaptureEnd = match.capturedEnd();
         matchOffset = lastCaptureEnd - 1;
 
-        QString wordIndexMatch = match.captured(3);
+        auto placeholderName = match.captured(1);
+        auto altText = match.captured(4);  // alt text or empty string
 
-        bool plus = wordIndexMatch.at(wordIndexMatch.size() - 1) == '+';
-        wordIndexMatch = wordIndexMatch.replace("+", "");
+        bool plus = placeholderName.at(placeholderName.size() - 1) == '+';
 
         bool ok;
-        int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
+        int wordIndex = placeholderName.replace("+", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            auto varName = match.captured(4);
-            auto altText = match.captured(5);  // alt text or empty string
+            auto varName = match.captured(2);
 
             auto var = context.find(varName);
 
@@ -663,12 +710,13 @@ QString CommandController::execCustomCommand(
             }
 
             // Fall back to replacing it with the actual matched string
-            result += "{" + match.captured(3) + "}";
+            result += "{" + match.captured(1) + match.captured(3) + "}";
             continue;
         }
 
         if (words.length() <= wordIndex)
         {
+            result += altText;
             continue;
         }
 
@@ -704,6 +752,38 @@ QString CommandController::execCustomCommand(
 QStringList CommandController::getDefaultChatterinoCommandList()
 {
     return this->defaultChatterinoCommandAutoCompletions_;
+}
+
+qsizetype CommandController::commandTriggerLen(QStringView text)
+{
+    auto words = text.split(' ');
+
+    qsizetype triggerLen = 0;
+    qsizetype spaces = 0;
+    QString commandName{};
+
+    for (qsizetype i = 0; i < words.length() && spaces <= this->maxSpaces_; ++i)
+    {
+        commandName += words[i];
+        triggerLen += words[i].length();
+
+        if (this->commands_.contains(commandName) ||
+            this->userCommands_.contains(commandName))
+        {
+            return triggerLen;
+        }
+
+        // ignore consecutive spaces
+        if (!words[i].isEmpty())
+        {
+            commandName += ' ';
+            ++spaces;
+        }
+        // account for the space between the current and next word
+        ++triggerLen;
+    }
+
+    return 0;
 }
 
 }  // namespace chatterino

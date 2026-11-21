@@ -1,15 +1,22 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
-#include <boost/variant.hpp>
+#include "util/Variant.hpp"
+
 #include <QLayout>
+
+#include <variant>
 
 class QWidget;
 class QScrollArea;
 
 namespace chatterino {
 
-using LayoutItem = boost::variant<QWidget *, QLayoutItem *>;
-using WidgetOrLayout = boost::variant<QWidget *, QLayout *>;
+using LayoutItem = std::variant<QWidget *, QLayoutItem *>;
+using WidgetOrLayout = std::variant<QWidget *, QLayout *>;
 
 QWidget *wrapLayout(QLayout *layout);
 QScrollArea *makeScrollArea(WidgetOrLayout item);
@@ -21,15 +28,15 @@ T *makeLayout(std::initializer_list<LayoutItem> items)
 
     for (const auto &item : items)
     {
-        switch (item.which())
-        {
-            case 0:
-                t->addItem(new QWidgetItem(boost::get<QWidget *>(item)));
-                break;
-            case 1:
-                t->addItem(boost::get<QLayoutItem *>(item));
-                break;
-        }
+        std::visit(variant::Overloaded{
+                       [&](QWidget *item) {
+                           t->addItem(new QWidgetItem(item));
+                       },
+                       [&](QLayoutItem *item) {
+                           t->addItem(item);
+                       },
+                   },
+                   item);
     }
 
     t->setContentsMargins(0, 0, 0, 0);

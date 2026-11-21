@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/Scrollbar.hpp"
 
 #include "common/QLogging.hpp"
@@ -293,12 +297,6 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     QPainter painter(this);
     painter.fillRect(this->rect(), this->theme->scrollbars.background);
 
-    bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
-    bool enableFirstMessageHighlights =
-        getSettings()->enableFirstMessageHighlight;
-    bool enableElevatedMessageHighlights =
-        getSettings()->enableElevatedMessageHighlight;
-
     if (this->shouldShowThumb())
     {
         this->thumbRect_.setX(xOffset);
@@ -334,41 +332,24 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
                 continue;
             }
 
-            if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
-            {
-                continue;
-            }
-
-            if (highlight.isFirstMessageHighlight() &&
-                !enableFirstMessageHighlights)
-            {
-                continue;
-            }
-
-            if (highlight.isElevatedMessageHighlight() &&
-                !enableElevatedMessageHighlights)
-            {
-                continue;
-            }
-
             QColor color = highlight.getColor();
             color.setAlpha(255);
 
             int y = static_cast<int>(dY * static_cast<float>(i));
             switch (highlight.getStyle())
             {
-                case ScrollbarHighlight::Default: {
+                case ScrollbarHighlight::Style::Default: {
                     painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight,
                                      color);
                 }
                 break;
 
-                case ScrollbarHighlight::Line: {
+                case ScrollbarHighlight::Style::Line: {
                     painter.fillRect(0, y, w, 1, color);
                 }
                 break;
 
-                case ScrollbarHighlight::None:;
+                case ScrollbarHighlight::Style::None:;
             }
         }
     }
@@ -465,16 +446,17 @@ void Scrollbar::updateScroll()
 {
     this->trackHeight_ = this->height() - MIN_THUMB_HEIGHT - 1;
 
-    auto div = std::max<qreal>(0.0000001, this->maximum_ - this->minimum_);
+    auto nMessages = std::max<qreal>(1.0, this->maximum_ - this->minimum_);
 
-    this->thumbRect_ =
-        QRect(0,
-              static_cast<int>((this->getRelativeCurrentValue()) / div *
-                               this->trackHeight_) +
-                  1,
-              this->width(),
-              static_cast<int>(this->pageSize_ / div * this->trackHeight_) +
-                  MIN_THUMB_HEIGHT);
+    this->thumbRect_ = QRect{
+        0,
+        static_cast<int>((this->getRelativeCurrentValue()) / nMessages *
+                         this->trackHeight_) +
+            1,
+        this->width(),
+        static_cast<int>(this->pageSize_ / nMessages * this->trackHeight_) +
+            MIN_THUMB_HEIGHT,
+    };
 
     this->update();
 }

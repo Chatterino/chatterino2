@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 
 #include "Application.hpp"
@@ -52,7 +56,8 @@ QString removeModerator(const CommandContext &ctx)
                     channel->addSystemMessage(
                         QString("You have removed %1 as a moderator of "
                                 "this channel.")
-                            .arg(targetUser.displayName));
+                            .arg(targetUser.displayName),
+                        targetUser.login);
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage =

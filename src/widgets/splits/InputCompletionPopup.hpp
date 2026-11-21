@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/completion/CompletionModel.hpp"
@@ -8,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace chatterino {
@@ -29,7 +34,12 @@ public:
     void updateCompletion(const QString &text, CompletionKind kind,
                           ChannelPtr channel);
 
+    bool hasCompletions() const;
+
     void setInputAction(ActionCallback callback);
+
+    std::optional<std::pair<QStringList, int>> selectedCompletions(
+        bool isFirstWord) const;
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -56,6 +66,8 @@ private:
 
     std::optional<CompletionKind> currentKind_{};
     ChannelPtr currentChannel_{};
+
+    friend class PopupCycleFixture;
 };
 
 }  // namespace chatterino

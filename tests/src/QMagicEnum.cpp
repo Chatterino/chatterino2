@@ -1,20 +1,26 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/QMagicEnum.hpp"
 
+#include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
+#include "common/ThumbnailPreviewMode.hpp"
 #include "Test.hpp"
 #include "util/QMagicEnumTagged.hpp"
 
 using namespace chatterino;
 using namespace literals;
 
+using qmagicenum::DisplayName;
 using qmagicenum::enumCast;
-using qmagicenum::enumDisplayName;
-using qmagicenum::enumDisplayNameString;
 using qmagicenum::enumFlagsName;
 using qmagicenum::enumName;
 using qmagicenum::enumNames;
 using qmagicenum::enumNameString;
+using qmagicenum::SerializedName;
 
 namespace {
 
@@ -48,6 +54,19 @@ constexpr chatterino::qmagicenum::customize_t qmagicenumDisplayName(
     {
         case MyCustom::First:
             return "First (Display Name)";
+
+        default:
+            return {};
+    }
+}
+
+constexpr chatterino::qmagicenum::customize_t qmagicenumSerializedName(
+    MyCustom value) noexcept
+{
+    switch (value)
+    {
+        case MyCustom::First:
+            return "First (Serialized Name)";
 
         default:
             return {};
@@ -202,7 +221,7 @@ TEST(QMagicEnum, open)
     static_assert(checkConst(OpenOne, u"OpenOne"));
     static_assert(checkConst(OpenTwo, u"OpenTwo"));
     static_assert(checkConst(OpenThree, u"OpenThree"));
-    static_assert(eq(enumName(static_cast<MyOpen>(16)), u""));
+    static_assert(eq(enumName(static_cast<MyOpen>(10)), u""));
     static_assert(checkValues<MyOpen>({u"OpenOne", u"OpenTwo", u"OpenThree"}));
 }
 
@@ -218,43 +237,57 @@ TEST(QMagicEnum, caseInsensitive)
 TEST(QMagicEnumTagged, displayName)
 {
     // MyCustom has a display name specialization for First, but not for Default or Second
-    static_assert(eq(enumDisplayName<MyCustom::Default>(), u"Default"));
-    static_assert(eq(enumDisplayName(MyCustom::Default), u"Default"));
-    static_assert(eq(enumDisplayName(static_cast<MyCustom>(1)), u"Default"));
+    static_assert(eq(DisplayName::enumName<MyCustom::Default>(), u"Default"));
+    static_assert(eq(DisplayName::enumName(MyCustom::Default), u"Default"));
     static_assert(
-        eq(enumDisplayName<MyCustom::First>(), u"First (Display Name)"));
+        eq(DisplayName::enumName(static_cast<MyCustom>(1)), u"Default"));
     static_assert(
-        eq(enumDisplayName(MyCustom::First), u"First (Display Name)"));
+        eq(DisplayName::enumName<MyCustom::First>(), u"First (Display Name)"));
     static_assert(
-        eq(enumDisplayName(static_cast<MyCustom>(4)), u"First (Display Name)"));
-    static_assert(eq(enumDisplayName<MyCustom::Second>(), u"mysecond.*"));
-    static_assert(eq(enumDisplayName(MyCustom::Second), u"mysecond.*"));
-    static_assert(eq(enumDisplayName(static_cast<MyCustom>(9)), u"mysecond.*"));
+        eq(DisplayName::enumName(MyCustom::First), u"First (Display Name)"));
+    static_assert(eq(DisplayName::enumName(static_cast<MyCustom>(4)),
+                     u"First (Display Name)"));
+    static_assert(eq(DisplayName::enumName<MyCustom::Second>(), u"mysecond.*"));
+    static_assert(eq(DisplayName::enumName(MyCustom::Second), u"mysecond.*"));
+    static_assert(
+        eq(DisplayName::enumName(static_cast<MyCustom>(9)), u"mysecond.*"));
 
     // MyFlag does not have a display name specialization
-    static_assert(eq(enumDisplayName<MyFlag::None>(), u"None"));
-    static_assert(eq(enumDisplayName<MyFlag::One>(), u"One"));
-    static_assert(eq(enumDisplayName<MyFlag::Two>(), u"Two"));
-    static_assert(eq(enumDisplayName<MyFlag::Four>(), u"Four"));
+    static_assert(eq(DisplayName::enumName<MyFlag::None>(), u"None"));
+    static_assert(eq(DisplayName::enumName<MyFlag::One>(), u"One"));
+    static_assert(eq(DisplayName::enumName<MyFlag::Two>(), u"Two"));
+    static_assert(eq(DisplayName::enumName<MyFlag::Four>(), u"Four"));
 }
 
 TEST(QMagicEnumTagged, enumDisplayNameString)
 {
-    auto withSpecDN = enumDisplayNameString<MyCustom::First>();
+    auto withSpecDN = DisplayName::enumNameString<MyCustom::First>();
     ASSERT_EQ(withSpecDN, u"First (Display Name)");
+    auto withSpecSN = SerializedName::enumNameString<MyCustom::First>();
+    ASSERT_EQ(withSpecSN, u"First (Serialized Name)");
 
     auto withSpec = enumName<MyCustom::First>();
     ASSERT_EQ(withSpec, u"myfirst");
 
-    auto withoutSpecDN = enumDisplayNameString<MyFlag::Eight>();
+    auto withoutSpecDN = DisplayName::enumNameString<MyFlag::Eight>();
     ASSERT_EQ(withoutSpecDN, u"Eight");
+    auto withoutSpecSN = SerializedName::enumNameString<MyFlag::Eight>();
+    ASSERT_EQ(withoutSpecSN, u"Eight");
 
     auto withoutSpec = enumName<MyFlag::Eight>();
     ASSERT_EQ(withoutSpec, u"Eight");
 
-    auto secondWithSpecDN = enumDisplayNameString<MyCustom::Second>();
+    auto secondWithSpecDN = DisplayName::enumNameString<MyCustom::Second>();
     ASSERT_EQ(secondWithSpecDN, u"mysecond.*");
+    auto secondWithSpecSN = SerializedName::enumNameString<MyCustom::Second>();
+    ASSERT_EQ(secondWithSpecSN, u"mysecond.*");
 
     auto secondWithSpec = enumName<MyCustom::Second>();
     ASSERT_EQ(secondWithSpec, u"mysecond.*");
+
+    ASSERT_EQ(DisplayName::enumNameString<ThumbnailPreviewMode::DontShow>(),
+              u"Don't show");
+
+    ASSERT_EQ(SerializedName::enumNameString<Channel::Type::TwitchWatching>(),
+              u"watching");
 }

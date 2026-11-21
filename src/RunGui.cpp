@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "RunGui.hpp"
 
 #include "Application.hpp"
@@ -38,6 +42,10 @@
 #    include "corefoundation/CFBundle.h"
 #endif
 
+// Forward declaration (Qt doesn't declare this in headers)
+// NOLINTNEXTLINE(readability-identifier-naming)
+extern void qt_set_sequence_auto_mnemonic(bool b);
+
 namespace chatterino {
 namespace {
 void installCustomPalette()
@@ -75,10 +83,13 @@ void installCustomPalette()
     QApplication::setPalette(dark);
 }
 
-void initQt()
+void initQt(const Args &args)
 {
-    // set up the QApplication flags
-    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    if (args.useOldScaling)
+    {
+        qCWarning(chatterinoApp) << "Using old scaling";
+        QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    }
 
 #ifdef Q_OS_WIN32
     // Avoid promoting child widgets to child windows
@@ -97,6 +108,9 @@ void initQt()
     // On the Mac/Cocoa platform this attribute is enabled by default
     // We override it to ensure shortcuts show in context menus on that platform
     QApplication::setAttribute(Qt::AA_DontShowShortcutsInContextMenus, false);
+
+    // Enable mnemonics (menu hotkeys) on macOS - they are disabled by default
+    qt_set_sequence_auto_mnemonic(true);
 #endif
 
     installCustomPalette();
@@ -110,20 +124,7 @@ void showLastCrashDialog(const Args &args, const Paths &paths)
     dialog->exec();
 }
 
-void createRunningFile(const QString &path)
-{
-    QFile runningFile(path);
-
-    runningFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    runningFile.flush();
-    runningFile.close();
-}
-
-void removeRunningFile(const QString &path)
-{
-    QFile::remove(path);
-}
-
+#if defined(NDEBUG) && !defined(CHATTERINO_WITH_CRASHPAD)
 std::chrono::steady_clock::time_point signalsInitTime;
 
 [[noreturn]] void handleSignal(int signum)
@@ -135,7 +136,7 @@ std::chrono::steady_clock::time_point signalsInitTime;
     {
         QProcess proc;
 
-#ifdef Q_OS_MAC
+#    ifdef Q_OS_MAC
         // On macOS, programs are bundled into ".app" Application bundles,
         // when restarting Chatterino that bundle should be opened with the "open"
         // terminal command instead of directly starting the underlying executable,
@@ -152,16 +153,17 @@ std::chrono::steady_clock::time_point signalsInitTime;
 
         CFRelease(appUrlRef);
         CFRelease(macPath);
-#else
+#    else
         proc.setProgram(QApplication::applicationFilePath());
         proc.setArguments({"--crash-recovery"});
-#endif
+#    endif
 
         proc.startDetached();
     }
 
     std::_Exit(signum);
 }
+#endif
 
 // We want to restart Chatterino when it crashes and the setting is set to
 // true.
@@ -240,10 +242,10 @@ void clearCrashes(QDir dir)
 }
 }  // namespace
 
-void runGui(QApplication &a, const Paths &paths, Settings &settings,
-            const Args &args, Updates &updates)
+void runGui(QApplication &a, const Modes &modes, const Paths &paths,
+            Settings &settings, const Args &args, Updates &updates)
 {
-    initQt();
+    initQt(args);
     initResources();
     initSignalHandler();
 
@@ -287,7 +289,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
         app->stop();
     });
 
-    Application app(settings, paths, args, updates);
+    Application app(settings, paths, args, modes, updates);
     app.initialize(settings, paths);
     app.run();
 

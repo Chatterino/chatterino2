@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/Modes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
 
@@ -17,10 +18,13 @@ public:
     explicit EmptyApplication(const QString &settingsData)
     {
         QFile settingsFile(this->settingsDir.filePath("settings.json"));
-        settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
-        settingsFile.write(settingsData.toUtf8());
-        settingsFile.flush();
-        settingsFile.close();
+        if (settingsFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            settingsFile.write(settingsData.toUtf8());
+            settingsFile.flush();
+            settingsFile.close();
+        }
+        this->paths_.settingsDirectory = this->settingsDir.path();
     }
 
     ~EmptyApplication() override = default;
@@ -40,6 +44,11 @@ public:
         return this->args_;
     }
 
+    const Modes &getModes() override
+    {
+        return this->modes_;
+    }
+
     Theme *getThemes() override
     {
         assert(
@@ -56,7 +65,7 @@ public:
         return nullptr;
     }
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         assert(
             false &&
@@ -161,6 +170,12 @@ public:
         return nullptr;
     }
 
+    BttvBadges *getBttvBadges() override
+    {
+        assert(!"getBttvBadges was called without being initialized");
+        return nullptr;
+    }
+
     SeventvBadges *getSeventvBadges() override
     {
         assert(!"getSeventvBadges was called without being initialized");
@@ -195,6 +210,11 @@ public:
     }
 
     SeventvAPI *getSeventvAPI() override
+    {
+        return nullptr;
+    }
+
+    SpellChecker *getSpellChecker() override
     {
         return nullptr;
     }
@@ -279,8 +299,9 @@ public:
     }
 
     QTemporaryDir settingsDir;
-    Paths paths_;
     Args args_;
+    Modes modes_{args_};
+    Paths paths_ = {args_, modes_};
 };
 
 }  // namespace chatterino::mock

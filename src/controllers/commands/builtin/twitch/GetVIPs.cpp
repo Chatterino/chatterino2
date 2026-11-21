@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/GetVIPs.hpp"
 
 #include "Application.hpp"
@@ -92,7 +96,7 @@ QString getVIPs(const CommandContext &ctx)
     }
 
     getHelix()->getChannelVIPs(
-        ctx.twitchChannel->roomId(),
+        ctx.twitchChannel->roomId(), nullptr,
         [channel{ctx.channel}, twitchChannel{ctx.twitchChannel}](
             const std::vector<HelixVip> &vipList) {
             if (vipList.empty())

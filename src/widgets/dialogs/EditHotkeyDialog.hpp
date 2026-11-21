@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QDialog>
@@ -20,7 +24,7 @@ class EditHotkeyDialog final : public QDialog
 
 public:
     explicit EditHotkeyDialog(const std::shared_ptr<Hotkey> data,
-                              bool isAdd = false, QWidget *parent = nullptr);
+                              QWidget *parent = nullptr);
     ~EditHotkeyDialog() final;
 
     std::shared_ptr<Hotkey> data();

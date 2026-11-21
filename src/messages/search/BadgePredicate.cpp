@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/search/BadgePredicate.hpp"
 
 #include "messages/Message.hpp"
@@ -33,9 +37,9 @@ BadgePredicate::BadgePredicate(const QString &badges, bool negate)
 
 bool BadgePredicate::appliesToImpl(const Message &message)
 {
-    for (const Badge &badge : message.badges)
+    for (const TwitchBadge &badge : message.twitchBadges)
     {
-        if (badges_.contains(badge.key_, Qt::CaseInsensitive))
+        if (this->badges_.contains(badge.key_, Qt::CaseInsensitive))
         {
             return true;
         }

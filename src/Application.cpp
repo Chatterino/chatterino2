@@ -1,7 +1,12 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "Application.hpp"
 
 #include "common/Args.hpp"
 #include "common/Channel.hpp"
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -11,6 +16,8 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "controllers/spellcheck/SpellChecker.hpp"
+#include "providers/bttv/BttvBadges.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
@@ -24,6 +31,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
+#include "controllers/emotes/EmoteController.hpp"
 #include "controllers/sound/MiniaudioBackend.hpp"
 #include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
@@ -43,7 +51,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/CrashHandler.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Logging.hpp"
@@ -80,7 +87,7 @@ ISoundController *makeSoundController(Settings &settings)
     switch (soundBackend)
     {
         case SoundBackend::Miniaudio: {
-            return new MiniaudioBackend();
+            return new MiniaudioBackend(settings.soundMiniaudioKeepEngineAlive);
         }
         break;
 
@@ -90,7 +97,7 @@ ISoundController *makeSoundController(Settings &settings)
         break;
 
         default: {
-            return new MiniaudioBackend();
+            return new MiniaudioBackend(settings.soundMiniaudioKeepEngineAlive);
         }
         break;
     }
@@ -99,7 +106,8 @@ ISoundController *makeSoundController(Settings &settings)
 BttvLiveUpdates *makeBttvLiveUpdates(Settings &settings)
 {
     bool enabled =
-        settings.enableBTTVLiveUpdates && settings.enableBTTVChannelEmotes;
+        settings.enableBTTVLiveUpdates &&
+        (settings.enableBTTVChannelEmotes || settings.showBadgesBttv);
 
     if (enabled)
     {
@@ -119,18 +127,6 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
     }
 
     return nullptr;
-}
-
-eventsub::IController *makeEventSubController(Settings &settings)
-{
-    bool enabled = settings.enableExperimentalEventSub;
-
-    if (enabled)
-    {
-        return new eventsub::Controller();
-    }
-
-    return new eventsub::DummyController();
 }
 
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
@@ -157,15 +153,17 @@ IApplication::~IApplication()
 // to each other
 
 Application::Application(Settings &_settings, const Paths &paths,
-                         const Args &_args, Updates &_updates)
+                         const Args &_args, const Modes &modes,
+                         Updates &_updates)
     : paths_(paths)
     , args_(_args)
+    , modes_(modes)
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , logging(new Logging(_settings))
-    , emotes(new Emotes)
+    , emotes(new EmoteController)
     , accounts(new AccountController)
-    , eventSub(makeEventSubController(_settings))
+    , eventSub(new eventsub::Controller())
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(_args, paths, _settings, *this->themes,
                                 *this->fonts))
@@ -179,6 +177,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , highlights(new HighlightController(_settings, this->accounts.get()))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
+    , bttvBadges(new BttvBadges)
     , seventvBadges(new SeventvBadges)
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
@@ -195,6 +194,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
+    , spellChecker(new SpellChecker)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -218,7 +218,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino",
                                     "Show changelog?",
                                     QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
@@ -233,6 +233,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
     }
+    this->emotes->initialize();
 
     this->accounts->load();
 
@@ -285,9 +286,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     if (!this->args_.isFramelessEmbed)
     {
-        this->initNm(paths);
+        this->initNm(this->modes_, paths);
     }
-    this->twitchPubSub->initialize();
 
     this->twitch->initEventAPIs(this->bttvLiveUpdates.get(),
                                 this->seventvEventAPI.get());
@@ -297,32 +297,21 @@ void Application::initialize(Settings &settings, const Paths &paths)
     this->initialized = true;
 }
 
-int Application::run()
+void Application::connect()
 {
     assert(this->initialized);
 
     this->twitch->connect();
+}
+
+int Application::run()
+{
+    this->connect();
 
     if (!this->args_.isFramelessEmbed)
     {
         this->windows->getMainWindow().show();
     }
-
-    getSettings()->enableBTTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllBTTVChannelEmotes();
-        },
-        false);
-    getSettings()->enableFFZChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllFFZChannelEmotes();
-        },
-        false);
-    getSettings()->enableSevenTVChannelEmotes.connect(
-        [this] {
-            this->twitch->reloadAllSevenTVChannelEmotes();
-        },
-        false);
 
     return QApplication::exec();
 }
@@ -343,7 +332,7 @@ Fonts *Application::getFonts()
     return this->fonts.get();
 }
 
-IEmotes *Application::getEmotes()
+EmoteController *Application::getEmotes()
 {
     assertInGuiThread();
     assert(this->emotes);
@@ -421,6 +410,14 @@ FfzBadges *Application::getFfzBadges()
     assert(this->ffzBadges);
 
     return this->ffzBadges.get();
+}
+
+BttvBadges *Application::getBttvBadges()
+{
+    // BttvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->bttvBadges);
+
+    return this->bttvBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()
@@ -597,6 +594,14 @@ eventsub::IController *Application::getEventSub()
     return this->eventSub.get();
 }
 
+SpellChecker *Application::getSpellChecker()
+{
+    assertInGuiThread();
+    assert(this->spellChecker);
+
+    return this->spellChecker.get();
+}
+
 void Application::aboutToQuit()
 {
     ABOUT_TO_QUIT.store(true);
@@ -607,6 +612,8 @@ void Application::aboutToQuit()
 
     this->hotkeys->save();
     this->windows->save();
+
+    this->windows->closeAll();
 }
 
 void Application::stop()
@@ -647,16 +654,18 @@ void Application::stop()
     this->logging.reset();
     this->fonts.reset();
     this->themes.reset();
+    this->spellChecker.reset();
 
     STOPPED.store(true);
 }
 
-void Application::initNm(const Paths &paths)
+void Application::initNm(const Modes &modes, const Paths &paths)
 {
+    (void)modes;
     (void)paths;
 
 #if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
-    registerNmHost(paths);
+    registerNmHost(modes, paths);
     this->nmServer->start();
 #endif
 }

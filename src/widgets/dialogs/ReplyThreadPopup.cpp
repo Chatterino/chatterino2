@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -93,14 +98,21 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
             this->giveFocus(Qt::MouseFocusReason);
         });
 
+    // Let the parent split handle twitch link actions
+    std::ignore = this->ui_.threadView->openChannelIn.connect(
+        [this](QString channelName, FromTwitchLinkOpenChannelIn openIn) {
+            this->split_->getChannelView().openChannelIn.invoke(
+                std::move(channelName), openIn);
+        });
+
     // Create SplitInput with inline replying disabled
     this->ui_.replyInput =
         new SplitInput(this, this->split_, this->ui_.threadView, false);
 
-    this->bSignals_.emplace_back(
+    this->currentUserConnection_ =
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
-        }));
+        });
 
     // We can safely ignore this signal's connection since threadView will always be deleted before
     // the ReplyThreadPopup
@@ -133,7 +145,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
     layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     // Top Row
-    bool addCheckbox = getSettings()->enableThreadHighlight;
+    bool addCheckbox =
+        getApp()->getHighlights()->isSubscribedThreadHighlightEnabled;
     if (addCheckbox || closeAutomatically)
     {
         auto *hbox = new QHBoxLayout();
@@ -197,7 +210,7 @@ void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 
     if (!this->thread_) [[unlikely]]
     {
-        this->replySubscriptionSignal_ = boost::signals2::scoped_connection{};
+        this->replySubscriptionSignal_ = pajlada::Signals::ScopedConnection{};
         return;
     }
 

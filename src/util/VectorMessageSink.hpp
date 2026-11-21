@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/MessageSink.hpp"
+
+#include <vector>
 
 namespace chatterino {
 

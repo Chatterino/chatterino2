@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/Common.hpp"
@@ -382,6 +386,7 @@ private:
 
 #ifdef FRIEND_TEST
     FRIEND_TEST(MessageLayoutContainerTest, RtlReordering);
+    FRIEND_TEST(MessageLayoutContainer, ExhaustiveFlags);
 #endif
 };
 

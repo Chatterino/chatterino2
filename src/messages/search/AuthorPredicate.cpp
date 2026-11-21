@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/search/AuthorPredicate.hpp"
 
 #include "messages/Message.hpp"
@@ -17,8 +21,8 @@ AuthorPredicate::AuthorPredicate(const QString &authors, bool negate)
 
 bool AuthorPredicate::appliesToImpl(const Message &message)
 {
-    return authors_.contains(message.displayName, Qt::CaseInsensitive) ||
-           authors_.contains(message.loginName, Qt::CaseInsensitive);
+    return this->authors_.contains(message.displayName, Qt::CaseInsensitive) ||
+           this->authors_.contains(message.loginName, Qt::CaseInsensitive);
 }
 
 }  // namespace chatterino

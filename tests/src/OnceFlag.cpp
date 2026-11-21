@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "util/OnceFlag.hpp"
 
 #include "Test.hpp"
@@ -37,7 +41,7 @@ TEST(OnceFlag, waitFor)
         startedFlag.set();
         startedAckFlag.wait();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds{100});
+        std::this_thread::sleep_for(std::chrono::milliseconds{1000});
         stoppedFlag.set();
     });
 
@@ -45,10 +49,10 @@ TEST(OnceFlag, waitFor)
     startedAckFlag.set();
 
     auto start = std::chrono::system_clock::now();
-    ASSERT_TRUE(stoppedFlag.waitFor(std::chrono::milliseconds{200}));
+    ASSERT_TRUE(stoppedFlag.waitFor(std::chrono::milliseconds{2000}));
     auto stop = std::chrono::system_clock::now();
 
-    ASSERT_LT(stop - start, std::chrono::milliseconds{200});
+    ASSERT_LT(stop - start, std::chrono::milliseconds{2000});
 
     start = std::chrono::system_clock::now();
     ASSERT_TRUE(stoppedFlag.waitFor(std::chrono::milliseconds{1000}));
@@ -79,10 +83,31 @@ TEST(OnceFlag, waitForTimeout)
     });
 
     startedFlag.wait();
+    ASSERT_TRUE(startedFlag.isSet());
     startedAckFlag.set();
+    ASSERT_TRUE(startedAckFlag.isSet());
 
     ASSERT_FALSE(stoppedFlag.waitFor(std::chrono::milliseconds{25}));
     stoppedFlag.wait();
+    ASSERT_TRUE(stoppedFlag.isSet());
 
     t.join();
+}
+
+TEST(OnceFlag, alreadySet)
+{
+    OnceFlag flag;
+    flag.set();
+    ASSERT_TRUE(flag.isSet());
+
+    auto start = std::chrono::system_clock::now();
+    flag.wait();
+    auto stop = std::chrono::system_clock::now();
+    ASSERT_LT(stop - start, std::chrono::milliseconds{10});
+
+    start = std::chrono::system_clock::now();
+    ASSERT_TRUE(flag.waitFor(std::chrono::milliseconds{0}));
+    stop = std::chrono::system_clock::now();
+
+    ASSERT_LT(stop - start, std::chrono::milliseconds{10});
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/WebSocketPool.hpp"
 
 #include "mocks/BaseApplication.hpp"
@@ -11,10 +15,11 @@ namespace {
 
 struct Listener : public WebSocketListener {
     Listener(std::vector<std::pair<bool, QByteArray>> &messages,
-             OnceFlag &messageFlag, OnceFlag &closeFlag)
+             OnceFlag &messageFlag, OnceFlag &closeFlag, OnceFlag &openFlag)
         : messages(messages)
         , messageFlag(messageFlag)
         , closeFlag(closeFlag)
+        , openFlag(openFlag)
     {
     }
 
@@ -35,9 +40,15 @@ struct Listener : public WebSocketListener {
         messages.emplace_back(false, std::move(data));
     }
 
+    void onOpen() override
+    {
+        this->openFlag.set();
+    }
+
     std::vector<std::pair<bool, QByteArray>> &messages;
     OnceFlag &messageFlag;
     OnceFlag &closeFlag;
+    OnceFlag &openFlag;
 };
 
 }  // namespace
@@ -50,10 +61,11 @@ TEST(WebSocketPool, tcpEcho)
     std::vector<std::pair<bool, QByteArray>> messages;
     OnceFlag messageFlag;
     OnceFlag closeFlag;
+    OnceFlag openFlag;
 
     auto handle = pool.createSocket(
         {
-            .url = QUrl("ws://127.0.0.1:9052/echo"),
+            .url = QUrl("ws://" + PUBSUB_WS_ADDR + "/echo?query=123&xd=wow"),
             .headers =
                 {
                     {"My-Header", "my-header-VALUE"},
@@ -62,13 +74,14 @@ TEST(WebSocketPool, tcpEcho)
                     {"User-Agent", "MyUserAgent"},
                 },
         },
-        std::make_unique<Listener>(messages, messageFlag, closeFlag));
+        std::make_unique<Listener>(messages, messageFlag, closeFlag, openFlag));
     handle.sendBinary("message1");
     handle.sendBinary("message2");
     handle.sendBinary("message3");
     handle.sendText("message4");
 
     ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");
@@ -76,11 +89,12 @@ TEST(WebSocketPool, tcpEcho)
     handle.sendText("/HEADER another-header");
     handle.sendText("/HEADER cookie");
     handle.sendText("/HEADER user-agent");
+    handle.sendText("/URL");
     handle.sendText("/CLOSE");
 
     ASSERT_TRUE(closeFlag.waitFor(1s));
 
-    ASSERT_EQ(messages.size(), 10);
+    ASSERT_EQ(messages.size(), 11);
     ASSERT_EQ(messages[0].first, false);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, false);
@@ -101,6 +115,8 @@ TEST(WebSocketPool, tcpEcho)
     ASSERT_EQ(messages[8].second, "xd");
     ASSERT_EQ(messages[9].first, true);
     ASSERT_EQ(messages[9].second, "MyUserAgent");
+    ASSERT_EQ(messages[10].first, true);
+    ASSERT_EQ(messages[10].second, "/echo?query=123&xd=wow");
 }
 
 TEST(WebSocketPool, tlsEcho)
@@ -111,23 +127,25 @@ TEST(WebSocketPool, tlsEcho)
     std::vector<std::pair<bool, QByteArray>> messages;
     OnceFlag messageFlag;
     OnceFlag closeFlag;
+    OnceFlag openFlag;
 
     auto handle = pool.createSocket(
         {
-            .url = QUrl("wss://127.0.0.1:9050/echo"),
+            .url = QUrl("wss://" + PUBSUB_WSS_ADDR + "/echo"),
             .headers{
                 {"My-Header", "my-header-VALUE"},
                 {"Another-Header", "other-header"},
                 {"Cookie", "xd"},  // "known" header
             },
         },
-        std::make_unique<Listener>(messages, messageFlag, closeFlag));
+        std::make_unique<Listener>(messages, messageFlag, closeFlag, openFlag));
     handle.sendBinary("message1");
     handle.sendBinary("message2");
     handle.sendBinary("message3");
     handle.sendText("message4");
 
     ASSERT_TRUE(messageFlag.waitFor(1s));
+    ASSERT_TRUE(openFlag.isSet());
     QByteArray bigMsg(1 << 15, 'A');
     handle.sendBinary(bigMsg);
     handle.sendText("foo");
@@ -135,11 +153,12 @@ TEST(WebSocketPool, tlsEcho)
     handle.sendText("/HEADER another-header");
     handle.sendText("/HEADER cookie");
     handle.sendText("/HEADER user-agent");
+    handle.sendText("/URL");
     handle.sendText("/CLOSE");
 
     ASSERT_TRUE(closeFlag.waitFor(1s));
 
-    ASSERT_EQ(messages.size(), 10);
+    ASSERT_EQ(messages.size(), 11);
     ASSERT_EQ(messages[0].first, false);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, false);
@@ -160,4 +179,6 @@ TEST(WebSocketPool, tlsEcho)
     ASSERT_EQ(messages[8].second, "xd");
     ASSERT_EQ(messages[9].first, true);
     ASSERT_TRUE(messages[9].second.startsWith("Chatterino"));
+    ASSERT_EQ(messages[10].first, true);
+    ASSERT_EQ(messages[10].second, "/echo");
 }

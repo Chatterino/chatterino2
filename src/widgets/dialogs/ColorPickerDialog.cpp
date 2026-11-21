@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
-#include "common/Literals.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "widgets/helper/color/AlphaSlider.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
@@ -10,6 +13,8 @@
 
 #include <QDialogButtonBox>
 #include <QSet>
+
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -58,14 +63,13 @@ void connectSignals(D *dialog, W *widget)
 
 namespace chatterino {
 
-using namespace literals;
-
 ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
     : BasePopup(
           {
               BaseWindow::EnableCustomFrame,
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
+              BaseWindow::UseSettingsStylesheet,
           },
           parent)
     , color_(color)

@@ -1,0 +1,22 @@
+{
+    "input": {
+        "deletionLink": "",
+        "formField": "file",
+        "headers": "Authorization: Basic XXXXXXXXXXXXXXX",
+        "link": "",
+        "url": "https://i.yourwebsite.com/upload"
+    },
+    "output": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "",
+        "FileFormName": "file",
+        "Headers": {
+            "Authorization": "Basic XXXXXXXXXXXXXXX"
+        },
+        "Name": "Chatterino Image Uploader Settings",
+        "RequestMethod": "POST",
+        "RequestURL": "https://i.yourwebsite.com/upload",
+        "URL": "",
+        "Version": "1.0.0"
+    }
+}

@@ -1,26 +1,43 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
+#include <IrcTagsRef>
 #include <QString>
 #include <QVariantMap>
 
 #include <unordered_map>
+#include <variant>
 
 namespace chatterino {
 
+struct TwitchGifOccurrence {
+    /// The giphy ID.
+    QString id;
+
+    bool operator==(const TwitchGifOccurrence &rhs) const = default;
+};
+
 struct TwitchEmoteOccurrence {
-    int start;
-    int end;
     EmotePtr ptr;
     EmoteName name;
 
-    bool operator==(const TwitchEmoteOccurrence &other) const
-    {
-        return std::tie(this->start, this->end, this->ptr, this->name) ==
-               std::tie(other.start, other.end, other.ptr, other.name);
-    }
+    bool operator==(const TwitchEmoteOccurrence &rhs) const = default;
+};
+
+struct TwitchSpecialOccurrence {
+    /// Start position in the message (in utf16 units)
+    int start = 0;
+    /// Length of the occurrence (in utf16 units)
+    int length = 0;
+    std::variant<TwitchEmoteOccurrence, TwitchGifOccurrence> data;
+
+    bool operator==(const TwitchSpecialOccurrence &other) const = default;
 };
 
 /// @brief Parses the `badge-info` tag of an IRC message
@@ -33,22 +50,24 @@ struct TwitchEmoteOccurrence {
 ///
 /// @param tags The tags of the IRC message
 /// @returns A map of badge-names to their values
-std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags);
+std::unordered_map<QString, QString> parseBadgeInfoTag(Communi::TagsRef tags);
 
-/// @brief Parses the `badges` tag of an IRC message
+/// @brief Parses the badges from the specified tag of an IRC message
 ///
-/// The `badges` tag contains a comma separated list of key-value elements which
-/// make up the name and version of each badge.
+/// All `badges`-type tags contain a comma separated list of key-value elements
+/// which make up the name and version of each badge.
 ///
 /// **Example**:
 /// `badges=broadcaster/1,subscriber/18` would be parsed as
 /// `[(broadcaster, 1), (subscriber, 18)]`
 ///
 /// @param tags The tags of the IRC message
+/// @param tagName The name of the tag to read badges from
 /// @returns A list of badges (name and version)
-std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+std::vector<TwitchBadge> parseBadgeTag(Communi::TagsRef tags,
+                                       const QString &tagName = "badges");
 
-/// @brief Parses Twitch emotes in an IRC message
+/// @brief Parses special Twitch occurrences (e.g. emotes) in an IRC message
 ///
 /// @param tags The tags of the IRC message
 /// @param content The message text. This might be shortened due to skipping
@@ -59,9 +78,8 @@ std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 ///                      `content` excludes the first three characters of the
 ///                      original message (`@a foo` (original message) -> `foo`
 ///                      (content)).
-/// @returns A list of emotes and their positions
-std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
-                                                     const QString &content,
-                                                     int messageOffset);
+/// @returns A list of their positions
+std::vector<TwitchSpecialOccurrence> parseTwitchOccurrences(
+    Communi::TagsRef tags, QStringView content, int messageOffset);
 
 }  // namespace chatterino

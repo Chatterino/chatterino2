@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
@@ -29,6 +33,7 @@ enum class SettingsDialogPreference {
     NoPreference,
     StreamerMode,
     Accounts,
+    Highlights,
     ModerationActions,
     About,
 };
@@ -44,7 +49,6 @@ public:
 
 protected:
     void scaleChangedEvent(float newDpi) override;
-    void themeChangedEvent() override;
     void showEvent(QShowEvent *) override;
 
 private:

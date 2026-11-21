@@ -40,10 +40,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -151,14 +147,21 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
             "searchText": "nerixyz denied the unban request from uint128: Nah, no unban for you ",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timestamp": "2024-05-14T12:31:47Z",
+            "timeoutUser": "uint128",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

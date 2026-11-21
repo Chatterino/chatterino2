@@ -1,67 +1,64 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
-#    include "controllers/plugins/LuaUtilities.hpp"
-#    include "controllers/plugins/PluginPermission.hpp"
+#    include "controllers/plugins/ConnectionManager.hpp"
+#    include "controllers/plugins/PluginMeta.hpp"
+#    include "controllers/plugins/PluginRef.hpp"
 
+#    include <pajlada/signals/signal.hpp>
 #    include <QDir>
 #    include <QString>
 #    include <QUrl>
 #    include <semver/semver.hpp>
 #    include <sol/forward.hpp>
 
+#    include <cassert>
 #    include <memory>
 #    include <optional>
 #    include <unordered_map>
 #    include <unordered_set>
+#    include <utility>
+#    include <variant>
 #    include <vector>
 
 struct lua_State;
 class QTimer;
 
+namespace chatterino::lua::api {
+enum class LogLevel;
+}  // namespace chatterino::lua::api
+
+namespace chatterino::lua {
+struct SignalCallback;
+}  // namespace chatterino::lua
+
 namespace chatterino {
 
-struct PluginMeta {
-    // for more info on these fields see docs/plugin-info.schema.json
+/// A plugin that hasn't been loaded.
+///
+/// Most likely, its metadata is invalid.
+class UnloadedPlugin
+{
+public:
+    QString id;
+    PluginMeta meta;
+    QDir loadDirectory;
 
-    // display name of the plugin
-    QString name;
-
-    // description shown to the user
-    QString description;
-
-    // plugin authors shown to the user
-    std::vector<QString> authors;
-
-    // license name
-    QString license;
-
-    // version of the plugin
-    semver::version version;
-
-    // optionally a homepage link
-    QString homepage;
-
-    // optionally tags that might help in searching for the plugin
-    std::vector<QString> tags;
-
-    std::vector<PluginPermission> permissions;
-
-    // errors that occurred while parsing info.json
-    std::vector<QString> errors;
-
-    bool isValid() const
+    UnloadedPlugin(QString id_, PluginMeta meta_, const QDir &loadDirectory_)
+        : id(std::move(id_))
+        , meta(std::move(meta_))
+        , loadDirectory(loadDirectory_)
     {
-        return this->errors.empty();
     }
-
-    explicit PluginMeta(const QJsonObject &obj);
-    // This is for tests
-    PluginMeta() = default;
 };
 
+/// A plugin with a valid lua state
 class Plugin
 {
 public:
@@ -74,7 +71,12 @@ public:
         , meta(std::move(meta))
         , loadDirectory_(loadDirectory)
         , state_(state)
+        , selfRef_(this)
     {
+        // The PluginMeta here must be valid, otherwise it should be initialized
+        // as an UnloadedPlugin
+        assert(this->meta.isValid());
+        assert(this->state_ != nullptr);
     }
 
     ~Plugin();
@@ -122,6 +124,8 @@ public:
         return it->second;
     }
 
+    lua::SignalCallback createCallback(sol::main_protected_function pfn);
+
     /**
      * If the plugin crashes while evaluating the main file, this function will return the error
      */
@@ -130,6 +134,8 @@ public:
         return this->error_;
     }
 
+    lua::PluginWeakRef weakRef() const;
+
     int addTimeout(QTimer *timer);
     void removeTimeout(QTimer *timer);
 
@@ -137,15 +143,26 @@ public:
     bool hasHTTPPermissionFor(const QUrl &url);
     bool hasNetworkPermission() const;
 
+    void log(lua_State *L, lua::api::LogLevel level, QDebug stream,
+             const sol::variadic_args &args);
+
+    sol::state_view state();
+
     std::map<lua::api::EventType, sol::protected_function> callbacks;
 
     // In-flight HTTP Requests
     // This is a lifetime hack to ensure they get deleted with the plugin. This relies on the Plugin getting deleted on reload!
     std::vector<std::shared_ptr<lua::api::HTTPRequest>> httpRequests;
 
+    pajlada::Signals::NoArgSignal onUnloaded;
+    pajlada::Signals::Signal<lua::api::LogLevel, const QString &> onLog;
+    lua::ConnectionManager connections;
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
+
+    lua::PluginRef selfRef_;
 
     QString error_;
 
@@ -157,5 +174,10 @@ private:
     friend class PluginController;
     friend class PluginControllerAccess;  // this is for tests
 };
+
+using PluginPtr = std::unique_ptr<Plugin>;
+using AnyPlugin = std::variant<PluginPtr, UnloadedPlugin>;
+
 }  // namespace chatterino
+
 #endif

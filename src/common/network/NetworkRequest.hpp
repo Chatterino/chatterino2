@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/network/NetworkCommon.hpp"
@@ -14,7 +18,8 @@ namespace chatterino {
 
 class NetworkData;
 
-class NetworkRequest final
+class [[nodiscard("NetworkRequests don't do anything unless sent. Call "
+                  "execute() to send the request.")]] NetworkRequest final
 {
     // Stores all data about the request that needs to be passed around to each
     // part of the request

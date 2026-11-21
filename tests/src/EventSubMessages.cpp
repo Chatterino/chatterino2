@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
+#include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -24,7 +29,8 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": {...} }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+const bool UPDATE_SNAPSHOTS =
+    chatterino::env::readBool("CHATTERINO_UPDATE_TEST_SNAPSHOTS", false);
 
 const QString CATEGORY = u"EventSub"_s;
 

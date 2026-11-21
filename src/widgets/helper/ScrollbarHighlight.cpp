@@ -1,8 +1,8 @@
-#include "widgets/helper/ScrollbarHighlight.hpp"
+// SPDX-FileCopyrightText: 2017 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
 
-#include "Application.hpp"
-#include "singletons/Theme.hpp"
-#include "widgets/Scrollbar.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
 namespace chatterino {
 
@@ -12,15 +12,10 @@ ScrollbarHighlight::ScrollbarHighlight()
 {
 }
 
-ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
-                                       Style style, bool isRedeemedHighlight,
-                                       bool isFirstMessageHighlight,
-                                       bool isElevatedMessageHighlight)
+ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> &color,
+                                       Style style)
     : color_(color)
     , style_(style)
-    , isRedeemedHighlight_(isRedeemedHighlight)
-    , isFirstMessageHighlight_(isFirstMessageHighlight)
-    , isElevatedMessageHighlight_(isElevatedMessageHighlight)
 {
 }
 
@@ -35,24 +30,10 @@ ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const
     return this->style_;
 }
 
-bool ScrollbarHighlight::isRedeemedHighlight() const
-{
-    return this->isRedeemedHighlight_;
-}
-
-bool ScrollbarHighlight::isFirstMessageHighlight() const
-{
-    return this->isFirstMessageHighlight_;
-}
-
-bool ScrollbarHighlight::isElevatedMessageHighlight() const
-{
-    return this->isElevatedMessageHighlight_;
-}
-
 bool ScrollbarHighlight::isNull() const
 {
-    return this->style_ == None || !this->color_;
+    return this->style_ == Style::None || !this->color_ ||
+           !this->color_->isValid();
 }
 
 }  // namespace chatterino

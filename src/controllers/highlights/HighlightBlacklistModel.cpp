@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 
 #include "Application.hpp"
@@ -15,7 +19,8 @@ HighlightBlacklistModel::HighlightBlacklistModel(QObject *parent)
 
 // turn a vector item into a model row
 HighlightBlacklistUser HighlightBlacklistModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const HighlightBlacklistUser &original)
+    std::vector<QStandardItem *> &row, const HighlightBlacklistUser &original,
+    std::optional<QModelIndex> index, std::optional<int> role)
 {
     // key, regex
 

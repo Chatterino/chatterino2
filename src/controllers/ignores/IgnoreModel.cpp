@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/ignores/IgnoreModel.hpp"
 
 #include "Application.hpp"
@@ -15,7 +19,9 @@ IgnoreModel::IgnoreModel(QObject *parent)
 
 // turn a vector item into a model row
 IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                         const IgnorePhrase &original)
+                                         const IgnorePhrase &original,
+                                         std::optional<QModelIndex> index,
+                                         std::optional<int> role)
 {
     // key, regex
 

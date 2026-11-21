@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/filters/FilterRecord.hpp"
 
 #include "controllers/filters/lang/Filter.hpp"
@@ -58,7 +62,7 @@ bool FilterRecord::valid() const
     return this->filter_ != nullptr;
 }
 
-bool FilterRecord::filter(const filters::ContextMap &context) const
+bool FilterRecord::filter(filters::RunContext context) const
 {
     assert(this->valid());
     return this->filter_->execute(context).toBool();

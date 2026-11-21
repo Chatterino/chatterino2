@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/CommandModel.hpp"
 
 #include "common/SignalVector.hpp"
@@ -14,7 +18,9 @@ CommandModel::CommandModel(QObject *parent)
 
 // turn a vector item into a model row
 Command CommandModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                     const Command &original)
+                                     const Command &original,
+                                     std::optional<QModelIndex> index,
+                                     std::optional<int> role)
 {
     return Command(row[Column::Trigger]->data(Qt::EditRole).toString(),
                    row[Column::CommandFunc]->data(Qt::EditRole).toString(),

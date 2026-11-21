@@ -74,10 +74,6 @@
     ],
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "pajlada",
             "count": 1,
             "displayName": "",
@@ -174,28 +170,17 @@
                         "",
                         "Deny"
                     ]
-                }
-            ],
-            "flags": "Disabled|PubSub|AutoMod|AutoModOffendingMessageHeader|EventSub|ModerationAction",
-            "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
-            "localizedName": "",
-            "loginName": "automod",
-            "messageText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny",
-            "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
-            "userID": "",
-            "usernameColor": "#ff000000"
-        },
-        {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
-            "channelName": "pajlada",
-            "count": 1,
-            "displayName": "",
-            "elements": [
+                },
+                {
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -282,14 +267,22 @@
                     ]
                 }
             ],
-            "flags": "PubSub|AutoMod|AutoModOffendingMessage|EventSub|ModerationAction",
-            "id": "",
+            "externalBadges": [
+            ],
+            "flags": "Highlighted|Disabled|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModOffendingMessage|EventSub|ModerationAction",
+            "frozen": true,
+            "highlightColor": "#7f404040",
+            "id": "automod_19d067ff-89b5-4790-a720-97599894eb6b",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz: ass",
-            "searchText": "nerixyz: ass",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "messageText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny nerixyz: ass",
+            "searchText": "AutoMod: Held a message for reason: swearing level 4. Allow will post it in chat. Allow Deny nerixyz: ass",
+            "timestamp": "2024-05-14T12:31:47Z",
             "timeoutUser": "",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QHBoxLayout>
@@ -72,7 +76,7 @@ public:
         return LayoutCreator<U>(layout);
     }
 
-    LayoutCreator<T> assign(T **ptr)
+    LayoutCreator<T> assign(auto **ptr)
     {
         *ptr = this->item_;
 

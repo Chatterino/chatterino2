@@ -9,6 +9,16 @@ on:
       - "release/*"
   pull_request:
   workflow_dispatch:
+    inputs:
+      buildType:
+        description: "Build type"
+        required: true
+        type: choice
+        default: "auto"
+        options:
+          - auto
+          - nightly
+          - stable
   merge_group:
 
 concurrency:
@@ -18,7 +28,8 @@ concurrency:
 env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
-  CONAN_VERSION: 2.11.0
+  CHATTERINO_BUILD_TYPE: ${{ case(inputs.buildType != '', inputs.buildType, 'auto') }}
+  CONAN_VERSION: 2.28.1
 
 jobs:
   build-ubuntu-docker:
@@ -30,55 +41,75 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
-            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
-            qt-version: 6.7.2
-            force-lto: false
-            skip-artifact: false
-            skip-crashpad: false
-            build-appimage: false
-            build-deb: true
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
-            build-appimage: true
             build-deb: true
+            plugins: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.7.2
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
-            build-appimage: false
             build-deb: true
+            plugins: true
+          - os: ubuntu-24.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: false
+            plugins: false
+          - os: ubuntu-26.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-26.04:latest
+            force-lto: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-deb: true
+            plugins: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Fix git permission error
         run: |
           git config --global --add safe.directory '*'
 
-      - name: Install Python and libclang (24.04)
-        if: matrix.os == 'ubuntu-24.04'
+      - name: Determine build type
+        id: build-type
+        shell: bash
         run: |
-          sudo apt update
-          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
-            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
-          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
+          if [ "${CHATTERINO_BUILD_TYPE}" = "auto" ]; then
+            if git describe --exact-match --match 'v*'; then
+              echo "Auto - found release tag format"
+              echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+            else
+              echo "Auto - did not find release tag format"
+              echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "nightly" ]; then
+            echo "Override to nightly"
+            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "stable" ]; then
+            echo "Override to stable"
+            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: no build type variable set"
+            exit 1
+          fi
 
       - name: Build
         run: |
@@ -93,30 +124,13 @@ jobs:
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
-            -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
+            -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
+            -DFORCE_JSON_GENERATION=Off \
+            -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
             -DSKIP_LUA_DEFINITIONS_GENERATION=${{matrix.os == 'ubuntu-20.04' && 'On' || 'Off'}} \
             -DFORCE_LUA_DEFINITIONS_GENERATION=${{matrix.os != 'ubuntu-20.04' && 'On' || 'Off'}} \
             ..
           make -j"$(nproc)"
-
-      - name: Check generated sources
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
-          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
-
-      - name: Package - AppImage (Ubuntu)
-        if: matrix.build-appimage
-        run: |
-          cd build
-          sh ./../.CI/CreateAppImage.sh
-
-      - name: Upload artifact - AppImage (Ubuntu)
-        if: matrix.build-appimage
-        uses: actions/upload-artifact@v4
-        with:
-          name: Chatterino-x86_64-Qt-${{ matrix.qt-version }}.AppImage
-          path: build/Chatterino-x86_64.AppImage
 
       - name: Package - .deb (Ubuntu)
         if: matrix.build-deb
@@ -126,26 +140,26 @@ jobs:
 
       - name: Upload artifact - .deb (Ubuntu)
         if: matrix.build-deb
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          name: Chatterino-${{ matrix.os }}.deb
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ case(matrix.skip-crashpad, 'off', 'on') }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           # macOS
-          - os: macos-14
-            qt-version: 6.7.1
+          - os: macos-26
+            qt-version: 6.11.1
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.8.3
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -156,28 +170,53 @@ jobs:
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
+
+      - name: Determine build type
+        id: build-type
+        shell: bash
+        run: |
+          if [ "${CHATTERINO_BUILD_TYPE}" = "auto" ]; then
+            if git describe --exact-match --match 'v*'; then
+              echo "Auto - found release tag format"
+              echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+            else
+              echo "Auto - did not find release tag format"
+              echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "nightly" ]; then
+            echo "Override to nightly"
+            echo "NIGHTLY_BUILD=On" >> "$GITHUB_OUTPUT"
+          elif [ "${CHATTERINO_BUILD_TYPE}" = "stable" ]; then
+            echo "Override to stable"
+            echo "NIGHTLY_BUILD=Off" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: no build type variable set"
+            exit 1
+          fi
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.3.0
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: qtimageformats
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+        uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.18
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -189,7 +228,7 @@ jobs:
 
       - name: Cache conan packages (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}-QT6
           path: ~/.conan2/
@@ -233,7 +272,9 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
-              -DFORCE_JSON_GENERATION=On `
+              -DCHATTERINO_NIGHTLY_BUILD="${{ steps.build-type.outputs.NIGHTLY_BUILD }}" `
+              -DFORCE_JSON_GENERATION=Off `
+              -DCHATTERINO_SPELLCHECK=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -253,10 +294,9 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           cd build
-          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+          windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --force-openssl --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           ..\.CI\deploy-crt.ps1 Chatterino2
-          echo nightly > Chatterino2/modes
 
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
@@ -266,14 +306,14 @@ jobs:
 
       - name: Upload artifact (Windows - binary)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
 
       - name: Upload artifact (Windows - symbols)
         if: startsWith(matrix.os, 'windows') && !matrix.skip-artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}-symbols.pdb.7z
           path: build/bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z
@@ -287,7 +327,8 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake tree boost
+          # brew install openssl rapidjson p7zip create-dmg cmake tree boost hunspell
+          brew install openssl rapidjson p7zip create-dmg tree boost hunspell
         shell: bash
 
       - name: Build (MacOS)
@@ -302,6 +343,8 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DFORCE_JSON_GENERATION=Off \
+              -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
+              -DCHATTERINO_SPELLCHECK=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -321,7 +364,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
           path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
@@ -332,55 +375,30 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           fetch-depth: 0 # allows for tags access
+          persist-credentials: true # Required to update the nightly-build tag.
 
-      # Windows
-      - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        name: Download artifacts
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1 symbols
-        with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
-          path: release-artifacts/
-
-      # Linux
-      - uses: actions/download-artifact@v4
-        name: Linux AppImage
-        with:
-          name: Chatterino-x86_64-Qt-6.7.2.AppImage
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: Ubuntu 20.04 deb
-        with:
-          name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: Ubuntu 22.04 deb
-        with:
-          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: Ubuntu 24.04 deb
-        with:
-          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
-          path: release-artifacts/
+          merge-multiple: true
 
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
         shell: bash
 
+      - name: Remove macOS artifacts
+        run: |
+          rm -f release-artifacts/*macos*.dmg
+        shell: bash
+
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
@@ -396,7 +414,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.16.0
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           replacesArtifacts: true
           allowUpdates: true

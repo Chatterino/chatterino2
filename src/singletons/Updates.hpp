@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -11,6 +15,7 @@ namespace chatterino {
 
 class Paths;
 class Settings;
+class Modes;
 
 /**
  * To check for updates, use the `checkForUpdates` method.
@@ -19,9 +24,10 @@ class Settings;
 class Updates
 {
     const Paths &paths;
+    const Modes &modes;
 
 public:
-    Updates(const Paths &paths_, Settings &settings);
+    Updates(const Modes &modes_, const Paths &paths_, Settings &settings);
 
     enum Status {
         None,
@@ -32,6 +38,8 @@ public:
         Downloading,
         DownloadFailed,
         WriteFileFailed,
+        MissingPortableUpdater,
+        RunUpdaterFailed,
     };
 
     static bool isDowngradeOf(const QString &online, const QString &current);
@@ -47,9 +55,14 @@ public:
     void installUpdates();
     Status getStatus() const;
 
+    static QString portableUpdaterPath(const Paths &paths);
+
     bool shouldShowUpdateButton() const;
     bool isError() const;
     bool isDowngrade() const;
+
+    /// Generates the string that the update dialog will show.
+    QString buildUpdateAvailableText() const;
 
     pajlada::Signals::Signal<Status> statusUpdated;
 

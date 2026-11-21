@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "common/SignalVector.hpp"
@@ -33,6 +37,7 @@ public:
     QStringList getDefaultChatterinoCommandList();
 
     CommandController(const Paths &paths);
+    ~CommandController();
     void save();
 
     CommandModel *createModel(QObject *parent);
@@ -50,6 +55,13 @@ public:
         return this->pluginCommands_;
     }
 #endif
+
+    /// Returns the length of the command trigger in `text`, including leading
+    /// spaces. If `text` does not start with a command trigger, 0 is returned.
+    /// Examples:
+    ///  - " /ban forsen" returns 5
+    ///  - "/non-existing-command" returns 0
+    qsizetype commandTriggerLen(QStringView text);
 
 private:
     void load(Paths &paths);

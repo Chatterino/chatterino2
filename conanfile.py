@@ -6,13 +6,14 @@ from os import path
 
 class Chatterino(ConanFile):
     name = "Chatterino"
-    requires = "boost/1.86.0"
+    requires = "boost/1.86.0", "hunspell/1.7.2"
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
         "with_benchmark": False,
         "with_openssl3": True,
         "openssl*:shared": True,
         "boost*:header_only": True,
+        "hunspell*:shared": False,
     }
     options = {
         "with_benchmark": [True, False],

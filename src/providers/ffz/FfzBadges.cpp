@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/ffz/FfzBadges.hpp"
 
 #include "Application.hpp"
@@ -66,25 +70,31 @@ void FfzBadges::load()
                                jsonBadge["height"].toInt(18));
 
                 auto emote = Emote{
-                    EmoteName{},
-                    ImageSet{Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("1").toString()),
-                                 1.0, baseSize),
-                             Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("2").toString()),
-                                 0.5, baseSize * 2),
-                             Image::fromUrl(
-                                 parseFfzUrl(jsonUrls.value("4").toString()),
-                                 0.25, baseSize * 4)},
-                    Tooltip{jsonBadge.value("title").toString()}, Url{}};
-
-                Badge badge;
+                    .name =
+                        EmoteName{
+                            u"frankerfacez:" %
+                                jsonBadge.value("name").toString(),
+                        },
+                    .images =
+                        ImageSet{
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("1").toString()),
+                                1.0, baseSize),
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("2").toString()),
+                                0.5, baseSize * 2),
+                            Image::fromUrl(
+                                parseFfzUrl(jsonUrls.value("4").toString()),
+                                0.25, baseSize * 4)},
+                    .tooltip = Tooltip{jsonBadge.value("title").toString()},
+                    .homePage = Url{},
+                };
 
                 int badgeID = jsonBadge.value("id").toInt();
 
                 this->badges[badgeID] = Badge{
-                    std::make_shared<const Emote>(std::move(emote)),
-                    QColor(jsonBadge.value("color").toString()),
+                    .emote = std::make_shared<const Emote>(std::move(emote)),
+                    .color = QColor(jsonBadge.value("color").toString()),
                 };
 
                 // Find users with this badge
@@ -97,12 +107,15 @@ void FfzBadges::load()
                     auto userIDString = QString::number(user.toInt());
 
                     auto [userBadges, created] = this->userBadges.emplace(
-                        std::make_pair<QString, std::set<int>>(
-                            std::move(userIDString), {badgeID}));
+                        std::move(userIDString),
+                        QVarLengthArray<int, 2>{badgeID});
                     if (!created)
                     {
                         // User already had a badge assigned
-                        userBadges->second.emplace(badgeID);
+                        if (!userBadges->second.contains(badgeID))
+                        {
+                            userBadges->second.emplace_back(badgeID);
+                        }
                     }
                 }
             }
@@ -128,11 +141,15 @@ void FfzBadges::assignBadgeToUser(const UserId &userID, int badgeID)
     auto it = this->userBadges.find(userID.string);
     if (it != this->userBadges.end())
     {
-        it->second.emplace(badgeID);
+        if (!it->second.contains(badgeID))
+        {
+            it->second.emplace_back(badgeID);
+        }
     }
     else
     {
-        this->userBadges.emplace(userID.string, std::set{badgeID});
+        this->userBadges.emplace(userID.string,
+                                 QVarLengthArray<int, 2>{badgeID});
     }
 }
 

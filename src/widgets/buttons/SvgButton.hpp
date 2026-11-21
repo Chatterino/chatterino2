@@ -1,8 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/buttons/Button.hpp"
 
+#include <QColor>
 #include <QString>
+
+#include <optional>
 
 class QSvgRenderer;
 
@@ -13,12 +20,7 @@ namespace chatterino {
 /// The source can be specified per theme (dark/light)
 /// and will get automatically updated when the theme changes.
 ///
-/// To set the size, use #setInnerHeight(). The width is adjusted according
-/// to the aspect ratio of the SVG. If the button should scale with the UI,
-/// turn on auto-scaling (@see #setAutoScale()), which will scale the button
-/// and padding according to the current UI-scale (linearly).
-///
-/// The button has #padding() around the SVG.
+/// The button has #padding() around the SVG, which will scale with the UI.
 class SvgButton : public Button
 {
     Q_OBJECT
@@ -41,6 +43,13 @@ public:
     /// Setter for #source()
     void setSource(Src source);
 
+    /// Sets a custom color to render over the SVG.
+    /// This allows you to change the color of a button to a solid color
+    /// of your choice without using multiple SVG resources.
+    ///
+    /// Set to std::nullopt to not override the color.
+    void setColor(std::optional<QColor> color);
+
     /// @brief Returns the padding inside the button.
     ///
     /// `width` is the padding applied horizontally (left and right).
@@ -62,9 +71,12 @@ protected:
 private:
     [[nodiscard]] QString currentSvgPath() const;
 
+    void loadSource();
+
     Src source_;
     QSvgRenderer *svg_;
     QSize padding_;
+    std::optional<QColor> color_;
 };
 
 }  // namespace chatterino

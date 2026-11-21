@@ -1,26 +1,34 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/Modes.hpp"
 
+#include "common/Args.hpp"
 #include "util/CombinePath.hpp"
 
 #include <QCoreApplication>
 
 namespace chatterino {
 
-Modes::Modes()
+Modes::Modes(const Args &args)
 {
+    if (args.portableEnable)
+    {
+        this->isPortable = true;
+    }
+
     QFile file(combinePath(QCoreApplication::applicationDirPath(), "modes"));
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
 
     while (!file.atEnd())
     {
         auto line = QString(file.readLine()).trimmed();
 
-        // we need to know if it is a nightly build to disable updates on windows
-        if (line == "nightly")
-        {
-            this->isNightly = true;
-        }
-        else if (line == "portable")
+        if (line == "portable")
         {
             this->isPortable = true;
         }
@@ -29,12 +37,6 @@ Modes::Modes()
             this->isExternallyPackaged = true;
         }
     }
-}
-
-const Modes &Modes::instance()
-{
-    static Modes instance;
-    return instance;
 }
 
 }  // namespace chatterino

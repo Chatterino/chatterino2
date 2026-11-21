@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH
 project(twitch-eventsub-ws VERSION 0.1.0)
 
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS json)
+find_package(Boost REQUIRED CONFIG OPTIONAL_COMPONENTS json)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)

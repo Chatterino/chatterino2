@@ -34,7 +34,6 @@ When prompted which components to install, do the following:
 2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 6.5.3`)
 3. Under this version, select the following entries:
    - `MSVC 2019 64-bit` (or `MSVC 2022 64-bit` from Qt 6.8 onwards)
-   - `Qt 5 Compatibility Module`
    - `Additional Libraries` > `Qt Image Formats`
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
 5. Continue through the installer and let the installer finish installing Qt.
@@ -62,7 +61,6 @@ These dependencies are only required if you are not using a package manager
 <summary>Boost</summary>
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
-
    - Visit the downloads list on [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
    - Select the latest version from the list.
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayoutContext.hpp"
 
 #include "singletons/Settings.hpp"
@@ -46,36 +50,6 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
 void MessagePreferences::connectSettings(Settings *settings,
                                          pajlada::Signals::SignalHolder &holder)
 {
-    settings->enableRedeemedHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableRedeemedHighlight = newValue;
-        },
-        holder);
-
-    settings->enableElevatedMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableElevatedMessageHighlight = newValue;
-        },
-        holder);
-
-    settings->enableFirstMessageHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableFirstMessageHighlight = newValue;
-        },
-        holder);
-
-    settings->enableSubHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableSubHighlight = newValue;
-        },
-        holder);
-
-    settings->enableAutomodHighlight.connect(
-        [this](const auto &newValue) {
-            this->enableAutomodHighlight = newValue;
-        },
-        holder);
-
     settings->alternateMessages.connect(
         [this](const auto &newValue) {
             this->alternateMessages = newValue;

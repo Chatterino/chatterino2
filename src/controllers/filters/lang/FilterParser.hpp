@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/filters/lang/expressions/Expression.hpp"
@@ -19,7 +23,7 @@ public:
     ExpressionPtr release();
 
     const QStringList &errors() const;
-    const QString debugString() const;
+    QString debugString() const;
 
 private:
     ExpressionPtr parseExpression(bool top = false);

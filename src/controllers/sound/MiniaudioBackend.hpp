@@ -1,16 +1,27 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "controllers/sound/ISoundController.hpp"
 #include "util/OnceFlag.hpp"
 #include "util/ThreadGuard.hpp"
 
-#include <boost/asio.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <QByteArray>
 #include <QString>
 #include <QUrl>
 
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <map>
 #include <memory>
-#include <vector>
+#include <thread>
 
 struct ma_engine;
 struct ma_device;
@@ -26,8 +37,20 @@ namespace chatterino {
  **/
 class MiniaudioBackend : public ISoundController
 {
+    // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
+    static constexpr const auto NUM_SOUNDS = 4;
+
+    enum class State : std::uint8_t {
+        Uninitialized,
+        Initialized,
+        Failed,
+        Stopping,
+    };
+
+    std::atomic<State> state{State::Uninitialized};
+
 public:
-    MiniaudioBackend();
+    explicit MiniaudioBackend(bool keepEngineAlive_);
     ~MiniaudioBackend() override;
 
     // Play a sound from the given url
@@ -41,14 +64,17 @@ private:
     // The engine is a high-level API for playing sounds from paths in a simple & efficient-enough manner
     std::unique_ptr<ma_engine> engine;
 
-    // Stores the data of our default ping sounds
-    QByteArray defaultPingData;
-    // Stores N decoders for simultaneous default ping playback.
-    // We can't use the engine API for this as this requires direct access to a custom data_source
-    std::vector<std::unique_ptr<ma_decoder>> defaultPingDecoders;
-    // Stores N sounds for simultaneous default ping playback
-    // We can't use the engine API for this as this requires direct access to a custom data_source
-    std::vector<std::unique_ptr<ma_sound>> defaultPingSounds;
+    struct BuiltInSound {
+        QByteArray data;
+        // Stores N decoders for simultaneous default ping playback.
+        // We can't use the engine API for this as this requires direct access to a custom data_source
+        std::array<std::unique_ptr<ma_decoder>, NUM_SOUNDS> decoders;
+        // Stores N sounds for simultaneous default ping playback
+        // We can't use the engine API for this as this requires direct access to a custom data_source
+        std::array<std::unique_ptr<ma_sound>, NUM_SOUNDS> sounds;
+    };
+
+    std::map<QUrl, BuiltInSound> defaultPingSounds;
 
     // Thread guard for the play method
     // Ensures play is only ever called from the same thread
@@ -63,7 +89,8 @@ private:
     OnceFlag stoppedFlag;
     boost::asio::steady_timer sleepTimer;
 
-    bool initialized{false};
+    /// This setting controls whether the miniaudio sound engine should be kept alive at all times
+    bool keepEngineAlive;
 
     friend class Application;
 };

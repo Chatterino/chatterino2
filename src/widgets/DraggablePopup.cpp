@@ -1,10 +1,13 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/DraggablePopup.hpp"
 
-#include "singletons/Resources.hpp"
-#include "singletons/Theme.hpp"
-#include "widgets/buttons/PixmapButton.hpp"
+#include "buttons/SvgButton.hpp"
 
 #include <QMouseEvent>
+#include <QWindow>
 
 #include <chrono>
 
@@ -12,31 +15,28 @@ namespace chatterino {
 
 namespace {
 
-#ifdef Q_OS_LINUX
-FlagsEnum<BaseWindow::Flags> popupFlags{
+constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS{
+// On macOS, the Dialog flag maps the popup to a Qt::Dialog window so the
+// NSWindow gets NSWindowCollectionBehaviorFullScreenAuxiliary.
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     BaseWindow::Dialog,
+#endif
     BaseWindow::EnableCustomFrame,
 };
-FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
+constexpr FlagsEnum<BaseWindow::Flags> POPUP_FLAGS_CLOSE_AUTOMATICALLY{
+#ifdef Q_OS_MACOS
     BaseWindow::Dialog,
-    BaseWindow::EnableCustomFrame,
-};
-#else
-FlagsEnum<BaseWindow::Flags> popupFlags{
-    BaseWindow::EnableCustomFrame,
-};
-FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
+#endif
     BaseWindow::EnableCustomFrame,
     BaseWindow::Frameless,
     BaseWindow::FramelessDraggable,
 };
-#endif
 
 }  // namespace
 
 DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
     : BaseWindow(
-          (closeAutomatically ? popupFlagsCloseAutomatically : popupFlags) |
+          (closeAutomatically ? POPUP_FLAGS_CLOSE_AUTOMATICALLY : POPUP_FLAGS) |
               BaseWindow::DisableLayoutSave |
               BaseWindow::ClearBuffersOnDpiChange,
           parent)
@@ -74,7 +74,8 @@ DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
 
 void DraggablePopup::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::MouseButton::LeftButton)
+    if (event->button() == Qt::MouseButton::LeftButton &&
+        !this->windowHandle()->startSystemMove())
     {
         this->dragTimer_.start(std::chrono::milliseconds(17));
         this->startPosDrag_ = event->pos();
@@ -105,22 +106,21 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
 
 void DraggablePopup::togglePinned()
 {
-    this->isPinned_ = !isPinned_;
-    if (isPinned_)
+    this->isPinned_ = !this->isPinned_;
+    if (this->isPinned_)
     {
         this->windowDeactivateAction = WindowDeactivateAction::Nothing;
-        this->pinButton_->setPixmap(getResources().buttons.pinEnabled);
+        this->pinButton_->setSource(this->pinEnabledSource_);
     }
     else
     {
         this->windowDeactivateAction = WindowDeactivateAction::Delete;
-        this->pinButton_->setPixmap(getTheme()->buttons.pin);
+        this->pinButton_->setSource(this->pinDisabledSource_);
     }
 }
 Button *DraggablePopup::createPinButton()
 {
-    this->pinButton_ = new PixmapButton(this);
-    this->pinButton_->setPixmap(getTheme()->buttons.pin);
+    this->pinButton_ = new SvgButton(this->pinDisabledSource_, this, {3, 3});
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 

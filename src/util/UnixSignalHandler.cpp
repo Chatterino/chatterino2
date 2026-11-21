@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include <QtGlobal>
 
 #if defined(Q_OS_UNIX)
@@ -11,6 +15,7 @@
 
 #    include <csignal>
 #    include <unordered_map>
+#    include <utility>
 
 namespace {
 
@@ -64,7 +69,7 @@ void UnixSignalHandler::fired(int signal)
     }
 
     char a = 1;
-    ::write(cls->fd[0], &a, sizeof(a));
+    std::ignore = ::write(cls->fd[0], &a, sizeof(a));
 }
 
 void UnixSignalHandler::handleSignal()
@@ -72,7 +77,7 @@ void UnixSignalHandler::handleSignal()
     this->socketNotifier->setEnabled(false);
 
     char tmp{};
-    ::read(this->fd[1], &tmp, sizeof(tmp));
+    std::ignore = ::read(this->fd[1], &tmp, sizeof(tmp));
 
     this->socketNotifier->setEnabled(true);
 

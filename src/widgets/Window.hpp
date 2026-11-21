@@ -1,21 +1,27 @@
+// SPDX-FileCopyrightText: 2016 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
 
-#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
-class PixmapButton;
 class LabelButton;
 class Theme;
 class UpdateDialog;
 class SplitNotebook;
 class Channel;
+class SvgButton;
 
+/**
+ * @exposeenum c2.WindowType
+ */
 enum class WindowType { Main, Popup, Attached };
 
 class Window : public BaseWindow
@@ -27,6 +33,10 @@ public:
 
     WindowType getType();
     SplitNotebook &getNotebook();
+    void showFollowedChannels();
+
+    void setPopupID(size_t id);
+    std::optional<size_t> popupID() const;
 
     pajlada::Signals::NoArgSignal closed;
 
@@ -52,11 +62,12 @@ private:
     std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::vector<boost::signals2::scoped_connection> bSignals_;
 
     // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
-    PixmapButton *streamerModeTitlebarIcon_ = nullptr;
+    SvgButton *streamerModeTitlebarIcon_ = nullptr;
     void updateStreamerModeIcon();
+
+    std::optional<size_t> popupID_;
 
     friend class Notebook;
 };

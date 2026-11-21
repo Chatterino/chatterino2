@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/MessageSimilarity.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"  // IWYU pragma: keep
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Settings.hpp"
 
@@ -65,7 +68,7 @@ float inMessages(const MessagePtr &msg, const T &messages)
          messages | std::views::reverse |
              std::views::take(getSettings()->hideSimilarMaxMessagesToCheck))
     {
-        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+        if (prevMsg->timestamp.secsTo(msg->timestamp) >=
             getSettings()->hideSimilarMaxDelay)
         {
             break;
@@ -115,7 +118,5 @@ void setSimilarityFlags(const MessagePtr &message, const T &messages)
 
 template void setSimilarityFlags<std::vector<MessagePtr>>(
     const MessagePtr &msg, const std::vector<MessagePtr> &messages);
-template void setSimilarityFlags<LimitedQueueSnapshot<MessagePtr>>(
-    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages);
 
 }  // namespace chatterino

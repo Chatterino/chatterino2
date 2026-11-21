@@ -16,37 +16,42 @@ jobs:
     strategy:
       matrix:
         include:
-          # Ubuntu 22.04, Qt 6.6
-          - os: ubuntu-22.04
-            qt-version: 6.6.2
+          # Ubuntu 24.04, Qt 6.11.1
+          - os: ubuntu-24.04
+            qt-version: 6.11.1
 
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
+          persist-credentials: false
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.3.0
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
+          modules: qtimageformats
           version: ${{ matrix.qt-version }}
           dir: ${{ github.workspace }}/.qtinstall
           set-env: false
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.21.0
+        uses: ZedThree/clang-tidy-review@438014136def4cb6242e9d0ef3da1a1cd48fa7ce # v0.23.1
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
+          error_action: abort
           exclude: "lib/*,tools/crash-handler/*,mocks/*"
+          extra_arguments: "--load=/usr/lib/ClazyClangTidy21.so --load=/usr/lib/chatterino-clang-tidy-module-21.so"
+          clang_tidy_version: 21
           cmake_command: >-
             ./.CI/setup-clang-tidy.sh
           apt_packages: >-
@@ -61,7 +66,8 @@ jobs:
             libxcb-glx0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0,
             libxcb-render-util0, libxcb-render0, libxcb-shape0, libxcb-shm0, libxcb-sync1,
             libxcb-util1, libxcb-xfixes0, libxcb-xinerama0, libxcb1, libxkbcommon-dev,
-            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0
+            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0,
+            curl, unzip
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.21.0
+        uses: ZedThree/clang-tidy-review/upload@438014136def4cb6242e9d0ef3da1a1cd48fa7ce # v0.23.1

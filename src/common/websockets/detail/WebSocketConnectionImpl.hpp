@@ -1,9 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
+#include "common/websockets/detail/BalancedResolverResults.hpp"
 #include "common/websockets/detail/WebSocketConnection.hpp"
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/websocket/stream.hpp>
 
@@ -41,6 +47,7 @@ protected:
     Derived *derived();
 
     void fail(boost::system::error_code ec, QStringView op);
+    void fail(std::string_view ec, QStringView op);
     void doWsHandshake();
 
     void closeImpl();
@@ -57,15 +64,36 @@ private:
 
     void onResolve(boost::system::error_code ec,
                    const boost::asio::ip::tcp::resolver::results_type &results);
-    void onTcpHandshake(
-        boost::system::error_code ec,
-        const boost::asio::ip::tcp::resolver::endpoint_type &ep);
+
+    /// Initialize a TCP connection to the given endpoint iterator in `resolvedEndpoints`.
+    ///
+    /// If we failed to connect, try the next iterator.
+    ///
+    /// If the iterator is invalid, we have run out of endpoints to try, and deem this
+    /// connection a failure.
+    void tryConnect(std::optional<BalancedResolverResults::Entry> entry);
+    void onTcpHandshake(const BalancedResolverResults::Entry &entry,
+                        boost::system::error_code ec);
     void onWsHandshake(boost::system::error_code ec);
 
     void onReadDone(boost::system::error_code ec, size_t bytesRead);
     void onWriteDone(boost::system::error_code ec, size_t bytesWritten);
+    void onHealthCheck(const boost::system::error_code &ec);
+    void onControlFrame(boost::beast::websocket::frame_type frame_type,
+                        std::string_view payload);
+    template <typename Duration>
+    void scheduleHealthCheck(std::chrono::duration<Duration> timeout);
 
     friend Derived;
+
+    /// A range of endpoints from the `onResolve` function.
+    ///
+    /// When we successfully resolve the host, we try to connect by
+    /// iterating over these results.
+    BalancedResolverResults resolvedEndpoints;
+
+    boost::asio::steady_timer healthCheckTimer;
+    unsigned int pingProbesTried = 0;
 };
 
 /// A WebSocket connection over TLS (wss://).

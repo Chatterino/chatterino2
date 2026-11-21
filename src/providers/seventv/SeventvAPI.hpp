@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <functional>
 
 class QString;
 class QJsonObject;
+class QByteArray;
 
 namespace chatterino {
 
@@ -24,18 +29,18 @@ public:
     SeventvAPI &operator=(const SeventvAPI &) = delete;
     SeventvAPI &operator=(SeventvAPI &&) = delete;
 
-    virtual void getUserByTwitchID(
+    void getUserByTwitchID(
         const QString &twitchID,
-        SuccessCallback<const QJsonObject &> &&onSuccess,
+        SuccessCallback<const QJsonObject &, const QByteArray &> &&onSuccess,
         ErrorCallback &&onError);
-    virtual void getEmoteSet(const QString &emoteSet,
-                             SuccessCallback<const QJsonObject &> &&onSuccess,
-                             ErrorCallback &&onError);
+    void getEmoteSet(
+        const QString &emoteSet,
+        SuccessCallback<const QJsonObject &, const QByteArray &> &&onSuccess,
+        ErrorCallback &&onError);
 
-    virtual void updatePresence(const QString &twitchChannelID,
-                                const QString &seventvUserID,
-                                SuccessCallback<> &&onSuccess,
-                                ErrorCallback &&onError);
+    void updatePresence(const QString &twitchChannelID,
+                        const QString &seventvUserID,
+                        SuccessCallback<> &&onSuccess, ErrorCallback &&onError);
 };
 
 }  // namespace chatterino

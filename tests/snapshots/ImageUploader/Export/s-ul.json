@@ -1,0 +1,19 @@
+{
+    "input": {
+        "deletionLink": "https://s-ul.eu/delete.php?file={filename}&key=XXXXXXXXXXXXXXX",
+        "formField": "file",
+        "headers": "",
+        "link": "{url}",
+        "url": "https://s-ul.eu/api/v1/upload?wizard=true&key=XXXXXXXXXXXXXXX"
+    },
+    "output": {
+        "Body": "MultipartFormData",
+        "DeletionURL": "https://s-ul.eu/delete.php?file={filename}&key=XXXXXXXXXXXXXXX",
+        "FileFormName": "file",
+        "Name": "Chatterino Image Uploader Settings",
+        "RequestMethod": "POST",
+        "RequestURL": "https://s-ul.eu/api/v1/upload?wizard=true&key=XXXXXXXXXXXXXXX",
+        "URL": "{url}",
+        "Version": "1.0.0"
+    }
+}

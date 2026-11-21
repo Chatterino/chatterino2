@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "util/OnceFlag.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
+#include <QString>
 
 #include <chrono>
 #include <memory>
@@ -17,7 +22,7 @@ class WebSocketConnection;
 class WebSocketPoolImpl
 {
 public:
-    WebSocketPoolImpl();
+    WebSocketPoolImpl(const QString &shortName);
     ~WebSocketPoolImpl();
 
     WebSocketPoolImpl(const WebSocketPoolImpl &) = delete;

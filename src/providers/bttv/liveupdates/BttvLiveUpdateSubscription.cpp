@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/bttv/liveupdates/BttvLiveUpdateSubscription.hpp"
 
 #include <QDebug>
@@ -60,12 +64,6 @@ bool BttvLiveUpdateSubscriptionChannel::operator==(
     return this->twitchID == rhs.twitchID;
 }
 
-bool BttvLiveUpdateSubscriptionChannel::operator!=(
-    const BttvLiveUpdateSubscriptionChannel &rhs) const
-{
-    return !(*this == rhs);
-}
-
 QDebug &operator<<(QDebug &dbg, const BttvLiveUpdateSubscriptionChannel &data)
 {
     dbg << "BttvLiveUpdateSubscriptionChannel{ twitchID:" << data.twitchID
@@ -91,12 +89,6 @@ bool BttvLiveUpdateBroadcastMe::operator==(
     const BttvLiveUpdateBroadcastMe &rhs) const
 {
     return this->twitchID == rhs.twitchID && this->userID == rhs.userID;
-}
-
-bool BttvLiveUpdateBroadcastMe::operator!=(
-    const BttvLiveUpdateBroadcastMe &rhs) const
-{
-    return !(*this == rhs);
 }
 
 QDebug &operator<<(QDebug &dbg, const BttvLiveUpdateBroadcastMe &data)

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <concepts>
@@ -24,27 +28,15 @@ public:
     {
         return lhs.value_ == rhs.value_;
     }
-    friend constexpr bool operator!=(FlagsEnum lhs, FlagsEnum rhs) noexcept
-    {
-        return lhs.value_ != rhs.value_;
-    }
 
     friend constexpr bool operator==(FlagsEnum lhs, T rhs) noexcept
     {
         return lhs.value_ == rhs;
     }
-    friend constexpr bool operator!=(FlagsEnum lhs, T rhs) noexcept
-    {
-        return lhs.value_ != rhs;
-    }
 
     friend constexpr bool operator==(T lhs, FlagsEnum rhs) noexcept
     {
         return lhs == rhs.value_;
-    }
-    friend constexpr bool operator!=(T lhs, FlagsEnum rhs) noexcept
-    {
-        return lhs != rhs.value_;
     }
 
     constexpr void set(std::convertible_to<T> auto... flags) noexcept

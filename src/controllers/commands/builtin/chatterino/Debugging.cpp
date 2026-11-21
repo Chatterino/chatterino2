@@ -1,28 +1,95 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/spellcheck/SpellChecker.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/FileLogger.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/Updates.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QApplication>
 #include <QLoggingCategory>
+#include <QProcess>
+#include <QProcessEnvironment>
 #include <QString>
 
-namespace chatterino::commands {
+using namespace Qt::StringLiterals;
 
-using namespace literals;
+namespace {
+
+bool restartChatterino(const QProcessEnvironment &env)
+{
+    chatterino::getSettings()->requestSave();
+
+    QProcess proc;
+    proc.setProgram(qApp->applicationFilePath());
+    // https://doc.qt.io/qt-6/debug.html#environment-variables-recognized-by-qt
+    proc.setProcessEnvironment(env);
+    if (proc.startDetached())
+    {
+        chatterino::getSettings()
+            ->disableSave();  // only disable if the process started
+        QMetaObject::invokeMethod(
+            qApp,
+            [] {
+                QApplication::exit();
+            },
+            Qt::QueuedConnection);
+        return true;
+    }
+
+    return false;
+}
+
+QString dequoteFilePath(QString filePath)
+{
+    if (filePath.startsWith('"') && filePath.endsWith('"') &&
+        filePath.length() > 2)
+    {
+        return filePath.mid(1, filePath.length() - 2);
+    }
+    return filePath;
+}
+
+QProcessEnvironment setUpEnvironmentForLogging(const QStringList &loggingRules)
+{
+    static constexpr QLatin1String loggingRulesEnv("QT_LOGGING_RULES");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    if (!loggingRules.isEmpty())
+    {
+        env.insert(loggingRulesEnv, loggingRules.join(';'));
+    }
+    else if (!env.contains(loggingRulesEnv))
+    {
+        // by default, enable all debug logging
+        env.insert(loggingRulesEnv, "chatterino.*.debug=true");
+    }
+
+    return env;
+}
+
+}  // namespace
+
+namespace chatterino::commands {
 
 QString setLoggingRules(const CommandContext &ctx)
 {
@@ -30,7 +97,7 @@ QString setLoggingRules(const CommandContext &ctx)
     {
         ctx.channel->addSystemMessage(
             "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
-            "for all categories from chatterino, use "
+            "for all categories from Chatterino, use "
             "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
             "qloggingcategory.html#configuring-categories");
@@ -139,6 +206,30 @@ QString forceImageUnload(const CommandContext &ctx)
     return "";
 }
 
+QString forceLayoutChannelViews(const CommandContext & /*ctx*/)
+{
+    getApp()->getWindows()->forceLayoutChannelViews();
+    return {};
+}
+
+QString incrementImageGeneration(const CommandContext & /*ctx*/)
+{
+    getApp()->getWindows()->incGeneration();
+    return {};
+}
+
+QString invalidateBuffers(const CommandContext & /*ctx*/)
+{
+    getApp()->getWindows()->invalidateChannelViewBuffers();
+    return {};
+}
+
+QString eventsub(const CommandContext & /*ctx*/)
+{
+    getApp()->getEventSub()->debug();
+    return {};
+}
+
 QString debugTest(const CommandContext &ctx)
 {
     if (!ctx.channel)
@@ -170,6 +261,41 @@ QString debugTest(const CommandContext &ctx)
         ctx.channel->addSystemMessage(
             QString("debug-test sent desktop notification"));
     }
+    else if (command == "update-check")
+    {
+        getApp()->getUpdates().checkForUpdates();
+        ctx.channel->addSystemMessage(QString("checking for updates"));
+    }
+    else if (command == "save-settings")
+    {
+        ctx.channel->addSystemMessage(u"requesting settings save"_s);
+        auto res = getSettings()->requestSave();
+        switch (res)
+        {
+            case pajlada::Settings::SettingManager::SaveResult::Failed:
+                ctx.channel->addSystemMessage(u"setting save failed"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Success:
+                ctx.channel->addSystemMessage(u"setting save success"_s);
+                break;
+            case pajlada::Settings::SettingManager::SaveResult::Skipped:
+                ctx.channel->addSystemMessage(u"setting save skipped"_s);
+                break;
+        }
+    }
+    else if (command == "set-watching")
+    {
+        if (ctx.words.size() < 3)
+        {
+            ctx.channel->addSystemMessage("Missing name");
+            return {};
+        }
+        auto chan = getApp()->getTwitch()->getOrAddChannel(ctx.words.at(2));
+        if (chan != getApp()->getTwitch()->getWatchingChannel().get())
+        {
+            getApp()->getTwitch()->setWatchingChannel(chan);
+        }
+    }
     else
     {
         ctx.channel->addSystemMessage(
@@ -177,6 +303,105 @@ QString debugTest(const CommandContext &ctx)
     }
 
     return "";
+}
+
+#ifdef Q_OS_WIN
+QString relaunchWithConsole(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    const QString winDebugConsoleEnv = u"QT_WIN_DEBUG_CONSOLE"_s;
+    auto env = setUpEnvironmentForLogging(ctx.words.mid(1));
+    env.insert(winDebugConsoleEnv, "new");
+
+    bool success = restartChatterino(env);
+    if (!success)
+    {
+        ctx.channel->addSystemMessage("Failed to start process.");
+    }
+
+    return {};
+}
+#endif
+
+QString disableLogfile(const CommandContext &ctx)
+{
+    FileLogger::instance().disable();
+
+    ctx.channel->addSystemMessage("Logging to file disabled");
+
+    return {};
+}
+
+QString enableLogfile(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addSystemMessage(
+            "Usage: /debug-enable-logfile <path-to-logfile>");
+
+        return {};
+    }
+
+    QString logFilePath = dequoteFilePath(ctx.words.mid(1).join(" "));
+    auto result = FileLogger::instance().enable(logFilePath);
+    if (result.has_value())
+    {
+        ctx.channel->addSystemMessage("Logging to file enabled");
+    }
+    else
+    {
+        auto error = result.error();
+
+        MessageBuilder builder;
+        builder.emplace<TextElement>(
+            QString("Unable to open log file '%1'. Error reported by "
+                    "the system was: %2 (Hint: Do not quote the file path "
+                    "even if it contains spaces)")
+                .arg(error.absFilePath, error.errorDesc),
+            MessageElementFlags{MessageElementFlag::Text,
+                                MessageElementFlag::AlwaysShow},
+            MessageColor{QColor(230, 30, 30)});
+        ctx.channel->addMessage(builder.release(), MessageContext::Original);
+    }
+
+    return {};
+}
+
+QString relaunchWithLogfile(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return {};
+    }
+
+    if (ctx.words.size() < 2)
+    {
+        ctx.channel->addSystemMessage(
+            "Usage: /debug-relaunch-with-logfile <path-to-logfile>");
+
+        return {};
+    }
+
+    auto env = setUpEnvironmentForLogging({});
+    QString logFilePath = ctx.words.mid(1).join(" ");
+    env.insert(env::LOG_TO_FILE, logFilePath);
+
+    bool success = restartChatterino(env);
+    if (!success)
+    {
+        ctx.channel->addSystemMessage("Failed to start process.");
+    }
+
+    return {};
 }
 
 }  // namespace chatterino::commands

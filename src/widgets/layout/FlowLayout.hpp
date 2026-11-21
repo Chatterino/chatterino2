@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QLayout>
@@ -98,7 +102,6 @@ private:
     std::vector<QLayoutItem *> itemList_;
     int hSpace_ = -1;
     int vSpace_ = -1;
-    int lineSpacing_ = -1;
 };
 
 }  // namespace chatterino

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "pajlada/settings/settinglistener.hpp"
@@ -14,6 +18,7 @@ namespace chatterino {
 class Settings;
 class Paths;
 
+/** @exposeenum c2.FontStyle */
 enum class FontStyle : uint8_t {
     Tiny,
     ChatSmall,

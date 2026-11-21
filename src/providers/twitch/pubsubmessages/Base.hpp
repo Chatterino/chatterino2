@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <magic_enum/magic_enum.hpp>
@@ -45,7 +49,7 @@ std::optional<InnerClass> PubSubMessage::toInner()
     return InnerClass{this->nonce, data};
 }
 
-std::optional<PubSubMessage> parsePubSubBaseMessage(const QString &blob);
+std::optional<PubSubMessage> parsePubSubBaseMessage(const QByteArray &blob);
 
 }  // namespace chatterino
 

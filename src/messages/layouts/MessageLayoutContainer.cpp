@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
@@ -24,6 +28,8 @@ using namespace chatterino;
 
 constexpr QMargins MARGIN{8, 4, 8, 4};
 constexpr qreal COMPACT_EMOTES_OFFSET = 4;
+/// Target width used to match Twitch's desktop chat layout.
+constexpr qreal ASCII_ART_WIDTH = 300.0;
 
 int maxUncollapsedLines()
 {
@@ -47,7 +53,12 @@ void MessageLayoutContainer::beginLayout(qreal width, float scale,
     this->lineHeight_ = 0;
     this->charIndex_ = 0;
 
-    this->width_ = width;
+    const auto horizontalMargin =
+        int(MARGIN.left() * scale) + int(MARGIN.right() * scale);
+    this->width_ =
+        flags.has(MessageFlag::AsciiArt)
+            ? std::min(width, (ASCII_ART_WIDTH * scale) + horizontalMargin)
+            : width;
     this->height_ = 0;
     this->scale_ = scale;
     this->imageScale_ = imageScale;
@@ -165,21 +176,21 @@ void MessageLayoutContainer::breakLine()
     {
         const int marginOffset = int(MARGIN.left() * this->scale_) +
                                  int(MARGIN.right() * this->scale_);
-        xOffset = (width_ - marginOffset -
+        xOffset = (this->width_ - marginOffset -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
                        .right()) /
                   2;
     }
 
-    for (size_t i = lineStart_; i < this->elements_.size(); i++)
+    for (size_t i = this->lineStart_; i < this->elements_.size(); i++)
     {
         MessageLayoutElement *element = this->elements_.at(i).get();
 
         bool isCompactEmote =
             !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
             element->getCreator().getFlags().has(
-                MessageElementFlag::EmoteImages);
+                MessageElementFlag::EmoteImage);
 
         qreal yExtra = 0;
         if (isCompactEmote)
@@ -199,11 +210,11 @@ void MessageLayoutContainer::breakLine()
         this->lines_.back().endCharIndex = this->charIndex_;
     }
     this->lines_.push_back({
-        .startIndex = lineStart_,
+        .startIndex = this->lineStart_,
         .endIndex = 0,
         .startCharIndex = this->charIndex_,
         .endCharIndex = 0,
-        .rect = QRectF(-100000, this->currentY_, 200000, lineHeight_),
+        .rect = QRectF(-100000, this->currentY_, 200000, this->lineHeight_),
     });
 
     for (auto i = this->lineStart_; i < this->elements_.size(); i++)
@@ -635,7 +646,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         }
 
         // Returns true if the last element was an emote image
-        return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
+        return lastElement->getFlags().has(MessageElementFlag::EmoteImage);
     };
 
     bool isRTLElement = element->getText().isRightToLeft();
@@ -670,7 +681,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     // compact emote offset
     bool isCompactEmote =
         !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
-        element->getCreator().getFlags().has(MessageElementFlag::EmoteImages);
+        element->getCreator().getFlags().has(MessageElementFlag::EmoteImage);
 
     if (isCompactEmote)
     {
@@ -686,13 +697,13 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     if (element->getCreator().getFlags().has(
             MessageElementFlag::ChannelPointReward) &&
         element->getCreator().getFlags().hasNone(
-            {MessageElementFlag::TwitchEmoteImage}))
+            {MessageElementFlag::EmoteImage}))
     {
         yOffset -= (MARGIN.top() * this->scale_);
     }
 
     if (getSettings()->removeSpacesBetweenEmotes &&
-        element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
+        element->getFlags().hasAny({MessageElementFlag::EmoteImage}) &&
         shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left (right in case of RTL) to combine hug the previous emote

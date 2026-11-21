@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
@@ -23,6 +27,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -32,10 +37,14 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/helper/LiveIndicator.hpp"
+#include "widgets/helper/ScalingSpacerItem.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/MarkdownLabel.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 #include "widgets/Window.hpp"
 
 #include <QCheckBox>
@@ -56,7 +65,6 @@ constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
 constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
-constexpr qsizetype NOTES_PREVIEW_LENGTH = 80;
 
 using namespace chatterino;
 
@@ -106,7 +114,7 @@ bool checkMessageUserName(const QString &userName, MessagePtr message)
 
 ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
+    std::vector<MessagePtr> snapshot = channel->getMessageSnapshot();
 
     ChannelPtr channelPtr;
     if (channel->isTwitchChannel())
@@ -119,10 +127,8 @@ ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
             std::make_shared<Channel>(channel->getName(), Channel::Type::None);
     }
 
-    for (size_t i = 0; i < snapshot.size(); i++)
+    for (const auto &message : snapshot)
     {
-        MessagePtr message = snapshot[i];
-
         if (checkMessageUserName(userName, message))
         {
             channelPtr->addMessage(message, MessageContext::Repost);
@@ -281,8 +287,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 switch (button)
                 {
                     case Qt::LeftButton: {
-                        QDesktopServices::openUrl(QUrl(
-                            "https://twitch.tv/" + this->userName_.toLower()));
+                        QDesktopServices::openUrl(
+                            QUrl("https://www.twitch.tv/" +
+                                 this->userName_.toLower()));
                     }
                     break;
 
@@ -314,7 +321,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                             [loginName] {
                                 auto *app = getApp();
                                 auto &window = app->getWindows()->createWindow(
-                                    WindowType::Popup, true);
+                                    WindowType::Popup, {});
                                 auto *split = window.getNotebook()
                                                   .getOrAddSelectedPage()
                                                   ->appendNewSplit(false);
@@ -356,6 +363,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                 this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                this->ui_.nameLabel->setPadding(QMargins(8, 0, 1, 0));
+                this->ui_.liveIndicator = new LiveIndicator;
+                this->ui_.liveIndicator->hide();
+                // addCopyableLabel adds the copy button last -> add the indicator before that
+                box->insertWidget(box->count() - 1, this->ui_.liveIndicator);
+                box->insertItem(box->count() - 1,
+                                ScalingSpacerItem::horizontal(7));
                 box->addSpacing(5);
                 box->addStretch(1);
 
@@ -411,6 +425,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
         user.emplace<LabelButton>("Add notes", this)
             .assign(&this->ui_.notesAdd);
+        auto whisper = user.emplace<LabelButton>("Whisper", this);
         auto usercard = user.emplace<LabelButton>("Usercard", this)
                             .assign(&this->ui_.usercardLabel);
         auto mod = user.emplace<PixmapButton>(this);
@@ -427,6 +442,18 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         unvip->setScaleIndependentSize(30, 30);
 
         user->addStretch(1);
+
+        QObject::connect(
+            whisper.getElement(), &Button::leftClicked, this, [this] {
+                if (this->userName_.isEmpty())
+                {
+                    return;
+                }
+
+                this->split_->getInput().setWhisperTarget(this->userName_);
+                this->split_->window()->activateWindow();
+                this->split_->setFocus(Qt::MouseFocusReason);
+            });
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
@@ -488,8 +515,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         });
     }
 
-    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    auto notesPreview = layout.emplace<MarkdownLabel>(this, QString())
+                            .assign(&this->ui_.notesPreview);
     notesPreview->setVisible(false);
+    notesPreview->setShouldElide(true);
 
     auto lineMod = layout.emplace<Line>(false);
 
@@ -576,6 +605,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     {
         this->ui_.noMessagesLabel = new Label("No recent messages");
         this->ui_.noMessagesLabel->setVisible(false);
+        this->ui_.noMessagesLabel->setSizePolicy(QSizePolicy::Expanding,
+                                                 QSizePolicy::Expanding);
 
         this->ui_.latestMessages =
             new ChannelView(this, this->split_, ChannelView::Context::UserCard,
@@ -613,7 +644,7 @@ void UserInfoPopup::themeChangedEvent()
 
 void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 {
-    themeChangedEvent();
+    this->themeChangedEvent();
 
     QTimer::singleShot(20, this, [this] {
         auto geo = this->geometry();
@@ -786,6 +817,11 @@ void UserInfoPopup::installEvents()
             getApp()->getUserData()->userDataUpdated().connect([this]() {
                 this->updateNotes();
             }));
+
+    QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
+                     [this]() {
+                         this->updateNotes();
+                     });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -802,7 +838,7 @@ void UserInfoPopup::setData(const QString &name,
     if (isId)
     {
         this->userId_ = name.mid(idPrefix.size());
-        updateNotes();
+        this->updateNotes();
         this->userName_ = "";
     }
     else
@@ -846,6 +882,11 @@ void UserInfoPopup::setData(const QString &name,
     }
 }
 
+Split *UserInfoPopup::getSplit() const
+{
+    return this->split_;
+}
+
 void UserInfoPopup::updateLatestMessages()
 {
     auto filteredChannel =
@@ -881,6 +922,19 @@ void UserInfoPopup::updateLatestMessages()
                         // and display the latest messages
                         this->updateLatestMessages();
                     }
+                }));
+
+    this->replaceConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            this->underlyingChannel_->messageReplaced.connect(
+                [this](auto, const auto &message, const auto &replacement) {
+                    if (!checkMessageUserName(this->userName_, replacement))
+                    {
+                        return;
+                    }
+
+                    this->ui_.latestMessages->channel()->replaceMessage(
+                        message, replacement);
                 }));
 }
 
@@ -944,8 +998,15 @@ void UserInfoPopup::updateUserData()
 
         this->setWindowTitle(TEXT_TITLE.arg(
             user.displayName, this->underlyingChannel_->getName()));
-        this->ui_.createdDateLabel->setText(
-            TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+        auto createdAt =
+            QDateTime::fromString(user.createdAt, Qt::ISODateWithMs);
+        auto createdStr = createdAt.toLocalTime().date().toString(Qt::ISODate);
+        this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(createdStr));
+        this->ui_.createdDateLabel->setToolTip(
+            formatLongFriendlyDuration(createdAt,
+                                       QDateTime::currentDateTimeUtc()) +
+            u" ago"_s);
+        this->ui_.createdDateLabel->setMouseTracking(true);
         this->ui_.userIDLabel->setText(TEXT_USER_ID % user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
@@ -960,7 +1021,7 @@ void UserInfoPopup::updateUserData()
         }
 
         getHelix()->getChannelFollowers(
-            user.id,
+            user.id, {},
             [this, hack](const auto &followers) {
                 if (!hack.lock())
                 {
@@ -973,6 +1034,29 @@ void UserInfoPopup::updateUserData()
                 qCWarning(chatterinoTwitch)
                     << "Error getting followers:" << errorMessage;
             });
+        getHelix()->getStreamById(
+            user.id,
+            [this, hack](bool isLive, const auto &stream) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+
+                if (isLive)
+                {
+                    this->ui_.liveIndicator->setViewers(stream.viewerCount);
+                    this->ui_.liveIndicator->show();
+                }
+                else
+                {
+                    this->ui_.liveIndicator->hide();
+                }
+            },
+            [id{user.id}]() {
+                qCWarning(chatterinoWidget)
+                    << "Failed to get stream for user ID" << id;
+            },
+            []() {});
 
         // get ignore state
         bool isIgnoring = currentUser->blockedUserIds().contains(user.id);
@@ -1000,28 +1084,19 @@ void UserInfoPopup::updateUserData()
         this->ui_.block->setChecked(isIgnoring);
         this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
+        this->ui_.notesAdd->setEnabled(true);
 
         auto type = this->underlyingChannel_->getType();
 
         if (type == Channel::Type::Twitch)
         {
-            // get followage and subage
+            // get subage
             getIvr()->getSubage(
                 this->userName_, this->underlyingChannel_->getName(),
                 [this, hack](const IvrSubage &subageInfo) {
                     if (!hack.lock())
                     {
                         return;
-                    }
-
-                    if (!subageInfo.followingSince.isEmpty())
-                    {
-                        QDateTime followedAt = QDateTime::fromString(
-                            subageInfo.followingSince, Qt::ISODate);
-                        QString followingSince =
-                            followedAt.toString("yyyy-MM-dd");
-                        this->ui_.followageLabel->setText("❤ Following since " +
-                                                          followingSince);
                     }
 
                     if (subageInfo.isSubHidden)
@@ -1044,6 +1119,41 @@ void UserInfoPopup::updateUserData()
                     }
                 },
                 [] {});
+
+            // get followage
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+            if (twitchChannel &&
+                (twitchChannel->isBroadcaster() || twitchChannel->isMod()))
+            {
+                getHelix()->getChannelFollowers(
+                    twitchChannel->roomId(), user.id,
+                    [this, hack](const auto &response) {
+                        if (!hack.lock())
+                        {
+                            return;
+                        }
+                        if (response.specifiedFollower)
+                        {
+                            const auto &followedAt =
+                                response.specifiedFollower->followedAt;
+                            this->ui_.followageLabel->setText(
+                                "❤ Following since " +
+                                followedAt.toLocalTime().date().toString(
+                                    Qt::ISODate));
+                            this->ui_.followageLabel->setToolTip(
+                                formatLongFriendlyDuration(
+                                    followedAt,
+                                    QDateTime::currentDateTimeUtc()) +
+                                u" ago"_s);
+                            this->ui_.followageLabel->setMouseTracking(true);
+                        }
+                    },
+                    [](const auto &errorMessage) {
+                        qCWarning(chatterinoTwitch)
+                            << "Error getting follow age:" << errorMessage;
+                    });
+            }
         }
 
         // get pronouns
@@ -1097,6 +1207,8 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
+    this->ui_.notesAdd->setEnabled(false);
+
     bool isMyself =
         getApp()->getAccounts()->twitch.getCurrent()->getUserName().compare(
             this->userName_, Qt::CaseInsensitive) == 0;
@@ -1125,6 +1237,8 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
             this->ui_.avatarButton->setPixmap(QPixmap());
         }
     });
+    QObject::connect(reply, &QNetworkReply::finished, reply,
+                     &QObject::deleteLater);
 }
 
 void UserInfoPopup::updateNotes()
@@ -1139,16 +1253,14 @@ void UserInfoPopup::updateNotes()
         this->ui_.notesPreview->setVisible(false);
         return;
     }
-
-    static QRegularExpression spaceRegex{"\\s+"};
-
-    auto previewText = "Notes: " + userData->notes.replace(spaceRegex, " ");
-    if (previewText.length() > NOTES_PREVIEW_LENGTH)
+    if (getApp()->getStreamerMode()->isEnabled() &&
+        getSettings()->streamerModeHideUserNotes)
     {
-        previewText = previewText.left(NOTES_PREVIEW_LENGTH - 3) + "...";
+        this->ui_.notesPreview->setText("Notes hidden in streamer mode.");
+        this->ui_.notesPreview->setVisible(true);
+        return;
     }
-
-    this->ui_.notesPreview->setText(previewText);
+    this->ui_.notesPreview->setText(userData->notes);
     this->ui_.notesPreview->setVisible(true);
 }
 
@@ -1173,7 +1285,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         title->addStretch(1);
         auto label = title.emplace<Label>(text);
         label->setStyleSheet("color: #BBB");
-        label->setHasOffset(false);
+        label->setPadding(QMargins{});
         title->addStretch(1);
 
         auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();

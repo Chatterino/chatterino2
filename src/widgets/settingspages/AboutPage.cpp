@@ -1,12 +1,18 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "widgets/settingspages/AboutPage.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+#include "singletons/Paths.hpp"
+#include "util/Expected.hpp"  // IWYU pragma: keep - this is being used to see if we're using the expected_lite library
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/buttons/SignalLabel.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QFile>
@@ -17,6 +23,7 @@
 #include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
+#include <twitch-eventsub-ws/chrono.hpp>  // IWYU pragma: keep - this is being used to see if we're using Howard Hinnant's date library
 
 namespace chatterino {
 
@@ -51,10 +58,26 @@ AboutPage::AboutPage()
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto vbox = versionInfo.emplace<QVBoxLayout>();
-            auto version = Version::instance();
+            const auto &version = Version::instance();
 
-            auto label = vbox.emplace<QLabel>(version.buildString() + "<br>" +
-                                              version.runningString());
+            QString string =
+                version.buildString() % "<br>" % version.runningString();
+
+            if (!version.extraString().isEmpty())
+            {
+                string += "<br>" % version.extraString();
+            }
+
+            string +=
+                "<br><br>Your settings directory is located at <a href=\"";
+            string +=
+                QUrl::fromLocalFile(getApp()->getPaths().settingsDirectory)
+                    .toString(QUrl::FullyEncoded);
+            string += "\">";
+            string += getApp()->getPaths().settingsDirectory.toHtmlEscaped();
+            string += "</a>.";
+
+            auto label = vbox.emplace<QLabel>(string);
             label->setWordWrap(true);
             label->setOpenExternalLinks(true);
             label->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -95,14 +118,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Pajlada/Signals",
                        "https://github.com/pajlada/signals",
                        ":/licenses/pajlada_signals.txt");
-            addLicense(form.getElement(), "Websocketpp",
-                       "https://www.zaphoyd.com/websocketpp/",
-                       ":/licenses/websocketpp.txt");
-#ifndef NO_QTKEYCHAIN
-            addLicense(form.getElement(), "QtKeychain",
-                       "https://github.com/frankosterfeld/qtkeychain",
-                       ":/licenses/qtkeychain.txt");
-#endif
+            addLicense(form.getElement(), "Pajlada/Serialize",
+                       "https://github.com/pajlada/serialize",
+                       ":/licenses/pajlada_serialize.txt");
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
@@ -127,14 +145,28 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Fluent icons",
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
+#ifdef CHATTERINO_USING_NONSTD_EXPECTED
             addLicense(form.getElement(), "expected-lite",
                        "https://github.com/martinmoene/expected-lite",
                        ":/licenses/expected-lite.txt");
+#endif
+            addLicense(form.getElement(), "certify",
+                       "https://github.com/djarek/certify",
+                       ":/licenses/certify.txt");
+#ifdef CHATTERINO_USING_HOWARD_HINNANTS_DATE
             addLicense(form.getElement(), "Howard Hinnant's date.h",
                        "https://github.com/HowardHinnant/date",
                        ":/licenses/howard-hinnant-date.txt");
+#endif
             addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
                        ":/licenses/fmtlib.txt");
+            addLicense(form.getElement(), "Unicode",
+                       "https://www.unicode.org/copyright.html",
+                       ":/licenses/unicode.txt");
+#ifdef CHATTERINO_WITH_SPELLCHECK
+            addLicense(form.getElement(), "Hunspell",
+                       "https://hunspell.github.io", ":/licenses/hunspell.txt");
+#endif
         }
 
         // Attributions
@@ -149,6 +181,9 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Google emojis provided by <a href=\"https://google.com\">Google</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a> "
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/Sadiquecat/sounds/865918/">Sadiquecat C4 Harmonic</a> by <a href="https://freesound.org/people/Sadiquecat/">freesound.org/people/Sadiquecat</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/CAT-FOX_ALEX/sounds/859006/">CAT-FOX_Alex FX-Jump 3</a> by <a href="https://freesound.org/people/CAT-FOX_ALEX/">freesound.org/people/CAT-FOX_ALEX</a>)")->setOpenExternalLinks(true);
+            l.emplace<QLabel>(R"(<a href="https://freesound.org/people/yfjesse/sounds/235911/">Notification Sound</a> by <a href="https://freesound.org/people/yfjesse/">freesound.org/people/yfjesse</a>)")->setOpenExternalLinks(true);
             // clang-format on
         }
 
@@ -158,14 +193,13 @@ AboutPage::AboutPage()
             auto l = contributors.emplace<FlowLayout>();
 
             QFile contributorsFile(":/contributors.txt");
-            contributorsFile.open(QFile::ReadOnly);
+            if (!contributorsFile.open(QFile::ReadOnly))
+            {
+                assert(false && "Resources not loaded");
+                qCWarning(chatterinoWidget) << "Resources not loaded";
+            }
 
             QTextStream stream(&contributorsFile);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            // Default encoding of QTextStream is already UTF-8
-#else
-            stream.setCodec("UTF-8");
-#endif
 
             QString line;
 
@@ -265,7 +299,12 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
             auto *edit = new QTextEdit;
 
             QFile file(licenseLink);
-            file.open(QIODevice::ReadOnly);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                assert(false && "License not found");
+                qCWarning(chatterinoWidget)
+                    << "License not found" << licenseLink;
+            }
             edit->setText(file.readAll());
             edit->setReadOnly(true);
 

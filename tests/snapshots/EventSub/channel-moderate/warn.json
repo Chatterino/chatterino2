@@ -39,10 +39,6 @@
     },
     "output": [
         {
-            "badgeInfos": {
-            },
-            "badges": [
-            ],
             "channelName": "",
             "count": 1,
             "displayName": "",
@@ -159,14 +155,21 @@
                     ]
                 }
             ],
+            "externalBadges": [
+            ],
             "flags": "System|EventSub|ModerationAction",
+            "frozen": true,
             "id": "",
             "localizedName": "",
             "loginName": "quotrok",
             "messageText": "quotrok has warned twitchdev: cut it out ",
             "searchText": "quotrok has warned twitchdev: cut it out ",
-            "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "",
+            "timestamp": "2024-05-14T12:31:47Z",
+            "timeoutUser": "twitchdev",
+            "twitchBadgeInfos": {
+            },
+            "twitchBadges": [
+            ],
             "userID": "",
             "usernameColor": "#ff000000"
         }

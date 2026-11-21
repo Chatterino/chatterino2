@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "controllers/commands/builtin/twitch/GetModerators.hpp"
 
 #include "common/Channel.hpp"
@@ -65,7 +69,7 @@ QString getModerators(const CommandContext &ctx)
     }
 
     getHelix()->getModerators(
-        ctx.twitchChannel->roomId(), 500,
+        ctx.twitchChannel->roomId(), 500, nullptr,
         [channel{ctx.channel}, twitchChannel{ctx.twitchChannel}](auto result) {
             if (result.empty())
             {

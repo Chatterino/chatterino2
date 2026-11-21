@@ -44,14 +44,16 @@ def _get_relative_header_path(header_path: str) -> str:
     return Path(header_path).relative_to(root_path).as_posix()
 
 
-def generate(header_path: str, additional_includes: list[str] = []) -> Tuple[str, str]:
+def generate(header_path: str, source_path: str, additional_includes: list[str] = []) -> Tuple[str, str]:
     structs = build_structs(header_path, additional_includes)
 
     rel_header_path = _get_relative_header_path(header_path)
 
     log.debug("Generate & format definitions")
-    definitions = format_code("\n\n".join([struct.try_value_to_definition(env) for struct in structs]))
+    # Technically the definitions we save will be saved in an .inc file, but for the purpose of formatting the code we can assume it's the real header file
+    definitions = format_code(header_path, "\n\n".join([struct.try_value_to_definition(env) for struct in structs]))
+
     log.debug("Generate & format implementations")
-    implementations = format_code(_generate_implementation(rel_header_path, structs))
+    implementations = format_code(source_path, _generate_implementation(rel_header_path, structs))
 
     return (definitions, implementations)

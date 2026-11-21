@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "messages/MessageElement.hpp"
@@ -45,12 +49,6 @@ struct MessageColors {
 struct MessagePreferences {
     QColor lastMessageColor;
     Qt::BrushStyle lastMessagePattern{};
-
-    bool enableRedeemedHighlight{};
-    bool enableElevatedMessageHighlight{};
-    bool enableFirstMessageHighlight{};
-    bool enableSubHighlight{};
-    bool enableAutomodHighlight{};
 
     bool alternateMessages{};
     bool separateMessages{};

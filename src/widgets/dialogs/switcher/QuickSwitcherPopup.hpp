@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "widgets/BasePopup.hpp"
@@ -24,6 +28,7 @@ public:
     explicit QuickSwitcherPopup(Window *parent);
 
 protected:
+    void showEvent(QShowEvent *event) override;
     void themeChangedEvent() override;
 
 public Q_SLOTS:

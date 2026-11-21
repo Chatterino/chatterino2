@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "common/websockets/detail/WebSocketPoolImpl.hpp"
 
 #include "Application.hpp"
@@ -6,21 +10,21 @@
 #include "util/RenameThread.hpp"
 
 #include <boost/certify/https_verification.hpp>
+#include <QStringBuilder>
 
 namespace chatterino::ws::detail {
 
-WebSocketPoolImpl::WebSocketPoolImpl()
+WebSocketPoolImpl::WebSocketPoolImpl(const QString &shortName)
     : ioc(1)
     , ssl(boost::asio::ssl::context::tls_client)
     , work(this->ioc.get_executor())
 {
     boost::system::error_code ec;
-    auto _ = this->ssl.set_options(
-        boost::asio::ssl::context::no_tlsv1 |
-            boost::asio::ssl::context::no_tlsv1_1 |
-            boost::asio::ssl::context::default_workarounds |
-            boost::asio::ssl::context::single_dh_use,
-        ec);
+    this->ssl.set_options(boost::asio::ssl::context::no_tlsv1 |
+                              boost::asio::ssl::context::no_tlsv1_1 |
+                              boost::asio::ssl::context::default_workarounds |
+                              boost::asio::ssl::context::single_dh_use,
+                          ec);
     if (ec)
     {
         qCWarning(chatterinoWebsocket) << "Failed to set SSL context options"
@@ -43,7 +47,15 @@ WebSocketPoolImpl::WebSocketPoolImpl()
         this->ioc.run();
         this->shutdownFlag.set();
     });
-    renameThread(*this->ioThread, "WebSocketPool");
+
+    auto threadName = [&]() -> QString {
+        if (shortName.isEmpty())
+        {
+            return "WebSocketPool";
+        }
+        return "WS-" % shortName;
+    }();
+    renameThread(*this->ioThread, threadName);
 }
 
 WebSocketPoolImpl::~WebSocketPoolImpl()

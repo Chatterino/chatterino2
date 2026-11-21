@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "providers/twitch/TwitchIrc.hpp"
 
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Emotes.hpp"
+#include "mocks/EmoteController.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 
@@ -15,12 +20,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication() = default;
 
-    IEmotes *getEmotes() override
+    EmoteController *getEmotes() override
     {
         return &this->emotes;
     }
 
-    mock::Emotes emotes;
+    mock::EmoteController emotes;
 };
 
 }  // namespace
@@ -89,7 +94,7 @@ TEST(TwitchIrc, BadgeInfoParsing)
     struct TestCase {
         QByteArray input;
         std::unordered_map<QString, QString> expectedBadgeInfo;
-        std::vector<Badge> expectedBadges;
+        std::vector<TwitchBadge> expectedBadges;
     };
 
     std::vector<TestCase> testCases{
@@ -99,7 +104,7 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"predictions", R"(<<<<<<\sHEAD[15A⸝asdf/test)"},
             },
             {
-                Badge{"predictions", "pink-2"},
+                TwitchBadge{"predictions", "pink-2"},
             },
         },
         {
@@ -109,10 +114,10 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"founder", "17"},
             },
             {
-                Badge{"predictions", "pink-2"},
-                Badge{"vip", "1"},
-                Badge{"founder", "0"},
-                Badge{"bits", "1"},
+                TwitchBadge{"predictions", "pink-2"},
+                TwitchBadge{"vip", "1"},
+                TwitchBadge{"founder", "0"},
+                TwitchBadge{"bits", "1"},
             },
         },
         {
@@ -121,9 +126,9 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"predictions", "foo/bar/baz"},
             },
             {
-                Badge{"predictions", "blue-1"},
-                Badge{"moderator", "1"},
-                Badge{"glhf-pledge", "1"},
+                TwitchBadge{"predictions", "blue-1"},
+                TwitchBadge{"moderator", "1"},
+                TwitchBadge{"glhf-pledge", "1"},
             },
         },
         {
@@ -132,9 +137,9 @@ TEST(TwitchIrc, BadgeInfoParsing)
                 {"subscriber", "22"},
             },
             {
-                Badge{"broadcaster", "1"},
-                Badge{"subscriber", "18"},
-                Badge{"glhf-pledge", "1"},
+                TwitchBadge{"broadcaster", "1"},
+                TwitchBadge{"subscriber", "18"},
+                TwitchBadge{"glhf-pledge", "1"},
             },
         },
     };
@@ -156,11 +161,11 @@ TEST(TwitchIrc, BadgeInfoParsing)
     }
 }
 
-TEST_F(TestTwitchIrc, ParseTwitchEmotes)
+TEST_F(TestTwitchIrc, ParseTwitchSpecials)
 {
     struct TestCase {
         QByteArray input;
-        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
+        std::vector<TwitchSpecialOccurrence> expectedTwitchSpecials;
     };
 
     auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
@@ -171,11 +176,14 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)",
             {
                 {{
-                    0,  // start
-                    4,  // end
-                    twitchEmotes->getOrCreateEmote(EmoteId{"25"},
-                                                   EmoteName{"Kappa"}),  // ptr
-                    EmoteName{"Kappa"},                                  // name
+                    .start = 0,
+                    .length = 5,
+                    .data =
+                        TwitchEmoteOccurrence{
+                            .ptr = twitchEmotes->getOrCreateEmote(
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
+                        },
                 }},
             },
         },
@@ -183,11 +191,14 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa)",
             {
                 {{
-                    0,  // start
-                    4,  // end
-                    twitchEmotes->getOrCreateEmote(EmoteId{"25"},
-                                                   EmoteName{"Kappa"}),  // ptr
-                    EmoteName{"Kappa"},                                  // name
+                    .start = 0,
+                    .length = 5,
+                    .data =
+                        TwitchEmoteOccurrence{
+                            .ptr = twitchEmotes->getOrCreateEmote(
+                                EmoteId{"25"}, EmoteName{"Kappa"}),
+                            .name = EmoteName{"Kappa"},
+                        },
                 }},
             },
         },
@@ -195,11 +206,14 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=1902:0-4;first-msg=0;flags=;id=9b1c3cb9-7817-47ea-add1-f9d4a9b4f846;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201095690;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Keepo)",
             {
                 {{
-                    0,  // start
-                    4,  // end
-                    twitchEmotes->getOrCreateEmote(EmoteId{"1902"},
-                                                   EmoteName{"Keepo"}),  // ptr
-                    EmoteName{"Keepo"},                                  // name
+                    .start = 0,
+                    .length = 5,
+                    .data =
+                        TwitchEmoteOccurrence{
+                            .ptr = twitchEmotes->getOrCreateEmote(
+                                EmoteId{"1902"}, EmoteName{"Keepo"}),
+                            .name = EmoteName{"Keepo"},
+                        },
                 }},
             },
         },
@@ -208,26 +222,35 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             {
                 {
                     {
-                        0,  // start
-                        4,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        EmoteName{"Kappa"},                      // name
+                        .start = 0,
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"25"}, EmoteName{"Kappa"}),
+                                .name = EmoteName{"Kappa"},
+                            },
                     },
                     {
-                        6,   // start
-                        10,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"1902"}, EmoteName{"Keepo"}),  // ptr
-                        EmoteName{"Keepo"},                        // name
+                        .start = 6,
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"1902"}, EmoteName{"Keepo"}),
+                                .name = EmoteName{"Keepo"},
+                            },
                     },
                     {
-                        12,  // start
-                        19,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"305954156"},
-                            EmoteName{"PogChamp"}),  // ptr
-                        EmoteName{"PogChamp"},       // name
+                        .start = 12,
+                        .length = 8,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"305954156"},
+                                    EmoteName{"PogChamp"}),
+                                .name = EmoteName{"PogChamp"},
+                            },
                     },
                 },
             },
@@ -237,18 +260,24 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             {
                 {
                     {
-                        0,  // start
-                        4,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        EmoteName{"Kappa"},                      // name
+                        .start = 0,
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"25"}, EmoteName{"Kappa"}),
+                                .name = EmoteName{"Kappa"},
+                            },
                     },
                     {
-                        6,   // start
-                        10,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        EmoteName{"Kappa"},                      // name
+                        .start = 6,
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"25"}, EmoteName{"Kappa"}),
+                                .name = EmoteName{"Kappa"},
+                            },
                     },
                 },
             },
@@ -258,18 +287,24 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             {
                 {
                     {
-                        0,  // start
-                        4,  // end
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        EmoteName{"Kappa"},                      // name
+                        .start = 0,
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"25"}, EmoteName{"Kappa"}),
+                                .name = EmoteName{"Kappa"},
+                            },
                     },
                     {
-                        9,   // start - modified due to emoji
-                        13,  // end - modified due to emoji
-                        twitchEmotes->getOrCreateEmote(
-                            EmoteId{"25"}, EmoteName{"Kappa"}),  // ptr
-                        EmoteName{"Kappa"},                      // name
+                        .start = 9,  // modified due to emoji
+                        .length = 5,
+                        .data =
+                            TwitchEmoteOccurrence{
+                                .ptr = twitchEmotes->getOrCreateEmote(
+                                    EmoteId{"25"}, EmoteName{"Kappa"}),
+                                .name = EmoteName{"Kappa"},
+                            },
                     },
                 },
             },
@@ -284,11 +319,14 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@emotes=84608:0-0 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
             {
                 {
-                    0,  // start
-                    0,  // end
-                    twitchEmotes->getOrCreateEmote(EmoteId{"84608"},
-                                                   EmoteName{"f"}),  // ptr
-                    EmoteName{"f"},                                  // name
+                    .start = 0,
+                    .length = 1,
+                    .data =
+                        TwitchEmoteOccurrence{
+                            .ptr = twitchEmotes->getOrCreateEmote(
+                                EmoteId{"84608"}, EmoteName{"f"}),
+                            .name = EmoteName{"f"},
+                        },
                 },
             },
         },
@@ -297,11 +335,14 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@emotes=84609:0-1 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
             {
                 {
-                    0,  // start
-                    1,  // end
-                    twitchEmotes->getOrCreateEmote(EmoteId{"84609"},
-                                                   EmoteName{"fo"}),  // ptr
-                    EmoteName{"fo"},                                  // name
+                    .start = 0,
+                    .length = 2,
+                    .data =
+                        TwitchEmoteOccurrence{
+                            .ptr = twitchEmotes->getOrCreateEmote(
+                                EmoteId{"84609"}, EmoteName{"fo"}),
+                            .name = EmoteName{"fo"},
+                        },
                 },
             },
         },
@@ -315,6 +356,12 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
             R"(@emotes=84608:15-2 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
             {},
         },
+        {
+            // end out of range (one unit)
+            .input =
+                R"(@emotes=84608:4-7 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
+            .expectedTwitchSpecials = {},
+        },
     };
 
     for (const auto &test : testCases)
@@ -325,10 +372,10 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
         QString originalMessage = privmsg->content();
 
         // TODO: Add tests with replies
-        auto actualTwitchEmotes =
-            parseTwitchEmotes(privmsg->tags(), originalMessage, 0);
+        auto actualTwitchSpecials =
+            parseTwitchOccurrences(privmsg->tags(), originalMessage, 0);
 
-        EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
+        EXPECT_EQ(actualTwitchSpecials, test.expectedTwitchSpecials)
             << "Input for twitch emotes " << test.input << " failed";
 
         delete privmsg;

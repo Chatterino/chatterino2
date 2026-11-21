@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 
@@ -117,7 +121,7 @@ void HTTPRequest::execute(sol::this_state L)
     pl->httpRequests.push_back(this->shared_from_this());
 
     std::move(this->req_)
-        .onSuccess([L, hack](const NetworkResult &res) {
+        .onSuccess([pl, hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -127,11 +131,12 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
-            (*self->cbSuccess)(HTTPResponse(res));
+
+            loggedVoidCall(*self->cbSuccess, u"HTTPRequest::on_success", pl,
+                           HTTPResponse(res));
             self->cbSuccess = std::nullopt;
         })
-        .onError([L, hack](const NetworkResult &res) {
+        .onError([pl, hack](const NetworkResult &res) {
             auto self = hack.lock();
             if (!self)
             {
@@ -141,18 +146,17 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
-            (*self->cbError)(HTTPResponse(res));
+            loggedVoidCall(*self->cbError, u"HTTPRequest::on_error", pl,
+                           HTTPResponse(res));
             self->cbError = std::nullopt;
         })
-        .finally([L, hack]() {
+        .finally([pl, hack]() {
             auto self = hack.lock();
             if (!self)
             {
                 // this could happen if the plugin was deleted
                 return;
             }
-            auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
             for (auto it = pl->httpRequests.begin();
                  it < pl->httpRequests.end(); it++)
             {
@@ -167,8 +171,7 @@ void HTTPRequest::execute(sol::this_state L)
             {
                 return;
             }
-            lua::StackGuard guard(L);
-            (*self->cbFinally)();
+            loggedVoidCall(*self->cbFinally, u"HTTPRequest::finally", pl);
             self->cbFinally = std::nullopt;
         })
         .timeout(this->timeout_)
@@ -179,14 +182,12 @@ HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
                          NetworkRequest req)
     : req_(std::move(req))
 {
-    DebugCount::increase("lua::api::HTTPRequest");
+    DebugCount::increase(DebugObject::LuaHTTPRequest);
 }
 
 HTTPRequest::~HTTPRequest()
 {
-    DebugCount::decrease("lua::api::HTTPRequest");
-    // We might leak a Lua function or two here if the request isn't executed
-    // but that's better than accessing a possibly invalid lua_State pointer.
+    DebugCount::decrease(DebugObject::LuaHTTPRequest);
 }
 
 QString HTTPRequest::to_string()

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 Contributors to Chatterino <https://chatterino.com>
+//
+// SPDX-License-Identifier: MIT
+
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
@@ -36,12 +40,12 @@ MessageLayoutElement::MessageLayoutElement(MessageElement &creator, QSizeF size)
     : rect_(QPointF{}, size)
     , creator_(creator)
 {
-    DebugCount::increase("message layout elements");
+    DebugCount::increase(DebugObject::MessageLayoutElement);
 }
 
 MessageLayoutElement::~MessageLayoutElement()
 {
-    DebugCount::decrease("message layout elements");
+    DebugCount::decrease(DebugObject::MessageLayoutElement);
 }
 
 MessageElement &MessageLayoutElement::getCreator() const
@@ -143,6 +147,16 @@ void ImageLayoutElement::addCopyTextToString(QString &str, uint32_t from,
             str += ' ';
         }
     }
+    else if (const auto *imageElement =
+                 dynamic_cast<ScalingImageElement *>(&this->getCreator()))
+    {
+        str += imageElement->copyText();
+        if (!imageElement->copyText().isEmpty() && this->hasTrailingSpace() &&
+            to >= 2)
+        {
+            str += ' ';
+        }
+    }
 }
 
 size_t ImageLayoutElement::getSelectionIndexCount() const
@@ -179,15 +193,31 @@ bool ImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
         {
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
+            const bool smooth =
+                this->getFlags().has(MessageElementFlag::TwitchGif);
+            if (smooth)
+            {
+                painter.save();
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+            }
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            if (smooth)
+            {
+                painter.restore();
+            }
             return true;
         }
     }
     return false;
 }
 
-int ImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int ImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -315,8 +345,13 @@ bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, qreal yOffset)
     return animatedFlag;
 }
 
-int LayeredImageLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int LayeredImageLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -447,12 +482,13 @@ void TextLayoutElement::paint(QPainter &painter,
     }
 
     painter.setPen(this->color_);
+    auto font = app->getFonts()->getFont(this->style_, this->scale_);
+    auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
 
-    painter.setFont(app->getFonts()->getFont(this->style_, this->scale_));
+    painter.setFont(font);
 
-    painter.drawText(
-        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), text,
-        QTextOption(Qt::AlignLeft | Qt::AlignTop));
+    QPointF pivot(this->getRect().x(), this->getRect().y() + metrics.ascent());
+    painter.drawText(pivot, text);
 }
 
 bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, qreal /*yOffset*/)
@@ -480,7 +516,8 @@ int TextLayoutElement::getMouseOverIndex(QPointF abs) const
         // accept mouse to be at only 50%+ of character width to increase index
         if (x + (width * 0.5) > abs.x())
         {
-            if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
+            if (text.size() > i + 1 &&
+                QChar::isLowSurrogate(static_cast<char32_t>(text[i].unicode())))
             {
                 i++;
             }
@@ -587,8 +624,13 @@ bool TextIconLayoutElement::paintAnimated(QPainter & /*painter*/,
     return false;
 }
 
-int TextIconLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int TextIconLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
@@ -662,8 +704,13 @@ bool ReplyCurveLayoutElement::paintAnimated(QPainter & /*painter*/,
     return false;
 }
 
-int ReplyCurveLayoutElement::getMouseOverIndex(QPointF /*abs*/) const
+int ReplyCurveLayoutElement::getMouseOverIndex(QPointF abs) const
 {
+    if (abs.x() >= this->getRect().center().x())
+    {
+        return static_cast<int>(this->getSelectionIndexCount());
+    }
+
     return 0;
 }
 
