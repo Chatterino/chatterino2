@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "util/Expected.hpp"
+
+#include <QByteArray>
 #include <QMimeData>
 #include <QMutex>
 #include <QString>
@@ -48,7 +51,7 @@ namespace chatterino {
 
 struct RawImageData {
     QByteArray data;
-    QString format;
+    QStringView format;
     QString filePath;
 };
 
@@ -58,11 +61,12 @@ public:
     /**
      * Tries to get the image(s) from the given QMimeData
      *
-     * If no images were found, the second value in the pair will contain an error message
+     * Returns an error if no images were found or an image couldn't be processed
      */
-    std::pair<std::queue<RawImageData>, QString> getImages(
-        const QMimeData *source) const;
+    static ExpectedStr<std::queue<RawImageData>> getImages(
+        const QMimeData *source);
 
+    /// Uploads the given images to the user's configured image uploader service
     void upload(std::queue<RawImageData> images, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
 
