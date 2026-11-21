@@ -55,6 +55,11 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
+      - name: Setup LLVM 23
+        uses: ZhongRuoyu/setup-llvm@eea6238baf53d41c1615923680d7a738da584318 # v0.2.0
+        with:
+          llvm-version: 23
+
       - name: Setup sccache
         # sccache v0.7.4
         uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
@@ -62,9 +67,9 @@ jobs:
           variant: sccache
           # only save on the default (master) branch
           save: ${{ github.event_name == 'push' }}
-          key: sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          key: sccache-test-${{ matrix.os }}-clang22-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
           restore-keys: |
-            sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
+            sccache-test-${{ matrix.os }}-clang22-${{ matrix.qt-version }}
 
       - name: Cache conan packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -118,7 +123,7 @@ jobs:
               -DBUILD_TESTS=On `
               -DBUILD_APP=OFF `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=On `
+              -DUSE_PRECOMPILED_HEADERS=Off `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_SPELLCHECK=On `
               ..
