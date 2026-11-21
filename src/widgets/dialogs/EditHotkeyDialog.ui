@@ -113,7 +113,7 @@ see this message :)</string>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QKeySequenceEdit" name="keyComboEdit"/>
+      <widget class="chatterino::HotkeySequenceEdit" name="keyComboEdit"/>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="easyArgsLabel">
@@ -179,6 +179,13 @@ see this message :)</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>chatterino::HotkeySequenceEdit</class>
+   <extends>QKeySequenceEdit</extends>
+   <header>widgets/helper/HotkeySequenceEdit.hpp</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>nameEdit</tabstop>
   <tabstop>categoryPicker</tabstop>

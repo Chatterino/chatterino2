@@ -13,8 +13,6 @@
 #include <optional>
 #include <set>
 
-class QShortcut;
-
 namespace chatterino {
 
 class Hotkey;
@@ -50,9 +48,9 @@ public:
     HotkeyController();
     HotkeyModel *createModel(QObject *parent);
 
-    std::vector<QShortcut *> shortcutsForCategory(HotkeyCategory category,
-                                                  HotkeyMap actionMap,
-                                                  QWidget *parent);
+    std::vector<QObject *> shortcutsForCategory(HotkeyCategory category,
+                                                HotkeyMap actionMap,
+                                                QWidget *parent);
 
     void save();
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
@@ -163,6 +161,8 @@ private:
      * For example:
      * - std::nullopt (or {}) will match any hotkey satisfying category, action values,
      * - {{"foo", "bar"}} will only match a hotkey that has these arguments and these arguments only
+     *
+     * Hotkeys bound to a mouse button are skipped, since they have no key sequence to display.
      */
     std::shared_ptr<Hotkey> findLike(
         HotkeyCategory category, const QString &action,

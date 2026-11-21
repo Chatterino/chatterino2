@@ -4,17 +4,18 @@
 
 - [Glossary](#Glossary)
 - [Adding new hotkeys](#Adding_new_hotkeys)
+- [Mouse buttons](#Mouse_buttons)
 - [Adding new hotkey categories](#Adding_new_hotkey_categories)
 
 ## Glossary
 
 | Word                    | Meaning                                                                                   |
 | ----------------------- | ----------------------------------------------------------------------------------------- |
-| Shortcut                | `QShortcut` object created from a hotkey.                                                 |
+| Shortcut                | `QShortcut` or `MouseShortcut` created from a hotkey.                                     |
 | Hotkey                  | Template for creating shortcuts in the right categories. See [Hotkey object][hotkey.hpp]. |
 | Category                | Place where hotkeys' actions are executed.                                                |
 | Action                  | Code that makes a hotkey do something.                                                    |
-| Keybinding or key combo | The keys you press on the keyboard to do something.                                       |
+| Keybinding or key combo | The keys or extra mouse button you press to do something.                                 |
 
 ## Adding new hotkeys
 
@@ -42,6 +43,12 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
 - `category` — same category that is in the `shortcutsForCategory` call
 - `name` — **unique** name of the default hotkey
 - `keySequence` - key combo for the hotkey
+
+## Mouse buttons
+
+Keyboard chords use `QShortcut`. Extra mouse buttons (Mouse Back, Mouse Forward, and Mouse Button 6+) are stored in the same `keySequence` settings field as `MouseBack` / `MouseForward` / `MouseButtonN` and dispatched with `MouseShortcut`. Left, Right, and Middle cannot be bound. Mouse bindings do not include keyboard modifiers.
+
+Users can bind extra mouse buttons in Settings → Keybindings. There are no default mouse bindings.
 
 ## Adding new hotkey categories
 
