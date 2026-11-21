@@ -960,21 +960,25 @@ else ()
         set(panic_on_error "--no-panic-on-error")
     endif()
 
-    if (FORCE_LUA_DEFINITIONS_GENERATION AND NOT Python3_EXECUTABLE)
-        message(FATAL_ERROR "Missing python3 for lua definition generation")
+    if (Python3_EXECUTABLE)
+        add_custom_command(
+            COMMENT "Generating Lua definitions"
+            DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py"
+            DEPFILE "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
+            COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py" --depfile "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d" "${panic_on_error}"
+            OUTPUT ${outputs}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            VERBATIM
+        )
+        add_custom_target(plugin_definitions ALL DEPENDS "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+        add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
+    else ()
+        if (FORCE_LUA_DEFINITIONS_GENERATION)
+            message(FATAL_ERROR "Missing python3 for lua definition generation")
+        else ()
+            message(STATUS "Generation of LuaLS meta is not supported (use FORCE_LUA_DEFINITIONS_GENERATION=On to get more information)")
+        endif ()
     endif ()
-
-    add_custom_command(
-        COMMENT "Generating Lua definitions"
-        DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py"
-        DEPFILE "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
-        COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py" --depfile "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d" "${panic_on_error}"
-        OUTPUT ${outputs}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        VERBATIM
-    )
-    add_custom_target(plugin_definitions ALL DEPENDS "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
-    add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
 endif ()
 
 if (APPLE)
