@@ -145,6 +145,19 @@ QString getName(const AnyHighlight &h)
                       h);
 }
 
+bool hasUserDefinedName(const AnyHighlight &h)
+{
+    return std::visit(variant::Overloaded{
+                          [](const InvalidHighlight & /*h*/) {
+                              return false;
+                          },
+                          [](const auto &h) {
+                              return !h.name.isEmpty();
+                          },
+                      },
+                      h);
+}
+
 bool isEnabled(const AnyHighlight &h)
 {
     return std::visit(
