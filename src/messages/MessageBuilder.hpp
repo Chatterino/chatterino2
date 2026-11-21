@@ -259,8 +259,11 @@ private:
         bool hasBits = false;
         bool bitsStacked = false;
         int bitsLeft = 0;
+        bool gigantifiedEmote = false;
     };
     void addEmoji(const EmotePtr &emote);
+    void addTwitchEmote(const EmotePtr &emote, bool trailingSpace,
+                        bool gigantified);
     void addTextOrEmote(TextState &state, QString string);
 
     void addTwitchGif(const QString &id, QStringView originalText);
