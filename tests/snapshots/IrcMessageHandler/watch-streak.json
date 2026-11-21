@@ -62,7 +62,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff4500",
+                    "userColor": "username:#ffff4500",
                     "userLoginName": "imrlazyi",
                     "words": [
                         "IMrLazyI"
@@ -180,7 +180,7 @@
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffff4500",
+                    "color": "username:#ffff4500",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",

@@ -170,6 +170,7 @@ WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
     this->forceLayoutChannelViewsListener.add(settings.collpseMessagesMinLines);
     this->forceLayoutChannelViewsListener.add(settings.colorUsernames);
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
+    this->forceLayoutChannelViewsListener.add(settings.readableUsernameColors);
     this->forceLayoutChannelViewsListener.add(
         settings.showBlockedTermAutomodMessages);
     this->forceLayoutChannelViewsListener.add(settings.hideModerated);

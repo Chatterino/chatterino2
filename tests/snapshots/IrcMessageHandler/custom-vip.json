@@ -76,7 +76,7 @@
                     "type": "VipBadgeElement"
                 },
                 {
-                    "color": "#ffff0000",
+                    "color": "username:#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",

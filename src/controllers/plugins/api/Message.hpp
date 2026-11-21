@@ -222,7 +222,7 @@ function c2.Message:clone() end
 ---@field highlight_color? string|nil The color of the highlight (if any)
 ---@field elements? (MessageElementInit|MessageElement)[] The elements of the message
 
----@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account
+---@alias MessageColor "text"|"link"|"system"|string A color for a text element - "text", "link", and "system" are special values that take the current theme into account. Colors prefixed with "username:" (e.g. "username:#ff0000") are the color of a user's username, so they might look different in chat if "Readable username colors" is enabled
 
 --- Creates a new message
 ---
