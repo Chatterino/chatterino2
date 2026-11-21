@@ -399,7 +399,7 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
         filename = comment.split(" ", 1)[1]
         out.write(f"-- Begin src/{filename}\n\n")
         f = repo_root / "src" / filename
-        depedancy_list.append(f)
+        dependency_list.append(f)
         read_file(f, out)
         out.write(f"-- End src/{filename}\n\n")
     elif comment.startswith("@lua@class"):
@@ -412,13 +412,13 @@ def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
         out.write(f"---{comment.replace('@lua', '', 1)}\n")
 
 
-depedancy_list: list[Path] = []
+dependency_list: list[Path] = []
 
 
 def main():
     global panic_on_error
     p = argparse.ArgumentParser()
-    p.add_argument("--depfile", help="Generate a dependancy file", type=Path)
+    p.add_argument("--depfile", help="Generate a dependency file", type=Path)
     p.add_argument("--log", default="DEBUG")
     p.add_argument(
         "--panic-on-error", default=True, action=argparse.BooleanOptionalAction
@@ -428,7 +428,7 @@ def main():
     logging.basicConfig(level=log_level, format="%(message)s")
     panic_on_error = args.panic_on_error
 
-    depedancy_list.append(lua_api_file)
+    dependency_list.append(lua_api_file)
     log.debug(f"Writing to {lua_meta.relative_to(repo_root)}")
     with lua_meta.open("w") as output:
         output.write(BOILERPLATE[1:])  # skip the newline after triple quote
@@ -440,7 +440,7 @@ def main():
         with open(depfile, "w") as output:
             output.write(str(lua_meta.resolve()) + ": ")
             output.write(
-                f" \\\n{' ' * 4}".join(str(p.resolve()) for p in depedancy_list)
+                f" \\\n{' ' * 4}".join(str(p.resolve()) for p in dependency_list)
             )
             output.write("\n")
         log.info(f"Wrote dependancy file: {depfile}")
