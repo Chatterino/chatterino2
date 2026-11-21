@@ -55,10 +55,10 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
-      - name: Setup LLVM 22
+      - name: Setup LLVM 23
         uses: ZhongRuoyu/setup-llvm@eea6238baf53d41c1615923680d7a738da584318 # v0.2.0
         with:
-          llvm-version: 22
+          llvm-version: 23
 
       - name: Setup sccache
         # sccache v0.7.4
