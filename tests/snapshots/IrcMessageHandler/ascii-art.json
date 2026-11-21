@@ -59,7 +59,7 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "user:#ffffffff",
+                    "color": "username:#ffffffff",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",

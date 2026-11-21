@@ -45,7 +45,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "user:#ffff0000",
+                    "userColor": "username:#ffff0000",
                     "userLoginName": "ozdani",
                     "words": [
                         "ozdani"

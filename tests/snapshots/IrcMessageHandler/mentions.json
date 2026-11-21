@@ -59,7 +59,7 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "user:#ffff0000",
+                    "color": "username:#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -118,7 +118,7 @@
                     "tooltip": "",
                     "trailingSpace": false,
                     "type": "MentionElement",
-                    "userColor": "user:#ff010203",
+                    "userColor": "username:#ff010203",
                     "userLoginName": "UserColor",
                     "words": [
                         "@UserColor"

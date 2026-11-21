@@ -101,7 +101,7 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "user:#ffff0000",
+                    "color": "username:#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -127,7 +127,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "user:#ffff0000",
+                    "userColor": "username:#ffff0000",
                     "userLoginName": "nerixyz",
                     "words": [
                         "@nerixyz"

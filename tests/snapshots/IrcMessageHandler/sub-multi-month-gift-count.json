@@ -45,7 +45,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "user:#ffff8ea3",
+                    "userColor": "username:#ffff8ea3",
                     "userLoginName": "inatsufn",
                     "words": [
                         "iNatsuFN"

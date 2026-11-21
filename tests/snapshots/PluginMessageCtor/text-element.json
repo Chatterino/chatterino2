@@ -10,7 +10,7 @@
         "  { type = 'text', text = 'foo', color = 'system' },",
         "  { type = 'text', text = 'foo', color = 'link' },",
         "  { type = 'text', text = 'foo', color = 'green' },",
-        "  { type = 'text', text = 'foo', color = 'user:green' },",
+        "  { type = 'text', text = 'foo', color = 'username:green' },",
         "  { type = 'text', text = 'foo', style = c2.FontStyle.ChatSmall },",
         "}}"
     ],
@@ -156,7 +156,7 @@
                 ]
             },
             {
-                "color": "user:#ff008000",
+                "color": "username:#ff008000",
                 "flags": "Text",
                 "link": {
                     "type": "None",

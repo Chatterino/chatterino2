@@ -62,7 +62,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "user:#ff0000ff",
+                    "userColor": "username:#ff0000ff",
                     "userLoginName": "calm__like_a_tom",
                     "words": [
                         "calm__like_a_tom"

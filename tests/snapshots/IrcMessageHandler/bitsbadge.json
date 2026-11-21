@@ -45,7 +45,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "user:#ffff4500",
+                    "userColor": "username:#ffff4500",
                     "userLoginName": "whoopiix",
                     "words": [
                         "whoopiix"
