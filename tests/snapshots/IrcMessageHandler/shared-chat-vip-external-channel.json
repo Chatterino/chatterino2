@@ -182,6 +182,7 @@
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
+                "vip",
                 "bits"
             ],
             "userID": "100229878",
