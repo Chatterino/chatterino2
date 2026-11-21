@@ -25,6 +25,8 @@
 
 #include <pajlada/signals/scoped-connection.hpp>
 
+#include <algorithm>
+
 namespace {
 
 using namespace chatterino;
@@ -990,6 +992,34 @@ bool Settings::isBlacklistedUser(const QString &username)
     return false;
 }
 
+bool Settings::isEmoteIgnored(const QString &name)
+{
+    const auto entries = this->ignoredEmotes.readOnly();
+    return std::ranges::any_of(*entries, [&name](const auto &entry) {
+        return entry.isMatch(name);
+    });
+}
+
+void Settings::setEmoteNameIgnored(const QString &name, bool ignored)
+{
+    const auto matchesName = [&name](const auto &entry) {
+        return !entry.regex && entry.pattern == name;
+    };
+    if (ignored)
+    {
+        if (std::ranges::none_of(this->ignoredEmotes.raw(), matchesName))
+        {
+            this->ignoredEmotes.append(IgnoredEmote{name, false});
+        }
+    }
+    else
+    {
+        while (this->ignoredEmotes.removeFirstMatching(matchesName))
+        {
+        }
+    }
+}
+
 bool Settings::isMutedChannel(const QString &channelName)
 {
     auto items = this->mutedChannels.readOnly();
@@ -1140,6 +1170,8 @@ Settings::Settings(const Modes &modes, const Args &args,
                            this->blacklistedUsers);
     initializeSignalVector(this->signalHolder, this->ignoredMessagesSetting,
                            this->ignoredMessages);
+    initializeSignalVector(this->signalHolder, this->ignoredEmotesSetting,
+                           this->ignoredEmotes);
     initializeSignalVector(this->signalHolder, this->mutedChannelsSetting,
                            this->mutedChannels);
     initializeSignalVector(this->signalHolder, this->filterRecordsSetting,
