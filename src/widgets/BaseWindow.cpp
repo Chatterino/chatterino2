@@ -271,13 +271,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     this->resize(300, 150);
 
-#ifdef USEWINSDK
-    this->useNextBounds_.setSingleShot(true);
-    QObject::connect(&this->useNextBounds_, &QTimer::timeout, this, [this]() {
-        this->currentBounds_ = this->geometry();
-    });
-#endif
-
     this->themeChangedEvent();
 
     if (this->flags_.has(UseSettingsStylesheet))
@@ -316,7 +309,7 @@ QRect BaseWindow::getBounds() const
 #ifdef USEWINSDK
     return this->currentBounds_;
 #else
-    return this->geometry();
+    return this->normalGeometry();
 #endif
 }
 
@@ -810,6 +803,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 #ifdef USEWINSDK
     this->calcButtonsSizes();
     this->updateRealSize();
+    this->updateCurrentBounds();
 #endif
 }
 
@@ -821,6 +815,10 @@ void BaseWindow::moveEvent(QMoveEvent *event)
     {
         getApp()->getWindows()->queueSave();
     }
+#endif
+
+#ifdef USEWINSDK
+    this->updateCurrentBounds();
 #endif
 
     BaseWidget::moveEvent(event);
@@ -880,11 +878,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
 
         case WM_SIZE:
             returnValue = this->handleSIZE(msg);
-            break;
-
-        case WM_MOVE:
-            returnValue = this->handleMOVE(msg);
-            *result = 0;
             break;
 
         case WM_NCHITTEST:
@@ -1247,18 +1240,6 @@ bool BaseWindow::handleSIZE(MSG *msg)
         }
         else if (this->hasCustomWindowFrame())
         {
-            this->isNotMinimizedOrMaximized_ = msg->wParam == SIZE_RESTORED;
-
-            if (this->isNotMinimizedOrMaximized_)
-            {
-                // Wait for WM_SIZE to be processed by Qt and update the current
-                // bounds afterwards.
-                postToThread([this] {
-                    this->currentBounds_ = this->geometry();
-                });
-            }
-            this->useNextBounds_.stop();
-
             if (msg->wParam == SIZE_MINIMIZED && this->ui_.titlebarButtons)
             {
                 // Windows doesn't send a WM_NCMOUSELEAVE event when clicking
@@ -1277,19 +1258,6 @@ bool BaseWindow::handleSIZE(MSG *msg)
 #else
     return false;
 #endif
-}
-
-bool BaseWindow::handleMOVE(MSG *msg)
-{
-#ifdef USEWINSDK
-    if (this->isNotMinimizedOrMaximized_)
-    {
-        // Wait for WM_SIZE (in case the window was maximized, we don't want to
-        // save the bounds but keep the old ones)
-        this->useNextBounds_.start(10);
-    }
-#endif
-    return false;
 }
 
 bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
@@ -1483,6 +1451,16 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, qintptr *result)
 }
 
 #ifdef USEWINSDK
+void BaseWindow::updateCurrentBounds()
+{
+    // Qt reports a native maximize after the resize, so ask Windows.
+    auto hwnd = this->safeHWND();
+    if (hwnd && !::IsIconic(*hwnd) && !::IsZoomed(*hwnd))
+    {
+        this->currentBounds_ = this->geometry();
+    }
+}
+
 std::optional<HWND> BaseWindow::safeHWND() const
 {
     if (!this->testAttribute(Qt::WA_WState_Created))
