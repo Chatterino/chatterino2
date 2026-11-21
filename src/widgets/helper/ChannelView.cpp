@@ -52,7 +52,6 @@
 #include "widgets/Window.hpp"
 
 #include <magic_enum/magic_enum_flags.hpp>
-#include <QApplication>
 #include <QClipboard>
 #include <QColor>
 #include <QDate>
@@ -420,6 +419,7 @@ void ChannelView::initializeSignals()
 
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) {
+            this->updateScrollbarLastMessageMarker(this->getMessagesSnapshot());
             this->update();
         },
         this->signalHolder_);
@@ -717,6 +717,7 @@ void ChannelView::performLayout(bool causedByScrollbar, bool disableAnimation)
 
     /// Update scrollbar
     this->updateScrollbar(messages, causedByScrollbar, disableAnimation);
+    this->updateScrollbarLastMessageMarker(messages);
 
     this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
                                   this->scrollBar_->isVisible() &&
@@ -826,11 +827,34 @@ void ChannelView::updateScrollbar(const std::vector<MessageLayoutPtr> &messages,
     }
 }
 
+void ChannelView::updateScrollbarLastMessageMarker(
+    const std::vector<MessageLayoutPtr> &messages)
+{
+    std::optional<qreal> markerPosition = std::nullopt;
+
+    if (getSettings()->showLastMessageIndicator &&
+        this->scrollBar_->isVisible() && this->lastReadMessage_)
+    {
+        const auto it = std::ranges::find(messages, this->lastReadMessage_);
+
+        if (it != messages.end())
+        {
+            // Draw the marker on the bottom edge of the message
+            markerPosition.emplace(
+                static_cast<qreal>(std::distance(messages.begin(), it) + 1));
+        }
+    }
+
+    this->scrollBar_->setLastMessageMarker(markerPosition);
+}
+
 void ChannelView::clearMessages()
 {
     // Clear all stored messages in this chat widget
     this->messages_.clear();
+    this->lastReadMessage_.reset();
     this->scrollBar_->clearHighlights();
+    this->scrollBar_->setLastMessageMarker(std::nullopt);
     this->scrollBar_->resetBounds();
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
@@ -1393,6 +1417,7 @@ void ChannelView::updateLastReadMessage()
         this->lastReadMessage_ = *lastMessage;
     }
 
+    this->updateScrollbarLastMessageMarker(this->getMessagesSnapshot());
     this->update();
 }
 
@@ -1645,7 +1670,6 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
         .preferences = this->messagePreferences_,
 
         .canvasWidth = this->width(),
-        .isWindowFocused = this->window() == QApplication::activeWindow(),
         .isMentions = this->underlyingChannel_ ==
                       getApp()->getTwitch()->getMentionsChannel(),
 

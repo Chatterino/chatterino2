@@ -13,7 +13,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 
-#include <QApplication>
 #include <QPainter>
 
 namespace {
@@ -89,7 +88,6 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
         .preferences = this->messagePreferences_,
 
         .canvasWidth = this->width_,
-        .isWindowFocused = this->window() == QApplication::activeWindow(),
         .isMentions = false,
 
         .y = 0,
