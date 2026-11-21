@@ -19,6 +19,7 @@
 namespace {
 
 const QChar RTL_EMBED(0x202B);
+const QChar LTR_EMBED(0x202A);
 
 void alignRectBottomCenter(QRectF &rect, const QRectF &reference)
 {
@@ -476,7 +477,18 @@ void TextLayoutElement::paint(QPainter &painter,
 {
     auto *app = getApp();
     QString text = this->getText();
-    if (text.isRightToLeft() || this->reversedNeutral)
+    // Usernames ("name:") and the replied-to user ("@name:") always sit in the
+    // left-to-right prefix of a line. Embedding them as RTL would move the
+    // "@" and ":" to the wrong side of an RTL name.
+    const bool isUserPrefix =
+        this->getFlags().has(MessageElementFlag::Username) ||
+        (this->getFlags().has(MessageElementFlag::RepliedMessage) &&
+         this->getLink().type == Link::UserInfo);
+    if (isUserPrefix || this->mentionInLTRLine)
+    {
+        text.prepend(LTR_EMBED);
+    }
+    else if (text.isRightToLeft() || this->reversedNeutral)
     {
         text.prepend(RTL_EMBED);
     }

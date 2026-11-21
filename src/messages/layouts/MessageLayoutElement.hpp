@@ -39,6 +39,9 @@ public:
     MessageLayoutElement &operator=(MessageLayoutElement &&) = delete;
 
     bool reversedNeutral = false;
+    /// An "@mention" in a left-to-right line: keep the "@" on its left even
+    /// if the name is RTL.
+    bool mentionInLTRLine = false;
 
     const QRectF &getRect() const;
     MessageElement &getCreator() const;
