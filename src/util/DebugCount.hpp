@@ -96,50 +96,50 @@ constexpr magic_enum::customize::customize_t
     switch (value)
     {
         // class names
-        case chatterino::DebugObject::AttachedWindow:
-        case chatterino::DebugObject::BaseWindow:
-        case chatterino::DebugObject::NetworkData:
-        case chatterino::DebugObject::MessageElement:
-        case chatterino::DebugObject::MessageLayout:
-        case chatterino::DebugObject::MessageLayoutElement:
-        case chatterino::DebugObject::MessageThread:
-        case chatterino::DebugObject::Message:
+        case DebugObject::AttachedWindow:
+        case DebugObject::BaseWindow:
+        case DebugObject::NetworkData:
+        case DebugObject::MessageElement:
+        case DebugObject::MessageLayout:
+        case DebugObject::MessageLayoutElement:
+        case DebugObject::MessageThread:
+        case DebugObject::Message:
         default:
             return default_tag;
 
-        case chatterino::DebugObject::AnimatedImage:
+        case DebugObject::AnimatedImage:
             return "animated images";
-        case chatterino::DebugObject::LiveUpdatesSubscription:
+        case DebugObject::LiveUpdatesSubscription:
             return "LiveUpdates subscriptions";
-        case chatterino::DebugObject::LiveUpdatesSubscriptionBacklog:
+        case DebugObject::LiveUpdatesSubscriptionBacklog:
             return "LiveUpdates subscription backlog";
-        case chatterino::DebugObject::LiveUpdatesConnection:
+        case DebugObject::LiveUpdatesConnection:
             return "LiveUpdates connections";
-        case chatterino::DebugObject::HTTPRequestStarted:
+        case DebugObject::HTTPRequestStarted:
             return "http requests started";
-        case chatterino::DebugObject::HTTPRequestSuccess:
+        case DebugObject::HTTPRequestSuccess:
             return "http requests succeeded";
-        case chatterino::DebugObject::Image:
+        case DebugObject::Image:
             return "images";
-        case chatterino::DebugObject::LoadedImage:
+        case DebugObject::LoadedImage:
             return "loaded images";
-        case chatterino::DebugObject::BytesImageCurrent:
+        case DebugObject::BytesImageCurrent:
             return "image bytes";
-        case chatterino::DebugObject::BytesImageLoaded:
+        case DebugObject::BytesImageLoaded:
             return "image bytes (ever loaded)";
-        case chatterino::DebugObject::BytesImageUnloaded:
+        case DebugObject::BytesImageUnloaded:
             return "image bytes (ever unloaded)";
-        case chatterino::DebugObject::LastImageGcExpired:
+        case DebugObject::LastImageGcExpired:
             return "last image gc: expired";
-        case chatterino::DebugObject::LastImageGcEligible:
+        case DebugObject::LastImageGcEligible:
             return "last image gc: eligible";
-        case chatterino::DebugObject::LastImageGcLeft:
+        case DebugObject::LastImageGcLeft:
             return "last image gc: left after gc";
-        case chatterino::DebugObject::LuaHTTPResponse:
+        case DebugObject::LuaHTTPResponse:
             return "lua::api::HTTPResponse";
-        case chatterino::DebugObject::LuaHTTPRequest:
+        case DebugObject::LuaHTTPRequest:
             return "lua::api::HTTPRequest";
-        case chatterino::DebugObject::MessageDrawingBuffer:
+        case DebugObject::MessageDrawingBuffer:
             return "message drawing buffers";
 
         case DebugObject::WindowLayoutSave:
