@@ -60,6 +60,7 @@ struct SplitDescriptor {
     QJsonObject toJson() const;
 
     IndirectChannel decodeChannel() const;
+    void setChannel(const IndirectChannel &chan);
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {

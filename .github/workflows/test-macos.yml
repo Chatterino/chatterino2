@@ -9,7 +9,6 @@ on:
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
-  QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
@@ -24,7 +23,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-14
+          - os: macos-15
             qt-version: 6.8.3
           - os: macos-26
             qt-version: 6.11.1
@@ -41,7 +40,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2

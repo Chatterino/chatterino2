@@ -181,6 +181,7 @@
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
+                "moderator",
                 "bits"
             ],
             "userID": "100229878",

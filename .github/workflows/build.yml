@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
@@ -126,6 +127,8 @@ jobs:
             -DCHATTERINO_NIGHTLY_BUILD=${{ steps.build-type.outputs.NIGHTLY_BUILD }} \
             -DFORCE_JSON_GENERATION=Off \
             -DCHATTERINO_PLUGINS=${{ case(matrix.plugins, 'On', 'Off') }} \
+            -DSKIP_LUA_DEFINITIONS_GENERATION=${{matrix.os == 'ubuntu-20.04' && 'On' || 'Off'}} \
+            -DFORCE_LUA_DEFINITIONS_GENERATION=${{matrix.os != 'ubuntu-20.04' && 'On' || 'Off'}} \
             ..
           make -j"$(nproc)"
 
@@ -199,7 +202,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -213,7 +216,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache

@@ -689,6 +689,8 @@ set(SOURCE_FILES
         widgets/BaseWindow.hpp
         widgets/ChatterListWidget.cpp
         widgets/ChatterListWidget.hpp
+        widgets/FollowedChannelsWindow.cpp
+        widgets/FollowedChannelsWindow.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
@@ -745,6 +747,8 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+        widgets/dialogs/StreamLinkErrorPopup.cpp
+        widgets/dialogs/StreamLinkErrorPopup.hpp
 
         widgets/dialogs/font/FontDialog.cpp
         widgets/dialogs/font/FontDialog.hpp
@@ -940,6 +944,42 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
+
+if (SKIP_LUA_DEFINITIONS_GENERATION)
+    message(STATUS "Skipping lua definition generation")
+else ()
+    message(STATUS "Doing lua definition generation")
+    find_package(Python3 COMPONENTS Interpreter)
+
+    # HACK(Mm2PL): Trick make into running our script
+    if (FORCE_LUA_DEFINITIONS_GENERATION)
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua" _fake_output)
+        set(panic_on_error "--panic-on-error")
+    else()
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+        set(panic_on_error "--no-panic-on-error")
+    endif()
+
+    if (Python3_EXECUTABLE)
+        add_custom_command(
+            COMMENT "Generating Lua definitions"
+            DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py"
+            DEPFILE "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
+            COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py" --depfile "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d" "${panic_on_error}"
+            OUTPUT ${outputs}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            VERBATIM
+        )
+        add_custom_target(plugin_definitions ALL DEPENDS "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+        add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
+    else ()
+        if (FORCE_LUA_DEFINITIONS_GENERATION)
+            message(FATAL_ERROR "Missing python3 for lua definition generation")
+        else ()
+            message(STATUS "Generation of LuaLS meta is not supported (use FORCE_LUA_DEFINITIONS_GENERATION=On to get more information)")
+        endif ()
+    endif ()
+endif ()
 
 if (APPLE)
     target_link_libraries(${LIBRARY_PROJECT} PRIVATE

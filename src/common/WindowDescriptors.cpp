@@ -9,7 +9,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/Backup.hpp"
-#include "util/QMagicEnum.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "widgets/Window.hpp"
 
 #include <QFile>
@@ -135,7 +135,8 @@ IndirectChannel SplitDescriptor::decodeChannel() const
 {
     assertInGuiThread();
 
-    auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
+    auto type =
+        qmagicenum::SerializedName::enumCast<Channel::Type>(this->type_);
     if (!type)
     {
         return Channel::getEmpty();
@@ -165,6 +166,30 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     }
 
     return Channel::getEmpty();
+}
+
+void SplitDescriptor::setChannel(const IndirectChannel &chan)
+{
+    this->type_ = qmagicenum::SerializedName::enumNameString(chan.getType());
+    switch (chan.getType())
+    {
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
+            this->channelName_ = chan.get()->getName();
+            break;
+
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;
+    }
 }
 
 SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)

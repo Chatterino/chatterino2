@@ -35,6 +35,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDrag>
 #include <QHBoxLayout>
@@ -516,7 +517,22 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "openModView"),
                 this->split_, &Split::openModViewInBrowser);
         }
+    }
 
+    menu->addAction(
+        "Followed channels",
+        h->getDisplaySequence(HotkeyCategory::Window, "openFollowedChannels"),
+        this, [this] {
+            auto *window = dynamic_cast<Window *>(this->window());
+            if (window != nullptr)
+            {
+                window->showFollowedChannels();
+            }
+        });
+    menu->addSeparator();
+
+    if (twitchChannel)
+    {
         menu->addAction(
                 "Create a clip",
                 h->getDisplaySequence(HotkeyCategory::Split, "createClip"),

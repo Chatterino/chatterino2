@@ -15,6 +15,12 @@
 using namespace chatterino;
 using namespace helpers::detail;
 
+TEST(Helpers, kFormatNumbers)
+{
+    EXPECT_EQ(kFormatNumbers(100), "100");
+    EXPECT_EQ(kFormatNumbers(1000), "1K");
+}
+
 TEST(Helpers, formatUserMention)
 {
     const auto userName = "pajlada";
