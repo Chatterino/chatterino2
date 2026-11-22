@@ -331,9 +331,40 @@ void appendBadges(MessageBuilder *builder,
         builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
             ->setTooltip(tooltip);
     }
+}
 
-    builder->message().twitchBadges = badges;
-    builder->message().twitchBadgeInfos = badgeInfos;
+/// Parses the moderator and VIP badges the author has in the source channel
+/// of a shared chat message.
+std::vector<TwitchBadge> parseSharedChatBadges(Communi::TagsRef tags)
+{
+    auto badges = parseBadgeTag(tags, "source-badges");
+    std::erase_if(badges, [](const auto &badge) {
+        return badge.key_ != "moderator" && badge.key_ != "vip" &&
+               badge.key_ != "lead_moderator";
+    });
+    return badges;
+}
+
+/// Parses the badges of the author. For shared messages, this includes the
+/// moderator and VIP badges from the source channel.
+std::vector<TwitchBadge> parseAuthorBadges(Communi::TagsRef tags,
+                                           MessageFlags flags)
+{
+    auto badges = parseBadgeTag(tags);
+    if (!flags.has(MessageFlag::SharedMessage))
+    {
+        return badges;
+    }
+
+    auto authorBadges = parseSharedChatBadges(tags);
+    for (auto &badge : badges)
+    {
+        if (std::ranges::find(authorBadges, badge) == authorBadges.end())
+        {
+            authorBadges.push_back(std::move(badge));
+        }
+    }
+    return authorBadges;
 }
 
 std::vector<TwitchBadge> appendSharedChatBadges(
@@ -343,12 +374,6 @@ std::vector<TwitchBadge> appendSharedChatBadges(
     auto appendedBadges = std::vector<TwitchBadge>{};
     for (const auto &badge : sharedBadges)
     {
-        if (badge.key_ != "moderator" && badge.key_ != "vip" &&
-            badge.key_ != "lead_moderator")
-        {
-            continue;
-        }
-
         auto badgeEmote = getTwitchBadge(badge, twitchChannel);
         if (!badgeEmote)
         {
@@ -2653,7 +2678,7 @@ HighlightAlert MessageBuilder::parseHighlights(Communi::TagsRef tags,
     }
 
     auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
-    auto badges = parseBadgeTag(tags);
+    auto badges = parseAuthorBadges(tags, this->message().flags);
     auto [highlighted, highlightResult] = getApp()->getHighlights()->check({
         .args = args,
         .twitchBadges = badges,
@@ -2890,7 +2915,7 @@ void MessageBuilder::appendTwitchBadges(Communi::TagsRef tags,
             makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
             MessageElementFlag::BadgeSharedChannel);
 
-        const auto sourceBadges = parseBadgeTag(tags, "source-badges");
+        const auto sourceBadges = parseSharedChatBadges(tags);
         const auto appendedBadges = appendSharedChatBadges(
             this, sourceBadges, sourceName, twitchChannel);
 
@@ -2908,6 +2933,10 @@ void MessageBuilder::appendTwitchBadges(Communi::TagsRef tags,
 
     auto badgeInfos = parseBadgeInfoTag(tags);
     appendBadges(this, badges, badgeInfos, twitchChannel);
+
+    this->message().twitchBadges =
+        parseAuthorBadges(tags, this->message().flags);
+    this->message().twitchBadgeInfos = std::move(badgeInfos);
 }
 
 void MessageBuilder::appendChatterinoBadges(const QString &userID)
