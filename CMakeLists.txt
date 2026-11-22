@@ -46,6 +46,9 @@ option(CHATTERINO_SANITIZER_SUPPORT "Attempt to enable Sanitizer support on the 
 mark_as_advanced(CHATTERINO_SANITIZER_SUPPORT)
 add_feature_info("Chatterino code sanitizer support" CHATTERINO_SANITIZER_SUPPORT "")
 
+option(FORCE_LUA_DEFINITIONS_GENERATION "Make sure docs/plugins-meta.lua is generated at build time" OFF)
+option(SKIP_LUA_DEFINITIONS_GENERATION "Skip docs/plugin-meta.lua generation" OFF)
+
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
 
