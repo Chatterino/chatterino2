@@ -152,7 +152,7 @@ constexpr magic_enum::customize::customize_t
         case DebugObject::SettingsSave:
             return "settings save";
         case DebugObject::SettingsSaveSkipped:
-            return "settings save skipepd";
+            return "settings save skipped";
         case DebugObject::SettingsSaveError:
             return "settings save error";
     }
