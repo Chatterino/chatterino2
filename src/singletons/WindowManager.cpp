@@ -15,6 +15,7 @@
 #include "singletons/Theme.hpp"
 #include "util/Backup.hpp"
 #include "util/CombinePath.hpp"
+#include "util/DebugCount.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
 #include "util/Variant.hpp"
