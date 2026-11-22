@@ -29,7 +29,8 @@ namespace chatterino::lua::api {
 class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 {
     // This type is private to prevent the accidental construction of HTTPRequest without a shared pointer
-    struct ConstructorAccessTag {};
+    struct ConstructorAccessTag {
+    };
 
 public:
     HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req);
