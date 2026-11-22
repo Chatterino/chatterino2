@@ -52,6 +52,16 @@ enum class DebugObject : size_t {
     MessageThread,
     Message,
 
+    // window layout
+    WindowLayoutSave,
+    WindowLayoutSaveQueued,
+    WindowLayoutSaveError,
+
+    // settings
+    SettingsSave,
+    SettingsSaveSkipped,
+    SettingsSaveError,
+
     Count,
 };
 
@@ -131,5 +141,19 @@ constexpr magic_enum::customize::customize_t
             return "lua::api::HTTPRequest";
         case chatterino::DebugObject::MessageDrawingBuffer:
             return "message drawing buffers";
+
+        case DebugObject::WindowLayoutSave:
+            return "window layout save";
+        case DebugObject::WindowLayoutSaveQueued:
+            return "window layout save queued";
+        case DebugObject::WindowLayoutSaveError:
+            return "window layout save error";
+
+        case DebugObject::SettingsSave:
+            return "settings save";
+        case DebugObject::SettingsSaveSkipped:
+            return "settings save skipepd";
+        case DebugObject::SettingsSaveError:
+            return "settings save error";
     }
 }

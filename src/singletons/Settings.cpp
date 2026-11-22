@@ -19,8 +19,10 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "debug/Benchmark.hpp"
+#include "pajlada/settings/settingmanager.hpp"
 #include "pajlada/settings/signalargs.hpp"
 #include "util/Backup.hpp"
+#include "util/DebugCount.hpp"
 #include "util/WindowsHelper.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -1175,7 +1177,24 @@ pajlada::Settings::SettingManager::SaveResult Settings::requestSave() const
         return pajlada::Settings::SettingManager::SaveResult::Skipped;
     }
 
-    return pajlada::Settings::SettingManager::gSave();
+    auto res = pajlada::Settings::SettingManager::gSave();
+
+    switch (res)
+    {
+        case pajlada::Settings::SettingManager::SaveResult::Success:
+            DebugCount::increase(DebugObject::SettingsSave);
+            break;
+
+        case pajlada::Settings::SettingManager::SaveResult::Failed:
+            DebugCount::increase(DebugObject::SettingsSaveError);
+            break;
+
+        case pajlada::Settings::SettingManager::SaveResult::Skipped:
+            DebugCount::increase(DebugObject::SettingsSaveSkipped);
+            break;
+    }
+
+    return res;
 }
 
 void Settings::saveSnapshot()
