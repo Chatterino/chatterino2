@@ -6,6 +6,7 @@
 #    include "controllers/plugins/PluginPermission.hpp"
 
 #    include "util/QMagicEnum.hpp"
+#    include "util/QMagicEnumQJsonValue.hpp"  // IWYU pragma: keep
 
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonObject>

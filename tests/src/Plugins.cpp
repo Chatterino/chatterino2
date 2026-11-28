@@ -927,6 +927,7 @@ TEST_F(PluginTest, MessageElementFlag)
                          "Mention=0x8000000,"
                          "Misc=0x1,"
                          "ModeratorTools=0x400000,"
+                         "None=0x0,"
                          "RepliedMessage=0x100000000,"
                          "ReplyButton=0x200000000,"
                          "SubscriptionHeader=0x10000000000,"
