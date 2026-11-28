@@ -14,6 +14,7 @@
 #include <QPainter>
 #include <QTimer>
 
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -59,6 +60,14 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
             this->update();
         },
         this->signalHolder);
+
+    getSettings()->lastMessageColor.connect(
+        [this](const QString &newValue) {
+            this->lastMessageMarkerColor_ =
+                newValue.isEmpty() ? QColor() : QColor(newValue);
+            this->update();
+        },
+        this->signalHolder);
 }
 
 boost::circular_buffer<ScrollbarHighlight> Scrollbar::getHighlights() const
@@ -101,6 +110,17 @@ void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
 void Scrollbar::clearHighlights()
 {
     this->highlights_.clear();
+}
+
+void Scrollbar::setLastMessageMarker(std::optional<qreal> relativePosition)
+{
+    if (this->lastMessageMarkerRelativePosition_ == relativePosition)
+    {
+        return;
+    }
+
+    this->lastMessageMarkerRelativePosition_ = relativePosition;
+    this->update();
 }
 
 void Scrollbar::scrollToBottom(bool animate)
@@ -351,6 +371,28 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 
                 case ScrollbarHighlight::Style::None:;
             }
+        }
+    }
+
+    if (this->lastMessageMarkerRelativePosition_.has_value() &&
+        this->lastMessageMarkerColor_.isValid())
+    {
+        const auto range = this->maximum_ - this->minimum_;
+
+        if (range > 0 && *this->lastMessageMarkerRelativePosition_ >= 0 &&
+            *this->lastMessageMarkerRelativePosition_ <= range)
+        {
+            const auto relativePosition =
+                *this->lastMessageMarkerRelativePosition_ / range;
+
+            const auto y = std::clamp(static_cast<int>(std::lround(
+                                          relativePosition * this->height())),
+                                      0, std::max(0, this->height() - 1));
+
+            QColor color = this->lastMessageMarkerColor_;
+            color.setAlpha(255);
+
+            painter.fillRect(0, y, this->width(), 1, color);
         }
     }
 }
