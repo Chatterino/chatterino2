@@ -38,6 +38,8 @@ using namespace literals;
 
 namespace {
 
+constexpr float GIGANTIFIED_EMOTE_SCALE = 4.F;
+
 // Computes the bounding box for the given vector of images
 QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
 {
@@ -253,6 +255,11 @@ EmotePtr EmoteElement::getEmote() const
     return this->emote_;
 }
 
+void EmoteElement::setGigantified(bool gigantified)
+{
+    this->gigantified_ = gigantified;
+}
+
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   const MessageLayoutContext &ctx)
 {
@@ -263,8 +270,9 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
     if (ctx.flags.has(MessageElementFlag::EmoteImage))
     {
-        auto image =
-            this->emote_->images.getImageOrLoaded(container.getImageScale());
+        auto image = this->emote_->images.getImageOrLoaded(
+            container.getImageScale() *
+            (this->gigantified_ ? GIGANTIFIED_EMOTE_SCALE : 1.F));
 
         if (image->isEmpty())
         {
@@ -275,6 +283,15 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             auto emoteScale = getSettings()->emoteScale.getValue();
 
             auto size = image->size() * container.getScale() * emoteScale;
+
+            if (this->gigantified_)
+            {
+                size *= GIGANTIFIED_EMOTE_SCALE;
+                if (size.width() > container.remainingWidth())
+                {
+                    size *= container.remainingWidth() / size.width();
+                }
+            }
 
             container.addElement(this->makeImageLayoutElement(image, size));
             return;
@@ -322,6 +339,10 @@ QJsonObject EmoteElement::toJson() const
     {
         base["text"_L1] = this->textElement_->toJson();
     }
+    if (this->gigantified_)
+    {
+        base["gigantified"_L1] = true;
+    }
 
     return base;
 }
@@ -335,6 +356,7 @@ std::unique_ptr<MessageElement> EmoteElement::clone() const
 {
     auto elem = std::make_unique<EmoteElement>(this->emote_, this->getFlags(),
                                                this->textColor_);
+    elem->gigantified_ = this->gigantified_;
     elem->cloneFrom(*this);
     return elem;
 }
