@@ -53,7 +53,7 @@ protected:
 
     Theme *theme;
 
-    std::vector<QShortcut *> shortcuts_;
+    std::vector<QObject *> shortcuts_;
     void clearShortcuts();
     pajlada::Signals::SignalHolder signalHolder_;
 
