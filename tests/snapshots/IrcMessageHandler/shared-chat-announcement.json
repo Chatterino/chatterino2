@@ -257,6 +257,7 @@
             "twitchBadgeInfos": {
             },
             "twitchBadges": [
+                "moderator",
                 "staff",
                 "raging-wolf-helm"
             ],

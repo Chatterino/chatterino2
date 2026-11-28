@@ -15,6 +15,7 @@
 #include "singletons/Theme.hpp"
 #include "util/Backup.hpp"
 #include "util/CombinePath.hpp"
+#include "util/DebugCount.hpp"
 #include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
 #include "util/Variant.hpp"
@@ -627,6 +628,7 @@ void WindowManager::save()
             if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
             {
                 ec = std::make_error_code(std::errc::io_error);
+                DebugCount::increase(DebugObject::WindowLayoutSaveError);
                 return;
             }
 
@@ -634,7 +636,10 @@ void WindowManager::save()
             if (!file.commit() || file.error() != QFile::NoError)
             {
                 ec = std::make_error_code(std::errc::io_error);
+                DebugCount::increase(DebugObject::WindowLayoutSaveError);
+                return;
             }
+            DebugCount::increase(DebugObject::WindowLayoutSave);
         },
         ec);
 
@@ -660,6 +665,8 @@ void WindowManager::sendAlert()
 void WindowManager::queueSave()
 {
     using namespace std::chrono_literals;
+
+    DebugCount::increase(DebugObject::WindowLayoutSaveQueued);
 
     this->saveTimer->start(10s);
 }
@@ -737,6 +744,8 @@ void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
 
     // highlighting on new messages
     obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+    obj.insert("alwaysShow", tab->getTab()->alwaysShow());
 
     // splits
     obj.insert("splits2", std::visit(
@@ -863,6 +872,8 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
 
             // highlighting on new messages
             page->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
+
+            page->getTab()->setAlwaysShow(tab.alwaysShow_);
 
             if (tab.rootNode_)
             {

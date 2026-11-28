@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
