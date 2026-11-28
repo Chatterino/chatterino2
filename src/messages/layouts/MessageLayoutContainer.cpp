@@ -190,7 +190,8 @@ void MessageLayoutContainer::breakLine()
         bool isCompactEmote =
             !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
             element->getCreator().getFlags().has(
-                MessageElementFlag::EmoteImage);
+                MessageElementFlag::EmoteImage) &&
+            element->isImage();
 
         qreal yExtra = 0;
         if (isCompactEmote)
@@ -646,7 +647,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         }
 
         // Returns true if the last element was an emote image
-        return lastElement->getFlags().has(MessageElementFlag::EmoteImage);
+        return lastElement->getFlags().has(MessageElementFlag::EmoteImage) &&
+               lastElement->isImage();
     };
 
     bool isRTLElement = element->getText().isRightToLeft();
@@ -681,7 +683,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     // compact emote offset
     bool isCompactEmote =
         !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
-        element->getCreator().getFlags().has(MessageElementFlag::EmoteImage);
+        element->getCreator().getFlags().has(MessageElementFlag::EmoteImage) &&
+        element->isImage();
 
     if (isCompactEmote)
     {
@@ -703,8 +706,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     }
 
     if (getSettings()->removeSpacesBetweenEmotes &&
-        element->getFlags().hasAny({MessageElementFlag::EmoteImage}) &&
-        shouldRemoveSpaceBetweenEmotes())
+        element->getFlags().has(MessageElementFlag::EmoteImage) &&
+        element->isImage() && shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left (right in case of RTL) to combine hug the previous emote
         if (isRTLAdjusting)
