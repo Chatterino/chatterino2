@@ -223,7 +223,7 @@
             "loginName": "",
             "messageText": "nerixyz banned uint128. (2 times) ",
             "searchText": "nerixyz banned uint128. (2 times) ",
-            "serverReceivedTime": "2025-02-22T17:53:50Z",
+            "timestamp": "2025-02-22T17:53:50Z",
             "timeoutUser": "uint128",
             "twitchBadgeInfos": {
             },
@@ -340,7 +340,7 @@
             "loginName": "nerixyz",
             "messageText": "nerixyz banned uint128. ",
             "searchText": "nerixyz banned uint128. ",
-            "serverReceivedTime": "2025-02-22T17:54:50Z",
+            "timestamp": "2025-02-22T17:54:50Z",
             "timeoutUser": "uint128",
             "twitchBadgeInfos": {
             },

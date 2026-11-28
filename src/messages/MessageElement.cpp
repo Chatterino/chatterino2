@@ -1206,9 +1206,9 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
 
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
                                const MessageColor &fallbackColor_,
-                               const MessageColor &userColor_)
-    : TextElement(displayName,
-                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+                               const MessageColor &userColor_,
+                               MessageElementFlags messageFlags)
+    : TextElement(displayName, messageFlags)
     , fallbackColor_(fallbackColor_)
     , userColor_(userColor_)
     , userLoginName_(std::move(loginName_))
@@ -1218,9 +1218,10 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 MentionElement::MentionElement(TextElement::CloneConstructorTag /* hack */,
                                QStringList words, QString loginName_,
                                const MessageColor &fallbackColor_,
-                               const MessageColor &userColor_)
+                               const MessageColor &userColor_,
+                               MessageElementFlags messageFlags)
     : TextElement(MentionElement::CloneConstructorTag{}, std::move(words),
-                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+                  messageFlags)
     , fallbackColor_(fallbackColor_)
     , userColor_(userColor_)
     , userLoginName_(std::move(loginName_))
@@ -1308,10 +1309,11 @@ std::unique_ptr<MessageElement> MentionElement::clone() const
 {
     auto elem = std::make_unique<MentionElement>(
         TextElement::CloneConstructorTag{}, this->words_, this->userLoginName_,
-        this->fallbackColor_, this->userColor_);
+        this->fallbackColor_, this->userColor_, this->getFlags());
 
     elem->setTooltip(this->getTooltip());
     elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->exhaustiveFlags = this->exhaustiveFlags;
     return elem;
 }
 
@@ -1324,6 +1326,24 @@ TimestampElement::TimestampElement()
 
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
+    , time_(time)
+    , element_(this->formatTime(time))
+{
+    assert(this->element_ != nullptr);
+}
+
+TimestampElement::TimestampElement(QTime time,
+                                   const MessageElementFlags extraFlags)
+    : MessageElement(extraFlags | MessageElementFlag::Timestamp)
+    , time_(time)
+    , element_(this->formatTime(time))
+{
+    assert(this->element_ != nullptr);
+}
+
+TimestampElement::TimestampElement(TimestampElement::CloneConstructorTag,
+                                   QTime time, const MessageElementFlags flags)
+    : MessageElement(flags)
     , time_(time)
     , element_(this->formatTime(time))
 {
@@ -1352,9 +1372,8 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
-    auto *text =
-        new TextElement(format, MessageElementFlag::Timestamp,
-                        MessageColor::System, FontStyle::TimestampMedium);
+    auto *text = new TextElement(format, this->getFlags(), MessageColor::System,
+                                 FontStyle::TimestampMedium);
     text->setLink(this->getLink());
     text->setTooltip(this->getTooltip());
     return text;
@@ -1385,7 +1404,8 @@ std::string_view TimestampElement::type() const
 
 std::unique_ptr<MessageElement> TimestampElement::clone() const
 {
-    auto elem = std::make_unique<TimestampElement>(this->time_);
+    auto elem = std::make_unique<TimestampElement>(
+        TimestampElement::CloneConstructorTag{}, this->time_, this->getFlags());
     elem->cloneFrom(*this);
     return elem;
 }
@@ -1477,13 +1497,16 @@ std::unique_ptr<MessageElement> LinebreakElement::clone() const
 {
     auto elem = std::make_unique<LinebreakElement>(this->getFlags());
     elem->setTrailingSpace(this->hasTrailingSpace());
+    elem->exhaustiveFlags = this->exhaustiveFlags;
     return elem;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
-                                         MessageElementFlags flags)
+                                         MessageElementFlags flags,
+                                         QString copyText)
     : MessageElement(flags)
     , images_(std::move(images))
+    , copyText_(std::move(copyText))
 {
 }
 
@@ -1509,6 +1532,11 @@ const ImageSet &ScalingImageElement::images() const
     return this->images_;
 }
 
+const QString &ScalingImageElement::copyText() const
+{
+    return this->copyText_;
+}
+
 QJsonObject ScalingImageElement::toJson() const
 {
     auto base = MessageElement::toJson();
@@ -1524,9 +1552,49 @@ std::string_view ScalingImageElement::type() const
 }
 std::unique_ptr<MessageElement> ScalingImageElement::clone() const
 {
+    auto elem = std::make_unique<ScalingImageElement>(
+        this->images_, this->getFlags(), this->copyText_);
+    elem->cloneFrom(*this);
+    return elem;
+}
+
+TwitchGifElement::TwitchGifElement(ImageSet images, QString copyText)
+    : ScalingImageElement(std::move(images), MessageElementFlag::TwitchGif,
+                          std::move(copyText))
+{
+}
+
+void TwitchGifElement::addToContainer(MessageLayoutContainer &container,
+                                      const MessageLayoutContext &ctx)
+{
+    if (!this->matchesFlags(ctx.flags))
+    {
+        return;
+    }
+
+    const auto scale = getSettings()->twitchGifScale.getValue();
+    const auto &image =
+        this->images().getImageOrLoaded(container.getImageScale() * scale);
+    if (image->isEmpty())
+    {
+        return;
+    }
+
+    auto size = image->size() * container.getScale() * scale;
+    // Scale down to fit within the split
+    if (size.width() > container.remainingWidth())
+    {
+        size *= container.remainingWidth() / size.width();
+    }
+
+    container.addElement(new ImageLayoutElement(*this, image, size));
+}
+
+std::unique_ptr<MessageElement> TwitchGifElement::clone() const
+{
     auto elem =
-        std::make_unique<ScalingImageElement>(this->images_, this->getFlags());
-    elem->setTrailingSpace(this->hasTrailingSpace());
+        std::make_unique<TwitchGifElement>(this->images(), this->copyText());
+    elem->cloneFrom(*this);
     return elem;
 }
 

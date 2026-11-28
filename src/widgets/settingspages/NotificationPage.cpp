@@ -36,7 +36,8 @@ NotificationPage::NotificationPage()
             {
                 settings.emplace<QLabel>(
                     "You can be informed when certain channels go live. You "
-                    "can be informed in multiple ways:");
+                    "must be logged in to receive live notifications."
+                    "\nYou can be informed in multiple ways:");
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));

@@ -25,7 +25,9 @@ public:
 protected:
     // turn a vector item into a model row
     ModerationAction getItemFromRow(std::vector<QStandardItem *> &row,
-                                    const ModerationAction &original) override;
+                                    const ModerationAction &original,
+                                    std::optional<QModelIndex> index,
+                                    std::optional<int> role) override;
 
     // turns a row in the model into a vector item
     void getRowFromItem(const ModerationAction &item,

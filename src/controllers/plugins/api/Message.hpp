@@ -177,7 +177,6 @@ function c2.MessageElementBase:add_flags(flags) end
 ---A chat message
 ---@class c2.Message
 ---@field flags c2.MessageFlag The message's flags
----@field parse_time number Time the message was parsed (in milliseconds since epoch)
 ---@field id string The message ID
 ---@field search_text string Text to check when searching for messages
 ---@field message_text string Text content of this message (used for filters for example)
@@ -187,7 +186,7 @@ function c2.MessageElementBase:add_flags(flags) end
 ---@field user_id string The ID of the sender
 ---@field channel_name string The name of the channel this message appeared in
 ---@field username_color string The color of the username
----@field server_received_time number The time the server received the message (in milliseconds since epoch)
+---@field timestamp number The message timestamp (in milliseconds since epoch)
 ---@field highlight_color string The color of the highlight or empty
 ---@field frozen boolean If this is set, Lua plugins can't modify this message (as it's visible to the user).
 c2.Message = {}
@@ -211,7 +210,6 @@ function c2.Message:clone() end
 ---@class MessageInit
 ---@field flags? c2.MessageFlag Message flags (see `c2.MessageFlags`)
 ---@field id? string The (ideally unique) message ID
----@field parse_time? number Time the message was parsed (in milliseconds since epoch)
 ---@field search_text? string Text to that is compared when searching for messages
 ---@field message_text? string The message text (used for filters for example)
 ---@field login_name? string The login name of the sender
@@ -220,7 +218,7 @@ function c2.Message:clone() end
 ---@field user_id? string The ID of the user who sent the message
 ---@field channel_name? string The name of the channel this message appeared in
 ---@field username_color? string The color of the username
----@field server_received_time? number The time the server received the message (in milliseconds since epoch)
+---@field timestamp? number The message timestamp (in milliseconds since epoch)
 ---@field highlight_color? string|nil The color of the highlight (if any)
 ---@field elements? (MessageElementInit|MessageElement)[] The elements of the message
 

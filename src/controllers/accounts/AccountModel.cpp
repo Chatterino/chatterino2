@@ -16,7 +16,8 @@ AccountModel::AccountModel(QObject *parent)
 
 // turn a vector item into a model row
 std::shared_ptr<Account> AccountModel::getItemFromRow(
-    std::vector<QStandardItem *> &, const std::shared_ptr<Account> &original)
+    std::vector<QStandardItem *> &, const std::shared_ptr<Account> &original,
+    std::optional<QModelIndex> index, std::optional<int> role)
 {
     return original;
 }

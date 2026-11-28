@@ -289,8 +289,8 @@ void runGui(QApplication &a, const Modes &modes, const Paths &paths,
         app->stop();
     });
 
-    Application app(settings, paths, args, updates);
-    app.initialize(settings, modes, paths);
+    Application app(settings, paths, args, modes, updates);
+    app.initialize(settings, paths);
     app.run();
 
     chatterino::NetworkManager::deinit();

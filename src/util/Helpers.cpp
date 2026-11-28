@@ -190,6 +190,11 @@ QString shortenString(const QString &str, unsigned maxWidth)
 
 QString kFormatNumbers(const int &number)
 {
+    if (number < 1000)
+    {
+        return QString::number(number);
+    }
+
     return QString("%1K").arg(number / 1000);
 }
 
@@ -342,6 +347,25 @@ QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
 #endif
 
     return dt;
+}
+
+qsizetype codepointLength(QStringView str)
+{
+    qsizetype length = 0;
+    const QChar *pos = str.begin();
+    const QChar *end = str.end();
+
+    while (pos < end)
+    {
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < end && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        length++;
+    }
+
+    return length;
 }
 
 QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)

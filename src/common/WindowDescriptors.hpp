@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/ProviderId.hpp"
+#include "util/Expected.hpp"
 
 #include <QJsonObject>
 #include <QList>
@@ -59,6 +60,7 @@ struct SplitDescriptor {
     QJsonObject toJson() const;
 
     IndirectChannel decodeChannel() const;
+    void setChannel(const IndirectChannel &chan);
 };
 
 struct SplitNodeDescriptor : SplitDescriptor {
@@ -136,7 +138,7 @@ public:
     /// If no split with the channel exists, a new one is added.
     /// If no window exists, a new one is added.
     void activateOrAddChannel(ProviderId provider, const QString &name);
-    static WindowLayout loadFromFile(const QString &path);
+    static ExpectedStr<WindowLayout> loadFromFile(const QString &path);
 };
 
 }  // namespace chatterino

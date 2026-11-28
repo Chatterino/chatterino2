@@ -95,14 +95,15 @@
             ],
             "externalBadges": [
             ],
-            "flags": "System|DoNotTriggerNotification|Subscription",
+            "flags": "System|Highlighted|Subscription",
             "frozen": false,
+            "highlightColor": "#64c466ff",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "An anonymous user gifted 6 months of a Tier 1 sub to MohammadrezaDH!",
             "searchText": "An anonymous user gifted 6 months of a Tier 1 sub to MohammadrezaDH!",
-            "serverReceivedTime": "",
+            "timestamp": "",
             "timeoutUser": "",
             "twitchBadgeInfos": {
             },

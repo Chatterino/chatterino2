@@ -712,16 +712,6 @@ void createUserType(sol::table &c2)
                 // flags are always mutable
                 msg->flags = f;
             }),
-        "parse_time",
-        sol::property(
-            [](Message *msg) {
-                return QDateTime(QDate::currentDate(), msg->parseTime)
-                    .toMSecsSinceEpoch();
-            },
-            [](Message *msg, qint64 ms) {
-                checkWritable(msg);
-                msg->parseTime = datetimeFromOffset(ms).time();
-            }),
         "id", memberAccessor<&Message::id>(),                         //
         "search_text", memberAccessor<&Message::searchText>(),        //
         "message_text", memberAccessor<&Message::messageText>(),      //
@@ -739,14 +729,14 @@ void createUserType(sol::table &c2)
                 checkWritable(msg);
                 msg->usernameColor = QColor::fromString(sv);
             }),
-        "server_received_time",
+        "timestamp",
         sol::property(
             [](Message *msg) {
-                return msg->serverReceivedTime.toMSecsSinceEpoch();
+                return msg->timestamp.toMSecsSinceEpoch();
             },
             [](Message *msg, qint64 ms) {
                 checkWritable(msg);
-                msg->serverReceivedTime = datetimeFromOffset(ms);
+                msg->timestamp = datetimeFromOffset(ms);
             }),
         "highlight_color",
         sol::property(
@@ -812,13 +802,6 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
     auto msg = std::make_shared<Message>();
     msg->flags = tbl.get_or("flags", MessageFlag::None);
 
-    // This takes a UTC offset (not the milliseconds since the start of the day)
-    auto parseTime = tbl.get<std::optional<qint64>>("parse_time");
-    if (parseTime)
-    {
-        msg->parseTime = datetimeFromOffset(*parseTime).time();
-    }
-
     msg->id = tbl.get_or("id", QString{});
     msg->searchText = tbl.get_or("search_text", QString{});
     msg->messageText = tbl.get_or("message_text", QString{});
@@ -835,11 +818,10 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
         msg->usernameColor = QColor(usernameColor);
     }
 
-    auto serverReceivedTime =
-        tbl.get<std::optional<qint64>>("server_received_time");
-    if (serverReceivedTime)
+    auto timestamp = tbl.get<std::optional<qint64>>("timestamp");
+    if (timestamp)
     {
-        msg->serverReceivedTime = datetimeFromOffset(*serverReceivedTime);
+        msg->timestamp = datetimeFromOffset(*timestamp);
     }
 
     // missing: badges

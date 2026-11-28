@@ -115,7 +115,7 @@ if (MSVC)
     # Disable min/max macros from Windows.h
     target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
 else ()
-    target_compile_options(${PROJECT_NAME} PUBLIC
+    target_compile_options(${PROJECT_NAME} PRIVATE
         -Wall
         # Disable the following warnings
         -Wno-unused-function

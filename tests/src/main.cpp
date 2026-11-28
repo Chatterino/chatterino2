@@ -25,6 +25,12 @@ using namespace chatterino;
 
 int main(int argc, char **argv)
 {
+    // Force the Qt Platform plugin to use minimal - this ensures we can "show" windows without
+    // someone's window manager actually showing a window.
+    // https://doc.qt.io/qt-6/qguiapplication.html#platformName-prop
+    // https://doc.qt.io/qt-6/qpa.html
+    qputenv("QT_QPA_PLATFORM", "minimal");
+
     ::testing::InitGoogleTest(&argc, argv);
 
 #ifdef SUPPORT_QT_NETWORK_TESTS

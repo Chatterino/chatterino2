@@ -37,6 +37,7 @@ public:
     QStringList getDefaultChatterinoCommandList();
 
     CommandController(const Paths &paths);
+    ~CommandController();
     void save();
 
     CommandModel *createModel(QObject *parent);

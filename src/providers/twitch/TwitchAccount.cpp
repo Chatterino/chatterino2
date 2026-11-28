@@ -108,6 +108,22 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
+void TwitchAccount::addWhisperUser(const QString &user)
+{
+    assertInGuiThread();
+
+    if (!user.isEmpty())
+    {
+        this->whisperUsers_.insert(user.toLower());
+    }
+}
+
+const std::unordered_set<QString> &TwitchAccount::whisperUsers() const
+{
+    assertInGuiThread();
+    return this->whisperUsers_;
+}
+
 void TwitchAccount::loadBlocks()
 {
     assertInGuiThread();
@@ -364,7 +380,7 @@ void TwitchAccount::loadSeventvUserID()
 
     seventv->getUserByTwitchID(
         this->getUserId(),
-        [this](const auto &json) {
+        [this](const auto &json, const auto & /*raw*/) {
             const auto id = json["user"]["id"].toString();
             if (!id.isEmpty())
             {
@@ -401,7 +417,7 @@ void TwitchAccount::setEmotes(std::shared_ptr<const EmoteMap> emotes)
     *this->emotes_.access() = std::move(emotes);
 }
 
-std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
+std::optional<EmotePtr> TwitchAccount::twitchEmote(EmoteNameView name) const
 {
     auto emotes = this->emotes_.accessConst();
     auto it = (*emotes)->find(name);

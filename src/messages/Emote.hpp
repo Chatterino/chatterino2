@@ -47,7 +47,8 @@ bool operator==(const Emote &a, const Emote &b);
 
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class EmoteMap : public std::unordered_map<EmoteName, EmotePtr>
+class EmoteMap : public std::unordered_map<EmoteName, EmotePtr, EmoteNameHash,
+                                           std::equal_to<>>
 {
 public:
     /**

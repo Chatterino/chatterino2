@@ -1,0 +1,59 @@
+{
+    "input": {
+        "highlighting": {
+            "automod": {
+                "color": "#ff33ff00"
+            }
+        }
+    },
+    "output": {
+        "highlighting": {
+            "automod": {
+                "color": "#ff33ff00"
+            },
+            "highlights2": [
+                {
+                    "id": "firstmessage"
+                },
+                {
+                    "id": "watchstreak"
+                },
+                {
+                    "id": "subscriptions"
+                },
+                {
+                    "id": "whispers"
+                },
+                {
+                    "id": "yourusername"
+                },
+                {
+                    "id": "yourmessages"
+                },
+                {
+                    "id": "subscribedthread"
+                },
+                {
+                    "id": "announcements"
+                },
+                {
+                    "id": "channelpoints"
+                },
+                {
+                    "backgroundColor": "#ff33ff00",
+                    "id": "automodcaught"
+                },
+                {
+                    "backgroundColor": "#ff33ff00",
+                    "id": "lowtrustuser"
+                },
+                {
+                    "id": "uncategorizednotification"
+                }
+            ]
+        },
+        "misc": {
+            "settingsVersion": 1
+        }
+    }
+}

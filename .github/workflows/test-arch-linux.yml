@@ -13,7 +13,6 @@ on:
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
-  QT_QPA_PLATFORM: minimal
 
 concurrency:
   group: test-arch-linux-${{ github.ref }}
@@ -33,6 +32,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           persist-credentials: false
 

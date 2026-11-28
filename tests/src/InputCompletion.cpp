@@ -5,6 +5,7 @@
 #include "Application.hpp"
 #include "common/Aliases.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/completion/sources/UserSource.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
@@ -16,6 +17,8 @@
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
@@ -23,6 +26,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QKeyEvent>
 #include <QModelIndex>
 #include <QString>
 #include <QTemporaryDir>
@@ -257,6 +261,27 @@ protected:
     }
 };
 
+TEST_F(InputCompletionTest, WhisperUserCompletion)
+{
+    auto currentUser = this->mockApplication->accounts.twitch.getCurrent();
+    currentUser->addWhisperUser("forsen");
+    currentUser->addWhisperUser("pajlada");
+
+    Channel whispers("/whispers", Channel::Type::TwitchWhispers);
+    UserSource source(&whispers, std::make_unique<ClassicUserStrategy>(),
+                      nullptr, false);
+
+    source.update("for");
+    ASSERT_EQ(source.output().size(), 1);
+    EXPECT_EQ(source.output()[0].first, "forsen");
+    EXPECT_EQ(source.output()[0].second, "forsen");
+
+    QStringList completions;
+    source.addToStringList(completions);
+    ASSERT_EQ(completions.size(), 1);
+    EXPECT_EQ(completions[0], "forsen ");
+}
+
 TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
 {
     // The completion doesn't guarantee an ordering for a specific category of emotes.
@@ -282,6 +307,22 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     ASSERT_EQ(completion[0].displayName, "cat");
     // FFZ emote is prioritized over any other matching emojis
     ASSERT_EQ(completion[1].displayName, "CatBag");
+}
+
+TEST_F(InputCompletionTest, EmptyPopupDoesNotConsumeEnter)
+{
+    auto channel = std::make_shared<TwitchChannel>("forsen");
+    channel->addRecentChatter("pajlada");
+    InputCompletionPopup popup;
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+
+    // Enter is not consumed when there is no completion to accept.
+    popup.updateCompletion("@nothing", CompletionKind::User, channel);
+    EXPECT_FALSE(popup.eventFilter(nullptr, &enter));
+
+    // Enter accepts an available completion.
+    popup.updateCompletion("@paj", CompletionKind::User, channel);
+    EXPECT_TRUE(popup.eventFilter(nullptr, &enter));
 }
 
 TEST_F(InputCompletionTest, ClassicEmoteExactNameMatching)

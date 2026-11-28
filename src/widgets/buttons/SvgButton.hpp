@@ -20,12 +20,7 @@ namespace chatterino {
 /// The source can be specified per theme (dark/light)
 /// and will get automatically updated when the theme changes.
 ///
-/// To set the size, use #setInnerHeight(). The width is adjusted according
-/// to the aspect ratio of the SVG. If the button should scale with the UI,
-/// turn on auto-scaling (@see #setAutoScale()), which will scale the button
-/// and padding according to the current UI-scale (linearly).
-///
-/// The button has #padding() around the SVG.
+/// The button has #padding() around the SVG, which will scale with the UI.
 class SvgButton : public Button
 {
     Q_OBJECT

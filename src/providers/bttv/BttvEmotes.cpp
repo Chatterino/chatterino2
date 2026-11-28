@@ -217,7 +217,7 @@ std::shared_ptr<const EmoteMap> BttvEmotes::emotes() const
     return this->global_.get();
 }
 
-std::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
+std::optional<EmotePtr> BttvEmotes::emote(EmoteNameView name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);

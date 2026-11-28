@@ -18,7 +18,7 @@ mkdir build-tests
 cd build-tests
 cmake -DBUILD_TESTS=On ..
 make
-./bin/chatterino-test
+ctest
 ```
 
 ### Example output

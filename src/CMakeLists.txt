@@ -197,23 +197,61 @@ set(SOURCE_FILES
         controllers/filters/lang/Types.cpp
         controllers/filters/lang/Types.hpp
 
-        controllers/highlights/BadgeHighlightModel.cpp
-        controllers/highlights/BadgeHighlightModel.hpp
-        controllers/highlights/HighlightBadge.cpp
-        controllers/highlights/HighlightBadge.hpp
+        controllers/highlights/ConfigureDialog.cpp
+        controllers/highlights/ConfigureDialog.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightCheck.hpp
         controllers/highlights/HighlightController.cpp
         controllers/highlights/HighlightController.hpp
-        controllers/highlights/HighlightModel.cpp
-        controllers/highlights/HighlightModel.hpp
-        controllers/highlights/HighlightPhrase.cpp
-        controllers/highlights/HighlightPhrase.hpp
         controllers/highlights/HighlightResult.cpp
         controllers/highlights/HighlightResult.hpp
-        controllers/highlights/UserHighlightModel.cpp
-        controllers/highlights/UserHighlightModel.hpp
+        controllers/highlights/Legacy.hpp
+        controllers/highlights/Model.cpp
+        controllers/highlights/Model.hpp
+        controllers/highlights/Sounds.cpp
+        controllers/highlights/Sounds.hpp
+        controllers/highlights/types/AnyHighlightForward.hpp
+        controllers/highlights/types/AnyHighlight.hpp
+        controllers/highlights/types/AnnouncementsHighlight.cpp
+        controllers/highlights/types/AnnouncementsHighlight.hpp
+        controllers/highlights/types/AutomodCaughtHighlight.cpp
+        controllers/highlights/types/AutomodCaughtHighlight.hpp
+        controllers/highlights/types/BadgeHighlight.cpp
+        controllers/highlights/types/BadgeHighlight.hpp
+        controllers/highlights/types/ChannelPointsHighlight.cpp
+        controllers/highlights/types/ChannelPointsHighlight.hpp
+        controllers/highlights/types/Common.cpp
+        controllers/highlights/types/Common.hpp
+        controllers/highlights/types/Concepts.hpp
+        controllers/highlights/types/FilterHighlight.cpp
+        controllers/highlights/types/FilterHighlight.hpp
+        controllers/highlights/types/FirstMessageHighlight.cpp
+        controllers/highlights/types/FirstMessageHighlight.hpp
+        controllers/highlights/types/InvalidHighlight.cpp
+        controllers/highlights/types/InvalidHighlight.hpp
+        controllers/highlights/types/LowTrustUserHighlight.cpp
+        controllers/highlights/types/LowTrustUserHighlight.hpp
+        controllers/highlights/types/MessageHighlight.cpp
+        controllers/highlights/types/MessageHighlight.hpp
+        controllers/highlights/types/Outcome.cpp
+        controllers/highlights/types/Outcome.hpp
+        controllers/highlights/types/SubscribedThreadHighlight.cpp
+        controllers/highlights/types/SubscribedThreadHighlight.hpp
+        controllers/highlights/types/SubscriptionsHighlight.cpp
+        controllers/highlights/types/SubscriptionsHighlight.hpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.cpp
+        controllers/highlights/types/UncategorizedNotificationHighlight.hpp
+        controllers/highlights/types/UserHighlight.cpp
+        controllers/highlights/types/UserHighlight.hpp
+        controllers/highlights/types/WatchStreakHighlight.cpp
+        controllers/highlights/types/WatchStreakHighlight.hpp
+        controllers/highlights/types/WhispersHighlight.cpp
+        controllers/highlights/types/WhispersHighlight.hpp
+        controllers/highlights/types/YourMessagesHighlight.cpp
+        controllers/highlights/types/YourMessagesHighlight.hpp
+        controllers/highlights/types/YourUsernameHighlight.cpp
+        controllers/highlights/types/YourUsernameHighlight.hpp
 
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp
@@ -327,6 +365,8 @@ set(SOURCE_FILES
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
+        messages/AsciiArt.cpp
+        messages/AsciiArt.hpp
         messages/Emote.cpp
         messages/Emote.hpp
         messages/Image.cpp
@@ -344,6 +384,7 @@ set(SOURCE_FILES
         messages/MessageElement.cpp
         messages/MessageElement.hpp
         messages/MessageFlag.hpp
+        messages/MessageParseArgs.hpp
         messages/MessageSimilarity.cpp
         messages/MessageSimilarity.hpp
         messages/MessageSink.hpp
@@ -648,6 +689,8 @@ set(SOURCE_FILES
         widgets/BaseWindow.hpp
         widgets/ChatterListWidget.cpp
         widgets/ChatterListWidget.hpp
+        widgets/FollowedChannelsWindow.cpp
+        widgets/FollowedChannelsWindow.hpp
         widgets/DraggablePopup.cpp
         widgets/DraggablePopup.hpp
         widgets/FramelessEmbedWindow.cpp
@@ -704,6 +747,8 @@ set(SOURCE_FILES
         widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+        widgets/dialogs/StreamLinkErrorPopup.cpp
+        widgets/dialogs/StreamLinkErrorPopup.hpp
 
         widgets/dialogs/font/FontDialog.cpp
         widgets/dialogs/font/FontDialog.hpp
@@ -784,6 +829,8 @@ set(SOURCE_FILES
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
+        widgets/helper/LiveIndicator.cpp
+        widgets/helper/LiveIndicator.hpp
         widgets/helper/MessageView.cpp
         widgets/helper/MessageView.hpp
         widgets/helper/NotebookTab.cpp
@@ -802,8 +849,8 @@ set(SOURCE_FILES
         widgets/helper/SearchPopup.hpp
         widgets/helper/SettingsDialogTab.cpp
         widgets/helper/SettingsDialogTab.hpp
-        widgets/helper/LiveIndicator.cpp
-        widgets/helper/LiveIndicator.hpp
+        widgets/helper/SvgWidget.cpp
+        widgets/helper/SvgWidget.hpp
         widgets/helper/TableStyles.cpp
         widgets/helper/TableStyles.hpp
         widgets/helper/TrimRegExpValidator.cpp
@@ -838,6 +885,8 @@ set(SOURCE_FILES
         widgets/settingspages/GeneralPageView.hpp
         widgets/settingspages/HighlightingPage.cpp
         widgets/settingspages/HighlightingPage.hpp
+        widgets/settingspages/HighlightingWidget.cpp
+        widgets/settingspages/HighlightingWidget.hpp
         widgets/settingspages/IgnoresPage.cpp
         widgets/settingspages/IgnoresPage.hpp
         widgets/settingspages/KeyboardSettingsPage.cpp
@@ -895,6 +944,42 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 list(APPEND SOURCE_FILES ${RES_AUTOGEN_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
+
+if (SKIP_LUA_DEFINITIONS_GENERATION)
+    message(STATUS "Skipping lua definition generation")
+else ()
+    message(STATUS "Doing lua definition generation")
+    find_package(Python3 COMPONENTS Interpreter)
+
+    # HACK(Mm2PL): Trick make into running our script
+    if (FORCE_LUA_DEFINITIONS_GENERATION)
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua" _fake_output)
+        set(panic_on_error "--panic-on-error")
+    else()
+        set(outputs "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+        set(panic_on_error "--no-panic-on-error")
+    endif()
+
+    if (Python3_EXECUTABLE)
+        add_custom_command(
+            COMMENT "Generating Lua definitions"
+            DEPENDS "${CMAKE_SOURCE_DIR}/scripts/make_luals_meta.py"
+            DEPFILE "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d"
+            COMMAND "${Python3_EXECUTABLE}" "scripts/make_luals_meta.py" --depfile "${CMAKE_BINARY_DIR}/docs/plugin-meta.lua.d" "${panic_on_error}"
+            OUTPUT ${outputs}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            VERBATIM
+        )
+        add_custom_target(plugin_definitions ALL DEPENDS "${CMAKE_SOURCE_DIR}/docs/plugin-meta.lua")
+        add_dependencies(${LIBRARY_PROJECT} plugin_definitions)
+    else ()
+        if (FORCE_LUA_DEFINITIONS_GENERATION)
+            message(FATAL_ERROR "Missing python3 for lua definition generation")
+        else ()
+            message(STATUS "Generation of LuaLS meta is not supported (use FORCE_LUA_DEFINITIONS_GENERATION=On to get more information)")
+        endif ()
+    endif ()
+endif ()
 
 if (APPLE)
     target_link_libraries(${LIBRARY_PROJECT} PRIVATE
@@ -961,7 +1046,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg
-        Qt${MAJOR_QT_VERSION}::SvgWidgets
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
@@ -981,16 +1065,16 @@ endif()
 
 if (CHATTERINO_SPELLCHECK)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_SPELLCHECK)
-    target_link_libraries(${LIBRARY_PROJECT} PRIVATE hunspell::hunspell)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC hunspell::hunspell)
 endif()
 
 if (CHATTERINO_ALLOW_PRIVATE_QT_API)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC Qt${MAJOR_QT_VERSION}::GuiPrivate)
-    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC 
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CHATTERINO_WITH_PRIVATE_QT_API)
 endif()
 
-# Set the output of TARGET to be 
+# Set the output of TARGET to be
 # - CMAKE_BIN_DIR/lib for libraries
 # - CMAKE_BIN_DIR/bin for BINARIES
 # an additional argument specifies the subdirectory.

@@ -8,7 +8,8 @@
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "util/QMagicEnum.hpp"
+#include "util/Backup.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "widgets/Window.hpp"
 
 #include <QFile>
@@ -23,17 +24,32 @@ namespace chatterino {
 
 namespace {
 
-QJsonArray loadWindowArray(const QString &settingsPath)
+ExpectedStr<QJsonArray> loadWindowArray(const QString &settingsPath)
 {
     QFile file(settingsPath);
     if (!file.open(QIODevice::ReadOnly))
     {
-        return {};
+        return makeUnexpected(u"Failed to open file: " % file.errorString());
     }
     QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
-    return windows_arr;
+    QJsonParseError err;
+    QJsonDocument document = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError)
+    {
+        return makeUnexpected(u"Failed to parse JSON: " % err.errorString());
+    }
+    if (!document.isObject())
+    {
+        return makeUnexpected(u"Root element is not an object"_s);
+    }
+    const auto rootObj = document.object();
+    const auto windowsEl = rootObj["windows"_L1];
+    if (!windowsEl.isArray())
+    {
+        return makeUnexpected(
+            u"Root object does not contain a 'windows' array"_s);
+    }
+    return windowsEl.toArray();
 }
 
 QList<QUuid> loadFilters(const QJsonValue &val)
@@ -119,7 +135,8 @@ IndirectChannel SplitDescriptor::decodeChannel() const
 {
     assertInGuiThread();
 
-    auto type = qmagicenum::enumCast<Channel::Type>(this->type_);
+    auto type =
+        qmagicenum::SerializedName::enumCast<Channel::Type>(this->type_);
     if (!type)
     {
         return Channel::getEmpty();
@@ -149,6 +166,30 @@ IndirectChannel SplitDescriptor::decodeChannel() const
     }
 
     return Channel::getEmpty();
+}
+
+void SplitDescriptor::setChannel(const IndirectChannel &chan)
+{
+    this->type_ = qmagicenum::SerializedName::enumNameString(chan.getType());
+    switch (chan.getType())
+    {
+        case Channel::Type::Twitch:
+        case Channel::Type::Misc:
+            this->channelName_ = chan.get()->getName();
+            break;
+
+        case Channel::Type::TwitchWhispers:
+        case Channel::Type::TwitchWatching:
+        case Channel::Type::TwitchMentions:
+        case Channel::Type::TwitchLive:
+        case Channel::Type::TwitchAutomod:
+
+        // FIXME: Remove these (#5703)
+        case Channel::Type::None:
+        case Channel::Type::Direct:
+        case Channel::Type::TwitchEnd:
+            break;
+    }
 }
 
 SplitNodeDescriptor::SplitNodeDescriptor(SplitDescriptor descriptor)
@@ -260,14 +301,19 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
     return tab;
 }
 
-WindowLayout WindowLayout::loadFromFile(const QString &path)
+ExpectedStr<WindowLayout> WindowLayout::loadFromFile(const QString &path)
 {
     WindowLayout layout;
 
     bool hasSetAMainWindow = false;
 
-    // "deserialize"
-    for (const auto windowVal : loadWindowArray(path))
+    auto rootArray = loadWindowArray(path);
+    if (!rootArray)
+    {
+        return makeUnexpected(std::move(rootArray).error());
+    }
+
+    for (const auto windowVal : std::as_const(*rootArray))
     {
         const QJsonObject windowObj = windowVal.toObject();
 

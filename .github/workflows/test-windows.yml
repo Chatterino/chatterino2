@@ -9,7 +9,6 @@ on:
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.12
   HTTPBOX_TAG: v0.2.1
-  QT_QPA_PLATFORM: minimal
   CONAN_VERSION: 2.28.1
 
 concurrency:
@@ -40,12 +39,13 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ case(github.event_name == 'pull_request', github.event.pull_request.head.sha, '') }} # checkout pull request HEAD if PR triggered this job
           submodules: recursive
           fetch-depth: 0 # allows for tags access
           persist-credentials: false
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -55,16 +55,21 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: Chatterino/msvc-dev-cmd@24444121cb2805a7adbd23d0f4455d0916af896b # v2.0.7
 
+      - name: Setup LLVM 23
+        uses: ZhongRuoyu/setup-llvm@eea6238baf53d41c1615923680d7a738da584318 # v0.2.0
+        with:
+          llvm-version: 23
+
       - name: Setup sccache
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           variant: sccache
           # only save on the default (master) branch
           save: ${{ github.event_name == 'push' }}
-          key: sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
+          key: sccache-test-${{ matrix.os }}-clang23-${{ matrix.qt-version }}-${{ matrix.skip-crashpad }}
           restore-keys: |
-            sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
+            sccache-test-${{ matrix.os }}-clang23-${{ matrix.qt-version }}
 
       - name: Cache conan packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -109,17 +114,20 @@ jobs:
       - name: Build
         run: |
           cmake `
-              -G"NMake Makefiles" `
+              -G Ninja `
+              -DCMAKE_CXX_COMPILER=clang-cl `
+              -DCMAKE_C_COMPILER=clang-cl `
+              -DCMAKE_RC_COMPILER=llvm-rc `
+              -DCMAKE_LINKER_TYPE=LLD `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DBUILD_TESTS=On `
               -DBUILD_APP=OFF `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=On `
+              -DUSE_PRECOMPILED_HEADERS=Off `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_SPELLCHECK=On `
               ..
-          set cl=/MP
-          nmake /S /NOLOGO
+          ninja
         working-directory: build-test
 
       - name: Download and extract Twitch PubSub Server Test

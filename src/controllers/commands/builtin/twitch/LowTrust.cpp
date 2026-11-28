@@ -11,6 +11,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "util/Twitch.hpp"
 
 namespace {
 
@@ -51,8 +52,10 @@ void addSuspiciousTreatment(const CommandContext &ctx, const QString &command,
 
     auto roomId = ctx.twitchChannel->roomId();
     auto modId = currentUser->getUserId();
+    auto target = ctx.words.at(1);
+    stripChannelName(target);
     getHelix()->getUserByName(
-        ctx.words.at(1),
+        target,
         [chan{ctx.channel}, roomId, modId, command, restrict](const auto &u) {
             getHelix()->addSuspiciousUser(
                 roomId, modId, u.id, restrict,
@@ -104,8 +107,10 @@ void removeSuspiciousTreatment(const CommandContext &ctx,
 
     auto roomId = ctx.twitchChannel->roomId();
     auto modId = currentUser->getUserId();
+    auto target = ctx.words.at(1);
+    stripChannelName(target);
     getHelix()->getUserByName(
-        ctx.words.at(1),
+        target,
         [chan{ctx.channel}, roomId, modId, command](const auto &user) {
             getHelix()->removeSuspiciousUser(
                 roomId, modId, user.id,

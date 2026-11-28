@@ -1,0 +1,4 @@
+InheritParentConfig: true
+CheckOptions:
+  - key: cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses
+    value: ^QJson(Object|Array|Value);^sol::state_view;^sol::basic_table_core

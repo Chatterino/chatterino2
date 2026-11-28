@@ -81,6 +81,7 @@ public:
 
     virtual const Paths &getPaths() = 0;
     virtual const Args &getArgs() = 0;
+    virtual const Modes &getModes() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual EmoteController *getEmotes() = 0;
@@ -126,12 +127,13 @@ class Application : public IApplication
 {
     const Paths &paths_;
     const Args &args_;
+    const Modes &modes_;
     int argc_{};
     char **argv_{};
 
 public:
     Application(Settings &_settings, const Paths &paths, const Args &_args,
-                Updates &_updates);
+                const Modes &modes, Updates &_updates);
     ~Application() override;
 
     Application(const Application &) = delete;
@@ -144,7 +146,7 @@ public:
         return false;
     }
 
-    void initialize(Settings &settings, const Modes &modes, const Paths &paths);
+    void initialize(Settings &settings, const Paths &paths);
     void load();
     void aboutToQuit();
     void stop();
@@ -203,6 +205,10 @@ public:
     const Args &getArgs() override
     {
         return this->args_;
+    }
+    const Modes &getModes() override
+    {
+        return this->modes_;
     }
     Theme *getThemes() override;
     Fonts *getFonts() override;

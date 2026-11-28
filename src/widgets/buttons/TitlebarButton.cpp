@@ -6,8 +6,6 @@
 
 #include "singletons/Theme.hpp"
 
-#include <QPainterPath>
-
 namespace chatterino {
 
 TitleBarButton::TitleBarButton(TitleBarButtonStyle style)
@@ -37,8 +35,7 @@ void TitleBarButton::paintContent(QPainter &painter)
 {
     painter.setOpacity(this->currentContentOpacity());
 
-    QColor color = this->theme->window.text;
-    QColor background = this->theme->window.background;
+    const QColor color = this->theme->window.text;
 
     int xD = this->height() / 3;
     int centerX = this->width() / 2;
@@ -72,35 +69,6 @@ void TitleBarButton::paintContent(QPainter &painter)
 
             painter.drawLine(rect.topLeft(), rect.bottomRight());
             painter.drawLine(rect.topRight(), rect.bottomLeft());
-            break;
-        }
-        case TitleBarButtonStyle::Settings: {
-            painter.setPen(color);
-            color = "#999";
-            painter.setRenderHint(QPainter::Antialiasing);
-
-            painter.save();
-            painter.translate(3, 3);
-
-            auto a = xD / 3;
-            QPainterPath path;
-
-            path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
-
-            for (int i = 0; i < 8; i++)
-            {
-                path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
-                           (360 / 32.0));
-                path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
-                           i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
-            }
-
-            painter.strokePath(path, color);
-            painter.fillPath(path, color);
-
-            painter.setBrush(background);
-            painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
-            painter.restore();
             break;
         }
         default:;

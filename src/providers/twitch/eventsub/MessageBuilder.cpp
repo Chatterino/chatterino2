@@ -53,6 +53,12 @@ QString stringifyAutomodReason(const lib::automod::AutomodReason &reason,
     return reason.category.qt() % u" level " % QString::number(reason.level);
 }
 
+QString stringifyAutomodReason(const std::string &reason,
+                               QStringView /* message */)
+{
+    return QString::fromStdString(reason).replace(u'_', u' ');
+}
+
 QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
                                QStringView message)
 {
@@ -174,7 +180,7 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
 {
     this->emplace<TimestampElement>(time.time());
     this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
-    this->message().serverReceivedTime = time;
+    this->message().timestamp = time;
 }
 
 EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel)
@@ -218,6 +224,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Vip &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -233,6 +240,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unvip &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -247,6 +255,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Warn &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     builder->flags.set(MessageFlag::ModerationAction);
     QString text;
 
@@ -532,6 +541,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Mod &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -547,6 +557,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unmod &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -591,6 +602,7 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UnbanRequest &action)
 {
+    builder->timeoutUser = action.userLogin.qt();
     builder->flags.set(MessageFlag::ModerationAction);
 
     QString text;
@@ -620,21 +632,22 @@ void makeModerateMessage(
     builder.setMessageAndSearchText(text);
 }
 
-MessagePtr makeAutomodHoldMessageHeader(
+std::pair<MessagePtr, HighlightAlert> makeAutomodHoldMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event)
 {
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
     builder->id = u"automod_" % event.messageID.qt();
-    builder->loginName = u"automod"_s;
-    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->timestamp = time;
     builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
                        MessageFlag::AutoMod,
-                       MessageFlag::AutoModOffendingMessageHeader);
+                       MessageFlag::AutoModOffendingMessageHeader,
+                       MessageFlag::AutoModOffendingMessage);
     builder->flags.set(
         MessageFlag::AutoModBlockedTerm,
         std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
+
+    builder->channelName = event.broadcasterUserLogin.qt();
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),
@@ -642,6 +655,7 @@ MessagePtr makeAutomodHoldMessageHeader(
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
                                  QColor(0, 0, 255), FontStyle::ChatMediumBold);
+
     // AutoMod header message
     auto reason = std::visit(
         [&](const auto &r) {
@@ -663,29 +677,8 @@ MessagePtr makeAutomodHoldMessageHeader(
                               MessageColor(QColor(255, 0, 0)),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModDeny, event.messageID.qt()});
+    builder.emplace<LinebreakElement>(MessageElementFlag::Text);
 
-    builder.setMessageAndSearchText(
-        u"AutoMod: Held a message for reason: " % reason %
-        u". Allow will post it in chat. Allow Deny");
-
-    return builder.release();
-}
-
-MessagePtr makeAutomodHoldMessageBody(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::automod_message_hold::v2::Event &event)
-{
-    EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
-                       MessageFlag::AutoMod,
-                       MessageFlag::AutoModOffendingMessage);
-    builder->flags.set(
-        MessageFlag::AutoModBlockedTerm,
-        std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
-
-    // Builder for offender's message
-    builder->channelName = event.broadcasterUserLogin.qt();
     builder
         .emplace<TextElement>(u'#' + event.broadcasterUserLogin.qt(),
                               MessageElementFlag::ChannelName,
@@ -705,13 +698,20 @@ MessagePtr makeAutomodHoldMessageBody(
     builder.emplace<TextElement>(event.message.text.qt(),
                                  MessageElementFlag::Text, MessageColor::Text);
 
-    builder.setMessageAndSearchText(displayName % u": " %
-                                    event.message.text.qt());
+    builder.setMessageAndSearchText(
+        u"AutoMod: Held a message for reason: " % reason %
+        u". Allow will post it in chat. Allow Deny " % displayName % u": " %
+        event.message.text.qt());
 
-    return builder.release();
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    auto highlights =
+        builder.parseHighlights(tags, event.message.text.qt(), {}, channel);
+
+    return {builder.release(), highlights};
 }
 
-MessagePtr makeSuspiciousUserMessageHeader(
+std::pair<MessagePtr, HighlightAlert> makeSuspiciousUserMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::channel_suspicious_user_message::v1::Event &event)
 {
@@ -719,8 +719,9 @@ MessagePtr makeSuspiciousUserMessageHeader(
 
     // Builder for low trust user message with explanation
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->serverReceivedTime = time;
-    builder->flags.set(MessageFlag::LowTrustUsers);
+    builder->timestamp = time;
+    builder->loginName = event.userLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::LowTrustUsers);
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),
@@ -774,26 +775,7 @@ MessagePtr makeSuspiciousUserMessageHeader(
     builder.emplace<TextElement>(headerMessage, MessageElementFlag::Text,
                                  MessageColor::Text);
 
-    builder.setMessageAndSearchText(prefix % u" " % headerMessage);
-
-    return builder.release();
-}
-
-MessagePtr makeSuspiciousUserMessageBody(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::channel_suspicious_user_message::v1::Event &event)
-{
-    EventSubMessageBuilder builder(channel);
-    builder->channelName = event.broadcasterUserLogin.qt();
-    builder->serverReceivedTime = time;
-    if (event.lowTrustStatus == lib::suspicious_users::Status::Restricted)
-    {
-        builder->flags.set(MessageFlag::RestrictedMessage);
-    }
-    else
-    {
-        builder->flags.set(MessageFlag::MonitoredMessage);
-    }
+    builder.emplace<LinebreakElement>(MessageElementFlag::Text);
 
     builder
         .emplace<TextElement>(u'#' + event.broadcasterUserLogin.qt(),
@@ -802,8 +784,6 @@ MessagePtr makeSuspiciousUserMessageBody(
         ->setLink({Link::JumpToChannel, event.broadcasterUserLogin.qt()});
     builder.emplace<TimestampElement>(time.time());
     builder.emplace<TwitchModerationElement>();
-    builder->loginName = event.userLogin.qt();
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::LowTrustUsers);
 
     // sender username
     builder.emplace<MentionElement>(
@@ -815,10 +795,16 @@ MessagePtr makeSuspiciousUserMessageBody(
     builder.emplace<TextElement>(event.message.text.qt(),
                                  MessageElementFlag::Text, MessageColor::Text);
 
-    builder.setMessageAndSearchText(event.userName.qt() % u": " %
+    builder.setMessageAndSearchText(prefix % u" " % headerMessage % u" " %
+                                    event.userName.qt() % u": " %
                                     event.message.text.qt());
 
-    return builder.release();
+    QVariantMap tagsMap;
+    Communi::TagsRef tags(tagsMap);
+    auto highlights =
+        builder.parseHighlights(tags, event.message.text.qt(), {}, channel);
+
+    return {builder.release(), highlights};
 }
 
 MessagePtr makeSuspiciousUserUpdate(
@@ -872,7 +858,7 @@ MessagePtr makeUserMessageHeldMessage(
     QString text("AutoMod: Hey! Your message is being checked by mods and has "
                  "not been sent.");
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
@@ -901,7 +887,7 @@ MessagePtr makeUserMessageUpdateMessage(
 
     QString text("AutoMod: ");
     EventSubMessageBuilder builder(channel);
-    builder->serverReceivedTime = time;
+    builder->timestamp = time;
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
