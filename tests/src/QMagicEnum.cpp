@@ -9,6 +9,7 @@
 #include "common/Literals.hpp"
 #include "common/ThumbnailPreviewMode.hpp"
 #include "Test.hpp"
+#include "util/QMagicEnumQJsonValue.hpp"  // IWYU pragma: keep
 #include "util/QMagicEnumTagged.hpp"
 
 using namespace chatterino;
@@ -158,9 +159,7 @@ TEST(QMagicEnum, flags)
     static_assert(eq(enumName<MyFlag::Four>(), u"Four"));
     static_assert(eq(enumName<MyFlag::Eight>(), u"Eight"));
 
-    static_assert(!magic_enum::enum_index<MyFlag>(MyFlag::None).has_value());
-    static_assert(eq(enumName(MyFlag::None), u""));
-
+    static_assert(checkConst(MyFlag::None, u"None"));
     static_assert(checkConst(MyFlag::One, u"One"));
     static_assert(checkConst(MyFlag::Two, u"Two"));
     static_assert(checkConst(MyFlag::Four, u"Four"));
@@ -168,7 +167,36 @@ TEST(QMagicEnum, flags)
     static_assert(checkConst(MyFlag::Eight, u"Eight"));
     static_assert(eq(enumName(static_cast<MyFlag>(16)), u""));
     static_assert(checkValues<MyFlag>(
-        {u"One", u"Two", u"Four", u"Eight", u"TwoPow9", u"TwoPow10"}));
+        {u"None", u"One", u"Two", u"Four", u"Eight", u"TwoPow9", u"TwoPow10"}));
+}
+
+TEST(QMagicEnum, QJsonValue)
+{
+    static_assert(eq(enumName<QJsonValue::Type::Null>(), u"Null"));
+    static_assert(eq(enumName<QJsonValue::Type::Bool>(), u"Bool"));
+    static_assert(eq(enumName<QJsonValue::Type::Double>(), u"Double"));
+    static_assert(eq(enumName<QJsonValue::Type::String>(), u"String"));
+    static_assert(eq(enumName<QJsonValue::Type::Array>(), u"Array"));
+    static_assert(eq(enumName<QJsonValue::Type::Object>(), u"Object"));
+    static_assert(eq(enumName<QJsonValue::Type::Undefined>(), u"Undefined"));
+
+    static_assert(checkConst(QJsonValue::Type::Null, u"Null"));
+    static_assert(checkConst(QJsonValue::Type::Bool, u"Bool"));
+    static_assert(checkConst(QJsonValue::Type::Double, u"Double"));
+    static_assert(checkConst(QJsonValue::Type::String, u"String"));
+    static_assert(checkConst(QJsonValue::Type::Array, u"Array"));
+    static_assert(checkConst(QJsonValue::Type::Object, u"Object"));
+    static_assert(checkConst(QJsonValue::Type::Undefined, u"Undefined"));
+
+    static_assert(checkValues<QJsonValue::Type>({
+        u"Null",
+        u"Bool",
+        u"Double",
+        u"String",
+        u"Array",
+        u"Object",
+        u"Undefined",
+    }));
 }
 
 TEST(QMagicEnum, enumNameString)
@@ -179,7 +207,7 @@ TEST(QMagicEnum, enumNameString)
     ASSERT_EQ(enumNameString<MyFlag::Four>(), u"Four");
 
     ASSERT_EQ(enumNameString(MyEnum::Bar), u"Bar");
-    ASSERT_EQ(enumNameString(MyFlag::None), u"");
+    ASSERT_EQ(enumNameString(MyFlag::None), u"None");
     ASSERT_EQ(enumNameString(MyFlag::One), u"One");
     ASSERT_EQ(enumNameString(MyCustom::Second), u"mysecond.*");
     ASSERT_EQ(enumNameString(OpenTwo), u"OpenTwo");

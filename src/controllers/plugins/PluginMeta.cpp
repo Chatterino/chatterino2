@@ -6,6 +6,7 @@
 #    include "controllers/plugins/PluginMeta.hpp"
 
 #    include "util/QMagicEnum.hpp"
+#    include "util/QMagicEnumQJsonValue.hpp"  // IWYU pragma: keep
 
 #    include <QJsonArray>
 #    include <QJsonObject>
