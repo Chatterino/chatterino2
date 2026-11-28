@@ -8,6 +8,8 @@
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
+#include "controllers/hotkeys/HotkeySequence.hpp"
+#include "controllers/hotkeys/MouseShortcut.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
 #include <pajlada/settings.hpp>
@@ -78,6 +80,8 @@ static bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
 HotkeyController::HotkeyController()
     : hotkeys_(hotkeySortCompare_)
 {
+    installMouseShortcutFilter();
+
     this->loadHotkeys();
 
     this->clearRemovedDefaults();
@@ -96,12 +100,12 @@ HotkeyModel *HotkeyController::createModel(QObject *parent)
     return model;
 }
 
-std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
+std::vector<QObject *> HotkeyController::shortcutsForCategory(
     HotkeyCategory category,
     std::map<QString, std::function<QString(std::vector<QString>)>> actionMap,
     QWidget *parent)
 {
-    std::vector<QShortcut *> output;
+    std::vector<QObject *> output;
     for (const auto &hotkey : this->hotkeys_)
     {
         if (hotkey->category() != category)
@@ -122,21 +126,31 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
             // Widget has chosen to explicitly not handle this action
             continue;
         }
+        auto invokeHotkey = [functionPointer = target->second, hotkey]() {
+            QString error = functionPointer(hotkey->arguments());
+            if (!error.isEmpty())
+            {
+                HotkeyController::showHotkeyError(hotkey, error);
+            }
+        };
+
         auto createShortcutFromKeySeq = [&](QKeySequence qs) {
             auto *s = new QShortcut(qs, parent);
             s->setContext(hotkey->getContext());
-            auto functionPointer = target->second;
-            QObject::connect(s, &QShortcut::activated, parent,
-                             [functionPointer, hotkey, this]() {
-                                 QString output =
-                                     functionPointer(hotkey->arguments());
-                                 if (!output.isEmpty())
-                                 {
-                                     this->showHotkeyError(hotkey, output);
-                                 }
-                             });
+            QObject::connect(s, &QShortcut::activated, parent, invokeHotkey);
             output.push_back(s);
         };
+
+        if (hotkey->sequence().isMouse())
+        {
+            auto *s = new MouseShortcut(hotkey->sequence().mouseButton(),
+                                        hotkey->getContext(), parent);
+            QObject::connect(s, &MouseShortcut::activated, parent,
+                             invokeHotkey);
+            output.push_back(s);
+            continue;
+        }
+
         auto qs = QKeySequence(hotkey->keySequence());
 
         // Create shortcut for the original key sequence
@@ -223,7 +237,7 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
         }
 
         if (shared->category() == hotkey->category() &&
-            shared->keySequence() == hotkey->keySequence())
+            shared->sequence() == hotkey->sequence())
         {
             return true;
         }
@@ -287,8 +301,8 @@ void HotkeyController::loadHotkeys()
             continue;
         }
         this->hotkeys_.append(std::make_shared<Hotkey>(
-            *category, QKeySequence(keySequence), action, arguments,
-            QString::fromStdString(key)));
+            *category, HotkeySequence::fromPortableString(keySequence), action,
+            arguments, QString::fromStdString(key)));
     }
 
     if (numDefaultsFromSettings != numCombinedDefaults)
@@ -319,8 +333,8 @@ void HotkeyController::saveHotkeys()
         auto section = "/hotkeys/" + hotkey->name().toStdString();
         pajlada::Settings::Setting<QString>::set(section + "/action",
                                                  hotkey->action());
-        pajlada::Settings::Setting<QString>::set(
-            section + "/keySequence", hotkey->keySequence().toString());
+        pajlada::Settings::Setting<QString>::set(section + "/keySequence",
+                                                 hotkey->toPortableString());
 
         auto categoryName = hotkeyCategoryName(hotkey->category());
         pajlada::Settings::Setting<QString>::set(section + "/category",
@@ -666,6 +680,10 @@ std::shared_ptr<Hotkey> HotkeyController::findLike(
 {
     for (auto other : this->hotkeys_)
     {
+        if (other->sequence().isMouse())
+        {
+            continue;
+        }
         if (other->category() == category && other->action() == action)
         {
             if (arguments)
