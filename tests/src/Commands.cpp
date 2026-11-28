@@ -70,6 +70,30 @@ public:
 
 namespace chatterino {
 
+TEST(Commands, customCommandArguments)
+{
+    MockApplication app;
+    auto channel = std::make_shared<TwitchChannel>("forsen");
+
+    app.commands.items.append(Command{"/trigger", "{1}|{2}|{1+}|{2+}"});
+    app.commands.items.append(Command{"/spaced trigger", "{1}|{2}|{1+}|{2+}"});
+    app.commands.items.append(
+        Command{"/triple word trigger", "{1}|{2}|{1+}|{2+}"});
+
+    // A single word command uses everything after its trigger as arguments.
+    EXPECT_EQ(
+        app.commands.execCommand("/trigger one two three", channel, false),
+        "one|two|one two three|two three");
+    // A two word command does not include part of its trigger in the arguments.
+    EXPECT_EQ(app.commands.execCommand("/spaced trigger one two three", channel,
+                                       false),
+              "one|two|one two three|two three");
+    // The arguments also start after longer command triggers.
+    EXPECT_EQ(app.commands.execCommand("/triple word trigger one two three",
+                                       channel, false),
+              "one|two|one two three|two three");
+}
+
 TEST(Commands, parseBanActions)
 {
     MockApplication app;
