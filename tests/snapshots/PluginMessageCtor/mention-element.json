@@ -24,7 +24,7 @@
                 "tooltip": "",
                 "trailingSpace": true,
                 "type": "MentionElement",
-                "userColor": "#ff008000",
+                "userColor": "username:#ff008000",
                 "userLoginName": "l",
                 "words": [
                     "d"
@@ -42,7 +42,7 @@
                 "tooltip": "",
                 "trailingSpace": true,
                 "type": "MentionElement",
-                "userColor": "#ff008000",
+                "userColor": "username:#ff008000",
                 "userLoginName": "l",
                 "words": [
                     "d"
@@ -60,7 +60,7 @@
                 "tooltip": "t",
                 "trailingSpace": true,
                 "type": "MentionElement",
-                "userColor": "#ff008000",
+                "userColor": "username:#ff008000",
                 "userLoginName": "l",
                 "words": [
                     "d"
@@ -78,7 +78,7 @@
                 "tooltip": "",
                 "trailingSpace": false,
                 "type": "MentionElement",
-                "userColor": "#ff008000",
+                "userColor": "username:#ff008000",
                 "userLoginName": "l",
                 "words": [
                     "d"

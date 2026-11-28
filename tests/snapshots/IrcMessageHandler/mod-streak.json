@@ -88,7 +88,7 @@
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffff7f50",
+                    "color": "username:#ffff7f50",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -219,7 +219,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff7f50",
+                    "userColor": "username:#ffff7f50",
                     "userLoginName": "jcrouzer",
                     "words": [
                         "JCRouzer"

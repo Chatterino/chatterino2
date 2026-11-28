@@ -19,11 +19,28 @@ MessageColor::MessageColor(Type type)
 {
 }
 
+MessageColor MessageColor::username(const QColor &color)
+{
+    MessageColor c(color);
+    c.type_ = Type::Username;
+    return c;
+}
+
+MessageColor MessageColor::asUsernameColor() const
+{
+    if (this->type_ == Type::Custom)
+    {
+        return MessageColor::username(this->customColor_);
+    }
+    return *this;
+}
+
 const QColor &MessageColor::getColor(const MessageColors &colors) const
 {
     switch (this->type_)
     {
         case Type::Custom:
+        case Type::Username:
             return this->customColor_;
         case Type::Text:
             return colors.regularText;
@@ -43,6 +60,9 @@ QString MessageColor::toString() const
     {
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
+        case Type::Username:
+            return QStringLiteral("username:") +
+                   this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("Text");
         case Type::System:
@@ -60,6 +80,9 @@ QString MessageColor::toLua() const
     {
         case Type::Custom:
             return this->customColor_.name(QColor::HexArgb);
+        case Type::Username:
+            return QStringLiteral("username:") +
+                   this->customColor_.name(QColor::HexArgb);
         case Type::Text:
             return QStringLiteral("text");
         case Type::System:
@@ -88,6 +111,10 @@ MessageColor MessageColor::fromLua(const QString &spec, Type fallback)
     if (spec == u"system")
     {
         return MessageColor::System;
+    }
+    if (spec.startsWith(u"username:"))
+    {
+        return MessageColor::username(QColor(spec.mid(9)));
     }
     // custom
     return QColor(spec);

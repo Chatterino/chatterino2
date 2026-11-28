@@ -45,7 +45,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ffff7f50",
+                    "userColor": "username:#ffff7f50",
                     "userLoginName": "jcrouzer",
                     "words": [
                         "JCRouzer"

@@ -1330,6 +1330,68 @@ TEST_F(PluginTest, MessageElementAccess)
     ASSERT_FALSE(res.valid());
 }
 
+// Test that username colors survive being passed through Lua
+TEST_F(PluginTest, MessageElementUsernameColor)
+{
+    configure();
+    sol::protected_function pfn = lua->script(R"lua(
+        return function(msg)
+            local els = msg:elements()
+            assert(els[1].color == "username:#ffaabbcc")
+            assert(els[2].color == "username:#ffaabbcc")
+            assert(els[3].color == "#ffaabbcc")
+            assert(els[4].user_color == "username:#ffaabbcc")
+            return c2.Message.new({ elements = {
+                { type = "text", text = "a", color = els[1].color },
+                { type = "single-line-text", text = "b", color = els[2].color },
+                { type = "text", text = "c", color = els[3].color },
+                {
+                    type = "mention",
+                    display_name = "d",
+                    login_name = "d",
+                    fallback_color = els[4].fallback_color,
+                    user_color = els[4].user_color,
+                },
+            }})
+        end
+    )lua");
+
+    auto msg = std::make_shared<Message>();
+    msg->elements.emplace_back(std::make_unique<TextElement>(
+        "a", MessageElementFlag::Text,
+        MessageColor::username(QColor(0xaabbcc))));
+    msg->elements.emplace_back(std::make_unique<SingleLineTextElement>(
+        "b", MessageElementFlag::Text,
+        MessageColor::username(QColor(0xaabbcc))));
+    msg->elements.emplace_back(std::make_unique<TextElement>(
+        "c", MessageElementFlag::Text, QColor(0xaabbcc)));
+    msg->elements.emplace_back(std::make_unique<MentionElement>(
+        "d", "d", MessageColor::Text, QColor(0xaabbcc)));
+    msg->freeze();
+
+    auto res = pfn(msg);
+    ASSERT_TRUE(res.valid()) << res.get<sol::error>().what();
+    Message *got = res;
+    ASSERT_EQ(got->elements.size(), 4);
+
+    auto color = [&](size_t i) {
+        auto *el = got->elements[i].get();
+        if (auto *mention = dynamic_cast<MentionElement *>(el))
+        {
+            return mention->userColor();
+        }
+        if (auto *text = dynamic_cast<TextElement *>(el))
+        {
+            return text->color();
+        }
+        return dynamic_cast<SingleLineTextElement *>(el)->color();
+    };
+    ASSERT_EQ(color(0), MessageColor::username(QColor(0xaabbcc)));
+    ASSERT_EQ(color(1), MessageColor::username(QColor(0xaabbcc)));
+    ASSERT_EQ(color(2), MessageColor(QColor(0xaabbcc)));
+    ASSERT_EQ(color(3), MessageColor::username(QColor(0xaabbcc)));
+}
+
 // Test that we can modify properties of message elements
 TEST_F(PluginTest, MessageElementModification)
 {

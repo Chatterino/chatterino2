@@ -59,7 +59,7 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "#ffff0000",
+                    "color": "username:#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
@@ -118,7 +118,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ff010203",
+                    "userColor": "username:#ff010203",
                     "userLoginName": "UserColor",
                     "words": [
                         "UserColor"
@@ -136,7 +136,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ff010203",
+                    "userColor": "username:#ff010203",
                     "userLoginName": "UserColor",
                     "words": [
                         "@UserColor"
@@ -154,7 +154,7 @@
                     "tooltip": "",
                     "trailingSpace": false,
                     "type": "MentionElement",
-                    "userColor": "#ff010203",
+                    "userColor": "username:#ff010203",
                     "userLoginName": "UserColor",
                     "words": [
                         "UserColor"
@@ -206,7 +206,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ff010203",
+                    "userColor": "username:#ff010203",
                     "userLoginName": "usercolor",
                     "words": [
                         "usercolor"
@@ -239,7 +239,7 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "MentionElement",
-                    "userColor": "#ff050607",
+                    "userColor": "username:#ff050607",
                     "userLoginName": "UserColor2",
                     "words": [
                         "@UserColor2"
