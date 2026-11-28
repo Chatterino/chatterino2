@@ -25,8 +25,8 @@ jobs:
 
       - name: run dos2unix
         run: |
-          apt-get update
-          apt-get install -y dos2unix
+          sudo apt-get update
+          sudo apt-get install -y dos2unix
           dos2unix **/*.hpp **/*.cpp
       - name: Check formatting with Prettier
         run: |
