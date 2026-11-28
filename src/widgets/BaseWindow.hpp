@@ -174,7 +174,6 @@ private:
 
     bool handleSHOWWINDOW(MSG *msg);
     bool handleSIZE(MSG *msg);
-    bool handleMOVE(MSG *msg);
     bool handleNCCALCSIZE(MSG *msg, qintptr *result);
     bool handleNCHITTEST(MSG *msg, qintptr *result);
 
@@ -202,6 +201,7 @@ private:
 
 #ifdef USEWINSDK
     void updateRealSize();
+    void updateCurrentBounds();
     /// @brief Returns the HWND of this window if it has one
     ///
     /// A QWidget only has an HWND if it has been created. Before that,
@@ -223,8 +223,6 @@ private:
 
     QRect initalBounds_;
     QRect currentBounds_;
-    QTimer useNextBounds_;
-    bool isNotMinimizedOrMaximized_{};
     bool lastEventWasNcMouseMove_ = false;
     /// The real bounds of the window as returned by
     /// GetWindowRect. Used for drawing.
