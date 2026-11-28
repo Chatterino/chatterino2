@@ -634,6 +634,9 @@ set(SOURCE_FILES
         util/LoadPixmap.hpp
         util/OnceFlag.cpp
         util/OnceFlag.hpp
+        util/QMagicEnum.hpp
+        util/QMagicEnumQJsonValue.hpp
+        util/QMagicEnumTagged.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RapidJsonSerializeQSize.hpp
