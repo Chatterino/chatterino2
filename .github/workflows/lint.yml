@@ -27,6 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y dos2unix
+          shopt -s globstar
           dos2unix **/*.hpp **/*.cpp
       - name: Check formatting with Prettier
         run: |
